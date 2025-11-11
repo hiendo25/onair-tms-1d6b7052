@@ -34,6 +34,7 @@ import type { AssignmentDto } from "@/types/dto/assignments";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function AssignmentList() {
   const router = useRouter();
@@ -80,7 +81,7 @@ export default function AssignmentList() {
   };
 
   const handleCreateAssignment = () => {
-    router.push("/assignments/create");
+    router.push(PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, assignmentId: string) => {
@@ -96,14 +97,14 @@ export default function AssignmentList() {
 
   const handleViewStudents = () => {
     if (selectedAssignmentId) {
-      router.push(`/assignments/${selectedAssignmentId}/students`);
+      router.push(PATHS.ASSIGNMENTS.STUDENTS(selectedAssignmentId));
     }
     handleMenuClose();
   };
 
   const handleEdit = () => {
     if (selectedAssignmentId) {
-      router.push(`/assignments/edit/${selectedAssignmentId}`);
+      router.push(PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT(selectedAssignmentId));
     }
     handleMenuClose();
   };
@@ -164,7 +165,7 @@ export default function AssignmentList() {
   return (
     <PageContainer
       title="Danh sách bài kiểm tra"
-      breadcrumbs={[{ title: "Bài kiểm tra", path: "/assignments" }]}
+      breadcrumbs={[{ title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>

@@ -1,6 +1,7 @@
 import React from "react";
 import PageContainer from "@/shared/ui/PageContainer";
 import AssignmentGrading from "./_components/AssignmentGrading";
+import { PATHS } from "@/constants/path.contstants";
 
 interface PageProps {
   params: Promise<{
@@ -16,8 +17,8 @@ export default async function GradeAssignmentPage({ params }: PageProps) {
     <PageContainer
       title="Chấm điểm"
       breadcrumbs={[
-        { title: "Trang chủ", path: "/" },
-        { title: "Bài kiểm tra", path: "/assignments" },
+        { title: "Trang chủ", path: PATHS.ROOT },
+        { title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT },
         { title: "Chấm điểm" },
       ]}
     >

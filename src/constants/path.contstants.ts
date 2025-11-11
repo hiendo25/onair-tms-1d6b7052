@@ -27,13 +27,13 @@ export const PATHS = {
   CLASSROOMS: {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
-    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/cedit`,
+    EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
     LIST_CLASSROOM: "/class-room/list",
   },
   COURSES: {
     ROOT: "/admin/online-course",
     CREATE: "/admin/online-course/create",
-    EDIT: (id: string = ":id") => `/admin/online-course/${id}/cedit`,
+    EDIT: (id: string = ":id") => `/admin/online-course/${id}/edit`,
   },
   STUDENTS: {
     ROOT: "/my-class",
@@ -42,9 +42,16 @@ export const PATHS = {
     ROOT: "/assignments",
     CREATE_ASSIGNMENT: "/assignments/create",
     EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
+    STUDENTS: (id: string = ":id") => `/assignments/${id}/students`,
+    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/submit/${employeeId}`,
+    GRADE: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/grade/${employeeId}`,
+    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/result/${employeeId}`,
   },
   MY_ASSIGNMENTS: {
     ROOT: "/my-assignments",
+    STUDENTS: (id: string = ":id") => `/my-assignments/${id}/students`,
+    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/my-assignments/${id}/submit/${employeeId}`,
+    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/my-assignments/${id}/result/${employeeId}`,
   },
   REPORTS: {
     ROOT: "/report",

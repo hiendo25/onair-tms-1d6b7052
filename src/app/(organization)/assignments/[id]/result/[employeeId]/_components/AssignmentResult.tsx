@@ -7,8 +7,6 @@ import {
   Typography,
   Stack,
   Button,
-  Avatar,
-  Divider,
   CircularProgress,
   Alert,
 } from "@mui/material";
@@ -16,16 +14,20 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
+import { PATHS } from "@/constants/path.contstants";
 import ResultQuestionCard from "./ResultQuestionCard";
+import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentResultProps {
   assignmentId: string;
   employeeId: string;
+  basePath?: string;
 }
 
 const AssignmentResult: React.FC<AssignmentResultProps> = ({
   assignmentId,
   employeeId,
+  basePath = PATHS.ASSIGNMENTS.ROOT,
 }) => {
   const router = useRouter();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
@@ -42,7 +44,11 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   }, [submission]);
 
   const handleBack = () => {
-    router.push(`/assignments/${assignmentId}/students`);
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      router.push(basePath);
+    } else {
+      router.push(`${basePath}/${assignmentId}/students`);
+    }
   };
 
   if (isLoading) {
@@ -50,7 +56,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
       <PageContainer
         title="Kết quả bài kiểm tra"
         breadcrumbs={[
-          { title: "Bài tập", path: "/assignments" },
+          { title: "Bài tập", path: basePath },
           { title: "Kết quả" },
         ]}
       >
@@ -66,7 +72,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
       <PageContainer
         title="Kết quả bài kiểm tra"
         breadcrumbs={[
-          { title: "Bài tập", path: "/assignments" },
+          { title: "Bài tập", path: basePath },
           { title: "Kết quả" },
         ]}
       >
@@ -90,74 +96,35 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
     <PageContainer
       title={`Kết quả - ${submission.assignmentName}`}
       breadcrumbs={[
-        { title: "Bài tập", path: "/assignments" },
-        { title: submission.assignmentName, path: `/assignments/${assignmentId}` },
-        { title: "Danh sách học viên", path: `/assignments/${assignmentId}/students` },
+        { title: "Bài tập", path: basePath },
+        { title: submission.assignmentName, path: `${basePath}/${assignmentId}` },
+        { title: "Danh sách học viên", path: `${basePath}/${assignmentId}/students` },
         { title: "Kết quả" },
       ]}
     >
       <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-          <Avatar
-            src={submission.avatar || undefined}
-            alt={submission.fullName}
-            sx={{ width: 56, height: 56 }}
-          />
-          <Box flex={1}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Mã học viên: {submission.employeeCode}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Email: {submission.email}
-            </Typography>
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="body2" color="text.secondary">
-              Ngày nộp
-            </Typography>
-            <Typography variant="body1">
-              {new Date(submission.submittedAt).toLocaleString("vi-VN")}
-            </Typography>
-          </Box>
-        </Stack>
+        <AssignmentSubmissionHeader
+          avatar={submission.avatar}
+          fullName={submission.fullName}
+          employeeCode={submission.employeeCode}
+          email={submission.email}
+          submittedAt={submission.submittedAt}
+          assignmentName={submission.assignmentName}
+          assignmentDescription={submission.assignmentDescription}
+          totalScore={totalScore}
+          maxScore={submission.maxScore}
+        />
 
-        <Divider sx={{ my: 2 }} />
-
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.assignmentName}
+        {submission.feedback && (
+          <Card sx={{ p: 3, mb: 3, bgcolor: "info.50", border: "1px solid", borderColor: "grey.400" }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Nhận xét chung của giáo viên
             </Typography>
-            {submission.assignmentDescription && (
-              <Box
-                sx={{
-                  "& p": { margin: 0 },
-                  "& ul, & ol": { marginTop: 0.5, marginBottom: 0.5 },
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  component="div"
-                  dangerouslySetInnerHTML={{ __html: submission.assignmentDescription }}
-                />
-              </Box>
-            )}
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              {totalScore.toFixed(1)}/{submission.maxScore}
+            <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
+              {submission.feedback}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Tổng điểm
-            </Typography>
-          </Box>
-        </Stack>
-        </Card>
+          </Card>
+        )}
 
         <Stack spacing={2} sx={{ mb: 3 }}>
           {submission.questions.map((question, index) => (

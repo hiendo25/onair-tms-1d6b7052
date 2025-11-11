@@ -8,6 +8,7 @@ import { useCreateAssignmentMutation } from "@/modules/assignment-management/ope
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function CreateAssignmentPage() {
   const { enqueueSnackbar } = useSnackbar();
@@ -24,7 +25,7 @@ export default function CreateAssignmentPage() {
     createAssignment(payload, {
       onSuccess: (data) => {
         enqueueSnackbar("Tạo bài kiểm tra thành công", { variant: "success" });
-        router.push("/assignments");
+        router.push(PATHS.ASSIGNMENTS.ROOT);
       },
       onError: (error) => {
         enqueueSnackbar(error.message || "Có lỗi xảy ra khi tạo bài kiểm tra", { variant: "error" });

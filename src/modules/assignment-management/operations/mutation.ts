@@ -1,5 +1,10 @@
 import { useTMutation } from "@/lib/queryClient";
-import type { CreateAssignmentDto, UpdateAssignmentDto, SaveGradeDto, SaveGradeResponse } from "@/types/dto/assignments";
+import type {
+  CreateAssignmentDto,
+  UpdateAssignmentDto,
+  SaveGradeDto,
+  SaveGradeResponse,
+} from "@/types/dto/assignments";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "./key";
 
@@ -87,7 +92,7 @@ export const useSaveGradeMutation = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ questionGrades: payload.questionGrades }),
+        body: JSON.stringify({ questionGrades: payload.questionGrades, overallFeedback: payload.overallFeedback }),
       });
 
       if (!response.ok) {

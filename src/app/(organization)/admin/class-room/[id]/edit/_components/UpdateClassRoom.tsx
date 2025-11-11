@@ -16,7 +16,6 @@ import { PATHS } from "@/constants/path.contstants";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
-type QrCodeSession = UpdateClassRoomFormValue["classRoomSessions"][number]["qrCode"];
 
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;

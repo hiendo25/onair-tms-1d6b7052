@@ -4,6 +4,7 @@ import type { UpdateAssignmentDto } from "@/types/dto/assignments";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
 import { employeesRepository } from "@/repository";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -15,7 +16,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     await assignmentService.deleteAssignmentWithRelations(assignmentId);
 
-    revalidatePath("/assignments");
+    revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 
     return NextResponse.json(
       {
@@ -61,7 +62,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     await assignmentService.updateAssignmentWithRelations(payload, employee.id);
 
-    revalidatePath("/assignments");
+    revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 
     return NextResponse.json(
       {

@@ -24,6 +24,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function MyAssignmentsList() {
   const router = useRouter();
@@ -57,14 +58,14 @@ export default function MyAssignmentsList() {
 
   const handleSubmitAssignment = () => {
     if (selectedAssignmentId && employeeId) {
-      router.push(`/assignments/${selectedAssignmentId}/submit/${employeeId}`);
+      router.push(PATHS.MY_ASSIGNMENTS.SUBMIT(selectedAssignmentId, employeeId));
       handleCloseMenu();
     }
   };
 
   const handleViewResult = () => {
     if (selectedAssignmentId && employeeId) {
-      router.push(`/assignments/${selectedAssignmentId}/result/${employeeId}`);
+      router.push(PATHS.MY_ASSIGNMENTS.RESULT(selectedAssignmentId, employeeId));
       handleCloseMenu();
     }
   };

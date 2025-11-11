@@ -7,20 +7,21 @@ import {
   Typography,
   Stack,
   Button,
-  Avatar,
-  Divider,
   CircularProgress,
   Alert,
+  TextField,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import { useSaveGradeMutation } from "@/modules/assignment-management/operations/mutation";
 import GradeQuestionCard from "./GradeQuestionCard";
 import { QuestionGradeInput } from "@/types/dto/assignments";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { PATHS } from "@/constants/path.contstants";
+import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentGradingProps {
   assignmentId: string;
@@ -29,6 +30,8 @@ interface AssignmentGradingProps {
 
 interface GradeFormData {
   grades: Record<string, number | string>;
+  feedbacks: Record<string, string>;
+  overallFeedback: string;
 }
 
 const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
@@ -52,18 +55,36 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
     return initialGrades;
   }, [submission]);
 
+  const defaultFeedbacks = useMemo(() => {
+    if (!submission) return {};
+
+    const initialFeedbacks: Record<string, string> = {};
+    submission.questions.forEach((q) => {
+      if (!q.isAutoGraded) {
+        initialFeedbacks[q.id] = q.feedback ?? "";
+      }
+    });
+    return initialFeedbacks;
+  }, [submission]);
+
   const { control, handleSubmit, watch, reset, formState: { errors, isValid } } = useForm<GradeFormData>({
     mode: "onChange",
     defaultValues: {
       grades: defaultGrades,
+      feedbacks: defaultFeedbacks,
+      overallFeedback: submission?.feedback ?? "",
     },
   });
 
   useEffect(() => {
     if (submission) {
-      reset({ grades: defaultGrades });
+      reset({
+        grades: defaultGrades,
+        feedbacks: defaultFeedbacks,
+        overallFeedback: submission.feedback ?? "",
+      });
     }
-  }, [submission, defaultGrades, reset]);
+  }, [submission, defaultGrades, defaultFeedbacks, reset]);
 
   const grades = watch("grades");
 
@@ -116,9 +137,11 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         const score = typeof gradeValue === "number"
           ? gradeValue
           : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
+        const feedback = data.feedbacks[q.id] || undefined;
         return {
           questionId: q.id,
           score,
+          feedback,
         };
       });
 
@@ -127,13 +150,14 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         assignmentId,
         employeeId,
         questionGrades,
+        overallFeedback: data.overallFeedback || undefined,
       });
 
       notifications.show("Chấm bài thành công!", {
         severity: "success",
         autoHideDuration: 3000,
       });
-      router.push(`/assignments/${assignmentId}/students`);
+      router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
     } catch (error) {
       console.error("Failed to save grade:", error);
       notifications.show(
@@ -147,7 +171,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
   };
 
   const handleBack = () => {
-    router.push(`/assignments/${assignmentId}/students`);
+    router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
   };
 
   if (isLoading) {
@@ -177,67 +201,17 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
 
   return (
     <Box>
-      <Card sx={{ p: 3, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-          <Avatar
-            src={submission.avatar || undefined}
-            alt={submission.fullName}
-            sx={{ width: 56, height: 56 }}
-          />
-          <Box flex={1}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Mã học viên: {submission.employeeCode}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Email: {submission.email}
-            </Typography>
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="body2" color="text.secondary">
-              Ngày nộp
-            </Typography>
-            <Typography variant="body1">
-              {new Date(submission.submittedAt).toLocaleString("vi-VN")}
-            </Typography>
-          </Box>
-        </Stack>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {submission.assignmentName}
-            </Typography>
-            {submission.assignmentDescription && (
-              <Box
-                sx={{
-                  "& p": { margin: 0 },
-                  "& ul, & ol": { marginTop: 0.5, marginBottom: 0.5 },
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  component="div"
-                  dangerouslySetInnerHTML={{ __html: submission.assignmentDescription }}
-                />
-              </Box>
-            )}
-          </Box>
-          <Box textAlign="right">
-            <Typography variant="h5" sx={{ fontWeight: 600 }}>
-              {totalScore.toFixed(1)}/{submission.maxScore}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Tổng điểm
-            </Typography>
-          </Box>
-        </Stack>
-      </Card>
+      <AssignmentSubmissionHeader
+        avatar={submission.avatar}
+        fullName={submission.fullName}
+        employeeCode={submission.employeeCode}
+        email={submission.email}
+        submittedAt={submission.submittedAt}
+        assignmentName={submission.assignmentName}
+        assignmentDescription={submission.assignmentDescription}
+        totalScore={totalScore}
+        maxScore={submission.maxScore}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2} sx={{ mb: 3 }}>
@@ -250,6 +224,27 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
             />
           ))}
         </Stack>
+
+        <Card variant="outlined" sx={{ p: 2.5, mb: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+            Nhận xét chung
+          </Typography>
+          <Controller
+            name="overallFeedback"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                value={field.value ?? ""}
+                label="Nhận xét chung cho bài làm"
+                multiline
+                rows={4}
+                fullWidth
+                placeholder="Nhập nhận xét chung cho toàn bộ bài làm của học viên (không bắt buộc)"
+              />
+            )}
+          />
+        </Card>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
           <Button

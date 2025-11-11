@@ -19,7 +19,7 @@ import {
   Button,
 } from "@mui/material";
 import { grey } from "@mui/material/colors";
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
@@ -31,10 +31,11 @@ import { useCallback, useState } from "react";
 import { TABLE_HEAD } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined';
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import ClassRoomType from "./ClassRoomType";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
+import { PATHS } from "@/constants/path.contstants";
 
 interface ClassRoomListTableProps {
   classRooms: ClassRoomPriorityDto[];
@@ -44,18 +45,12 @@ interface ClassRoomListTableProps {
 }
 const formatOrder = (index: number) => index.toString().padStart(2, "0");
 
-export default function ClassRoomListTable({
-  classRooms,
-  page,
-  pageSize,
-  isAdmin,
-}: ClassRoomListTableProps) {
+export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin }: ClassRoomListTableProps) {
   const startIndex = (page - 1) * pageSize;
   const queryClient = useQueryClient();
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedClassRoom, setSelectedClassRoom] = useState<ClassRoomPriorityDto | null>(null);
-
 
   const { mutateAsync: deleteClassRoom, isPending } = useDeleteClassRoomMutation();
   const [isOpenDialogDelete, setIsOpenDialogDelete] = useState(false);
@@ -73,52 +68,59 @@ export default function ClassRoomListTable({
     } else {
       setIsAllowDelete(false);
     }
-  }
+  };
 
   const handleDeleteClassRoom = async () => {
     if (classRoomId) {
       await deleteClassRoom(classRoomId);
-      queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] })
+      queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] });
       setIsOpenDialogDelete(false);
     }
-  }
+  };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    if (isOnline) {
-      return router.push(`/class-room/manage/online/edit/${classRoomId}`)
-    }
-    return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
-  }
+    return PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId);
+    // if (isOnline) {
+    //   return router.push(`/class-room/manage/online/edit/${classRoomId}`)
+    // }
+    // return router.push(`/class-room/manage/offline/edit/${classRoomId}`)
+  };
 
-  const navigateToSession = useCallback((sessionId?: string, slug?: string | null) => {
-    if (!sessionId || !slug) {
-      return;
-    }
-    router.push(`/class-room/cd/${slug}/${sessionId}`);
-  }, [router]);
+  const navigateToSession = useCallback(
+    (sessionId?: string, slug?: string | null) => {
+      if (!sessionId || !slug) {
+        return;
+      }
+      router.push(`/class-room/cd/${slug}/${sessionId}`);
+    },
+    [router],
+  );
 
   const handleCloseDialog = useCallback(() => {
     setDialogOpen(false);
     setSelectedClassRoom(null);
   }, []);
 
-  const handleSelectSession = useCallback((sessionId: string) => {
-    if (!selectedClassRoom) {
-      return;
-    }
+  const handleSelectSession = useCallback(
+    (sessionId: string) => {
+      if (!selectedClassRoom) {
+        return;
+      }
 
-    const isOnline = selectedClassRoom.class_sessions?.[0]?.is_online;
-    if (!isOnline) {
-      //  xử lý btn quét mã qr khi là lớp học offline chuỗi
-      return;
-    }
+      const isOnline = selectedClassRoom.class_sessions?.[0]?.is_online;
+      if (!isOnline) {
+        //  xử lý btn quét mã qr khi là lớp học offline chuỗi
+        return;
+      }
 
-    const slug = selectedClassRoom.slug ?? undefined;
+      const slug = selectedClassRoom.slug ?? undefined;
 
-    setDialogOpen(false);
-    navigateToSession(sessionId, slug);
-    setSelectedClassRoom(null);
-  }, [navigateToSession, selectedClassRoom]);
+      setDialogOpen(false);
+      navigateToSession(sessionId, slug);
+      setSelectedClassRoom(null);
+    },
+    [navigateToSession, selectedClassRoom],
+  );
 
   const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
     setSelectedClassRoom(room);
@@ -206,7 +208,7 @@ export default function ClassRoomListTable({
                 });
 
                 const teachers = Array.from(teacherMap.values());
-                const isOnline = room?.class_sessions?.[0]?.is_online
+                const isOnline = room?.class_sessions?.[0]?.is_online;
 
                 return (
                   <TableRow
@@ -240,9 +242,7 @@ export default function ClassRoomListTable({
                     <TableCell align="center">
                       <Stack direction="row" alignItems="center" spacing={0.5}>
                         <PeopleAltOutlinedIcon className="w-4 h-4" />
-                        <Typography className="text-xs">
-                          {room?.studentCount?.[0].count}
-                        </Typography>
+                        <Typography className="text-xs">{room?.studentCount?.[0].count}</Typography>
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
@@ -259,7 +259,7 @@ export default function ClassRoomListTable({
                                 sx={{ width: 24, height: 24 }}
                               />
                             </Tooltip>
-                          )
+                          );
                         })}
                       </AvatarGroup>
                     </TableCell>
@@ -284,12 +284,29 @@ export default function ClassRoomListTable({
                               <MoreVertIcon />
                             </IconButton>
                             <Menu {...bindMenu(popupState)}>
-                              <MenuItem onClick={() => { }}>Xem chi tiết lớp học</MenuItem>
-                              <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>Vào lớp học</MenuItem>
-                              <MenuItem onClick={() => { }} disabled={isOnline!}>Qr điểm danh</MenuItem>
-                              <MenuItem onClick={() => handleEditClassRoom(isOnline!, room?.id as string)} disabled={!isAdmin}>Chỉnh sửa</MenuItem>
-                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room)} disabled={!isAdmin}>Xoá lớp học</MenuItem>
-                              <MenuItem onClick={() => { router.push(`${room.id}/students`) }}>Danh sách học viên</MenuItem>
+                              <MenuItem onClick={() => {}}>Xem chi tiết lớp học</MenuItem>
+                              <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>
+                                Vào lớp học
+                              </MenuItem>
+                              <MenuItem onClick={() => {}} disabled={isOnline!}>
+                                Qr điểm danh
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => handleEditClassRoom(isOnline!, room?.id as string)}
+                                disabled={!isAdmin}
+                              >
+                                Chỉnh sửa
+                              </MenuItem>
+                              <MenuItem onClick={() => handleOpenDeleteClassRoom(room)} disabled={!isAdmin}>
+                                Xoá lớp học
+                              </MenuItem>
+                              <MenuItem
+                                onClick={() => {
+                                  router.push(`${room.id}/students`);
+                                }}
+                              >
+                                Danh sách học viên
+                              </MenuItem>
                             </Menu>
                           </>
                         )}
@@ -307,7 +324,11 @@ export default function ClassRoomListTable({
         open={isOpenDialogDelete}
         onClose={() => setIsOpenDialogDelete(false)}
         title={isAllowDelete ? "Xác nhận xoá lớp học trực tuyến" : "Không thể xoá lớp học"}
-        content={isAllowDelete ? "Bạn có chắc muốn xoá lớp học này? Hành động này sẽ xoá toàn bộ thông tin đã tạo và không thể hoàn tác." : "Lớp học này đã có học viên tham gia. Vui lòng gỡ học viên ra khỏi trước khi thực hiện thao tác này."}
+        content={
+          isAllowDelete
+            ? "Bạn có chắc muốn xoá lớp học này? Hành động này sẽ xoá toàn bộ thông tin đã tạo và không thể hoàn tác."
+            : "Lớp học này đã có học viên tham gia. Vui lòng gỡ học viên ra khỏi trước khi thực hiện thao tác này."
+        }
         action={
           <>
             <Button variant="contained" color="error" onClick={handleDeleteClassRoom} disabled={!isAllowDelete}>

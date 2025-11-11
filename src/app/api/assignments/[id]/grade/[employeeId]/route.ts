@@ -59,7 +59,7 @@ export async function POST(
     const { id: assignmentId, employeeId } = params;
 
     const body = await request.json();
-    const { questionGrades } = body;
+    const { questionGrades, overallFeedback } = body;
 
     if (!questionGrades || !Array.isArray(questionGrades)) {
       return NextResponse.json(
@@ -72,6 +72,7 @@ export async function POST(
       assignmentId,
       employeeId,
       questionGrades,
+      overallFeedback,
     });
 
     return NextResponse.json(

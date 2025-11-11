@@ -3,23 +3,19 @@
 import React from "react";
 import {
   Card,
-  Typography,
-  Stack,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Checkbox,
-  FormGroup,
   Box,
-  Chip,
-  Link,
   TextField,
   FormHelperText,
 } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import { QuestionGradeDetail } from "@/types/dto/assignments";
 import { Control, Controller } from "react-hook-form";
+import QuestionHeader from "../../../_components/QuestionHeader";
+import QuestionAttachments from "../../../_components/QuestionAttachments";
+import RadioAnswerDisplay from "../../../_components/RadioAnswerDisplay";
+import CheckboxAnswerDisplay from "../../../_components/CheckboxAnswerDisplay";
+import TextAnswerDisplay from "../../../_components/TextAnswerDisplay";
+import FileAnswerDisplay from "../../../_components/FileAnswerDisplay";
+import AnswerAttachments from "../../../_components/AnswerAttachments";
 
 interface GradeQuestionCardProps {
   question: QuestionGradeDetail;
@@ -27,210 +23,129 @@ interface GradeQuestionCardProps {
   control?: Control<any>;
 }
 
+interface ScoreAndFeedbackInputProps {
+  questionId: string;
+  maxScore: number;
+  control: Control<any>;
+}
+
+const ScoreAndFeedbackInput: React.FC<ScoreAndFeedbackInputProps> = ({
+  questionId,
+  maxScore,
+  control,
+}) => {
+  return (
+    <>
+      <Controller
+        name={`grades.${questionId}` as any}
+        control={control}
+        rules={{
+          required: "Vui lòng nhập điểm",
+          validate: (value) => {
+            if (value === "" || value === null || value === undefined) {
+              return "Vui lòng nhập điểm";
+            }
+            const num = typeof value === "number" ? value : parseFloat(value);
+            if (isNaN(num)) {
+              return "Điểm không hợp lệ";
+            }
+            if (num < 0) {
+              return "Điểm không được nhỏ hơn 0";
+            }
+            if (num > maxScore) {
+              return `Điểm không được lớn hơn ${maxScore}`;
+            }
+            return true;
+          },
+        }}
+        render={({ field, fieldState: { error } }) => (
+          <Box>
+            <TextField
+              {...field}
+              value={field.value ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                field.onChange(value === "" ? "" : parseFloat(value) || 0);
+              }}
+              label="Điểm"
+              type="number"
+              fullWidth
+              error={!!error}
+              inputProps={{ min: 0, max: maxScore, step: 0.5 }}
+            />
+            {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
+            {!error?.message && (
+              <FormHelperText>Điểm tối đa: {maxScore}</FormHelperText>
+            )}
+          </Box>
+        )}
+      />
+      <Controller
+        name={`feedbacks.${questionId}` as any}
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            value={field.value ?? ""}
+            label="Nhận xét"
+            multiline
+            rows={3}
+            fullWidth
+            placeholder="Nhập nhận xét cho câu trả lời này (không bắt buộc)"
+            sx={{ mt: 2 }}
+          />
+        )}
+      />
+    </>
+  );
+};
+
 const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
   question,
   questionNumber,
   control,
 }) => {
-  const isCorrect = question.earnedScore === question.maxScore;
-
   return (
     <Card variant="outlined" sx={{ p: 2.5 }}>
-      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          Câu {questionNumber} ({question.maxScore} điểm)
-        </Typography>
-        {question.isAutoGraded && (
-          <Chip
-            icon={isCorrect ? <CheckCircleIcon /> : <CancelIcon />}
-            label={`${question.earnedScore}/${question.maxScore} điểm`}
-            color={isCorrect ? "success" : "error"}
-            size="small"
-          />
-        )}
-      </Stack>
-
-      <Typography variant="body1" sx={{ mb: 2 }}>
-        {question.label}
-      </Typography>
+      <QuestionHeader
+        questionNumber={questionNumber}
+        questionLabel={question.label}
+        maxScore={question.maxScore}
+        earnedScore={question.earnedScore}
+        isAutoGraded={question.isAutoGraded}
+      />
 
       {question.attachments && question.attachments.length > 0 && (
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-            Tệp đính kèm:
-          </Typography>
-          <Stack spacing={0.5}>
-            {question.attachments.map((url, index) => (
-              <Link
-                key={index}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ fontSize: "0.875rem" }}
-              >
-                Tệp đính kèm {index + 1}
-              </Link>
-            ))}
-          </Stack>
-        </Box>
+        <QuestionAttachments attachments={question.attachments} />
       )}
 
       {question.type === "radio" && (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Câu trả lời của học viên:
-          </Typography>
-          <RadioGroup value={question.answer.selectedOptionId || ""}>
-            {question.options?.map((option) => {
-              const isSelected = option.id === question.answer.selectedOptionId;
-              const isCorrectOption = option.correct;
-
-              return (
-                <FormControlLabel
-                  key={option.id}
-                  value={option.id}
-                  control={<Radio size="small" disabled />}
-                  label={
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body2">{option.label}</Typography>
-                      {isSelected && isCorrectOption && (
-                        <CheckCircleIcon fontSize="small" color="success" />
-                      )}
-                      {isSelected && !isCorrectOption && (
-                        <CancelIcon fontSize="small" color="error" />
-                      )}
-                      {!isSelected && isCorrectOption && (
-                        <Typography variant="caption" color="success.main">
-                          (Đáp án đúng)
-                        </Typography>
-                      )}
-                    </Stack>
-                  }
-                  sx={{ mb: 0.5 }}
-                />
-              );
-            })}
-          </RadioGroup>
-        </Box>
+        <RadioAnswerDisplay
+          selectedOptionId={question.answer.selectedOptionId}
+          options={question.options}
+        />
       )}
 
       {question.type === "checkbox" && (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Câu trả lời của học viên:
-          </Typography>
-          <FormGroup>
-            {question.options?.map((option) => {
-              const isSelected = question.answer.selectedOptionIds?.includes(option.id);
-              const isCorrectOption = option.correct;
-
-              return (
-                <FormControlLabel
-                  key={option.id}
-                  control={<Checkbox size="small" checked={isSelected} disabled />}
-                  label={
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                      <Typography variant="body2">{option.label}</Typography>
-                      {isSelected && isCorrectOption && (
-                        <CheckCircleIcon fontSize="small" color="success" />
-                      )}
-                      {isSelected && !isCorrectOption && (
-                        <CancelIcon fontSize="small" color="error" />
-                      )}
-                      {!isSelected && isCorrectOption && (
-                        <Typography variant="caption" color="success.main">
-                          (Đáp án đúng)
-                        </Typography>
-                      )}
-                    </Stack>
-                  }
-                  sx={{ mb: 0.5 }}
-                />
-              );
-            })}
-          </FormGroup>
-        </Box>
+        <CheckboxAnswerDisplay
+          selectedOptionIds={question.answer.selectedOptionIds}
+          options={question.options}
+        />
       )}
 
       {question.type === "text" && (
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Câu trả lời của học viên:
-          </Typography>
-          <TextField
-            fullWidth
-            multiline
-            rows={5}
-            value={question.answer.text || ""}
-            disabled
-            sx={{ mb: 2 }}
-          />
+          <TextAnswerDisplay text={question.answer.text} />
 
           {question.answerAttachments && question.answerAttachments.length > 0 && (
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                Tệp đính kèm của học viên:
-              </Typography>
-              <Stack spacing={0.5}>
-                {question.answerAttachments.map((url, index) => (
-                  <Link
-                    key={index}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    sx={{ fontSize: "0.875rem" }}
-                  >
-                    Tệp đính kèm {index + 1}
-                  </Link>
-                ))}
-              </Stack>
-            </Box>
+            <AnswerAttachments attachments={question.answerAttachments} />
           )}
 
           {control && (
-            <Controller
-              name={`grades.${question.id}` as any}
+            <ScoreAndFeedbackInput
+              questionId={question.id}
+              maxScore={question.maxScore}
               control={control}
-              rules={{
-                required: "Vui lòng nhập điểm",
-                validate: (value) => {
-                  if (value === "" || value === null || value === undefined) {
-                    return "Vui lòng nhập điểm";
-                  }
-                  const num = typeof value === "number" ? value : parseFloat(value);
-                  if (isNaN(num)) {
-                    return "Điểm không hợp lệ";
-                  }
-                  if (num < 0) {
-                    return "Điểm không được nhỏ hơn 0";
-                  }
-                  if (num > question.maxScore) {
-                    return `Điểm không được lớn hơn ${question.maxScore}`;
-                  }
-                  return true;
-                },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <Box>
-                  <TextField
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? "" : parseFloat(value) || 0);
-                    }}
-                    label="Điểm"
-                    type="number"
-                    fullWidth
-                    error={!!error}
-                    inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
-                  />
-                  {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
-                  {!error?.message && (
-                    <FormHelperText>Điểm tối đa: {question.maxScore}</FormHelperText>
-                  )}
-                </Box>
-              )}
             />
           )}
         </Box>
@@ -238,70 +153,13 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 
       {question.type === "file" && (
         <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Tệp nộp của học viên:
-          </Typography>
-          {question.answer.fileUrl ? (
-            <Box sx={{ mb: 2 }}>
-              <Link
-                href={question.answer.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ fontSize: "0.875rem" }}
-              >
-                Xem tệp đã nộp
-              </Link>
-            </Box>
-          ) : (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Học viên chưa nộp tệp
-            </Typography>
-          )}
+          <FileAnswerDisplay files={question.answer.files} />
 
           {control && (
-            <Controller
-              name={`grades.${question.id}` as any}
+            <ScoreAndFeedbackInput
+              questionId={question.id}
+              maxScore={question.maxScore}
               control={control}
-              rules={{
-                required: "Vui lòng nhập điểm",
-                validate: (value) => {
-                  if (value === "" || value === null || value === undefined) {
-                    return "Vui lòng nhập điểm";
-                  }
-                  const num = typeof value === "number" ? value : parseFloat(value);
-                  if (isNaN(num)) {
-                    return "Điểm không hợp lệ";
-                  }
-                  if (num < 0) {
-                    return "Điểm không được nhỏ hơn 0";
-                  }
-                  if (num > question.maxScore) {
-                    return `Điểm không được lớn hơn ${question.maxScore}`;
-                  }
-                  return true;
-                },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <Box>
-                  <TextField
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      field.onChange(value === "" ? "" : parseFloat(value) || 0);
-                    }}
-                    label="Điểm"
-                    type="number"
-                    fullWidth
-                    error={!!error}
-                    inputProps={{ min: 0, max: question.maxScore, step: 0.5 }}
-                  />
-                  {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
-                  {!error?.message && (
-                    <FormHelperText>Điểm tối đa: {question.maxScore}</FormHelperText>
-                  )}
-                </Box>
-              )}
             />
           )}
         </Box>

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Button, FormLabel } from "@mui/material";
+import { Box, Button, FormLabel, Stack } from "@mui/material";
 import FileListItem from "./FileListItem";
 
 interface AttachmentSectionProps {
@@ -31,17 +31,21 @@ function AttachmentSection({
         <input
           type="file"
           hidden
+          multiple
           accept={accept}
           onChange={(e) => onAttachmentSelect?.(e.target.files)}
         />
       </Button>
-      {attachments.length > 0 && attachments[0] && (
-        <Box sx={{ mt: 1.5 }}>
-          <FileListItem
-            file={attachments[0]}
-            onRemove={() => onRemoveAttachment?.(0)}
-          />
-        </Box>
+      {attachments.length > 0 && (
+        <Stack spacing={1.5} sx={{ mt: 1.5 }}>
+          {attachments.map((file, index) => (
+            <FileListItem
+              key={index}
+              file={file}
+              onRemove={() => onRemoveAttachment?.(index)}
+            />
+          ))}
+        </Stack>
       )}
     </Box>
   );

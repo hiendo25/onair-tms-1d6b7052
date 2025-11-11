@@ -1,13 +1,32 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto, SubmissionDetailDto, MyAssignmentDto } from "@/types/dto/assignments";
+import type { GetAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto, SubmissionDetailDto, MyAssignmentDto, AssignmentDto } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import * as assignmentService from "@/services/assignments/assignment.service";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 
 export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
-  return useTQuery({
+  return useTQuery<PaginatedResult<AssignmentDto>>({
     queryKey: [GET_ASSIGNMENTS, params],
-    queryFn: () => assignmentService.getAssignments(params),
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+
+      if (params?.page !== undefined) {
+        searchParams.set("page", params.page.toString());
+      }
+      if (params?.limit !== undefined) {
+        searchParams.set("limit", params.limit.toString());
+      }
+      if (params?.search) {
+        searchParams.set("search", params.search);
+      }
+
+      const response = await fetch(`/api/assignments?${searchParams.toString()}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch assignments");
+      }
+      return response.json();
+    },
   });
 };
 

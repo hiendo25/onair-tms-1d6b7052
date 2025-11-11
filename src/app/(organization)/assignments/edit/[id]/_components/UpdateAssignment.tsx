@@ -8,6 +8,7 @@ import { useGetAssignmentQuery } from "@/modules/assignment-management/operation
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
+import { PATHS } from "@/constants/path.contstants";
 
 interface UpdateAssignmentProps {
   assignmentId: string;
@@ -30,7 +31,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
     updateAssignment(payload, {
       onSuccess: (data) => {
         enqueueSnackbar("Cập nhật bài kiểm tra thành công", { variant: "success" });
-        router.push("/assignments");
+        router.push(PATHS.ASSIGNMENTS.ROOT);
       },
       onError: (error) => {
         enqueueSnackbar(error.message || "Có lỗi xảy ra khi cập nhật bài kiểm tra", { variant: "error" });

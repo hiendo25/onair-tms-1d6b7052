@@ -8,4 +8,5 @@ export type { QuestionOption } from "./question-option.dto";
 export type { SubmissionDetailDto, QuestionGradeDetail } from "./submission-detail.dto";
 export type { SaveGradeDto, QuestionGradeInput, SaveGradeResponse } from "./save-grade.dto";
 export type { MyAssignmentDto } from "./my-assignment.dto";
+export type { FileMetadata } from "./file-metadata.dto";
 

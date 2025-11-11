@@ -17,7 +17,6 @@ export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRo
     location: "",
     isOnline: init?.isOnline || false,
     agendas: [],
-    resources: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
   };
 };
