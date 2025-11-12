@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -21,8 +21,10 @@ import {
   Typography,
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { grey } from "@mui/material/colors";
-import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "./constants";
+import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "../constants/constants";
 import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
 import useDebounce from "@/hooks/useDebounce";
 import { Pagination } from "@/shared/ui/Pagination";
@@ -32,12 +34,13 @@ import type { ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { fDateTime } from "@/lib";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
-import { useDeleteUserInClassRoomMutation, useExportStudentsMutation } from "@/modules/class-room-management/operations/mutation";
+import { useDeleteUserInClassRoomMutation, useExportStudentsMutation, useMarkAttendanceMutation } from "@/modules/class-room-management/operations/mutation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import DownloadIcon from '@mui/icons-material/Download';
 import { SearchIcon } from "@/shared/assets/icons";
+import { StudentSessionsCollapseRow } from "./StudentSessionsCollapseRow";
 
 interface StudentsSectionProps {
   classRoomId: string;
@@ -78,6 +81,9 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const [deletedComfirm, setDeleteConfirm] = useState(false);
   const [employeeIds, setEmployeeIds] = useState<string[]>([]);
   const [isAllowDeleteUser, setIsAllowDeleteUser] = useState(false);
+  const [expandedStudentRows, setExpandedStudentRows] = useState<
+    Record<string, boolean>
+  >({});
 
 
   const { organization } = useUserOrganization((state) => state.data);
@@ -86,6 +92,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const { data: organizationUnits = [] } = useGetOrganizationUnitsQuery();
 
   const { mutateAsync: deleteUserInClassRoom, isPending } = useDeleteUserInClassRoomMutation();
+  const { mutateAsync: markAttendance, isPending: isMarkingAttendance } = useMarkAttendanceMutation();
   const { mutateAsync: exportStudents, isPending: isExporting } = useExportStudentsMutation();
 
 
@@ -185,6 +192,13 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     setPage(nextPage);
   };
 
+  const handleToggleStudentSessions = (studentId: string) => {
+    setExpandedStudentRows((prev) => ({
+      ...prev,
+      [studentId]: !prev[studentId],
+    }));
+  };
+
   const handleOpenDialogDeleteUser = (employeeId: string, classRoomRuntimeStatus: any) => {
     setDeleteConfirm(true);
     if (classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing") {
@@ -204,6 +218,36 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     queryClient.invalidateQueries({ queryKey: ["class-room-students"] })
     queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] })
     setDeleteConfirm(false);
+  }
+
+  const handleMarkAttendance = async (classSessionId: string, employeeId?: string) => {
+    if (!employeeId) {
+      notifications.show("Không thể xác định học viên để điểm danh.", {
+        severity: "error",
+      });
+      return;
+    }
+
+    try {
+      await markAttendance({
+        classSessionId,
+        classRoomId,
+        employeeId,
+        attendance_method: "manual",
+        attendance_mode: "offline",
+      });
+      notifications.show("Điểm danh thủ công thành công.", {
+        severity: "success",
+      });
+      queryClient.invalidateQueries({ queryKey: ["class-room-students"] });
+    } catch (error) {
+      const fallbackMessage = "Điểm danh thủ công thất bại. Vui lòng thử lại.";
+      const message =
+        error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
+      notifications.show(message, {
+        severity: "error",
+      });
+    }
   }
 
   const handleExport = async () => {
@@ -265,7 +309,6 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       });
     }
   };
-
 
   return (
     <Stack spacing={2}>
@@ -462,82 +505,120 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               ) : (
                 students.map((student, index) => {
                   const order = (page - 1) * PAGE_SIZE + index + 1;
-                  const isAttendance = student.class_room_attendance?.some((item) => item.check_in_at);
+                  const sessions = student.class_rooms?.sessions ?? [];
+                  const hasSessions = sessions.length > 0;
+                  const isExpanded = Boolean(expandedStudentRows[student.id]);
+
+                  const toggleSessions = () => {
+                    if (!hasSessions) {
+                      return;
+                    }
+                    handleToggleStudentSessions(student.id);
+                  };
+
                   return (
-                    <TableRow
-                      key={`${student.id}-${order}`}
-                      sx={{
-                        "&:last-child td": { borderBottom: "none" },
-                        "&:hover": {
-                          backgroundColor: grey[50],
-                        },
-                      }}
-                    >
-                      <TableCell>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight={600}
-                          noWrap
-                        >
-                          {student.employee?.profile?.full_name ?? "-"}
-                        </Typography>
-                        <Chip label={student.employee?.employee_code ?? "-"} variant="filled" color="success" />
-                      </TableCell>
-                      <TableCell>
-                        {student.employee?.profile?.email ?? "-"}
-                      </TableCell>
-                      <TableCell>
-                        {student.employee?.profile?.phone_number ?? "-"}
-                      </TableCell>
-                      <TableCell>
-                        {resolveOrganizationUnitName(student, "branch")}
-                      </TableCell>
-                      <TableCell>
-                        {resolveOrganizationUnitName(student, "department")}
-                      </TableCell>
-                      <TableCell align="center">
-                        {fDateTime(student.created_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        {
-                          isAttendance ? (
-                            <Chip
-                              label={"Tham gia"}
-                              size="medium"
-                              variant="filled"
-                              color="success"
-                            />
-                          ) : (
-                            <Chip
-                              label={"Vắng mặt"}
-                              size="medium"
-                              variant="filled"
-                              color="error"
-                            />
-                          )
-                        }
-                      </TableCell>
-                      <TableCell align="center">
-                        {fDateTime(student?.class_room_attendance?.[0]?.check_in_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        {fDateTime(student?.class_room_attendance?.[0]?.check_out_at)}
-                      </TableCell>
-                      <TableCell align="center">
-                        <PopupState variant="popover" popupId="demo-popup-menu">
-                          {(popupState) => (
-                            <>
-                              <IconButton {...bindTrigger(popupState)}>
-                                <MoreVertIcon />
-                              </IconButton>
-                              <Menu {...bindMenu(popupState)}>
-                                <MenuItem onClick={() => handleOpenDialogDeleteUser(student.employee?.id as string, student?.class_rooms_priority?.runtime_status)}>Gỡ học viên</MenuItem>
-                              </Menu>
-                            </>
-                          )}
-                        </PopupState>
-                      </TableCell>
-                    </TableRow>
+                    <Fragment key={`${student.id}-${order}`}>
+                      <TableRow
+                        sx={{
+                          "&:last-child td": { borderBottom: "none" },
+                          "&:hover": {
+                            backgroundColor: grey[50],
+                          },
+                        }}
+                      >
+                        <TableCell>
+                          <Stack
+                            direction="row"
+                            spacing={1.5}
+                            alignItems="flex-start"
+                          >
+                            <IconButton
+                              size="small"
+                              onClick={toggleSessions}
+                              disabled={!hasSessions}
+                              sx={{ mt: 0.5 }}
+                              aria-label={
+                                isExpanded
+                                  ? "Ẩn danh sách buổi học"
+                                  : "Hiển thị danh sách buổi học"
+                              }
+                            >
+                              {isExpanded ? (
+                                <KeyboardArrowUpIcon fontSize="small" />
+                              ) : (
+                                <KeyboardArrowDownIcon fontSize="small" />
+                              )}
+                            </IconButton>
+                            <Box>
+                              <Typography
+                                variant="subtitle2"
+                                fontWeight={600}
+                                noWrap
+                              >
+                                {student.employee?.profile?.full_name ?? "-"}
+                              </Typography>
+                              <Chip
+                                label={student.employee?.employee_code ?? "-"}
+                                variant="filled"
+                                color="success"
+                                size="small"
+                                sx={{ mt: 0.5 }}
+                              />
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          {student.employee?.profile?.email ?? "-"}
+                        </TableCell>
+                        <TableCell>
+                          {student.employee?.profile?.phone_number ?? "-"}
+                        </TableCell>
+                        <TableCell>
+                          {resolveOrganizationUnitName(student, "branch")}
+                        </TableCell>
+                        <TableCell>
+                          {resolveOrganizationUnitName(student, "department")}
+                        </TableCell>
+                        <TableCell align="center">
+                          {fDateTime(student.created_at)}
+                        </TableCell>
+                        <TableCell align="center">
+                          <PopupState
+                            variant="popover"
+                            popupId="demo-popup-menu"
+                          >
+                            {(popupState) => (
+                              <>
+                                <IconButton {...bindTrigger(popupState)}>
+                                  <MoreVertIcon />
+                                </IconButton>
+                                <Menu {...bindMenu(popupState)}>
+                                  <MenuItem
+                                    onClick={() =>
+                                      handleOpenDialogDeleteUser(
+                                        student.employee?.id as string,
+                                        student?.class_rooms_priority
+                                          ?.runtime_status,
+                                      )
+                                    }
+                                  >
+                                    Gỡ học viên
+                                  </MenuItem>
+                                </Menu>
+                              </>
+                            )}
+                          </PopupState>
+                        </TableCell>
+                      </TableRow>
+                      <StudentSessionsCollapseRow
+                        student={student}
+                        sessions={sessions}
+                        colSpan={STUDENT_TABLE_HEAD.length}
+                        isExpanded={isExpanded}
+                        isMarkingAttendance={isMarkingAttendance}
+                        onMarkAttendance={handleMarkAttendance}
+                      />
+                    </Fragment>
                   );
                 })
               )}

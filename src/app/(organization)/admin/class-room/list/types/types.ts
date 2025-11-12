@@ -39,3 +39,7 @@ export interface ClassRoomFilters {
   runtimeStatus: ClassRoomRuntimeStatusFilter;
   status: ClassRoomStatusFilter;
 }
+
+export interface ElearningFilters {
+  search: string;
+}

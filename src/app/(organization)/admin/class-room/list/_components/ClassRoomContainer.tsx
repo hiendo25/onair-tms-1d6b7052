@@ -10,9 +10,9 @@ import {
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { redirect, usePathname, useRouter, useSearchParams } from "next/navigation";
 import ClassRoomTab from "./ClassRoomTab";
-import ELearningTab from "./ELearningTab";
 import TvOutlinedIcon from '@mui/icons-material/TvOutlined';
 import AirplayOutlinedIcon from '@mui/icons-material/AirplayOutlined';
+import ELearningTab from "./Elearning/ELearningTab";
 
 type TabValue = "ClassRoomTab" | "ElearningTab";
 
@@ -39,10 +39,8 @@ export default function ClassRoomContainer() {
   const [value, setValue] = useState<TabValue>(tabFromQuery);
 
   useEffect(() => {
-    if (tabFromQuery !== value) {
-      setValue(tabFromQuery);
-    }
-  }, [tabFromQuery, value]);
+    setValue((prev) => (prev === tabFromQuery ? prev : tabFromQuery));
+  }, [tabFromQuery]);
 
   const syncQueryWithTab = (nextValue: TabValue) => {
     const params = new URLSearchParams(searchParams.toString());

@@ -1,17 +1,31 @@
 "use client";
 import { Button } from "@mui/material";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useMarkAttendanceMutation } from "@/modules/class-room-management/operations/mutation";
 
 interface IJoinButton {
-	startDate: string
-	roomUrl: string
-	isOwner: boolean
+	startDate: string;
+	roomUrl: string;
+	isOwner: boolean;
+	classRoomId: string;
+	classSessionId: string;
+	employeeId?: string;
+	shouldMarkAttendance?: boolean;
 }
 
+const JoinButton = ({
+	startDate,
+	roomUrl,
+	isOwner,
+	classRoomId,
+	classSessionId,
+	employeeId,
+	shouldMarkAttendance = true,
+}: IJoinButton) => {
+	const [isJoining, setIsJoining] = useState(false);
+	const { mutateAsync: markAttendance } = useMarkAttendanceMutation();
 
-const JoinButton = ({ startDate, roomUrl, isOwner }: IJoinButton) => {
-
-	const isDisable = useMemo(() => {
+	const isTimeRestricted = useMemo(() => {
 		if (isOwner) {
 			return (
 				new Date(new Date().getTime() + 60 * 60 * 1000) < new Date(startDate)
@@ -22,16 +36,47 @@ const JoinButton = ({ startDate, roomUrl, isOwner }: IJoinButton) => {
 		);
 	}, [isOwner, startDate]);
 
+	const handleJoin = useCallback(async () => {
+		if (isTimeRestricted || isJoining || !roomUrl) {
+			return;
+		}
+
+		setIsJoining(true);
+
+		try {
+			if (shouldMarkAttendance && employeeId) {
+				await markAttendance({
+					attendance_method: "online_auto",
+					attendance_mode: "online",
+					classRoomId,
+					classSessionId,
+					employeeId,
+				});
+			}
+		} catch (error) {
+			console.error("Failed to mark attendance on join", error);
+		} finally {
+			window.location.replace(roomUrl);
+		}
+	}, [
+		isTimeRestricted,
+		isJoining,
+		roomUrl,
+		employeeId,
+		markAttendance,
+		classRoomId,
+		classSessionId,
+		shouldMarkAttendance,
+	]);
+
 	return (
 		<Button
-			disabled={isDisable}
+			disabled={isTimeRestricted || isJoining || !roomUrl}
 			variant="contained"
 			size="large"
 			fullWidth
-			component="a"
-			// href={!isDisable ? roomUrl : undefined}
 			className="w-40"
-		// onClick={(e) => isDisable && e.preventDefault()}
+			onClick={handleJoin}
 		>
 			Vào lớp học
 		</Button>

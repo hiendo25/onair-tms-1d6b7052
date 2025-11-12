@@ -144,7 +144,7 @@ export default function ClassRoomFilters({
             size="small"
           />
         </Box>
-        <Link href="/class-room">
+        <Link href="/admin/class-room/create">
           <Button
             variant="contained"
             color="primary"

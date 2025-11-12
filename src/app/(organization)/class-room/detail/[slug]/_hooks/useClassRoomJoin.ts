@@ -18,6 +18,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
+  const [qrViewOpen, setQrViewOpen] = useState(false);
   const [selectedSessionForQR, setSelectedSessionForQR] = useState<string | null>(null);
 
   const isSingleSession = useMemo(() => data?.room_type === "single", [data?.room_type]);
@@ -42,6 +43,14 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
     setSelectedSessionForQR(null);
   }, []);
 
+  const openQRView = useCallback(() => {
+    setQrViewOpen(true);
+  }, []);
+
+  const closeQRView = useCallback(() => {
+    setQrViewOpen(false);
+  }, []);
+
   const navigateToClassRoomCountDown = useCallback(
     (sessionId: string) => {
       router.push(PATHS.CLASSROOMS.COUNTDOWN_CLASSROOM(classRoomSlug, sessionId));
@@ -52,13 +61,18 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
   const joinSession = useCallback(
     ({ sessionId, isOnline }: JoinSessionOptions) => {
       if (!isOnline) {
+        // For admin view, show QR view dialog instead of scanner
+        if (isAdminView) {
+          openQRView();
+          return;
+        }
         openQRDialog(sessionId);
         return;
       }
 
       navigateToClassRoomCountDown(sessionId);
     },
-    [openQRDialog, navigateToClassRoomCountDown],
+    [openQRDialog, openQRView, navigateToClassRoomCountDown, isAdminView],
   );
 
   const handleClickJoin = useCallback(() => {
@@ -100,6 +114,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
   return {
     dialogOpen,
     qrDialogOpen,
+    qrViewOpen,
     selectedSessionForQR,
 
     isSingleSession,
@@ -112,6 +127,8 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
     handleCloseDialog,
     openQRDialog,
     closeQRDialog,
+    openQRView,
+    closeQRView,
 
     joinSession,
   };

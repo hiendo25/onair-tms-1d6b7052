@@ -9,7 +9,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { fDateTime } from "@/lib";
 import EnterClassRoomsDialog from "./EnterClassRooms";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
-import { ClassRoomTypeFilter } from "../../class-room/list/types/types";
+import { ClassRoomTypeFilter } from "../../admin/class-room/list/types/types";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { PATHS } from "@/constants/path.contstants";

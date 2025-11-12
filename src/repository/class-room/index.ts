@@ -19,6 +19,7 @@ import {
   ClassRoomSessionDetailDto,
   ClassRoomStatusCountDto,
   ClassRoomStudentDto,
+  ClassRoomStudentSessionAttendanceDto,
 } from "@/types/dto/classRooms/classRoom.dto";
 import {
   CLASS_ROOM_STUDENTS_SELECT,
@@ -34,7 +35,8 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/class-room/list/types/types";
+} from "@/app/(organization)/admin/class-room/list/types/types";
+import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 export * from "./type";
 
 const getClassRoomById = async (classRoomId: string) => {
@@ -431,7 +433,6 @@ const createClassRoomsQuery = (
   options?: { count?: "exact" | "planned" | "estimated"; head?: boolean },
 ) => {
   const { organizationId, employeeId, teacherClassRoomIds } = filters;
-  const trimmedEmployeeId = employeeId?.trim();
   const uuidPattern = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
   const sanitizedTeacherClassRoomIds = Array.from(
     new Set(
@@ -449,8 +450,8 @@ const createClassRoomsQuery = (
 
   const orConditions: string[] = [];
 
-  if (trimmedEmployeeId) {
-    orConditions.push(`employee_id.eq.${trimmedEmployeeId}`);
+  if (employeeId) {
+    orConditions.push(`employee_id.eq.${employeeId}`);
   }
 
   if (sanitizedTeacherClassRoomIds.length > 0) {
@@ -563,6 +564,45 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
   };
 };
 
+const normalizeStudentSessionAttendances = (student: ClassRoomStudentDto, classRoomId: string): ClassRoomStudentDto => {
+  const sessions = student.class_rooms?.sessions;
+
+  if (!sessions?.length) {
+    return student;
+  }
+
+  const attendancesForClassRoom = (student.employee?.attendances ?? []).filter(
+    (attendance) => attendance.class_room_id === classRoomId,
+  );
+
+  const attendanceBySessionId = attendancesForClassRoom.reduce<Record<string, ClassRoomStudentSessionAttendanceDto[]>>(
+    (acc, attendance) => {
+      if (!attendance.class_session_id) {
+        return acc;
+      }
+
+      if (!acc[attendance.class_session_id]) {
+        acc[attendance.class_session_id] = [];
+      }
+
+      acc[attendance?.class_session_id]?.push(attendance);
+
+      return acc;
+    },
+    {},
+  );
+
+  const normalizedSessions = sessions.map((session) => ({
+    ...session,
+    class_attendances: session.id ? attendanceBySessionId[session.id] ?? [] : [],
+  }));
+
+  return {
+    ...student,
+    class_rooms: student.class_rooms ? { ...student.class_rooms, sessions: normalizedSessions } : student.class_rooms,
+  };
+};
+
 const getClassRoomStudents = async (
   input: GetClassRoomStudentsQueryInput,
   client?: SupabaseClient<Database>,
@@ -589,7 +629,8 @@ const getClassRoomStudents = async (
     .from("class_room_employee")
     .select(CLASS_ROOM_STUDENTS_SELECT, { count: "exact" })
     .eq("class_room_id", classRoomId)
-    .eq("employee.employee_type", "student");
+    .eq("employee.employee_type", "student")
+    .eq("employee.attendances.class_room_id", classRoomId);
 
   if (search?.trim()) {
     const sanitized = sanitizeSearchTerm(search.trim());
@@ -615,30 +656,11 @@ const getClassRoomStudents = async (
     throw error;
   }
 
-  // Remove auxiliary relations used for filtering so the payload matches the expected DTO shape.
-  const rawData = (data ?? []) as Record<string, any>[];
-  const parsedData = rawData.map((item) => {
-    const { employee, ...restItem } = item as Record<string, any>;
-
-    if (!employee) {
-      return {
-        ...restItem,
-      };
-    }
-
-    const { employments, ...restEmployee } = employee;
-
-    return {
-      ...restItem,
-      employee: {
-        ...restEmployee,
-        employments: employments ?? [],
-      },
-    };
-  }) as ClassRoomStudentDto[];
+  const students = (data ?? []) as unknown as ClassRoomStudentDto[];
+  const normalizedStudents = students.map((student) => normalizeStudentSessionAttendances(student, classRoomId));
 
   return {
-    data: parsedData,
+    data: normalizedStudents,
     total: count ?? 0,
     page: safePage,
     limit: safeLimit,
@@ -821,6 +843,46 @@ const getClassRoomsByEmployeeId = async (
   };
 };
 
+const markAttendance = async (payload: MarkAttendancePayload) => {
+  try {
+    const { data: existingAttendance, error: existingAttendanceError } = await supabase
+      .from("class_attendances")
+      .select("id")
+      .eq("class_session_id", payload.classSessionId)
+      .eq("employee_id", payload.employeeId);
+
+    if (existingAttendanceError) {
+      throw existingAttendanceError;
+    }
+
+    if ((existingAttendance?.length ?? 0) > 0) {
+      throw new Error("Học viên đã được điểm danh trong buổi học này.");
+    }
+
+    const { data, error } = await supabase
+      .from("class_attendances")
+      .insert({
+        class_session_id: payload.classSessionId,
+        class_room_id: payload.classRoomId,
+        employee_id: payload.employeeId,
+        attendance_method: payload.attendance_method,
+        attendance_mode: payload.attendance_mode,
+        attended_at: new Date().toISOString(),
+        attendance_status: "present",
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export {
   createClassRoom,
   createPivotClassRoomAndHashTag,
@@ -839,4 +901,5 @@ export {
   getClassRoomStudents,
   getClassRooms,
   deletePivotClassRoomAndEmployeeByEmployeeId,
+  markAttendance,
 };

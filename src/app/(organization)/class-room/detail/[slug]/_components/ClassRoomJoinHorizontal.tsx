@@ -8,6 +8,7 @@ import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
 import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
 import JoinButton from "./JoinButton";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 interface ClassRoomJoinProps {
@@ -21,12 +22,14 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
   const {
     dialogOpen,
     qrDialogOpen,
+    qrViewOpen,
     selectedSessionForQR,
     isAllOnline,
     handleClickJoin,
     handleSelectSession,
     handleCloseDialog,
     closeQRDialog,
+    closeQRView,
   } = useClassRoomJoin({ data, isAdminView });
 
   return (
@@ -107,7 +110,23 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
       />
 
       {isAdminView ? (
-        <>{/* TODO: Add QR View */}</>
+        data && (
+          <QRCodeViewDialog
+            open={qrViewOpen}
+            onClose={closeQRView}
+            classRoom={{
+              id: data.id,
+              title: data.title,
+              class_sessions: data.sessions?.map((s) => ({
+                id: s.id,
+                title: s.title,
+                start_at: s.start_at,
+                end_at: s.end_at,
+                is_online: s.is_online,
+              })),
+            } as any}
+          />
+        )
       ) : (
         <QRScannerDialog
           open={qrDialogOpen}

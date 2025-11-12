@@ -43,7 +43,7 @@ export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
     headerName: "Phòng ban",
     width: 220,
     renderCell: ({ row }) => {
-      return row.employments[0]?.organization_units.name;
+      return row.employments[0]?.organization_units?.name;
     },
   },
   {

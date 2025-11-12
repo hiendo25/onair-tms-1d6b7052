@@ -1,21 +1,35 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import dayjs from "dayjs";
-import { redirect } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { Typography } from "@mui/material";
 import { useCountdownDate } from "@/hooks/useCountdown";
-
+import { useMarkAttendanceMutation } from "@/modules/class-room-management/operations/mutation";
 
 interface ITimeCountDown {
-	startDate: string,
-	roomUrl: string,
-	className: string,
+	startDate: string;
+	roomUrl: string;
+	className?: string;
+	classRoomId: string;
+	classSessionId: string;
+	employeeId?: string;
+	shouldMarkAttendance?: boolean;
 }
 
-const TimeCountDown = ({ startDate, roomUrl, className = "" }: ITimeCountDown) => {
+const TimeCountDown = ({
+	startDate,
+	roomUrl,
+	className = "",
+	classRoomId,
+	classSessionId,
+	employeeId,
+	shouldMarkAttendance = true,
+}: ITimeCountDown) => {
 	const [isSplashScreenVisible, setIsSplashScreenVisible] = useState(true);
+	const [hasTriggered, setHasTriggered] = useState(false);
 	const countdownDate = useCountdownDate(new Date(dayjs(startDate).format()));
+
+	const { mutateAsync: markAttendance } = useMarkAttendanceMutation();
+
 
 	const days = parseInt(countdownDate.days, 10);
 	const hours = parseInt(countdownDate.hours, 10);
@@ -27,16 +41,60 @@ const TimeCountDown = ({ startDate, roomUrl, className = "" }: ITimeCountDown) =
 		if (startDate && countdownDate) {
 			setIsSplashScreenVisible(false);
 		}
-		if (
+	}, [startDate, countdownDate]);
+
+	useEffect(() => {
+		const shouldStart =
 			days <= 0 &&
 			hours <= 0 &&
 			minutes <= 0 &&
 			seconds <= 0 &&
-			initialized
-		) {
-			window.location.replace(roomUrl);
+			initialized &&
+			roomUrl &&
+			!hasTriggered;
+
+		if (!shouldStart) {
+			return;
 		}
-	}, [days, hours, minutes, seconds, initialized, startDate]);
+
+		const shouldCallMarkAttendance =
+			shouldMarkAttendance &&
+			Boolean(classRoomId && classSessionId && employeeId) &&
+			!hasTriggered;
+
+		const handleStart = async () => {
+			setHasTriggered(true);
+			if (shouldCallMarkAttendance) {
+				try {
+					await markAttendance({
+						attendance_method: "online_auto",
+						attendance_mode: "online",
+						classRoomId,
+						classSessionId,
+						employeeId: employeeId!,
+					});
+				} catch (error) {
+					console.error("Failed to mark attendance automatically", error);
+				}
+			}
+			window.location.replace(roomUrl);
+		};
+
+		void handleStart();
+	}, [
+		days,
+		hours,
+		minutes,
+		seconds,
+		initialized,
+		roomUrl,
+		markAttendance,
+		classRoomId,
+		classSessionId,
+		employeeId,
+		hasTriggered,
+		shouldMarkAttendance,
+	]);
 
 	return (
 		<div

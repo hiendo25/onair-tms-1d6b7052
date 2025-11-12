@@ -75,6 +75,7 @@ const ClassRoomCountDownSection = ({ sessionId }: ClassRoomCountDownSection) => 
     const targetDate = classSession?.start_at ?? classRoom?.start_at ?? null;
     const joinUrl = resolveJoinUrl(classSession);
     const isOwner = classRoom?.employee_id === userEmployeeId;
+    const shouldMarkAttendance = !isOwner && !isAdmin;
 
     if (isPending) {
         return (
@@ -178,6 +179,10 @@ const ClassRoomCountDownSection = ({ sessionId }: ClassRoomCountDownSection) => 
                                         startDate={targetDate!}
                                         roomUrl={joinUrl!}
                                         className="mt-4"
+                                        classRoomId={classRoom.id}
+                                        classSessionId={classSession.id}
+                                        employeeId={userEmployeeId}
+                                        shouldMarkAttendance={shouldMarkAttendance}
                                     />
                                 </section>
                             </section>
@@ -192,6 +197,10 @@ const ClassRoomCountDownSection = ({ sessionId }: ClassRoomCountDownSection) => 
                                 startDate={targetDate!}
                                 roomUrl={joinUrl!}
                                 isOwner={isOwner}
+                                classRoomId={classRoom.id}
+                                classSessionId={classSession.id}
+                                employeeId={userEmployeeId}
+                                shouldMarkAttendance={shouldMarkAttendance}
                             />
 
                             <Link href={'/'} className="mt-6">

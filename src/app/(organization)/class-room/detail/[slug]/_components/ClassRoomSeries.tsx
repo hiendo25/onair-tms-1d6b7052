@@ -22,6 +22,7 @@ import { ROOM_PROVIDERS } from "../_constants";
 import JoinButton from "./JoinButton";
 import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 const ClassRoomSerieCard = ({
@@ -281,10 +282,6 @@ interface ClassRoomSeriesProps {
 }
 
 const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
-  const isSingle = data?.room_type === "single";
-
-  if (isSingle) return null;
-
   const employee = useUserOrganization((state) => state.data);
 
   const [selectedSession, setSelectedSession] = useState<
@@ -296,9 +293,13 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
       ...session,
       thumbnail_url: data?.thumbnail_url,
     }));
-  }, [data?.sessions]);
+  }, [data?.sessions, data?.thumbnail_url]);
 
-  const { joinSession, qrDialogOpen, selectedSessionForQR, closeQRDialog } = useClassRoomJoin({ data, isAdminView });
+  const { joinSession, qrDialogOpen, qrViewOpen, selectedSessionForQR, closeQRDialog, closeQRView } = useClassRoomJoin({ data, isAdminView });
+
+  const isSingle = data?.room_type === "single";
+
+  if (isSingle) return null;
 
   const onClickJoinSession = (sessionId: string) => {
     setSelectedSession(null);
@@ -352,7 +353,23 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
       />
 
       {isAdminView ? (
-        <>{/* TODO: Add QR View */}</>
+        data && (
+          <QRCodeViewDialog
+            open={qrViewOpen}
+            onClose={closeQRView}
+            classRoom={{
+              id: data.id,
+              title: data.title,
+              class_sessions: data.sessions?.map((s) => ({
+                id: s.id,
+                title: s.title,
+                start_at: s.start_at,
+                end_at: s.end_at,
+                is_online: s.is_online,
+              })),
+            } as any}
+          />
+        )
       ) : (
         <QRScannerDialog
           open={qrDialogOpen}

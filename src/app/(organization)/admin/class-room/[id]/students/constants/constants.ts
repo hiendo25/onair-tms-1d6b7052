@@ -5,9 +5,9 @@ export const STUDENT_TABLE_HEAD = [
   { id: "branch", label: "Chi nhánh", width: 160, align: "left" as const },
   { id: "department", label: "Phòng ban", width: 160, align: "left" as const },
   { id: "assignedAt", label: "Thời gian gán", width: 160, align: "center" as const },
-  { id: "attendance", label: "Điểm danh", width: 140, align: "center" as const },
-  { id: "checkIn", label: "Thời gian vào lớp", width: 140, align: "center" as const },
-  { id: "checkOut", label: "Thời gian kết thúc", width: 140, align: "center" as const },
+  // { id: "attendance", label: "Điểm danh", width: 140, align: "center" as const },
+  // { id: "checkIn", label: "Thời gian vào lớp", width: 140, align: "center" as const },
+  // { id: "checkOut", label: "Thời gian kết thúc", width: 140, align: "center" as const },
   { id: "action", label: "Hành động", width: 140, align: "center" as const },
 ];
 
