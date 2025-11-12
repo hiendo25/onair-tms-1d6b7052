@@ -99,7 +99,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
     console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
 
-    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
+    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "published") => async () => {
       try {
         const TAB_LIST = [
           TAB_KEYS_MANAGE_COURSE["clsTab-information"],
@@ -208,7 +208,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
               </Button> */}
               <Button
                 size="large"
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "publish")}
+                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "published")}
                 disabled={isLoading}
                 loading={isLoading}
               >

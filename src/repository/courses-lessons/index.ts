@@ -1,9 +1,9 @@
 import { supabase } from "@/services";
-import { CreateLessonPayload, UpdateLessonPayload } from "./type";
+import { CreateLessonPayload, UpdateLessonPayload, CreatePivotLessonsWithResourcesPayload } from "./type";
 
 const createLessons = async (payload: CreateLessonPayload[]) => {
   try {
-    return await supabase.from("lessons").insert(payload).select("*").single();
+    return await supabase.from("lessons").insert(payload).select("*");
   } catch (err: any) {
     console.log(err);
     throw new Error(err?.message);
@@ -20,4 +20,13 @@ const updateSection = async (payload: UpdateLessonPayload) => {
   }
 };
 
-export { createLessons, updateSection };
+const createPivotLessonsWithResources = async (payload: CreatePivotLessonsWithResourcesPayload[]) => {
+  try {
+    return await supabase.from("lessons_resources").insert(payload).select("*");
+  } catch (err: any) {
+    console.log(err);
+    throw new Error(err?.message);
+  }
+};
+
+export { createLessons, updateSection, createPivotLessonsWithResources };
