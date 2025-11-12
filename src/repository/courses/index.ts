@@ -7,6 +7,7 @@ import {
   CreatePivotCoursesWithStudentsPayload,
   CreatePivotCoursesWithResourcesPayload,
 } from "./type";
+import { CourseMetaKey, CourseMetaValue } from "@/constants/course-meta.constant";
 
 const createCourse = async (payload: CreateCoursePayload) => {
   try {
@@ -63,6 +64,141 @@ const createPivotCoursesWithResources = async (payload: CreatePivotCoursesWithRe
   }
 };
 
+const getCourseById = async (courseId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("courses")
+      .select(
+        `
+          id, 
+          title,
+          slug,
+          description,
+          community_info,
+          thumbnail_url,
+          start_at,
+          end_at,
+          status,
+          created_by,
+          courses_metadatas(id, key, value, course_id),
+          courses_categories(
+            id,
+            categories(
+              id, name, slug
+            )
+          ),
+          courses_resources(
+            id, 
+            resources(
+              id,
+              path,
+              size, 
+              kind, 
+              mime_type, 
+              name
+            )
+          ),
+          students:courses_students(
+            id,
+            student:employees(
+              id,
+              employee_type,
+              employee_code,
+              profile:profiles(
+                id,
+                full_name,
+                email,
+                employee_id,
+                avatar
+              )
+            )
+          ),
+          owner:employees(
+            id,
+            employee_type,
+            employee_code,
+            profile:profiles(
+              id,
+              full_name,
+              email,
+              employee_id,
+              avatar
+            )
+          ),
+          organizations(
+            id, 
+            name
+          ),
+          sections(
+            id,
+            title,
+            description,
+            course_id,
+            status,
+            priority,
+            lessons(
+              id,
+              title,
+              content,
+              section_id,
+              assignment_id,
+              lesson_type,
+              priority,
+              status,
+              main_resource:resources(
+                id,
+                path,
+                size, 
+                kind, 
+                mime_type, 
+                name
+              ),
+              assignments(
+                id,
+                name, 
+                description
+              ),
+              lessons_resources(
+                id,
+                resource:resources(
+                  id,
+                  path,
+                  size, 
+                  kind, 
+                  mime_type, 
+                  name
+                  )
+                )
+            )
+          )
+        `,
+      )
+      .eq("id", courseId)
+      .order("priority", { ascending: true, foreignTable: "sections" })
+      .single()
+      .overrideTypes<{
+        courses_meta: {
+          class_room_id: string;
+          id: string;
+          key: CourseMetaKey;
+          value: CourseMetaValue;
+        }[];
+        community_info: { name: string; url: string };
+        // sessions: {
+        //   channel_info: {
+        //     providerId: string;
+        //     url: string;
+        //     password: string;
+        //   };
+        // }[];
+      }>();
+    return { data, error };
+  } catch (err: any) {
+    throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");
+  }
+};
+export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
+
 export {
   createCourse,
   updateCourse,
@@ -70,4 +206,5 @@ export {
   createPivotCoursesWithStudents,
   createPivotCoursesWithTeachers,
   createPivotCoursesWithResources,
+  getCourseById,
 };
