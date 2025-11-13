@@ -89,18 +89,21 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       setActiveDragSectionId(activeId);
       onSectionDragStart?.(activeId);
     };
-    const handleDragEnd = (event: DragEndEvent) => {
-      const { active, over } = event;
-      const activeId = active.id;
-      const overId = over?.id;
+    const handleDragEnd = useCallback(
+      (event: DragEndEvent) => {
+        const { active, over } = event;
+        const activeId = active.id;
+        const overId = over?.id;
 
-      if (!over || activeId === overId) return;
+        if (!over || activeId === overId) return;
 
-      const activeIndex = sections.findIndex((field) => field._sectionId === activeId);
-      const overIndex = sections.findIndex((field) => field._sectionId === overId);
-      setActiveDragSectionId(undefined);
-      move(activeIndex, overIndex);
-    };
+        const activeIndex = sections.findIndex((field) => field._sectionId === activeId);
+        const overIndex = sections.findIndex((field) => field._sectionId === overId);
+        setActiveDragSectionId(undefined);
+        move(activeIndex, overIndex);
+      },
+      [sections, move],
+    );
 
     const hasLessonEditing = useCallback(
       (sectionIndex: number, lessonIndex: number) => {

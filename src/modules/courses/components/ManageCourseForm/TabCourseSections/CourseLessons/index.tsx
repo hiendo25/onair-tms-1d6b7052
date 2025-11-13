@@ -72,7 +72,6 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
       (evt: DragStartEvent) => {
         const { active } = evt;
         const activeId = active.id;
-        console.log(activeId);
         setActiveDragLessonId(activeId);
         onLessonDragStart?.(activeId);
       },
@@ -92,7 +91,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
 
         move(activeIndex, overIndex);
       },
-      [lessons],
+      [lessons, move],
     );
 
     const lessonDraggingItem = useMemo(() => {
@@ -125,7 +124,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
         },
         removeLesson: remove,
       }),
-      [sectionIndex],
+      [sectionIndex, lessons],
     );
     return (
       <div className="section-item__body flex flex-col gap-2">
