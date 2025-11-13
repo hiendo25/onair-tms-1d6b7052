@@ -3,12 +3,15 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/class-room/list/types/types";
+} from "@/app/(organization)/admin/class-room/list/types/types";
 import { useTQuery } from "@/lib/queryClient";
+import { classRoomRepository } from "@/repository";
 import {
-  classRoomRepository,
-} from "@/repository";
-import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, ClassRoomStatusCountDto, ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
+  ClassRoomPriorityDto,
+  ClassRoomSessionDetailDto,
+  ClassRoomStatusCountDto,
+  ClassRoomStudentDto,
+} from "@/types/dto/classRooms/classRoom.dto";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export interface GetClassRoomsQueryInput {
@@ -27,8 +30,7 @@ export interface GetClassRoomsQueryInput {
   orderBy?: "asc" | "desc";
 }
 
-export interface GetAssignedClassRoomsQueryInput
-  extends GetClassRoomsQueryInput {
+export interface GetAssignedClassRoomsQueryInput extends GetClassRoomsQueryInput {
   userId: string;
 }
 
@@ -52,9 +54,15 @@ export interface GetClassRoomStudentsQueryInput {
   attendanceStatus?: "attended" | "absent" | "pending";
 }
 
-export const useGetClassRoomsPriorityQuery = (
-  input: GetClassRoomsQueryInput = {},
-) => {
+export const useGetClassRoomQuery = (slug: string) => {
+  return useTQuery({
+    queryKey: ["class-room-detail", slug],
+    queryFn: () => classRoomRepository.getClassRoomBySlug(slug),
+    enabled: Boolean(slug),
+  });
+};
+
+export const useGetClassRoomsPriorityQuery = (input: GetClassRoomsQueryInput = {}) => {
   return useTQuery<PaginatedResult<ClassRoomPriorityDto>>({
     queryKey: ["class-rooms-priority", input],
     queryFn: () => classRoomRepository.getClassRooms(input),
@@ -62,10 +70,7 @@ export const useGetClassRoomsPriorityQuery = (
   });
 };
 
-
-export const useCountStatusClassRoomsQuery = (
-  input: GetClassRoomStatusCountsInput,
-) => {
+export const useCountStatusClassRoomsQuery = (input: GetClassRoomStatusCountsInput) => {
   return useTQuery<ClassRoomStatusCountDto[]>({
     queryKey: ["class_room_status_counts", input],
     queryFn: () => classRoomRepository.getClassRoomStatusCounts(input),
@@ -73,13 +78,11 @@ export const useCountStatusClassRoomsQuery = (
   });
 };
 
-export const useGetClassRoomStudentsQuery = (
-  input: GetClassRoomStudentsQueryInput,
-) => {
+export const useGetClassRoomStudentsQuery = (input: GetClassRoomStudentsQueryInput) => {
   return useTQuery<PaginatedResult<ClassRoomStudentDto>>({
     queryKey: ["class-room-students", input],
     queryFn: () => classRoomRepository.getClassRoomStudents(input),
-    enabled: Boolean(input?.classRoomId)
+    enabled: Boolean(input?.classRoomId),
   });
 };
 
@@ -87,9 +90,7 @@ type GetClassRoomsByEmployeeIdQueryInput = Omit<GetClassRoomsQueryInput, "organi
   employeeId?: string;
 };
 
-export const useGetClassRoomsByEmployeeId = (
-  input: GetClassRoomsByEmployeeIdQueryInput,
-) => {
+export const useGetClassRoomsByEmployeeId = (input: GetClassRoomsByEmployeeIdQueryInput) => {
   return useTQuery<PaginatedResult<ClassRoomPriorityDto>>({
     queryKey: ["class-room-assign", input],
     queryFn: () =>
@@ -101,9 +102,7 @@ export const useGetClassRoomsByEmployeeId = (
   });
 };
 
-export const useGetClassRoomSessionDetailQuery = (
-  input: { sessionId?: string },
-) => {
+export const useGetClassRoomSessionDetailQuery = (input: { sessionId?: string }) => {
   const { sessionId } = input;
 
   return useTQuery<ClassRoomSessionDetailDto | null>({

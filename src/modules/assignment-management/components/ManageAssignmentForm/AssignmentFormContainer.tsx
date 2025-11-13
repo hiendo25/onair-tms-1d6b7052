@@ -10,6 +10,8 @@ import { Button, IconButton } from "@mui/material";
 import AssignmentTabContainer from "./AssignmentTabContainer";
 import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
 import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
+import { useRouter } from "next/navigation";
+import { PATHS } from "@/constants/path.contstants";
 
 export const TAB_KEYS_ASSIGNMENT = {
   "assignTab-information": "assignTab-information",
@@ -40,6 +42,7 @@ export const initAssignmentFormData = (): Partial<Assignment> => {
 
 const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, AssignmentFormContainerProps>(
   ({ onSubmit, isLoading, action, value }, ref) => {
+    const router = useRouter();
     const formSubmitStateRef = React.useRef<boolean>(false);
 
     const methods = useForm<Assignment>({
@@ -74,6 +77,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
     const cancelCreateAssignment = () => {
       formSubmitStateRef.current = false;
       reset();
+      router.push(PATHS.ASSIGNMENTS.ROOT);
     };
 
     const handleClickSubmit = () => {

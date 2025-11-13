@@ -16,11 +16,11 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { Image } from "@/shared/ui/Image";
-import { ClassRoomRuntimeStatusFilter } from "../../class-room/list/types/types";
+import { ClassRoomRuntimeStatusFilter } from "../../admin/class-room/list/types/types";
 import {
     CLASSROOM_RUNTIME_STATUS_LABEL,
     RUNTIME_STATUS_COLOR_MAP,
-} from "../../class-room/list/utils/status";
+} from "../../admin/class-room/list/utils/status";
 
 interface EnterClassRoomsDialogProps {
     open: boolean;

@@ -23,6 +23,7 @@ import {
   Menu,
   MenuItem,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -70,6 +71,14 @@ export default function AssignmentList() {
 
   const assignments = assignmentsResult?.data || [];
   const totalCount = assignmentsResult?.total || 0;
+
+  const selectedAssignment = React.useMemo(() => {
+    return assignments.find((a) => a.id === selectedAssignmentId);
+  }, [assignments, selectedAssignmentId]);
+
+  const hasAssignedStudents = React.useMemo(() => {
+    return (selectedAssignment?.assignment_employees?.length || 0) > 0;
+  }, [selectedAssignment]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -308,9 +317,16 @@ export default function AssignmentList() {
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
-            <MenuItem onClick={handleDelete} disabled={isDeleting}>
-              <ListItemText>Xóa bài kiểm tra</ListItemText>
-            </MenuItem>
+            <Tooltip
+              title={hasAssignedStudents ? "Không thể xóa bài kiểm tra đã có học viên được giao" : ""}
+              placement="left"
+            >
+              <span>
+                <MenuItem onClick={handleDelete} disabled={isDeleting || hasAssignedStudents}>
+                  <ListItemText>Xóa bài kiểm tra</ListItemText>
+                </MenuItem>
+              </span>
+            </Tooltip>
           </Menu>
         </Card>
       </Box>

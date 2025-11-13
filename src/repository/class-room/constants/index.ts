@@ -55,7 +55,6 @@ export const CLASS_SESSION_WITH_CLASS_ROOM_SELECT = `
   class_room_id,
   is_online,
   limit_person,
-  resource_ids,
   class_room:class_rooms!inner (
     id,
     title,
@@ -101,13 +100,14 @@ export const CLASS_ROOM_STUDENTS_SELECT = `
       class_rooms_priority!class_room_employee_class_room_id_fkey (
         runtime_status
       ),
-      class_room_attendance (
-        id,
-        class_room_employee_id,
-        check_in_at,
-        check_out_at,
-        created_at,
-        updated_at
+      class_rooms!inner (
+        sessions:class_sessions!inner (
+          id,
+          title,
+          start_at,
+          end_at,
+          is_online
+        )
       ),
       employee:employees!inner (
         id,
@@ -131,6 +131,16 @@ export const CLASS_ROOM_STUDENTS_SELECT = `
           )
         ),
         branchEmployments:employments!inner (organization_unit_id),
-        departmentEmployments:employments!inner (organization_unit_id)
+        departmentEmployments:employments!inner (organization_unit_id),
+        attendances:class_attendances!class_attendances_employee_id_fkey (
+          id,
+          employee_id,
+          class_room_id,
+          class_session_id,
+          attendance_status,
+          attended_at,
+          attendance_mode,
+          attendance_method
+        )
       )
 `;

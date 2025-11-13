@@ -13,6 +13,21 @@ export const useDeleteUserInClassRoomMutation = () => {
     });
 };
 
+export type MarkAttendancePayload = {
+    classSessionId: string;
+    classRoomId: string;
+    employeeId: string,
+    attendance_method: "qr" | "manual" | "online_auto"
+    attendance_mode: "offline" | "online"
+};
+
+export const useMarkAttendanceMutation = () => {
+    return useTMutation({
+        mutationFn: (payload: MarkAttendancePayload) => classRoomRepository.markAttendance(payload),
+    });
+};
+
+
 type ExportStudentsAttendance = "attended" | "absent" | "pending";
 
 export interface ExportStudentsMutationInput {

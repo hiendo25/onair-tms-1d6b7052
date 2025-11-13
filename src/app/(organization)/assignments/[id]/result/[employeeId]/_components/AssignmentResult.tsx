@@ -51,14 +51,39 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
     }
   };
 
+  const loadingBreadcrumbs = useMemo(() => {
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      return [
+        { title: "Bài kiểm tra của tôi", path: basePath },
+        { title: "Kết quả" },
+      ];
+    }
+    return [
+      { title: "Bài tập", path: basePath },
+      { title: "Kết quả" },
+    ];
+  }, [basePath]);
+
+  const successBreadcrumbs = useMemo(() => {
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      return [
+        { title: "Bài kiểm tra của tôi", path: basePath },
+        { title: "Kết quả" },
+      ];
+    }
+    return [
+      { title: "Bài tập", path: basePath },
+      { title: submission?.assignmentName || "...", path: `${basePath}/${assignmentId}` },
+      { title: "Danh sách học viên", path: `${basePath}/${assignmentId}/students` },
+      { title: "Kết quả" },
+    ];
+  }, [basePath, submission, assignmentId]);
+
   if (isLoading) {
     return (
       <PageContainer
         title="Kết quả bài kiểm tra"
-        breadcrumbs={[
-          { title: "Bài tập", path: basePath },
-          { title: "Kết quả" },
-        ]}
+        breadcrumbs={loadingBreadcrumbs}
       >
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
           <CircularProgress />
@@ -71,10 +96,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
     return (
       <PageContainer
         title="Kết quả bài kiểm tra"
-        breadcrumbs={[
-          { title: "Bài tập", path: basePath },
-          { title: "Kết quả" },
-        ]}
+        breadcrumbs={loadingBreadcrumbs}
       >
         <Box p={3}>
           <Alert severity="error">
@@ -95,12 +117,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   return (
     <PageContainer
       title={`Kết quả - ${submission.assignmentName}`}
-      breadcrumbs={[
-        { title: "Bài tập", path: basePath },
-        { title: submission.assignmentName, path: `${basePath}/${assignmentId}` },
-        { title: "Danh sách học viên", path: `${basePath}/${assignmentId}/students` },
-        { title: "Kết quả" },
-      ]}
+      breadcrumbs={successBreadcrumbs}
     >
       <Box sx={{ py: 3 }}>
         <AssignmentSubmissionHeader

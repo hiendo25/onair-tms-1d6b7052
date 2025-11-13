@@ -207,8 +207,8 @@ export type Database = {
             | Database["public"]["Enums"]["attendance_mode_enum"]
             | null
           attendance_status:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at: string | null
           class_room_id: string | null
           class_session_id: string | null
@@ -217,6 +217,7 @@ export type Database = {
           distance_from_class: number | null
           employee_id: string
           id: string
+          qr_code_id: string | null
           qr_code_id: string | null
           rejection_reason: string | null
           scan_location_lat: number | null
@@ -230,8 +231,8 @@ export type Database = {
             | Database["public"]["Enums"]["attendance_mode_enum"]
             | null
           attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -240,6 +241,7 @@ export type Database = {
           distance_from_class?: number | null
           employee_id: string
           id?: string
+          qr_code_id?: string | null
           qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
@@ -253,8 +255,8 @@ export type Database = {
             | Database["public"]["Enums"]["attendance_mode_enum"]
             | null
           attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -263,6 +265,7 @@ export type Database = {
           distance_from_class?: number | null
           employee_id?: string
           id?: string
+          qr_code_id?: string | null
           qr_code_id?: string | null
           rejection_reason?: string | null
           scan_location_lat?: number | null
@@ -739,8 +742,8 @@ export type Database = {
         Row: {
           channel_info: Json | null
           channel_provider:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id: string
           created_at: string
           description: string | null
@@ -757,8 +760,8 @@ export type Database = {
         Insert: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -775,8 +778,8 @@ export type Database = {
         Update: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -1058,6 +1061,7 @@ export type Database = {
         Insert: {
           course_id?: string
           created_at?: string
+          created_at?: string
           id?: number
           student_id?: string
         }
@@ -1088,17 +1092,20 @@ export type Database = {
       courses_teachers: {
         Row: {
           course_id: string
+          course_id: string
           created_at: string
           id: number
           teacher_id: string
         }
         Insert: {
           course_id?: string
+          course_id?: string
           created_at?: string
           id?: number
           teacher_id?: string
         }
         Update: {
+          course_id?: string
           course_id?: string
           created_at?: string
           id?: number
@@ -1107,6 +1114,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "online_courses_teachers_online_course_id_fkey"
+            columns: ["course_id"]
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
@@ -1257,10 +1265,12 @@ export type Database = {
       lessons: {
         Row: {
           assignment_id: string | null
+          assignment_id: string | null
           content: string | null
           created_at: string
           id: string
           lesson_type: Database["public"]["Enums"]["lesson_type"]
+          main_resource: string | null
           main_resource: string | null
           priority: number
           section_id: string
@@ -1271,10 +1281,12 @@ export type Database = {
         }
         Insert: {
           assignment_id?: string | null
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
+          main_resource?: string | null
           main_resource?: string | null
           priority?: number
           section_id?: string
@@ -1285,10 +1297,12 @@ export type Database = {
         }
         Update: {
           assignment_id?: string | null
+          assignment_id?: string | null
           content?: string | null
           created_at?: string
           id?: string
           lesson_type?: Database["public"]["Enums"]["lesson_type"]
+          main_resource?: string | null
           main_resource?: string | null
           priority?: number
           section_id?: string
@@ -1298,6 +1312,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "lessons_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_main_resource_fkey"
+            columns: ["main_resource"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lessons_assignment_id_fkey"
             columns: ["assignment_id"]
@@ -1829,6 +1857,21 @@ export type Database = {
           },
         ]
       }
+      supersemar_masters: {
+        Row: {
+          data: string | null
+          id: number
+        }
+        Insert: {
+          data?: string | null
+          id?: number
+        }
+        Update: {
+          data?: string | null
+          id?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1929,10 +1972,7 @@ export type Database = {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -1947,22 +1987,24 @@ export type Database = {
       assignment_result_status: "submitted" | "graded"
       attendance_method_enum: "qr" | "manual" | "online_auto"
       attendance_mode_enum: "offline" | "online"
+      attendance_method_enum: "qr" | "manual" | "online_auto"
+      attendance_mode_enum: "offline" | "online"
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
-        | "publish"
-        | "active"
-        | "deactive"
-        | "pending"
-        | "deleted"
-        | "draft"
+      | "publish"
+      | "active"
+      | "deactive"
+      | "pending"
+      | "deleted"
+      | "draft"
       class_room_type: "single" | "multiple"
       course_status:
-        | "published"
-        | "pending"
-        | "draft"
-        | "deleted"
-        | "unpublished"
+      | "published"
+      | "pending"
+      | "draft"
+      | "deleted"
+      | "unpublished"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
@@ -1987,122 +2029,124 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
       assignment_result_status: ["submitted", "graded"],
+      attendance_method_enum: ["qr", "manual", "online_auto"],
+      attendance_mode_enum: ["offline", "online"],
       attendance_method_enum: ["qr", "manual", "online_auto"],
       attendance_mode_enum: ["offline", "online"],
       attendance_status: ["present", "late", "absent", "rejected"],

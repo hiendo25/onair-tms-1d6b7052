@@ -37,12 +37,34 @@ type ClassRoomStudentEmployeeDto = Tables<"employees"> & {
     "id" | "full_name" | "email" | "phone_number" | "avatar"
   > | null;
   employments?: EmploymentWithOrganizationUnitDto[];
+  attendances?: ClassRoomStudentSessionAttendanceDto[] | null;
+};
+
+export type ClassRoomStudentSessionAttendanceDto = Pick<
+  Tables<"class_attendances">,
+  | "id"
+  | "employee_id"
+  | "class_room_id"
+  | "class_session_id"
+  | "attendance_status"
+  | "attended_at"
+  | "attendance_method"
+  | "attendance_mode"
+>;
+
+type ClassRoomStudentSessionDto = Pick<
+  Tables<"class_sessions">,
+  "id" | "is_online" | "title" | "start_at" | "end_at"
+> & {
+  class_attendances?: ClassRoomStudentSessionAttendanceDto[] | null;
 };
 
 export type ClassRoomStudentDto = Tables<"class_room_employee"> & {
+  id: string;
+  created_at: Date;
   employee?: ClassRoomStudentEmployeeDto | null;
-  class_room_attendance?: Tables<"class_room_attendance">[] | null;
   class_rooms_priority?: { runtime_status: string | null } | null;
+  class_rooms?: { sessions: ClassRoomStudentSessionDto[] | null };
 };
 
 type ClassRoomSummaryDto = Pick<

@@ -441,7 +441,7 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
   const breadcrumbs = React.useMemo(() => {
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
       return [
-        { title: "Bài kiểm tra", path: basePath },
+        { title: "Bài kiểm tra của tôi", path: basePath },
         { title: "Nộp bài" },
       ];
     }

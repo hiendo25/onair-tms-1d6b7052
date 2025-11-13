@@ -50,6 +50,7 @@ import FileZipIcon from "./FileZipIcon";
 import FileImageIcon from "./FileImageIcon";
 import FileVideoIcon from "./FileVideoIcon";
 import FileAdioIcon from "./FileAudioIcon";
+import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
 import Edit05Icon from "./Edit05Icon";
 import Trash01Icon from "./TrashIcon1";
@@ -115,4 +116,5 @@ export {
   TrashIcon1,
   Trash01Icon,
   ZaloIcon,
+  VideoCameraRecordFillIcon,
 };

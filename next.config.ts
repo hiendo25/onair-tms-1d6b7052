@@ -35,8 +35,20 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http", // or 'http' if needed
+        hostname: "127.0.0.1",
+        port: "8000", // leave empty unless using custom port
+        pathname: "/storage/v1/object/public/**", // match all paths
+      },
+      {
+        protocol: "http", // or 'http' if needed
         hostname: "localhost",
         port: "3000", // leave empty unless using custom port
+        pathname: "/storage/v1/object/public/**", // match all paths
+      },
+            {
+        protocol: "http", // or 'http' if needed
+        hostname: "localhost",
+        port: "8000", // leave empty unless using custom port
         pathname: "/storage/v1/object/public/**", // match all paths
       },
       {

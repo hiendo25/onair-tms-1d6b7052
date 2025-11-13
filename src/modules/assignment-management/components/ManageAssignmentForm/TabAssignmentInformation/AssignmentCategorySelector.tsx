@@ -38,7 +38,6 @@ const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({
       label="Lĩnh vực"
       control={control}
       name="assignmentCategories"
-      required
       placeholder="Chọn lĩnh vực"
       onInputEnter={handleEnter}
       onRemove={handleRemoveItem}
