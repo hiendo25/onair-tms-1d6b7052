@@ -32,8 +32,12 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
 
   return (
     <PageContainer
-      title="Quản lý môn học"
-      breadcrumbs={[{ title: "Quản lý môn học", path: PATHS.CLASSROOMS.ROOT }, { title: "Tạo bài học" }]}
+      title={courseDetail.data.title || "Sửa môn học"}
+      breadcrumbs={[
+        { title: "Quản lý môn học", path: PATHS.CLASSROOMS.ROOT },
+        { title: "sửa môn học" },
+        { title: courseDetail.data.title || "" },
+      ]}
     >
       <UpdateCourseForm data={courseDetail.data} />
     </PageContainer>

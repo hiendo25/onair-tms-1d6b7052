@@ -2,6 +2,7 @@ import { supabase } from "@/services";
 import {
   CreateCoursePayload,
   UpdateCoursePayload,
+  UpsertCoursePayload,
   CreatePivotCoursesWithCategoriesPayload,
   CreatePivotCoursesWithTeachersPayload,
   CreatePivotCoursesWithStudentsPayload,
@@ -37,6 +38,15 @@ const createPivotCoursesWithCategories = async (payload: CreatePivotCoursesWithC
   }
 };
 
+const deletePivotCoursesWithCategories = async (ids: number[]) => {
+  try {
+    return await supabase.from("courses_categories").delete().in("id", ids).select("*");
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error Delete Pivot Courses With Categories");
+  }
+};
+
 const createPivotCoursesWithStudents = async (payload: CreatePivotCoursesWithStudentsPayload[]) => {
   try {
     return await supabase.from("courses_students").insert(payload).select();
@@ -58,6 +68,15 @@ const createPivotCoursesWithTeachers = async (payload: CreatePivotCoursesWithTea
 const createPivotCoursesWithResources = async (payload: CreatePivotCoursesWithResourcesPayload[]) => {
   try {
     return await supabase.from("courses_resources").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
+  }
+};
+
+const deletePivotCoursesWithResources = async (ids: number[]) => {
+  try {
+    return await supabase.from("courses_resources").delete().in("id", ids).select();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error create Class Room and Employee");
@@ -98,9 +117,24 @@ const getCourseById = async (courseId: string) => {
               name
             )
           ),
-          students:courses_students(
+          courses_students(
             id,
             student:employees(
+              id,
+              employee_type,
+              employee_code,
+              profile:profiles(
+                id,
+                full_name,
+                email,
+                employee_id,
+                avatar
+              )
+            )
+          ),
+           courses_teachers(
+            id,
+            teacher:employees(
               id,
               employee_type,
               employee_code,
@@ -174,23 +208,17 @@ const getCourseById = async (courseId: string) => {
         `,
       )
       .eq("id", courseId)
-      .order("priority", { ascending: true, foreignTable: "sections" })
+      .order("priority", { ascending: true, referencedTable: "sections" })
+      .order("priority", { ascending: true, referencedTable: "sections.lessons" })
       .single()
       .overrideTypes<{
-        courses_meta: {
+        courses_metadatas: {
           class_room_id: string;
-          id: string;
+          id: number;
           key: CourseMetaKey;
           value: CourseMetaValue;
         }[];
         community_info: { name: string; url: string };
-        // sessions: {
-        //   channel_info: {
-        //     providerId: string;
-        //     url: string;
-        //     password: string;
-        //   };
-        // }[];
       }>();
     return { data, error };
   } catch (err: any) {
@@ -199,6 +227,24 @@ const getCourseById = async (courseId: string) => {
 };
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
+const deletePivotCoursesWithStudents = async (ids: number[]) => {
+  try {
+    return await supabase.from("courses_students").delete().in("id", ids);
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error Delete Courses Students ID");
+  }
+};
+
+const deletePivotCoursesWithTeachers = async (ids: number[]) => {
+  try {
+    return await supabase.from("courses_teachers").delete().in("id", ids);
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error Delete Courses Teachers ID");
+  }
+};
+
 export {
   createCourse,
   updateCourse,
@@ -206,5 +252,9 @@ export {
   createPivotCoursesWithStudents,
   createPivotCoursesWithTeachers,
   createPivotCoursesWithResources,
+  deletePivotCoursesWithResources,
   getCourseById,
+  deletePivotCoursesWithStudents,
+  deletePivotCoursesWithTeachers,
+  deletePivotCoursesWithCategories,
 };

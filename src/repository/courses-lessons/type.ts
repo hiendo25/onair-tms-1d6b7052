@@ -9,6 +9,16 @@ export type UpdateLessonPayload = Pick<
   "title" | "content" | "lesson_type" | "priority" | "main_resource" | "status" | "id" | "assignment_id"
 >;
 
+export type UpsertLessonPayload =
+  | {
+      action: "create";
+      payload: CreateLessonPayload;
+    }
+  | {
+      action: "update";
+      payload: UpdateLessonPayload;
+    };
+
 export type CreatePivotLessonsWithResourcesPayload = {
   lesson_id: string;
   resource_id: string;
