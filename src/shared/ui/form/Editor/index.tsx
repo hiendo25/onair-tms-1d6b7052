@@ -1,5 +1,6 @@
 "use client";
-
+import { useState, useEffect, forwardRef, useCallback } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
 import Youtube from "@tiptap/extension-youtube";
 import Dropcursor from "@tiptap/extension-dropcursor";
 // import { common, createLowlight } from "lowlight";
@@ -8,9 +9,7 @@ import ImageExtension from "@tiptap/extension-image";
 import StarterKitExtension from "@tiptap/starter-kit";
 import TextAlignExtension from "@tiptap/extension-text-align";
 import PlaceholderExtension from "@tiptap/extension-placeholder";
-import { useState, useEffect, forwardRef, useCallback } from "react";
 import CodeBlockLowlightExtension from "@tiptap/extension-code-block-lowlight";
-import { useEditor, EditorContent, ReactNodeViewRenderer } from "@tiptap/react";
 import CustomVideoExtension from "./extensions/custom-video-extension";
 
 import Stack from "@mui/material/Stack";
@@ -24,7 +23,8 @@ import { CodeHighlightBlock } from "./EditorToolbar/components/code-highlight-bl
 import { all, createLowlight } from "lowlight";
 import type { EditorProps } from "./types";
 import EditorToolbar from "./EditorToolbar";
-export const Editor = forwardRef<HTMLDivElement, EditorProps>(
+
+const Editor = forwardRef<HTMLDivElement, EditorProps>(
   (
     {
       sx,
@@ -190,3 +190,4 @@ export const Editor = forwardRef<HTMLDivElement, EditorProps>(
     );
   },
 );
+export default Editor;

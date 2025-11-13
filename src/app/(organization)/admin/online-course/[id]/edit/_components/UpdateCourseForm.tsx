@@ -21,7 +21,7 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
   const { enqueueSnackbar } = useSnackbar();
   const formRef = useRef<ManageCourseFormRef>(null);
   const { isLoading, onUpdate } = useUpsertCourse();
-
+  const { courses_students, courses_teachers } = data;
   const initFormValue = useMemo((): UpdateCourseFormvalue => {
     const { sections, courses_resources, courses_metadatas } = data;
 
@@ -38,6 +38,7 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
         url: cr.resources.path || "",
       };
     });
+
     const courseSections = sections.reduce<UpdateCourseFormvalue["sections"]>((acc, session) => {
       const lessons = session.lessons.map<LessonFormValue>(
         ({ id, title, content, assignment_id, main_resource, lesson_type, status, lessons_resources }) => {
@@ -77,12 +78,8 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
         } as UpdateCourseFormvalue["sections"][number],
       ];
     }, []);
-    // const metas = [...courses_metadatas]
-    // const benefits = getCourseMetaValue(metas, 'benefits')
-    // const faqs = getClassRoomMetaValue(class_room_metadata, "faqs");
-    // const galleries = getClassRoomMetaValue(class_room_metadata, "galleries");
-    // const whies = getClassRoomMetaValue(class_room_metadata, "why");
 
+    const benefits = getCourseMetaValue(courses_metadatas, "benefits");
     return {
       title: data.title || "",
       slug: data.slug || "",
@@ -92,9 +89,50 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       docs: coursedocs,
       status: data.status,
       courseId: data.id,
-      benefits: [],
+      benefits:
+        benefits?.map((content) => ({
+          content: content,
+        })) || [],
       sections: courseSections,
     };
+  }, [data]);
+
+  const students = useMemo((): ManageCourseFormProps["students"] => {
+    return courses_students.reduce<Exclude<ManageCourseFormProps["students"], undefined>>((acc, std) => {
+      if (std.student.employee_type === "student") {
+        acc = [
+          ...acc,
+          {
+            id: std.student.id,
+            avatar: std.student.profile?.avatar || "",
+            email: std.student.profile?.email || "",
+            employeeCode: std.student.employee_code,
+            empoyeeType: std.student.employee_type,
+            fullName: std.student.profile?.full_name || "",
+          },
+        ];
+      }
+      return acc;
+    }, []);
+  }, [data]);
+
+  const teachers = useMemo((): ManageCourseFormProps["teachers"] => {
+    return courses_teachers.reduce<Exclude<ManageCourseFormProps["teachers"], undefined>>((acc, tch) => {
+      if (tch.teacher.employee_type === "teacher") {
+        acc = [
+          ...acc,
+          {
+            id: tch.teacher.id,
+            avatar: tch.teacher.profile?.avatar || "",
+            email: tch.teacher.profile?.email || "",
+            employeeCode: tch.teacher.employee_code,
+            empoyeeType: tch.teacher.employee_type,
+            fullName: tch.teacher.profile?.full_name || "",
+          },
+        ];
+      }
+      return acc;
+    }, []);
   }, [data]);
 
   const handleCancelUpdate = () => {
@@ -108,8 +146,10 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       { courseId: data.id, formData, students, teachers },
       {
         onSuccess(data, variables, onMutateResult, context) {
-          enqueueSnackbar("Cập nhật lớp học thành công.", { variant: "success" });
-          router.refresh();
+          startTransition(() => {
+            enqueueSnackbar("Cập nhật lớp học thành công.", { variant: "success" });
+            router.push(PATHS.CLASSROOMS.ROOT);
+          });
         },
       },
     );
@@ -117,9 +157,12 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
 
   return (
     <ManageCourseForm
-      initFormValue={initFormValue}
       ref={formRef}
+      action="edit"
+      initFormValue={initFormValue}
       onSubmit={handleUpdateCourse}
+      students={students}
+      teachers={teachers}
       onCancel={handleCancelUpdate}
       isLoading={isLoading || isTransition}
     />
