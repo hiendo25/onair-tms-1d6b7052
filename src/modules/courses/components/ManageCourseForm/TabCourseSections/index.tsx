@@ -79,6 +79,9 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
     setIsAddLesson(false);
   }, []);
 
+  const hideEditLessonForm = useCallback<Exclude<CourseSectionsProps["onSectionDragStart"], undefined>>(() => {
+    setEditingLesson(undefined);
+  }, []);
   return (
     <div className="flex flex-wrap gap-6">
       <div className="section w-96">
@@ -95,6 +98,8 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
             onAddLesson={handleClickAddLesson}
             onEditLesson={handleClickEditLesson}
             editingLesson={editingLesson}
+            onSectionDragStart={hideEditLessonForm}
+            onLessonDragStart={hideEditLessonForm}
           />
           <div className="h-6"></div>
         </div>

@@ -11,11 +11,13 @@ export type CreateCourseMetaPayload<K extends CourseMetaKey> = {
   value: CourseMetaValue<K>;
 };
 export type UpdateCourseMetaPayload<K extends CourseMetaKey> = {
-  id: string;
-  course_id: string;
+  id: number;
   key: K;
   value: CourseMetaValue<K>;
 };
-export type UpSertClassRoomMetaPayload<T extends CourseMetaKey> =
-  | CreateCourseMetaPayload<T>
-  | UpdateCourseMetaPayload<T>;
+export type UpSertCourseMetaPayload<T extends CourseMetaKey> =
+  | { action: "create"; payload: CreateCourseMetaPayload<T> }
+  | {
+      action: "update";
+      payload: UpdateCourseMetaPayload<T>;
+    };

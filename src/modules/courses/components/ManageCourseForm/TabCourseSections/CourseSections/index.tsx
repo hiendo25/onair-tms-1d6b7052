@@ -18,7 +18,7 @@ import CourseSectionItem from "./CourseSectionItem";
 
 import BoxEmptySection from "./BoxEmptySection";
 import { LessonType } from "@/model/lesson.model";
-import CourseLessons, { CourseLessonsRef } from "../CourseLessons";
+import CourseLessons, { CourseLessonsProps, CourseLessonsRef } from "../CourseLessons";
 import SortableSection from "./CourseSectionItem/SortableSection";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
@@ -47,9 +47,11 @@ export interface CourseSectionsProps {
     lessonIndex: number;
   };
   editingSectionIndex?: number;
+  onSectionDragStart?: (sectionId: UniqueIdentifier) => void;
+  onLessonDragStart?: CourseLessonsProps["onLessonDragStart"];
 }
 const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
-  ({ onAddLesson, onEditLesson, editingLesson, editingSectionIndex }, ref) => {
+  ({ onAddLesson, onEditLesson, editingLesson, editingSectionIndex, onSectionDragStart, onLessonDragStart }, ref) => {
     const sectionRefs = useRef<Map<number, CourseLessonsRef>>(new Map());
     const [activeDragSectionId, setActiveDragSectionId] = useState<UniqueIdentifier>();
     const methods = useUpsertCourseFormContext();
@@ -85,6 +87,7 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       const { active } = event;
       const activeId = active.id;
       setActiveDragSectionId(activeId);
+      onSectionDragStart?.(activeId);
     };
     const handleDragEnd = (event: DragEndEvent) => {
       const { active, over } = event;
@@ -143,26 +146,27 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       <div className="sections__list flex flex-col gap-3">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <SortableContext items={sections.map((section) => section._sectionId)} strategy={verticalListSortingStrategy}>
-            {sections.map((section, _index) => (
+            {sections.map((section, _indexSection) => (
               <SortableSection
                 id={section._sectionId}
                 key={section._sectionId}
-                subLabel={`H${_index + 1}`}
-                isError={hasSectionError(_index)}
+                subLabel={`H${_indexSection + 1}`}
+                isError={hasSectionError(_indexSection)}
               >
                 <CourseSectionItem
                   key={section._sectionId}
-                  index={_index}
+                  index={_indexSection}
                   onDelete={remove}
                   onButtonAddLessonClick={onAddLesson}
                 >
                   <CourseLessons
-                    ref={(ref) => setSectionRefs(_index, ref)}
-                    sectionIndex={_index}
+                    ref={(ref) => setSectionRefs(_indexSection, ref)}
+                    sectionIndex={_indexSection}
                     onLessonClick={(sectionIndex, lessonIndex) =>
                       onEditLesson?.({ sectionIndex: sectionIndex, lessonIndex })
                     }
                     hasLessonEditing={hasLessonEditing}
+                    onLessonDragStart={onLessonDragStart}
                   />
                 </CourseSectionItem>
               </SortableSection>

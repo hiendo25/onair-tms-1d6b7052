@@ -10,6 +10,8 @@ import TeacherSelector from "./fields/TeacherSelector";
 import DocumentsFields from "./fields/DocumentsFields";
 import BenefitsFields from "./fields/BenefitsFields";
 import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
+import dynamic from "next/dynamic";
+
 interface TabCourseInformationProps {
   className?: string;
 }
