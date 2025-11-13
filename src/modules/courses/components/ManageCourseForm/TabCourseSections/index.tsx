@@ -80,7 +80,7 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
   }, []);
 
   const hideEditLessonForm = useCallback<Exclude<CourseSectionsProps["onSectionDragStart"], undefined>>(() => {
-    setEditingLesson(undefined);
+    if (editingLesson) setEditingLesson(undefined);
   }, []);
   return (
     <div className="flex flex-wrap gap-6">
