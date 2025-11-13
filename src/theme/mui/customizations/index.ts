@@ -14,3 +14,4 @@ export { toggleButtonsCustomizations } from "./components/toggleButtons";
 export { checkboxCustomizations } from "./components/checkbox";
 export { tabsCustomization } from "./components/tabs";
 export { popoverCustomizations } from "./components/popover";
+export { cardsCustomizations } from "./components/card";

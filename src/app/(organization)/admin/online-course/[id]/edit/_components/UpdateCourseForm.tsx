@@ -22,6 +22,7 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
   const formRef = useRef<ManageCourseFormRef>(null);
   const { isLoading, onUpdate } = useUpsertCourse();
   const { courses_students, courses_teachers } = data;
+
   const initFormValue = useMemo((): UpdateCourseFormvalue => {
     const { sections, courses_resources, courses_metadatas } = data;
 

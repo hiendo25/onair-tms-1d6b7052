@@ -24,6 +24,7 @@ import {
   checkboxCustomizations,
   popoverCustomizations,
   tabsCustomization,
+  cardsCustomizations,
 } from "./customizations";
 
 interface AppThemeProps {
@@ -58,6 +59,7 @@ const theme = createTheme(
       ...tabsCustomization,
       ...checkboxCustomizations,
       ...popoverCustomizations,
+      ...cardsCustomizations,
     },
   },
   dateViVN,
