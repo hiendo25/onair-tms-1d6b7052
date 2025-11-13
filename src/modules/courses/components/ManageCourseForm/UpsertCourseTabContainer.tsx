@@ -66,26 +66,15 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
       callback?.();
     }, []);
 
-    // const handleChangeTab = useCallback(
-    //   (_: React.SyntheticEvent, newTab: TabKeyType) =>
-    //     validateCurrentTabBeforeProceed(currentTab, () => {
-    //       setCurrentTab((oldTab) => {
-    //         const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
-    //         const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
-    //         return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
-    //       });
-    //     }),
-    //   [currentTab],
-    // );
-
     const handleChangeTab = useCallback(
-      (_: React.SyntheticEvent, newTab: TabKeyType) => {
-        setCurrentTab((oldTab) => {
-          const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
-          const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
-          return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
-        });
-      },
+      (_: React.SyntheticEvent, newTab: TabKeyType) =>
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          setCurrentTab((oldTab) => {
+            const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
+            const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
+            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+          });
+        }),
       [currentTab],
     );
     /**
