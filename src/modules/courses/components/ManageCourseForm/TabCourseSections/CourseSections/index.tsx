@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
@@ -12,14 +12,15 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
-import CourseSectionItem from "./CourseSectionItem";
 
+import type { LessonType } from "@/model/lesson.model";
 import BoxEmptySection from "./BoxEmptySection";
-import { LessonType } from "@/model/lesson.model";
-import CourseLessons, { CourseLessonsProps, CourseLessonsRef } from "../CourseLessons";
+import CourseSectionItem from "./CourseSectionItem";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 import SortableSection from "./CourseSectionItem/SortableSection";
+import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
+import CourseLessons, { CourseLessonsProps, CourseLessonsRef } from "../CourseLessons";
+import { isUndefined } from "lodash";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {
@@ -40,19 +41,19 @@ export type CourseSectionsRef = {
 };
 export interface CourseSectionsProps {
   className?: string;
-  onAddLesson?: (sectionIndex: number) => void;
-  onEditLesson?: (options: { sectionIndex: number; lessonIndex: number }) => void;
   editingLesson?: {
     sectionIndex: number;
     lessonIndex: number;
   };
-  editingSectionIndex?: number;
-  onSectionDragStart?: (sectionId: UniqueIdentifier) => void;
   onLessonDragStart?: CourseLessonsProps["onLessonDragStart"];
+  onAddLesson?: (sectionIndex: number) => void;
+  onEditLesson?: (options: { sectionIndex: number; lessonIndex: number }) => void;
+  onSectionDragStart?: (sectionId: UniqueIdentifier) => void;
 }
 const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
-  ({ onAddLesson, onEditLesson, editingLesson, editingSectionIndex, onSectionDragStart, onLessonDragStart }, ref) => {
+  ({ onAddLesson, onEditLesson, editingLesson, onSectionDragStart, onLessonDragStart }, ref) => {
     const sectionRefs = useRef<Map<number, CourseLessonsRef>>(new Map());
+    const [editingSectionId, setEditingSectionId] = useState<UniqueIdentifier>();
     const [activeDragSectionId, setActiveDragSectionId] = useState<UniqueIdentifier>();
     const methods = useUpsertCourseFormContext();
     const {
@@ -89,6 +90,7 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       setActiveDragSectionId(activeId);
       onSectionDragStart?.(activeId);
     };
+
     const handleDragEnd = useCallback(
       (event: DragEndEvent) => {
         const { active, over } = event;
@@ -102,7 +104,7 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
         setActiveDragSectionId(undefined);
         move(activeIndex, overIndex);
       },
-      [sections, move],
+      [sections, move, editingLesson],
     );
 
     const hasLessonEditing = useCallback(
@@ -111,6 +113,7 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       },
       [editingLesson],
     );
+
     const sectionDragingItem = useMemo(() => {
       const indexActiveSection = sections.findIndex((sec) => sec._sectionId === activeDragSectionId);
       const activeSectionDrag = sections[indexActiveSection];
@@ -124,6 +127,13 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
         return Boolean(errors?.sections?.[sectionIndex]);
       },
       [errors],
+    );
+
+    const handleDeleteSection = useCallback(
+      (index: number) => {
+        remove(index);
+      },
+      [remove],
     );
 
     useImperativeHandle(ref, () => ({
@@ -143,6 +153,23 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       },
     }));
 
+    /**
+     * update new index position for Editting Lesson after Drag Section
+     */
+    useEffect(() => {
+      if (!editingSectionId) return;
+
+      console.log("checking section...");
+
+      const newIndexSectionEditting = sections.findIndex((section) => section._sectionId === editingSectionId);
+      if (
+        newIndexSectionEditting !== -1 &&
+        !isUndefined(editingLesson) &&
+        newIndexSectionEditting !== editingLesson.sectionIndex
+      ) {
+        onEditLesson?.({ sectionIndex: newIndexSectionEditting, lessonIndex: editingLesson.lessonIndex });
+      }
+    });
     if (!sections.length) return <BoxEmptySection />;
 
     return (
@@ -159,15 +186,18 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
                 <CourseSectionItem
                   key={section._sectionId}
                   index={_indexSection}
-                  onDelete={remove}
+                  onDelete={handleDeleteSection}
                   onButtonAddLessonClick={onAddLesson}
                 >
                   <CourseLessons
                     ref={(ref) => setSectionRefs(_indexSection, ref)}
                     sectionIndex={_indexSection}
-                    onLessonClick={(sectionIndex, lessonIndex) =>
-                      onEditLesson?.({ sectionIndex: sectionIndex, lessonIndex })
-                    }
+                    editingLessonIndex={editingLesson?.lessonIndex}
+                    editingSectionIndex={editingLesson?.sectionIndex}
+                    onLessonClick={(sectionIndex, lessonIndex) => {
+                      setEditingSectionId(section._sectionId);
+                      onEditLesson?.({ sectionIndex, lessonIndex });
+                    }}
                     hasLessonEditing={hasLessonEditing}
                     onLessonDragStart={onLessonDragStart}
                   />

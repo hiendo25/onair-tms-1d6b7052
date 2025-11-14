@@ -1,9 +1,9 @@
+import React, { ChangeEventHandler, KeyboardEventHandler, useState } from "react";
+import { Button, FormControl, FormHelperText, FormLabel, OutlinedInput, Popover } from "@mui/material";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { Button, FormControl, FormHelperText, FormLabel, OutlinedInput } from "@mui/material";
-import { ChangeEventHandler, KeyboardEventHandler, useState } from "react";
-
 export interface ButtonAddSectionProps {
   onOk: (title: string) => void;
+  className?: string;
 }
 const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
   const [openForm, setOpenForm] = useState(false);
@@ -35,13 +35,13 @@ const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
     setError(undefined);
   };
   return (
-    <>
-      <Button startIcon={<PlusIcon />} variant="fill" fullWidth onClick={() => setOpenForm(true)} size="large">
-        Tạo học phần
-      </Button>
-      {openForm ? (
-        <div className="add-section-form mt-4">
-          <div className="bg-white rounded-xl p-4">
+    <div className="relative">
+      <div className="bg-white p-4 rounded-xl">
+        <Button startIcon={<PlusIcon />} variant="fill" fullWidth onClick={() => setOpenForm(true)} size="large">
+          Tạo học phần
+        </Button>
+        {openForm ? (
+          <div className="border rounded-lg border-gray-200 p-4 overflow-hidden mt-4">
             <FormControl className="mb-6" variant="outlined" error={!!error}>
               <FormLabel>Tiêu đề</FormLabel>
               <OutlinedInput
@@ -64,9 +64,9 @@ const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
               </Button>
             </div>
           </div>
-        </div>
-      ) : null}
-    </>
+        ) : null}
+      </div>
+    </div>
   );
 };
 export default ButtonAddSection;
