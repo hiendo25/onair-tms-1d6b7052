@@ -1,12 +1,14 @@
-import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
-import { Control, useController } from "react-hook-form";
+import { memo, useCallback } from "react";
 import Image from "next/image";
-import { cn } from "@/utils";
-import { CloseIcon, FilePdfIcon } from "@/shared/assets/icons";
-import { useLibraryStore } from "@/modules/library/store/libraryProvider";
-import { LessonType } from "@/model/lesson.model";
+import { Control, useController } from "react-hook-form";
 import { useSnackbar } from "notistack";
+import { cn } from "@/utils";
+import { LessonType } from "@/model/lesson.model";
+import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { FormHelperText, FormLabel, Typography } from "@mui/material";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
+import VideoViewItem from "./VideoItemView";
+import FileViewItem from "./FileViewItem";
 export interface MainResourceFieldProps {
   onChange?: (url: string) => void;
   control: Control<UpsertCourseFormData>;
@@ -53,9 +55,10 @@ const MainResourceField: React.FC<MainResourceFieldProps> = ({
     });
   };
 
-  const handleRemove = () => {
+  const handleRemove = useCallback(() => {
     onChange(undefined);
-  };
+  }, [onChange]);
+
   return (
     <div>
       <FormLabel component="div" className="mb-2 inline-block">
@@ -65,33 +68,9 @@ const MainResourceField: React.FC<MainResourceFieldProps> = ({
       {subTitle ? <Typography className="text-xs mb-4">{subTitle}</Typography> : null}
       {value ? (
         <>
-          {lessonType === "video" ? (
-            <div className="aspect-video rounded-lg w-[460px] overflow-hidden relative">
-              <video src={value.url} controls className="absolute left-0 top-0 w-full h-full object-cover" />
-              <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={handleRemove}>
-                <CloseIcon className="w-4 h-4" />
-              </IconButton>
-            </div>
-          ) : lessonType === "file" ? (
-            <div className="w-32 px-1 mb-2">
-              <div className="py-4 px-2 bg-gray-100 relative flex flex-col rounded-lg w-full h-full">
-                <div className="file-icon mx-auto mb-4">
-                  <FilePdfIcon className="w-10 h-10" />
-                </div>
-                <div className="file-name line-clamp-2 text-xs text-center">
-                  <a href={value.url} target="__blank">
-                    {value.name}
-                  </a>
-                </div>
-                <IconButton className="w-6 h-6 absolute top-1 right-1" onClick={handleRemove}>
-                  <CloseIcon className="w-4 h-4" />
-                </IconButton>
-              </div>
-            </div>
-          ) : lessonType === "assessment" ? (
-            "assessment"
-          ) : (
-            "unknown"
+          {lessonType === "video" && <VideoViewItem videoUrl={value.url} onClickRemove={handleRemove} />}
+          {lessonType === "file" && (
+            <FileViewItem fileName={value.name} fileUrl={value.url} onClickRemove={handleRemove} />
           )}
         </>
       ) : (
@@ -136,4 +115,4 @@ const MainResourceField: React.FC<MainResourceFieldProps> = ({
     </div>
   );
 };
-export default MainResourceField;
+export default memo(MainResourceField);
