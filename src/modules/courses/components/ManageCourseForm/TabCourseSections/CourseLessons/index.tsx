@@ -1,4 +1,13 @@
-import React, { forwardRef, memo, PropsWithChildren, useCallback, useImperativeHandle, useMemo, useState } from "react";
+import React, {
+  forwardRef,
+  memo,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
 import {
   DndContext,
@@ -16,8 +25,10 @@ import SortableLessionItem from "./SortableLessionItem";
 import { LessonType } from "@/model/lesson.model";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 import LessonContentItem from "./LessonContentItem";
+import { isUndefined } from "lodash";
 
-export const initLessonFormData = (type: LessonType): UpsertCourseFormData["sections"][number]["lessons"][number] => {
+type LessonItem = UpsertCourseFormData["sections"][number]["lessons"][number];
+export const initLessonFormData = (type: LessonType): LessonItem => {
   return {
     lessonType: type,
     title: "",
@@ -34,6 +45,7 @@ export type CourseLessonsRef = {
 export interface CourseLessonsProps extends PropsWithChildren {
   sectionIndex: number;
   editingLessonIndex?: number;
+  editingSectionIndex?: number;
   hasLessonEditing?: (sessonIndex: number, lessonIndex: number) => boolean;
   onDelete?: (index: number) => void;
   onLessonClick?: (sectionIndex: number, lessionIndex: number) => void;
@@ -41,8 +53,12 @@ export interface CourseLessonsProps extends PropsWithChildren {
   onLessonDragStart?: (id: UniqueIdentifier) => void;
 }
 const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
-  ({ sectionIndex, onLessonClick, hasLessonEditing, onLessonDragStart }, ref) => {
+  (
+    { sectionIndex, editingLessonIndex, editingSectionIndex, onLessonClick, hasLessonEditing, onLessonDragStart },
+    ref,
+  ) => {
     const [activeDragLessonId, setActiveDragLessonId] = useState<UniqueIdentifier>();
+    const [editingLessonId, setEditingLessonId] = useState<UniqueIdentifier>();
     const methods = useUpsertCourseFormContext();
     const {
       control,
@@ -88,7 +104,6 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
 
         const activeIndex = lessons.findIndex((field) => field._lessionId === activeId);
         const overIndex = lessons.findIndex((field) => field._lessionId === overId);
-
         move(activeIndex, overIndex);
       },
       [lessons, move],
@@ -101,8 +116,10 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
       return { index: indexActiveLesson, lesson: activeSectionDrag };
     }, [lessons, activeDragLessonId, sectionIndex]);
 
+    // console.log({ editingLessonId, editingLessonIndex });
     const handleClickLesson = useCallback(
-      (lessonIndex: number) => () => {
+      (lessonIndex: number, lessonId: UniqueIdentifier) => () => {
+        setEditingLessonId(lessonId);
         onLessonClick?.(sectionIndex, lessonIndex);
       },
       [sectionIndex],
@@ -126,6 +143,22 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
       }),
       [sectionIndex, lessons],
     );
+
+    /**
+     * update new index position for Editting Lesson after Drag Lesson
+     */
+    useEffect(() => {
+      if (!editingLessonId || editingSectionIndex !== sectionIndex) return;
+      const newIndexLessonEditing = lessons.findIndex((lesson) => lesson._lessionId === editingLessonId);
+      if (
+        newIndexLessonEditing !== -1 &&
+        !isUndefined(editingLessonIndex) &&
+        newIndexLessonEditing !== editingLessonIndex
+      ) {
+        onLessonClick?.(sectionIndex, newIndexLessonEditing);
+      }
+    });
+
     return (
       <div className="section-item__body flex flex-col gap-2">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
@@ -141,7 +174,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
                   control={control}
                   sectionIndex={sectionIndex}
                   lessonIndex={lessonIndex}
-                  onClick={handleClickLesson(lessonIndex)}
+                  onClick={handleClickLesson(lessonIndex, lession._lessionId)}
                 />
               </SortableLessionItem>
             ))}
