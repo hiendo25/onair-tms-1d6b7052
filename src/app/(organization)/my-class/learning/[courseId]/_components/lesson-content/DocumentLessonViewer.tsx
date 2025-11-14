@@ -1,9 +1,10 @@
+'use client';
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   IconButton,
   Stack,
   Typography,
@@ -19,43 +20,6 @@ import type {
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 
-declare global {
-  var pdfjsLib: any;
-}
-
-const PDF_JS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.js";
-const PDF_JS_WORKER = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js";
-
-let pdfjsLoader: Promise<any> | null = null;
-
-const loadPdfJs = () => {
-  if (typeof window === "undefined") {
-    return Promise.reject(new Error("PDF.js chỉ chạy được trên trình duyệt"));
-  }
-
-  if (window.pdfjsLib) {
-    return Promise.resolve(window.pdfjsLib);
-  }
-
-  if (!pdfjsLoader) {
-    pdfjsLoader = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = PDF_JS_CDN;
-      script.onload = () => {
-        if (window.pdfjsLib) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_JS_WORKER;
-          resolve(window.pdfjsLib);
-        } else {
-          reject(new Error("Không thể khởi tạo PDF.js"));
-        }
-      };
-      script.onerror = () => reject(new Error("Không thể tải thư viện PDF.js"));
-      document.body.appendChild(script);
-    });
-  }
-
-  return pdfjsLoader;
-};
 
 const splitTextIntoPages = (content: string | null): string[] => {
   if (!content) {
@@ -90,6 +54,11 @@ interface DocumentLessonViewerProps {
   onToggleCompletion: (completed: boolean) => void;
 }
 
+const MIN_ZOOM = 0.6;
+const MAX_ZOOM = 2.5;
+const ZOOM_STEP = 0.2;
+const BASE_PDF_HEIGHT = 640;
+
 const DocumentLessonViewer = ({
   lesson,
   resource,
@@ -99,115 +68,59 @@ const DocumentLessonViewer = ({
   onToggleCompletion,
 }: DocumentLessonViewerProps) => {
   const { url, error } = useResourceUrl(resource);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const pdfDocRef = useRef<any>(null);
+  const isPdf = contentKind === "pdf";
 
   const [currentPage, setCurrentPage] = useState(lessonProgress?.document?.page ?? 1);
   const [totalPages, setTotalPages] = useState(lessonProgress?.document?.totalPages ?? 1);
   const [zoom, setZoom] = useState(lessonProgress?.document?.zoom ?? 1);
-  const [isRendering, setIsRendering] = useState(false);
-  const [pdfError, setPdfError] = useState<string | null>(null);
+
+  const zoomPercent = useMemo(() => Math.round(zoom * 100), [zoom]);
+
+  const pdfViewerUrl = useMemo(() => {
+    if (!url) {
+      return null;
+    }
+    const hashIndex = url.indexOf("#");
+    if (hashIndex >= 0) {
+      const base = url.substring(0, hashIndex);
+      const hash = url.substring(hashIndex + 1);
+      const hashPrefix = hash ? `${hash}&` : "";
+      return `${base}#${hashPrefix}toolbar=0&navpanes=0&zoom=${zoomPercent}`;
+    }
+    return `${url}#toolbar=0&navpanes=0&zoom=${zoomPercent}`;
+  }, [url, zoomPercent]);
 
   const textPages = useMemo(() => {
-    if (contentKind === "pdf") {
+    if (isPdf) {
       return [];
     }
     return splitTextIntoPages(lesson.content);
-  }, [lesson.content, contentKind]);
+  }, [lesson.content, isPdf]);
 
   useEffect(() => {
-    if (contentKind !== "pdf") {
-      setTotalPages(Math.max(textPages.length, 1));
-      setCurrentPage(
-        Math.min(lessonProgress?.document?.page ?? 1, Math.max(textPages.length, 1)),
-      );
-    }
-  }, [textPages, contentKind, lessonProgress?.document?.page]);
-
-  useEffect(() => {
-    if (contentKind !== "pdf" || !url) {
+    if (isPdf) {
+      setTotalPages(1);
+      setCurrentPage(lessonProgress?.document?.page ?? 1);
       return;
     }
-    let isCancelled = false;
-    setPdfError(null);
-    setIsRendering(true);
+    const maxPages = Math.max(textPages.length, 1);
+    setTotalPages(maxPages);
+    setCurrentPage(Math.min(lessonProgress?.document?.page ?? 1, maxPages));
+  }, [isPdf, textPages, lessonProgress?.document?.page]);
 
-    loadPdfJs()
-      .then((pdfjs) => {
-        if (isCancelled) return null;
-        return pdfjs.getDocument(url).promise;
-      })
-      .then((doc) => {
-        if (!doc || isCancelled) {
-          return;
-        }
-        pdfDocRef.current = doc;
-        setTotalPages(doc.numPages);
-        const savedPage = lessonProgress?.document?.page ?? 1;
-        setCurrentPage(Math.min(savedPage, doc.numPages));
-      })
-      .catch((err) => {
-        if (isCancelled) return;
-        setPdfError(err instanceof Error ? err.message : "Không thể tải tài liệu PDF");
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setIsRendering(false);
-        }
-      });
-
-    return () => {
-      isCancelled = true;
-      if (pdfDocRef.current) {
-        pdfDocRef.current.destroy?.();
-        pdfDocRef.current = null;
-      }
-    };
-  }, [url, contentKind, lessonProgress?.document?.page]);
+  const progressChangeRef = useRef(onProgressChange);
 
   useEffect(() => {
-    if (contentKind !== "pdf" || !pdfDocRef.current) {
-      return;
-    }
-    let isCancelled = false;
-    const render = async () => {
-      setIsRendering(true);
-      const page = await pdfDocRef.current.getPage(currentPage);
-      if (isCancelled) return;
-
-      const viewport = page.getViewport({ scale: zoom });
-      const canvas = canvasRef.current;
-      if (!canvas) {
-        setIsRendering(false);
-        return;
-      }
-      const context = canvas.getContext("2d");
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      await page.render({
-        canvasContext: context!,
-        viewport,
-      }).promise;
-      if (!isCancelled) {
-        setIsRendering(false);
-      }
-    };
-
-    render().catch(() => setIsRendering(false));
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [currentPage, zoom, contentKind]);
+    progressChangeRef.current = onProgressChange;
+  }, [onProgressChange]);
 
   useEffect(() => {
-    onProgressChange({
+    progressChangeRef.current({
       page: currentPage,
       totalPages,
       zoom,
     });
-  }, [currentPage, totalPages, zoom, onProgressChange]);
+  }, [currentPage, totalPages, zoom]);
 
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -218,36 +131,82 @@ const DocumentLessonViewer = ({
   };
 
   const handleZoomIn = () => {
-    setZoom((prev) => Math.min(prev + 0.2, 2.5));
+    setZoom((prev) => Math.min(prev + ZOOM_STEP, MAX_ZOOM));
   };
 
   const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.2, 0.6));
+    setZoom((prev) => Math.max(prev - ZOOM_STEP, MIN_ZOOM));
   };
 
-  const isOnLastPage = totalPages > 1 ? currentPage === totalPages : true;
+  const showPageControls = !isPdf;
+  const isOnLastPage = showPageControls
+    ? totalPages > 1
+      ? currentPage === totalPages
+      : true
+    : true;
 
   return (
     <Stack spacing={2}>
-      {contentKind === "pdf" ? (
+      {isPdf ? (
         <>
           {error ? (
             <Alert severity="error">{error}</Alert>
-          ) : pdfError ? (
-            <Alert severity="error">{pdfError}</Alert>
           ) : !url ? (
             <Alert severity="info">Chưa có tệp PDF cho bài giảng này.</Alert>
           ) : (
-            <Box className="rounded-2xl border border-[#EFF0F3] bg-[#0F172A]/5 p-4">
-              <canvas ref={canvasRef} className="mx-auto block max-h-[520px] w-full" />
-              {isRendering ? (
-                <Stack alignItems="center" spacing={1} mt={2}>
-                  <CircularProgress size={24} />
-                  <Typography variant="caption" color="text.secondary">
-                    Đang render trang...
-                  </Typography>
-                </Stack>
-              ) : null}
+            <Box className="rounded-2xl border border-[#EFF0F3] bg-white shadow-sm overflow-hidden">
+              {/* <Box
+                sx={{
+                  borderBottom: "1px solid #EFF0F3",
+                  px: 3,
+                  py: 2,
+                  bgcolor: "#F8FAFF",
+                }}
+              >
+                <Typography variant="subtitle2" color="text.primary" fontWeight={600}>
+                  {lesson.title || "Tài liệu PDF"}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Bạn có thể phóng to hoặc thu nhỏ tài liệu bằng các nút điều khiển bên dưới.
+                </Typography>
+              </Box> */}
+
+              <Box
+                sx={{
+                  bgcolor: "#F4F6FB",
+                  p: { xs: 2, md: 3 },
+                  overflow: "auto",
+                  borderTop: "1px solid #EFF0F3",
+                }}
+              >
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    mx: "auto",
+                  }}
+                >
+                  <iframe
+                    key={zoomPercent}
+                    src={pdfViewerUrl ?? url}
+                    title={lesson.title ?? "PDF Viewer"}
+                    loading="lazy"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      minHeight: BASE_PDF_HEIGHT,
+                      border: "none",
+                      borderRadius: 16,
+                      boxShadow: "0 12px 48px rgba(15, 23, 42, 0.12)",
+                      backgroundColor: "#fff",
+                    }}
+                    allow="fullscreen"
+                  />
+                </Box>
+              </Box>
+              {/* <Typography variant="caption" color="text.secondary" px={3} py={2} display="block">
+                Trình xem PDF sử dụng iframe và hoạt động tốt nhất trên trình duyệt Chrome hoặc Edge.
+              </Typography> */}
             </Box>
           )}
         </>
@@ -268,24 +227,32 @@ const DocumentLessonViewer = ({
         justifyContent="space-between"
         className="rounded-2xl border border-[#EFF0F3] bg-white px-4 py-3"
       >
-        <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton onClick={handlePrevPage} disabled={currentPage <= 1}>
-            <NavigateBeforeIcon />
-          </IconButton>
-          <Typography variant="body2" fontWeight={600}>
-            Trang {totalPages ? `${currentPage}/${totalPages}` : currentPage}
+        {showPageControls ? (
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton onClick={handlePrevPage} disabled={currentPage <= 1}>
+              <NavigateBeforeIcon />
+            </IconButton>
+            <Typography variant="body2" fontWeight={600}>
+              Trang {totalPages ? `${currentPage}/${totalPages}` : currentPage}
+            </Typography>
+            <IconButton onClick={handleNextPage} disabled={currentPage >= totalPages}>
+              <NavigateNextIcon />
+            </IconButton>
+          </Stack>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Tuỳ chỉnh vùng xem PDF bằng các nút phóng to / thu nhỏ.
           </Typography>
-          <IconButton onClick={handleNextPage} disabled={currentPage >= totalPages}>
-            <NavigateNextIcon />
-          </IconButton>
-        </Stack>
+        )}
 
         <Stack direction="row" spacing={1} alignItems="center">
-          <IconButton onClick={handleZoomOut}>
+          <IconButton onClick={handleZoomOut} disabled={zoom <= MIN_ZOOM}>
             <ZoomOutIcon />
           </IconButton>
-          <Typography variant="body2">{Math.round(zoom * 100)}%</Typography>
-          <IconButton onClick={handleZoomIn}>
+          <Typography variant="body2" fontWeight={600}>
+            {Math.round(zoom * 100)}%
+          </Typography>
+          <IconButton onClick={handleZoomIn} disabled={zoom >= MAX_ZOOM}>
             <ZoomInIcon />
           </IconButton>
         </Stack>

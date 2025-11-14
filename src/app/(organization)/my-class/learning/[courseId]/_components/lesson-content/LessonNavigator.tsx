@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
   Chip,
   Collapse,
   IconButton,
+  LinearProgress,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,19 +15,19 @@ import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DescriptionIcon from "@mui/icons-material/Description";
 import QuizIcon from "@mui/icons-material/Quiz";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ArticleIcon from "@mui/icons-material/Article";
 import clsx from "clsx";
-import Image from "next/image";
-import type { LearningSection } from "@/modules/learning-screen/types";
+import type { LearningSectionOutline } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import {
   LessonContentKind,
   inferLessonContentKind,
 } from "@/modules/learning-screen/utils/resource";
+import { Image } from "@/shared/ui/Image";
+import { formatFileSize } from "@/utils";
 
 interface LessonNavigatorProps {
-  sections: LearningSection[];
+  sections: LearningSectionOutline[];
   selectedLessonId: string | null;
   progressMap: Record<string, StoredLessonProgress>;
   onSelectLesson: (lessonId: string) => void;
@@ -95,7 +96,7 @@ const LessonNavigator = ({
     setExpandedSections((prev) => {
       if (prev.size === 0) {
         const next = new Set<string>();
-        next.add(sections[0].id);
+        next.add(sections?.[0]?.id as string);
         return next;
       }
       return prev;
@@ -139,22 +140,6 @@ const LessonNavigator = ({
   const getSectionSummary = (sectionId: string) =>
     sectionSummaries.find((item) => item.sectionId === sectionId);
 
-  const getLessonStatus = (
-    lessonId: string,
-  ): { label: string; color: "success" | "primary" | "warning" } | null => {
-    const state = progressMap[lessonId];
-    if (state?.completed) {
-      return { label: "Đã hoàn thành", color: "success" };
-    }
-    if (lessonId === selectedLessonId) {
-      return { label: "Đang học", color: "primary" };
-    }
-    if (state?.video || state?.document) {
-      return { label: "Đang dở", color: "warning" };
-    }
-    return null;
-  };
-
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => {
       const next = new Set(prev);
@@ -184,32 +169,87 @@ const LessonNavigator = ({
           summary && summary.total > 0
             ? `${summary.completed}/${summary.total} bài đã hoàn thành`
             : "Chưa có bài giảng";
+        const percent =
+          summary && summary.total
+            ? Math.round((summary.completed / summary.total) * 100)
+            : 0;
 
         return (
           <Box
             key={section.id}
-            className="rounded-2xl border border-[#EFF0F3] bg-white shadow-sm"
+            className={clsx(
+              "rounded-[28px] border bg-white shadow-sm transition",
+              expandedSections.has(section.id)
+                ? "border-[#B3C7FF] shadow-lg"
+                : "border-transparent hover:border-[#E1E4EF]",
+            )}
           >
             <Box
-              className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
+              className="flex cursor-pointer select-none flex-col gap-2 px-5 py-4"
               onClick={() => toggleSection(section.id)}
             >
-              <Box>
-                <Typography variant="subtitle1" fontWeight={600}>
-                  {section.title || `Học phần ${index + 1}`}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {completedText}
-                </Typography>
-              </Box>
-              <IconButton size="small">
-                <ExpandMoreIcon
-                  className={clsx(
-                    "transition-transform",
-                    isExpanded ? "rotate-180" : "rotate-0",
-                  )}
+              <Stack
+                direction="row"
+                spacing={1}
+                alignItems="center"
+                flexWrap="wrap"
+                className="text-sm text-[#64748B]"
+              >
+                <Chip
+                  label={`Học phần ${index + 1}`}
+                  size="small"
+                  color="primary"
+                  className="bg-[#000000]"
                 />
-              </IconButton>
+                <Typography variant="caption" color="text.secondary">
+                  {section.lessons.length} bài
+                </Typography>
+                {/* <Typography variant="caption" color="text.secondary">
+                  • 15:08
+                </Typography> */}
+              </Stack>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Box flex={1}>
+                  <Typography variant="subtitle1" fontWeight={600}>
+                    {section.title || `Học phần ${index + 1}`}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {completedText}
+                  </Typography>
+                </Box>
+                <IconButton size="small">
+                  <ExpandMoreIcon
+                    className={clsx(
+                      "transition-transform",
+                      isExpanded ? "rotate-180" : "rotate-0",
+                    )}
+                  />
+                </IconButton>
+              </Stack>
+
+              <Stack spacing={1} mt={1}>
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Typography variant="caption" color="text.secondary">
+                    Tiến độ học tập
+                  </Typography>
+                  <Typography variant="caption" fontWeight={600}>
+                    {percent}%
+                  </Typography>
+                </Stack>
+                <LinearProgress
+                  variant="determinate"
+                  value={percent}
+                  sx={{
+                    height: 6,
+                    borderRadius: 999,
+                    backgroundColor: "#E2E8F0",
+                    "& .MuiLinearProgress-bar": {
+                      borderRadius: 999,
+                      background: "linear-gradient(90deg, #3F6BFF 0%, #8A4DFF 100%)",
+                    },
+                  }}
+                />
+              </Stack>
             </Box>
 
             <Collapse in={isExpanded}>
@@ -223,8 +263,8 @@ const LessonNavigator = ({
                     const isActive = lesson.id === selectedLessonId;
                     const contentKind = inferLessonContentKind(lesson);
                     const typeMeta = LESSON_TYPE_META[contentKind] ?? LESSON_TYPE_META.unknown;
-                    const status = getLessonStatus(lesson.id);
                     const thumbnail = lesson.mainResource?.thumbnail_url ?? null;
+                    const fileSizeLabel = formatFileSize(lesson.mainResource?.size ?? null);
 
                     return (
                       <Box
@@ -232,92 +272,57 @@ const LessonNavigator = ({
                         component="button"
                         onClick={() => onSelectLesson(lesson.id)}
                         className={clsx(
-                          "flex w-full items-center gap-3 rounded-2xl border px-3 py-3 text-left transition",
+                          "flex w-full items-center gap-3 rounded-3xl border px-3 py-3 text-left transition focus:outline-none",
                           isActive
-                            ? "border-[#2150F5] bg-[#F2F6FF]"
+                            ? "border-[#2150F5] bg-[#EEF3FF] shadow-sm"
                             : "border-transparent hover:border-[#E0E4EC] hover:bg-[#F9FAFB]",
                         )}
                       >
-                        <Box
-                          className={clsx(
-                            "flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl",
-                            thumbnail ? "bg-transparent" : "bg-[#EFF2F6]",
-                          )}
-                        >
+                        <Box className="relative h-16 w-24 overflow-hidden rounded-2xl bg-[#EFF2F6]">
                           {thumbnail ? (
-                            <Box className="relative h-14 w-14">
-                              <Image
-                                src={thumbnail}
-                                alt={lesson.title ?? "thumbnail"}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </Box>
+                            <Image
+                              src={thumbnail}
+                              alt={lesson.title ?? "thumbnail"}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
                           ) : (
-                            typeMeta.icon
+                            <Box className="flex h-full w-full items-center justify-center">
+                              {typeMeta.icon}
+                            </Box>
                           )}
+                          {isActive ? (
+                            <Box className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-[#2150F5] shadow-sm">
+                              Đang học
+                            </Box>
+                          ) : null}
                         </Box>
                         <Box flex={1}>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={1}
-                            flexWrap="wrap"
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            className={clsx(
+                              "text-[#0F172A]",
+                              isActive ? "text-[#2150F5]" : "text-[#0F172A]",
+                            )}
                           >
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              className="text-[#111827]"
-                            >
-                              {`Bài ${lessonIndex + 1}: ${
-                                lesson.title ?? "Chưa đặt tên"
-                              }`}
+                            {`Bài ${lessonIndex + 1}: ${lesson.title ?? "Chưa đặt tên"}`}
+                          </Typography>
+                          <Stack direction="row" spacing={0.5} alignItems="center" mt={0.5}>
+                            <Typography variant="caption" color="text.secondary">
+                              {typeMeta.label}
                             </Typography>
-                            <Chip
-                              size="small"
-                              variant="outlined"
-                              color={typeMeta.chipColor}
-                              label={typeMeta.label}
-                            />
-                          </Stack>
-                          {lesson.content ? (
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              className="line-clamp-1"
-                            >
-                              {lesson.content.replace(/<[^>]*>?/gm, "").slice(0, 90) ||
-                                "Nội dung đang cập nhật"}
-                            </Typography>
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">
-                              Nội dung đang cập nhật
-                            </Typography>
-                          )}
-
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            alignItems="center"
-                            mt={0.5}
-                          >
-                            {status ? (
-                              <Chip
-                                size="small"
-                                color={status.color}
-                                variant={status.color === "warning" ? "outlined" : "filled"}
-                                label={status.label}
-                              />
-                            ) : null}
-                            {progressMap[lesson.id]?.completed ? (
-                              <Stack direction="row" spacing={0.5} alignItems="center">
-                                <CheckCircleIcon className="h-4 w-4 text-[#16A34A]" />
-                                <Typography variant="caption" color="text.secondary">
-                                  Đã hoàn thành
+                            {fileSizeLabel && (
+                              <>
+                                <Typography variant="caption" color="text.disabled">
+                                  •
                                 </Typography>
-                              </Stack>
-                            ) : null}
+                                <Typography variant="caption" color="text.secondary">
+                                  {fileSizeLabel}
+                                </Typography>
+                              </>
+                            )}
                           </Stack>
                         </Box>
                       </Box>

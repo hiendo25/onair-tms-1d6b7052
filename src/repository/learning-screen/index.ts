@@ -1,10 +1,11 @@
 import { supabase } from "@/services";
 import type { Tables } from "@/types/supabase.types";
 import type {
-  LearningCourseDetail,
+  LearningCourseOutline,
   LearningLesson,
   LearningLessonAttachment,
-  LearningSection,
+  LearningLessonSummary,
+  LearningSectionOutline,
   ResourceRow,
 } from "@/modules/learning-screen/types";
 
@@ -12,29 +13,56 @@ type LessonResourceBridgeRow = Tables<"lessons_resources"> & {
   resource?: ResourceRow | null;
 };
 
-type RawLessonRow = Tables<"lessons"> & {
+type RawLessonDetailRow = Tables<"lessons"> & {
   lesson_resources?: LessonResourceBridgeRow[] | null;
 };
 
-type RawSectionRow = Tables<"sections"> & {
-  lessons?: RawLessonRow[] | null;
+type RawOutlineLessonRow = Pick<
+  Tables<"lessons">,
+  | "assignment_id"
+  | "created_at"
+  | "id"
+  | "lesson_type"
+  | "main_resource"
+  | "priority"
+  | "section_id"
+  | "status"
+  | "title"
+  | "updated_at"
+>;
+
+type RawOutlineSectionRow = Tables<"sections"> & {
+  lessons?: RawOutlineLessonRow[] | null;
 };
 
-type RawCourseRow = Tables<"courses"> & {
-  sections?: RawSectionRow[] | null;
+type RawOutlineCourseRow = Tables<"courses"> & {
+  sections?: RawOutlineSectionRow[] | null;
 };
 
-const COURSE_DETAIL_SELECT = `
+const COURSE_OUTLINE_SELECT = `
   *,
   sections:sections (
     *,
     lessons:lessons (
-      *,
-      lesson_resources:lessons_resources (
-        *,
-        resource:resources (*)
-      )
+      id,
+      title,
+      lesson_type,
+      priority,
+      main_resource,
+      section_id,
+      status,
+      assignment_id,
+      created_at,
+      updated_at
     )
+  )
+`;
+
+const LESSON_DETAIL_SELECT = `
+  *,
+  lesson_resources:lessons_resources (
+    *,
+    resource:resources (*)
   )
 `;
 
@@ -51,7 +79,29 @@ const toAttachment = (bridge: LessonResourceBridgeRow): LearningLessonAttachment
   resource: bridge.resource ?? null,
 });
 
-const getCourseLearningDetail = async (courseId: string): Promise<LearningCourseDetail> => {
+const fetchResourcesByIds = async (resourceIds: Set<string>) => {
+  const resourceMap = new Map<string, ResourceRow>();
+  if (!resourceIds.size) {
+    return resourceMap;
+  }
+
+  const { data, error } = await supabase
+    .from("resources")
+    .select("*")
+    .in("id", Array.from(resourceIds));
+
+  if (error) {
+    throw error;
+  }
+
+  for (const resource of data ?? []) {
+    resourceMap.set(resource.id, resource);
+  }
+
+  return resourceMap;
+};
+
+const getCourseLearningOutline = async (courseId: string): Promise<LearningCourseOutline> => {
   const trimmedCourseId = courseId?.trim();
   if (!trimmedCourseId) {
     return {
@@ -62,7 +112,7 @@ const getCourseLearningDetail = async (courseId: string): Promise<LearningCourse
 
   const { data, error } = await supabase
     .from("courses")
-    .select(COURSE_DETAIL_SELECT)
+    .select(COURSE_OUTLINE_SELECT)
     .eq("id", trimmedCourseId)
     .single();
 
@@ -70,7 +120,7 @@ const getCourseLearningDetail = async (courseId: string): Promise<LearningCourse
     throw error;
   }
 
-  const rawCourse = (data ?? null) as unknown as RawCourseRow | null;
+  const rawCourse = (data ?? null) as unknown as RawOutlineCourseRow | null;
 
   if (!rawCourse) {
     return {
@@ -80,52 +130,29 @@ const getCourseLearningDetail = async (courseId: string): Promise<LearningCourse
   }
 
   const { sections: rawSections = [], ...courseInfo } = rawCourse;
+  const mainResourceIds = new Set<string>();
 
-  const assignmentIds = new Set<string>();
-  const resourceIdsToFetch = new Set<string>();
-
-  const normalizedSections: LearningSection[] = rawSections
-    .filter((section): section is RawSectionRow => Boolean(section))
+  const normalizedSections: LearningSectionOutline[] = rawSections
+    .filter((section): section is RawOutlineSectionRow => Boolean(section))
     .map((section) => {
       const { lessons: rawLessons = [], ...sectionInfo } = section;
 
-      const normalizedLessons: LearningLesson[] = rawLessons
-        .filter((lesson): lesson is RawLessonRow => Boolean(lesson))
+      const normalizedLessons: LearningLessonSummary[] = rawLessons
+        .filter((lesson): lesson is RawOutlineLessonRow => Boolean(lesson))
         .map((lesson) => {
-          const { lesson_resources: lessonResourceBridges = [], ...lessonInfo } = lesson;
-
-          const attachments: LearningLessonAttachment[] = (lessonResourceBridges ?? [])
-            .filter((bridge): bridge is LessonResourceBridgeRow => Boolean(bridge))
-            .map((bridge) => {
-              if (!bridge.resource && bridge.resource_id) {
-                resourceIdsToFetch.add(bridge.resource_id);
-              }
-              return toAttachment(bridge);
-            });
-
-          if (lessonInfo.lesson_type === "assessment" && lessonInfo.main_resource) {
-            assignmentIds.add(lessonInfo.main_resource);
-          } else if (lessonInfo.main_resource) {
-            const hasPrimaryAttachment = attachments.some(
-              (item) => item.resource?.id === lessonInfo.main_resource,
-            );
-            if (!hasPrimaryAttachment) {
-              resourceIdsToFetch.add(lessonInfo.main_resource);
-            }
+          if (lesson.main_resource) {
+            mainResourceIds.add(lesson.main_resource);
           }
-
-          const normalizedLesson: LearningLesson = {
-            ...lessonInfo,
-            attachments,
-            assignment: null,
+          const normalizedLesson: LearningLessonSummary = {
+            ...lesson,
+            content: null,
             mainResource: null,
           };
-
           return normalizedLesson;
         })
         .sort(sortByPriority);
 
-      const normalizedSection: LearningSection = {
+      const normalizedSection: LearningSectionOutline = {
         ...sectionInfo,
         lessons: normalizedLessons,
       };
@@ -134,60 +161,13 @@ const getCourseLearningDetail = async (courseId: string): Promise<LearningCourse
     })
     .sort(sortByPriority);
 
-  const allLessons = normalizedSections.flatMap((section) => section.lessons);
+  const resourceMap = await fetchResourcesByIds(mainResourceIds);
 
-  const resourceMap = new Map<string, ResourceRow>();
-
-  if (resourceIdsToFetch.size > 0) {
-    const { data: extraResources, error: resourcesError } = await supabase
-      .from("resources")
-      .select("*")
-      .in("id", Array.from(resourceIdsToFetch));
-
-    if (resourcesError) {
-      throw resourcesError;
-    }
-
-    for (const resource of extraResources ?? []) {
-      resourceMap.set(resource.id, resource);
-    }
-  }
-
-  for (const lesson of allLessons) {
-    lesson.attachments = lesson.attachments.map((attachment) => ({
-      ...attachment,
-      resource: attachment.resource ?? resourceMap.get(attachment.resourceId) ?? null,
-    }));
-
-    if (lesson.main_resource) {
-      const attachmentResource =
-        lesson.attachments.find((item) => item.resource?.id === lesson.main_resource)?.resource ??
-        null;
-      lesson.mainResource = attachmentResource ?? resourceMap.get(lesson.main_resource) ?? null;
-    } else {
-      lesson.mainResource = lesson.attachments[0]?.resource ?? null;
-    }
-  }
-
-  if (assignmentIds.size > 0) {
-    const { data: assignments, error: assignmentsError } = await supabase
-      .from("assignments")
-      .select("*")
-      .in("id", Array.from(assignmentIds));
-
-    if (assignmentsError) {
-      throw assignmentsError;
-    }
-
-    const assignmentMap = new Map<string, Tables<"assignments">>();
-    for (const assignment of assignments ?? []) {
-      assignmentMap.set(assignment.id, assignment);
-    }
-
-    for (const lesson of allLessons) {
-      if (lesson.lesson_type === "assessment" && lesson.main_resource) {
-        lesson.assignment = assignmentMap.get(lesson.main_resource) ?? null;
-      }
+  for (const section of normalizedSections) {
+    for (const lesson of section.lessons) {
+      lesson.mainResource = lesson.main_resource
+        ? resourceMap.get(lesson.main_resource) ?? null
+        : null;
     }
   }
 
@@ -197,4 +177,93 @@ const getCourseLearningDetail = async (courseId: string): Promise<LearningCourse
   };
 };
 
-export { getCourseLearningDetail };
+const getLessonLearningDetail = async (lessonId: string): Promise<LearningLesson | null> => {
+  const trimmedLessonId = lessonId?.trim();
+  if (!trimmedLessonId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .select(LESSON_DETAIL_SELECT)
+    .eq("id", trimmedLessonId)
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  const rawLesson = (data ?? null) as unknown as RawLessonDetailRow | null;
+
+  if (!rawLesson) {
+    return null;
+  }
+
+  const { lesson_resources: lessonResourceBridges = [], ...lessonInfo } = rawLesson;
+
+  const attachments: LearningLessonAttachment[] = (lessonResourceBridges ?? [])
+    .filter((bridge): bridge is LessonResourceBridgeRow => Boolean(bridge))
+    .map(toAttachment);
+
+  const resourceIdsToFetch = new Set<string>();
+
+  for (const attachment of attachments) {
+    if (!attachment.resource && attachment.resourceId) {
+      resourceIdsToFetch.add(attachment.resourceId);
+    }
+  }
+
+  if (lessonInfo.main_resource) {
+    const hasPrimaryAttachment = attachments.some(
+      (item) => item.resource?.id === lessonInfo.main_resource,
+    );
+    if (!hasPrimaryAttachment) {
+      resourceIdsToFetch.add(lessonInfo.main_resource);
+    }
+  }
+
+  const resourceMap = await fetchResourcesByIds(resourceIdsToFetch);
+
+  const resolvedAttachments = attachments.map((attachment) => ({
+    ...attachment,
+    resource: attachment.resource ?? resourceMap.get(attachment.resourceId) ?? null,
+  }));
+
+  let mainResource =
+    resolvedAttachments.find((item) => item.resource?.id === lessonInfo.main_resource)?.resource ??
+    null;
+
+  if (!mainResource && lessonInfo.main_resource) {
+    mainResource = resourceMap.get(lessonInfo.main_resource) ?? null;
+  }
+
+  if (!mainResource) {
+    mainResource = resolvedAttachments[0]?.resource ?? null;
+  }
+
+  let assignment: Tables<"assignments"> | null = null;
+  if (lessonInfo.lesson_type === "assessment" && lessonInfo.main_resource) {
+    const { data: assignmentRow, error: assignmentError } = await supabase
+      .from("assignments")
+      .select("*")
+      .eq("id", lessonInfo.main_resource)
+      .maybeSingle();
+
+    if (assignmentError) {
+      throw assignmentError;
+    }
+
+    assignment = assignmentRow ?? null;
+  }
+
+  const normalizedLesson: LearningLesson = {
+    ...(lessonInfo as Tables<"lessons">),
+    attachments: resolvedAttachments,
+    assignment,
+    mainResource,
+  };
+
+  return normalizedLesson;
+};
+
+export { getCourseLearningOutline, getLessonLearningDetail };

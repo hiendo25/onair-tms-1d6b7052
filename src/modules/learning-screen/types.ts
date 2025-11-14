@@ -15,17 +15,28 @@ export interface LearningLessonAttachment {
   resource: ResourceRow | null;
 }
 
-export interface LearningLesson extends LessonRow {
-  attachments: LearningLessonAttachment[];
+interface LearningLessonBase extends LessonRow {
   mainResource: ResourceRow | null;
+}
+
+export interface LearningLesson extends LearningLessonBase {
+  attachments: LearningLessonAttachment[];
   assignment: AssignmentRow | null;
 }
 
-export interface LearningSection extends SectionRow {
-  lessons: LearningLesson[];
+export type LearningLessonSummary = LearningLessonBase;
+
+export interface LearningSectionOutline extends SectionRow {
+  lessons: LearningLessonSummary[];
 }
 
-export interface LearningCourseDetail {
+export interface LearningCourseOutline {
   course: CourseRow | null;
-  sections: LearningSection[];
+  sections: LearningSectionOutline[];
+}
+
+export interface LessonContentLike {
+  lesson_type: LessonTypeEnum | null;
+  mainResource: ResourceRow | null;
+  content?: string | null;
 }

@@ -1,18 +1,40 @@
 import PageContainer from "@/shared/ui/PageContainer";
-import { Box } from "@mui/material";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, IconButton } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import LearningScreenSection from "./_components";
+import { createSVClient } from "@/services";
 
-const LearningScreenPage = () => {
+interface ILearningScreenPage {
+    params: Promise<{
+        courseId: string;
+    }>;
+}
+
+const LearningScreenPage = async ({ params }: ILearningScreenPage) => {
+    const { courseId } = await params;
+
+    const supabase = await createSVClient();
+    const { data: courseDetail, error } = await supabase
+        .from("courses")
+        .select("id, title")
+        .eq("id", courseId)
+        .single();
+
+    if (error || !courseDetail) {
+        notFound();
+    }
+
     return (
         <PageContainer
             actions={
                 <Box>
                     <div className="flex items-center gap-2">
-                        <div className="cursor-pointer">
-                            <ArrowBackIcon className="w-6 h-6 text-[#636365]" />
-                        </div>
-                        <p className="font-semibold text-2xl">Khoá học hướng dẫn và chuyển đổi số cùng Ai...</p>
+                        <IconButton component={Link} href="/my-class" sx={{ color: "#636365" }}>
+                            <ArrowBackIcon className="h-6 w-6" />
+                        </IconButton>
+                        <p className="text-2xl font-semibold">{courseDetail.title ?? "--"}</p>
                     </div>
                 </Box>
             }
@@ -29,6 +51,6 @@ const LearningScreenPage = () => {
             <LearningScreenSection />
         </PageContainer>
     );
-}
+};
 
 export default LearningScreenPage;

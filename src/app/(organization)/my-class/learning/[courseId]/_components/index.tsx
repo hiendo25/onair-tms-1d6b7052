@@ -2,33 +2,26 @@
 
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { useLearningCourseDetailQuery } from "@/modules/learning-screen/operations/query";
+import {
+  useLearningCourseOutlineQuery,
+  useLearningLessonDetailQuery,
+} from "@/modules/learning-screen/operations/query";
 import type {
   LearningLesson,
-  LearningSection,
+  LearningLessonSummary,
+  LearningSectionOutline,
 } from "@/modules/learning-screen/types";
-import LessonNavigator from "./lesson-navigator";
-import LessonContentPanel from "./lesson-content-panel";
-import {
-  StoredCourseProgress,
+import LessonNavigator from "./lesson-content/LessonNavigator";
+import LessonContentPanel from "./lesson-content/LessonContentPanel";
+import type {
+  LessonProgressMap,
   StoredLessonProgress,
-  getCourseProgressState,
-  markLessonCompleted,
-  recordLessonVisit,
-  updateLessonProgressState,
 } from "@/modules/learning-screen/utils/progressStorage";
 
-const createLessonLookup = (sections: LearningSection[]) => {
-  const lookup = new Map<string, LearningLesson>();
+const createLessonLookup = (sections: LearningSectionOutline[]) => {
+  const lookup = new Map<string, LearningLessonSummary>();
   for (const section of sections) {
     for (const lesson of section.lessons) {
       lookup.set(lesson.id, lesson);
@@ -47,35 +40,24 @@ const LearningScreenSection = () => {
     isLoading,
     isError,
     refetch,
-  } = useLearningCourseDetailQuery(courseId, { enabled: Boolean(courseId) });
+  } = useLearningCourseOutlineQuery(courseId, { enabled: Boolean(courseId) });
 
   const course = data?.course ?? null;
   const sections = useMemo(() => data?.sections ?? [], [data?.sections]);
 
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
-  const [courseProgress, setCourseProgress] = useState<StoredCourseProgress | null>(null);
+  const [lessonProgressMap, setLessonProgressMap] = useState<LessonProgressMap>({});
 
   const lessonLookup = useMemo(() => createLessonLookup(sections), [sections]);
   const flatLessons = useMemo(() => Array.from(lessonLookup.values()), [lessonLookup]);
 
-  const syncProgressState = useCallback((nextState: StoredCourseProgress | null) => {
-    if (!nextState) {
-      return;
-    }
-    setCourseProgress({
-      ...nextState,
-      lessons: { ...nextState.lessons },
-    });
-  }, []);
+  useEffect(() => {
+    setLessonProgressMap({});
+  }, [courseId, studentId]);
 
   useEffect(() => {
-    if (!studentId || !courseId) {
-      setCourseProgress(null);
-      return;
-    }
-    const storedState = getCourseProgressState(studentId, courseId) ?? null;
-    setCourseProgress(storedState);
-  }, [studentId, courseId]);
+    setSelectedLessonId(null);
+  }, [courseId]);
 
   useEffect(() => {
     if (!flatLessons.length) {
@@ -87,41 +69,76 @@ const LearningScreenSection = () => {
       if (current && lessonLookup.has(current)) {
         return current;
       }
-
-      const storedLessonId = courseProgress?.lastLessonId;
-      if (storedLessonId && lessonLookup.has(storedLessonId)) {
-        return storedLessonId;
-      }
-
       return flatLessons[0]?.id ?? null;
     });
-  }, [flatLessons, lessonLookup, courseProgress?.lastLessonId]);
+  }, [flatLessons, lessonLookup]);
+
+  const updateLessonProgress = useCallback(
+    (lessonId: string, updater: (prev?: StoredLessonProgress) => StoredLessonProgress) => {
+      if (!lessonId) {
+        return;
+      }
+      setLessonProgressMap((prev) => ({
+        ...prev,
+        [lessonId]: updater(prev[lessonId]),
+      }));
+    },
+    [setLessonProgressMap],
+  );
 
   useEffect(() => {
     if (!selectedLessonId) {
       return;
     }
-    const nextState = recordLessonVisit(studentId, courseId, selectedLessonId);
-    syncProgressState(nextState ?? null);
-  }, [selectedLessonId, studentId, courseId, syncProgressState]);
+    updateLessonProgress(selectedLessonId, (prev) => {
+      const timestamp = new Date().toISOString();
+      return {
+        ...(prev ?? { lastVisitedAt: timestamp }),
+        lastVisitedAt: timestamp,
+      };
+    });
+  }, [selectedLessonId, updateLessonProgress]);
 
-  const selectedLesson = selectedLessonId ? lessonLookup.get(selectedLessonId) ?? null : null;
+  const selectedLessonSummary = selectedLessonId ? lessonLookup.get(selectedLessonId) ?? null : null;
+
+  const {
+    data: selectedLessonDetail,
+    isLoading: isLessonLoading,
+    isFetching: isLessonFetching,
+    isError: isLessonError,
+    error: lessonError,
+    refetch: refetchLessonDetail,
+  } = useLearningLessonDetailQuery(selectedLessonId, {
+    enabled: Boolean(selectedLessonId),
+  });
+
+  const selectedLesson = selectedLessonDetail ?? null;
+  const lessonErrorMessage = isLessonError
+    ? lessonError instanceof Error
+      ? lessonError.message
+      : "Không thể tải dữ liệu bài học."
+    : null;
+  const isLessonRequestLoading = (isLessonLoading || isLessonFetching) && Boolean(selectedLessonId);
 
   const selectedLessonProgress: StoredLessonProgress | null = selectedLessonId
-    ? courseProgress?.lessons[selectedLessonId] ?? null
+    ? lessonProgressMap[selectedLessonId] ?? null
     : null;
-
-  const lessonProgressMap = courseProgress?.lessons ?? {};
 
   const persistVideoProgress = useCallback(
     (lessonId: string, payload: { position: number; duration?: number }) => {
       if (!lessonId) return;
-      const nextState = updateLessonProgressState(studentId, courseId, lessonId, {
-        video: payload,
-      });
-      syncProgressState(nextState ?? null);
+      const timestamp = new Date().toISOString();
+      updateLessonProgress(lessonId, (prev) => ({
+        ...(prev ?? { lastVisitedAt: timestamp }),
+        lastVisitedAt: timestamp,
+        video: {
+          position: payload.position,
+          duration: payload.duration,
+          updatedAt: timestamp,
+        },
+      }));
     },
-    [studentId, courseId, syncProgressState],
+    [updateLessonProgress],
   );
 
   const persistDocumentProgress = useCallback(
@@ -130,21 +147,32 @@ const LearningScreenSection = () => {
       payload: { page: number; totalPages?: number; zoom?: number },
     ) => {
       if (!lessonId) return;
-      const nextState = updateLessonProgressState(studentId, courseId, lessonId, {
-        document: payload,
-      });
-      syncProgressState(nextState ?? null);
+      const timestamp = new Date().toISOString();
+      updateLessonProgress(lessonId, (prev) => ({
+        ...(prev ?? { lastVisitedAt: timestamp }),
+        lastVisitedAt: timestamp,
+        document: {
+          page: payload.page,
+          totalPages: payload.totalPages,
+          zoom: payload.zoom,
+          updatedAt: timestamp,
+        },
+      }));
     },
-    [studentId, courseId, syncProgressState],
+    [updateLessonProgress],
   );
 
   const toggleLessonCompletion = useCallback(
     (lessonId: string, completed: boolean) => {
       if (!lessonId) return;
-      const nextState = markLessonCompleted(studentId, courseId, lessonId, completed);
-      syncProgressState(nextState ?? null);
+      const timestamp = new Date().toISOString();
+      updateLessonProgress(lessonId, (prev) => ({
+        ...(prev ?? { lastVisitedAt: timestamp }),
+        lastVisitedAt: timestamp,
+        completed,
+      }));
     },
-    [studentId, courseId, syncProgressState],
+    [updateLessonProgress],
   );
 
   const handleSelectLesson = useCallback(
@@ -213,7 +241,7 @@ const LearningScreenSection = () => {
       <Box
         sx={{
           display: "grid",
-          gap: 24,
+          gap: 2,
           gridTemplateColumns: {
             xs: "1fr",
             lg: "minmax(0, 2.3fr) minmax(340px, 1fr)",
@@ -225,11 +253,14 @@ const LearningScreenSection = () => {
           lesson={selectedLesson}
           lessonProgress={selectedLessonProgress}
           orderedLessons={flatLessons}
+          selectedLessonSummary={selectedLessonSummary}
+          isLessonLoading={isLessonRequestLoading}
+          lessonError={lessonErrorMessage}
+          onRetryLesson={refetchLessonDetail}
           onSelectLesson={handleSelectLesson}
           onPersistVideoProgress={persistVideoProgress}
           onPersistDocumentProgress={persistDocumentProgress}
           onToggleCompletion={toggleLessonCompletion}
-          courseId={courseId}
           studentId={studentId}
         />
 

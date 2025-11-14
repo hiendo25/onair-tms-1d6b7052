@@ -1,18 +1,33 @@
 import { useTQuery } from "@/lib/queryClient";
 import { learningScreenRepository } from "@/repository";
-import type { LearningCourseDetail } from "../types";
+import type { LearningCourseOutline, LearningLesson } from "../types";
 
-interface LearningCourseDetailQueryOptions {
+interface LearningCourseOutlineQueryOptions {
   enabled?: boolean;
 }
 
-export const useLearningCourseDetailQuery = (
+interface LearningLessonDetailQueryOptions {
+  enabled?: boolean;
+}
+
+export const useLearningCourseOutlineQuery = (
   courseId: string | null,
-  options?: LearningCourseDetailQueryOptions,
+  options?: LearningCourseOutlineQueryOptions,
 ) => {
-  return useTQuery<LearningCourseDetail>({
-    queryKey: ["learning-course-detail", courseId],
-    queryFn: () => learningScreenRepository.getCourseLearningDetail(courseId ?? ""),
+  return useTQuery<LearningCourseOutline>({
+    queryKey: ["learning-course-outline", courseId],
+    queryFn: () => learningScreenRepository.getCourseLearningOutline(courseId ?? ""),
     enabled: Boolean(courseId) && (options?.enabled ?? true),
+  });
+};
+
+export const useLearningLessonDetailQuery = (
+  lessonId: string | null,
+  options?: LearningLessonDetailQueryOptions,
+) => {
+  return useTQuery<LearningLesson | null>({
+    queryKey: ["learning-lesson-detail", lessonId],
+    queryFn: () => learningScreenRepository.getLessonLearningDetail(lessonId ?? ""),
+    enabled: Boolean(lessonId) && (options?.enabled ?? true),
   });
 };

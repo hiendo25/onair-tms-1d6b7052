@@ -1,5 +1,5 @@
 import { supabase } from "@/services";
-import type { ResourceRow, LearningLesson } from "@/modules/learning-screen/types";
+import type { ResourceRow, LessonContentLike } from "@/modules/learning-screen/types";
 
 const FALLBACK_BUCKET = "uploads";
 const DEFAULT_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour
@@ -117,7 +117,7 @@ const normalizeExtension = (value?: string | null) => {
 
 const normalizeMime = (mime?: string | null) => mime?.toLowerCase().trim() ?? null;
 
-export const inferLessonContentKind = (lesson: LearningLesson): LessonContentKind => {
+export const inferLessonContentKind = (lesson: LessonContentLike): LessonContentKind => {
   if (lesson.lesson_type === "assessment") {
     return "assessment";
   }
@@ -151,6 +151,15 @@ export const inferLessonContentKind = (lesson: LearningLesson): LessonContentKin
 
   if (lesson.content) {
     return "text";
+  }
+
+  if (!resource) {
+    if (lesson.lesson_type === "video") {
+      return "video";
+    }
+    if (lesson.lesson_type === "file") {
+      return "document";
+    }
   }
 
   return "unknown";
