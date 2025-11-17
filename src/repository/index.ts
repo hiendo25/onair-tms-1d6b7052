@@ -22,3 +22,7 @@ export * as qrAttendanceRepository from "./qr-attendance";
 export * as classSessionAgendaRepository from "./class-session-agenda";
 export * as categoriesRepository from "./categories";
 export * as elearningRepository from "./elearning";
+export * as coursesRepository from "./courses";
+export * as coursesMetaRepository from "./courses-meta";
+export * as coursesSectionsRepository from "./courses-sections";
+export * as coursesLessonsRepository from "./courses-lessons";

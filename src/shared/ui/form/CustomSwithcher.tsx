@@ -1,10 +1,6 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import FormGroup from "@mui/material/FormGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch, { SwitchProps } from "@mui/material/Switch";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 62,
@@ -62,55 +58,81 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const Android12Switch = styled((props: SwitchProps) => <Switch {...props} />)(
-  ({ theme }) => ({
-    padding: 8,
+const Android12Switch = styled((props: SwitchProps) => <Switch {...props} />)(({ theme }) => ({
+  padding: 8,
+  "&.MuiSwitch-sizeSmall": {
+    width: 48,
+    height: 36,
     "& .MuiSwitch-switchBase": {
-      color: "white",
+      padding: 3,
       "&.Mui-checked": {
-        color: "white",
-      },
-      "&.Mui-checked + .MuiSwitch-track": {
-        backgroundColor: theme.palette.primary.main,
-        opacity: 1,
+        transform: "translateX(12px)",
       },
     },
     "& .MuiSwitch-track": {
-      borderRadius: 22 / 2,
-      backgroundColor: theme.palette.grey[500],
-      "&.Mui-checked": {
-        backgroundColor: `${theme.palette.primary.dark}!important `,
-        opacity: 0,
-      },
       "&::before, &::after": {
-        content: '""',
-        position: "absolute",
-        top: "50%",
-        transform: "translateY(-50%)",
         width: 16,
         height: 16,
       },
       "&::before": {
-        // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        //   theme.palette.getContrastText(theme.palette.primary.main),
-        // )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
         left: 12,
       },
       "&::after": {
-        // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
-        //   theme.palette.getContrastText(theme.palette.primary.main),
-        // )}" d="M19,13H5V11H19V13Z" /></svg>')`,
         right: 12,
       },
     },
     "& .MuiSwitch-thumb": {
       boxShadow: "none",
+      width: 14,
+      height: 14,
+      margin: 8,
+    },
+  },
+  "& .MuiSwitch-switchBase": {
+    color: "white",
+    "&.Mui-checked": {
+      color: "white",
+    },
+    "&.Mui-checked + .MuiSwitch-track": {
+      backgroundColor: theme.palette.primary.main,
+      opacity: 1,
+    },
+  },
+  "& .MuiSwitch-track": {
+    borderRadius: 22 / 2,
+    backgroundColor: theme.palette.grey[500],
+    "&.Mui-checked": {
+      backgroundColor: `${theme.palette.primary.dark}!important `,
+      opacity: 0,
+    },
+    "&::before, &::after": {
+      content: '""',
+      position: "absolute",
+      top: "50%",
+      transform: "translateY(-50%)",
       width: 16,
       height: 16,
-      margin: 2,
     },
-  }),
-);
+    "&::before": {
+      // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+      //   theme.palette.getContrastText(theme.palette.primary.main),
+      // )}" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"/></svg>')`,
+      left: 12,
+    },
+    "&::after": {
+      // backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 24 24"><path fill="${encodeURIComponent(
+      //   theme.palette.getContrastText(theme.palette.primary.main),
+      // )}" d="M19,13H5V11H19V13Z" /></svg>')`,
+      right: 12,
+    },
+  },
+  "& .MuiSwitch-thumb": {
+    boxShadow: "none",
+    width: 16,
+    height: 16,
+    margin: 2,
+  },
+}));
 
 const IOSSwitch = styled((props: SwitchProps) => (
   <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
@@ -118,6 +140,24 @@ const IOSSwitch = styled((props: SwitchProps) => (
   width: 42,
   height: 26,
   padding: 0,
+  "&.MuiSwitch-sizeSmall": {
+    width: 38,
+    height: 22,
+
+    "& .MuiSwitch-thumb": {
+      boxSizing: "border-box",
+      width: 18,
+      height: 18,
+    },
+    "& .MuiSwitch-track": {
+      borderRadius: 22 / 2,
+    },
+    "& .MuiSwitch-switchBase": {
+      "&.Mui-checked": {
+        transform: "translateX(16px)",
+      },
+    },
+  },
   "& .MuiSwitch-switchBase": {
     padding: 0,
     margin: 2,
@@ -126,7 +166,7 @@ const IOSSwitch = styled((props: SwitchProps) => (
       transform: "translateX(16px)",
       color: "#fff",
       "& + .MuiSwitch-track": {
-        backgroundColor: "#65C466",
+        backgroundColor: theme.palette.primary.main,
         opacity: 1,
         border: 0,
         ...theme.applyStyles("dark", {

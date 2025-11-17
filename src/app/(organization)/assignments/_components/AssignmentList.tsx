@@ -57,7 +57,11 @@ export default function AssignmentList() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  const { data: assignmentsResult, isLoading, error } = useGetAssignmentsQuery({
+  const {
+    data: assignmentsResult,
+    isLoading,
+    error,
+  } = useGetAssignmentsQuery({
     page,
     limit: rowsPerPage,
     search: debouncedSearch,
@@ -149,15 +153,10 @@ export default function AssignmentList() {
       handleMenuClose();
     } catch (error) {
       console.error("Error deleting assignment:", error);
-      notifications.show(
-        error instanceof Error
-          ? error.message
-          : "Có lỗi xảy ra khi xóa bài kiểm tra",
-        {
-          severity: "error",
-          autoHideDuration: 5000,
-        },
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa bài kiểm tra", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
       handleMenuClose();
     }
   };
@@ -200,11 +199,7 @@ export default function AssignmentList() {
               sx={{ maxWidth: 300 }}
             />
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateAssignment}
-            >
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateAssignment}>
               Tạo bài kiểm tra
             </Button>
           </Stack>
@@ -221,9 +216,7 @@ export default function AssignmentList() {
               <CircularProgress />
             </Box>
           ) : error ? (
-            <Alert severity="error">
-              Có lỗi xảy ra khi tải danh sách bài kiểm tra
-            </Alert>
+            <Alert severity="error">Có lỗi xảy ra khi tải danh sách bài kiểm tra</Alert>
           ) : (
             <>
               <TableContainer>
@@ -248,30 +241,17 @@ export default function AssignmentList() {
                       </TableRow>
                     ) : (
                       assignments.map((assignment) => (
-                        <TableRow
-                          key={assignment.id}
-                          hover
-                          sx={{ cursor: "pointer" }}
-                        >
+                        <TableRow key={assignment.id} hover sx={{ cursor: "pointer" }}>
                           <TableCell>
                             <Typography variant="body2" fontWeight={500}>
                               {assignment.name}
                             </Typography>
                           </TableCell>
-                          <TableCell>
-                            {assignment.questions?.length || 0}
-                          </TableCell>
-                          <TableCell>
-                            {assignment.assignment_employees?.length || 0}
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(assignment.created_at)}
-                          </TableCell>
+                          <TableCell>{assignment.questions?.length || 0}</TableCell>
+                          <TableCell>{assignment.assignment_employees?.length || 0}</TableCell>
+                          <TableCell>{formatDate(assignment.created_at)}</TableCell>
                           <TableCell align="center">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => handleMenuOpen(e, assignment.id)}
-                            >
+                            <IconButton size="small" onClick={(e) => handleMenuOpen(e, assignment.id)}>
                               <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </TableCell>
@@ -291,9 +271,7 @@ export default function AssignmentList() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[12, 25, 50, 100]}
                 labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} của ${count}`
-                }
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
               />
             </>
           )}
@@ -333,4 +311,3 @@ export default function AssignmentList() {
     </PageContainer>
   );
 }
-

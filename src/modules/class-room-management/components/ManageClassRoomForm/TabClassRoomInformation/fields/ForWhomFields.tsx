@@ -2,13 +2,12 @@
 import { useCallback } from "react";
 
 import { useFieldArray } from "react-hook-form";
-import { useFormContext } from "react-hook-form";
-import { ClassRoom } from "../../../classroom-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { MarkerPinIcon, TrashIcon1 } from "@/shared/assets/icons";
 import { Button, FormLabel, IconButton } from "@mui/material";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import BoxIcon from "../../TabClassRoomResource/BoxIcon";
+import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 const MAX_FIELD_COUNT = 4;
 const MIN_FIELD_COUNT = 2;
@@ -16,7 +15,7 @@ interface ForWhomFieldsProps {
   className?: string;
 }
 const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
-  const { control, setValue, trigger } = useFormContext<ClassRoom>();
+  const { control, setValue, trigger } = useClassRoomFormContext();
   const {
     fields: forWhomFields,
     remove,

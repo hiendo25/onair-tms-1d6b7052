@@ -1,9 +1,14 @@
 "use client";
-import { FormControl, FormHelperText, FormLabel } from "@mui/material";
-import { Editor } from "../Editor";
+import { FormControl, FormLabel } from "@mui/material";
 import { Control, Controller, Path, PathValue, FieldValues } from "react-hook-form";
 import { useId } from "react";
+import dynamic from "next/dynamic";
+import EditorSkeleton from "../Editor/EditorSkeleton";
 
+const DynamicEditor = dynamic(() => import("../Editor"), {
+  ssr: false,
+  loading: () => <EditorSkeleton aspect="auto" className="aspect-21/9" />,
+});
 interface RHFRichEditorProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
@@ -37,7 +42,7 @@ const RHFRichEditor = <T extends FieldValues>({
               {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
-          <Editor {...field} error={!!error} helperText={error?.message} />
+          <DynamicEditor {...field} error={!!error} helperText={error?.message} />
         </FormControl>
       )}
     />
