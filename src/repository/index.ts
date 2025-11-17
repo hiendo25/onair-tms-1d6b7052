@@ -26,3 +26,4 @@ export * as coursesMetaRepository from "./courses-meta";
 export * as coursesSectionsRepository from "./courses-sections";
 export * as coursesLessonsRepository from "./courses-lessons";
 export * as learningScreenRepository from "./learning-screen";
+export * as learningScreenServerRepository from "./learning-screen/server";

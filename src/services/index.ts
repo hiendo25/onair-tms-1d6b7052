@@ -7,5 +7,6 @@ export * as employeeFileService from "./employees/employee-file.service";
 export * as classRoomService from "./class-room/upsert-class-room.service";
 export * as libraryService from "./libraries/library.service";
 export * as assignmentService from "./assignments/assignment.service";
+export * as learningScreenService from "./learning-screen/learning-screen.service";
 export * as branchService from "./branches/branch.service";
 export * as departmentService from "./departments/department.service";

@@ -31,7 +31,7 @@ const LearningScreenPage = async ({ params }: ILearningScreenPage) => {
             actions={
                 <Box>
                     <div className="flex items-center gap-2">
-                        <IconButton component={Link} href="/my-class" sx={{ color: "#636365" }}>
+                        <IconButton component={Link} href="/my-class?tab=ElearningTab" sx={{ color: "#636365" }}>
                             <ArrowBackIcon className="h-6 w-6" />
                         </IconButton>
                         <p className="text-2xl font-semibold">{courseDetail.title ?? "--"}</p>

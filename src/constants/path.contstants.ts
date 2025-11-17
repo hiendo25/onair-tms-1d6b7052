@@ -28,6 +28,8 @@ export const PATHS = {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
+    DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
+    COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
     LIST_CLASSROOM: "/admin/class-room/list",
     DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
