@@ -19,6 +19,7 @@ export async function generateMetadata(
 }
 
 export default function CreateCoursePage({ searchParams }: CreateCoursePageProps) {
+  console.log("add Linh");
   return (
     <PageContainer
       title="Tạo bài học"
