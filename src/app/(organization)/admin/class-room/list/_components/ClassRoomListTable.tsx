@@ -34,8 +34,8 @@ import { useCallback, useState } from "react";
 import { TABLE_HEAD_CLASS_ROOM } from "../constants";
 import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
-import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import ClassRoomType from "./ClassRoomType";
+import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 
 interface ClassRoomListTableProps {

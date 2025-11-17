@@ -14,6 +14,19 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, message: "Invalid assignment ID" }, { status: 400 });
     }
 
+    // Check if assignment has assigned students
+    const assignment = await assignmentService.getAssignmentById(assignmentId);
+
+    if (assignment.assignment_employees && assignment.assignment_employees.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Không thể xóa bài kiểm tra đã có học viên được giao. Vui lòng xóa tất cả học viên trước khi xóa bài kiểm tra."
+        },
+        { status: 400 }
+      );
+    }
+
     await assignmentService.deleteAssignmentWithRelations(assignmentId);
 
     revalidatePath(PATHS.ASSIGNMENTS.ROOT);

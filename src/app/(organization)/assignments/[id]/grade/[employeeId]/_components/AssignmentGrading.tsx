@@ -20,6 +20,7 @@ import { useSaveGradeMutation } from "@/modules/assignment-management/operations
 import GradeQuestionCard from "./GradeQuestionCard";
 import { QuestionGradeInput } from "@/types/dto/assignments";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { PATHS } from "@/constants/path.contstants";
 import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentGradingProps {
@@ -156,7 +157,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         severity: "success",
         autoHideDuration: 3000,
       });
-      router.push(`/assignments/${assignmentId}/students`);
+      router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
     } catch (error) {
       console.error("Failed to save grade:", error);
       notifications.show(
@@ -170,7 +171,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
   };
 
   const handleBack = () => {
-    router.push(`/assignments/${assignmentId}/students`);
+    router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
   };
 
   if (isLoading) {

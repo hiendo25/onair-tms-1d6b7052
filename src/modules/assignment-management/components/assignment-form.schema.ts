@@ -72,8 +72,8 @@ const assignmentSchema = zod.object({
   description: zod.string().min(1, { message: "Mô tả bài kiểm tra không bỏ trống." }),
   assignmentCategories: zod
     .array(zod.string())
-    .min(1, "Chọn tối thiểu 1 lĩnh vực.")
-    .max(3, "Chọn tối đa 3 lĩnh vực."),
+    .max(3, "Chọn tối đa 3 lĩnh vực.")
+    .optional(),
   questions: zod.array(questionSchema).min(1, { message: "Tạo ít nhất 1 câu hỏi." }),
   assignedEmployees: zod.array(employeeItemSchema),
 });

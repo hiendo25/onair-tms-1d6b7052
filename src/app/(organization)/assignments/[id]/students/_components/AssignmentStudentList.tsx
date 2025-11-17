@@ -73,21 +73,21 @@ export default function AssignmentStudentList() {
 
   const handleSubmitAssignment = () => {
     if (selectedStudentId) {
-      router.push(`/assignments/${assignmentId}/submit/${selectedStudentId}`);
+      router.push(PATHS.ASSIGNMENTS.SUBMIT(assignmentId, selectedStudentId));
       handleCloseMenu();
     }
   };
 
   const handleGradeAssignment = () => {
     if (selectedStudentId) {
-      router.push(`/assignments/${assignmentId}/grade/${selectedStudentId}`);
+      router.push(PATHS.ASSIGNMENTS.GRADE(assignmentId, selectedStudentId));
       handleCloseMenu();
     }
   };
 
   const handleViewResult = () => {
     if (selectedStudentId) {
-      router.push(`/assignments/${assignmentId}/result/${selectedStudentId}`);
+      router.push(PATHS.ASSIGNMENTS.RESULT(assignmentId, selectedStudentId));
       handleCloseMenu();
     }
   };

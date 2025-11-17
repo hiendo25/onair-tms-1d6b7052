@@ -18,11 +18,6 @@ const classRoomSessionSchema = zod
     thumbnailUrl: zod.string(),
     startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
     endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
-    resources: zod.array(
-      zod.object({
-        id: zod.string(),
-      }),
-    ),
     isOnline: zod.boolean(),
     location: zod.string(), //only for offline class room
     channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for online class room

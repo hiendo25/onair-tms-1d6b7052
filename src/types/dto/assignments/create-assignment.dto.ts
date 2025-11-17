@@ -4,7 +4,7 @@ import { QuestionOption } from "./question-option.dto";
 export class CreateAssignmentDto {
   name!: string;
   description!: string;
-  assignmentCategories!: string[]; // category IDs
+  assignmentCategories?: string[]; // category IDs
   questions!: Array<{
     type: Database["public"]["Enums"]["question_type"];
     label: string;

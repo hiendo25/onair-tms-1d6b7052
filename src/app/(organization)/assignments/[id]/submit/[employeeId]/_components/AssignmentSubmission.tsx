@@ -86,7 +86,11 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
   }, [questions, setValue]);
 
   const handleBack = React.useCallback(() => {
-    router.push(`${basePath}/${assignmentId}/students`);
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      router.push(basePath);
+    } else {
+      router.push(`${basePath}/${assignmentId}/students`);
+    }
   }, [router, assignmentId, basePath]);
 
   const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
@@ -413,7 +417,11 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
         queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });
 
-      router.push(`${basePath}/${assignmentId}/students`);
+      if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+        router.push(PATHS.MY_ASSIGNMENTS.RESULT(assignmentId, employeeId));
+      } else {
+        router.push(`${basePath}/${assignmentId}/students`);
+      }
     } catch (error) {
       console.error("Error submitting assignment:", error);
 
@@ -430,14 +438,24 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
     }
   };
 
+  const breadcrumbs = React.useMemo(() => {
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      return [
+        { title: "Bài kiểm tra của tôi", path: basePath },
+        { title: "Nộp bài" },
+      ];
+    }
+    return [
+      { title: "Bài kiểm tra", path: basePath },
+      { title: assignment?.name || "...", path: `${basePath}/${assignmentId}/students` },
+      { title: "Nộp bài" },
+    ];
+  }, [basePath, assignment, assignmentId]);
+
   return (
     <PageContainer
       title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
-      breadcrumbs={[
-        { title: "Bài kiểm tra", path: basePath },
-        { title: assignment?.name || "...", path: `${basePath}/${assignmentId}/students` },
-        { title: "Nộp bài" },
-      ]}
+      breadcrumbs={breadcrumbs}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
