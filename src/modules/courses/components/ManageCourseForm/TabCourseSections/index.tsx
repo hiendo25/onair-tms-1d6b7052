@@ -2,7 +2,6 @@
 import { forwardRef, memo, useCallback, useRef, useState } from "react";
 import { Typography } from "@mui/material";
 import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
-
 import { UpsertCourseFormData } from "../upsert-course.schema";
 import ButtonAddSection, { ButtonAddSectionProps } from "./ButtonAddSection";
 import LessonTypeSelector, { LessonTypeSelectorProps } from "./LessonTypeSelector";
@@ -23,7 +22,9 @@ export const initSectionFormData = (): UpsertCourseFormData["sections"][number] 
 type TabCourseSectionsRef = {
   checkAllFields: () => Promise<boolean>;
 };
-interface TabCourseSectionsProps {}
+interface TabCourseSectionsProps {
+  className?: string;
+}
 const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProps>((props, ref) => {
   const courseSectionsRef = useRef<CourseSectionsRef>(null);
   const [isAddLesson, setIsAddLesson] = useState(false);
@@ -36,11 +37,12 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
 
   const handleAddSection: ButtonAddSectionProps["onOk"] = useCallback((title) => {
     courseSectionsRef.current?.appendSection(title);
+    const layoutContent = document.querySelector(".main-layout__content");
+    layoutContent?.scrollTo({ top: 900 });
   }, []);
 
   const handleClickEditLesson = useCallback<Exclude<CourseSectionsProps["onEditLesson"], undefined>>(
     ({ sectionIndex, lessonIndex }) => {
-      console.log(sectionIndex, lessonIndex);
       setEditingLesson({ lessonIndex, sectionIndex });
       setIsAddLesson(false);
     },
@@ -79,12 +81,18 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
     setIsAddLesson(false);
   }, []);
 
+  const hideEditLessonForm = useCallback<Exclude<CourseSectionsProps["onSectionDragStart"], undefined>>(() => {
+    if (editingLesson) setEditingLesson(undefined);
+  }, [editingLesson]);
+
   return (
     <div className="flex flex-wrap gap-6">
       <div className="section w-96">
         <div className="section__iner">
-          <ButtonAddSection onOk={handleAddSection} />
-          <div className="h-6"></div>
+          <div className="sticky top-0 z-10">
+            <ButtonAddSection onOk={handleAddSection} />
+          </div>
+          <div className="h-4"></div>
           {errors.sections?.message && (
             <Typography component="p" className="text-xs text-red-600 mb-6">
               {errors.sections?.message}
@@ -95,8 +103,9 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
             onAddLesson={handleClickAddLesson}
             onEditLesson={handleClickEditLesson}
             editingLesson={editingLesson}
+            // onSectionDragStart={hideEditLessonForm}
+            // onLessonDragStart={hideEditLessonForm}
           />
-          <div className="h-6"></div>
         </div>
       </div>
       <div className="lession-wraper flex-1">

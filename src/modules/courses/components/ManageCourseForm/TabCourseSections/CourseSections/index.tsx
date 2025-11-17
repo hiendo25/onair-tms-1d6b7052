@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
@@ -12,14 +12,15 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
-import CourseSectionItem from "./CourseSectionItem";
 
+import type { LessonType } from "@/model/lesson.model";
 import BoxEmptySection from "./BoxEmptySection";
-import { LessonType } from "@/model/lesson.model";
-import CourseLessons, { CourseLessonsRef } from "../CourseLessons";
+import CourseSectionItem from "./CourseSectionItem";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 import SortableSection from "./CourseSectionItem/SortableSection";
+import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
+import CourseLessons, { CourseLessonsProps, CourseLessonsRef } from "../CourseLessons";
+import { isUndefined } from "lodash";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {
@@ -40,17 +41,19 @@ export type CourseSectionsRef = {
 };
 export interface CourseSectionsProps {
   className?: string;
-  onAddLesson?: (sectionIndex: number) => void;
-  onEditLesson?: (options: { sectionIndex: number; lessonIndex: number }) => void;
   editingLesson?: {
     sectionIndex: number;
     lessonIndex: number;
   };
-  editingSectionIndex?: number;
+  onLessonDragStart?: CourseLessonsProps["onLessonDragStart"];
+  onAddLesson?: (sectionIndex: number) => void;
+  onEditLesson?: (options: { sectionIndex: number; lessonIndex: number }) => void;
+  onSectionDragStart?: (sectionId: UniqueIdentifier) => void;
 }
 const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
-  ({ onAddLesson, onEditLesson, editingLesson, editingSectionIndex }, ref) => {
+  ({ onAddLesson, onEditLesson, editingLesson, onSectionDragStart, onLessonDragStart }, ref) => {
     const sectionRefs = useRef<Map<number, CourseLessonsRef>>(new Map());
+    const [editingSectionId, setEditingSectionId] = useState<UniqueIdentifier>();
     const [activeDragSectionId, setActiveDragSectionId] = useState<UniqueIdentifier>();
     const methods = useUpsertCourseFormContext();
     const {
@@ -85,19 +88,24 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       const { active } = event;
       const activeId = active.id;
       setActiveDragSectionId(activeId);
+      onSectionDragStart?.(activeId);
     };
-    const handleDragEnd = (event: DragEndEvent) => {
-      const { active, over } = event;
-      const activeId = active.id;
-      const overId = over?.id;
 
-      if (!over || activeId === overId) return;
+    const handleDragEnd = useCallback(
+      (event: DragEndEvent) => {
+        const { active, over } = event;
+        const activeId = active.id;
+        const overId = over?.id;
 
-      const activeIndex = sections.findIndex((field) => field._sectionId === activeId);
-      const overIndex = sections.findIndex((field) => field._sectionId === overId);
-      setActiveDragSectionId(undefined);
-      move(activeIndex, overIndex);
-    };
+        if (!over || activeId === overId) return;
+
+        const activeIndex = sections.findIndex((field) => field._sectionId === activeId);
+        const overIndex = sections.findIndex((field) => field._sectionId === overId);
+        setActiveDragSectionId(undefined);
+        move(activeIndex, overIndex);
+      },
+      [sections, move, editingLesson],
+    );
 
     const hasLessonEditing = useCallback(
       (sectionIndex: number, lessonIndex: number) => {
@@ -105,6 +113,7 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       },
       [editingLesson],
     );
+
     const sectionDragingItem = useMemo(() => {
       const indexActiveSection = sections.findIndex((sec) => sec._sectionId === activeDragSectionId);
       const activeSectionDrag = sections[indexActiveSection];
@@ -118,6 +127,13 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
         return Boolean(errors?.sections?.[sectionIndex]);
       },
       [errors],
+    );
+
+    const handleDeleteSection = useCallback(
+      (index: number) => {
+        remove(index);
+      },
+      [remove],
     );
 
     useImperativeHandle(ref, () => ({
@@ -137,32 +153,53 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       },
     }));
 
+    /**
+     * update new index position for Editting Lesson after Drag Section
+     */
+    useEffect(() => {
+      if (!editingSectionId) return;
+
+      console.log("checking section...");
+
+      const newIndexSectionEditting = sections.findIndex((section) => section._sectionId === editingSectionId);
+      if (
+        newIndexSectionEditting !== -1 &&
+        !isUndefined(editingLesson) &&
+        newIndexSectionEditting !== editingLesson.sectionIndex
+      ) {
+        onEditLesson?.({ sectionIndex: newIndexSectionEditting, lessonIndex: editingLesson.lessonIndex });
+      }
+    });
     if (!sections.length) return <BoxEmptySection />;
 
     return (
       <div className="sections__list flex flex-col gap-3">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <SortableContext items={sections.map((section) => section._sectionId)} strategy={verticalListSortingStrategy}>
-            {sections.map((section, _index) => (
+            {sections.map((section, _indexSection) => (
               <SortableSection
                 id={section._sectionId}
                 key={section._sectionId}
-                subLabel={`H${_index + 1}`}
-                isError={hasSectionError(_index)}
+                subLabel={`H${_indexSection + 1}`}
+                isError={hasSectionError(_indexSection)}
               >
                 <CourseSectionItem
                   key={section._sectionId}
-                  index={_index}
-                  onDelete={remove}
+                  index={_indexSection}
+                  onDelete={handleDeleteSection}
                   onButtonAddLessonClick={onAddLesson}
                 >
                   <CourseLessons
-                    ref={(ref) => setSectionRefs(_index, ref)}
-                    sectionIndex={_index}
-                    onLessonClick={(sectionIndex, lessonIndex) =>
-                      onEditLesson?.({ sectionIndex: sectionIndex, lessonIndex })
-                    }
+                    ref={(ref) => setSectionRefs(_indexSection, ref)}
+                    sectionIndex={_indexSection}
+                    editingLessonIndex={editingLesson?.lessonIndex}
+                    editingSectionIndex={editingLesson?.sectionIndex}
+                    onLessonClick={(sectionIndex, lessonIndex) => {
+                      setEditingSectionId(section._sectionId);
+                      onEditLesson?.({ sectionIndex, lessonIndex });
+                    }}
                     hasLessonEditing={hasLessonEditing}
+                    onLessonDragStart={onLessonDragStart}
                   />
                 </CourseSectionItem>
               </SortableSection>

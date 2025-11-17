@@ -1,4 +1,13 @@
-import React, { forwardRef, memo, PropsWithChildren, useCallback, useImperativeHandle, useMemo, useState } from "react";
+import React, {
+  forwardRef,
+  memo,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from "react";
 import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
 import {
   DndContext,
@@ -16,8 +25,10 @@ import SortableLessionItem from "./SortableLessionItem";
 import { LessonType } from "@/model/lesson.model";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 import LessonContentItem from "./LessonContentItem";
+import { isUndefined } from "lodash";
 
-export const initLessonFormData = (type: LessonType): UpsertCourseFormData["sections"][number]["lessons"][number] => {
+type LessonItem = UpsertCourseFormData["sections"][number]["lessons"][number];
+export const initLessonFormData = (type: LessonType): LessonItem => {
   return {
     lessonType: type,
     title: "",
@@ -34,15 +45,20 @@ export type CourseLessonsRef = {
 export interface CourseLessonsProps extends PropsWithChildren {
   sectionIndex: number;
   editingLessonIndex?: number;
+  editingSectionIndex?: number;
   hasLessonEditing?: (sessonIndex: number, lessonIndex: number) => boolean;
   onDelete?: (index: number) => void;
   onLessonClick?: (sectionIndex: number, lessionIndex: number) => void;
   onAddLession?: (sectionIndex: number) => void;
-  isActive?: boolean;
+  onLessonDragStart?: (id: UniqueIdentifier) => void;
 }
 const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
-  ({ sectionIndex, onLessonClick, hasLessonEditing, isActive }, ref) => {
+  (
+    { sectionIndex, editingLessonIndex, editingSectionIndex, onLessonClick, hasLessonEditing, onLessonDragStart },
+    ref,
+  ) => {
     const [activeDragLessonId, setActiveDragLessonId] = useState<UniqueIdentifier>();
+    const [editingLessonId, setEditingLessonId] = useState<UniqueIdentifier>();
     const methods = useUpsertCourseFormContext();
     const {
       control,
@@ -68,11 +84,16 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
       }),
     );
 
-    const handleDragfStart = useCallback((evt: DragStartEvent) => {
-      const { active } = evt;
-      const activeId = active.id;
-      setActiveDragLessonId(activeId);
-    }, []);
+    const handleDragStart = useCallback(
+      (evt: DragStartEvent) => {
+        const { active } = evt;
+        const activeId = active.id;
+        setActiveDragLessonId(activeId);
+        onLessonDragStart?.(activeId);
+      },
+      [sectionIndex],
+    );
+
     const handleDragEnd = useCallback(
       (event: DragEndEvent) => {
         const { active, over } = event;
@@ -83,21 +104,22 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
 
         const activeIndex = lessons.findIndex((field) => field._lessionId === activeId);
         const overIndex = lessons.findIndex((field) => field._lessionId === overId);
-
         move(activeIndex, overIndex);
       },
-      [lessons],
+      [lessons, move],
     );
 
     const lessonDraggingItem = useMemo(() => {
-      const indexActiveSection = lessons.findIndex((sec) => sec._lessionId === activeDragLessonId);
-      const activeSectionDrag = lessons[indexActiveSection];
-      if (indexActiveSection === -1 || !activeSectionDrag) return;
+      const indexActiveLesson = lessons.findIndex((lesson) => lesson._lessionId === activeDragLessonId);
+      const activeSectionDrag = lessons[indexActiveLesson];
+      if (indexActiveLesson === -1 || !activeSectionDrag) return;
+      return { index: indexActiveLesson, lesson: activeSectionDrag };
+    }, [lessons, activeDragLessonId, sectionIndex]);
 
-      return { index: indexActiveSection, lesson: activeSectionDrag };
-    }, [lessons, activeDragLessonId]);
+    // console.log({ editingLessonId, editingLessonIndex });
     const handleClickLesson = useCallback(
-      (lessonIndex: number) => () => {
+      (lessonIndex: number, lessonId: UniqueIdentifier) => () => {
+        setEditingLessonId(lessonId);
         onLessonClick?.(sectionIndex, lessonIndex);
       },
       [sectionIndex],
@@ -119,11 +141,27 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
         },
         removeLesson: remove,
       }),
-      [sectionIndex],
+      [sectionIndex, lessons],
     );
+
+    /**
+     * update new index position for Editting Lesson after Drag Lesson
+     */
+    useEffect(() => {
+      if (!editingLessonId || editingSectionIndex !== sectionIndex) return;
+      const newIndexLessonEditing = lessons.findIndex((lesson) => lesson._lessionId === editingLessonId);
+      if (
+        newIndexLessonEditing !== -1 &&
+        !isUndefined(editingLessonIndex) &&
+        newIndexLessonEditing !== editingLessonIndex
+      ) {
+        onLessonClick?.(sectionIndex, newIndexLessonEditing);
+      }
+    });
+
     return (
       <div className="section-item__body flex flex-col gap-2">
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragfStart}>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <SortableContext items={lessons.map((lession) => lession._lessionId)} strategy={verticalListSortingStrategy}>
             {lessons.map((lession, lessonIndex) => (
               <SortableLessionItem
@@ -136,7 +174,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
                   control={control}
                   sectionIndex={sectionIndex}
                   lessonIndex={lessonIndex}
-                  onClick={handleClickLesson(lessonIndex)}
+                  onClick={handleClickLesson(lessonIndex, lession._lessionId)}
                 />
               </SortableLessionItem>
             ))}

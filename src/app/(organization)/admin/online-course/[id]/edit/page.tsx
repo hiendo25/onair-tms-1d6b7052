@@ -3,27 +3,43 @@ import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
 import UpdateCourseForm from "./_components/UpdateCourseForm";
 import { PATHS } from "@/constants/path.contstants";
-interface EditCoursePageProps {}
+import { coursesRepository } from "@/repository";
+import { notFound } from "next/navigation";
 
-type Props = {
-  params: Promise<{ slug: string }>;
+type EditCoursePageProps = {
+  params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
-export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+export async function generateMetadata(
+  { params, searchParams }: EditCoursePageProps,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
   return {
-    title: "Quản lý lớp học",
-    description: "Quản lý lớp học",
+    title: "Quản lý môn học",
+    description: "Quản lý môn học",
   };
 }
 
-export default function EditCoursePage({}: EditCoursePageProps) {
+export default async function EditCoursePage({ params }: EditCoursePageProps) {
+  const { id: courseId } = await params;
+  const courseDetail = await coursesRepository.getCourseById(courseId);
+
+  console.log(courseDetail);
+  if (courseDetail.error || !courseDetail.data) {
+    notFound();
+  }
+
   return (
     <PageContainer
-      title="Cap nhat bài học"
-      breadcrumbs={[{ title: "Quản lý lớp học", path: PATHS.CLASSROOMS.ROOT }, { title: "Tạo bài học" }]}
+      title={courseDetail.data.title || "Sửa môn học"}
+      breadcrumbs={[
+        { title: "Quản lý môn học", path: PATHS.CLASSROOMS.ROOT },
+        { title: "sửa môn học" },
+        { title: courseDetail.data.title || "" },
+      ]}
     >
-      <UpdateCourseForm />
+      <UpdateCourseForm data={courseDetail.data} />
     </PageContainer>
   );
 }
