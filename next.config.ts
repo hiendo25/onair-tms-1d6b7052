@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
+      {
+        protocol: "https",
+        hostname: "dev-event-files-bucket.s3.ap-southeast-1.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
       // {
       //   protocol: 'https',
       //   hostname: 'xyzsupabase.co',
