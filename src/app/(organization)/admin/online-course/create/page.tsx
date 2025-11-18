@@ -19,10 +19,9 @@ export async function generateMetadata(
 }
 
 export default function CreateCoursePage({ searchParams }: CreateCoursePageProps) {
-  console.log("add Linh");
   return (
     <PageContainer
-      title="Tạo bài học"
+      title="Tạo môn học"
       breadcrumbs={[{ title: "Quản lý lớp học", path: PATHS.CLASSROOMS.ROOT }, { title: "Tạo môn học" }]}
     >
       <CreateCourseForm />
