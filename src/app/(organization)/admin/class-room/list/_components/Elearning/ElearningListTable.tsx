@@ -29,6 +29,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import { useState } from "react";
 import AirplayOutlinedIcon from '@mui/icons-material/AirplayOutlined';
+import { PATHS } from "@/constants/path.contstants";
 
 const formatOrder = (value: number) => value.toString().padStart(2, "0");
 type ElearningTeacher = NonNullable<
@@ -82,7 +83,14 @@ export default function ElearningListTable({
         if (!courseId) {
             return;
         }
-        router.push(`/admin/elearning/${courseId}/students`);
+        router.push(PATHS.COURSES.STUDENTS(courseId));
+    };
+
+    const handleEditCourse = (courseId?: string | null) => {
+        if (!courseId) {
+            return;
+        }
+        router.push(PATHS.COURSES.EDIT(courseId));
     };
 
     return (
@@ -226,7 +234,12 @@ export default function ElearningListTable({
                                                             <MenuItem onClick={() => popupState.close()}>
                                                                 Truy cập học
                                                             </MenuItem>
-                                                            <MenuItem onClick={() => popupState.close()} disabled={!isAdmin}>
+                                                            <MenuItem onClick={() => {
+                                                                popupState.close()
+                                                                handleEditCourse(course.id)
+                                                            }}
+                                                                disabled={!isAdmin}
+                                                            >
                                                                 Chỉnh sửa
                                                             </MenuItem>
                                                             <MenuItem onClick={() => {
