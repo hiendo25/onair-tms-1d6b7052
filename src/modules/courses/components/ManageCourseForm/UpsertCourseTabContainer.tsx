@@ -134,7 +134,7 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
                 {item?.content}
               </TabPanel>
             ))}
-            <div className={cn({ hidden: currentTab === "clsTab-setting" || currentTab === "clsTab-section" })}>
+            <div className={cn({ hidden: currentTab === "clsTab-section" })}>
               <div className={cn("py-6 flex justify-between")}>
                 <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
                   Quay lại

@@ -62,6 +62,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
     const methods = useUpsertCourseFormContext();
     const {
       control,
+      getValues,
       formState: { errors },
     } = methods;
 
@@ -135,7 +136,7 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
       ref,
       () => ({
         appendLesson: (type: LessonType) => {
-          const nextLessonIndex = lessons.length;
+          const nextLessonIndex = getValues(`sections.${sectionIndex}.lessons`).length;
           append(initLessonFormData(type));
           return { lessonIndex: nextLessonIndex, sectionIndex: sectionIndex };
         },

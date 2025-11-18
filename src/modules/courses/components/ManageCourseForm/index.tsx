@@ -1,7 +1,6 @@
 "use client";
 import { forwardRef, memo } from "react";
 import { UpsertCourseProvider } from "../../store/upsert-course-context";
-import { UpsertCourseStore } from "../../store/upsert-course-store";
 import UpsertCourseFormContainer, {
   UpsertCourseFormContainerProps,
   UpsertCourseFormContainerRef,
@@ -14,13 +13,11 @@ export interface ManageCourseFormProps {
   onSubmit?: UpsertCourseFormContainerProps["onSubmit"];
   onCancel?: UpsertCourseFormContainerProps["onCancel"];
   initFormValue?: UpsertCourseFormContainerProps["value"];
-  students?: UpsertCourseStore["state"]["selectedStudents"]; // init students
-  teachers?: UpsertCourseStore["state"]["selectedTeachers"]; // init teachers
 }
 const ManageCourseForm = forwardRef<ManageCourseFormRef, ManageCourseFormProps>(
-  ({ onSubmit, initFormValue, action = "create", isLoading = false, teachers, students, onCancel }, ref) => {
+  ({ onSubmit, initFormValue, action = "create", isLoading = false, onCancel }, ref) => {
     return (
-      <UpsertCourseProvider selectedStudents={students} selectedTeachers={teachers}>
+      <UpsertCourseProvider selectedStudents={[]} selectedTeachers={[]}>
         <UpsertCourseFormContainer
           ref={ref}
           onSubmit={onSubmit}

@@ -21,24 +21,14 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
   const { enqueueSnackbar } = useSnackbar();
   const formRef = useRef<ManageCourseFormRef>(null);
   const { isLoading, onUpdate } = useUpsertCourse();
-  const { courses_students, courses_teachers } = data;
 
   const initFormValue = useMemo((): UpdateCourseFormvalue => {
-    const { sections, courses_resources, courses_metadatas } = data;
+    const { sections, courses_metadatas } = data;
 
     const categories = data.courses_categories.reduce<string[]>((acc, item) => {
       const categoryId = item.categories?.id;
       return categoryId ? [...acc, categoryId] : acc;
     }, []);
-
-    const coursedocs = courses_resources.map<UpdateCourseFormvalue["docs"][number]>((cr) => {
-      return {
-        id: cr.resources.id,
-        mimeType: cr.resources.mime_type || "",
-        name: cr.resources.name,
-        url: cr.resources.path || "",
-      };
-    });
 
     const courseSections = sections.reduce<UpdateCourseFormvalue["sections"]>((acc, session) => {
       const lessons = session.lessons.map<LessonFormValue>(
@@ -80,60 +70,15 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       ];
     }, []);
 
-    const benefits = getCourseMetaValue(courses_metadatas, "benefits");
     return {
       title: data.title || "",
       slug: data.slug || "",
       description: data.description || "",
-      thumbnailUrl: data.thumbnail_url || "",
       categories: categories,
-      docs: coursedocs,
       status: data.status,
-      courseId: data.id,
-      benefits:
-        benefits?.map((content) => ({
-          content: content,
-        })) || [],
+      id: data.id,
       sections: courseSections,
     };
-  }, [data]);
-
-  const students = useMemo((): ManageCourseFormProps["students"] => {
-    return courses_students.reduce<Exclude<ManageCourseFormProps["students"], undefined>>((acc, std) => {
-      if (std.student.employee_type === "student") {
-        acc = [
-          ...acc,
-          {
-            id: std.student.id,
-            avatar: std.student.profile?.avatar || "",
-            email: std.student.profile?.email || "",
-            employeeCode: std.student.employee_code,
-            empoyeeType: std.student.employee_type,
-            fullName: std.student.profile?.full_name || "",
-          },
-        ];
-      }
-      return acc;
-    }, []);
-  }, [data]);
-
-  const teachers = useMemo((): ManageCourseFormProps["teachers"] => {
-    return courses_teachers.reduce<Exclude<ManageCourseFormProps["teachers"], undefined>>((acc, tch) => {
-      if (tch.teacher.employee_type === "teacher") {
-        acc = [
-          ...acc,
-          {
-            id: tch.teacher.id,
-            avatar: tch.teacher.profile?.avatar || "",
-            email: tch.teacher.profile?.email || "",
-            employeeCode: tch.teacher.employee_code,
-            empoyeeType: tch.teacher.employee_type,
-            fullName: tch.teacher.profile?.full_name || "",
-          },
-        ];
-      }
-      return acc;
-    }, []);
   }, [data]);
 
   const handleCancelUpdate = () => {
@@ -142,9 +87,9 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
     });
   };
 
-  const handleUpdateCourse: ManageCourseFormProps["onSubmit"] = (formData, students, teachers) => {
+  const handleUpdateCourse: ManageCourseFormProps["onSubmit"] = (formData) => {
     onUpdate(
-      { courseId: data.id, formData, students, teachers },
+      { courseId: data.id, formData },
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
@@ -162,8 +107,6 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       action="edit"
       initFormValue={initFormValue}
       onSubmit={handleUpdateCourse}
-      students={students}
-      teachers={teachers}
       onCancel={handleCancelUpdate}
       isLoading={isLoading || isTransition}
     />

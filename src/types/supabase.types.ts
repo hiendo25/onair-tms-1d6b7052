@@ -875,45 +875,33 @@ export type Database = {
       }
       courses: {
         Row: {
-          community_info: Json | null
           created_at: string
           created_by: string
           description: string | null
-          end_at: string
           id: string
           organization_id: string
           slug: string
-          start_at: string
           status: Database["public"]["Enums"]["course_status"]
-          thumbnail_url: string | null
           title: string | null
         }
         Insert: {
-          community_info?: Json | null
           created_at?: string
           created_by: string
           description?: string | null
-          end_at: string
           id?: string
           organization_id: string
           slug: string
-          start_at: string
           status?: Database["public"]["Enums"]["course_status"]
-          thumbnail_url?: string | null
           title?: string | null
         }
         Update: {
-          community_info?: Json | null
           created_at?: string
           created_by?: string
           description?: string | null
-          end_at?: string
           id?: string
           organization_id?: string
           slug?: string
-          start_at?: string
           status?: Database["public"]["Enums"]["course_status"]
-          thumbnail_url?: string | null
           title?: string | null
         }
         Relationships: [
@@ -997,111 +985,6 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_resources: {
-        Row: {
-          course_id: string
-          id: number
-          resource_id: string
-        }
-        Insert: {
-          course_id?: string
-          id?: number
-          resource_id?: string
-        }
-        Update: {
-          course_id?: string
-          id?: number
-          resource_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_resources_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_resources_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "resources"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_students: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: number
-          student_id: string
-        }
-        Insert: {
-          course_id?: string
-          created_at?: string
-          id?: number
-          student_id?: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: number
-          student_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_students_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "courses_students_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      courses_teachers: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: number
-          teacher_id: string
-        }
-        Insert: {
-          course_id?: string
-          created_at?: string
-          id?: number
-          teacher_id?: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: number
-          teacher_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "online_courses_teachers_online_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "online_courses_teachers_teacher_id_fkey"
-            columns: ["teacher_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
