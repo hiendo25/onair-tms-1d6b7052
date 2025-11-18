@@ -260,6 +260,36 @@ export async function deleteAssignmentCategoriesByAssignmentId(assignmentId: str
   }
 }
 
+export async function deleteAssignmentCategoriesByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  // First, get all assignment IDs created by this employee
+  const { data: assignments, error: fetchError } = await supabase
+    .from("assignments")
+    .select("id")
+    .eq("created_by", employeeId);
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch assignments by employee: ${fetchError.message}`);
+  }
+
+  if (!assignments || assignments.length === 0) {
+    return; // No assignments to delete categories for
+  }
+
+  const assignmentIds = assignments.map((a) => a.id);
+
+  // Delete all assignment_categories for these assignments
+  const { error } = await supabase
+    .from("assignment_categories")
+    .delete()
+    .in("assignment_id", assignmentIds);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment categories by employee: ${error.message}`);
+  }
+}
+
 // Assignment employees repository methods
 export async function createAssignmentEmployees(
   employees: Array<{
