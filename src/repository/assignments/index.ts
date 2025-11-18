@@ -177,6 +177,16 @@ export async function deleteAssignmentById(assignmentId: string) {
   }
 }
 
+export async function deleteAssignmentsByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("assignments").delete().eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignments by employee: ${error.message}`);
+  }
+}
+
 // Questions repository methods
 export async function createQuestions(
   questions: Array<{
@@ -211,6 +221,16 @@ export async function deleteQuestionsByAssignmentId(assignmentId: string) {
 
   if (error) {
     throw new Error(`Failed to delete questions: ${error.message}`);
+  }
+}
+
+export async function deleteQuestionsByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("questions").delete().eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete questions by employee: ${error.message}`);
   }
 }
 
@@ -263,6 +283,16 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
 
   if (error) {
     throw new Error(`Failed to delete assignment employees: ${error.message}`);
+  }
+}
+
+export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("assignment_employees").delete().eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment employees by employee: ${error.message}`);
   }
 }
 

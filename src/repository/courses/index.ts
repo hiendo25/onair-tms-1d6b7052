@@ -135,6 +135,49 @@ const getCourseById = async (courseId: string) => {
     throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");
   }
 };
+
+const deleteCoursesStudentsByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase
+      .from("courses_students")
+      .delete()
+      .eq("student_id", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting courses students");
+  }
+};
+
+const deleteCoursesTeachersByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase
+      .from("courses_teachers")
+      .delete()
+      .eq("teacher_id", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting courses teachers");
+  }
+};
+
+const deleteCoursesByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase
+      .from("courses")
+      .update({ status: "deleted" })
+      .eq("created_by", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting courses");
+  }
+};
+
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
 export {
@@ -143,4 +186,7 @@ export {
   createPivotCoursesWithCategories,
   getCourseById,
   deletePivotCoursesWithCategories,
+  deleteCoursesStudentsByEmployeeId,
+  deleteCoursesTeachersByEmployeeId,
+  deleteCoursesByEmployeeId,
 };

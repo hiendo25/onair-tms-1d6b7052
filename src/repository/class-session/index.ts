@@ -134,11 +134,26 @@ const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
   }
 };
 
+const deleteClassSessionTeachersByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase
+      .from("class_session_teacher")
+      .delete()
+      .eq("teacher_id", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting class session teachers");
+  }
+};
+
 export {
   createClassSession,
   deleteClassSession,
   createPivotClassSessionAndTeacher,
   deletePivotClassSessionAndTeacher,
+  deleteClassSessionTeachersByEmployeeId,
   upsertClassSession,
   bulkUpsertClassSession,
   bulkCreateClassSession,
