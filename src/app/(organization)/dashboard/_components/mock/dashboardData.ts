@@ -15,25 +15,25 @@ export type CourseRow = {
 
 export const summaryCards = [
   {
-    title: "Khoá học đang diễn ra",
+    title: "Lớp học đang diễn ra",
     value: "24",
     icon: "in-progress",
     colors: { bg: "#FFB0E8", icon: "#f062c0" },
   },
   {
-    title: "Khoá học sắp diễn ra",
+    title: "Lớp học sắp diễn ra",
     value: "8",
     icon: "upcoming",
     colors: { bg: "#CDDEFF", icon: "#648efc" },
   },
   {
-    title: "Khoá học sắp hết hạn",
+    title: "Lớp học sắp hết hạn",
     value: "3",
     icon: "expiring",
     colors: { bg: "#CDDEFF", icon: "#648efc" },
   },
   {
-    title: "Khoá học đã diễn ra",
+    title: "Lớp học đã diễn ra",
     value: "112",
     icon: "completed",
     colors: { bg: "#FFD365", icon: "#f5a524" },
@@ -122,27 +122,27 @@ export const courseRows: CourseRow[] = [
 
 export const topRatedCourses = [
   {
-    title: "Khoá học chuyển Đổi số Doanh nghiệp B2B",
+    title: "Lớp học chuyển Đổi số Doanh nghiệp B2B",
     rating: "4,8/5",
     students: "120 học viên",
   },
   {
-    title: "Khoá học chuyển Đổi số với AI",
+    title: "Lớp học chuyển Đổi số với AI",
     rating: "4,7/5",
     students: "104 học viên",
   },
   {
-    title: "Khoá học tổ chức đội nhóm",
+    title: "Lớp học tổ chức đội nhóm",
     rating: "4,6/5",
     students: "92 học viên",
   },
   {
-    title: "Khoá học hình thành hệ sinh thái B2B",
+    title: "Lớp học hình thành hệ sinh thái B2B",
     rating: "4,5/5",
     students: "86 học viên",
   },
   {
-    title: "Khoá học chuyển minh cùng AI",
+    title: "Lớp học chuyển minh cùng AI",
     rating: "4,4/5",
     students: "78 học viên",
   },
@@ -150,62 +150,93 @@ export const topRatedCourses = [
 
 export const lowRatedCourses = [
   {
-    title: "Khoá học chuyển Đổi số Doanh nghiệp B2B",
+    title: "Lớp học chuyển Đổi số Doanh nghiệp B2B",
     rating: "1/5",
     students: "40 học viên",
   },
   {
-    title: "Khoá học chuyển Đổi số với AI",
+    title: "Lớp học chuyển Đổi số với AI",
     rating: "2/5",
     students: "36 học viên",
   },
   {
-    title: "Khoá học tổ chức đội nhóm",
+    title: "Lớp học tổ chức đội nhóm",
     rating: "2,6/5",
     students: "28 học viên",
   },
   {
-    title: "Khoá học hình thành hệ sinh thái B2B",
+    title: "Lớp học hình thành hệ sinh thái B2B",
     rating: "1,7/5",
     students: "24 học viên",
   },
   {
-    title: "Khoá học chuyển minh cùng AI",
+    title: "Lớp học chuyển minh cùng AI",
     rating: "1,4/5",
     students: "18 học viên",
   },
 ];
 
+const currentMonth = dayjs().startOf("month");
+
+const buildDate = (dayOfMonth: number, hour: number, minute: number) =>
+  currentMonth
+    .clone()
+    .date(dayOfMonth)
+    .hour(hour)
+    .minute(minute)
+    .second(0)
+    .millisecond(0);
 
 export const mockEvents = [
   {
     id: "event-1",
     title: "Lớp Ứng dụng AI vào Doanh nghiệp",
-    start: dayjs().year(2025).month(2).date(12).toISOString(),
+    start: buildDate(4, 9, 0).toISOString(),
     frames: [{ id: "frame-1" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
-    time: "13:30 - 15:30",
-    avatarUrl: `https://i.pravatar.cc/100?img=9`
+    time: "09:00 - 11:00",
+    avatarUrl: `https://i.pravatar.cc/100?img=9`,
   },
   {
     id: "event-2",
     title: "Tư Duy Phản Biện & Giải Quyết Vấn Đề",
-    start: dayjs().year(2025).month(2).date(21).toISOString(),
+    start: buildDate(12, 14, 0).toISOString(),
     frames: [{ id: "frame-2" }],
-    status: CalenderStatus.AVAILABLE,
+    status: CalenderStatus.APPROVED,
     mode: "Trực tiếp",
-    time: "15:00 - 17:00",
-    avatarUrl: `https://i.pravatar.cc/100?img=10`
+    time: "14:00 - 16:00",
+    avatarUrl: `https://i.pravatar.cc/100?img=10`,
   },
   {
     id: "event-3",
     title: "Nghệ Thuật Giao Tiếp Trong Đội Nhóm",
-    start: dayjs().year(2025).month(2).date(31).toISOString(),
+    start: buildDate(20, 18, 30).toISOString(),
     frames: [{ id: "frame-3" }],
-    status: CalenderStatus.PENDING,
+    status: CalenderStatus.APPROVED,
     mode: "Online",
-    time: "13:30 - 15:30",
-    avatarUrl: `https://i.pravatar.cc/100?img=11`
+    time: "18:30 - 20:00",
+    avatarUrl: `https://i.pravatar.cc/100?img=11`,
   },
+  {
+    id: "event-4",
+    title: "Chiến Lược Xây Dựng Văn Hóa Học Tập",
+    start: buildDate(26, 10, 0).toISOString(),
+    frames: [{ id: "frame-4" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Online",
+    time: "10:00 - 11:30",
+    avatarUrl: `https://i.pravatar.cc/100?img=12`,
+  },
+  {
+    id: "event-5",
+    title: "Chiến Lược Xây Dựng Văn Hóa Học Tập",
+    start: buildDate(18, 10, 0).toISOString(),
+    frames: [{ id: "frame-5" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Online",
+    time: "10:00 - 11:30",
+    avatarUrl: `https://i.pravatar.cc/100?img=12`,
+  },
+
 ];

@@ -155,6 +155,14 @@ export const CalendarSidebar = (props: PropTypes) => {
                         actionBar: () => null,
                         day: (cell) => {
                             const els = dataGroup[dayjs(cell.day).format("YYYY/MM/DD")] ?? [];
+                            const indicatorColor =
+                                (els.find((el: any) => el.status === CalenderStatus.APPROVED) &&
+                                    CALENDER_SPECS[CalenderStatus.APPROVED]?.color) ||
+                                (els.find((el: any) => el.status === CalenderStatus.PENDING) &&
+                                    CALENDER_SPECS[CalenderStatus.PENDING]?.color) ||
+                                (els.find((el: any) => el.status === CalenderStatus.AVAILABLE) &&
+                                    CALENDER_SPECS[CalenderStatus.AVAILABLE]?.color) ||
+                                "#16a34a";
 
                             return (
                                 <Stack
@@ -164,49 +172,20 @@ export const CalendarSidebar = (props: PropTypes) => {
                                 >
                                     <PickersDay {...cell} />
                                     {els?.length > 0 && (
-                                        <Stack
+                                        <Box
                                             position="absolute"
                                             bottom={4}
-                                            direction="row"
-                                            spacing={0.3}
-                                        >
-                                            {els.find((el: any) => {
-                                                return el.status === CalenderStatus.AVAILABLE;
-                                            }) && (
-                                                    <Box
-                                                        className="size-1 rounded-full"
-                                                        sx={{
-                                                            bgcolor: cell.selected
-                                                                ? "#fff"
-                                                                : CALENDER_SPECS[CalenderStatus.AVAILABLE]?.color,
-                                                        }}
-                                                    />
-                                                )}
-                                            {els.find((el: any) => {
-                                                return el.status === CalenderStatus.APPROVED;
-                                            }) && (
-                                                    <Box
-                                                        className="size-1 rounded-full"
-                                                        sx={{
-                                                            bgcolor: cell.selected
-                                                                ? "#fff"
-                                                                : CALENDER_SPECS[CalenderStatus.APPROVED]?.color,
-                                                        }}
-                                                    />
-                                                )}
-                                            {els.find((el: any) => {
-                                                return el.status === CalenderStatus.PENDING;
-                                            }) && (
-                                                    <Box
-                                                        className="size-1 rounded-full"
-                                                        sx={{
-                                                            bgcolor: cell.selected
-                                                                ? "#fff"
-                                                                : CALENDER_SPECS[CalenderStatus.PENDING]?.color,
-                                                        }}
-                                                    />
-                                                )}
-                                        </Stack>
+                                            width={4}
+                                            height={4}
+                                            borderRadius="50%"
+                                            sx={{
+                                                bgcolor: cell.selected ? "#fff" : indicatorColor,
+                                                border: `1px solid ${indicatorColor}`,
+                                                boxShadow: cell.selected
+                                                    ? `0 0 0 1px ${indicatorColor}`
+                                                    : "none",
+                                            }}
+                                        />
                                     )}
                                 </Stack>
                             );
