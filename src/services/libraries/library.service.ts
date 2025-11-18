@@ -1,14 +1,12 @@
-"use server";
-
-import { libraryRepository, employeesRepository } from "@/repository";
+import { libraryRepository } from "@/repository";
 import { Database } from "@/types/supabase.types";
-import { createSVClient } from "@/services";
+import { createClient } from "@/services";
 
 type Library = Database["public"]["Tables"]["libraries"]["Row"];
 type Resource = Database["public"]["Tables"]["resources"]["Row"];
 
-export async function getCurrentUserLibrary(): Promise<Library | null> {
-  const supabase = await createSVClient();
+async function getCurrentEmployee() {
+  const supabase = createClient();
 
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -16,8 +14,25 @@ export async function getCurrentUserLibrary(): Promise<Library | null> {
     throw new Error("User not authenticated");
   }
 
-  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id, organization_id")
+    .eq("user_id", user.id)
+    .single();
 
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  if (!employee) {
+    throw new Error("Employee not found");
+  }
+
+  return employee;
+}
+
+export async function getCurrentUserLibrary(): Promise<Library | null> {
+  const employee = await getCurrentEmployee();
   return libraryRepository.getLibraryByEmployeeId(employee.id);
 }
 
@@ -41,15 +56,7 @@ export async function createFolder(
   libraryId: string,
   parentId: string | null
 ): Promise<Resource> {
-  const supabase = await createSVClient();
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+  const employee = await getCurrentEmployee();
 
   if (!employee.organization_id) {
     throw new Error("Employee does not belong to an organization");
@@ -78,15 +85,7 @@ export async function createFileResource(
   extension: string,
   thumbnailUrl: string | null
 ): Promise<Resource> {
-  const supabase = await createSVClient();
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+  const employee = await getCurrentEmployee();
 
   if (!employee.organization_id) {
     throw new Error("Employee does not belong to an organization");
@@ -107,15 +106,7 @@ export async function createFileResource(
 }
 
 export async function getResourceById(resourceId: string): Promise<Resource> {
-  const supabase = await createSVClient();
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+  const employee = await getCurrentEmployee();
 
   if (!employee.organization_id) {
     throw new Error("Employee does not belong to an organization");
@@ -131,15 +122,7 @@ export async function getResourceById(resourceId: string): Promise<Resource> {
 }
 
 export async function getResourcesByIds(resourceIds: string[]): Promise<Resource[]> {
-  const supabase = await createSVClient();
-
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    throw new Error("User not authenticated");
-  }
-
-  const employee = await employeesRepository.getEmployeeByUserId(user.id);
+  const employee = await getCurrentEmployee();
 
   if (!employee.organization_id) {
     throw new Error("Employee does not belong to an organization");
