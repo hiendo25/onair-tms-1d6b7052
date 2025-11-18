@@ -378,6 +378,28 @@ const deletePivotClassRoomAndEmployeeByEmployeeId = async (payload: DeletePivotC
   }
 };
 
+const deleteAllClassRoomEmployeesByEmployeeId = async (employeeId: string) => {
+  const { error } = await supabase
+    .from("class_room_employee")
+    .delete()
+    .eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete class room employees by employee: ${error.message}`);
+  }
+};
+
+const deleteClassRoomsByEmployeeId = async (employeeId: string) => {
+  const { error } = await supabase
+    .from("class_rooms")
+    .update({ status: "deleted" })
+    .eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete class rooms by employee: ${error.message}`);
+  }
+};
+
 const sanitizeSearchTerm = (value: string) => value.replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/,/g, " ");
 
 const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, any>>(
@@ -901,5 +923,7 @@ export {
   getClassRoomStudents,
   getClassRooms,
   deletePivotClassRoomAndEmployeeByEmployeeId,
+  deleteAllClassRoomEmployeesByEmployeeId,
+  deleteClassRoomsByEmployeeId,
   markAttendance,
 };

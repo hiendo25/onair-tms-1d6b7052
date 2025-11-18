@@ -204,3 +204,29 @@ export async function getResourcesByIds(resourceIds: string[]): Promise<Resource
 
   return data || [];
 }
+
+export async function deleteLibraryByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("libraries")
+    .delete()
+    .eq("owner_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete library by employee: ${error.message}`);
+  }
+}
+
+export async function softDeleteResourcesByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("resources")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to soft delete resources by employee: ${error.message}`);
+  }
+}
