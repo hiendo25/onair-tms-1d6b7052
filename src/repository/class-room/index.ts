@@ -357,7 +357,7 @@ const deletePivotClassRoomAndEmployee = async (ids: number[]) => {
     return await supabase.from("class_room_employee").delete().in("id", ids);
   } catch (err: any) {
     console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
+    throw new Error(err.message ?? "Unknown error Delete ClassRoom Employee ID");
   }
 };
 

@@ -66,26 +66,15 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
       callback?.();
     }, []);
 
-    // const handleChangeTab = useCallback(
-    //   (_: React.SyntheticEvent, newTab: TabKeyType) =>
-    //     validateCurrentTabBeforeProceed(currentTab, () => {
-    //       setCurrentTab((oldTab) => {
-    //         const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
-    //         const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
-    //         return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
-    //       });
-    //     }),
-    //   [currentTab],
-    // );
-
     const handleChangeTab = useCallback(
-      (_: React.SyntheticEvent, newTab: TabKeyType) => {
-        setCurrentTab((oldTab) => {
-          const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
-          const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
-          return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
-        });
-      },
+      (_: React.SyntheticEvent, newTab: TabKeyType) =>
+        validateCurrentTabBeforeProceed(currentTab, () => {
+          setCurrentTab((oldTab) => {
+            const nextTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.next;
+            const prevTab = TAB_NODES_MANAGE_COURSE.get(oldTab)?.prev;
+            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+          });
+        }),
       [currentTab],
     );
     /**
@@ -145,7 +134,7 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
                 {item?.content}
               </TabPanel>
             ))}
-            <div className={cn({ hidden: currentTab === "clsTab-setting" || currentTab === "clsTab-section" })}>
+            <div className={cn({ hidden: currentTab === "clsTab-section" })}>
               <div className={cn("py-6 flex justify-between")}>
                 <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
                   Quay lại
