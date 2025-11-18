@@ -228,10 +228,11 @@ async function deleteEmployeeWithRelations(
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
-  // Delete assignment-related relationships
+  // Delete assignment-related relationships (child records first, then parent)
   await assignmentResultsRepository.deleteAssignmentResultsByEmployeeId(employeeId);
   await assignmentsRepository.deleteAssignmentEmployeesByEmployeeId(employeeId);
   await assignmentsRepository.deleteQuestionsByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentCategoriesByEmployeeId(employeeId);
   await assignmentsRepository.deleteAssignmentsByEmployeeId(employeeId);
 
   // Delete class-related relationships
