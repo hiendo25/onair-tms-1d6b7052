@@ -17,7 +17,7 @@ import { UpsertCourseStore } from "../../store/upsert-course-store";
 export const TAB_KEYS_MANAGE_COURSE = {
   "clsTab-information": "clsTab-information",
   "clsTab-section": "clsTab-section",
-  "clsTab-setting": "clsTab-setting",
+  // "clsTab-setting": "clsTab-setting",
 } as const;
 
 export const TAB_NODES_MANAGE_COURSE = new Map([
@@ -32,27 +32,23 @@ export const TAB_NODES_MANAGE_COURSE = new Map([
     TAB_KEYS_MANAGE_COURSE["clsTab-section"],
     {
       prev: TAB_KEYS_MANAGE_COURSE["clsTab-information"],
-      next: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
-    },
-  ],
-  [
-    TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
-    {
-      prev: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
       next: null,
     },
   ],
+  // [
+  //   TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
+  //   {
+  //     prev: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+  //     next: null,
+  //   },
+  // ],
 ]);
 
 export interface UpsertCourseFormContainerRef {
   resetForm: () => void;
 }
 export interface UpsertCourseFormContainerProps {
-  onSubmit?: (
-    formData: UpsertCourseFormData,
-    selectedStudents: UpsertCourseStore["state"]["selectedStudents"],
-    selectedTeachers: UpsertCourseStore["state"]["selectedTeachers"],
-  ) => void;
+  onSubmit?: (formData: UpsertCourseFormData) => void;
   onCancel?: () => void;
   value?: UpsertCourseFormData;
   isLoading?: boolean;
@@ -63,23 +59,17 @@ export const initClassRoomFormData = (): Partial<UpsertCourseFormData> => {
   return {
     title: "",
     description: "",
-    thumbnailUrl: "",
     categories: [],
     slug: "",
     status: "draft",
-    benefits: [],
-    docs: [],
     sections: [],
   };
 };
 
 const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, UpsertCourseFormContainerProps>(
   ({ onSubmit, isLoading, action, value: initFormValue, onCancel }, ref) => {
-    const { enqueueSnackbar } = useSnackbar();
     const classRoomTabContainerRef = useRef<UpsertCourseTabContainerRef>(null);
     const resetStore = useUpsertCourseStore(({ actions }) => actions.reset);
-    const selectedStudents = useUpsertCourseStore(({ state }) => state.selectedStudents);
-    const selectedTeachers = useUpsertCourseStore(({ state }) => state.selectedTeachers);
 
     const methods = useForm<UpsertCourseFormData>({
       resolver: zodResolver(upsertCourseSchema),
@@ -97,15 +87,11 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
       reset,
     } = methods;
 
-    console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
+    console.log({ errors, value: getValues() });
 
     const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "published") => async () => {
       try {
-        const TAB_LIST = [
-          TAB_KEYS_MANAGE_COURSE["clsTab-information"],
-          TAB_KEYS_MANAGE_COURSE["clsTab-section"],
-          TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
-        ];
+        const TAB_LIST = [TAB_KEYS_MANAGE_COURSE["clsTab-information"], TAB_KEYS_MANAGE_COURSE["clsTab-section"]];
         const allTabsTriggers = await Promise.allSettled(
           TAB_LIST.map(async (tabKey) => {
             const isValid = await trigger(getKeyFieldByTab(tabKey));
@@ -118,12 +104,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
         if (isSomeTabFailed) return;
 
-        if (!selectedTeachers.length) {
-          classRoomTabContainerRef.current?.setTabStatus("clsTab-information", "invalid");
-          enqueueSnackbar(`Chưa chọn giáo viên.`, { variant: "error" });
-          return;
-        }
-
         setValue("status", status);
 
         submitAction();
@@ -133,9 +113,9 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     };
 
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
-      console.log({ errors, data, selectedTeachers, selectedStudents });
+      console.log({ errors, data });
 
-      onSubmit?.(data, selectedStudents, selectedTeachers);
+      onSubmit?.(data);
     };
 
     const cancelCreateClassRoom = () => {
@@ -177,12 +157,12 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
               icon: <BookOpenIcon className="w-5 h-5" />,
               content: <TabCourseSections />,
             },
-            {
-              tabName: "Thiết lập",
-              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
-              icon: <UsersPlusIcon className="w-5 h-5" />,
-              content: <TabCourseSetting />,
-            },
+            // {
+            //   tabName: "Thiết lập",
+            //   tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
+            //   icon: <UsersPlusIcon className="w-5 h-5" />,
+            //   content: <TabCourseSetting />,
+            // },
           ]}
           actions={
             <div className="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { UpsertCourseFormData } from "./upsert-course.schema";
 import { TAB_KEYS_MANAGE_COURSE } from "./UpsertCourseFormContainer";
 
 /**
- * @param tabKey Name of classRoom tabs
+ * @param tabKey Name of courses tabs
  * @returns The key fields by tab.
  */
 export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_MANAGE_COURSE) => {
@@ -11,7 +11,7 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_MANAGE_COURSE) =>
 
   switch (tabKey) {
     case "clsTab-information": {
-      keyListByTab = ["title", "thumbnailUrl", "slug", "description", "categories", "docs", "benefits"];
+      keyListByTab = ["title", "slug", "description", "categories"];
       break;
     }
 
@@ -19,15 +19,11 @@ export const getKeyFieldByTab = (tabKey: keyof typeof TAB_KEYS_MANAGE_COURSE) =>
       keyListByTab = ["sections"];
       break;
     }
-    case "clsTab-setting": {
-      keyListByTab = ["startAt", "endAt"];
-      break;
-    }
   }
   return keyListByTab;
 };
 
-export const getStatusTabClassRoom = (
+export const getStatusCoursesTab = (
   errors: FieldErrors<UpsertCourseFormData>,
   tabKey: keyof typeof TAB_KEYS_MANAGE_COURSE,
 ): "invalid" | "valid" => {

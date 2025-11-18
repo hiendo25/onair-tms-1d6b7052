@@ -61,6 +61,7 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
 
       const lesson = courseSectionsRef.current?.appendLesson({ type, sectionIndex });
 
+      console.log(lesson);
       if (!lesson) return;
       setEditingLesson({ lessonIndex: lesson.lessonIndex, sectionIndex });
       setIsAddLesson(false);
@@ -77,13 +78,10 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
     [editingLesson],
   );
 
+  console.log({ editingLesson });
   const handleCancelSelectLesson = useCallback(() => {
     setIsAddLesson(false);
   }, []);
-
-  const hideEditLessonForm = useCallback<Exclude<CourseSectionsProps["onSectionDragStart"], undefined>>(() => {
-    if (editingLesson) setEditingLesson(undefined);
-  }, [editingLesson]);
 
   return (
     <div className="flex flex-wrap gap-6">

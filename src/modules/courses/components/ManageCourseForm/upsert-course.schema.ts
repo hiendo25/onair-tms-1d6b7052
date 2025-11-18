@@ -1,6 +1,5 @@
 import { Course } from "@/model/course.model";
 import { LessonType } from "@/model/lesson.model";
-import { isUndefined } from "lodash";
 import * as zod from "zod";
 
 const courseResourceSchema = zod.object({
@@ -64,63 +63,32 @@ const courseSectionSchema = zod.object({
 });
 
 const upsertCourseSchema = zod.object({
-  courseId: zod.string().optional(),
+  id: zod.string().optional(),
   title: zod.string().min(1, { error: "Tên môn học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
   description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
   slug: zod.string(),
-  startAt: zod.string().optional(),
-  endAt: zod.string().optional(),
-  thumbnailUrl: zod
-    .string()
-    .min(1, { error: "Ảnh bìa không bỏ trống." })
-    .superRefine((value, ctx) => {
-      if (!value.startsWith("http://") && !value.startsWith("https://")) {
-        ctx.addIssue({
-          code: "invalid_format",
-          format: "thumbnailUrl",
-          message: "Đường dẫn không hợp lệ.",
-        });
-      }
-    }),
-  categories: zod
-    .array(zod.string())
-    .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")
-    .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
+  categories: zod.array(zod.string()).min(1, "Chọn tối thiểu 1 lĩnh vực."),
   status: zod.enum(["published", "pending", "draft", "deleted", "unpublished"]),
   sections: zod.array(courseSectionSchema).min(1, { error: "Học phần dang trống." }),
-  benefits: zod
-    .array(
-      zod.object({
-        content: zod.string(),
-      }),
-    )
-    .superRefine((values, context) => {
-      if (values.length) {
-        values.forEach(({ content }, i) => {
-          if (!content.length) {
-            context.addIssue({
-              code: "custom",
-              message: `Không bỏ trống.`,
-              path: [i, "content"],
-            });
-          }
-        });
-      }
-    }),
-  docs: zod.array(courseResourceSchema),
-  // docs: zod
+  // benefits: zod
   //   .array(
   //     zod.object({
-  //       type: zod.string(),
-  //       fileExtension: zod.string(),
-  //       size: zod
-  //         .number()
-  //         .positive()
-  //         .max(5 * 1024 * 1024, "Dung lượng file không vượt quá 5mb"),
-  //       url: zod.string(),
+  //       content: zod.string(),
   //     }),
   //   )
-  //   .optional(),
+  //   .superRefine((values, context) => {
+  //     if (values.length) {
+  //       values.forEach(({ content }, i) => {
+  //         if (!content.length) {
+  //           context.addIssue({
+  //             code: "custom",
+  //             message: `Không bỏ trống.`,
+  //             path: [i, "content"],
+  //           });
+  //         }
+  //       });
+  //     }
+  //   }),
 });
 
 type CourseSectionFormData = zod.infer<typeof courseSectionSchema>;
