@@ -242,8 +242,6 @@ async function deleteEmployeeWithRelations(
   await classRoomRepository.deleteClassRoomsByEmployeeId(employeeId);
 
   // Delete course-related relationships
-  await coursesRepository.deleteCoursesStudentsByEmployeeId(employeeId);
-  await coursesRepository.deleteCoursesTeachersByEmployeeId(employeeId);
   await coursesRepository.deleteCoursesByEmployeeId(employeeId);
 
   // Delete library-related relationships

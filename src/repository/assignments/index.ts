@@ -427,6 +427,21 @@ const getAssignmentQuestions = async (assignmentId: string) => {
   return data;
 };
 
+async function getQuestionsByIds(questionIds: string[]) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("questions")
+    .select("*")
+    .in("id", questionIds);
+
+  if (error) {
+    throw new Error(`Failed to fetch questions: ${error.message}`);
+  }
+
+  return data;
+}
+
 const getMyAssignments = async (
   employeeId: string,
   params?: GetMyAssignmentsParams
@@ -602,5 +617,5 @@ const getMyAssignments = async (
   };
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments };
+export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments, getQuestionsByIds };
 

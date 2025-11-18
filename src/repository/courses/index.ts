@@ -136,34 +136,6 @@ const getCourseById = async (courseId: string) => {
   }
 };
 
-const deleteCoursesStudentsByEmployeeId = async (employeeId: string) => {
-  try {
-    const { error } = await supabase
-      .from("courses_students")
-      .delete()
-      .eq("student_id", employeeId);
-
-    if (error) throw error;
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error deleting courses students");
-  }
-};
-
-const deleteCoursesTeachersByEmployeeId = async (employeeId: string) => {
-  try {
-    const { error } = await supabase
-      .from("courses_teachers")
-      .delete()
-      .eq("teacher_id", employeeId);
-
-    if (error) throw error;
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error deleting courses teachers");
-  }
-};
-
 const deleteCoursesByEmployeeId = async (employeeId: string) => {
   try {
     const { error } = await supabase
@@ -186,7 +158,5 @@ export {
   createPivotCoursesWithCategories,
   getCourseById,
   deletePivotCoursesWithCategories,
-  deleteCoursesStudentsByEmployeeId,
-  deleteCoursesTeachersByEmployeeId,
   deleteCoursesByEmployeeId,
 };

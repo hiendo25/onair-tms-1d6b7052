@@ -383,9 +383,6 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
 
           return {
             questionId: answer.questionId,
-            questionLabel: question.label,
-            questionType: answer.questionType,
-            options: question.options,
             answer: answerData,
             attachments: attachmentMetadata,
           };
