@@ -1,13 +1,5 @@
 import { supabase } from "@/services";
-import {
-  CreateCoursePayload,
-  UpdateCoursePayload,
-  UpsertCoursePayload,
-  CreatePivotCoursesWithCategoriesPayload,
-  CreatePivotCoursesWithTeachersPayload,
-  CreatePivotCoursesWithStudentsPayload,
-  CreatePivotCoursesWithResourcesPayload,
-} from "./type";
+import { CreateCoursePayload, UpdateCoursePayload, CreatePivotCoursesWithCategoriesPayload } from "./type";
 import { CourseMetaKey, CourseMetaValue } from "@/constants/course-meta.constant";
 
 const createCourse = async (payload: CreateCoursePayload) => {
@@ -47,42 +39,6 @@ const deletePivotCoursesWithCategories = async (ids: number[]) => {
   }
 };
 
-const createPivotCoursesWithStudents = async (payload: CreatePivotCoursesWithStudentsPayload[]) => {
-  try {
-    return await supabase.from("courses_students").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
-};
-
-const createPivotCoursesWithTeachers = async (payload: CreatePivotCoursesWithTeachersPayload[]) => {
-  try {
-    return await supabase.from("courses_teachers").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
-};
-
-const createPivotCoursesWithResources = async (payload: CreatePivotCoursesWithResourcesPayload[]) => {
-  try {
-    return await supabase.from("courses_resources").insert(payload).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
-};
-
-const deletePivotCoursesWithResources = async (ids: number[]) => {
-  try {
-    return await supabase.from("courses_resources").delete().in("id", ids).select();
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error create Class Room and Employee");
-  }
-};
-
 const getCourseById = async (courseId: string) => {
   try {
     const { data, error } = await supabase
@@ -93,10 +49,6 @@ const getCourseById = async (courseId: string) => {
           title,
           slug,
           description,
-          community_info,
-          thumbnail_url,
-          start_at,
-          end_at,
           status,
           created_by,
           courses_metadatas(id, key, value, course_id),
@@ -104,47 +56,6 @@ const getCourseById = async (courseId: string) => {
             id,
             categories(
               id, name, slug
-            )
-          ),
-          courses_resources(
-            id, 
-            resources(
-              id,
-              path,
-              size, 
-              kind, 
-              mime_type, 
-              name
-            )
-          ),
-          courses_students(
-            id,
-            student:employees(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-           courses_teachers(
-            id,
-            teacher:employees(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
             )
           ),
           owner:employees(
@@ -218,7 +129,6 @@ const getCourseById = async (courseId: string) => {
           key: CourseMetaKey;
           value: CourseMetaValue;
         }[];
-        community_info: { name: string; url: string };
       }>();
     return { data, error };
   } catch (err: any) {
@@ -227,34 +137,10 @@ const getCourseById = async (courseId: string) => {
 };
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
-const deletePivotCoursesWithStudents = async (ids: number[]) => {
-  try {
-    return await supabase.from("courses_students").delete().in("id", ids);
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error Delete Courses Students ID");
-  }
-};
-
-const deletePivotCoursesWithTeachers = async (ids: number[]) => {
-  try {
-    return await supabase.from("courses_teachers").delete().in("id", ids);
-  } catch (err: any) {
-    console.error("Unexpected error:", err);
-    throw new Error(err.message ?? "Unknown error Delete Courses Teachers ID");
-  }
-};
-
 export {
   createCourse,
   updateCourse,
   createPivotCoursesWithCategories,
-  createPivotCoursesWithStudents,
-  createPivotCoursesWithTeachers,
-  createPivotCoursesWithResources,
-  deletePivotCoursesWithResources,
   getCourseById,
-  deletePivotCoursesWithStudents,
-  deletePivotCoursesWithTeachers,
   deletePivotCoursesWithCategories,
 };

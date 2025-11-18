@@ -27,13 +27,9 @@ const useUpsertCourse = () => {
 
   const { mutate: doCreateCourse, isPending } = useTMutation({
     mutationKey: ["CREATE_COURSE"],
-    mutationFn: async (payload: {
-      formData: UpsertCourseFormData;
-      teachers: UpsertCourseStore["state"]["selectedTeachers"];
-      students: UpsertCourseStore["state"]["selectedStudents"];
-    }) => {
-      const { formData, teachers, students } = payload;
-      const { categories, description, thumbnailUrl, slug, status, title, sections, benefits, docs } = formData;
+    mutationFn: async (payload: { formData: UpsertCourseFormData }) => {
+      const { formData } = payload;
+      const { categories, description, slug, status, title, sections } = formData;
 
       /**
        * Step 1: Create ClassRoom
@@ -44,10 +40,6 @@ const useUpsertCourse = () => {
         title: title,
         slug: slug,
         description: description,
-        community_info: "",
-        thumbnail_url: thumbnailUrl,
-        start_at: dayjs().toISOString(),
-        end_at: dayjs().add(1).toISOString(),
         status: status,
       });
 
@@ -67,49 +59,7 @@ const useUpsertCourse = () => {
       );
 
       /**
-       * Step 3: Create Course Meta
-       */
-
-      if (benefits.length) {
-        await coursesMetaRepository.createCourseMeta({
-          course_id: courseData.id,
-          key: "benefits",
-          value: benefits.map((item) => item.content),
-        });
-      }
-
-      /**
-       * Step 4: Sync Course with Students
-       */
-      await coursesRepository.createPivotCoursesWithStudents(
-        students.map((std) => ({
-          course_id: courseData.id,
-          student_id: std.id,
-        })),
-      );
-
-      /**
-       * Step 5: Sync Course with Teachers
-       */
-      await coursesRepository.createPivotCoursesWithTeachers(
-        teachers.map((teacher) => ({
-          course_id: courseData.id,
-          teacher_id: teacher.id,
-        })),
-      );
-
-      /**
-       * Step 5: Sync Course with Teachers
-       */
-      await coursesRepository.createPivotCoursesWithResources(
-        docs.map((doc) => ({
-          course_id: courseData.id,
-          resource_id: doc.id,
-        })),
-      );
-
-      /**
-       * Step 6: Create course sections
+       * Step 3: Create course sections
        */
 
       await Promise.all(
@@ -183,14 +133,9 @@ const useUpsertCourse = () => {
   });
 
   const { mutate: doUpdate, isPending: isPendingUpdate } = useTMutation({
-    mutationKey: ["UPDATE_CLASS_ROOM"],
-    mutationFn: async (payload: {
-      courseId: string;
-      formData: UpsertCourseFormData;
-      teachers: UpsertCourseStore["state"]["selectedTeachers"];
-      students: UpsertCourseStore["state"]["selectedStudents"];
-    }) => {
-      const { formData, teachers, students, courseId } = payload;
+    mutationKey: ["UPDATE_COURSE"],
+    mutationFn: async (payload: { courseId: string; formData: UpsertCourseFormData }) => {
+      const { formData, courseId } = payload;
 
       const { data: courseDetail, error: courseDetailError } = await coursesRepository.getCourseById(courseId);
       console.log(courseDetail);
@@ -199,115 +144,26 @@ const useUpsertCourse = () => {
         throw new Error(`Course ${courseId} not found.`);
       }
 
-      const { categories, description, thumbnailUrl, slug, status, title, sections, benefits, docs, startAt, endAt } =
-        formData;
+      const { categories, description, slug, status, title, sections } = formData;
 
       /**
-       * Step 1: Create ClassRoom
+       * Step 1: Create Course
        */
       const { data: courseDataUpdated, error: updateError } = await coursesRepository.updateCourse({
         id: courseId,
         title: title,
         slug: slug,
         description: description,
-        community_info: "",
-        thumbnail_url: thumbnailUrl,
-        start_at: startAt ? dayjs(startAt).toISOString() : dayjs().toISOString(),
-        end_at: endAt ? dayjs(endAt).toISOString() : dayjs().toISOString(),
         status: status,
       });
 
       if (updateError) {
         console.error(updateError);
-        throw new Error("Cập nhật lớp học thất bại.");
+        throw new Error("Update course failed.");
       }
 
       /**
-       * Step 2: Update Courses Metadata
-       */
-
-      const benefitsData = courseDetail.courses_metadatas.find((item) => item.key === "benefits");
-
-      const upsertCourseMetaPayload: UpSertCourseMetaPayload<"benefits"> = benefitsData
-        ? {
-            action: "update",
-            payload: {
-              id: benefitsData.id,
-              key: "benefits",
-              value: benefits.map((item) => item.content),
-            },
-          }
-        : {
-            action: "create",
-            payload: {
-              key: "benefits",
-              value: benefits.map((item) => item.content),
-              course_id: courseId,
-            },
-          };
-
-      const { error: forWhomError } = await coursesMetaRepository.upsertCourseMeta(upsertCourseMetaPayload);
-
-      /**
-       * Step 3: Sync Courses with Students
-       */
-
-      const studentListDeletion = courseDetail.courses_students.filter((row) =>
-        students.every((std) => std.id !== row.student?.id),
-      );
-      const studentListAddition = students.filter((std) =>
-        courseDetail.courses_students.every((row) => row.student?.id !== std.id),
-      );
-
-      console.log({
-        studentListDeletion,
-        studentListAddition,
-        newList: students,
-        oldList: courseDetail.courses_students,
-      });
-      if (studentListDeletion.length) {
-        await coursesRepository.deletePivotCoursesWithStudents(studentListDeletion.map((pvRow) => pvRow.id));
-      }
-      if (studentListAddition.length) {
-        await coursesRepository.createPivotCoursesWithStudents(
-          studentListAddition.map((std) => ({
-            course_id: courseDetail.id,
-            student_id: std.id,
-          })),
-        );
-      }
-
-      /**
-       * Step 4: Sync Courses with Teachers
-       */
-
-      const teacherListDeletion = courseDetail.courses_teachers.filter((row) =>
-        teachers.every((std) => std.id !== row.teacher?.id),
-      );
-      const teacherListAddition = teachers.filter((std) =>
-        courseDetail.courses_teachers.every((row) => row.teacher?.id !== std.id),
-      );
-
-      console.log({
-        teacherListDeletion,
-        teacherListAddition,
-        newList: teachers,
-        oldList: courseDetail.courses_teachers,
-      });
-      if (teacherListDeletion.length) {
-        await coursesRepository.deletePivotCoursesWithTeachers(teacherListDeletion.map((pvRow) => pvRow.id));
-      }
-      if (teacherListAddition.length) {
-        await coursesRepository.createPivotCoursesWithTeachers(
-          teacherListAddition.map((tch) => ({
-            course_id: courseDetail.id,
-            teacher_id: tch.id,
-          })),
-        );
-      }
-
-      /**
-       * Step 5: Sync Courses with Categories
+       * Step 2: Sync Courses with Categories
        */
 
       const currentCategories = [...courseDetail.courses_categories];
@@ -332,37 +188,13 @@ const useUpsertCourse = () => {
       }
 
       /**
-       * Step 6: Sync Courses with Resources
-       */
-
-      const currentCoursesDocuments = [...courseDetail.courses_resources];
-      const currentCoursesDocumentsIds = currentCoursesDocuments
-        .map((item) => item.resources?.id)
-        .filter((item) => !isUndefined(item));
-
-      const documentsAddition = docs.filter((doc) => !currentCoursesDocumentsIds.includes(doc.id));
-      const documentsDeletion = currentCoursesDocuments.filter((cdoc) =>
-        docs.every((doc) => doc.id !== cdoc.resources?.id),
-      );
-
-      if (documentsDeletion.length) {
-        await coursesRepository.deletePivotCoursesWithResources(documentsDeletion.map((rdoc) => rdoc.id));
-      }
-
-      if (documentsAddition.length) {
-        await coursesRepository.createPivotCoursesWithResources(
-          documentsAddition.map((doc) => ({ course_id: courseDetail.id, resource_id: doc.id })),
-        );
-      }
-
-      /**
-       * Step 7 Synchronize sections
+       * Step 3 Synchronize sections
        * 1. Delete any section in courseDetail that does not exist in formData.sections.
        * 2. Upsert (create or update) sections from formData.
        */
 
       /**
-       * Step 7.1: Delete Sections
+       * Step 3.1: Delete Sections
        */
 
       const sectionsDeletion = courseDetail.sections.filter((s) => sections.every((newS) => s.id !== newS.id));
@@ -381,7 +213,7 @@ const useUpsertCourse = () => {
       }
 
       /**
-       * Step 7.2: UpSert Sections
+       * Step 3.2: UpSert Sections
        */
 
       await Promise.all(
@@ -498,6 +330,7 @@ const useUpsertCourse = () => {
   /** --------------------------------------------------------
    *  Helper: Map create session payloads
    * -------------------------------------------------------- */
+
   const mapSectionWithCourse = (
     courseId: string,
     section: UpsertCourseFormData["sections"][number],
