@@ -6,10 +6,10 @@ import ElearningStudentsSection from "./_components";
 const ElearningCourseStudentsPage = async ({
   params,
 }: {
-  params: Promise<{ courseId: string }>;
+  params: Promise<{ id: string }>;
 }) => {
-  const { courseId } = await params;
-  const { data: course, error } = await getElearningCourseById(courseId);
+  const { id } = await params;
+  const { data: course, error } = await getElearningCourseById(id);
 
   if (!course || error) {
     return notFound();
@@ -29,7 +29,7 @@ const ElearningCourseStudentsPage = async ({
         { title: "Danh sách học viên" },
       ]}
     >
-      <ElearningStudentsSection courseId={courseId} />
+      <ElearningStudentsSection courseId={id} />
     </PageContainer>
   );
 };
