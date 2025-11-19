@@ -14,10 +14,10 @@ export const PATHS = {
     IMPORT_BRANCHES: "/department/branches/import",
   },
   EMPLOYEES: {
-    ROOT: "/employees",
-    EMPLOYEES_ID: (id: string = ":id") => `/employees/${id}`,
-    CREATE_EMPLOYEE: "/employees/create",
-    IMPORT_EMPLOYEES: "/employees/import",
+    ROOT: "/admin/employees",
+    EMPLOYEES_ID: (id: string = ":id") => `/admin/employees/${id}`,
+    CREATE_EMPLOYEE: "/admin/employees/create",
+    IMPORT_EMPLOYEES: "/admin/employees/import",
   },
   ROLE: {
     ROOT: "/roles",

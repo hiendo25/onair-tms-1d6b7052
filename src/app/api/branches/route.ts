@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { CreateBranchDto } from "@/types/dto/branches";
 import { branchService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const result = await branchService.createBranch(payload);
 
-    revalidatePath("/department/branches");
+    revalidatePath(PATHS.BRANCHES.ROOT);
 
     return NextResponse.json(
       {

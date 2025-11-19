@@ -190,7 +190,7 @@ const EmployeeImport = () => {
         );
 
         setTimeout(() => {
-          router.push("/employees");
+          router.push("/admin/employees");
         }, 2000);
       } else {
         notifications.show(

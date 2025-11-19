@@ -118,7 +118,7 @@ export default function EmployeeList() {
   };
 
   const handleCreateEmployee = () => {
-    router.push("/employees/create");
+    router.push("/admin/employees/create");
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
@@ -134,7 +134,7 @@ export default function EmployeeList() {
 
   const handleEdit = () => {
     if (selectedEmployeeId) {
-      router.push(`/employees/${selectedEmployeeId}/edit`);
+      router.push(`/admin/employees/${selectedEmployeeId}/edit`);
     }
     handleMenuClose();
   };
@@ -226,7 +226,7 @@ export default function EmployeeList() {
   return (
     <PageContainer
       title="Danh sách nhân viên"
-      breadcrumbs={[{ title: "Nhân viên", path: "/employees" }]}
+      breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { employeeFileService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     const result = await employeeFileService.importEmployees(file);
 
-    revalidatePath("/employees");
+    revalidatePath(PATHS.EMPLOYEES.ROOT);
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

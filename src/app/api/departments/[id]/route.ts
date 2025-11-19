@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { UpdateDepartmentDto } from "@/types/dto/departments";
 import { departmentService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function PUT(
   request: NextRequest,
@@ -16,7 +17,7 @@ export async function PUT(
 
     const result = await departmentService.updateDepartment(payload);
 
-    revalidatePath("/department/departments");
+    revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
     return NextResponse.json(
       {
@@ -47,7 +48,7 @@ export async function DELETE(
   try {
     await departmentService.deleteDepartment(params.id);
 
-    revalidatePath("/department/departments");
+    revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
     return NextResponse.json(
       {
