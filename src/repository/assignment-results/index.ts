@@ -171,6 +171,19 @@ export async function deleteAssignmentResultsByAssignmentId(assignmentId: string
   }
 }
 
+export async function deleteAssignmentResultsByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("assignment_results")
+    .delete()
+    .eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment results by employee: ${error.message}`);
+  }
+}
+
 export interface AssignmentResultWithEmployee {
   id: string;
   assignment_id: string;

@@ -82,8 +82,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    return router.push(PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId))
-  };
+    return router.push(`/admin/class-room/${classRoomId}/edit`)
+  }
 
   const navigateToSession = useCallback(
     (sessionId?: string, slug?: string | null) => {

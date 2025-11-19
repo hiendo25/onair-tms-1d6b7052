@@ -135,6 +135,21 @@ const getCourseById = async (courseId: string) => {
     throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");
   }
 };
+
+const deleteCoursesByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase
+      .from("courses")
+      .update({ status: "deleted" })
+      .eq("created_by", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting courses");
+  }
+};
+
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
 export type GetCoursesQueryParams = {
@@ -194,4 +209,5 @@ export {
   getCourses,
   updateCourse,
   deletePivotCoursesWithCategories,
+  deleteCoursesByEmployeeId,
 };

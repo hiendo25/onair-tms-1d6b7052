@@ -16,9 +16,6 @@ type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_sta
 
 export interface QuestionAnswerInput {
   questionId: string;
-  questionLabel: string;
-  questionType: QuestionType;
-  options?: QuestionOption[];
   answer: string | string[] | FileMetadata[];
   attachments?: FileMetadata[];
 }
