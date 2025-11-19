@@ -1,5 +1,4 @@
 import { ClassRoom } from "@/model/class-room.model";
-import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
 
 export type CreateClassRoomPayload = Pick<
   ClassRoom,

@@ -78,6 +78,13 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
         path: PATHS.CLASSROOMS.LIST_CLASSROOM,
         type: "item",
       },
+      {
+        title: "Môn học",
+        icon: React.createElement(SquareFourIcon),
+        key: "manage-department",
+        path: PATHS.COURSES.LIST,
+        type: "item",
+      },
     ],
   },
   {

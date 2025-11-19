@@ -1,16 +1,10 @@
 "use client";
-import {
-  coursesRepository,
-  coursesMetaRepository,
-  coursesLessonsRepository,
-  coursesSectionsRepository,
-} from "@/repository";
+import { coursesRepository, coursesLessonsRepository, coursesSectionsRepository } from "@/repository";
 import { enqueueSnackbar } from "notistack";
 
 import { UpsertCourseFormData } from "../components/ManageCourseForm/upsert-course.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useTMutation } from "@/lib";
-import { UpsertCourseStore } from "../store/upsert-course-store";
 
 import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
 import {
@@ -18,8 +12,6 @@ import {
   CreatePivotLessonsWithResourcesPayload,
   UpsertLessonPayload,
 } from "@/repository/courses-lessons/type";
-import dayjs from "dayjs";
-import { UpSertCourseMetaPayload } from "@/repository/courses-meta";
 import { isUndefined } from "lodash";
 
 const useUpsertCourse = () => {
