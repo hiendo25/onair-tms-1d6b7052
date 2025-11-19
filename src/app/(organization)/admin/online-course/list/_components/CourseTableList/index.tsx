@@ -5,14 +5,13 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { SearchIcon } from "@/shared/assets/icons";
 import { GetElearningsQueryInput } from "@/modules/elearning/operations/query";
 import { useGetCourseListQuery } from "@/modules/courses/operations/query";
-import { ElearningFilters } from "../../types/types";
 import Link from "next/link";
 import { PATHS } from "@/constants/path.contstants";
 import { DataGrid, DataGridProps } from "@mui/x-data-grid";
 import { columns } from "./columns";
 
 const PAGE_SIZE = 10;
-const initialFilters: ElearningFilters = {
+const initialFilters = {
   search: "",
 };
 
@@ -23,7 +22,7 @@ interface CourseTableListProps {
 export default function CourseTableList({ className }: CourseTableListProps) {
   const [page, setPage] = useState(1);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-  const [filters, setFilters] = useState<ElearningFilters>(initialFilters);
+  const [filters, setFilters] = useState<typeof initialFilters>(initialFilters);
   const { organization, employeeType, ...rest } = useUserOrganization((state) => state.data);
 
   const employeeId = employeeType === "teacher" ? rest.id : undefined;
