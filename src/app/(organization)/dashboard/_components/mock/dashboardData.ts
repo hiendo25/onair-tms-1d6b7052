@@ -13,6 +13,122 @@ export type CourseRow = {
   times: string[];
 };
 
+export type TimeRange = "year" | "month" | "week";
+
+export const timeRangeOptions = [
+  { label: "Năm", value: "year" },
+  { label: "Tháng", value: "month" },
+  { label: "Tuần", value: "week" },
+] as const;
+
+type PercentageItem = { label: string; value: number };
+
+export const participationRateByRange: Record<TimeRange, PercentageItem[]> = {
+  year: [
+    { label: "Chuyển đổi số doanh nghiệp", value: 86 },
+    { label: "Quản trị vận hành", value: 74 },
+    { label: "Phát triển lãnh đạo", value: 69 },
+    { label: "Data Analytics", value: 82 },
+    { label: "Kỹ năng mềm", value: 65 },
+  ],
+  month: [
+    { label: "Chuyển đổi số doanh nghiệp", value: 78 },
+    { label: "Quản trị vận hành", value: 72 },
+    { label: "Phát triển lãnh đạo", value: 64 },
+    { label: "Data Analytics", value: 76 },
+    { label: "Kỹ năng mềm", value: 60 },
+  ],
+  week: [
+    { label: "Chuyển đổi số doanh nghiệp", value: 95 },
+    { label: "Quản trị vận hành", value: 80 },
+    { label: "Phát triển lãnh đạo", value: 75 },
+    { label: "Data Analytics", value: 90 },
+    { label: "Kỹ năng mềm", value: 85 },
+  ],
+};
+
+export const channelParticipationByRange: Record<TimeRange, PercentageItem[]> = {
+  year: [
+    { label: "Online", value: 68 },
+    { label: "Offline", value: 52 },
+    { label: "eLearning", value: 86 },
+  ],
+  month: [
+    { label: "Online", value: 64 },
+    { label: "Offline", value: 48 },
+    { label: "eLearning", value: 82 },
+  ],
+  week: [
+    { label: "Online", value: 60 },
+    { label: "Offline", value: 55 },
+    { label: "eLearning", value: 78 },
+  ],
+};
+
+type CompletionSnapshot = { completed: number; total: number };
+
+export const completionRateByRange: Record<TimeRange, CompletionSnapshot> = {
+  year: { completed: 312, total: 420 },
+  month: { completed: 96, total: 120 },
+  week: { completed: 78, total: 100 },
+};
+
+export type RankingCourse = {
+  title: string;
+  score: number;
+};
+
+export const courseRankingByRange: Record<TimeRange, { top: RankingCourse[]; low: RankingCourse[] }> = {
+  year: {
+    top: [
+      { title: "Chuyển đổi số doanh nghiệp", score: 92 },
+      { title: "Khai thác dữ liệu nâng cao", score: 88 },
+      { title: "Xây dựng văn hóa học tập", score: 84 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
+      { title: "Tối ưu vận hành số", score: 78 },
+    ],
+    low: [
+      { title: "Tư duy phản biện", score: 12 },
+      { title: "Kỹ năng thuyết trình", score: 15 },
+      { title: "Vận hành dự án", score: 18 },
+      { title: "Quản trị rủi ro", score: 20 },
+      { title: "Kỹ năng bán hàng", score: 22 },
+    ],
+  },
+  month: {
+    top: [
+      { title: "Chuyển đổi số doanh nghiệp", score: 88 },
+      { title: "Khai thác dữ liệu nâng cao", score: 85 },
+      { title: "Xây dựng văn hóa học tập", score: 80 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 78 },
+      { title: "Tối ưu vận hành số", score: 74 },
+    ],
+    low: [
+      { title: "Tư duy phản biện", score: 10 },
+      { title: "Kỹ năng thuyết trình", score: 12 },
+      { title: "Vận hành dự án", score: 14 },
+      { title: "Quản trị rủi ro", score: 16 },
+      { title: "Kỹ năng bán hàng", score: 18 },
+    ],
+  },
+  week: {
+    top: [
+      { title: "Chuyển đổi số doanh nghiệp", score: 95 },
+      { title: "Khai thác dữ liệu nâng cao", score: 90 },
+      { title: "Xây dựng văn hóa học tập", score: 85 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
+      { title: "Tối ưu vận hành số", score: 75 },
+    ],
+    low: [
+      { title: "Tư duy phản biện", score: 3 },
+      { title: "Kỹ năng thuyết trình", score: 10 },
+      { title: "Vận hành dự án", score: 9 },
+      { title: "Quản trị rủi ro", score: 8 },
+      { title: "Kỹ năng bán hàng", score: 8 },
+    ],
+  },
+};
+
 export const summaryCards = [
   {
     title: "Lớp học đang diễn ra",
@@ -120,62 +236,6 @@ export const courseRows: CourseRow[] = [
   },
 ];
 
-export const topRatedCourses = [
-  {
-    title: "Lớp học chuyển Đổi số Doanh nghiệp B2B",
-    rating: "4,8/5",
-    students: "120 học viên",
-  },
-  {
-    title: "Lớp học chuyển Đổi số với AI",
-    rating: "4,7/5",
-    students: "104 học viên",
-  },
-  {
-    title: "Lớp học tổ chức đội nhóm",
-    rating: "4,6/5",
-    students: "92 học viên",
-  },
-  {
-    title: "Lớp học hình thành hệ sinh thái B2B",
-    rating: "4,5/5",
-    students: "86 học viên",
-  },
-  {
-    title: "Lớp học chuyển minh cùng AI",
-    rating: "4,4/5",
-    students: "78 học viên",
-  },
-];
-
-export const lowRatedCourses = [
-  {
-    title: "Lớp học chuyển Đổi số Doanh nghiệp B2B",
-    rating: "1/5",
-    students: "40 học viên",
-  },
-  {
-    title: "Lớp học chuyển Đổi số với AI",
-    rating: "2/5",
-    students: "36 học viên",
-  },
-  {
-    title: "Lớp học tổ chức đội nhóm",
-    rating: "2,6/5",
-    students: "28 học viên",
-  },
-  {
-    title: "Lớp học hình thành hệ sinh thái B2B",
-    rating: "1,7/5",
-    students: "24 học viên",
-  },
-  {
-    title: "Lớp học chuyển minh cùng AI",
-    rating: "1,4/5",
-    students: "18 học viên",
-  },
-];
-
 const currentMonth = dayjs().startOf("month");
 
 const buildDate = (dayOfMonth: number, hour: number, minute: number) =>
@@ -237,6 +297,56 @@ export const mockEvents = [
     mode: "Online",
     time: "10:00 - 11:30",
     avatarUrl: `https://i.pravatar.cc/100?img=12`,
+  },
+  {
+    id: "event-6",
+    title: "Workshop Thiết Kế Trải Nghiệm Học Tập",
+    start: buildDate(20, 15, 0).toISOString(),
+    frames: [{ id: "frame-6" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Online",
+    time: "15:00 - 16:30",
+    avatarUrl: `https://i.pravatar.cc/100?img=21`,
+  },
+  {
+    id: "event-7",
+    title: "Chiến Lược Tái Đào Tạo Nhân Viên",
+    start: buildDate(20, 8, 30).toISOString(),
+    frames: [{ id: "frame-7" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Trực tiếp",
+    time: "08:30 - 10:00",
+    avatarUrl: `https://i.pravatar.cc/100?img=18`,
+  },
+  {
+    id: "event-8",
+    title: "Huấn Luyện Kỹ Năng Dẫn Dắt",
+    start: buildDate(30, 13, 0).toISOString(),
+    frames: [{ id: "frame-8" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Online",
+    time: "13:00 - 15:00",
+    avatarUrl: `https://i.pravatar.cc/100?img=47`,
+  },
+  {
+    id: "event-9",
+    title: "Đổi Mới Sáng Tạo Trong Doanh Nghiệp",
+    start: buildDate(30, 16, 0).toISOString(),
+    frames: [{ id: "frame-9" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Online",
+    time: "16:00 - 17:30",
+    avatarUrl: `https://i.pravatar.cc/100?img=28`,
+  },
+  {
+    id: "event-10",
+    title: "Thiết Lập KPIs Cho Đội Ngũ Đào Tạo",
+    start: buildDate(30, 9, 0).toISOString(),
+    frames: [{ id: "frame-10" }],
+    status: CalenderStatus.APPROVED,
+    mode: "Trực tiếp",
+    time: "09:00 - 10:30",
+    avatarUrl: `https://i.pravatar.cc/100?img=32`,
   },
 
 ];

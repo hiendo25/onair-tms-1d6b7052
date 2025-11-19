@@ -23,7 +23,7 @@ const CourseTable = () => (
       alignItems={{ xs: "flex-start", sm: "center" }}
       sx={{ mb: 2 }}
     >
-      <Typography variant="h6" fontWeight={700}>
+      <Typography variant="h6" fontWeight={600}>
         Lớp học trong tháng
       </Typography>
       <Stack direction="row" spacing={1}>
