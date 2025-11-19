@@ -4,15 +4,18 @@ import { Paper, Stack, Typography, Box } from "@mui/material";
 import PureClient from "@/shared/ui/PureClient";
 import ApexChart from "./ApexChart";
 import { panelSx } from "./mock/panelSx";
+import TimeRangeSwitcher from "./TimeRangeSwitcher";
+import { TimeRange, completionRateByRange } from "./mock/dashboardData";
 
 type LegendItemProps = {
   color: string;
   label: string;
-  value: string;
+  count: number;
+  percent: number;
 };
 
-const LegendItem = ({ color, label, value }: LegendItemProps) => (
-  <Stack direction="row" spacing={1} alignItems="center">
+const LegendItem = ({ color, label, count, percent }: LegendItemProps) => (
+  <Stack direction="row" spacing={1.5} alignItems="center">
     <Box
       sx={{
         width: 12,
@@ -23,16 +26,30 @@ const LegendItem = ({ color, label, value }: LegendItemProps) => (
         boxShadow: "0 0 0 1px #e2e8f0",
       }}
     />
-    <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }}>
-      {label}
-    </Typography>
-    <Typography variant="body2" fontWeight={700}>
-      {value}
-    </Typography>
+    <Stack sx={{ flex: 1 }}>
+      <Typography variant="body2" color="text.primary" fontWeight={600}>
+        {label}
+      </Typography>
+    </Stack>
+    <Stack spacing={0.25} alignItems="flex-end">
+      <Typography variant="body2" fontWeight={700}>
+        {count} Lớp
+      </Typography>
+      <Typography variant="caption" color="text.secondary">
+        {percent}%
+      </Typography>
+    </Stack>
   </Stack>
 );
 
+const rangeLabel: Record<TimeRange, string> = { week: "tuần", month: "tháng", year: "năm" };
+
 const CompletionRateCard = () => {
+  const [range, setRange] = React.useState<TimeRange>("week");
+  const { completed, total } = completionRateByRange[range];
+  const completionPercent = Math.round((completed / total) * 100);
+  const remainingCount = Math.max(total - completed, 0);
+
   const completionOptions = React.useMemo(
     () => ({
       labels: ["Hoàn thành", "Còn lại"],
@@ -45,18 +62,14 @@ const CompletionRateCard = () => {
             labels: {
               show: true,
               name: { show: false },
-              value: {
-                formatter: (val: number) => `${val}%`,
-                fontSize: "20px",
-                fontWeight: 800,
-              },
+              value: { show: false },
               total: {
                 show: true,
-                label: "Tỉ lệ hoàn thành",
+                label: "Tỷ lệ hoàn thành",
                 fontSize: "13px",
                 fontWeight: 600,
                 color: "#475569",
-                formatter: () => "78%",
+                formatter: () => `${completionPercent}%`,
               },
             },
           },
@@ -65,24 +78,66 @@ const CompletionRateCard = () => {
       legend: { show: false },
       stroke: { width: 4 },
       tooltip: {
-        y: { formatter: (val: number) => `${val}%` },
+        y: { formatter: (val: number) => `${val} Lớp` },
         theme: "light",
       },
     }),
-    [],
+    [completionPercent],
   );
+  const series = React.useMemo(() => [completed, remainingCount], [completed, remainingCount]);
 
   return (
     <Paper sx={{ ...panelSx, p: 2.5, height: "100%" }}>
-      <Typography variant="h6" fontWeight={700} sx={{ mb: 1 }}>
-        Tỷ lệ hoàn thành
-      </Typography>
-      <PureClient>
-        <ApexChart type="donut" height={300} series={[78, 22]} options={completionOptions} />
-      </PureClient>
-      <Stack spacing={1.25} sx={{ mt: 1 }}>
-        <LegendItem color="#0f5bd2" label="Tổng số lớp học hoàn thành" value="78 Lớp | 78%" />
-        <LegendItem color="#e2e8f0" label="Tổng số lớp học" value="100 Lớp | 100%" />
+      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+        <Typography variant="h6" fontWeight={600}>
+          Tỷ lệ hoàn thành lớp học
+        </Typography>
+        <TimeRangeSwitcher value={range} onChange={setRange} />
+      </Stack>
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        spacing={2.5}
+        alignItems="stretch"
+        sx={{ mt: 1 }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            width: "100%",
+            maxWidth: 300,
+            mx: "auto",
+            position: "relative",
+          }}
+        >
+          <PureClient>
+            <ApexChart type="donut" height={260} series={series} options={completionOptions} />
+          </PureClient>
+          <Stack
+            spacing={0.25}
+            alignItems="center"
+            justifyContent="center"
+            sx={{ position: "absolute", inset: 0, pointerEvents: "none" }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Tỷ lệ hoàn thành
+            </Typography>
+            <Typography variant="h4" fontWeight={800} color="text.primary">
+              {completionPercent}%
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Theo {rangeLabel[range]}
+            </Typography>
+          </Stack>
+        </Box>
+        <Stack spacing={1.5} sx={{ minWidth: 0, flex: 1, justifyContent: "center" }}>
+          <LegendItem
+            color="#0f5bd2"
+            label="Tổng số lớp học hoàn thành"
+            count={completed}
+            percent={completionPercent}
+          />
+          <LegendItem color="#94a3b8" label="Tổng số lớp học" count={total} percent={100} />
+        </Stack>
       </Stack>
     </Paper>
   );

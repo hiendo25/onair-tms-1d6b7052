@@ -30,20 +30,20 @@ const DashboardSection = () => (
     </Grid>
 
     <Grid container spacing={2} columns={12}>
-      <Grid size={{ xs: 12, lg: 5 }}>
-        <CompletionRateCard />
+      <Grid size={{ xs: 12, lg: 6 }}>
+        <ChannelParticipationCard />
       </Grid>
-      <Grid size={{ xs: 12, lg: 7 }}>
-        <ParticipationRateCard />
+      <Grid size={{ xs: 12, lg: 6 }}>
+        <CompletionRateCard />
       </Grid>
     </Grid>
 
     <Grid container spacing={2} columns={12}>
-      <Grid size={{ xs: 12, lg: 5 }}>
-        <ChannelParticipationCard />
+      <Grid size={{ xs: 12, lg: 6 }}>
+        <CourseRankingList variant="top" />
       </Grid>
-      <Grid size={{ xs: 12, lg: 7 }}>
-        <CourseRankingList />
+      <Grid size={{ xs: 12, lg: 6 }}>
+        <CourseRankingList variant="low" />
       </Grid>
     </Grid>
   </Stack>
