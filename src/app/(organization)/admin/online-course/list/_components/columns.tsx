@@ -15,7 +15,6 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
   {
     field: "id",
     headerName: "STT",
-    width: 60,
     renderCell: (params) => {
       return params.api.getRowIndexRelativeToVisibleRows(params.id) + 1;
     },
@@ -23,12 +22,12 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
   {
     field: "title",
     headerName: "Tên môn học",
-    width: 400,
+    flex: 1,
   },
   {
     field: "status",
     headerName: "Trạng thái",
-    width: 100,
+    flex: 1,
     renderCell: ({ row }) => {
       const labelChip =
         row.status === "published"
@@ -70,7 +69,6 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
   },
   {
     field: "Hành động",
-    width: 200,
     renderCell: ({ row: { id: courseId } }) => {
       return (
         <PopupState variant="popover" popupId={`elearning-row-${courseId}`}>
