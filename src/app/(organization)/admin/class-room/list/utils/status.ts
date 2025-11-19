@@ -1,4 +1,4 @@
-import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room";
 
 export const RUNTIME_STATUS_COLOR_MAP: Record<
   ClassRoomRuntimeStatusFilter,

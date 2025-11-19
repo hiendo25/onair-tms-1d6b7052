@@ -1,6 +1,13 @@
 import { supabase } from "@/services";
 import { CreateCoursePayload, UpdateCoursePayload, CreatePivotCoursesWithCategoriesPayload } from "./type";
 import { CourseMetaKey, CourseMetaValue } from "@/constants/course-meta.constant";
+import { PaginatedResult } from "@/types/dto/pagination.dto";
+import { CourseDto } from "@/types/dto/courses/course.dto";
+import { GetCoursesQueryInput } from "@/modules/courses/operations/query";
+
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 12;
+const ALLOWED_ORDER_FIELDS = new Set(["created_at", "title", "start_at", "end_at"]);
 
 const createCourse = async (payload: CreateCoursePayload) => {
   try {
@@ -152,55 +159,91 @@ const deleteCoursesByEmployeeId = async (employeeId: string) => {
 
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
-export type GetCoursesQueryParams = {
-  limit?: number;
-};
-const getCourses = async (courseQueryparams?: GetCoursesQueryParams) => {
-  try {
-    return await supabase.from("courses").select(
-      `
-        id,
-        title,
-        slug,
-        status,
-        created_by,
-        courses_categories(
-          id,
-          categories(
-            id, name, slug
-          )
-        ),
-        organizations(
-          id, 
-          name
-        ),
-        sections(
-          id,
-          title,
-          course_id,
-          status,
-          priority,
-          lessons(
-            id,
-            title,
-            lesson_type,
-            priority,
-            status
-          )
-        ),
-        owner:employees(
-          id,
-          employee_code,
-          profiles(id, full_name, avatar, email)
-        )
-      `,
-      { count: "exact" },
-    );
-  } catch (err: any) {
-    throw new Error(err?.message ?? "Fetching Course list failed.");
+const getCourses = async (
+  input: GetCoursesQueryInput = {},
+): Promise<PaginatedResult<CourseDto>> => {
+  const {
+    q,
+    page = DEFAULT_PAGE,
+    limit = DEFAULT_LIMIT,
+    orderField,
+    orderBy = "desc",
+    employeeId,
+    organizationId,
+  } = input;
+
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : DEFAULT_PAGE;
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : DEFAULT_LIMIT;
+  const rangeStart = (safePage - 1) * safeLimit;
+  const rangeEnd = rangeStart + safeLimit - 1;
+
+  if (!organizationId) {
+    return {
+      data: [],
+      total: 0,
+      page: safePage,
+      limit: safeLimit,
+    };
   }
+
+  let query = supabase
+    .from("courses")
+    .select("*", { count: "exact" })
+    .not("status", "in", "(deleted)");
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId!);
+  }
+
+  const accessConditions: string[] = [];
+
+  const trimmedSearch = q?.trim();
+  const sanitizedSearch = trimmedSearch ? trimmedSearch : null;
+  const searchClause = sanitizedSearch
+    ? `or(title.ilike.%${sanitizedSearch}%,description.ilike.%${sanitizedSearch}%)`
+    : null;
+
+  if (accessConditions.length > 0 && searchClause) {
+    const combined = accessConditions.map(
+      (condition) => `and(${condition},${searchClause})`,
+    );
+    query = query.or(combined.join(","));
+  } else if (accessConditions.length > 0) {
+    query = query.or(accessConditions.join(","));
+  } else if (searchClause) {
+    query = query.or(searchClause);
+  }
+
+  const sortField =
+    orderField && ALLOWED_ORDER_FIELDS.has(orderField) ? orderField : "created_at";
+  const ascending = orderBy === "asc";
+
+  const { data, error, count } = await query
+    .order(sortField, { ascending, nullsFirst: false })
+    .range(rangeStart, rangeEnd);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    data: data,
+    total: count ?? 0,
+    page: safePage,
+    limit: safeLimit,
+  };
 };
-export type GetCoursesResponse = Awaited<ReturnType<typeof getCourses>>;
+
+const deleteCourseById = async (courseId: string) => {
+  const { error } = await supabase.from("courses")
+    .update({ status: "deleted" })
+    .eq("id", courseId);
+
+  if (error) {
+    throw new Error(`Failed to delete course: ${error.message}`);
+  }
+}
+
 
 export {
   createCourse,
@@ -210,4 +253,5 @@ export {
   updateCourse,
   deletePivotCoursesWithCategories,
   deleteCoursesByEmployeeId,
+  deleteCourseById,
 };

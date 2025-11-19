@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { BoxProps } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { ClassRoomRuntimeStatusFilter } from "../types/types";
+import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room";
 import { getClassRoomRuntimeStatusLabel } from "../utils/status";
 
 type ClassRoomRuntimeStatusProps = Omit<BoxProps, "children"> & {

@@ -1,33 +1,52 @@
 "use client";
+
 import { useCallback, useMemo, useState } from "react";
 import { Alert, Box, Button, CircularProgress, InputAdornment, Stack, TextField, Typography } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { SearchIcon } from "@/shared/assets/icons";
-import { GetElearningsQueryInput } from "@/modules/elearning/operations/query";
-import { useGetCourseListQuery } from "@/modules/courses/operations/query";
+import { GetCoursesQueryInput, useGetCourseListQuery } from "@/modules/courses/operations/query";
 import Link from "next/link";
 import { PATHS } from "@/constants/path.contstants";
 import { DataGrid, DataGridProps } from "@mui/x-data-grid";
-import { columns } from "./columns";
+import { getColumns } from "./columns";
+import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 
 const PAGE_SIZE = 10;
 const initialFilters = {
   search: "",
 };
 
-interface CourseTableListProps {
-  className?: string;
-}
+export default function CourseTableList() {
 
-export default function CourseTableList({ className }: CourseTableListProps) {
+  const queryClient = useQueryClient();
+
   const [page, setPage] = useState(1);
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
   const [filters, setFilters] = useState<typeof initialFilters>(initialFilters);
   const { organization, employeeType, ...rest } = useUserOrganization((state) => state.data);
 
-  const employeeId = employeeType === "teacher" ? rest.id : undefined;
+  const { mutateAsync: deleteCourseById } = useDeleteCourseByIdMutation()
 
-  const queryInput = useMemo<GetElearningsQueryInput>(() => {
+  const employeeId = employeeType === "teacher" ? rest.id : undefined;
+  const isAdmin = employeeType === "admin";
+
+  const handleDeleteCourse = useCallback(async (courseId: string) => {
+    await deleteCourseById(courseId);
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] })
+  }, [deleteCourseById])
+
+  const courseColumns = useMemo(
+    () =>
+      getColumns({
+        isAdmin,
+        onDelete: handleDeleteCourse,
+      }),
+    [handleDeleteCourse, isAdmin],
+  );
+
+  const queryInput = useMemo<GetCoursesQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
     return {
       q: trimmedSearch ? trimmedSearch : undefined,
@@ -38,12 +57,12 @@ export default function CourseTableList({ className }: CourseTableListProps) {
       organizationId: organization.id,
       employeeId,
     };
-  }, [employeeId, filters.search, page]);
+  }, [employeeId, filters.search, organization.id, page]);
 
-  const { data: course, isLoading, isError, refetch, isPending } = useGetCourseListQuery({ queryParams: queryInput });
+  const { data: course, isLoading, isError, refetch, isPending } = useGetCourseListQuery(queryInput);
 
   const coursesList = course?.data || [];
-  const totalCourses = course?.count ?? 0;
+  const totalCourses = course?.total ?? 0;
 
   const handleSearchChange = (value: string) => {
     setPage(1);
@@ -102,7 +121,7 @@ export default function CourseTableList({ className }: CourseTableListProps) {
           <Stack alignItems="center" justifyContent="center" sx={{ py: 6 }} spacing={2}>
             <CircularProgress />
             <Typography variant="body2" color="text.secondary">
-              Đang tải danh sách khóa học eLearning...
+              Đang tải danh sách khóa học...
             </Typography>
           </Stack>
         ) : null}
@@ -116,7 +135,7 @@ export default function CourseTableList({ className }: CourseTableListProps) {
               </Button>
             }
           >
-            Không thể tải danh sách khóa học eLearning. Vui lòng kiểm tra lại kết nối.
+            Không thể tải danh sách khóa học. Vui lòng kiểm tra lại kết nối.
           </Alert>
         ) : null}
 
@@ -140,24 +159,16 @@ export default function CourseTableList({ className }: CourseTableListProps) {
             </Box>
           ) : (
             <Box
-              sx={{
-                border: "1px solid",
-                borderColor: "divider",
-                borderRadius: 1,
-                overflow: "hidden",
-                backgroundColor: "#fff",
-              }}
             >
               <DataGrid
                 rows={coursesList}
-                columns={columns}
+                columns={courseColumns}
                 rowCount={totalCourses}
                 loading={isPending}
-                density="standard"
                 pageSizeOptions={[10, 15, 20]}
                 disableColumnSelector
                 disableColumnSorting
-                disableColumnResize
+                // disableColumnResize
                 disableRowSelectionOnClick
                 disableColumnMenu
                 paginationMode="server"

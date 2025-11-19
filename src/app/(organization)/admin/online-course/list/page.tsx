@@ -24,11 +24,16 @@ const OnlineCourseListPage = () => {
       title="Danh sách môn học"
       breadcrumbs={[
         {
-          title: "Quản lý lớp học",
-          path: PATHS.CLASSROOMS.ROOT,
+          title: "LMS",
+          path: PATHS.DASHBOARD,
+        },
+        {
+          title: "Quản lý môn học",
+          path: PATHS.COURSES.ROOT,
         },
         {
           title: "Danh sách môn học",
+          path: ""
         },
       ]}
     >
