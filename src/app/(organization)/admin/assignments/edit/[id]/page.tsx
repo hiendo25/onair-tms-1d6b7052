@@ -1,5 +1,6 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import UpdateAssignment from "./_components/UpdateAssignment";
+import { PATHS } from "@/constants/path.contstants";
 
 interface EditAssignmentPageProps {
   params: Promise<{
@@ -14,7 +15,7 @@ export default async function EditAssignmentPage({ params }: EditAssignmentPageP
     <PageContainer
       title="Chỉnh sửa bài kiểm tra"
       breadcrumbs={[
-        { title: "Bài kiểm tra", path: "/assignments" },
+        { title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT },
         {
           title: "Chỉnh sửa bài kiểm tra",
         },

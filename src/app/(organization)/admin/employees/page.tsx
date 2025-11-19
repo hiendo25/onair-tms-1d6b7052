@@ -1,4 +1,4 @@
-import EmployeeList from "@/app/(organization)/employees/_components/EmployeeList";
+import EmployeeList from "@/app/(organization)/admin/employees/_components/EmployeeList";
 
 const EmployeePage = async () => {
   return <EmployeeList />;

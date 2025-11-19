@@ -68,7 +68,7 @@ const EditEmployeePage = () => {
         autoHideDuration: 3000,
       });
 
-      router.push("/employees");
+      router.push("/admin/employees");
     } catch (error) {
       notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật nhân viên", {
         severity: "error",
@@ -79,7 +79,7 @@ const EditEmployeePage = () => {
 
   if (isLoading) {
     return (
-      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
+      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
         <Box
           sx={{
             display: "flex",
@@ -96,7 +96,7 @@ const EditEmployeePage = () => {
 
   if (error || !employee) {
     return (
-      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
+      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
         <Box sx={{ py: 3 }}>
           <Alert severity="error">Không tìm thấy thông tin nhân viên hoặc có lỗi xảy ra</Alert>
         </Box>
@@ -105,7 +105,7 @@ const EditEmployeePage = () => {
   }
 
   return (
-    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/employees" }, { title: pageTitle }]}>
+    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
       <Box sx={{ py: 3 }}>
         <EmployeeForm mode="edit" defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={isPending} />
       </Box>

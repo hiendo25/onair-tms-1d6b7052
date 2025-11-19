@@ -7,7 +7,7 @@ const EmployeeImportPage = () => {
     <PageContainer
       title="Import User"
       breadcrumbs={[
-        { title: "Nhân viên", path: "/employees" },
+        { title: "Nhân viên", path: "/admin/employees" },
         { title: "Import User" },
       ]}
     >

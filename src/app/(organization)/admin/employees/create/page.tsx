@@ -39,7 +39,7 @@ const CreateEmployeePage = () => {
         });
 
         // Navigate to employees list page
-        router.push("/employees");
+        router.push("/admin/employees");
       },
       onError: (error) => {
         console.error("Error creating employee:", error);
@@ -58,7 +58,7 @@ const CreateEmployeePage = () => {
     <PageContainer
       title={pageTitle}
       breadcrumbs={[
-        { title: "Nhân viên", path: "/employees" },
+        { title: "Nhân viên", path: "/admin/employees" },
         { title: pageTitle },
       ]}
     >
