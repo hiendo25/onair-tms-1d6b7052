@@ -7,8 +7,6 @@ import {
     Button,
     CircularProgress,
     Stack,
-    Tab,
-    Tabs,
     Typography,
 } from "@mui/material";
 import {
@@ -17,7 +15,7 @@ import {
     ClassRoomStatusFilter,
     ClassRoomTypeFilter,
     ClassSessionModeFilter,
-} from "../types/types";
+} from "@/repository/class-room";
 import {
     GetClassRoomsQueryInput,
     useGetClassRoomsPriorityQuery,
@@ -39,19 +37,14 @@ const initialFilters: ClassRoomFilters = {
 };
 
 const PAGE_SIZE = 12;
-
-interface ClassRoomTabProps {
-    isActive: boolean;
-}
-
-export default function ClassRoomTab({ isActive }: ClassRoomTabProps) {
+export default function ClassRoomTableList() {
     const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
     const [page, setPage] = useState(1);
     const { organization, ...rest } = useUserOrganization((state) => state.data);
     const isAdmin = rest.employeeType === "admin";
     const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
-    const organizationId = isActive && isAdmin ? organization?.id : undefined;
-    const employeeId = isActive && rest.employeeType === "teacher" ? rest.id : undefined;
+    const organizationId = isAdmin ? organization?.id : undefined;
+    const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
     const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
         const trimmedSearch = filters.search.trim();

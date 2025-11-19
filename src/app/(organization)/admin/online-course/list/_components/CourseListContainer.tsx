@@ -1,10 +1,7 @@
 "use client";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { redirect, usePathname, useRouter, useSearchParams } from "next/navigation";
-import ELearningTab from "./CourseTableList";
+import { redirect } from "next/navigation";
 import CourseTableList from "./CourseTableList";
-
-type TabValue = "ClassRoomTab" | "ElearningTab";
 
 export default function CourseListContainer() {
   const { ...rest } = useUserOrganization((state) => state.data);

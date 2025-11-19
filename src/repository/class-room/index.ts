@@ -35,7 +35,7 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/admin/class-room/list/types/types";
+} from "@/repository/class-room";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 export * from "./type";
 

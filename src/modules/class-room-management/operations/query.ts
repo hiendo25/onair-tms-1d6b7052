@@ -3,7 +3,7 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/admin/class-room/list/types/types";
+} from "@/repository/class-room";
 import { useTQuery } from "@/lib/queryClient";
 import { classRoomRepository } from "@/repository";
 import {
