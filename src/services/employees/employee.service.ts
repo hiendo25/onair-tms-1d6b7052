@@ -77,8 +77,6 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
-    const organization = await organizationsRepository.getFirstOrganization();
-
     const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
@@ -88,7 +86,6 @@ async function createEmployeeWithRelations(
       employee_type: payload.employee_type || null,
       organization_id: organizationId,
       status: "active",
-      organization_id: organization.id,
     });
 
     employeeId = employeeData.id;
