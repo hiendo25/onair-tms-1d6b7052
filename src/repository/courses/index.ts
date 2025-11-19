@@ -152,11 +152,62 @@ const deleteCoursesByEmployeeId = async (employeeId: string) => {
 
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
+export type GetCoursesQueryParams = {
+  limit?: number;
+};
+const getCourses = async (courseQueryparams?: GetCoursesQueryParams) => {
+  try {
+    return await supabase.from("courses").select(
+      `
+        id,
+        title,
+        slug,
+        status,
+        created_by,
+        courses_categories(
+          id,
+          categories(
+            id, name, slug
+          )
+        ),
+        organizations(
+          id, 
+          name
+        ),
+        sections(
+          id,
+          title,
+          course_id,
+          status,
+          priority,
+          lessons(
+            id,
+            title,
+            lesson_type,
+            priority,
+            status
+          )
+        ),
+        owner:employees(
+          id,
+          employee_code,
+          profiles(id, full_name, avatar, email)
+        )
+      `,
+      { count: "exact" },
+    );
+  } catch (err: any) {
+    throw new Error(err?.message ?? "Fetching Course list failed.");
+  }
+};
+export type GetCoursesResponse = Awaited<ReturnType<typeof getCourses>>;
+
 export {
   createCourse,
-  updateCourse,
   createPivotCoursesWithCategories,
   getCourseById,
+  getCourses,
+  updateCourse,
   deletePivotCoursesWithCategories,
   deleteCoursesByEmployeeId,
 };
