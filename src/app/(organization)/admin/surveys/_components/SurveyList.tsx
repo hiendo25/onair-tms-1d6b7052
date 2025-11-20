@@ -26,6 +26,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
+import LinkIcon from "@mui/icons-material/Link";
 import PageContainer from "@/shared/ui/PageContainer";
 import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { Survey } from "@/types/survey.types";
@@ -102,6 +103,22 @@ export default function SurveyList() {
       severity: "success",
       autoHideDuration: 3000,
     });
+  };
+
+  const handleCopyLink = async (id: string) => {
+    const surveyUrl = `${window.location.origin}/surveys/${id}/submit`;
+    try {
+      await navigator.clipboard.writeText(surveyUrl);
+      notifications.show("Đã sao chép liên kết khảo sát", {
+        severity: "success",
+        autoHideDuration: 3000,
+      });
+    } catch (error) {
+      notifications.show("Không thể sao chép liên kết", {
+        severity: "error",
+        autoHideDuration: 3000,
+      });
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -195,11 +212,30 @@ export default function SurveyList() {
                       <TableCell>{survey.total_submissions}</TableCell>
                       <TableCell>{formatDate(survey.created_at)}</TableCell>
                       <TableCell align="center">
-                        <Stack direction="row" spacing={1} justifyContent="center">
+                        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
                           <IconButton
                             size="small"
-                            color="primary"
+                            onClick={() => handleCopyLink(survey.id)}
+                            title="Sao chép liên kết"
+                            sx={{
+                              color: "text.secondary",
+                              "&:hover": {
+                                color: "primary.main",
+                              },
+                            }}
+                          >
+                            <LinkIcon fontSize="small" />
+                          </IconButton>
+                          <IconButton
+                            size="small"
                             onClick={() => handleEdit(survey.id)}
+                            title="Chỉnh sửa"
+                            sx={{
+                              color: "text.secondary",
+                              "&:hover": {
+                                color: "primary.main",
+                              },
+                            }}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
@@ -207,6 +243,7 @@ export default function SurveyList() {
                             size="small"
                             color="error"
                             onClick={() => handleDelete(survey.id)}
+                            title="Xóa"
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>

@@ -23,3 +23,18 @@ export interface SurveyFormData {
   questions: Question[];
 }
 
+// Survey submission types
+export interface QuestionAnswer {
+  questionId: string;
+  questionType: QuestionType;
+  textAnswer?: string;
+  radioAnswer?: string;
+  checkboxAnswers?: string[];
+  ratingAnswer?: number;
+  selectAnswer?: string;
+}
+
+export interface SurveySubmissionData {
+  answers: QuestionAnswer[];
+}
+
