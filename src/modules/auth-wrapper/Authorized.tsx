@@ -24,7 +24,7 @@ const Authorized: React.FC<Props> = async ({ children }) => {
       accessToken: "",
     };
   }
-  if (currentUser.app_metadata.provider === "gmail") {
+  if (currentUser.app_metadata.provider === "google") {
     userInfo = {
       id: currentUser.user_metadata.sub,
       name: currentUser.user_metadata.name,

@@ -7,6 +7,7 @@ import {
   CreatePivotClassSessionWithAssignmentPayload,
   UpSertClassRoomSessionPayload,
 } from "./type";
+import { SELECT_SESSION_DETAIL } from "./query-select.constant";
 export * from "./type";
 
 const bulkCreateClassSession = async (payload: BulkCreateClassRoomSessionsPayload) => {
@@ -54,84 +55,7 @@ const bulkUpsertClassSession = async (upsertPayload: UpSertClassRoomSessionPaylo
 
 const upsertClassSession = async (upsertPayload: UpSertClassRoomSessionPayload) => {
   try {
-    return await supabase
-      .from("class_sessions")
-      .upsert(upsertPayload.payload)
-      .select(
-        `
-          id,
-          title,
-          description,
-          start_at,
-          end_at,
-          class_room_id,
-          channel_provider,
-          channel_info,
-          session_type,
-          courses_period:class_sessions_courses_period(
-            id,
-            course:courses(id, title, slug),
-            start_at,
-            end_at,
-            teacher:employees(id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          session_assignment:class_session_assignment(
-            id,
-            assignments(
-              id,
-              name
-            )
-          ),
-          teachers:class_session_teacher(
-            id,
-            employee:employees!class_session_teacher_teacher_id_fkey(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          agendas:class_sessions_agendas(
-            id,
-            title,
-            description,
-            thumbnail_url,
-            start_at,
-            end_at,
-            class_session_id
-          ),
-          metadata:class_session_metadata(
-            id,
-            class_session_id,
-            key,
-            value
-          ),
-          class_qr_codes(
-            id,
-            class_room_id, 
-            class_session_id, 
-            checkin_start_time, 
-            checkin_end_time
-          )
-        `,
-      )
-      .single();
+    return await supabase.from("class_sessions").upsert(upsertPayload.payload).select(SELECT_SESSION_DETAIL).single();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error Delete Sessions");

@@ -1,12 +1,17 @@
 import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
 import { getEmployeeDetailInfoByUserId } from "../actions/getOrganization";
 import { ensureGetCurrentUser } from "../../auth/actions/getCurrentUser";
+import { redirect, RedirectType } from "next/navigation";
+import { createSVClient } from "@/services";
+
 const UserOrganizationWraper = async ({ children }: { readonly children: React.ReactNode }) => {
+  const supabase = await createSVClient();
   const currentUser = await ensureGetCurrentUser();
   const employeeDetail = await getEmployeeDetailInfoByUserId(currentUser.id);
 
-  if (!employeeDetail.organizations) {
-    throw new Error("Invalid Organization");
+  if (!employeeDetail || !employeeDetail.organizations) {
+    await supabase.auth.signOut();
+    redirect("auth/signin", RedirectType.replace);
   }
 
   return (
