@@ -146,7 +146,7 @@ export const summaryCards = [
     title: "Lớp học sắp hết hạn",
     value: "3",
     icon: "expiring",
-    colors: { bg: "#CDDEFF", icon: "#648efc" },
+    colors: { bg: "#9723F914", icon: "#648efc" },
   },
   {
     title: "Lớp học đã diễn ra",
