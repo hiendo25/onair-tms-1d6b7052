@@ -65,7 +65,7 @@ const useCRUDClassRoom = () => {
           status: status,
           thumbnail_url: thumbnailUrl,
           title: title,
-          created_by: userInfo.id,
+          employee_id: userInfo.id,
           start_at: startDate,
           end_at: endDate,
           organization_id: userInfo.organization.id,
