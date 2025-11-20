@@ -8,7 +8,8 @@ export type BulkCreateClassRoomSessionsPayload = {
     | "start_at"
     | "end_at"
     | "description"
-    | "is_online"
+    | "assignment_id"
+    | "session_type"
     | "priority"
     | "channel_info"
     | "channel_provider"
@@ -22,7 +23,8 @@ export type CreateClassRoomSessionPayload = Pick<
   | "start_at"
   | "end_at"
   | "description"
-  | "is_online"
+  | "assignment_id"
+  | "session_type"
   | "priority"
   | "channel_info"
   | "channel_provider"
@@ -37,7 +39,8 @@ export type UpdateClassRoomSessionPayload = Pick<
   | "start_at"
   | "end_at"
   | "description"
-  | "is_online"
+  | "assignment_id"
+  | "session_type"
   | "priority"
   | "channel_info"
   | "channel_provider"
@@ -56,4 +59,19 @@ export type UpSertClassRoomSessionPayload =
 export type CreatePivotClassRoomSessionAndTeacherPayload = {
   class_session_id: string;
   teacher_id: string;
+};
+
+export type CreatePivotClassSessionWithCoursePeriodPayload = {
+  class_session_id: string;
+  course_id: string;
+  teacher_id: string;
+  start_at: string;
+  end_at: string;
+};
+
+export type CreatePivotClassSessionWithAssignmentPayload = {
+  session_id: string;
+  assignment_id: string;
+  start_at: string | null;
+  end_at: string | null;
 };

@@ -600,14 +600,12 @@ export type Database = {
       }
       class_rooms: {
         Row: {
-          comunity_info: Json | null
           created_at: string
+          created_by: string | null
           description: string | null
-          documents: Json | null
-          employee_id: string | null
           end_at: string | null
           id: string
-          organization_id: string | null
+          organization_id: string
           resource_id: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
           slug: string | null
@@ -617,14 +615,12 @@ export type Database = {
           title: string | null
         }
         Insert: {
-          comunity_info?: Json | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
-          documents?: Json | null
-          employee_id?: string | null
           end_at?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           resource_id?: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
           slug?: string | null
@@ -634,14 +630,12 @@ export type Database = {
           title?: string | null
         }
         Update: {
-          comunity_info?: Json | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
-          documents?: Json | null
-          employee_id?: string | null
           end_at?: string | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"]
           slug?: string | null
@@ -652,8 +646,8 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "class_rooms_employee_id_fkey"
-            columns: ["employee_id"]
+            foreignKeyName: "class_rooms_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -663,6 +657,91 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_rooms_resources: {
+        Row: {
+          class_room_id: string
+          created_at: string
+          id: number
+          resource_id: string
+        }
+        Insert: {
+          class_room_id?: string
+          created_at?: string
+          id?: number
+          resource_id?: string
+        }
+        Update: {
+          class_room_id?: string
+          created_at?: string
+          id?: number
+          resource_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_rooms_resources_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_rooms_resources_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_rooms_resources_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_session_assignment: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          end_at: string | null
+          id: number
+          session_id: string
+          start_at: string | null
+        }
+        Insert: {
+          assignment_id?: string
+          created_at?: string
+          end_at?: string | null
+          id?: number
+          session_id?: string
+          start_at?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          end_at?: string | null
+          id?: number
+          session_id?: string
+          start_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_session_assignment_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_session_assignment_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: true
+            referencedRelation: "class_sessions"
             referencedColumns: ["id"]
           },
         ]
@@ -734,6 +813,7 @@ export type Database = {
       }
       class_sessions: {
         Row: {
+          assignment_id: string | null
           channel_info: Json | null
           channel_provider:
             | Database["public"]["Enums"]["channel_provider"]
@@ -743,15 +823,15 @@ export type Database = {
           description: string | null
           end_at: string | null
           id: string
-          is_online: boolean
-          limit_person: number | null
           location: string | null
           priority: number
+          session_type: Database["public"]["Enums"]["class_session_type"]
           start_at: string | null
           title: string | null
           updated_at: string | null
         }
         Insert: {
+          assignment_id?: string | null
           channel_info?: Json | null
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
@@ -761,15 +841,15 @@ export type Database = {
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean
-          limit_person?: number | null
           location?: string | null
           priority?: number
+          session_type?: Database["public"]["Enums"]["class_session_type"]
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
         }
         Update: {
+          assignment_id?: string | null
           channel_info?: Json | null
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
@@ -779,10 +859,9 @@ export type Database = {
           description?: string | null
           end_at?: string | null
           id?: string
-          is_online?: boolean
-          limit_person?: number | null
           location?: string | null
           priority?: number
+          session_type?: Database["public"]["Enums"]["class_session_type"]
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
@@ -800,6 +879,13 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
         ]
@@ -844,6 +930,58 @@ export type Database = {
             columns: ["class_session_id"]
             isOneToOne: false
             referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_sessions_courses_period: {
+        Row: {
+          class_session_id: string
+          course_id: string
+          created_at: string
+          end_at: string | null
+          id: number
+          start_at: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          class_session_id?: string
+          course_id?: string
+          created_at?: string
+          end_at?: string | null
+          id?: number
+          start_at?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          class_session_id?: string
+          course_id?: string
+          created_at?: string
+          end_at?: string | null
+          id?: number
+          start_at?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_courses_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_courses_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1710,7 +1848,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "class_rooms_employee_id_fkey"
+            foreignKeyName: "class_rooms_created_by_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
@@ -1787,6 +1925,7 @@ export type Database = {
         | "deleted"
         | "draft"
       class_room_type: "single" | "multiple"
+      class_session_type: "online" | "offline" | "live"
       course_status:
         | "published"
         | "pending"
@@ -1945,6 +2084,7 @@ export const Constants = {
         "draft",
       ],
       class_room_type: ["single", "multiple"],
+      class_session_type: ["online", "offline", "live"],
       course_status: [
         "published",
         "pending",

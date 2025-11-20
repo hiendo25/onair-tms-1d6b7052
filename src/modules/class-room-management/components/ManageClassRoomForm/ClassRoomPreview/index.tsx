@@ -1,5 +1,5 @@
 import { Control, useFormContext, UseFormReturn, useWatch } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoom } from "../classroom-form.schema";
 import { memo } from "react";
 import WallpaperPreview from "./WallpaperPreview";
 import ClassTitle from "./ClassTitle";

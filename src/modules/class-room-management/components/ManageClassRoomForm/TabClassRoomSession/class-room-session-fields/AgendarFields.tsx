@@ -6,7 +6,7 @@ import { Control, useController, useFieldArray } from "react-hook-form";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { TrashIcon1 } from "@/shared/assets/icons";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoom } from "../../classroom-form.schema";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import { cn } from "@/utils";
 import dayjs from "dayjs";
@@ -118,10 +118,7 @@ const AgendaFieldBox: React.FC<AgendaFieldBoxProps> = ({ sessionIndex, index, re
             <Typography sx={{ fontWeight: "bold" }}>Lịch trình {index + 1}</Typography>
           </div>
 
-          <IconButton
-            className="w-[28px] h-[28px] bg-white border rounded-md border-gray-300"
-            onClick={() => remove(index)}
-          >
+          <IconButton className="w-7 h-7 bg-white border rounded-md border-gray-300" onClick={() => remove(index)}>
             <TrashIcon1 className="w-4 h-4" />
           </IconButton>
         </div>

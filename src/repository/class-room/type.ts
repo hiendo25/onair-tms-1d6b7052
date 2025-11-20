@@ -3,7 +3,6 @@ import { ClassRoom } from "@/model/class-room.model";
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -12,36 +11,31 @@ export type CreateClassRoomPayload = Pick<
   | "thumbnail_url"
   | "title"
   | "organization_id"
-  | "resource_id"
-  | "employee_id"
-  | "documents"
+  | "created_by"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
-  | "description"
-  // | "comunity_info"
-  | "room_type"
+  | "id"
+  | "title"
   | "slug"
+  | "description"
+  | "room_type"
   | "start_at"
   | "end_at"
   | "status"
   | "thumbnail_url"
-  | "title"
   | "organization_id"
-  | "resource_id"
-  | "employee_id"
-  | "id"
-  | "documents"
+  | "created_by"
 >;
 export type UpSertClassRoomPayload =
   | {
-    action: "create";
-    payload: CreateClassRoomPayload;
-  }
+      action: "create";
+      payload: CreateClassRoomPayload;
+    }
   | {
-    action: "update";
-    payload: UpdateClassRoomPayload;
-  };
+      action: "update";
+      payload: UpdateClassRoomPayload;
+    };
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;
@@ -57,7 +51,6 @@ export type CreatePivotClassRoomAndEmployeePayload = {
   employee_id: string;
 };
 
-
 export enum ClassRoomRuntimeStatusFilter {
   All = "all",
   Ongoing = "ongoing",
@@ -70,7 +63,7 @@ export enum ClassRoomRuntimeStatusFilter {
 export enum ClassRoomTypeFilter {
   All = "all",
   Single = "single",
-  Multiple = "multiple"
+  Multiple = "multiple",
 }
 
 export enum ClassSessionModeFilter {
@@ -87,7 +80,7 @@ export enum ClassRoomStatusFilter {
   Pending = "pending",
   Deactive = "deactive",
   Deleted = "deleted",
-};
+}
 
 export type AttendanceStatus = "attended" | "absent" | "pending";
 export interface ClassRoomFilters {
@@ -100,3 +93,12 @@ export interface ClassRoomFilters {
   status: ClassRoomStatusFilter;
 }
 
+export type DeletePivotClassRoomAndEmployeePayload = {
+  class_room_id: string;
+  employeeIds: string[];
+};
+
+export type CreatePivotClassRoomWithResourcePayload = {
+  class_room_id: string;
+  resource_id: string;
+};

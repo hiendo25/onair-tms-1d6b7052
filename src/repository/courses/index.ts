@@ -145,10 +145,7 @@ const getCourseById = async (courseId: string) => {
 
 const deleteCoursesByEmployeeId = async (employeeId: string) => {
   try {
-    const { error } = await supabase
-      .from("courses")
-      .update({ status: "deleted" })
-      .eq("created_by", employeeId);
+    const { error } = await supabase.from("courses").update({ status: "deleted" }).eq("created_by", employeeId);
 
     if (error) throw error;
   } catch (err: any) {
@@ -159,9 +156,7 @@ const deleteCoursesByEmployeeId = async (employeeId: string) => {
 
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
-const getCourses = async (
-  input: GetCoursesQueryInput = {},
-): Promise<PaginatedResult<CourseDto>> => {
+const getCourses = async (input: GetCoursesQueryInput = {}): Promise<PaginatedResult<CourseDto>> => {
   const {
     q,
     page = DEFAULT_PAGE,
@@ -186,10 +181,7 @@ const getCourses = async (
     };
   }
 
-  let query = supabase
-    .from("courses")
-    .select("*", { count: "exact" })
-    .not("status", "in", "(deleted)");
+  let query = supabase.from("courses").select("*", { count: "exact" }).not("status", "in", "(deleted)");
 
   if (organizationId) {
     query = query.eq("organization_id", organizationId!);
@@ -204,9 +196,7 @@ const getCourses = async (
     : null;
 
   if (accessConditions.length > 0 && searchClause) {
-    const combined = accessConditions.map(
-      (condition) => `and(${condition},${searchClause})`,
-    );
+    const combined = accessConditions.map((condition) => `and(${condition},${searchClause})`);
     query = query.or(combined.join(","));
   } else if (accessConditions.length > 0) {
     query = query.or(accessConditions.join(","));
@@ -214,8 +204,7 @@ const getCourses = async (
     query = query.or(searchClause);
   }
 
-  const sortField =
-    orderField && ALLOWED_ORDER_FIELDS.has(orderField) ? orderField : "created_at";
+  const sortField = orderField && ALLOWED_ORDER_FIELDS.has(orderField) ? orderField : "created_at";
   const ascending = orderBy === "asc";
 
   const { data, error, count } = await query
@@ -235,15 +224,78 @@ const getCourses = async (
 };
 
 const deleteCourseById = async (courseId: string) => {
-  const { error } = await supabase.from("courses")
-    .update({ status: "deleted" })
-    .eq("id", courseId);
+  const { error } = await supabase.from("courses").update({ status: "deleted" }).eq("id", courseId);
 
   if (error) {
     throw new Error(`Failed to delete course: ${error.message}`);
   }
-}
+};
 
+export type GetCoursesListMinimalQueryParams = {
+  page?: number;
+  pageSize?: number;
+  excludes?: string[];
+  search?: string;
+};
+const getCoursesListMinimal = async (queryParams?: GetCoursesListMinimalQueryParams) => {
+  try {
+    const { page = 1, pageSize = 20, excludes, search } = queryParams || {};
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let courseQuery = supabase.from("courses").select(
+      `
+        id,
+        title,
+        slug,
+        status,
+        created_by,
+        courses_categories(
+          id,
+          categories(
+            id, name, slug
+          )
+        ),
+        organizations(
+          id, 
+          name
+        ),
+        sections(
+          id,
+          title,
+          course_id,
+          status,
+          priority,
+          lessons(
+            id,
+            title,
+            lesson_type,
+            priority,
+            status
+          )
+        ),
+        owner:employees(
+          id,
+          employee_code,
+          profiles(id, full_name, avatar, email)
+        )
+      `,
+      { count: "exact" },
+    );
+
+    if (excludes?.length) {
+      courseQuery = courseQuery.not("id", "in", `(${excludes.join(",")})`);
+    }
+    if (search) {
+      courseQuery = courseQuery.ilike("profiles.full_name", `%${search}%`);
+    }
+
+    return await courseQuery.order("created_at", { ascending: false }).range(from, to);
+  } catch (err: any) {
+    throw new Error(err?.message ?? "Fetching Course list failed.");
+  }
+};
+export type GetCoursesListMinimalResponse = Awaited<ReturnType<typeof getCoursesListMinimal>>;
 
 export {
   createCourse,
@@ -254,4 +306,5 @@ export {
   deletePivotCoursesWithCategories,
   deleteCoursesByEmployeeId,
   deleteCourseById,
+  getCoursesListMinimal,
 };

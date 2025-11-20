@@ -16,7 +16,6 @@ import { PATHS } from "@/constants/path.contstants";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
-
 type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
@@ -25,7 +24,7 @@ interface UpdateClassRoomProps {
 }
 const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
   const router = useRouter();
-  const { sessions, class_room_metadata, employees } = data;
+  const { sessions, employees } = data;
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
@@ -36,17 +35,16 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     });
   };
 
-  const platform = sessions.every((s) => s.is_online)
-    ? "online"
-    : sessions.every((s) => !s.is_online)
+  const platform = sessions.every((s) => s.session_type === "live")
+    ? "live"
+    : sessions.every((s) => s.session_type === "offline")
     ? "offline"
+    : sessions.every((s) => s.session_type === "online")
+    ? "online"
     : "hybrid";
 
   const initFormValue = useMemo((): UpdateClassRoomFormValue => {
-    // const hastTags = data?.class_hash_tag.reduce<string[]>((acc, ht) => {
-    //   const hastTagId = ht.hash_tags?.id;
-    //   return hastTagId ? [...acc, hastTagId] : acc;
-    // }, []);
+    const { sessions, class_room_metadata, resources } = data;
 
     const categories = data?.class_room_field.reduce<string[]>((acc, item) => {
       const fieldId = item.categories?.id;
@@ -68,6 +66,19 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
         description: agenda.description || "",
       }));
 
+      const coursePeriods = session.courses_period.map<ClassRoomSession["coursesPeriod"][number]>((cp) => ({
+        startAt: cp.start_at || "",
+        endAt: cp.end_at || "",
+        course: {
+          id: cp.course.id,
+          title: cp.course.title || "",
+        },
+        teacher: {
+          id: cp.teacher?.id || "",
+          name: cp.teacher?.profile?.full_name || "",
+          departmentName: "",
+        },
+      }));
       return [
         ...acc,
         {
@@ -78,10 +89,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
           location: session.location,
           endDate: session.end_at ? dayjs(session.end_at).toISOString() : "",
           startDate: session.start_at ? dayjs(session.start_at).toISOString() : "",
-          isOnline: session.is_online,
+          sessionType: session.session_type,
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
           agendas: agendas,
+          coursesPeriod: coursePeriods,
+          assessmentId: session.session_assignment?.assignments.id || "",
           qrCode: {
             id: session.class_qr_codes[0]?.id,
             isLimitTimeScanQrCode:
@@ -106,7 +119,12 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       classRoomSessions: classRoomSessions,
       thumbnailUrl: data.thumbnail_url || "",
       categories: categories,
-      docs: data.documents,
+      docs: resources.map(({ resource }) => ({
+        id: resource.id,
+        mimeType: resource.mime_type || "",
+        name: resource.name,
+        url: resource.path || "",
+      })),
       forWhom: forWhom ? forWhom.map((item) => ({ description: item })) : [],
       status: data.status,
       roomType: data.room_type || "single",
@@ -115,48 +133,50 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     };
   }, [data]);
 
-  const teacherList = useMemo(() => {
-    return sessions.reduce<TeacherType>((acc, session, _index) => {
-      return {
-        ...acc,
-        [_index]: session.teachers.reduce<TeacherType[0]>((teacherSumary, tc) => {
-          if (tc.employee && tc.employee.employee_type === "teacher") {
-            teacherSumary = [
-              ...teacherSumary,
-              {
-                avatar: tc.employee?.profile?.avatar || "",
-                email: tc.employee?.profile?.email || "",
-                id: tc.employee?.id,
-                fullName: tc.employee?.profile?.full_name || "",
-                employeeCode: tc.employee.employee_code || "",
-                empoyeeType: tc.employee.employee_type,
-              },
-            ];
-          }
-          return teacherSumary;
-        }, []),
-      };
-    }, {});
-  }, [sessions]);
+  /**
+   * remove teader to class sessions
+   */
+  // const teacherList = useMemo(() => {
+  //   return sessions.reduce<TeacherType>((acc, session, _index) => {
+  //     return {
+  //       ...acc,
+  //       [_index]: session.teachers.reduce<TeacherType[number]>((teacherSumary, tc) => {
+  //         return tc.employee && tc.employee.employee_type === "teacher"
+  //           ? [
+  //               ...teacherSumary,
+  //               {
+  //                 id: tc.employee?.id,
+  //                 avatar: tc.employee?.profile?.avatar || "",
+  //                 email: tc.employee?.profile?.email || "",
+  //                 fullName: tc.employee?.profile?.full_name || "",
+  //                 employeeCode: tc.employee.employee_code || "",
+  //                 empoyeeType: tc.employee.employee_type,
+  //               },
+  //             ]
+  //           : teacherSumary;
+  //       }, []),
+  //     };
+  //   }, {});
+  // }, [sessions]);
 
   const studentList = useMemo(() => {
     return employees.reduce<StudentType>((acc, emp) => {
-      if (emp.employee && emp.employee.employee_type === "student") {
-        acc = [
-          ...acc,
-          {
-            id: emp.employee.id,
-            avatar: emp.employee.profile?.avatar || "",
-            email: emp.employee.profile?.email || "",
-            employeeCode: emp.employee.employee_code,
-            empoyeeType: emp.employee.employee_type,
-            fullName: emp.employee.profile?.full_name || "",
-          },
-        ];
-      }
-      return acc;
+      return emp.employee && emp.employee.employee_type === "student"
+        ? [
+            ...acc,
+            {
+              id: emp.employee.id,
+              avatar: emp.employee.profile?.avatar || "",
+              email: emp.employee.profile?.email || "",
+              employeeCode: emp.employee.employee_code,
+              empoyeeType: emp.employee.employee_type,
+              fullName: emp.employee.profile?.full_name || "",
+            },
+          ]
+        : acc;
     }, []);
   }, [employees]);
+
   const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
     onUpdate(
       { classRoomId: data.id, formData, students, teachers },
@@ -174,7 +194,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       initFormValue={initFormValue}
       action="edit"
       students={studentList}
-      teachers={teacherList}
+      // teachers={teacherList}
       isLoading={isLoading || isTransition}
       platform={platform}
       onSubmit={handleUpdateClassRoom}

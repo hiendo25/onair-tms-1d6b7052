@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useRef, useImperativeHandle, useCallback, forwardRef, useLayoutEffect } from "react";
+import React, { useRef, useImperativeHandle, useCallback, forwardRef, useLayoutEffect } from "react";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
-import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
+import { classRoomSchema, ClassRoom } from "./classroom-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
@@ -45,6 +45,26 @@ export const TAB_NODES_CLASS_ROOM = new Map([
   ],
 ]);
 
+export const initClassRoomFormData = (oprions: {
+  platform?: ClassRoomPlatformType;
+  roomType?: ClassRoomType;
+}): Partial<ClassRoom> => {
+  return {
+    title: "",
+    description: "",
+    thumbnailUrl: "",
+    categories: [],
+    classRoomId: "",
+    slug: "",
+    status: "draft",
+    roomType: oprions?.roomType,
+    forWhom: [],
+    docs: [],
+    platform: oprions?.platform,
+    classRoomSessions: [],
+  };
+};
+
 export interface ClassRoomFormContainerRef {
   resetForm: () => void;
 }
@@ -61,27 +81,6 @@ export interface ClassRoomFormContainerProps {
   isLoading?: boolean;
   action?: "create" | "edit";
 }
-
-export const initClassRoomFormData = (oprions: {
-  platform?: ClassRoomPlatformType;
-  roomType?: ClassRoomType;
-}): Partial<ClassRoom> => {
-  return {
-    title: "",
-    description: "",
-    thumbnailUrl: "",
-    categories: [],
-    classRoomId: "",
-    slug: "",
-    status: "draft",
-    roomType: oprions?.roomType || "single",
-    forWhom: [],
-    docs: [],
-    platform: oprions?.platform,
-    classRoomSessions: [],
-  };
-};
-
 const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
   ({ onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel }, ref) => {
     const { enqueueSnackbar } = useSnackbar();
@@ -96,6 +95,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         platform: platform,
         roomType: roomType,
       }),
+      mode: "onChange",
     });
 
     const {
@@ -103,9 +103,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       setValue,
       handleSubmit,
       formState: { errors },
-      control,
       trigger,
-      watch,
       reset,
     } = methods;
 
@@ -140,24 +138,18 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const submitForm: SubmitHandler<ClassRoom> = (data) => {
       console.log({ errors, data, selectedTeachers, selectedStudents });
 
-      const sessionList = getValues("classRoomSessions");
+      // const sessionList = getValues("classRoomSessions");
 
-      const isEverySessionHasTeacher = sessionList.every((session, _index) => {
-        const hasTeacher = !!selectedTeachers[_index]?.length;
-        if (!hasTeacher) {
-          enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
-          classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
-        }
-        return hasTeacher;
-      });
+      // const isEverySessionHasTeacher = sessionList.every((session, _index) => {
+      //   const hasTeacher = !!selectedTeachers[_index]?.length;
+      //   if (!hasTeacher) {
+      //     enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
+      //     classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
+      //   }
+      //   return hasTeacher;
+      // });
 
-      if (!isEverySessionHasTeacher) {
-        return;
-      }
-
-      // if (!selectedStudents.length) {
-      //   enqueueSnackbar(`Chưa chọn học viên.`, { variant: "error" });
-      //   classRoomTabContainerRef.current?.setTabStatus("clsTab-setting", "invalid");
+      // if (!isEverySessionHasTeacher) {
       //   return;
       // }
 
@@ -188,7 +180,9 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     useLayoutEffect(() => {
       if (!roomType) return;
 
-      const initSessionsFormData = initClassSessionFormData({ isOnline: platform === "online" });
+      const initSessionsFormData = initClassSessionFormData(
+        platform !== "hybrid" ? { sessionType: platform } : undefined,
+      );
       setValue(
         "classRoomSessions",
         roomType === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],

@@ -2,10 +2,12 @@
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 import SingleSession, { SingleSessionRef } from "./SingleSession";
 import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoom } from "../classroom-form.schema";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
-export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRoom["classRoomSessions"][number] => {
+export const initClassSessionFormData = (init?: {
+  sessionType?: "online" | "offline" | "live";
+}): ClassRoom["classRoomSessions"][number] => {
   return {
     title: "",
     description: "",
@@ -15,8 +17,10 @@ export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRo
     channelProvider: "zoom",
     thumbnailUrl: "",
     location: "",
-    isOnline: init?.isOnline || false,
+    sessionType: init?.sessionType ?? "live",
     agendas: [],
+    coursesPeriod: [],
+    assessmentId: "",
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
   };
 };

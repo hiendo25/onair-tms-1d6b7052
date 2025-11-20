@@ -3,6 +3,8 @@ import {
   BulkCreateClassRoomSessionsPayload,
   CreateClassRoomSessionPayload,
   CreatePivotClassRoomSessionAndTeacherPayload,
+  CreatePivotClassSessionWithCoursePeriodPayload,
+  CreatePivotClassSessionWithAssignmentPayload,
   UpSertClassRoomSessionPayload,
 } from "./type";
 export * from "./type";
@@ -63,14 +65,26 @@ const upsertClassSession = async (upsertPayload: UpSertClassRoomSessionPayload) 
           start_at,
           end_at,
           class_room_id,
-          is_online,
+          session_type,
           channel_provider,
           channel_info,
-          limit_person,
-          teachers:class_session_teacher(
+          assignment_id,
+          session_assignment:class_session_assignment(
             id,
-            employee:employees!class_session_teacher_teacher_id_fkey(
+            start_at,
+            end_at,
+            assignment_id,
+            assignment(
               id,
+              name
+            )
+          ),
+          courses_period:class_sessions_courses_period(
+            id,
+            course:courses(id, title, slug),
+            start_at,
+            end_at,
+            teacher:employees(id,
               employee_type,
               employee_code,
               profile:profiles(
@@ -136,10 +150,7 @@ const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
 
 const deleteClassSessionTeachersByEmployeeId = async (employeeId: string) => {
   try {
-    const { error } = await supabase
-      .from("class_session_teacher")
-      .delete()
-      .eq("teacher_id", employeeId);
+    const { error } = await supabase.from("class_session_teacher").delete().eq("teacher_id", employeeId);
 
     if (error) throw error;
   } catch (err: any) {
@@ -147,13 +158,34 @@ const deleteClassSessionTeachersByEmployeeId = async (employeeId: string) => {
     throw new Error(err.message ?? "Unknown error deleting class session teachers");
   }
 };
+const bulkCreatePivotClassSessionWithCoursePeriod = async (
+  payload: CreatePivotClassSessionWithCoursePeriodPayload[],
+) => {
+  try {
+    return await supabase.from("class_sessions_courses_period").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload) => {
+  try {
+    return await supabase.from("class_session_assignment").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
 
 export {
+  bulkCreatePivotClassSessionWithCoursePeriod,
+  createPivotClassSessionWithAssignment,
   createClassSession,
-  deleteClassSession,
   createPivotClassSessionAndTeacher,
   deletePivotClassSessionAndTeacher,
   deleteClassSessionTeachersByEmployeeId,
+  deleteClassSession,
   upsertClassSession,
   bulkUpsertClassSession,
   bulkCreateClassSession,

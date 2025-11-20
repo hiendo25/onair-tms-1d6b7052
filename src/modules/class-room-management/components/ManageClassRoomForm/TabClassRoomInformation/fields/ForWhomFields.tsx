@@ -10,7 +10,6 @@ import BoxIcon from "../../TabClassRoomResource/BoxIcon";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 const MAX_FIELD_COUNT = 4;
-const MIN_FIELD_COUNT = 2;
 interface ForWhomFieldsProps {
   className?: string;
 }
@@ -19,7 +18,6 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
   const {
     fields: forWhomFields,
     remove,
-
     append,
   } = useFieldArray({
     control,
@@ -34,7 +32,7 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
     }
 
     if (fieldCount >= MAX_FIELD_COUNT) return;
-    append([{ description: "" }, { description: "" }, { description: "" }, { description: "" }]);
+    append([{ description: "" }]);
   }, [forWhomFields]);
 
   return (
@@ -46,15 +44,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
           </BoxIcon>
           <FormLabel className="mb-0">Mục tiêu của lớp học</FormLabel>
         </div>
-        {!forWhomFields.length ? (
-          <Button onClick={handleAddMore} startIcon={<PlusIcon />} variant="fill" size="small">
-            Thêm
-          </Button>
-        ) : (
-          <IconButton size="small" className="p-0 bg-transparent mt-0.5" onClick={() => remove([0, 1, 2, 3, 4])}>
-            <TrashIcon1 className="w-4 h-4" />
-          </IconButton>
-        )}
+        <Button startIcon={<PlusIcon />} variant="fill" size="small" onClick={handleAddMore}>
+          Thêm
+        </Button>
       </div>
       {forWhomFields.length ? (
         <div className="pt-4 flex flex-col gap-4">
@@ -65,6 +57,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
                 placeholder={`Mục tiêu ${_index + 1}`}
                 control={control}
               />
+              <IconButton size="small" className="p-0 bg-transparent" onClick={() => remove(_index)}>
+                <TrashIcon1 className="w-4 h-4" />
+              </IconButton>
             </div>
           ))}
         </div>
