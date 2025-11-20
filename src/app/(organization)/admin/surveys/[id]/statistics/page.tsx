@@ -5,6 +5,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { MOCK_SURVEY_RESPONSES } from "@/constants/survey-statistics.constants";
 import SurveyStatistics from "./_components/SurveyStatistics";
+import { PATHS } from "@/constants/path.contstants";
 
 interface PageProps {
   params: Promise<{
@@ -29,10 +30,9 @@ export default async function SurveyStatisticsPage({ params }: PageProps) {
     <PageContainer
       title="Thống kê khảo sát"
       breadcrumbs={[
-        { title: "Quản trị", path: "/admin" },
-        { title: "Khảo sát", path: "/admin/surveys" },
-        { title: survey.name, path: `/admin/surveys/${id}` },
-        { title: "Thống kê", path: `/admin/surveys/${id}/statistics` },
+        { title: "Khảo sát", path: PATHS.SURVEYS.ROOT },
+        { title: survey.name, path: "#" },
+        { title: "Thống kê", path: PATHS.SURVEYS.STATISTICS(id) },
       ]}
     >
       <Box sx={{ py: 3 }}>

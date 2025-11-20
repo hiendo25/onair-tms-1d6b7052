@@ -7,6 +7,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HomeIcon from "@mui/icons-material/Home";
 import PublicPageContainer from "@/shared/ui/PageContainer/PublicPageContainer";
 import { MOCK_SURVEYS } from "@/constants/survey.constants";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function ThankYouPage() {
   const params = useParams();
@@ -20,7 +21,7 @@ export default function ThankYouPage() {
   }, [surveyId]);
 
   const handleGoHome = () => {
-    router.push("/");
+    router.push(PATHS.ROOT);
   };
 
   return (

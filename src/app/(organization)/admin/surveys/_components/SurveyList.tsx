@@ -30,6 +30,7 @@ import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { Survey } from "@/types/survey.types";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function SurveyList() {
   const router = useRouter();
@@ -94,7 +95,7 @@ export default function SurveyList() {
   const handleCopyLink = async () => {
     if (!selectedSurveyId) return;
 
-    const surveyUrl = `${window.location.origin}/surveys/${selectedSurveyId}/submit`;
+    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.SUBMIT(selectedSurveyId)}`;
     try {
       await navigator.clipboard.writeText(surveyUrl);
       notifications.show("Đã sao chép liên kết khảo sát", {
@@ -112,14 +113,14 @@ export default function SurveyList() {
 
   const handleViewStatistics = () => {
     if (selectedSurveyId) {
-      router.push(`/admin/surveys/${selectedSurveyId}/statistics`);
+      router.push(PATHS.SURVEYS.STATISTICS(selectedSurveyId));
     }
     handleMenuClose();
   };
 
   const handleEdit = () => {
     if (selectedSurveyId) {
-      router.push(`/admin/surveys/${selectedSurveyId}/edit`);
+      router.push(PATHS.SURVEYS.EDIT_SURVEY(selectedSurveyId));
     }
     handleMenuClose();
   };
@@ -169,7 +170,7 @@ export default function SurveyList() {
   return (
     <PageContainer
       title="Danh sách khảo sát"
-      breadcrumbs={[{ title: "Khảo sát", path: "/admin/surveys" }]}
+      breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
