@@ -11,7 +11,7 @@ export type CreateClassRoomPayload = Pick<
   | "thumbnail_url"
   | "title"
   | "organization_id"
-  | "created_by"
+  | "employee_id"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
@@ -25,7 +25,7 @@ export type UpdateClassRoomPayload = Pick<
   | "status"
   | "thumbnail_url"
   | "organization_id"
-  | "created_by"
+  | "employee_id"
 >;
 export type UpSertClassRoomPayload =
   | {
