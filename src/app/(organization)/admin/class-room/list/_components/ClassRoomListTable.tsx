@@ -32,7 +32,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TABLE_HEAD_CLASS_ROOM } from "../constants";
-import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "../types/types";
+import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
 import ClassRoomType from "./ClassRoomType";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
@@ -82,8 +82,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    return router.push(PATHS.CLASSROOMS.EDIT_CLASSROOM(classRoomId))
-  };
+    return router.push(`/admin/class-room/${classRoomId}/edit`)
+  }
 
   const navigateToSession = useCallback(
     (sessionId?: string, slug?: string | null) => {

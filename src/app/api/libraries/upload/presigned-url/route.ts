@@ -20,17 +20,6 @@ interface PresignedUrlResponse {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSVClient();
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const body: PresignedUrlRequest = await request.json();
     const { fileName, fileType, fileSize } = body;
 

@@ -33,6 +33,7 @@ import {
   createFolder,
   renameResource,
   deleteResource,
+  createFileResource,
 } from "@/services/libraries/library.service";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 
@@ -277,27 +278,16 @@ export function LibraryDialog() {
       });
 
       const fileExtension = file.name.split('.').pop() || '';
-      const createResourceResponse = await fetch("/api/libraries/resources", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: uploadResult.fileName,
-          libraryId: config.libraryId,
-          parentId: currentFolderId,
-          path: uploadResult.url,
-          size: uploadResult.fileSize,
-          mimeType: uploadResult.fileType,
-          extension: fileExtension,
-          thumbnailUrl: uploadResult.thumbnailUrl,
-        }),
-      });
-
-      if (!createResourceResponse.ok) {
-        const errorData = await createResourceResponse.json();
-        throw new Error(errorData.error || "Failed to create resource record");
-      }
+      await createFileResource(
+        uploadResult.fileName,
+        config.libraryId,
+        currentFolderId,
+        uploadResult.url,
+        uploadResult.fileSize,
+        uploadResult.fileType,
+        fileExtension,
+        uploadResult.thumbnailUrl || null
+      );
 
       await refreshResources();
     } catch (err) {

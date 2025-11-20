@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { CreateEmployeeDto } from "@/types/dto/employees";
 import { employeeService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +10,7 @@ export async function POST(request: NextRequest) {
 
     const result = await employeeService.createEmployeeWithRelations(payload);
 
-    revalidatePath("/employees");
+    revalidatePath(PATHS.EMPLOYEES.ROOT);
 
     return NextResponse.json(
       {

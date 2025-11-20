@@ -1,5 +1,6 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import ClassRoomContainer from "./_components/ClassRoomContainer";
+import { PATHS } from "@/constants/path.contstants";
 
 
 const ClassRoomList = () => {
@@ -9,15 +10,15 @@ const ClassRoomList = () => {
       breadcrumbs={[
         {
           title: "LMS",
-          path: "/dashboard/",
+          path: PATHS.DASHBOARD,
         },
         {
           title: "Quản lý lớp học",
-          path: "/class-room"
+          path: PATHS.CLASSROOMS.ROOT,
         },
         {
           title: "Danh sách lớp học",
-          path: "/class-room/list"
+          path: ""
         },
       ]}
     >

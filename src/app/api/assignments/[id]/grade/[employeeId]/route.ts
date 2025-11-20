@@ -7,16 +7,6 @@ export async function GET(
   context: { params: Promise<{ id: string; employeeId: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const { id: assignmentId, employeeId } = params;
 
@@ -45,16 +35,6 @@ export async function POST(
   context: { params: Promise<{ id: string; employeeId: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const { id: assignmentId, employeeId } = params;
 

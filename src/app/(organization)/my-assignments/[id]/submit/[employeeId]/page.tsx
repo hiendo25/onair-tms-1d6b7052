@@ -1,4 +1,4 @@
- import AssignmentSubmission from "@/app/(organization)/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
+import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
 import { PATHS } from "@/constants/path.contstants";
 
 const StudentAssignmentSubmissionPage = async () => {

@@ -37,7 +37,7 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/admin/class-room/list/types/types";
+} from "@/repository/class-room";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 export * from "./type";
 
@@ -394,6 +394,22 @@ const deletePivotClassRoomAndEmployeeByEmployeeId = async (payload: DeletePivotC
 
   if (error) {
     throw new Error(`Failed to delete user in classRoom: ${error.message}`);
+  }
+};
+
+const deleteAllClassRoomEmployeesByEmployeeId = async (employeeId: string) => {
+  const { error } = await supabase.from("class_room_employee").delete().eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete class room employees by employee: ${error.message}`);
+  }
+};
+
+const deleteClassRoomsByEmployeeId = async (employeeId: string) => {
+  const { error } = await supabase.from("class_rooms").update({ status: "deleted" }).eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete class rooms by employee: ${error.message}`);
   }
 };
 
@@ -939,6 +955,8 @@ export {
   getClassRoomStudents,
   getClassRooms,
   deletePivotClassRoomAndEmployeeByEmployeeId,
+  deleteAllClassRoomEmployeesByEmployeeId,
+  deleteClassRoomsByEmployeeId,
   deletePivotClassRoomsWithResources,
   markAttendance,
 };

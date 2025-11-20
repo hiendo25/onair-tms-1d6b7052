@@ -3,6 +3,7 @@ import { createSVClient } from "@/services";
 import * as assignmentResultService from "@/services/assignment-results/assignment-result.service";
 import { Database } from "@/types/supabase.types";
 import { QuestionOption, FileMetadata } from "@/types/dto/assignments";
+import { assignmentsRepository } from "@/repository";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 
@@ -10,9 +11,6 @@ interface SubmitAssignmentRequest {
   employeeId: string;
   answers: Array<{
     questionId: string;
-    questionLabel: string;
-    questionType: QuestionType;
-    options?: QuestionOption[];
     answer: string | string[] | FileMetadata[];
     attachments?: FileMetadata[];
   }>;
@@ -23,16 +21,6 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const assignmentId = params.id;
 
@@ -53,14 +41,49 @@ export async function POST(
       );
     }
 
+    // Validate that all answers have questionId
     for (const answer of answers) {
-      if (!answer.questionId || !answer.questionType) {
+      if (!answer.questionId) {
         return NextResponse.json(
           { error: "Thiếu thông tin câu hỏi" },
           { status: 400 }
         );
       }
+    }
 
+    // Fetch question details from database
+    const questionIds = answers.map(a => a.questionId);
+    const questions = await assignmentsRepository.getQuestionsByIds(questionIds);
+
+    if (questions.length !== answers.length) {
+      return NextResponse.json(
+        { error: "Một số câu hỏi không tồn tại" },
+        { status: 400 }
+      );
+    }
+
+    // Create a map of questions for easy lookup
+    const questionMap = new Map(questions.map(q => [q.id, q]));
+
+    // Populate answer objects with question details from database
+    const enrichedAnswers = answers.map(answer => {
+      const question = questionMap.get(answer.questionId);
+      if (!question) {
+        throw new Error(`Question not found: ${answer.questionId}`);
+      }
+
+      return {
+        questionId: answer.questionId,
+        questionLabel: question.label,
+        questionType: question.type,
+        options: question.options as QuestionOption[] | undefined,
+        answer: answer.answer,
+        attachments: answer.attachments,
+      };
+    });
+
+    // Validate enriched answers
+    for (const answer of enrichedAnswers) {
       if (answer.attachments && Array.isArray(answer.attachments)) {
         for (const attachment of answer.attachments) {
           if (typeof attachment !== "object" || !attachment.url || !attachment.originalName || attachment.fileSize === undefined || !attachment.mimeType) {
@@ -198,7 +221,7 @@ export async function POST(
     const result = await assignmentResultService.submitAssignment({
       assignmentId,
       employeeId,
-      answers,
+      answers: enrichedAnswers,
     });
 
     let message = "Nộp bài thành công!";
@@ -238,16 +261,6 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const assignmentId = params.id;
 

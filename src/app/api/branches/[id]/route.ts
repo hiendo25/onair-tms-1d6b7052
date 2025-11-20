@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { UpdateBranchDto } from "@/types/dto/branches";
 import { branchService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function PUT(
   request: NextRequest,
@@ -16,7 +17,7 @@ export async function PUT(
 
     const result = await branchService.updateBranch(payload);
 
-    revalidatePath("/department/branches");
+    revalidatePath(PATHS.BRANCHES.ROOT);
 
     return NextResponse.json(
       {
@@ -47,7 +48,7 @@ export async function DELETE(
   try {
     await branchService.deleteBranch(params.id);
 
-    revalidatePath("/department/branches");
+    revalidatePath(PATHS.BRANCHES.ROOT);
 
     return NextResponse.json(
       {

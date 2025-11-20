@@ -14,10 +14,10 @@ export const PATHS = {
     IMPORT_BRANCHES: "/department/branches/import",
   },
   EMPLOYEES: {
-    ROOT: "/employees",
-    EMPLOYEES_ID: (id: string = ":id") => `/employees/${id}`,
-    CREATE_EMPLOYEE: "/employees/create",
-    IMPORT_EMPLOYEES: "/employees/import",
+    ROOT: "/admin/employees",
+    EMPLOYEES_ID: (id: string = ":id") => `/admin/employees/${id}`,
+    CREATE_EMPLOYEE: "/admin/employees/create",
+    IMPORT_EMPLOYEES: "/admin/employees/import",
   },
   ROLE: {
     ROOT: "/roles",
@@ -28,7 +28,7 @@ export const PATHS = {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
-    LIST_CLASSROOM: "admin/class-room/list",
+    LIST_CLASSROOM: "/admin/class-room/list",
     DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
   },
@@ -43,13 +43,13 @@ export const PATHS = {
     ROOT: "/my-class",
   },
   ASSIGNMENTS: {
-    ROOT: "/assignments",
-    CREATE_ASSIGNMENT: "/assignments/create",
-    EDIT_ASSIGNMENT: (id: string = ":id") => `/assignments/edit/${id}`,
-    STUDENTS: (id: string = ":id") => `/assignments/${id}/students`,
-    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/submit/${employeeId}`,
-    GRADE: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/grade/${employeeId}`,
-    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/assignments/${id}/result/${employeeId}`,
+    ROOT: "/admin/assignments",
+    CREATE_ASSIGNMENT: "/admin/assignments/create",
+    EDIT_ASSIGNMENT: (id: string = ":id") => `/admin/assignments/edit/${id}`,
+    STUDENTS: (id: string = ":id") => `/admin/assignments/${id}/students`,
+    SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/submit/${employeeId}`,
+    GRADE: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/grade/${employeeId}`,
+    RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/result/${employeeId}`,
   },
   MY_ASSIGNMENTS: {
     ROOT: "/my-assignments",
@@ -60,5 +60,13 @@ export const PATHS = {
   REPORTS: {
     ROOT: "/report",
     OVER_VIEW: "/report/overview",
+  },
+  SURVEYS: {
+    ROOT: "/admin/surveys",
+    CREATE_SURVEY: "/admin/surveys/create",
+    EDIT_SURVEY: (id: string = ":id") => `/admin/surveys/${id}/edit`,
+    STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
+    SUBMIT: (id: string = ":id") => `/surveys/${id}/submit`,
+    THANK_YOU: (id: string = ":id") => `/surveys/${id}/submit/thank-you`,
   },
 };

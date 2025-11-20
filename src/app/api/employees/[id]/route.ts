@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { UpdateEmployeeDto } from "@/types/dto/employees";
 import { employeeService } from "@/services";
+import { PATHS } from "@/constants/path.contstants";
 
 export async function DELETE(
   request: NextRequest,
@@ -19,7 +20,7 @@ export async function DELETE(
 
     await employeeService.deleteEmployeeWithRelations(employeeId);
 
-    revalidatePath("/employees");
+    revalidatePath(PATHS.EMPLOYEES.ROOT);
 
     return NextResponse.json(
       {
@@ -66,7 +67,7 @@ export async function PUT(
 
     await employeeService.updateEmployeeWithRelations(payload);
 
-    revalidatePath("/employees");
+    revalidatePath(PATHS.EMPLOYEES.ROOT);
 
     return NextResponse.json(
       {

@@ -1,18 +1,21 @@
 import { Box } from "@mui/material";
 import SPAHeader from "./header";
+import PublicHeader from "./PublicHeader";
 
 interface PropTypes {
     children: React.ReactNode;
     loading?: boolean;
+    isPublic?: boolean;
 }
 
 export const SPALayout: React.FC<PropTypes> = async ({
     children,
-    loading
+    loading,
+    isPublic = false
 }) => {
     return (
         <>
-            <SPAHeader />
+            {isPublic ? <PublicHeader /> : <SPAHeader />}
             <Box
             >
                 {children}

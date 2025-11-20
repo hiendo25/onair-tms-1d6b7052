@@ -11,6 +11,13 @@ import {
   employmentsRepository,
   managersEmployeesRepository,
   organizationsRepository,
+  assignmentsRepository,
+  assignmentResultsRepository,
+  qrAttendanceRepository,
+  classRoomRepository,
+  classRoomSessionRepository,
+  coursesRepository,
+  libraryRepository,
 } from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { createSVClient } from "@/services/supabase/server";
@@ -70,8 +77,6 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
-    const organization = await organizationsRepository.getFirstOrganization();
-
     const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
@@ -81,7 +86,6 @@ async function createEmployeeWithRelations(
       employee_type: payload.employee_type || null,
       organization_id: organizationId,
       status: "active",
-      organization_id: organization.id,
     });
 
     employeeId = employeeData.id;
@@ -221,11 +225,34 @@ async function deleteEmployeeWithRelations(
 ): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
+  // Delete assignment-related relationships (child records first, then parent)
+  await assignmentResultsRepository.deleteAssignmentResultsByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentEmployeesByEmployeeId(employeeId);
+  await assignmentsRepository.deleteQuestionsByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentCategoriesByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentsByEmployeeId(employeeId);
+
+  // Delete class-related relationships
+  await qrAttendanceRepository.deleteAttendancesByEmployeeId(employeeId);
+  await qrAttendanceRepository.deleteQRCodesByEmployeeId(employeeId);
+  await classRoomRepository.deleteAllClassRoomEmployeesByEmployeeId(employeeId);
+  await classRoomSessionRepository.deleteClassSessionTeachersByEmployeeId(employeeId);
+  await classRoomRepository.deleteClassRoomsByEmployeeId(employeeId);
+
+  // Delete course-related relationships
+  await coursesRepository.deleteCoursesByEmployeeId(employeeId);
+
+  // Delete library-related relationships
+  await libraryRepository.softDeleteResourcesByEmployeeId(employeeId);
+  await libraryRepository.deleteLibraryByEmployeeId(employeeId);
+
+  // Delete core employee relationships
   await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
   await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);
 
+  // Delete auth user
   const adminSupabase = createServiceRoleClient();
   const { error: authError } = await adminSupabase.auth.admin.deleteUser(userId);
 

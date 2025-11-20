@@ -6,13 +6,13 @@ import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import CloseIcon from "@mui/icons-material/Close";
-import { useGetCourseListQuery } from "../../operations/query";
+import { useGetCourseListMinimalQuery } from "../../operations/query";
 import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
 import { SearchIcon } from "@/shared/assets/icons";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
 import useDebounce from "@/hooks/useDebounce";
 import { columns } from "./columns";
-import { GetCoursesResponse } from "@/repository/courses";
+import { GetCoursesListMinimalResponse } from "@/repository/courses";
 
 export type SimpleDialogCourseSelectorRef = {
   openDialog: () => void;
@@ -20,7 +20,7 @@ export type SimpleDialogCourseSelectorRef = {
 };
 export interface SimpleDialogCourseSelectorProps {
   disableMultipleSelect?: boolean;
-  onOk?: (course: NonNullable<GetCoursesResponse["data"]>) => void;
+  onOk?: (course: NonNullable<GetCoursesListMinimalResponse["data"]>) => void;
   value?: string[];
 }
 const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, SimpleDialogCourseSelectorProps>(
@@ -30,13 +30,15 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
     const [searchTeacherName, setSearchTeacherName] = useState("");
     const searchDebouce = useDebounce(searchTeacherName, 600);
     const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
-    const [selectedCourseList, setSelectedCourseList] = useState<NonNullable<GetCoursesResponse["data"]>>([]);
+    const [selectedCourseList, setSelectedCourseList] = useState<NonNullable<GetCoursesListMinimalResponse["data"]>>(
+      [],
+    );
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
       ids: new Set(value),
       type: "include",
     });
 
-    const { data: courseData, isPending } = useGetCourseListQuery({
+    const { data: courseData, isPending } = useGetCourseListMinimalQuery({
       queryParams: {
         page: paginationModel.page + 1,
         pageSize: paginationModel.pageSize,

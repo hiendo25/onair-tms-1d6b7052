@@ -1,4 +1,4 @@
-import AssignmentResult from "@/app/(organization)/assignments/[id]/result/[employeeId]/_components/AssignmentResult";
+import AssignmentResult from "@/app/(organization)/admin/assignments/[id]/result/[employeeId]/_components/AssignmentResult";
 import { PATHS } from "@/constants/path.contstants";
 
 interface StudentAssignmentResultPageProps {
