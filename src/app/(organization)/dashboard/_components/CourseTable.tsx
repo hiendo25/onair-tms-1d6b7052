@@ -25,17 +25,19 @@ import { EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 
 type DashboardCourseRow = {
   id: string;
+  slug?: string | null;
   label: string;
   name: string;
   mode: "Trực tuyến (Online)" | "Trực tiếp (Offline)";
   students: number;
   teachers: EmployeeWithProfileDto[];
-  start_at: Date;
-  end_at: Date;
+  start_at: string | null;
+  end_at: string | null;
 };
 
 const CourseTable = () => {
   const user = useUserOrganization((state) => state.data);
+  const formatDateLabel = (date?: string | null) => fDate(date) ?? "Chưa có lịch";
 
   const monthRange = React.useMemo(
     () => ({
@@ -83,16 +85,18 @@ const CourseTable = () => {
 
       const teachers = [
         ...new Map(
-          sessions.flatMap(s => s.teacherAssignments ?? [])
-            .map(a => [a?.teacher?.id, a.teacher])
-        ).values()
-      ];
+          sessions
+            .flatMap((session) => session.teacherAssignments ?? [])
+            .map((assignment) => [assignment?.teacher?.id, assignment.teacher]),
+        ).values(),
+      ].filter(Boolean) as EmployeeWithProfileDto[];
 
       const sessionForMode = sessions.find((session) => session.is_online !== null && session.is_online !== undefined);
       const isOnline = sessionForMode?.is_online ?? sessions[0]?.is_online ?? false;
 
       return {
         id: classRoom.id,
+        slug: classRoom.slug,
         label: classRoom.room_type === "multiple" ? "Chuỗi" : "Đơn",
         name: classRoom.title ?? "Lớp học",
         mode: isOnline ? "Trực tuyến (Online)" : "Trực tiếp (Offline)",
@@ -200,84 +204,95 @@ const CourseTable = () => {
             </Box>
           ) : (
             courseRows.map((row) => (
-              <Box
+              <Link
                 key={row.id}
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr 1fr",
-                  px: 2,
-                  py: 1.75,
-                  gap: 1,
-                  alignItems: "center",
-                  bgcolor: "#fff",
-                }}
+                href={PATHS.CLASSROOMS.DETAIL_CLASSROOM(row.slug || row.id)}
+                style={{ textDecoration: "none" }}
               >
-                <Stack spacing={0.6}>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <Chip
-                      label={row.label}
-                      size="small"
-                      sx={{
-                        bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B1F" : "#0050FF29",
-                        color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#0038B2",
-                        height: 24,
-                        "& .MuiChip-label": {
-                          color: "unset",
-                        },
-                      }}
-                    />
-                  </Stack>
-                  <Typography className="font-normal text-xs text-[#212B36] line-clamp-2">
-                    {row.name}
-                  </Typography>
-                </Stack>
-
-                <Chip
-                  label={row.mode}
-                  size="small"
+                <Box
                   sx={{
-                    bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B29" : "#9723F93D",
-                    color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#6E05C6",
-                    height: 26,
-                    justifySelf: "flex-start",
-                    "& .MuiChip-label": {
-                      color: "unset",
+                    display: "grid",
+                    gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr 1fr",
+                    px: 2,
+                    py: 1.75,
+                    gap: 1,
+                    alignItems: "center",
+                    bgcolor: "#fff",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease, transform 0.1s ease",
+                    "&:hover": {
+                      bgcolor: "#f5f8ff",
+                      transform: "translateY(-1px)",
                     },
                   }}
-                />
+                >
+                  <Stack spacing={0.6}>
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Chip
+                        label={row.label}
+                        size="small"
+                        sx={{
+                          bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B1F" : "#0050FF29",
+                          color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#0038B2",
+                          height: 24,
+                          "& .MuiChip-label": {
+                            color: "unset",
+                          },
+                        }}
+                      />
+                    </Stack>
+                    <Typography className="font-normal text-xs text-[#212B36] line-clamp-2">
+                      {row.name}
+                    </Typography>
+                  </Stack>
 
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <PeopleAltOutlinedIcon className="w-4 h-4" />
-                  <Typography className="font-normal text-xs text-[#212B36]">
-                    {row.students}
-                  </Typography>
-                </Stack>
+                  <Chip
+                    label={row.mode}
+                    size="small"
+                    sx={{
+                      bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B29" : "#9723F93D",
+                      color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#6E05C6",
+                      height: 26,
+                      justifySelf: "flex-start",
+                      "& .MuiChip-label": {
+                        color: "unset",
+                      },
+                    }}
+                  />
 
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <AvatarGroup sx={{ justifyContent: "center" }} variant="circular" max={4}>
-                    {row.teachers.map((teacher) => {
-                      return (
-                        <Tooltip key={teacher.profile?.id} title={teacher.profile?.full_name}>
-                          <Avatar
-                            alt={teacher.profile?.full_name}
-                            src={teacher.profile?.avatar as string}
-                            sx={{ width: 24, height: 24 }}
-                          />
-                        </Tooltip>
-                      );
-                    })}
-                  </AvatarGroup>
-                </Stack>
+                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <PeopleAltOutlinedIcon className="w-4 h-4" />
+                    <Typography className="font-normal text-xs text-[#212B36]">
+                      {row.students}
+                    </Typography>
+                  </Stack>
 
-                <Stack spacing={0.5}>
-                  <Typography className="font-normal text-xs text-[#212B36]">
-                    {fDate(row.start_at)}
-                  </Typography>
-                  <Typography className="font-normal text-xs text-[#212B36]">
-                    {fDate(row.end_at)}
-                  </Typography>
-                </Stack>
-              </Box>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <AvatarGroup sx={{ justifyContent: "center" }} variant="circular" max={4}>
+                      {row.teachers.map((teacher) => {
+                        return (
+                          <Tooltip key={teacher.profile?.id || teacher.id} title={teacher.profile?.full_name}>
+                            <Avatar
+                              alt={teacher.profile?.full_name}
+                              src={teacher.profile?.avatar as string}
+                              sx={{ width: 24, height: 24 }}
+                            />
+                          </Tooltip>
+                        );
+                      })}
+                    </AvatarGroup>
+                  </Stack>
+
+                  <Stack spacing={0.5}>
+                    <Typography className="font-normal text-xs text-[#212B36]">
+                      {formatDateLabel(row.start_at)}
+                    </Typography>
+                    <Typography className="font-normal text-xs text-[#212B36]">
+                      {formatDateLabel(row.end_at)}
+                    </Typography>
+                  </Stack>
+                </Box>
+              </Link>
             ))
           )}
         </Stack>
