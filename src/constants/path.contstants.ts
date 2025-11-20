@@ -61,4 +61,12 @@ export const PATHS = {
     ROOT: "/report",
     OVER_VIEW: "/report/overview",
   },
+  SURVEYS: {
+    ROOT: "/admin/surveys",
+    CREATE_SURVEY: "/admin/surveys/create",
+    EDIT_SURVEY: (id: string = ":id") => `/admin/surveys/${id}/edit`,
+    STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
+    SUBMIT: (id: string = ":id") => `/surveys/${id}/submit`,
+    THANK_YOU: (id: string = ":id") => `/surveys/${id}/submit/thank-you`,
+  },
 };

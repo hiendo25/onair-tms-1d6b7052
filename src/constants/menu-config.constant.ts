@@ -11,9 +11,7 @@ import {
   BarChart10Icon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import React from "react";
+import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';import React from "react";
 import { PATHS } from "./path.contstants";
 
 const ADMIN_MENU_LIST: MenuItemType[] = [
@@ -104,6 +102,20 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
         icon: React.createElement(ClipboardIcon),
         key: "assignments",
         path: PATHS.ASSIGNMENTS.ROOT,
+      },
+    ],
+  },
+  {
+    title: "Quản lý kế hoạch",
+    icon: React.createElement(StickyNote2OutlinedIcon),
+    key: "planning",
+    path: PATHS.SURVEYS.ROOT,
+    children: [
+      {
+        title: "Quản lý khảo sát",
+        icon: React.createElement(ClipboardIcon),
+        key: "planning/surveys",
+        path: PATHS.SURVEYS.ROOT,
       },
     ],
   },

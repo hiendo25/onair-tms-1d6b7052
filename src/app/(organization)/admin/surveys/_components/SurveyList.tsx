@@ -22,16 +22,15 @@ import {
   TextField,
   InputAdornment,
 } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import LinkIcon from "@mui/icons-material/Link";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
 import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { Survey } from "@/types/survey.types";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { PATHS } from "@/constants/path.contstants";
 
 export default function SurveyList() {
   const router = useRouter();
@@ -42,6 +41,9 @@ export default function SurveyList() {
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const [surveys, setSurveys] = React.useState<Survey[]>(MOCK_SURVEYS);
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [selectedSurveyId, setSelectedSurveyId] = React.useState<string | null>(null);
+  const menuOpen = Boolean(anchorEl);
 
   const filteredSurveys = React.useMemo(() => {
     if (!searchQuery.trim()) {
@@ -79,34 +81,21 @@ export default function SurveyList() {
     router.push("/admin/surveys/create");
   };
 
-  const handleEdit = (id: string) => {
-    router.push(`/admin/surveys/${id}/edit`);
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, surveyId: string) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setSelectedSurveyId(surveyId);
   };
 
-  const handleDelete = async (id: string) => {
-    const confirmed = await dialogs.confirm(
-      "Bạn có chắc chắn muốn xóa khảo sát này không? Hành động này không thể hoàn tác.",
-      {
-        title: "Xác nhận xóa",
-        okText: "Xóa",
-        cancelText: "Hủy",
-        severity: "error",
-      },
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setSurveys((prev) => prev.filter((survey) => survey.id !== id));
-    notifications.show("Xóa khảo sát thành công!", {
-      severity: "success",
-      autoHideDuration: 3000,
-    });
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedSurveyId(null);
   };
 
-  const handleCopyLink = async (id: string) => {
-    const surveyUrl = `${window.location.origin}/surveys/${id}/submit`;
+  const handleCopyLink = async () => {
+    if (!selectedSurveyId) return;
+
+    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.SUBMIT(selectedSurveyId)}`;
     try {
       await navigator.clipboard.writeText(surveyUrl);
       notifications.show("Đã sao chép liên kết khảo sát", {
@@ -119,6 +108,47 @@ export default function SurveyList() {
         autoHideDuration: 3000,
       });
     }
+    handleMenuClose();
+  };
+
+  const handleViewStatistics = () => {
+    if (selectedSurveyId) {
+      router.push(PATHS.SURVEYS.STATISTICS(selectedSurveyId));
+    }
+    handleMenuClose();
+  };
+
+  const handleEdit = () => {
+    if (selectedSurveyId) {
+      router.push(PATHS.SURVEYS.EDIT_SURVEY(selectedSurveyId));
+    }
+    handleMenuClose();
+  };
+
+  const handleDelete = async () => {
+    if (!selectedSurveyId) return;
+
+    const confirmed = await dialogs.confirm(
+      "Bạn có chắc chắn muốn xóa khảo sát này không? Hành động này không thể hoàn tác.",
+      {
+        title: "Xác nhận xóa",
+        okText: "Xóa",
+        cancelText: "Hủy",
+        severity: "error",
+      },
+    );
+
+    if (!confirmed) {
+      handleMenuClose();
+      return;
+    }
+
+    setSurveys((prev) => prev.filter((survey) => survey.id !== selectedSurveyId));
+    notifications.show("Xóa khảo sát thành công!", {
+      severity: "success",
+      autoHideDuration: 3000,
+    });
+    handleMenuClose();
   };
 
   const formatDate = (dateString: string) => {
@@ -140,7 +170,7 @@ export default function SurveyList() {
   return (
     <PageContainer
       title="Danh sách khảo sát"
-      breadcrumbs={[{ title: "Khảo sát", path: "/admin/surveys" }]}
+      breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
@@ -177,7 +207,7 @@ export default function SurveyList() {
                   <TableCell>Tên khảo sát</TableCell>
                   <TableCell>Số lượng phản hồi</TableCell>
                   <TableCell>Ngày tạo</TableCell>
-                  <TableCell align="center">Hành động</TableCell>
+                  <TableCell align="center"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -212,42 +242,9 @@ export default function SurveyList() {
                       <TableCell>{survey.total_submissions}</TableCell>
                       <TableCell>{formatDate(survey.created_at)}</TableCell>
                       <TableCell align="center">
-                        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
-                          <IconButton
-                            size="small"
-                            onClick={() => handleCopyLink(survey.id)}
-                            title="Sao chép liên kết"
-                            sx={{
-                              color: "text.secondary",
-                              "&:hover": {
-                                color: "primary.main",
-                              },
-                            }}
-                          >
-                            <LinkIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEdit(survey.id)}
-                            title="Chỉnh sửa"
-                            sx={{
-                              color: "text.secondary",
-                              "&:hover": {
-                                color: "primary.main",
-                              },
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => handleDelete(survey.id)}
-                            title="Xóa"
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, survey.id)}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
                       </TableCell>
                     </TableRow>
                   ))
@@ -267,6 +264,33 @@ export default function SurveyList() {
             labelRowsPerPage="Số hàng mỗi trang:"
             labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
           />
+
+          <Menu
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <MenuItem onClick={handleViewStatistics}>
+              <ListItemText>Xem thống kê</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleCopyLink}>
+              <ListItemText>Sao chép liên kết</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleEdit}>
+              <ListItemText>Chỉnh sửa</ListItemText>
+            </MenuItem>
+            <MenuItem onClick={handleDelete}>
+              <ListItemText>Xóa khảo sát</ListItemText>
+            </MenuItem>
+          </Menu>
         </Card>
       </Box>
     </PageContainer>

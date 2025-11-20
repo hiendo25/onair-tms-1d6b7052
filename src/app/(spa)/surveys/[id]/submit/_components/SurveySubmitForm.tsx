@@ -31,6 +31,7 @@ import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { Survey, Question, QuestionAnswer } from "@/types/survey.types";
 import { surveySubmissionSchema, SurveySubmissionSchema } from "@/modules/surveys/survey-submission.schema";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { PATHS } from "@/constants/path.contstants";
 
 interface QuestionCardProps {
   question: Question;
@@ -309,7 +310,7 @@ export default function SurveySubmitForm() {
       });
 
       // Redirect to thank you page
-      router.push(`/surveys/${surveyId}/submit/thank-you`);
+      router.push(PATHS.SURVEYS.THANK_YOU(surveyId));
     } catch (error) {
       console.error("Error submitting survey:", error);
       notifications.show("Có lỗi xảy ra khi nộp khảo sát. Vui lòng thử lại.", {

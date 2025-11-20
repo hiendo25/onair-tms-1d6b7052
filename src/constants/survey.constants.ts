@@ -11,54 +11,76 @@ export const QUESTION_TYPE_OPTIONS: { id: QuestionType; label: string }[] = [
 export const MOCK_SURVEYS: Survey[] = [
   {
     id: "1",
-    name: "Khảo sát mức độ hài lòng về khóa học",
-    description: "Khảo sát đánh giá mức độ hài lòng của học viên về chất lượng khóa học và giảng viên",
+    name: "Đánh giá hiệu quả khóa học đã hoàn thành",
+    description: "Khảo sát đánh giá mức độ hài lòng và hiệu quả của các khóa học đã tham gia trong quý vừa qua",
     questions: [
       {
         id: "q1",
-        label: "Bạn đánh giá như thế nào về chất lượng khóa học?",
+        label: "Bạn đánh giá như thế nào về chất lượng nội dung khóa học?",
         type: "rating",
         is_required: true,
       },
       {
         id: "q2",
-        label: "Giảng viên có truyền đạt kiến thức rõ ràng không?",
-        type: "radio",
+        label: "Yếu tố nào của khóa học bạn đánh giá cao nhất? (Chọn nhiều đáp án)",
+        type: "checkbox",
         is_required: true,
-        options: ["Rất rõ ràng", "Rõ ràng", "Bình thường", "Chưa rõ ràng", "Không rõ ràng"],
+        options: [
+          "Nội dung bài giảng chất lượng",
+          "Giảng viên nhiệt tình và chuyên nghiệp",
+          "Bài tập thực hành phong phú",
+          "Tài liệu học tập đầy đủ",
+          "Hỗ trợ học viên tốt",
+          "Nền tảng học trực tuyến dễ sử dụng"
+        ],
       },
       {
         id: "q3",
-        label: "Bạn có góp ý gì thêm không?",
+        label: "Mức độ ứng dụng kiến thức từ khóa học vào công việc thực tế",
+        type: "rating",
+        is_required: true,
+      },
+      {
+        id: "q4",
+        label: "Bạn có đề xuất gì để cải thiện chất lượng khóa học?",
         type: "text",
         is_required: false,
       },
     ],
-    total_submissions: 45,
+    total_submissions: 127,
     created_at: "2024-01-15T08:30:00Z",
   },
   {
     id: "2",
-    name: "Khảo sát nhu cầu đào tạo",
-    description: "Thu thập thông tin về nhu cầu đào tạo và phát triển kỹ năng của nhân viên",
+    name: "Khảo sát nhu cầu đào tạo năm 2025",
+    description: "Thu thập thông tin về nhu cầu đào tạo và kế hoạch phát triển kỹ năng cho năm 2025",
     questions: [
       {
         id: "q1",
-        label: "Bạn muốn học thêm kỹ năng nào?",
+        label: "Bạn muốn phát triển kỹ năng nào trong năm 2025? (Chọn nhiều đáp án)",
         type: "checkbox",
         is_required: true,
-        options: ["Lập trình", "Thiết kế", "Marketing", "Quản lý dự án", "Ngoại ngữ", "Kỹ năng mềm"],
+        options: [
+          "Lập trình và phát triển phần mềm",
+          "Phân tích dữ liệu và AI",
+          "Quản lý dự án Agile/Scrum",
+          "Kỹ năng lãnh đạo và quản lý",
+          "Thiết kế giảng dạy trực tuyến",
+          "Công nghệ giáo dục (EdTech)",
+          "Kỹ năng giao tiếp và thuyết trình",
+          "Quản lý thời gian và năng suất"
+        ],
       },
       {
         id: "q2",
-        label: "Thời gian học phù hợp với bạn?",
+        label: "Thời lượng khóa học phù hợp với bạn?",
         type: "select",
         is_required: true,
-        options: ["Sáng (8h-12h)", "Chiều (13h-17h)", "Tối (18h-21h)", "Cuối tuần"],
+        options: ["1-2 tuần", "1 tháng", "2-3 tháng", "6 tháng", "Linh hoạt theo tiến độ cá nhân"],
       },
       {
         id: "q3",
-        label: "Lý do bạn muốn tham gia khóa học?",
+        label: "Mục tiêu phát triển nghề nghiệp của bạn cần những khóa học nào?",
         type: "text",
         is_required: true,
       },
@@ -68,18 +90,18 @@ export const MOCK_SURVEYS: Survey[] = [
   },
   {
     id: "3",
-    name: "Đánh giá môi trường làm việc",
-    description: "Khảo sát về môi trường làm việc và văn hóa công ty",
+    name: "Phân tích khoảng trống kỹ năng theo vị trí",
+    description: "Đánh giá khoảng cách giữa kỹ năng hiện tại và kỹ năng cần thiết cho từng vị trí công việc",
     questions: [
       {
         id: "q1",
-        label: "Bạn có hài lòng với môi trường làm việc hiện tại?",
+        label: "Mức độ tự tin của bạn với các kỹ năng cần thiết cho vị trí hiện tại",
         type: "rating",
         is_required: true,
       },
       {
         id: "q2",
-        label: "Điều gì bạn thích nhất ở công ty?",
+        label: "Kỹ năng nào bạn cần cải thiện để thực hiện tốt hơn công việc hiện tại?",
         type: "text",
         is_required: false,
       },
@@ -89,19 +111,27 @@ export const MOCK_SURVEYS: Survey[] = [
   },
   {
     id: "4",
-    name: "Khảo sát về công nghệ và công cụ làm việc",
-    description: "Thu thập ý kiến về các công nghệ và công cụ hỗ trợ công việc",
+    name: "Đánh giá nền tảng LMS và công cụ học tập",
+    description: "Thu thập phản hồi về trải nghiệm sử dụng nền tảng học trực tuyến và các công cụ hỗ trợ học tập",
     questions: [
       {
         id: "q1",
-        label: "Công cụ nào bạn sử dụng thường xuyên nhất?",
+        label: "Tính năng nào của nền tảng LMS bạn sử dụng thường xuyên nhất? (Chọn nhiều đáp án)",
         type: "checkbox",
         is_required: true,
-        options: ["Slack", "Microsoft Teams", "Zoom", "Jira", "Trello", "Google Workspace"],
+        options: [
+          "Xem video bài giảng",
+          "Làm bài tập và kiểm tra",
+          "Tham gia diễn đàn thảo luận",
+          "Tải tài liệu học tập",
+          "Theo dõi tiến độ học tập",
+          "Tương tác với giảng viên",
+          "Học nhóm trực tuyến"
+        ],
       },
       {
         id: "q2",
-        label: "Bạn có gặp khó khăn gì khi sử dụng công cụ không?",
+        label: "Bạn gặp khó khăn gì khi sử dụng nền tảng học trực tuyến?",
         type: "text",
         is_required: false,
       },
@@ -111,25 +141,32 @@ export const MOCK_SURVEYS: Survey[] = [
   },
   {
     id: "5",
-    name: "Khảo sát về chế độ phúc lợi",
-    description: "Đánh giá mức độ hài lòng về các chính sách phúc lợi của công ty",
+    name: "Lập kế hoạch chương trình đào tạo quý 1/2025",
+    description: "Khảo sát để xây dựng kế hoạch đào tạo chi tiết cho quý 1 năm 2025",
     questions: [
       {
         id: "q1",
-        label: "Bạn đánh giá như thế nào về chế độ phúc lợi hiện tại?",
+        label: "Mức độ ưu tiên của việc tham gia đào tạo trong quý tới",
         type: "rating",
         is_required: true,
       },
       {
         id: "q2",
-        label: "Phúc lợi nào bạn mong muốn được cải thiện?",
+        label: "Hình thức đào tạo bạn mong muốn? (Chọn nhiều đáp án)",
         type: "checkbox",
         is_required: true,
-        options: ["Bảo hiểm y tế", "Nghỉ phép", "Thưởng", "Đào tạo", "Chế độ ăn trưa", "Hoạt động team building"],
+        options: [
+          "Khóa học trực tuyến tự học",
+          "Lớp học trực tuyến có giảng viên",
+          "Hội thảo/Workshop trực tiếp",
+          "Học kết hợp (Blended Learning)",
+          "Coaching 1-1",
+          "Dự án thực hành nhóm"
+        ],
       },
       {
         id: "q3",
-        label: "Ý kiến khác",
+        label: "Đề xuất chủ đề khóa học cụ thể bạn muốn tham gia trong quý 1/2025",
         type: "text",
         is_required: false,
       },

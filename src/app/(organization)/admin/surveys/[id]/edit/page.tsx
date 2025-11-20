@@ -1,5 +1,6 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import EditSurveyForm from "./_components/EditSurveyForm";
+import { PATHS } from "@/constants/path.contstants";
 
 interface EditSurveyPageProps {
   params: Promise<{
@@ -14,7 +15,7 @@ export default async function EditSurveyPage({ params }: EditSurveyPageProps) {
     <PageContainer
       title="Chỉnh sửa khảo sát"
       breadcrumbs={[
-        { title: "Khảo sát", path: "/admin/surveys" },
+        { title: "Khảo sát", path: PATHS.SURVEYS.ROOT },
         { title: "Chỉnh sửa khảo sát" },
       ]}
     >
