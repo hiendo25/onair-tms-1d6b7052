@@ -8,18 +8,25 @@ import {
 import type {
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
+  CreatePivotClassRoomWithResourcePayload,
 } from "@/repository/class-room";
-import type { CreateClassRoomSessionPayload, UpSertClassRoomSessionPayload } from "@/repository/class-session";
+import type {
+  CreateClassRoomSessionPayload,
+  CreatePivotClassSessionWithCoursePeriodPayload,
+  UpSertClassRoomSessionPayload,
+} from "@/repository/class-session";
 import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
 import { enqueueSnackbar } from "notistack";
 
-import { ClassRoom } from "../components/classroom-form.schema";
+import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useTMutation } from "@/lib";
 import { ClassRoomStore } from "../store/class-room-store";
 import { isUndefined } from "lodash";
 import { qrAttendanceRepository } from "@/repository";
 import { CreateQRCodePayload, UpSertQrCodePayload } from "@/repository/qr-attendance";
+import dayjs from "dayjs";
+
 const useCRUDClassRoom = () => {
   const userInfo = useUserOrganization((state) => state.data);
 
@@ -34,20 +41,15 @@ const useCRUDClassRoom = () => {
       const {
         categories,
         platform,
-        // hashTags,
         classRoomSessions,
-        // communityInfo,
-        // galleries,
         description,
         thumbnailUrl,
         roomType,
         slug,
         status,
         title,
-        // faqs,
         forWhom,
         docs,
-        // whies,
       } = formData;
 
       const { startDate, endDate } = getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
@@ -57,19 +59,16 @@ const useCRUDClassRoom = () => {
       const { data: classRoomData, error } = await classRoomRepository.upsertClassRoom({
         action: "create",
         payload: {
-          // comunity_info: communityInfo,
           description: description,
           room_type: roomType,
           slug: slug,
           status: status,
           thumbnail_url: thumbnailUrl,
           title: title,
-          employee_id: userInfo.id,
+          created_by: userInfo.id,
           start_at: startDate,
           end_at: endDate,
           organization_id: userInfo.organization.id,
-          resource_id: null,
-          documents: docs || null,
         },
       });
 
@@ -81,22 +80,6 @@ const useCRUDClassRoom = () => {
       /**
        * Step 2: Create ClassRoom Meta
        */
-      // if (faqs.length) {
-      //   const { data: faqsData, error: faqsDataError } = await classRoomMetaRepository.createClassRoomMeta({
-      //     class_room_id: classRoomData.id,
-      //     key: "faqs",
-      //     value: faqs.map((faq) => ({ answer: faq.answer, question: faq.question })),
-      //   });
-      // }
-
-      // if (whies.length) {
-      //   const { data: whyData, error: whyError } = await classRoomMetaRepository.createClassRoomMeta({
-      //     class_room_id: classRoomData.id,
-      //     key: "why",
-      //     value: whies.map((item) => item.description),
-      //   });
-      // }
-
       if (forWhom.length) {
         const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.createClassRoomMeta({
           class_room_id: classRoomData.id,
@@ -104,13 +87,6 @@ const useCRUDClassRoom = () => {
           value: forWhom.map((item) => item.description),
         });
       }
-      // if (galleries.length) {
-      //   const { data: galleriesData, error: galleriesDataError } = await classRoomMetaRepository.createClassRoomMeta({
-      //     class_room_id: classRoomData.id,
-      //     key: "galleries",
-      //     value: galleries,
-      //   });
-      // }
 
       /**
        * Step 3: Sync Class room with Class Field
@@ -122,15 +98,16 @@ const useCRUDClassRoom = () => {
         })),
       );
       /**
-       * Step 4: Sync Class room with Hashtags
+       * Step 4: Sync Class room with Resources
        */
-      // await classRoomRepository.createPivotClassRoomAndHashTag(
-      //   hashTags.map<CreatePivotClassRoomAndHashTagPayload>((hashTagId) => ({
-      //     hash_tag_id: hashTagId,
-      //     class_room_id: classRoomData.id,
-      //   })),
-      // );
-
+      if (docs && docs.length) {
+        await classRoomRepository.createPivotClassRoomsWithResources(
+          docs.map<CreatePivotClassRoomWithResourcePayload>((rc) => ({
+            resource_id: rc.id,
+            class_room_id: classRoomData.id,
+          })),
+        );
+      }
       /**
        * Step 5: Sync ClassRoom with Students
        */
@@ -148,21 +125,12 @@ const useCRUDClassRoom = () => {
       await Promise.all(
         classRoomSessions.map(async (classSession, _sessionIndex) => {
           try {
-            const sessionPayload = mapSessionWithClassRoom(
-              classSession,
-              roomType,
-              title,
-              description,
-              classRoomData.id,
-              _sessionIndex,
-            );
-
             const { data: sessionData, error: sessionError } = await classRoomSessionRepository.createClassSession(
-              sessionPayload,
+              mapSessionWithClassRoom(classSession, roomType, title, description, classRoomData.id, _sessionIndex),
             );
 
             if (sessionError) {
-              console.log("Create Session failed", sessionError);
+              console.log("Create Session failed", sessionError, _sessionIndex);
               throw new Error("Create Classroom Session Failed");
             }
 
@@ -177,20 +145,22 @@ const useCRUDClassRoom = () => {
 
             /**
              * Teachers
+             *  teacher removed from Update 20/11/2025
              */
-            const teacherPromise = (async () => {
-              const teachersList = teachers[_sessionIndex] || [];
-              const { error: teacherError } = await classRoomSessionRepository.createPivotClassSessionAndTeacher(
-                teachersList.map((tc) => ({
-                  class_session_id: sessionData.id,
-                  teacher_id: tc.id,
-                })),
-              );
-              if (teacherError) throw new Error("Create Teacher failed");
-            })();
+            // const teacherPromise = (async () => {
+            //   const teachersList = teachers[_sessionIndex] || [];
+            //   const { error: teacherError } = await classRoomSessionRepository.createPivotClassSessionAndTeacher(
+            //     teachersList.map((tc) => ({
+            //       class_session_id: sessionData.id,
+            //       teacher_id: tc.id,
+            //     })),
+            //   );
+            //   if (teacherError) throw new Error("Create Teacher failed");
+            // })();
 
             /**
              * QRCode
+             * this QRcode only for classroom is offline
              */
             const qrCodePromise = (async () => {
               if (platform !== "offline") return;
@@ -206,9 +176,54 @@ const useCRUDClassRoom = () => {
             })();
 
             /**
+             * Sync class Session to an assignment
+             * Optional
+             */
+
+            const syncSessionWithAssignmentPromise = (async () => {
+              if (!classSession.assessmentId) return;
+              console.log("pass", classSession.assessmentId);
+              const { data, error } = await classRoomSessionRepository.createPivotClassSessionWithAssignment({
+                assignment_id: classSession.assessmentId,
+                session_id: sessionData.id,
+                start_at: null,
+                end_at: null,
+              });
+              if (error) {
+                throw new Error(error.message);
+              }
+            })();
+
+            /**
+             * Sync class Session to an assignment
+             */
+            const syncSessionWithCoursePeriodPromise = (async () => {
+              const payloadCouses = classSession.coursesPeriod.map<CreatePivotClassSessionWithCoursePeriodPayload>(
+                (cp) => ({
+                  class_session_id: sessionData.id,
+                  course_id: cp.course.id,
+                  teacher_id: cp.teacher.id,
+                  start_at: dayjs(cp.startAt).toISOString(),
+                  end_at: dayjs(cp.endAt).toISOString(),
+                }),
+              );
+              const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithCoursePeriod(
+                payloadCouses,
+              );
+              if (error) {
+                throw new Error(error.message);
+              }
+            })();
+
+            /**
              * Run all promise in parrallel
              */
-            await Promise.all([agendaPromise, teacherPromise, qrCodePromise]);
+            await Promise.all([
+              agendaPromise,
+              qrCodePromise,
+              syncSessionWithAssignmentPromise,
+              syncSessionWithCoursePeriodPromise,
+            ]);
           } catch (err) {
             console.error(`Session ${_sessionIndex} failed:`, error);
             throw error;
@@ -639,7 +654,8 @@ const useCRUDClassRoom = () => {
       channel_provider: classSession.channelProvider,
       end_at: classSession.endDate,
       start_at: classSession.startDate,
-      is_online: classSession.isOnline,
+      session_type: classSession.sessionType,
+      assignment_id: classSession.assessmentId || null,
       priority: index + 1,
     };
 
@@ -679,7 +695,8 @@ const useCRUDClassRoom = () => {
       channel_provider: classSession.channelProvider,
       end_at: classSession.endDate,
       start_at: classSession.startDate,
-      is_online: classSession.isOnline,
+      session_type: classSession.sessionType,
+      assignment_id: classSession.assessmentId || null,
       class_room_id: classRoomId,
       priority: index + 1,
     };

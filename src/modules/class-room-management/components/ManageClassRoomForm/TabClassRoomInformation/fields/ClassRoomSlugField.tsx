@@ -1,4 +1,4 @@
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoom } from "../../classroom-form.schema";
 import { Control, useController, useWatch } from "react-hook-form";
 import { Typography } from "@mui/material";
 import { slugify } from "@/utils/slugify";

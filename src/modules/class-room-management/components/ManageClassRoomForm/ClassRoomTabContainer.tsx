@@ -13,7 +13,7 @@ import { TAB_KEYS_CLASS_ROOM, TAB_NODES_CLASS_ROOM } from "./ClassRoomFormContai
 import { useTransition } from "react";
 import { getKeyFieldByTab } from "./utils";
 import { FieldErrors, UseFormTrigger } from "react-hook-form";
-import { ClassRoom } from "../classroom-form.schema";
+import { ClassRoom } from "./classroom-form.schema";
 import { getStatusTabClassRoom } from "./utils";
 
 type ClassRoomTabStatus = "idle" | "invalid" | "valid";

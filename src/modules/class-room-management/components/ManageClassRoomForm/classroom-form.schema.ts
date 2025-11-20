@@ -1,6 +1,14 @@
 import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
+import { EmployeeType } from "@/model/employee.model";
 import dayjs from "dayjs";
 import * as zod from "zod";
+
+const courseResourceSchema = zod.object({
+  id: zod.string(),
+  url: zod.string(),
+  name: zod.string(),
+  mimeType: zod.string(),
+});
 
 const classRoomSessionAgendaSchema = zod.object({
   id: zod.string().optional(),
@@ -18,9 +26,8 @@ const classRoomSessionSchema = zod
     thumbnailUrl: zod.string(),
     startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
     endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
-    isOnline: zod.boolean(),
-    location: zod.string(), //only for offline class room
-    channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for online class room
+    location: zod.string(), //only for CLASS_ROOM_PLATFORM.OFFLINE
+    channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for CLASS_ROOM_PLATFORM.LIVE class room
     channelInfo: zod.object({
       providerId: zod.string(),
       url: zod.string(),
@@ -33,8 +40,25 @@ const classRoomSessionSchema = zod
       startDate: zod.string(),
       endDate: zod.string(),
     }),
+    coursesPeriod: zod.array(
+      zod.object({
+        course: zod.object({
+          id: zod.string(),
+          title: zod.string(),
+        }),
+        teacher: zod.object({
+          id: zod.string(),
+          name: zod.string(),
+          departmentName: zod.string(),
+        }),
+        startAt: zod.string(),
+        endAt: zod.string(),
+      }),
+    ),
+    assessmentId: zod.string().optional(),
+    sessionType: zod.enum([CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE, CLASS_ROOM_PLATFORM.LIVE]),
   })
-  .superRefine(({ startDate, endDate, qrCode, isOnline, location, channelInfo }, ctx) => {
+  .superRefine(({ startDate, endDate, qrCode, sessionType, location, channelInfo }, ctx) => {
     if (dayjs(startDate).isAfter(endDate)) {
       ctx.addIssue({
         code: "custom",
@@ -46,7 +70,7 @@ const classRoomSessionSchema = zod
      * Only Validate if event is offline
      */
 
-    if (isOnline) {
+    if (sessionType === "live") {
       if (!channelInfo.url.length) {
         ctx.addIssue({
           code: "custom",
@@ -63,7 +87,8 @@ const classRoomSessionSchema = zod
           });
         }
       }
-    } else {
+    }
+    if (sessionType === "offline") {
       if (!location.length) {
         ctx.addIssue({
           code: "custom",
@@ -118,8 +143,8 @@ const classRoomSchema = zod
   .object({
     classRoomId: zod.string(),
     title: zod.string().min(1, { message: "Tên lớp học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
-    description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
     slug: zod.string(),
+    description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
     thumbnailUrl: zod
       .string()
       .min(1, { error: "Ảnh bìa không bỏ trống." })
@@ -132,11 +157,7 @@ const classRoomSchema = zod
           });
         }
       }),
-    categories: zod
-      .array(zod.string())
-      .min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực.")
-      .max(3, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
-    status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
+    categories: zod.array(zod.string()).min(1, "Chọn tối thiểu 1 lĩnh vực và tối đa 3 lĩnh vực."),
     roomType: zod.enum(["single", "multiple"]),
     classRoomSessions: zod.array(classRoomSessionSchema),
     forWhom: zod
@@ -159,52 +180,14 @@ const classRoomSchema = zod
           });
         }
       }),
-    docs: zod
-      .array(
-        zod.object({
-          type: zod.string(),
-          fileExtension: zod.string(),
-          size: zod
-            .number()
-            .positive()
-            .max(5 * 1024 * 1024, "Dung lượng file không vượt quá 5mb"),
-          url: zod.string(),
-        }),
-      )
-      .optional(),
-    // whies: zod
-    //   .array(
-    //     zod.object({
-    //       id: zod.string().optional(),
-    //       description: zod.string(),
-    //     }),
-    //   )
-    //   .superRefine((values, context) => {
-    //     if (values.length) {
-    //       values.forEach(({ description }, i) => {
-    //         if (!description.length) {
-    //           context.addIssue({
-    //             code: "custom",
-    //             message: `Không bỏ trống.`,
-    //             path: [i, "description"],
-    //           });
-    //         }
-    //       });
-    //     }
-    //   }),
-    // galleries: zod.array(zod.string()).superRefine((values, ctx) => {
-    //   if (values.length)
-    //     values.forEach((v, i) => {
-    //       if (!v.startsWith("http://")) {
-    //         ctx.addIssue({
-    //           code: "invalid_format",
-    //           format: "starts_with",
-    //           message: `Đường dẫn ${i} không hợp lệ.`,
-    //         });
-    //       }
-    //     });
-    // }),
-    platform: zod.enum([CLASS_ROOM_PLATFORM.HYBRID, CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE]),
+    docs: zod.array(courseResourceSchema).optional(),
+    platform: zod.enum([
+      CLASS_ROOM_PLATFORM.HYBRID,
+      CLASS_ROOM_PLATFORM.ONLINE,
+      CLASS_ROOM_PLATFORM.OFFLINE,
+      CLASS_ROOM_PLATFORM.LIVE,
+    ]),
+    status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

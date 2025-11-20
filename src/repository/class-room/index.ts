@@ -5,6 +5,8 @@ import {
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomAndEmployeePayload,
   UpSertClassRoomPayload,
+  DeletePivotClassRoomAndEmployeePayload,
+  CreatePivotClassRoomWithResourcePayload,
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
@@ -50,14 +52,23 @@ const getClassRoomById = async (classRoomId: string) => {
           slug,
           description,
           room_type,
-          comunity_info,
           thumbnail_url,
-          documents,
           start_at,
           end_at,
           status,
-          employee_id,
+          created_by,
           class_room_metadata(id, key, value, class_room_id),
+          class_rooms_resources(
+            id,
+            resource:resources(
+              id,
+              path,
+              size, 
+              kind, 
+              mime_type, 
+              name
+            )
+          ),
           class_hash_tag(
             id,
             hash_tags(
@@ -97,9 +108,20 @@ const getClassRoomById = async (classRoomId: string) => {
               avatar
             )
           ),
-          organizations(
+          organization:organizations(
             id, 
             name
+          ),
+          resources:class_rooms_resources(
+            id,
+            resource:resources(
+              id,
+              path,
+              size, 
+              kind, 
+              mime_type, 
+              name
+            )
           ),
           sessions:class_sessions(
             id,
@@ -109,15 +131,16 @@ const getClassRoomById = async (classRoomId: string) => {
             end_at,
             class_room_id,
             location,
-            is_online,
             channel_provider,
             channel_info,
-            limit_person,
             priority,
-            teachers:class_session_teacher(
+            session_type,
+            courses_period:class_sessions_courses_period(
               id,
-              employee:employees!class_session_teacher_teacher_id_fkey(
-                id,
+              course:courses(id, title, slug),
+              start_at,
+              end_at,
+              teacher:employees(id,
                 employee_type,
                 employee_code,
                 profile:profiles(
@@ -127,6 +150,13 @@ const getClassRoomById = async (classRoomId: string) => {
                   employee_id,
                   avatar
                 )
+              )
+            ),
+            session_assignment:class_session_assignment(
+              id,
+              assignments(
+                id,
+                name
               )
             ),
             agendas:class_sessions_agendas(
@@ -155,7 +185,7 @@ const getClassRoomById = async (classRoomId: string) => {
         `,
       )
       .eq("id", classRoomId)
-      .order("priority", { ascending: true, foreignTable: "class_sessions" })
+      .order("priority", { ascending: true, referencedTable: "class_sessions" })
       .single()
       .overrideTypes<{
         class_room_metadata: {
@@ -164,19 +194,12 @@ const getClassRoomById = async (classRoomId: string) => {
           key: ClassRoomMetaKey;
           value: ClassRoomMetaValue;
         }[];
-        comunity_info: { name: string; url: string };
         sessions: {
           channel_info: {
             providerId: string;
             url: string;
             password: string;
           };
-        }[];
-        documents: {
-          fileExtension: string;
-          size: number;
-          type: string;
-          url: string;
         }[];
       }>();
     return { data, error };
@@ -361,10 +384,6 @@ const deletePivotClassRoomAndEmployee = async (ids: number[]) => {
   }
 };
 
-type DeletePivotClassRoomAndEmployeePayload = {
-  class_room_id: string;
-  employeeIds: string[];
-};
 const deletePivotClassRoomAndEmployeeByEmployeeId = async (payload: DeletePivotClassRoomAndEmployeePayload) => {
   const { error } = await supabase
     .from("class_room_employee")
@@ -883,10 +902,29 @@ const markAttendance = async (payload: MarkAttendancePayload) => {
   }
 };
 
+const createPivotClassRoomsWithResources = async (payload: CreatePivotClassRoomWithResourcePayload[]) => {
+  try {
+    return await supabase.from("class_rooms_resources").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create pivot Class Room and Resources");
+  }
+};
+
+const deletePivotClassRoomsWithResources = async (ids: number[]) => {
+  try {
+    return await supabase.from("class_rooms_resources").delete().in("id", ids);
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error Delete Class rooom Resource");
+  }
+};
+
 export {
   createClassRoom,
   createPivotClassRoomAndHashTag,
   createPivotClassRoomAndField,
+  createPivotClassRoomsWithResources,
   deletePivotClassRoomAndField,
   createPivotClassRoomAndEmployee,
   upsertClassRoom,
@@ -901,5 +939,6 @@ export {
   getClassRoomStudents,
   getClassRooms,
   deletePivotClassRoomAndEmployeeByEmployeeId,
+  deletePivotClassRoomsWithResources,
   markAttendance,
 };

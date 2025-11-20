@@ -1,5 +1,5 @@
 import { FieldErrors } from "react-hook-form";
-import { ClassRoom, ClassRoomSession } from "../classroom-form.schema";
+import { ClassRoom, ClassRoomSession } from "./classroom-form.schema";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 
 /**

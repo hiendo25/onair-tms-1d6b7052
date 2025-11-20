@@ -3,7 +3,6 @@ import { ClassRoom } from "@/model/class-room.model";
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -12,26 +11,21 @@ export type CreateClassRoomPayload = Pick<
   | "thumbnail_url"
   | "title"
   | "organization_id"
-  | "resource_id"
-  | "employee_id"
-  | "documents"
+  | "created_by"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
-  | "description"
-  // | "comunity_info"
-  | "room_type"
+  | "id"
+  | "title"
   | "slug"
+  | "description"
+  | "room_type"
   | "start_at"
   | "end_at"
   | "status"
   | "thumbnail_url"
-  | "title"
   | "organization_id"
-  | "resource_id"
-  | "employee_id"
-  | "id"
-  | "documents"
+  | "created_by"
 >;
 export type UpSertClassRoomPayload =
   | {
@@ -55,4 +49,13 @@ export type CreatePivotClassRoomAndFieldPayload = {
 export type CreatePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
   employee_id: string;
+};
+export type DeletePivotClassRoomAndEmployeePayload = {
+  class_room_id: string;
+  employeeIds: string[];
+};
+
+export type CreatePivotClassRoomWithResourcePayload = {
+  class_room_id: string;
+  resource_id: string;
 };

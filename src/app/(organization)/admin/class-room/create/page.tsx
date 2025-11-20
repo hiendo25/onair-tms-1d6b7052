@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import PageContainer from "@/shared/ui/PageContainer";
 import CreateClassRoomForm from "./_components/CreateClassRoomForm";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { ClassRoomPlatformType, CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import { PATHS } from "@/constants/path.contstants";
 interface CreateClassRoomPageProps {
@@ -15,16 +15,30 @@ interface CreateClassRoomPageProps {
 const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchParams }) => {
   const { platform, roomtype } = await searchParams;
 
-  if (
-    (roomtype !== "multiple" && roomtype !== "single") ||
-    (platform !== "hybrid" && platform !== "offline" && platform !== "online")
-  ) {
+  const PLATFORMS: ClassRoomPlatformType[] = [
+    CLASS_ROOM_PLATFORM.HYBRID,
+    CLASS_ROOM_PLATFORM.LIVE,
+    CLASS_ROOM_PLATFORM.OFFLINE,
+    CLASS_ROOM_PLATFORM.ONLINE,
+  ];
+  const ROOMS: ClassRoomType[] = ["multiple", "single"];
+
+  if (!ROOMS.includes(roomtype) || !PLATFORMS.includes(platform)) {
     redirect("/admin/class-room");
   }
+  const pageTitle = `Tạo lớp học ${
+    platform === "online"
+      ? "E-learning"
+      : platform === "offline"
+      ? "trực tiếp (In-house)"
+      : platform === "live"
+      ? "trực tuyến (Live)"
+      : ""
+  }`;
 
   return (
     <PageContainer
-      title={`Tạo lớp học ${platform === "online" ? "trực tuyến" : "trực tiếp"}`}
+      title={pageTitle}
       breadcrumbs={[
         {
           title: "Quản lý lớp học",

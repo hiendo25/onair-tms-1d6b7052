@@ -3,6 +3,8 @@ import {
   BulkCreateClassRoomSessionsPayload,
   CreateClassRoomSessionPayload,
   CreatePivotClassRoomSessionAndTeacherPayload,
+  CreatePivotClassSessionWithCoursePeriodPayload,
+  CreatePivotClassSessionWithAssignmentPayload,
   UpSertClassRoomSessionPayload,
 } from "./type";
 export * from "./type";
@@ -133,12 +135,33 @@ const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
     throw new Error(err.message ?? "Unknown error create Agendas");
   }
 };
+const bulkCreatePivotClassSessionWithCoursePeriod = async (
+  payload: CreatePivotClassSessionWithCoursePeriodPayload[],
+) => {
+  try {
+    return await supabase.from("class_sessions_courses_period").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload) => {
+  try {
+    return await supabase.from("class_session_assignment").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
 
 export {
+  bulkCreatePivotClassSessionWithCoursePeriod,
+  createPivotClassSessionWithAssignment,
   createClassSession,
-  deleteClassSession,
   createPivotClassSessionAndTeacher,
   deletePivotClassSessionAndTeacher,
+  deleteClassSession,
   upsertClassSession,
   bulkUpsertClassSession,
   bulkCreateClassSession,

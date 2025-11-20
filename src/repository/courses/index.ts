@@ -138,11 +138,18 @@ const getCourseById = async (courseId: string) => {
 export type GetCourseByIdResponse = Awaited<ReturnType<typeof getCourseById>>;
 
 export type GetCoursesQueryParams = {
-  limit?: number;
+  page?: number;
+  pageSize?: number;
+  excludes?: string[];
+  search?: string;
 };
-const getCourses = async (courseQueryparams?: GetCoursesQueryParams) => {
+const getCourses = async (queryParams?: GetCoursesQueryParams) => {
   try {
-    return await supabase.from("courses").select(
+    const { page = 1, pageSize = 20, excludes, search } = queryParams || {};
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    let courseQuery = supabase.from("courses").select(
       `
         id,
         title,
@@ -181,6 +188,15 @@ const getCourses = async (courseQueryparams?: GetCoursesQueryParams) => {
       `,
       { count: "exact" },
     );
+
+    if (excludes?.length) {
+      courseQuery = courseQuery.not("id", "in", `(${excludes.join(",")})`);
+    }
+    if (search) {
+      courseQuery = courseQuery.ilike("profiles.full_name", `%${search}%`);
+    }
+
+    return await courseQuery.order("created_at", { ascending: false }).range(from, to);
   } catch (err: any) {
     throw new Error(err?.message ?? "Fetching Course list failed.");
   }

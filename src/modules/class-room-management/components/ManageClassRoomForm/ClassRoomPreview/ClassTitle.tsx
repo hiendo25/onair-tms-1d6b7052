@@ -1,5 +1,5 @@
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoom } from "../classroom-form.schema";
 import Image from "next/image";
 import { alpha, Box, Typography } from "@mui/material";
 
