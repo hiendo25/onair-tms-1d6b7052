@@ -20,7 +20,7 @@ import { PATHS } from "@/constants/path.contstants";
 import dayjs from "dayjs";
 import { useGetClassRoomsPriorityQuery } from "@/modules/class-room-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { fDate } from "@/lib";
+import { fDateTime, FORMAT_DATE_TIME_SHORTER } from "@/lib";
 import { EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 
 type DashboardCourseRow = {
@@ -37,7 +37,7 @@ type DashboardCourseRow = {
 
 const CourseTable = () => {
   const user = useUserOrganization((state) => state.data);
-  const formatDateLabel = (date?: string | null) => fDate(date) ?? "Chưa có lịch";
+  const formatDateLabel = (date?: string | null) => fDateTime(date, FORMAT_DATE_TIME_SHORTER) ?? "Chưa có lịch";
 
   const monthRange = React.useMemo(
     () => ({
