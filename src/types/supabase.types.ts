@@ -626,8 +626,8 @@ export type Database = {
       class_rooms: {
         Row: {
           created_at: string
-          created_by: string | null
           description: string | null
+          employee_id: string | null
           end_at: string | null
           id: string
           organization_id: string
@@ -641,8 +641,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          created_by?: string | null
           description?: string | null
+          employee_id?: string | null
           end_at?: string | null
           id?: string
           organization_id?: string
@@ -656,8 +656,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          created_by?: string | null
           description?: string | null
+          employee_id?: string | null
           end_at?: string | null
           id?: string
           organization_id?: string
@@ -672,7 +672,7 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "class_rooms_created_by_fkey"
-            columns: ["created_by"]
+            columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
@@ -838,7 +838,6 @@ export type Database = {
       }
       class_sessions: {
         Row: {
-          assignment_id: string | null
           channel_info: Json | null
           channel_provider:
             | Database["public"]["Enums"]["channel_provider"]
@@ -856,7 +855,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          assignment_id?: string | null
           channel_info?: Json | null
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
@@ -874,7 +872,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          assignment_id?: string | null
           channel_info?: Json | null
           channel_provider?:
             | Database["public"]["Enums"]["channel_provider"]
@@ -904,13 +901,6 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_sessions_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
         ]

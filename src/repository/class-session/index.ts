@@ -65,10 +65,33 @@ const upsertClassSession = async (upsertPayload: UpSertClassRoomSessionPayload) 
           start_at,
           end_at,
           class_room_id,
-          is_online,
           channel_provider,
           channel_info,
-          limit_person,
+          session_type,
+          courses_period:class_sessions_courses_period(
+            id,
+            course:courses(id, title, slug),
+            start_at,
+            end_at,
+            teacher:employees(id,
+              employee_type,
+              employee_code,
+              profile:profiles(
+                id,
+                full_name,
+                email,
+                employee_id,
+                avatar
+              )
+            )
+          ),
+          session_assignment:class_session_assignment(
+            id,
+            assignments(
+              id,
+              name
+            )
+          ),
           teachers:class_session_teacher(
             id,
             employee:employees!class_session_teacher_teacher_id_fkey(

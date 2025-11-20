@@ -65,7 +65,7 @@ const useCRUDClassRoom = () => {
           status: status,
           thumbnail_url: thumbnailUrl,
           title: title,
-          created_by: userInfo.id,
+          employee_id: userInfo.id,
           start_at: startDate,
           end_at: endDate,
           organization_id: userInfo.organization.id,
@@ -282,7 +282,6 @@ const useCRUDClassRoom = () => {
         action: "update",
         payload: {
           id: classRoomId,
-          // comunity_info: communityInfo,
           description: description,
           room_type: roomType,
           slug: slug,
@@ -293,8 +292,6 @@ const useCRUDClassRoom = () => {
           start_at: startDate,
           end_at: endDate,
           organization_id: userInfo.organization.id,
-          resource_id: null,
-          documents: docs || null,
         },
       });
 
@@ -447,17 +444,17 @@ const useCRUDClassRoom = () => {
       console.log({ classRoomSessions, sessionListDeletion, sessionListAddNew });
 
       if (sessionListDeletion.length) {
-        const pivotSessionWithTeacherIdsDeletion = sessionListDeletion.reduce<string[]>((acc, session) => {
-          const pivotIds = session.teachers.map((tc) => tc.id);
-          return [...acc, ...pivotIds];
-        }, []);
+        // const pivotSessionWithTeacherIdsDeletion = sessionListDeletion.reduce<string[]>((acc, session) => {
+        //   const pivotIds = session.teachers.map((tc) => tc.id);
+        //   return [...acc, ...pivotIds];
+        // }, []);
 
         const agendaIdsDeletion = sessionListDeletion.reduce<string[]>((acc, session) => {
           const agendaIds = session.agendas.map((ag) => ag.id);
           return [...acc, ...agendaIds];
         }, []);
 
-        await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIdsDeletion);
+        // await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotSessionWithTeacherIdsDeletion);
 
         await classSessionAgendaRepository.deleteAgendas(agendaIdsDeletion);
 
@@ -497,20 +494,20 @@ const useCRUDClassRoom = () => {
           /**
            * Update Teacher
            */
-          const upsertTeacherPromise = (async () => {
-            const pivotTeacherIdsDeletion = sessionData.teachers.map((tc) => tc.id);
-            await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotTeacherIdsDeletion);
-            const newTeacherListBySession = teachers[_sessionIndex] || [];
+          // const upsertTeacherPromise = (async () => {
+          //   const pivotTeacherIdsDeletion = sessionData.teachers.map((tc) => tc.id);
+          //   await classRoomSessionRepository.deletePivotClassSessionAndTeacher(pivotTeacherIdsDeletion);
+          //   const newTeacherListBySession = teachers[_sessionIndex] || [];
 
-            const { data: sessionTeacher, error: sessionTeacherError } =
-              await classRoomSessionRepository.createPivotClassSessionAndTeacher(
-                newTeacherListBySession.map((tc) => ({
-                  class_session_id: sessionId,
-                  teacher_id: tc.id,
-                })),
-              );
-            if (sessionTeacherError) throw new Error(`Upsert Teacher Session index: ${_sessionIndex} failed`);
-          })();
+          //   const { data: sessionTeacher, error: sessionTeacherError } =
+          //     await classRoomSessionRepository.createPivotClassSessionAndTeacher(
+          //       newTeacherListBySession.map((tc) => ({
+          //         class_session_id: sessionId,
+          //         teacher_id: tc.id,
+          //       })),
+          //     );
+          //   if (sessionTeacherError) throw new Error(`Upsert Teacher Session index: ${_sessionIndex} failed`);
+          // })();
 
           /**
            * Update QRCode
@@ -532,7 +529,7 @@ const useCRUDClassRoom = () => {
           /**
            * Parallel update
            */
-          await Promise.all([upsertAgendaPromise, upsertTeacherPromise, upsertQrcodePromise]);
+          await Promise.all([upsertAgendaPromise, upsertQrcodePromise]);
         }),
       );
 

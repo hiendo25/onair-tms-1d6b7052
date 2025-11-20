@@ -56,7 +56,7 @@ const getClassRoomById = async (classRoomId: string) => {
           start_at,
           end_at,
           status,
-          created_by,
+          employee_id,
           class_room_metadata(id, key, value, class_room_id),
           class_rooms_resources(
             id,
