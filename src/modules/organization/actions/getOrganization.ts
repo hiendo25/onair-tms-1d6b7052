@@ -7,35 +7,35 @@ export const getEmployeeDetailInfoByUserId = async (userId: string) => {
       .from("employees")
       .select(
         `
-      id, 
-      status, 
-      employee_code, 
-      employee_type,
-      user_id,
-      organization_id,
-      organizations(
         id, 
-        name, 
-        subdomain, 
-        employee_limit, 
-        subdomain
-      ),
-      positions(
-        id,
-        title, 
-        organization_id
-      ),
-      profiles(
-        id,
-        full_name,
-        gender,
-        avatar,
-        email
-      )
-    `,
+        status, 
+        employee_code, 
+        employee_type,
+        user_id,
+        organization_id,
+        organizations(
+          id, 
+          name, 
+          subdomain, 
+          employee_limit, 
+          subdomain
+        ),
+        positions(
+          id,
+          title, 
+          organization_id
+        ),
+        profiles(
+          id,
+          full_name,
+          gender,
+          avatar,
+          email
+        )
+      `,
       )
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.log(error);
