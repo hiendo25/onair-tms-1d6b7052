@@ -1,5 +1,3 @@
-import { Course } from "@/model/course.model";
-import { LessonType } from "@/model/lesson.model";
 import * as zod from "zod";
 
 const courseResourceSchema = zod.object({
@@ -70,25 +68,6 @@ const upsertCourseSchema = zod.object({
   categories: zod.array(zod.string()).min(1, "Chọn tối thiểu 1 lĩnh vực."),
   status: zod.enum(["published", "pending", "draft", "deleted", "unpublished"]),
   sections: zod.array(courseSectionSchema).min(1, { error: "Học phần dang trống." }),
-  // benefits: zod
-  //   .array(
-  //     zod.object({
-  //       content: zod.string(),
-  //     }),
-  //   )
-  //   .superRefine((values, context) => {
-  //     if (values.length) {
-  //       values.forEach(({ content }, i) => {
-  //         if (!content.length) {
-  //           context.addIssue({
-  //             code: "custom",
-  //             message: `Không bỏ trống.`,
-  //             path: [i, "content"],
-  //           });
-  //         }
-  //       });
-  //     }
-  //   }),
 });
 
 type CourseSectionFormData = zod.infer<typeof courseSectionSchema>;

@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import dayjs, { Dayjs } from "dayjs";
+import { PATHS } from "@/constants/path.contstants";
 interface EditClassRoomPageProps {
   params: Promise<{
     id: string;
@@ -64,7 +65,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
       breadcrumbs={[
         {
           title: "Quản lý lớp học",
-          path: "/admin/class-room",
+          path: PATHS.CLASSROOMS.ROOT,
         },
         {
           title: "Chỉnh sửa",

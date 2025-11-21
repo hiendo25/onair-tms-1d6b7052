@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useTransition, useCallback, forwardRef, useImperativeHandle } from "react";
-import { type ClassRoom } from "../../../classroom-form.schema";
+import { type ClassRoom } from "../../classroom-form.schema";
 import { Button, Divider, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 // import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
@@ -15,6 +15,9 @@ import AgendarFields from "../class-room-session-fields/AgendarFields";
 import { initClassSessionFormData } from "..";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import CoursePeriodSelector from "../class-room-session-fields/CoursePeriodSelector";
+import AssessmentField from "../class-room-session-fields/AssessmentField";
+import QRCodeSettingFields from "../class-room-session-fields/QRCodeSettingFields";
 
 export type MultipleSessionRef = {
   checkAllSessionFields: () => Promise<boolean>;
@@ -90,7 +93,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
       startTransition(() => {
         const nextSessionIndex = classSessionsFields.length;
         const platform = getValues("platform");
-        append(initClassSessionFormData({ isOnline: platform === "online" }));
+        append(initClassSessionFormData(platform !== "hybrid" ? { sessionType: platform } : undefined));
         setSessionsState((prev) => ({ ...prev, [nextSessionIndex]: { isInit: true } }));
       });
     });
@@ -127,7 +130,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
           </Typography>
         </div>
         <div className="session-list flex flex-col gap-3">
-          {classSessionsFields.map(({ _sessionId, title, isOnline }, _index) => (
+          {classSessionsFields.map(({ _sessionId, title, sessionType }, _index) => (
             <AccordionSessionItem
               index={_index}
               key={_sessionId}
@@ -146,6 +149,8 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
                     helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
                   />
                   <ClassRoomSessionFromToDate index={_index} control={control} />
+                  <CoursePeriodSelector sessionIndex={_index} />
+                  <AssessmentField sessionIndex={_index} control={control} />
                   {/* <QuantityPersonField control={control} fieldIndex={_index} /> */}
                   <RHFRichEditor
                     control={control}
@@ -154,26 +159,28 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
                     label="Nội dung"
                     required
                   />
-                  <TeacherSelector
+                  {/* <TeacherSelector
                     ref={(tRef) => {
                       tRef && teacherSelectorRefs.current.set(_index, tRef);
                     }}
                     sessionIndex={_index}
                     error={sessionsState[_index]?.isInit ? undefined : !getTeachersByIndexSession(_index)?.length}
                     helperText="Hiện chưa có giáo viên nào được chọn"
-                  />
+                  /> */}
 
-                  {isOnline ? (
-                    <RoomChannel control={control} index={_index} />
-                  ) : (
-                    <RHFTextField
-                      name={`classRoomSessions.${_index}.location`}
-                      control={control}
-                      label="Địa điểm tổ chức"
-                      required
-                      startAdornment={<MarkerPin01Icon />}
-                      placeholder="Nhập địa điểm tổ chức lớp học"
-                    />
+                  {sessionType === "live" && <RoomChannel control={control} index={_index} />}
+                  {sessionType === "offline" && (
+                    <>
+                      <RHFTextField
+                        name={`classRoomSessions.${_index}.location`}
+                        control={control}
+                        label="Địa điểm tổ chức"
+                        required
+                        startAdornment={<MarkerPin01Icon />}
+                        placeholder="Nhập địa điểm tổ chức lớp học"
+                      />
+                      <QRCodeSettingFields sessionIndex={_index} control={control} />
+                    </>
                   )}
                   <AgendarFields sessionIndex={_index} />
                 </div>

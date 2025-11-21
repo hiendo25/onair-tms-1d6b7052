@@ -21,9 +21,9 @@ const CreateCourseForm = () => {
     router.push("/admin/class-room");
   };
 
-  const handleCreateClassRoom: ManageCourseFormProps["onSubmit"] = (formData, students, teachers) => {
+  const handleCreateClassRoom: ManageCourseFormProps["onSubmit"] = (formData) => {
     onCreate(
-      { formData, students, teachers },
+      { formData },
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {

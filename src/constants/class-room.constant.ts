@@ -1,6 +1,7 @@
 export const CLASS_ROOM_PLATFORM = {
   ONLINE: "online",
   OFFLINE: "offline",
+  LIVE: "live",
   HYBRID: "hybrid",
 } as const;
 

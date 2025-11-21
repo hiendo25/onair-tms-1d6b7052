@@ -17,28 +17,20 @@ interface BoxMenuClassListProps {
 const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
   const router = useRouter();
   const [isLoading, startTransition] = useTransition();
-  const [manageType, setManageType] = useState<"classRoom" | "course">("classRoom");
   const [platform, setPlatform] = useState<ClassRoomPlatformType>("offline");
   const [roomType, setRoomType] = useState<ClassRoomType>();
 
-  const handleSelectManageType = (type: "classRoom" | "course", platform?: ClassRoomPlatformType) => () => {
-    setManageType(type);
-    if (type === "course") {
-      setRoomType(undefined);
-    }
+  const handleSelectManageType = (platform?: ClassRoomPlatformType) => () => {
     if (platform) setPlatform(platform);
   };
 
   const handleClickOk = () => {
-    if (manageType === "classRoom" && !roomType) return;
     startTransition(() => {
-      const path =
-        manageType === "classRoom"
-          ? `${PATHS.CLASSROOMS.CREATE_CLASSROOM}?platform=${platform}&roomtype=${roomType}`
-          : PATHS.COURSES.CREATE;
-      router.push(path);
+      if (!roomType) return;
+      router.push(`${PATHS.CLASSROOMS.CREATE_CLASSROOM}?platform=${platform}&roomtype=${roomType}`);
     });
   };
+
   return (
     <div className="bg-white rounded-2xl p-8 max-w-[1040px] mx-auto">
       <Typography className="font-semibold text-center text-2xl">Chọn loại lớp học</Typography>
@@ -47,63 +39,49 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
         <BoxMenuClassItem
           title="Lớp học trực tuyến (Live)"
           description="Buổi học diễn ra qua nền tảng trực tuyến. Người tham gia có thể học ở bất kỳ đâu chỉ với kết nối Internet."
-          isActive={platform === "online" && manageType === "classRoom"}
-          onClick={handleSelectManageType("classRoom", "online")}
+          isActive={platform === "live"}
+          onClick={handleSelectManageType("live")}
+        />
+        <BoxMenuClassItem
+          title="Lớp học E-learning"
+          description="Khóa học học qua video và tài liệu số. Học viên có thể học bất cứ lúc nào, theo tiến độ riêng của mình."
+          isActive={platform === "online"}
+          onClick={handleSelectManageType("online")}
         />
         <BoxMenuClassItem
           title="Lớp học trực tiếp (In-house)"
           description="Buổi học tổ chức tại địa điểm thực tế. Học viên tham gia gặp gỡ, trao đổi và trải nghiệm trực tiếp cùng
             giảng viên."
-          isActive={platform === "offline" && manageType === "classRoom"}
-          onClick={handleSelectManageType("classRoom", "offline")}
-        />
-        <BoxMenuClassItem
-          title="Môn học eLearning"
-          description="Khóa học học qua video và tài liệu số. Học viên có thể học bất cứ lúc nào, theo tiến độ riêng của mình."
-          isActive={manageType === "course"}
-          onClick={handleSelectManageType("course")}
+          isActive={platform === "offline"}
+          onClick={handleSelectManageType("offline")}
         />
       </div>
       <div className="h-6"></div>
-      {manageType === "classRoom" && (
-        <div className="class-room-type-selector grid grid-cols-2 gap-4">
-          <BoxItem
-            thumbnail={
-              <Image src="/assets/icons/calendar-1.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
-            }
-            title="Lớp đơn"
-            description="Diễn ra trong một buổi duy nhất với thời gian cố định."
-            isActive={roomType === "single"}
-            onClick={() => setRoomType("single")}
-          />
-          <BoxItem
-            thumbnail={
-              <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
-            }
-            title="Lớp chuỗi"
-            description="Gồm nhiều lớp học diễn ra vào các khung giờ khác nhau."
-            isActive={roomType === "multiple"}
-            onClick={() => setRoomType("multiple")}
-          />
-        </div>
-      )}
-      {manageType === "course" && (
-        <div className="max-w-1/2 mx-auto">
-          <BoxItem
-            thumbnail={
-              <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
-            }
-            title="Môn học eLearning"
-            description="Khóa học học qua video và tài liệu số. Học viên có thể học bất cứ lúc nào, theo tiến độ riêng của mình."
-            isActive={true}
-          />
-        </div>
-      )}
+      <div className="class-room-type-selector grid grid-cols-2 gap-4">
+        <BoxItem
+          thumbnail={
+            <Image src="/assets/icons/calendar-1.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
+          }
+          title="Lớp đơn"
+          description="Diễn ra trong một buổi duy nhất với thời gian cố định."
+          isActive={roomType === "single"}
+          onClick={() => setRoomType("single")}
+        />
+        <BoxItem
+          thumbnail={
+            <Image src="/assets/icons/calendar-2.svg" alt="icon calendar" width={56} height={56} className="mb-3" />
+          }
+          title="Lớp chuỗi"
+          description="Gồm nhiều lớp học diễn ra vào các khung giờ khác nhau."
+          isActive={roomType === "multiple"}
+          onClick={() => setRoomType("multiple")}
+        />
+      </div>
       <div className="h-6"></div>
       <div className="py-2 text-center">
         <Button
           onClick={handleClickOk}
-          disabled={isLoading}
+          disabled={isLoading || !roomType}
           loading={isLoading}
           endIcon={<ChevronRightDoubleIcon />}
           size="large"

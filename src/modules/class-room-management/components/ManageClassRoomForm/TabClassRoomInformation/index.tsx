@@ -3,7 +3,7 @@ import { memo } from "react";
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { Typography } from "@mui/material";
-import { type ClassRoom } from "../../classroom-form.schema";
+import { type ClassRoom } from "../classroom-form.schema";
 import { useFormContext } from "react-hook-form";
 import ThumbnailUploader from "./fields/ThumbailUploader";
 import ClassRoomSlugField from "./fields/ClassRoomSlugField";

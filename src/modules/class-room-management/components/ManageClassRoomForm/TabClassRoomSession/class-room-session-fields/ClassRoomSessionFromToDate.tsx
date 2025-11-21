@@ -1,6 +1,6 @@
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import dayjs from "dayjs";
 
@@ -78,7 +78,7 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
       <FormLabel component="div">
         Thời gian diễn ra <span className="text-red-600">*</span>
       </FormLabel>
-      <div className="flex gap-4 max-w-[680px]">
+      <div className="flex gap-3 max-w-[680px]">
         <RHFDateTimePicker
           control={control}
           name={`classRoomSessions.${index}.startDate`}

@@ -56,7 +56,7 @@ const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(
           <div className="flex items-center">
             <div className="pr-6 flex-1">
               <FormLabel component="div">
-                Giảng viên phụ trách <span className="text-red-600">*</span>
+                Giảng viên phụ trách lớp học <span className="text-red-600">*</span>
               </FormLabel>
               <Typography className="text-xs text-gray-600">
                 Chỉ định giảng viên phụ trách nội dung, quản lý lớp học và hỗ trợ người học trong buổi học.

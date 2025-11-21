@@ -1,5 +1,5 @@
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
