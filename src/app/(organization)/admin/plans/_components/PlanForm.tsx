@@ -11,6 +11,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import StepNavigation, { Step } from "./StepNavigation";
 import StepPlanInfo from "./StepPlanInfo";
 import StepTrainingProgram from "./StepTrainingProgram";
+import StepTrainingTopics from "./StepTrainingTopics";
 import StepTopics from "./StepTopics";
 import StepApproval from "./StepApproval";
 import StepAssignCourses from "./StepAssignCourses";
@@ -90,6 +91,10 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
     }
   };
 
+  const handleBack = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
   const handleStepClick = async (stepId: number) => {
     const accessible = isStepAccessible(stepId);
     if (!accessible) return;
@@ -140,10 +145,19 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
           />
         );
       case 3:
-        return <StepTopics control={control} errors={errors} />;
+        return (
+          <StepTrainingTopics
+            control={control}
+            errors={errors}
+            onContinue={handleContinue}
+            onBack={handleBack}
+          />
+        );
       case 4:
-        return <StepApproval control={control} errors={errors} />;
+        return <StepTopics control={control} errors={errors} />;
       case 5:
+        return <StepApproval control={control} errors={errors} />;
+      case 6:
         return <StepAssignCourses control={control} errors={errors} />;
       default:
         return null;

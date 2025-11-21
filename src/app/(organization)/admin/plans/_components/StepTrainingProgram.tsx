@@ -47,6 +47,7 @@ export default function StepTrainingProgram({
       startDate: undefined,
       endDate: undefined,
       description: "",
+      topics: [],
     },
   });
 
@@ -56,6 +57,7 @@ export default function StepTrainingProgram({
       startDate: "",
       endDate: "",
       description: "",
+      topics: [],
     });
     setEditingIndex(null);
     setShowForm(true);

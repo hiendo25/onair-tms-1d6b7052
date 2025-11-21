@@ -12,11 +12,18 @@ const dateFieldSchema = zod
   ])
   .optional();
 
+// Topic schema for training topics within programs
+export const topicSchema = zod.object({
+  name: zod.string().min(1, { message: "Tên chủ đề không được bỏ trống." }),
+  description: zod.string().optional(),
+});
+
 export const trainingProgramSchema = zod.object({
   name: zod.string().min(1, { message: "Tên chương trình không được bỏ trống." }),
   startDate: dateFieldSchema,
   endDate: dateFieldSchema,
   description: zod.string().optional(),
+  topics: zod.array(topicSchema).optional(),
 });
 
 export const planSchema = zod.object({
@@ -30,6 +37,7 @@ export const planSchema = zod.object({
   programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
 });
 
+export type Topic = zod.infer<typeof topicSchema>;
 export type TrainingProgram = zod.infer<typeof trainingProgramSchema>;
 export type PlanFormSchema = zod.infer<typeof planSchema>;
 
