@@ -53,11 +53,14 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const defaultValues: PlanFormSchema = {
-    name: "",
-    objective: "",
-    startDate: "",
-    endDate: "",
-    budget: undefined,
+    info: {
+      name: "",
+      objective: "",
+      startDate: undefined,
+      endDate: undefined,
+      budget: undefined,
+    },
+    programs: [],
   };
 
   const { control, handleSubmit, formState: { errors }, trigger } = useForm<PlanFormSchema>({
@@ -65,8 +68,20 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
     defaultValues,
   });
 
+  const getStepFieldName = (stepId: number): "info" | "programs" | undefined => {
+    switch (stepId) {
+      case 1:
+        return "info";
+      case 2:
+        return "programs";
+      default:
+        return undefined;
+    }
+  };
+
   const handleContinue = async () => {
-    const isValid = await trigger();
+    const fieldName = getStepFieldName(currentStep);
+    const isValid = fieldName ? await trigger(fieldName) : true;
     if (isValid) {
       if (!completedSteps.includes(currentStep)) {
         setCompletedSteps([...completedSteps, currentStep]);
@@ -80,7 +95,8 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
     if (!accessible) return;
 
     if (stepId !== currentStep) {
-      const isValid = await trigger();
+      const currentFieldName = getStepFieldName(currentStep);
+      const isValid = currentFieldName ? await trigger(currentFieldName) : true;
       if (!isValid && completedSteps.includes(currentStep)) {
         setCompletedSteps(completedSteps.filter(s => s !== currentStep));
       } else if (isValid && !completedSteps.includes(currentStep)) {
@@ -91,7 +107,8 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
     setCurrentStep(stepId);
 
     if (completedSteps.includes(stepId)) {
-      const isStepValid = await trigger();
+      const stepFieldName = getStepFieldName(stepId);
+      const isStepValid = stepFieldName ? await trigger(stepFieldName) : true;
       if (!isStepValid) {
         setCompletedSteps(completedSteps.filter(s => s !== stepId));
       }
@@ -115,7 +132,13 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
           />
         );
       case 2:
-        return <StepTrainingProgram control={control} errors={errors} />;
+        return (
+          <StepTrainingProgram
+            control={control}
+            errors={errors}
+            onContinue={handleContinue}
+          />
+        );
       case 3:
         return <StepTopics control={control} errors={errors} />;
       case 4:

@@ -29,7 +29,7 @@ export default function StepPlanInfo({
         <Stack spacing={3}>
           <RHFTextField
             control={control}
-            name="name"
+            name="info.name"
             label="Tên kế hoạch"
             placeholder="VD: Kế hoạch đào tạo 2025"
             required
@@ -37,7 +37,7 @@ export default function StepPlanInfo({
 
           <RHFTextAreaField
             control={control}
-            name="objective"
+            name="info.objective"
             label="Mục tiêu"
             placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo"
             minRows={3}
@@ -51,12 +51,12 @@ export default function StepPlanInfo({
             <Box sx={{ display: "flex", gap: 2 }}>
               <RHFDatePicker
                 control={control}
-                name="startDate"
+                name="info.startDate"
                 placeholder="Chọn ngày bắt đầu"
               />
               <RHFDatePicker
                 control={control}
-                name="endDate"
+                name="info.endDate"
                 placeholder="Chọn ngày kết thúc"
               />
             </Box>
@@ -64,7 +64,7 @@ export default function StepPlanInfo({
 
           <RHFTextField
             control={control}
-            name="budget"
+            name="info.budget"
             label="Ngân sách (VND)"
             placeholder="VD: 50.000.000"
             type="number"
