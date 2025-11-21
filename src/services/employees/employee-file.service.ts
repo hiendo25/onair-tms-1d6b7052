@@ -46,7 +46,7 @@ function mapHeaderToFieldKey(headerName: string): string {
     "Ngày bắt đầu": "start_date",
     "Chức vụ": "position",
     "Người quản lý": "manager",
-    "Vai trò": "role",
+    "Vai trò": "employee_type",
   };
 
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, "_");
@@ -158,7 +158,7 @@ async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
 
 const EmployeeImportSchema = EmployeeFormSchema.partial({
   manager_id: true,
-  role: true,
+  employee_type: true,
   position_id: true,
   employee_code: true,
   branch: true,
