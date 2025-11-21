@@ -1,5 +1,5 @@
 import PageContainer from "@/shared/ui/PageContainer";
-import UpdateClassRoom from "./_components/UpdateClassRoom";
+import UpdateClassRoomForm from "./_components/UpdateClassRoomForm";
 import { getClassRoomById } from "@/repository/class-room";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
@@ -77,7 +77,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <UpdateClassRoom data={data} />
+        <UpdateClassRoomForm data={data} />
       </div>
     </PageContainer>
   );

@@ -24,15 +24,15 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
     router.push("/admin/class-room");
   };
 
-  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
     onCreate(
-      { formData, students, teachers },
+      { formData, students },
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
             enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
-            // formClassRoomRef.current?.resetForm();
-            // router.push("/admin/class-room");
+            formClassRoomRef.current?.resetForm();
+            router.push("/admin/class-room");
           });
         },
       },

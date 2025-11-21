@@ -1,3 +1,4 @@
+import { ClassSessionsCoursesPeriod } from "@/model/class-session-course-period";
 import { ClassSession } from "@/model/class-session.model";
 
 export type BulkCreateClassRoomSessionsPayload = {
@@ -8,7 +9,6 @@ export type BulkCreateClassRoomSessionsPayload = {
     | "start_at"
     | "end_at"
     | "description"
-    | "assignment_id"
     | "session_type"
     | "priority"
     | "channel_info"
@@ -23,7 +23,6 @@ export type CreateClassRoomSessionPayload = Pick<
   | "start_at"
   | "end_at"
   | "description"
-  | "assignment_id"
   | "session_type"
   | "priority"
   | "channel_info"
@@ -39,7 +38,6 @@ export type UpdateClassRoomSessionPayload = Pick<
   | "start_at"
   | "end_at"
   | "description"
-  | "assignment_id"
   | "session_type"
   | "priority"
   | "channel_info"
@@ -61,13 +59,24 @@ export type CreatePivotClassRoomSessionAndTeacherPayload = {
   teacher_id: string;
 };
 
-export type CreatePivotClassSessionWithCoursePeriodPayload = {
-  class_session_id: string;
-  course_id: string;
-  teacher_id: string;
-  start_at: string;
-  end_at: string;
-};
+export type CreatePivotClassSessionWithCoursePeriodPayload = Pick<
+  ClassSessionsCoursesPeriod,
+  "class_session_id" | "course_id" | "teacher_id" | "start_at" | "end_at"
+>;
+export type UpdatePivotClassSessionWithCoursePeriodPayload = Pick<
+  ClassSessionsCoursesPeriod,
+  "id" | "teacher_id" | "start_at" | "end_at"
+>;
+
+export type UpsertPivotClassSessionWithCoursePeriodPayload =
+  | {
+      action: "create";
+      payload: CreatePivotClassSessionWithCoursePeriodPayload;
+    }
+  | {
+      action: "update";
+      payload: UpdatePivotClassSessionWithCoursePeriodPayload;
+    };
 
 export type CreatePivotClassSessionWithAssignmentPayload = {
   session_id: string;

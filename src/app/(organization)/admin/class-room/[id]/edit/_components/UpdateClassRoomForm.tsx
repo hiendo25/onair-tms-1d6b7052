@@ -16,13 +16,12 @@ import { PATHS } from "@/constants/path.contstants";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
-type TeacherType = Exclude<ManageClassRoomFormProps["teachers"], undefined>;
 type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
 
-interface UpdateClassRoomProps {
+interface UpdateClassRoomFormProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
-const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
+const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const router = useRouter();
   const { sessions, employees } = data;
   const [isTransition, startTransition] = useTransition();
@@ -67,6 +66,7 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
       }));
 
       const coursePeriods = session.courses_period.map<ClassRoomSession["coursesPeriod"][number]>((cp) => ({
+        id: cp.id,
         startAt: cp.start_at || "",
         endAt: cp.end_at || "",
         course: {
@@ -133,32 +133,6 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     };
   }, [data]);
 
-  /**
-   * remove teader to class sessions
-   */
-  // const teacherList = useMemo(() => {
-  //   return sessions.reduce<TeacherType>((acc, session, _index) => {
-  //     return {
-  //       ...acc,
-  //       [_index]: session.teachers.reduce<TeacherType[number]>((teacherSumary, tc) => {
-  //         return tc.employee && tc.employee.employee_type === "teacher"
-  //           ? [
-  //               ...teacherSumary,
-  //               {
-  //                 id: tc.employee?.id,
-  //                 avatar: tc.employee?.profile?.avatar || "",
-  //                 email: tc.employee?.profile?.email || "",
-  //                 fullName: tc.employee?.profile?.full_name || "",
-  //                 employeeCode: tc.employee.employee_code || "",
-  //                 empoyeeType: tc.employee.employee_type,
-  //               },
-  //             ]
-  //           : teacherSumary;
-  //       }, []),
-  //     };
-  //   }, {});
-  // }, [sessions]);
-
   const studentList = useMemo(() => {
     return employees.reduce<StudentType>((acc, emp) => {
       return emp.employee && emp.employee.employee_type === "student"
@@ -177,9 +151,9 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     }, []);
   }, [employees]);
 
-  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
+  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
     onUpdate(
-      { classRoomId: data.id, formData, students, teachers },
+      { classRoomId: data.id, formData, students },
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
@@ -203,4 +177,4 @@ const UpdateClassRoom: React.FC<UpdateClassRoomProps> = ({ data }) => {
     />
   );
 };
-export default UpdateClassRoom;
+export default UpdateClassRoomForm;
