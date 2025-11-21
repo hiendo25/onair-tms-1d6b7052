@@ -69,11 +69,7 @@ export interface ClassRoomFormContainerRef {
   resetForm: () => void;
 }
 export interface ClassRoomFormContainerProps {
-  onSubmit?: (
-    formData: ClassRoom,
-    selectedStudents: ClassRoomStore["state"]["selectedStudents"],
-    selectedTeachers: ClassRoomStore["state"]["selectedTeachers"],
-  ) => void;
+  onSubmit?: (formData: ClassRoom, selectedStudents: ClassRoomStore["state"]["selectedStudents"]) => void;
   onCancel?: () => void;
   platform: ClassRoomPlatformType;
   roomType?: ClassRoomType;
@@ -87,7 +83,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
-    const selectedTeachers = useClassRoomStore(({ state }) => state.selectedTeachers);
 
     const methods = useForm<ClassRoom>({
       resolver: zodResolver(classRoomSchema),
@@ -107,7 +102,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       reset,
     } = methods;
 
-    console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
+    console.log({ errors, value: getValues(), selectedStudents });
 
     const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
@@ -136,7 +131,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     };
 
     const submitForm: SubmitHandler<ClassRoom> = (data) => {
-      console.log({ errors, data, selectedTeachers, selectedStudents });
+      console.log({ errors, data, selectedStudents });
 
       // const sessionList = getValues("classRoomSessions");
 
@@ -153,7 +148,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       //   return;
       // }
 
-      onSubmit?.(data, selectedStudents, selectedTeachers);
+      onSubmit?.(data, selectedStudents);
     };
 
     const cancelCreateClassRoom = () => {

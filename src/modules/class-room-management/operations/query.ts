@@ -4,6 +4,7 @@ import {
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
 } from "@/repository/class-room";
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTQuery } from "@/lib/queryClient";
 import { classRoomRepository } from "@/repository";
 import {
@@ -64,7 +65,7 @@ export const useGetClassRoomQuery = (slug: string) => {
 
 export const useGetClassRoomsPriorityQuery = (input: GetClassRoomsQueryInput = {}) => {
   return useTQuery<PaginatedResult<ClassRoomPriorityDto>>({
-    queryKey: ["class-rooms-priority", input],
+    queryKey: [QUERY_KEYS.GET_CLASS_ROOMS, input],
     queryFn: () => classRoomRepository.getClassRooms(input),
     enabled: Boolean(input.organizationId ?? input.employeeId),
   });

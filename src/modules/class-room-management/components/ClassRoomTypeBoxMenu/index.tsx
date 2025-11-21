@@ -11,10 +11,10 @@ import BoxItem from "./BoxItem";
 import Image from "next/image";
 import { PATHS } from "@/constants/path.contstants";
 
-interface BoxMenuClassListProps {
+interface ClassRoomTypeBoxMenuProps {
   items?: { path: string; title: string }[];
 }
-const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
+const ClassRoomTypeBoxMenu: React.FC<ClassRoomTypeBoxMenuProps> = ({ items }) => {
   const router = useRouter();
   const [isLoading, startTransition] = useTransition();
   const [platform, setPlatform] = useState<ClassRoomPlatformType>("offline");
@@ -92,7 +92,7 @@ const BoxMenuClassList: React.FC<BoxMenuClassListProps> = ({ items }) => {
     </div>
   );
 };
-export default BoxMenuClassList;
+export default ClassRoomTypeBoxMenu;
 
 interface BoxMenuClassItemProps {
   className?: string;
