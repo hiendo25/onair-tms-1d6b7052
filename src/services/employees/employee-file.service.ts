@@ -201,7 +201,7 @@ function validateParsedData(data: any[]): ValidationResult {
       employee_code: row.employee_code,
       start_date: row.start_date,
       manager_id: undefined,
-      role: undefined,
+      employee_type: row.employee_type,
       position_id: undefined,
     };
 
@@ -252,6 +252,7 @@ function validateParsedData(data: any[]): ValidationResult {
         department: String(row.department).trim(),
         branch: row.branch ? String(row.branch).trim() : undefined,
         start_date: row.start_date ? String(row.start_date).trim() : undefined,
+        employee_type: row.employee_type ? String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"] : undefined,
       };
       validRecords.push(validRecord);
       if (index < 3) {
@@ -506,7 +507,7 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
         start_date: record.start_date || new Date().toISOString().split('T')[0],
         manager_id: "",
         position_id: undefined,
-        employee_type: undefined,
+        employee_type: record.employee_type,
       };
 
       const result = await createEmployeeCore(employeePayload, organizationId);

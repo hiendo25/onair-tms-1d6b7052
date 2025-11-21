@@ -96,19 +96,25 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
     throw new Error("Không tìm thấy phòng ban nào trong hệ thống. Vui lòng tạo phòng ban trước khi tạo file mẫu.");
   }
 
+  const lastOrder = await employeesRepository.getLastEmployeeOrder();
+  const startingOrder = lastOrder + 1;
+
   const samples: SampleEmployeeData[] = [];
 
-  for (let i = 1; i <= count; i++) {
+  for (let i = 0; i < count; i++) {
     const gender: "male" | "female" = Math.random() > 0.5 ? "male" : "female";
     const fullName = generateVietnameseName(gender);
     const department = departments[Math.floor(Math.random() * departments.length)];
     const branch = branches.length > 0 ? branches[Math.floor(Math.random() * branches.length)] : null;
     const employeeType: "student" | "teacher" = Math.random() > 0.5 ? "student" : "teacher";
 
+    const employeeOrder = startingOrder + i;
+    const employeeCode = String(employeeOrder).padStart(5, "0");
+
     samples.push({
-      employee_code: `NV${i.toString().padStart(3, "0")}`,
+      employee_code: employeeCode,
       full_name: fullName,
-      email: generateEmail(fullName, i),
+      email: generateEmail(fullName, employeeOrder),
       phone_number: generatePhoneNumber(),
       gender: gender,
       birthday: generateBirthday(),
