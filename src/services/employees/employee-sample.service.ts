@@ -118,8 +118,8 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
       phone_number: generatePhoneNumber(),
       gender: gender,
       birthday: generateBirthday(),
-      department: department.id,
-      branch: branch ? branch.id : "",
+      department: department.name,
+      branch: branch ? branch.name : "",
       start_date: generateStartDate(),
       employee_type: employeeType,
     });
