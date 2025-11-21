@@ -20,9 +20,9 @@ export const PATHS = {
     IMPORT_EMPLOYEES: "/admin/employees/import",
   },
   ROLE: {
-    ROOT: "/roles",
-    ROLES_ID: (id: string = ":id") => `/roles/${id}`,
-    CREATE: "/roles/create",
+    ROOT: "/admin/roles",
+    ROLES_ID: (id: string = ":id") => `/admin/roles/${id}`,
+    CREATE: "/admin/roles/create",
   },
   CLASSROOMS: {
     ROOT: "/admin/class-room",
