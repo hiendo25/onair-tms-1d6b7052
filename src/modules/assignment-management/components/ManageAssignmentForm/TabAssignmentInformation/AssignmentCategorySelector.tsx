@@ -51,4 +51,3 @@ const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({
 };
 
 export default AssignmentCategorySelector;
-

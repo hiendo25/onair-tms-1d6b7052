@@ -24,7 +24,7 @@ const useCRUDClassRoom = () => {
       enqueueSnackbar({ message: error.message, variant: "error" });
     },
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
     },
   });
 
@@ -43,7 +43,7 @@ const useCRUDClassRoom = () => {
       enqueueSnackbar({ message: error.message, variant: "error" });
     },
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
     },
   });
 
