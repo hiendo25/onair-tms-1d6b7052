@@ -63,10 +63,15 @@ export const PATHS = {
   },
   SURVEYS: {
     ROOT: "/admin/surveys",
-    CREATE_SURVEY: "/admin/surveys/create",
-    EDIT_SURVEY: (id: string = ":id") => `/admin/surveys/${id}/edit`,
+    CREATE: "/admin/surveys/create",
+    EDIT: (id: string = ":id") => `/admin/surveys/${id}/edit`,
     STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
     SUBMIT: (id: string = ":id") => `/surveys/${id}/submit`,
     THANK_YOU: (id: string = ":id") => `/surveys/${id}/submit/thank-you`,
+  },
+  PLANS: {
+    ROOT: "/admin/plans",
+    CREATE: "/admin/plans/create",
+    EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
 };
