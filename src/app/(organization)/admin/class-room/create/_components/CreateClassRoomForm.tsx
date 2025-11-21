@@ -10,6 +10,7 @@ import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useTransition } from "react";
+import { PATHS } from "@/constants/path.contstants";
 interface CreateClassRoomFormProps {
   platform: ClassRoomPlatformType;
   roomType: ClassRoomType;
@@ -21,7 +22,7 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { onCreate, isLoading } = useCRUDClassRoom();
   const handleCancel = () => {
-    router.push("/admin/class-room");
+    router.push(PATHS.CLASSROOMS.ROOT);
   };
 
   const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
@@ -32,7 +33,7 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
           startTransition(() => {
             enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
             formClassRoomRef.current?.resetForm();
-            router.push("/admin/class-room");
+            router.push(PATHS.CLASSROOMS.ROOT);
           });
         },
       },
