@@ -12,7 +12,6 @@ import StepNavigation, { Step } from "./StepNavigation";
 import StepPlanInfo from "./StepPlanInfo";
 import StepTrainingProgram from "./StepTrainingProgram";
 import StepTrainingTopics from "./StepTrainingTopics";
-import StepTopics from "./StepTopics";
 import StepApproval from "./StepApproval";
 import StepAssignCourses from "./StepAssignCourses";
 
@@ -154,10 +153,16 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
           />
         );
       case 4:
-        return <StepTopics control={control} errors={errors} />;
+        return (
+          <StepApproval
+            control={control}
+            errors={errors}
+            onBack={handleBack}
+            onSubmit={handleSubmit(onSubmit)}
+            isLoading={isLoading}
+          />
+        );
       case 5:
-        return <StepApproval control={control} errors={errors} />;
-      case 6:
         return <StepAssignCourses control={control} errors={errors} />;
       default:
         return null;
