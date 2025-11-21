@@ -1,9 +1,11 @@
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import { createSVClient } from "@/services/supabase/server";
 import type { Database } from "@/types/supabase.types";
 import type {
   ValidateEmployeeFileResultDto,
   ImportEmployeesResultDto,
   EmployeeImportData,
+  CreateEmployeeDto,
 } from "@/types/dto/employees";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 import {
@@ -11,6 +13,7 @@ import {
   profilesRepository,
   organizationUnitsRepository,
 } from "@/repository";
+import { createEmployeeCore } from "./employee.service";
 
 interface ValidationResult {
   totalCount: number;
@@ -464,7 +467,16 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     throw new Error(`File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`);
   }
 
-  const adminSupabase = createServiceRoleClient();
+  const supabase = await createSVClient();
+  const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+  console.log(`Importing employees to organization: ${organizationId}`);
+
   const records = validationResult.validRecords;
   let successCount = 0;
   let failedCount = 0;
@@ -482,33 +494,25 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     }
 
     try {
-      const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+      const employeePayload: CreateEmployeeDto = {
         email: record.email,
-        password: "123456",
-        email_confirm: true,
-        user_metadata: {
-          full_name: record.full_name,
-          phone_number: record.phone_number || "",
-          gender: record.gender,
-          birthday: record.birthday || null,
-          employee_code: record.employee_code || "",
-          start_date: record.start_date || null,
-          department_id: record.department,
-          branch_id: record.branch || null,
-          manager_id: null,
-        },
-      });
+        full_name: record.full_name,
+        phone_number: record.phone_number,
+        gender: record.gender,
+        birthday: record.birthday || null,
+        department: record.department,
+        branch: record.branch,
+        employee_code: record.employee_code,
+        start_date: record.start_date || new Date().toISOString().split('T')[0],
+        manager_id: "",
+        position_id: undefined,
+        employee_type: undefined,
+      };
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user");
-      }
+      const result = await createEmployeeCore(employeePayload, organizationId);
 
       successCount++;
-      console.log(`Successfully imported employee ${record.employee_code} (${successCount}/${records.length})`);
+      console.log(`Successfully imported employee ${result.employeeCode} (${successCount}/${records.length})`);
     } catch (error) {
       failedCount++;
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

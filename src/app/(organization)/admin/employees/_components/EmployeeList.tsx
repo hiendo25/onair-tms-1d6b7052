@@ -32,6 +32,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
@@ -119,6 +120,10 @@ export default function EmployeeList() {
 
   const handleCreateEmployee = () => {
     router.push("/admin/employees/create");
+  };
+
+  const handleImportEmployees = () => {
+    router.push("/admin/employees/import");
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, employeeId: string) => {
@@ -300,13 +305,22 @@ export default function EmployeeList() {
               </Select>
             </Stack>
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateEmployee}
-            >
-              Tạo nhân viên
-            </Button>
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                startIcon={<FileUploadIcon />}
+                onClick={handleImportEmployees}
+              >
+                Import người dùng
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleCreateEmployee}
+              >
+                Tạo người dùng
+              </Button>
+            </Stack>
           </Stack>
 
           {isLoading ? (
