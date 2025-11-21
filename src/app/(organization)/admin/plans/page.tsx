@@ -1,8 +1,6 @@
+import PlansTable from "./_components/PlansTable";
+
 export default async function PlansPage() {
-  return (
-    <div>
-      <p>Listing page</p>
-    </div>
-  );
+  return <PlansTable />;
 }
 
