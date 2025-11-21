@@ -1,6 +1,6 @@
 import { createSVClient } from "@/services/supabase/server";
 import { employeesRepository } from "@/repository";
-import { getAllOrganizationUnitsWithDetails } from "@/repository/organization-units";
+import { getOrganizationUnitsByOrganizationId } from "@/repository/organization-units";
 
 interface SampleEmployeeData {
   employee_code: string;
@@ -87,13 +87,13 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
   }
 
   const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
-  const orgUnits = await getAllOrganizationUnitsWithDetails();
+  const orgUnits = await getOrganizationUnitsByOrganizationId(organizationId);
 
   const departments = orgUnits.filter(unit => unit.type === "department");
   const branches = orgUnits.filter(unit => unit.type === "branch");
 
   if (departments.length === 0) {
-    throw new Error("Không tìm thấy phòng ban nào trong hệ thống. Vui lòng tạo phòng ban trước khi tạo file mẫu.");
+    throw new Error("Không tìm thấy phòng ban nào trong tổ chức của bạn. Vui lòng tạo phòng ban trước khi tạo file mẫu.");
   }
 
   const lastOrder = await employeesRepository.getLastEmployeeOrder();
