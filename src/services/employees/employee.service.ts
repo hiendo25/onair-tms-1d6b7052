@@ -29,25 +29,15 @@ interface CreateEmployeeResult {
   profileId: string;
 }
 
-async function createEmployeeWithRelations(
+async function createEmployeeCore(
   payload: CreateEmployeeDto,
+  organizationId: string,
 ): Promise<CreateEmployeeResult> {
   let userId: string | null = null;
   let employeeId: string | null = null;
   let profileId: string | null = null;
 
   try {
-    // Get the current authenticated user's organization_id
-    const supabase = await createSVClient();
-    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !currentUser) {
-      throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
-    }
-
-    const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
-    console.log(`Creating employee in organization: ${organizationId}`);
-
     const adminSupabase = createServiceRoleClient();
 
     const temporaryPassword = "123456";
@@ -170,6 +160,22 @@ async function createEmployeeWithRelations(
   }
 }
 
+async function createEmployeeWithRelations(
+  payload: CreateEmployeeDto,
+): Promise<CreateEmployeeResult> {
+  const supabase = await createSVClient();
+  const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+  console.log(`Creating employee in organization: ${organizationId}`);
+
+  return createEmployeeCore(payload, organizationId);
+}
+
 async function updateEmployeeWithRelations(
   payload: UpdateEmployeeDto,
 ): Promise<void> {
@@ -270,6 +276,7 @@ async function getEmployeeById(id: string): Promise<EmployeeDto> {
 }
 
 export {
+  createEmployeeCore,
   createEmployeeWithRelations,
   updateEmployeeWithRelations,
   deleteEmployeeWithRelations,
