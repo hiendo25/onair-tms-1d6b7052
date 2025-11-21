@@ -63,7 +63,7 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
     programs: [],
   };
 
-  const { control, handleSubmit, formState: { errors }, trigger } = useForm<PlanFormSchema>({
+  const { control, handleSubmit, formState: { errors }, trigger, getValues, setError, clearErrors } = useForm<PlanFormSchema>({
     resolver: zodResolver(planSchema),
     defaultValues,
   });
@@ -73,6 +73,7 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
       case 1:
         return "info";
       case 2:
+      case 3:
         return "programs";
       default:
         return undefined;
@@ -80,6 +81,33 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
   };
 
   const handleContinue = async () => {
+    // Step 3: Custom validation to ensure all programs have at least 1 topic
+    if (currentStep === 3) {
+      const programs = getValues("programs");
+      let hasError = false;
+
+      // Clear previous errors
+      programs.forEach((_, index) => {
+        clearErrors(`programs.${index}.topics`);
+      });
+
+      // Check each program for topics
+      programs.forEach((program, index) => {
+        if (!program.topics || program.topics.length === 0) {
+          setError(`programs.${index}.topics`, {
+            type: "manual",
+            message: "Mỗi chương trình cần có ít nhất 1 chủ đề.",
+          });
+          hasError = true;
+        }
+      });
+
+      if (hasError) {
+        return; // Don't proceed if validation fails
+      }
+    }
+
+    // Standard validation for other steps
     const fieldName = getStepFieldName(currentStep);
     const isValid = fieldName ? await trigger(fieldName) : true;
     if (isValid) {

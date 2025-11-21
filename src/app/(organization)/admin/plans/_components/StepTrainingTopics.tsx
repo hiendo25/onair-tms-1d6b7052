@@ -95,7 +95,7 @@ export default function StepTrainingTopics({
         <Stack spacing={2}>
           {programs.map((program, programIndex) => {
             const dateRange = formatDateRange(program.startDate, program.endDate);
-            
+
             return (
               <ProgramCard
                 key={program.id}
@@ -103,6 +103,7 @@ export default function StepTrainingTopics({
                 programIndex={programIndex}
                 dateRange={dateRange}
                 control={control}
+                errors={errors}
                 showFormForProgram={showFormForProgram}
                 editingTopic={editingTopic}
                 topicForm={topicForm}
@@ -132,6 +133,7 @@ interface ProgramCardProps {
   programIndex: number;
   dateRange: string | null;
   control: Control<PlanFormSchema>;
+  errors: FieldErrors<PlanFormSchema>;
   showFormForProgram: number | null;
   editingTopic: { programIndex: number; topicIndex: number } | null;
   topicForm: any;
@@ -145,6 +147,7 @@ function ProgramCard({
   programIndex,
   dateRange,
   control,
+  errors,
   showFormForProgram,
   editingTopic,
   topicForm,
@@ -171,15 +174,17 @@ function ProgramCard({
   };
 
   const isShowingAddForm = showFormForProgram === programIndex;
+  const topicsError = errors.programs?.[programIndex]?.topics?.message;
+  const hasError = !!topicsError;
 
   return (
     <Box
       sx={{
         p: 2.5,
         border: "1px solid",
-        borderColor: "#1976d2",
+        borderColor: hasError ? "error.main" : "#1976d2",
         borderRadius: 1,
-        bgcolor: "#e3f2fd",
+        bgcolor: hasError ? "#ffebee" : "#e3f2fd",
       }}
     >
       <Box sx={{ mb: 2 }}>
@@ -189,6 +194,11 @@ function ProgramCard({
         {dateRange && (
           <Typography variant="body2" color="text.secondary">
             {dateRange}
+          </Typography>
+        )}
+        {hasError && (
+          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+            {topicsError}
           </Typography>
         )}
       </Box>
