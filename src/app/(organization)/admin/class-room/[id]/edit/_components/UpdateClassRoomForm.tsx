@@ -157,7 +157,8 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
-          router.refresh();
+          // router.refresh();
+          router.push(PATHS.CLASSROOMS.ROOT);
         },
       },
     );
@@ -168,7 +169,6 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       initFormValue={initFormValue}
       action="edit"
       students={studentList}
-      // teachers={teacherList}
       isLoading={isLoading || isTransition}
       platform={platform}
       onSubmit={handleUpdateClassRoom}
