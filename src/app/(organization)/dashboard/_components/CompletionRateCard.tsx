@@ -31,28 +31,27 @@ const LegendItem = ({ color, label, count, percent }: LegendItemProps) => (
         {label}
       </Typography>
     </Stack>
-    <Stack spacing={0.25} alignItems="flex-end">
-      <Typography variant="body2" fontWeight={700}>
-        {count} Lớp
-      </Typography>
+    <Stack spacing={0.25} direction={"row"} gap={1}>
       <Typography variant="caption" color="text.secondary">
+        {count} Học viên
+      </Typography>
+      <Typography variant="body2" fontWeight={600}>
         {percent}%
       </Typography>
     </Stack>
   </Stack>
 );
 
-const rangeLabel: Record<TimeRange, string> = { week: "tuần", month: "tháng", year: "năm" };
-
 const CompletionRateCard = () => {
   const [range, setRange] = React.useState<TimeRange>("week");
   const { completed, total } = completionRateByRange[range];
   const completionPercent = Math.round((completed / total) * 100);
   const remainingCount = Math.max(total - completed, 0);
+  const remainingPercent = Math.max(100 - completionPercent, 0);
 
   const completionOptions = React.useMemo(
     () => ({
-      labels: ["Hoàn thành", "Còn lại"],
+      labels: ["Hoàn thành", "Chưa hoàn thành"],
       colors: ["#0f5bd2", "#e2e8f0"],
       dataLabels: { enabled: false },
       plotOptions: {
@@ -78,7 +77,7 @@ const CompletionRateCard = () => {
       legend: { show: false },
       stroke: { width: 4 },
       tooltip: {
-        y: { formatter: (val: number) => `${val} Lớp` },
+        y: { formatter: (val: number) => `${val} Học viên` },
         theme: "light",
       },
     }),
@@ -95,9 +94,6 @@ const CompletionRateCard = () => {
         <TimeRangeSwitcher value={range} onChange={setRange} />
       </Stack>
       <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={2.5}
-        alignItems="stretch"
         sx={{ mt: 1 }}
       >
         <Box
@@ -119,24 +115,26 @@ const CompletionRateCard = () => {
             sx={{ position: "absolute", inset: 0, pointerEvents: "none" }}
           >
             <Typography variant="body2" color="text.secondary">
-              Tỷ lệ hoàn thành
+              Tổng số học viên
             </Typography>
             <Typography variant="h4" fontWeight={800} color="text.primary">
-              {completionPercent}%
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Theo {rangeLabel[range]}
+              {total.toLocaleString("vi-VN")}
             </Typography>
           </Stack>
         </Box>
-        <Stack spacing={1.5} sx={{ minWidth: 0, flex: 1, justifyContent: "center" }}>
+        <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, justifyContent: "center" }}>
           <LegendItem
             color="#0f5bd2"
-            label="Tổng số lớp học hoàn thành"
+            label="Số học viên hoàn thành lớp học"
             count={completed}
             percent={completionPercent}
           />
-          <LegendItem color="#94a3b8" label="Tổng số lớp học" count={total} percent={100} />
+          <LegendItem
+            color="#94a3b8"
+            label="Số học viên chưa hoàn thành lớp học"
+            count={remainingCount}
+            percent={remainingPercent}
+          />
         </Stack>
       </Stack>
     </Paper>

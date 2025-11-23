@@ -435,8 +435,7 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
   }
 
   if (sessionMode && sessionMode !== ClassSessionModeFilter.All) {
-    const isOnline = sessionMode === ClassSessionModeFilter.Online;
-    builder = builder.eq("class_sessions.is_online", isOnline);
+    builder = builder.eq("class_sessions.session_type", sessionMode);
   }
 
   if (from) {

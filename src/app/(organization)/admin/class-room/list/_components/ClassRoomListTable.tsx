@@ -106,7 +106,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
         return;
       }
 
-      const isOnline = selectedClassRoom.class_sessions?.[0]?.is_online;
+      const isOnline = selectedClassRoom.class_sessions?.[0]?.session_type;
       if (!isOnline) {
         //  xử lý btn quét mã qr khi là lớp học offline chuỗi
         return;
@@ -217,7 +217,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                 });
 
                 const teachers = Array.from(teacherMap.values());
-                const isOnline = room?.class_sessions?.[0]?.is_online;
+                const isOnline = room?.class_sessions?.[0]?.session_type === "online";
 
                 return (
                   <TableRow
@@ -246,7 +246,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
-                      <ClassRoomType isOnline={isOnline!} />
+                      <ClassRoomType sessionType={room?.class_sessions?.[0]?.session_type} />
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" alignItems="center" spacing={0.5}>

@@ -25,52 +25,52 @@ type PercentageItem = { label: string; value: number };
 
 export const participationRateByRange: Record<TimeRange, PercentageItem[]> = {
   year: [
-    { label: "Chuyển đổi số doanh nghiệp", value: 86 },
-    { label: "Quản trị vận hành", value: 74 },
-    { label: "Phát triển lãnh đạo", value: 69 },
-    { label: "Data Analytics", value: 82 },
-    { label: "Kỹ năng mềm", value: 65 },
+    { label: "Chuyển đổi số doanh nghiệp", value: 83 },
+    { label: "Quản trị vận hành", value: 76 },
+    { label: "Phát triển lãnh đạo", value: 72 },
+    { label: "Data Analytics", value: 79 },
+    { label: "Kỹ năng mềm", value: 68 },
   ],
   month: [
-    { label: "Chuyển đổi số doanh nghiệp", value: 78 },
+    { label: "Chuyển đổi số doanh nghiệp", value: 76 },
     { label: "Quản trị vận hành", value: 72 },
-    { label: "Phát triển lãnh đạo", value: 64 },
-    { label: "Data Analytics", value: 76 },
-    { label: "Kỹ năng mềm", value: 60 },
+    { label: "Phát triển lãnh đạo", value: 69 },
+    { label: "Data Analytics", value: 74 },
+    { label: "Kỹ năng mềm", value: 65 },
   ],
   week: [
-    { label: "Chuyển đổi số doanh nghiệp", value: 95 },
-    { label: "Quản trị vận hành", value: 80 },
-    { label: "Phát triển lãnh đạo", value: 75 },
-    { label: "Data Analytics", value: 90 },
-    { label: "Kỹ năng mềm", value: 85 },
+    { label: "Chuyển đổi số doanh nghiệp", value: 69 },
+    { label: "Quản trị vận hành", value: 64 },
+    { label: "Phát triển lãnh đạo", value: 61 },
+    { label: "Data Analytics", value: 67 },
+    { label: "Kỹ năng mềm", value: 59 },
   ],
 };
 
 export const channelParticipationByRange: Record<TimeRange, PercentageItem[]> = {
   year: [
-    { label: "Online", value: 68 },
-    { label: "Offline", value: 52 },
-    { label: "eLearning", value: 86 },
+    { label: "Online", value: 62 },
+    { label: "Offline", value: 48 },
+    { label: "eLearning", value: 78 },
   ],
   month: [
-    { label: "Online", value: 64 },
-    { label: "Offline", value: 48 },
-    { label: "eLearning", value: 82 },
+    { label: "Online", value: 58 },
+    { label: "Offline", value: 46 },
+    { label: "eLearning", value: 74 },
   ],
   week: [
-    { label: "Online", value: 60 },
-    { label: "Offline", value: 55 },
-    { label: "eLearning", value: 78 },
+    { label: "Online", value: 55 },
+    { label: "Offline", value: 44 },
+    { label: "eLearning", value: 70 },
   ],
 };
 
 type CompletionSnapshot = { completed: number; total: number };
 
 export const completionRateByRange: Record<TimeRange, CompletionSnapshot> = {
-  year: { completed: 312, total: 420 },
-  month: { completed: 96, total: 120 },
-  week: { completed: 78, total: 100 },
+  year: { completed: 360, total: 480 },
+  month: { completed: 142, total: 190 },
+  week: { completed: 58, total: 82 },
 };
 
 export type RankingCourse = {
@@ -83,48 +83,48 @@ export const courseRankingByRange: Record<TimeRange, { top: RankingCourse[]; low
     top: [
       { title: "Chuyển đổi số doanh nghiệp", score: 92 },
       { title: "Khai thác dữ liệu nâng cao", score: 88 },
-      { title: "Xây dựng văn hóa học tập", score: 84 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
-      { title: "Tối ưu vận hành số", score: 78 },
+      { title: "Xây dựng văn hóa học tập", score: 85 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 82 },
+      { title: "Tối ưu vận hành số", score: 79 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 12 },
-      { title: "Kỹ năng thuyết trình", score: 15 },
-      { title: "Vận hành dự án", score: 18 },
-      { title: "Quản trị rủi ro", score: 20 },
-      { title: "Kỹ năng bán hàng", score: 22 },
+      { title: "Tư duy phản biện", score: 64 },
+      { title: "Kỹ năng thuyết trình", score: 61 },
+      { title: "Vận hành dự án", score: 59 },
+      { title: "Quản trị rủi ro", score: 57 },
+      { title: "Kỹ năng bán hàng", score: 54 },
     ],
   },
   month: {
     top: [
-      { title: "Chuyển đổi số doanh nghiệp", score: 88 },
-      { title: "Khai thác dữ liệu nâng cao", score: 85 },
-      { title: "Xây dựng văn hóa học tập", score: 80 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 78 },
-      { title: "Tối ưu vận hành số", score: 74 },
+      { title: "Chuyển đổi số doanh nghiệp", score: 90 },
+      { title: "Khai thác dữ liệu nâng cao", score: 86 },
+      { title: "Xây dựng văn hóa học tập", score: 83 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
+      { title: "Tối ưu vận hành số", score: 77 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 10 },
-      { title: "Kỹ năng thuyết trình", score: 12 },
-      { title: "Vận hành dự án", score: 14 },
-      { title: "Quản trị rủi ro", score: 16 },
-      { title: "Kỹ năng bán hàng", score: 18 },
+      { title: "Tư duy phản biện", score: 60 },
+      { title: "Kỹ năng thuyết trình", score: 58 },
+      { title: "Vận hành dự án", score: 56 },
+      { title: "Quản trị rủi ro", score: 54 },
+      { title: "Kỹ năng bán hàng", score: 51 },
     ],
   },
   week: {
     top: [
-      { title: "Chuyển đổi số doanh nghiệp", score: 95 },
-      { title: "Khai thác dữ liệu nâng cao", score: 90 },
-      { title: "Xây dựng văn hóa học tập", score: 85 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
-      { title: "Tối ưu vận hành số", score: 75 },
+      { title: "Chuyển đổi số doanh nghiệp", score: 88 },
+      { title: "Khai thác dữ liệu nâng cao", score: 84 },
+      { title: "Xây dựng văn hóa học tập", score: 81 },
+      { title: "Huấn luyện lãnh đạo trẻ", score: 78 },
+      { title: "Tối ưu vận hành số", score: 74 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 3 },
-      { title: "Kỹ năng thuyết trình", score: 10 },
-      { title: "Vận hành dự án", score: 9 },
-      { title: "Quản trị rủi ro", score: 8 },
-      { title: "Kỹ năng bán hàng", score: 8 },
+      { title: "Tư duy phản biện", score: 58 },
+      { title: "Kỹ năng thuyết trình", score: 56 },
+      { title: "Vận hành dự án", score: 54 },
+      { title: "Quản trị rủi ro", score: 52 },
+      { title: "Kỹ năng bán hàng", score: 49 },
     ],
   },
 };
@@ -132,29 +132,43 @@ export const courseRankingByRange: Record<TimeRange, { top: RankingCourse[]; low
 export const summaryCards = [
   {
     title: "Lớp học đang diễn ra",
-    value: "24",
+    value: "12",
     icon: "in-progress",
     colors: { bg: "#FFB0E8", icon: "#f062c0" },
   },
   {
     title: "Lớp học sắp diễn ra",
-    value: "8",
+    value: "9",
     icon: "upcoming",
     colors: { bg: "#CDDEFF", icon: "#648efc" },
   },
   {
     title: "Lớp học sắp hết hạn",
-    value: "3",
+    value: "5",
     icon: "expiring",
     colors: { bg: "#9723F914", icon: "#648efc" },
   },
   {
     title: "Lớp học đã diễn ra",
-    value: "112",
+    value: "34",
     icon: "completed",
     colors: { bg: "#FFD365", icon: "#f5a524" },
   },
 ];
+
+const currentMonth = dayjs().startOf("month");
+
+const buildDate = (dayOfMonth: number, hour: number, minute: number = 0) =>
+  currentMonth
+    .clone()
+    .date(dayOfMonth)
+    .hour(hour)
+    .minute(minute)
+    .second(0)
+    .millisecond(0);
+
+const formatTimeSlot = (dayOfMonth: number, hour: number, minute = 0) =>
+  buildDate(dayOfMonth, hour, minute).format("HH:mm DD/MM/YYYY");
 
 export const courseRows: CourseRow[] = [
   {
@@ -166,7 +180,7 @@ export const courseRows: CourseRow[] = [
     students: "26",
     lecturer: "Nguyễn Thị Mai Linh",
     avatar: "https://i.pravatar.cc/100?img=32",
-    times: ["09:00 12/10/2025", "19:00 13/10/2025"],
+    times: [formatTimeSlot(5, 9), formatTimeSlot(6, 19)],
   },
   {
     id: "2",
@@ -177,7 +191,7 @@ export const courseRows: CourseRow[] = [
     students: "32",
     lecturer: "Phạm Quang Huy",
     avatar: "https://i.pravatar.cc/100?img=54",
-    times: ["14:00 16/10/2025"],
+    times: [formatTimeSlot(8, 14)],
   },
   {
     id: "3",
@@ -188,7 +202,7 @@ export const courseRows: CourseRow[] = [
     students: "18",
     lecturer: "Vũ Thùy Dương",
     avatar: "https://i.pravatar.cc/100?img=16",
-    times: ["19:00 17/10/2025"],
+    times: [formatTimeSlot(10, 19)],
   },
   {
     id: "4",
@@ -199,7 +213,7 @@ export const courseRows: CourseRow[] = [
     students: "24",
     lecturer: "Đỗ Minh Đức",
     avatar: "https://i.pravatar.cc/100?img=25",
-    times: ["09:00 18/10/2025"],
+    times: [formatTimeSlot(12, 9)],
   },
   {
     id: "5",
@@ -210,7 +224,7 @@ export const courseRows: CourseRow[] = [
     students: "21",
     lecturer: "Trần Hải An",
     avatar: "https://i.pravatar.cc/100?img=46",
-    times: ["13:30 19/10/2025"],
+    times: [formatTimeSlot(15, 13, 30)],
   },
   {
     id: "6",
@@ -221,7 +235,7 @@ export const courseRows: CourseRow[] = [
     students: "27",
     lecturer: "Lê Hoài Nam",
     avatar: "https://i.pravatar.cc/100?img=63",
-    times: ["15:00 20/10/2025"],
+    times: [formatTimeSlot(18, 15)],
   },
   {
     id: "7",
@@ -232,26 +246,15 @@ export const courseRows: CourseRow[] = [
     students: "19",
     lecturer: "Nguyễn Mai Chi",
     avatar: "https://i.pravatar.cc/100?img=36",
-    times: ["19:30 21/10/2025"],
+    times: [formatTimeSlot(22, 19, 30)],
   },
 ];
-
-const currentMonth = dayjs().startOf("month");
-
-const buildDate = (dayOfMonth: number, hour: number, minute: number) =>
-  currentMonth
-    .clone()
-    .date(dayOfMonth)
-    .hour(hour)
-    .minute(minute)
-    .second(0)
-    .millisecond(0);
 
 export const mockEvents = [
   {
     id: "event-1",
     title: "Lớp Ứng dụng AI vào Doanh nghiệp",
-    start: buildDate(4, 9, 0).toISOString(),
+    start: buildDate(3, 9, 0).toISOString(),
     frames: [{ id: "frame-1" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -261,7 +264,7 @@ export const mockEvents = [
   {
     id: "event-2",
     title: "Tư Duy Phản Biện & Giải Quyết Vấn Đề",
-    start: buildDate(12, 14, 0).toISOString(),
+    start: buildDate(8, 14, 0).toISOString(),
     frames: [{ id: "frame-2" }],
     status: CalenderStatus.APPROVED,
     mode: "Offline",
@@ -271,7 +274,7 @@ export const mockEvents = [
   {
     id: "event-3",
     title: "Nghệ Thuật Giao Tiếp Trong Đội Nhóm",
-    start: buildDate(20, 18, 30).toISOString(),
+    start: buildDate(12, 18, 30).toISOString(),
     frames: [{ id: "frame-3" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -281,7 +284,7 @@ export const mockEvents = [
   {
     id: "event-4",
     title: "Chiến Lược Xây Dựng Văn Hóa Học Tập",
-    start: buildDate(26, 10, 0).toISOString(),
+    start: buildDate(16, 10, 0).toISOString(),
     frames: [{ id: "frame-4" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -311,7 +314,7 @@ export const mockEvents = [
   {
     id: "event-7",
     title: "Chiến Lược Tái Đào Tạo Nhân Viên",
-    start: buildDate(20, 8, 30).toISOString(),
+    start: buildDate(22, 8, 30).toISOString(),
     frames: [{ id: "frame-7" }],
     status: CalenderStatus.APPROVED,
     mode: "Offline",
@@ -321,7 +324,7 @@ export const mockEvents = [
   {
     id: "event-8",
     title: "Huấn Luyện Kỹ Năng Dẫn Dắt",
-    start: buildDate(30, 13, 0).toISOString(),
+    start: buildDate(25, 13, 0).toISOString(),
     frames: [{ id: "frame-8" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -331,7 +334,7 @@ export const mockEvents = [
   {
     id: "event-9",
     title: "Đổi Mới Sáng Tạo Trong Doanh Nghiệp",
-    start: buildDate(30, 16, 0).toISOString(),
+    start: buildDate(25, 16, 0).toISOString(),
     frames: [{ id: "frame-9" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -341,7 +344,7 @@ export const mockEvents = [
   {
     id: "event-10",
     title: "Thiết Lập KPIs Cho Đội Ngũ Đào Tạo",
-    start: buildDate(30, 9, 0).toISOString(),
+    start: buildDate(27, 9, 0).toISOString(),
     frames: [{ id: "frame-10" }],
     status: CalenderStatus.APPROVED,
     mode: "Offline",

@@ -29,13 +29,13 @@ export type UpdateClassRoomPayload = Pick<
 >;
 export type UpSertClassRoomPayload =
   | {
-      action: "create";
-      payload: CreateClassRoomPayload;
-    }
+    action: "create";
+    payload: CreateClassRoomPayload;
+  }
   | {
-      action: "update";
-      payload: UpdateClassRoomPayload;
-    };
+    action: "update";
+    payload: UpdateClassRoomPayload;
+  };
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;
@@ -70,6 +70,7 @@ export enum ClassSessionModeFilter {
   All = "all",
   Online = "online",
   Offline = "offline",
+  Live = "live"
 }
 
 export enum ClassRoomStatusFilter {

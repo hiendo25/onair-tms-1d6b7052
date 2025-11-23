@@ -41,4 +41,5 @@ export const SESSION_MODE_OPTIONS = [
     { label: "Tất cả", value: ClassSessionModeFilter.All, display: true },
     { label: "Online", value: ClassSessionModeFilter.Online, display: true },
     { label: "Offline", value: ClassSessionModeFilter.Offline, display: true },
+    { label: "Live", value: ClassSessionModeFilter.Live, display: true },
 ];
