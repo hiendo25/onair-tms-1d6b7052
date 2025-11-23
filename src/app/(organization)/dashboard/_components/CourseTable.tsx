@@ -28,7 +28,7 @@ type DashboardCourseRow = {
   slug?: string | null;
   label: string;
   name: string;
-  mode: "Trực tuyến (Online)" | "Trực tiếp (Offline)";
+  mode: "Trực tuyến (Online)" | "Trực tiếp (Offline)" | "Lớp học live";
   students: number;
   teachers: EmployeeWithProfileDto[];
   start_at: string | null;
@@ -91,15 +91,15 @@ const CourseTable = () => {
         ).values(),
       ].filter(Boolean) as EmployeeWithProfileDto[];
 
-      const sessionForMode = sessions.find((session) => session.is_online !== null && session.is_online !== undefined);
-      const isOnline = sessionForMode?.is_online ?? sessions[0]?.is_online ?? false;
+      const sessionForMode = sessions.find((session) => session.session_type !== null && session.session_type !== undefined);
+      const mode = sessionForMode?.session_type === "online" ? "Trực tuyến (Online)" : sessionForMode?.session_type === "offline" ? "Trực tiếp (Offline)" : "Lớp học live";
 
       return {
         id: classRoom.id,
         slug: classRoom.slug,
         label: classRoom.room_type === "multiple" ? "Chuỗi" : "Đơn",
         name: classRoom.title ?? "Lớp học",
-        mode: isOnline ? "Trực tuyến (Online)" : "Trực tiếp (Offline)",
+        mode,
         students: Number(classRoom.studentCount?.[0]?.count ?? 0),
         teachers: teachers,
         start_at: classRoom.start_at,
@@ -122,9 +122,11 @@ const CourseTable = () => {
           Lớp học trong tháng
         </Typography>
         <Stack direction="row" spacing={1}>
-          <Button variant="outlined" size="small" color="primary">
-            Tạo khảo sát
-          </Button>
+          <Link href={PATHS.SURVEYS.CREATE_SURVEY}>
+            <Button variant="outlined" size="small" color="primary">
+              Tạo khảo sát
+            </Button>
+          </Link>
           <Link href={PATHS.CLASSROOMS.ROOT}>
             <Button variant="outlined" size="small" color="primary">
               Tạo môn học
@@ -232,8 +234,8 @@ const CourseTable = () => {
                         label={row.label}
                         size="small"
                         sx={{
-                          bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B1F" : "#0050FF29",
-                          color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#0038B2",
+                          bgcolor: row.label === "Chuỗi" ? "#FF662B1F" : "#0050FF29",
+                          color: row.label === "Chuỗi" ? "#9A3E1A" : "#0038B2",
                           height: 24,
                           "& .MuiChip-label": {
                             color: "unset",

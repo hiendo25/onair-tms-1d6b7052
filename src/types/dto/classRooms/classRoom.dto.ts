@@ -54,7 +54,7 @@ export type ClassRoomStudentSessionAttendanceDto = Pick<
 
 type ClassRoomStudentSessionDto = Pick<
   Tables<"class_sessions">,
-  "id" | "is_online" | "title" | "start_at" | "end_at"
+  "id" | "session_type" | "title" | "start_at" | "end_at"
 > & {
   class_attendances?: ClassRoomStudentSessionAttendanceDto[] | null;
 };
