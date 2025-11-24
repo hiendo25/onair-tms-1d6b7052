@@ -31,14 +31,25 @@ const MOCK_PLANS: Record<string, PlanFormSchema> = {
           {
             name: "Kỹ năng giao tiếp hiệu quả",
             description: "Học cách giao tiếp rõ ràng và thuyết phục trong môi trường làm việc, xây dựng mối quan hệ tốt với đồng nghiệp và khách hàng",
+            courses: [
+              { id: "1", title: "4 buổi làm sao quản lý kỹ năng giao tiếp" },
+              { id: "6", title: "Kỹ năng thuyết trình" },
+            ],
           },
           {
             name: "Quản lý thời gian và ưu tiên công việc",
             description: "Tối ưu hóa năng suất làm việc thông qua quản lý thời gian hiệu quả, phân bổ nguồn lực hợp lý và ưu tiên các công việc quan trọng",
+            courses: [
+              { id: "5", title: "Quản lý thời gian hiệu quả" },
+            ],
           },
           {
             name: "Xây dựng và phát triển đội nhóm",
             description: "Kỹ năng tuyển dụng, đào tạo và phát triển nhân viên, tạo môi trường làm việc tích cực và động lực cho đội nhóm",
+            courses: [
+              { id: "2", title: "Môn học Kỹ năng làm việc đội nhóm" },
+              { id: "9", title: "Làm việc nhóm hiệu quả" },
+            ],
           },
         ],
       },

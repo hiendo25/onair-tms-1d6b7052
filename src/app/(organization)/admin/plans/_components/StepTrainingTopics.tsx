@@ -19,6 +19,7 @@ import { PlanFormSchema, Topic, topicSchema } from "@/modules/plans/plan-form.sc
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import dayjs, { Dayjs } from "dayjs";
+import TopicCard from "./shared/TopicCard";
 
 interface StepTrainingTopicsProps {
   control: Control<PlanFormSchema>;
@@ -262,69 +263,13 @@ function ProgramCard({
 
           // Show topic card
           return (
-            <Box
+            <TopicCard
               key={topic.id}
-              sx={{
-                p: 2,
-                border: "1px solid",
-                borderColor: "primary.main",
-                borderRadius: 1,
-                bgcolor: "common.white",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                  <Box
-                    sx={{
-                      px: 1,
-                      py: 0.25,
-                      bgcolor: "text.primary",
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Typography variant="caption" sx={{ color: "common.white", fontWeight: 500 }}>
-                      Chủ đề
-                    </Typography>
-                  </Box>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                    {topic.name}
-                  </Typography>
-                </Box>
-                {topic.description && (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {topic.description}
-                  </Typography>
-                )}
-              </Box>
-              <Box sx={{ display: "flex", gap: 0.5 }}>
-                <IconButton
-                  size="small"
-                  onClick={() => onEditTopic(programIndex, topicIndex, topic)}
-                >
-                  <EditIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  size="small"
-                  onClick={() => handleDeleteTopic(topicIndex)}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            </Box>
+              topic={topic}
+              mode="editable"
+              onEdit={() => onEditTopic(programIndex, topicIndex, topic)}
+              onDelete={() => handleDeleteTopic(topicIndex)}
+            />
           );
         })}
 

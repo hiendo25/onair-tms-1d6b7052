@@ -9,6 +9,7 @@ interface StepApprovalProps {
   errors: FieldErrors<PlanFormSchema>;
   onBack: () => void;
   onSubmit: () => void;
+  onContinue?: () => void;
   isLoading?: boolean;
   mode?: "create" | "edit";
 }
@@ -18,6 +19,7 @@ export default function StepApproval({
   errors,
   onBack,
   onSubmit,
+  onContinue,
   isLoading = false,
   mode = "create",
 }: StepApprovalProps) {
@@ -87,7 +89,7 @@ export default function StepApproval({
         </Box>
 
         {/* Action Buttons */}
-        <Box sx={{ display: "flex", justifyContent: mode === "edit" ? "flex-start" : "space-between", mt: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button
             variant="outlined"
             onClick={onBack}
@@ -95,13 +97,21 @@ export default function StepApproval({
           >
             Quay lại
           </Button>
-          {mode === "create" && (
+          {mode === "create" ? (
             <Button
               variant="contained"
               onClick={onSubmit}
               disabled={isLoading}
             >
               Gửi duyệt kế hoạch
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={onContinue}
+              disabled={isLoading}
+            >
+              Tiếp tục
             </Button>
           )}
         </Box>

@@ -233,12 +233,21 @@ export default function PlanForm({
             errors={errors}
             onBack={handleBack}
             onSubmit={handleSubmit(onSubmit)}
+            onContinue={() => setCurrentStep(5)}
             isLoading={isLoading}
             mode={mode}
           />
         );
       case 5:
-        return <StepAssignCourses control={control} errors={errors} />;
+        return (
+          <StepAssignCourses
+            control={control}
+            errors={errors}
+            onBack={handleBack}
+            onSave={handleSubmit(onSubmit)}
+            isLoading={isLoading}
+          />
+        );
       default:
         return null;
     }
