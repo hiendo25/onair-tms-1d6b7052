@@ -23,7 +23,6 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
   const classSessionStartDate = watch(`classRoomSessions.${sessionIndex}.startDate`);
   const classSessionEndDate = watch(`classRoomSessions.${sessionIndex}.endDate`);
 
-  console.log(classSessionStartDate, classSessionEndDate);
   const {
     fields: coursesFields,
     append,
@@ -112,7 +111,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
       return [...acc, ...session.coursesPeriod.map((course) => course.course.id)];
     }, []);
     return courseSelectedIds;
-  }, [watch(`classRoomSessions.${sessionIndex}.coursesPeriod`)]);
+  }, [watch(`classRoomSessions`)]);
 
   return (
     <div>

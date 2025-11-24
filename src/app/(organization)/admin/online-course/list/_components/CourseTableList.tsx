@@ -1,90 +1,139 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Alert, Box, Button, CircularProgress, InputAdornment, Stack, TextField, Typography } from "@mui/material";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Alert, Box, Button, Divider, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { SearchIcon } from "@/shared/assets/icons";
-import { GetCoursesQueryInput, useGetCourseListQuery } from "@/modules/courses/operations/query";
+import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
+import { useGetCourseListQuery, useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
 import Link from "next/link";
 import { PATHS } from "@/constants/path.contstants";
-import { DataGrid, DataGridProps } from "@mui/x-data-grid";
-import { getColumns } from "./columns";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+// import { getColumnsCourse } from "./column-course";
+import useDebounce from "@/hooks/useDebounce";
+import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
-import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { columnsCourse, CourseRowItem } from "./column-course";
+import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
 
-const PAGE_SIZE = 10;
-const initialFilters = {
-  search: "",
-};
+const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 
-export default function CourseTableList() {
+interface CourseTableListProps {
+  className?: string;
+}
+export default function CourseTableList({ className }: CourseTableListProps) {
+  const dialogDeleteRef = useRef<DialogDeleteCourseConfirmationRef>(null);
+  const {
+    organization: { id: organizationId },
+    employeeType,
+    id: employeeId,
+  } = useUserOrganization((state) => state.data);
 
-  const queryClient = useQueryClient();
+  const [queryParams, setQueryParams] = useState<GetCoursesQueryParams>({
+    search: "",
+    page: 1,
+    pageSize: 20,
+  });
+  const searchTextDebounce = useDebounce(queryParams.search, 600);
 
-  const [page, setPage] = useState(1);
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-  const [filters, setFilters] = useState<typeof initialFilters>(initialFilters);
-  const { organization, employeeType, ...rest } = useUserOrganization((state) => state.data);
+  const {
+    data: coursesData,
+    isLoading,
+    isError,
+    refetch,
+    isPending,
+  } = useGetCourseListQueryV2({
+    queryParams: {
+      ...queryParams,
+      search: searchTextDebounce,
+      organizationId: organizationId,
+      createdBy: employeeType !== "admin" ? employeeId : undefined,
+    },
+  });
 
-  const { mutateAsync: deleteCourseById } = useDeleteCourseByIdMutation()
+  const { mutate: deleteCourse, isPending: isLoadingDelete } = useDeleteCourseByIdMutation();
 
-  const employeeId = employeeType === "teacher" ? rest.id : undefined;
-  const isAdmin = employeeType === "admin";
-
-  const handleDeleteCourse = useCallback(async (courseId: string) => {
-    await deleteCourseById(courseId);
-    queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] })
-  }, [deleteCourseById])
-
-  const courseColumns = useMemo(
-    () =>
-      getColumns({
-        isAdmin,
-        onDelete: handleDeleteCourse,
-      }),
-    [handleDeleteCourse, isAdmin],
-  );
-
-  const queryInput = useMemo<GetCoursesQueryInput>(() => {
-    const trimmedSearch = filters.search.trim();
-    return {
-      q: trimmedSearch ? trimmedSearch : undefined,
-      page,
-      limit: PAGE_SIZE,
-      orderField: "created_at",
-      orderBy: "desc",
-      organizationId: organization.id,
-      employeeId,
-    };
-  }, [employeeId, filters.search, organization.id, page]);
-
-  const { data: course, isLoading, isError, refetch, isPending } = useGetCourseListQuery(queryInput);
-
-  const coursesList = course?.data || [];
-  const totalCourses = course?.total ?? 0;
+  const coursesList = useMemo(() => coursesData?.data || [], [coursesData]);
+  const totalCourses = coursesData?.count ?? 0;
 
   const handleSearchChange = (value: string) => {
-    setPage(1);
-    setFilters((prev) => ({
+    setQueryParams((prev) => ({
       ...prev,
       search: value,
+      page: 1,
     }));
   };
 
-  const handlePaginationModelChange: Exclude<DataGridProps["onPaginationModelChange"], undefined> = useCallback(
-    (paginationModel) => {
-      setPaginationModel(paginationModel);
+  const handleChangePagegination = (newPage: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
+  const handleChangePageSize = (newPageSize: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      pageSize: newPageSize,
+    }));
+  };
+
+  const handleDeleteCourse = (courseId: string, courseName: string) => () => {
+    dialogDeleteRef.current?.open(
+      {
+        title: `Xóa "${courseName}"`,
+        description: "Dữ liệu đã xóa không thể khôi phục, bạn vẫn muốn xóa",
+      },
+      {
+        onOk: () => {
+          deleteCourse(courseId);
+        },
+      },
+    );
+  };
+  const mergeColumns: TableDataProps<CourseRowItem>["columns"] = [
+    ...columnsCourse,
+    {
+      id: "action",
+      field: "action",
+      headerName: "Hành động",
+      fixed: "right",
+      width: 140,
+      renderCell: (value, { id: courseId, title: courseName }) => {
+        return (
+          <>
+            <IconButton
+              size="small"
+              href={PATHS.COURSES.EDIT(courseId)}
+              LinkComponent={Link}
+              className="text-blue-600 bg-transparent hover:bg-blue-50"
+            >
+              <Edit02Icon className="w-4 h-4" />
+            </IconButton>
+            <IconButton
+              size="small"
+              className="text-red-600 bg-transparent hover:bg-red-50"
+              onClick={handleDeleteCourse(courseId, courseName ?? "")}
+            >
+              <Trash01Icon className="w-4 h-4" />
+            </IconButton>
+          </>
+        );
+      },
     },
-    [],
-  );
+  ];
 
   return (
-    <Box bgcolor={"#fff"} borderRadius={2} p={2}>
-      <div className="flex items-center justify-between gap-2 mb-3">
+    <Box
+      sx={{
+        background: "white",
+        borderRadius: "8px",
+        overflow: "hidden",
+      }}
+    >
+      <div className="flex items-center justify-between gap-2 mb-3 p-4">
         <Box component="div" className="w-full max-w-[360px] block">
           <TextField
-            value={filters.search}
+            value={queryParams.search}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder="Tìm kiếm..."
             size="small"
@@ -100,32 +149,12 @@ export default function CourseTableList() {
             }}
           />
         </Box>
-        <Link href={PATHS.COURSES.CREATE}>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              minWidth: { xs: "100%", lg: 160 },
-              flex: { xs: "1 1 100%", lg: "0 0 auto" },
-              alignSelf: { xs: "stretch", lg: "center" },
-              py: 1.1,
-            }}
-          >
-            Tạo môn học
-          </Button>
-        </Link>
+        <Button variant="contained" color="primary" LinkComponent={Link} href={PATHS.COURSES.CREATE} size="large">
+          Tạo môn học
+        </Button>
       </div>
 
       <Stack spacing={3}>
-        {isLoading ? (
-          <Stack alignItems="center" justifyContent="center" sx={{ py: 6 }} spacing={2}>
-            <CircularProgress />
-            <Typography variant="body2" color="text.secondary">
-              Đang tải danh sách khóa học...
-            </Typography>
-          </Stack>
-        ) : null}
-
         {isError ? (
           <Alert
             severity="error"
@@ -138,55 +167,26 @@ export default function CourseTableList() {
             Không thể tải danh sách khóa học. Vui lòng kiểm tra lại kết nối.
           </Alert>
         ) : null}
-
-        {!isLoading && !isError ? (
-          coursesList.length === 0 ? (
-            <Box
-              sx={{
-                py: 6,
-                px: 3,
-                border: "1px dashed",
-                borderColor: "divider",
-                borderRadius: 3,
-                textAlign: "center",
-                color: "text.secondary",
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Không có khóa học phù hợp
-              </Typography>
-              <Typography variant="body2">Hãy thử điều chỉnh lại từ khóa tìm kiếm hoặc làm mới dữ liệu.</Typography>
-            </Box>
-          ) : (
-            <Box
-            >
-              <DataGrid
-                rows={coursesList}
-                columns={courseColumns}
-                rowCount={totalCourses}
-                loading={isPending}
-                pageSizeOptions={[10, 15, 20]}
-                disableColumnSelector
-                disableColumnSorting
-                // disableColumnResize
-                disableRowSelectionOnClick
-                disableColumnMenu
-                paginationMode="server"
-                paginationModel={paginationModel}
-                onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
-                sx={{
-                  border: 0,
-                  ".MuiDataGrid-columnHeaders": {
-                    ".MuiDataGrid-columnHeaderCheckbox": {
-                      pointerEvents: "none",
-                    },
-                  },
-                }}
-              />
-            </Box>
-          )
-        ) : null}
+        <Divider />
+        <TableData
+          rows={coursesList}
+          columns={mergeColumns}
+          hoverRow
+          loading={isLoading || isPending}
+          showRowCount
+          bordered={false}
+          pagination={{
+            page: queryParams.page,
+            pageSize: queryParams.pageSize,
+            total: totalCourses,
+            perPageOptions: PAGE_SIZE_OPTIONS,
+            onChangePage: handleChangePagegination,
+            onChangePageSize: handleChangePageSize,
+          }}
+          minWidth={1200}
+        />
       </Stack>
+      <DialogDeleteCourseConfirmation ref={dialogDeleteRef} isLoading={isLoadingDelete} />
     </Box>
   );
 }

@@ -3,7 +3,7 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { coursesRepository } from "@/repository";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
 import { CourseDto } from "@/types/dto/courses/course.dto";
-import { GetCoursesListMinimalQueryParams } from "@/repository/courses";
+import { GetCoursesListMinimalQueryParams, GetCoursesQueryParams } from "@/repository/courses";
 export interface GetCoursesQueryInput {
   q?: string;
   page?: number;
@@ -19,6 +19,15 @@ export const useGetCourseListQuery = (input: GetCoursesQueryInput = {}, options?
     queryKey: [QUERY_KEYS.GET_COURSES, input],
     queryFn: () => coursesRepository.getCourses(input),
     enabled: options?.enabled ?? true,
+  });
+};
+
+export const useGetCourseListQueryV2 = (options?: { enabled?: boolean; queryParams: GetCoursesQueryParams }) => {
+  const { enabled = true, queryParams } = options || {};
+  return useTQuery({
+    queryKey: [QUERY_KEYS.GET_COURSES, queryParams],
+    queryFn: () => coursesRepository.getCoursesV2(queryParams),
+    enabled: enabled,
   });
 };
 
