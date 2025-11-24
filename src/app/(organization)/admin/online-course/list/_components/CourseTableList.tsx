@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Alert, Box, Button, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
+import { Alert, Box, Button, Divider, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
 import { useGetCourseListQuery, useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
@@ -12,14 +12,10 @@ import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import useDebounce from "@/hooks/useDebounce";
 import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
-import { useQueryClient } from "@tanstack/react-query";
-import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { columnsCourse, CourseRowItem } from "./column-course";
 import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
 
-const PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [10, 20, 40, 100];
-const PAGE = 1;
+const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 
 interface CourseTableListProps {
   className?: string;
@@ -34,8 +30,8 @@ export default function CourseTableList({ className }: CourseTableListProps) {
 
   const [queryParams, setQueryParams] = useState<GetCoursesQueryParams>({
     search: "",
-    page: PAGE,
-    pageSize: PAGE_SIZE,
+    page: 1,
+    pageSize: 20,
   });
   const searchTextDebounce = useDebounce(queryParams.search, 600);
 
@@ -82,10 +78,17 @@ export default function CourseTableList({ className }: CourseTableListProps) {
   };
 
   const handleDeleteCourse = (courseId: string, courseName: string) => () => {
-    dialogDeleteRef.current?.open({
-      title: `Xóa "${courseName}"`,
-      description: "Dữ liệu đã xóa không thể khôi phục, bạn vẫn muốn xóa",
-    });
+    dialogDeleteRef.current?.open(
+      {
+        title: `Xóa "${courseName}"`,
+        description: "Dữ liệu đã xóa không thể khôi phục, bạn vẫn muốn xóa",
+      },
+      {
+        onOk: () => {
+          deleteCourse(courseId);
+        },
+      },
+    );
   };
   const mergeColumns: TableDataProps<CourseRowItem>["columns"] = [
     ...columnsCourse,
@@ -120,8 +123,14 @@ export default function CourseTableList({ className }: CourseTableListProps) {
   ];
 
   return (
-    <Box bgcolor={"#fff"} borderRadius={2} p={2}>
-      <div className="flex items-center justify-between gap-2 mb-3">
+    <Box
+      sx={{
+        background: "white",
+        borderRadius: "8px",
+        overflow: "hidden",
+      }}
+    >
+      <div className="flex items-center justify-between gap-2 mb-3 p-4">
         <Box component="div" className="w-full max-w-[360px] block">
           <TextField
             value={queryParams.search}
@@ -158,34 +167,26 @@ export default function CourseTableList({ className }: CourseTableListProps) {
             Không thể tải danh sách khóa học. Vui lòng kiểm tra lại kết nối.
           </Alert>
         ) : null}
-        <Box
-          sx={{
-            border: "1px solid",
-            borderColor: "divider",
-            borderRadius: 1,
-            overflow: "hidden",
-            backgroundColor: "#fff",
+        <Divider />
+        <TableData
+          rows={coursesList}
+          columns={mergeColumns}
+          hoverRow
+          loading={isLoading || isPending}
+          showRowCount
+          bordered={false}
+          pagination={{
+            page: queryParams.page,
+            pageSize: queryParams.pageSize,
+            total: totalCourses,
+            perPageOptions: PAGE_SIZE_OPTIONS,
+            onChangePage: handleChangePagegination,
+            onChangePageSize: handleChangePageSize,
           }}
-        >
-          <TableData
-            rows={coursesList}
-            columns={mergeColumns}
-            hoverRow
-            loading={isLoading || isPending}
-            showRowCount
-            pagination={{
-              page: queryParams.page,
-              pageSize: queryParams.pageSize,
-              total: totalCourses,
-              perPageOptions: PAGE_SIZE_OPTIONS,
-              onChangePage: handleChangePagegination,
-              onChangePageSize: handleChangePageSize,
-            }}
-            minWidth={1200}
-          />
-        </Box>
+          minWidth={1200}
+        />
       </Stack>
-      <DialogDeleteCourseConfirmation ref={dialogDeleteRef} />
+      <DialogDeleteCourseConfirmation ref={dialogDeleteRef} isLoading={isLoadingDelete} />
     </Box>
   );
 }

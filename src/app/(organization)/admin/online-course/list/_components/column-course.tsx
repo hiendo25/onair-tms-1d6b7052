@@ -1,10 +1,6 @@
 "use client";
 import { Chip, ChipProps, IconButton } from "@mui/material";
 import { GetCoursesV2Response } from "@/repository/courses";
-import { PATHS } from "@/constants/path.contstants";
-
-import Link from "next/link";
-import { Edit02Icon } from "@/shared/assets/icons";
 import { TableDataProps } from "@/shared/ui/TableData";
 import dayjs from "dayjs";
 

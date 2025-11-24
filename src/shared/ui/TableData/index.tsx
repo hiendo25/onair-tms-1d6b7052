@@ -2,6 +2,7 @@ import { createContext, memo, useCallback, useContext, useLayoutEffect, useMemo,
 import {
   Box,
   Paper,
+  SxProps,
   Table,
   TableBody,
   TableContainer,
@@ -25,6 +26,7 @@ export type TableDataProps<T> = {
   hoverRow?: boolean;
   stickyHeader?: boolean;
   showRowCount?: boolean;
+  bordered?: boolean;
   pagination?: {
     page?: number;
     pageSize?: number;
@@ -54,6 +56,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   minWidth,
   loading,
   hoverRow,
+  bordered = true,
   pagination = initPagination,
   stickyHeader,
   showRowCount,
@@ -127,14 +130,21 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
 
   return (
     <TableRowDataProvider>
-      <TableContainer component={Paper} className="table-container shadow-none bg-transparent">
+      <TableContainer
+        component="div"
+        sx={(theme) => ({
+          marginTop: "0px !important",
+          ...(bordered ? { border: "1px solid", borderColor: theme.palette.grey[200] } : {}),
+        })}
+        className="table-container shadow-none bg-transparent"
+      >
         <Box
           component="div"
           className="container-wraper w-full overflow-x-auto"
           sx={{
             scrollbarWidth: "thin",
             scrollbarColor: "#eaeaea transparent",
-            scrollbarGutter: "stable",
+            // scrollbarGutter: "stable",
           }}
         >
           <Table stickyHeader={stickyHeader} sx={{ minWidth: minWidth }} aria-label="sticky table">

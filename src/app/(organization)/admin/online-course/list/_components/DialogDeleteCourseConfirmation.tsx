@@ -37,6 +37,10 @@ const DialogDeleteCourseConfirmation = forwardRef<
   const handleConfirm = () => {
     dialogAction?.onOk?.();
     onOk?.();
+    setDialog((prev) => ({
+      ...prev,
+      open: false,
+    }));
   };
 
   useImperativeHandle(ref, () => ({
