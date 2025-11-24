@@ -26,8 +26,12 @@ const useCreateCategoriesMutation = () => {
 };
 
 const useDeleteCourseByIdMutation = () => {
+  const queryClient = useQueryClient();
   return useTMutation({
     mutationFn: (courseId: string) => coursesRepository.deleteCourseById(courseId),
+    onSuccess(data, variables, onMutateResult, context) {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] });
+    },
   });
 };
 

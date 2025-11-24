@@ -34,7 +34,7 @@ const TableDataHeader = <T,>({ columns, showRowCount }: TableRowDataProps<T>) =>
 
       cellNode.style.left = leftPosition + "px";
       cellNode.classList.add("fixed-left");
-      cellNode.style.background = "rgb(245 246 248)";
+      // cellNode.style.background = "rgb(245 246 248)";
     });
 
     const nodelistRightReverse = [...nodesRight].reverse();
@@ -51,18 +51,23 @@ const TableDataHeader = <T,>({ columns, showRowCount }: TableRowDataProps<T>) =>
 
       cellNode.style.right = rightPosition + "px";
       cellNode.classList.add("fixed-right");
-      cellNode.style.background = "rgb(245 246 248)";
+      // cellNode.style.background = "rgb(245 246 248)";
     });
   }, []);
 
   return (
-    <TableRowStyled className="table-data-row table-data-row-header">
-      {showRowCount && <TableCell className="w-20 table-cell-head">STT</TableCell>}
+    <TableRowStyled className="table-data-row table-data-row-header h-15">
+      {showRowCount && (
+        <TableCell className="w-20 table-cell-head" sx={{ padding: "8px 12px" }}>
+          STT
+        </TableCell>
+      )}
       {columns.map(({ headerName, field, renderCell, ...restProps }, _index) => (
         <TableCell
           ref={splitCellsRefs(restProps.fixed)}
           key={field.toString()}
           className="table-cell-head"
+          sx={{ padding: "8px 12px" }}
           {...restProps}
         >
           {headerName}

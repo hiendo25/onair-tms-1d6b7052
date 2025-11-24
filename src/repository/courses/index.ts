@@ -236,11 +236,13 @@ export type GetCoursesListMinimalQueryParams = {
   pageSize?: number;
   excludes?: string[];
   search?: string;
+  organizationId?: string;
+  createdBy?: string;
 };
 const getCoursesListMinimal = async (queryParams?: GetCoursesListMinimalQueryParams) => {
   try {
-    const { page = 1, pageSize = 20, excludes, search } = queryParams || {};
-    const from = (page - 1) * pageSize;
+    const { page = 1, pageSize = 20, excludes, search, organizationId, createdBy } = queryParams || {};
+    const from = page > 0 ? (page - 1) * pageSize : page;
     const to = from + pageSize - 1;
 
     let courseQuery = supabase.from("courses").select(
@@ -278,16 +280,24 @@ const getCoursesListMinimal = async (queryParams?: GetCoursesListMinimalQueryPar
           id,
           employee_code,
           profiles(id, full_name, avatar, email)
-        )
+        ),
+        created_at
       `,
       { count: "exact" },
     );
+
+    if (organizationId) {
+      courseQuery = courseQuery.eq("organization_id", organizationId);
+    }
+    if (createdBy) {
+      courseQuery = courseQuery.eq("created_by", createdBy);
+    }
 
     if (excludes?.length) {
       courseQuery = courseQuery.not("id", "in", `(${excludes.join(",")})`);
     }
     if (search) {
-      courseQuery = courseQuery.ilike("profiles.full_name", `%${search}%`);
+      courseQuery = courseQuery.ilike("title", `%${search}%`);
     }
 
     return await courseQuery.order("created_at", { ascending: false }).range(from, to);
@@ -297,11 +307,91 @@ const getCoursesListMinimal = async (queryParams?: GetCoursesListMinimalQueryPar
 };
 export type GetCoursesListMinimalResponse = Awaited<ReturnType<typeof getCoursesListMinimal>>;
 
+export type GetCoursesQueryParams = {
+  page?: number;
+  pageSize?: number;
+  excludes?: string[];
+  search?: string;
+  organizationId?: string;
+  createdBy?: string;
+};
+const getCoursesV2 = async (queryParams?: GetCoursesQueryParams) => {
+  try {
+    const { page = 1, pageSize = 20, excludes, search, organizationId, createdBy } = queryParams || {};
+    const from = page > 0 ? (page - 1) * pageSize : page;
+    const to = from + pageSize - 1;
+
+    let courseQuery = supabase
+      .from("courses")
+      .select(
+        `
+        id,
+        title,
+        slug,
+        status,
+        created_by,
+        courses_categories(
+          id,
+          categories(
+            id, name, slug
+          )
+        ),
+        organizations(
+          id, 
+          name
+        ),
+        sections(
+          id,
+          title,
+          course_id,
+          status,
+          priority,
+          lessons(
+            id,
+            title,
+            lesson_type,
+            priority,
+            status
+          )
+        ),
+        owner:employees(
+          id,
+          employee_code,
+          profiles(id, full_name, avatar, email)
+        ),
+        created_at
+      `,
+        { count: "exact" },
+      )
+      .not("status", "in", "(deleted)");
+
+    if (organizationId) {
+      courseQuery = courseQuery.eq("organization_id", organizationId);
+    }
+    if (createdBy) {
+      courseQuery = courseQuery.eq("created_by", createdBy);
+    }
+
+    if (excludes?.length) {
+      courseQuery = courseQuery.not("id", "in", `(${excludes.join(",")})`);
+    }
+    if (search) {
+      courseQuery = courseQuery.ilike("title", `%${search.trim()}%`);
+    }
+
+    return await courseQuery.order("created_at", { ascending: false }).range(from, to);
+  } catch (err: any) {
+    throw new Error(err?.message ?? "Fetching Course list failed.");
+  }
+};
+export type GetCoursesV2Response = Awaited<ReturnType<typeof getCoursesV2>>;
+
 export {
   createCourse,
   createPivotCoursesWithCategories,
   getCourseById,
   getCourses,
+  getCoursesV2,
   updateCourse,
   deletePivotCoursesWithCategories,
   deleteCoursesByEmployeeId,

@@ -1,10 +1,11 @@
 "use client";
-import { IconButton, Typography } from "@mui/material";
+import { Button, IconButton, Typography } from "@mui/material";
 import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import QrSetting from "./QrSetting";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
+import { Download01Icon } from "@/shared/assets/icons";
 
 const TabClassRoomSetting = () => {
   const { control, getValues } = useClassRoomFormContext();
@@ -31,6 +32,9 @@ const TabClassRoomSetting = () => {
         <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
           Thêm học viên <span className="text-red-600">*</span>
         </Typography>
+        <Button variant="outlined" startIcon={<Download01Icon />}>
+          Import
+        </Button>
       </div>
       {/* {!selectedStudents.length ? (
           <div className="py-2">
