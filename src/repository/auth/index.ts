@@ -8,9 +8,7 @@ export interface AuthSignInWithPasswordPayload {
   email: string;
   password: string;
 }
-const authSignInWithPassword = async (
-  payload: AuthSignInWithPasswordPayload,
-) => {
+const authSignInWithPassword = async (payload: AuthSignInWithPasswordPayload) => {
   return await supabase.auth.signInWithPassword(payload);
 };
 
@@ -36,9 +34,4 @@ const authSignUp = async (payload: AuthSignUpPayload) => {
   });
 };
 
-export {
-  authSignOut,
-  authSignInWithPassword,
-  authSignInWithGoogle,
-  authSignUp,
-};
+export { authSignOut, authSignInWithPassword, authSignInWithGoogle, authSignUp };

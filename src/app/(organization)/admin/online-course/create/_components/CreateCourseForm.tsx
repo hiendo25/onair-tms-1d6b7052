@@ -18,7 +18,9 @@ const CreateCourseForm = () => {
   const router = useRouter();
   const courseFormRef = useRef<ManageCourseFormRef>(null);
   const handleCancel = () => {
-    router.push("/admin/class-room");
+    startTransition(() => {
+      router.push(PATHS.CLASSROOMS.ROOT);
+    });
   };
 
   const handleCreateClassRoom: ManageCourseFormProps["onSubmit"] = (formData) => {

@@ -24,7 +24,7 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
   const ROOMS: ClassRoomType[] = ["multiple", "single"];
 
   if (!ROOMS.includes(roomtype) || !PLATFORMS.includes(platform)) {
-    redirect("/admin/class-room");
+    redirect(PATHS.CLASSROOMS.ROOT);
   }
   const pageTitle = `Tạo lớp học ${
     platform === "online"

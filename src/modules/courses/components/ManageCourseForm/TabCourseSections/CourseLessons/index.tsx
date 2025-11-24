@@ -148,17 +148,17 @@ const CourseLessons = forwardRef<CourseLessonsRef, CourseLessonsProps>(
     /**
      * update new index position for Editting Lesson after Drag Lesson
      */
-    useEffect(() => {
-      if (!editingLessonId || editingSectionIndex !== sectionIndex) return;
-      const newIndexLessonEditing = lessons.findIndex((lesson) => lesson._lessionId === editingLessonId);
-      if (
-        newIndexLessonEditing !== -1 &&
-        !isUndefined(editingLessonIndex) &&
-        newIndexLessonEditing !== editingLessonIndex
-      ) {
-        onLessonClick?.(sectionIndex, newIndexLessonEditing);
-      }
-    });
+    // useEffect(() => {
+    //   if (!editingLessonId || editingSectionIndex !== sectionIndex) return;
+    //   const newIndexLessonEditing = lessons.findIndex((lesson) => lesson._lessionId === editingLessonId);
+    //   if (
+    //     newIndexLessonEditing !== -1 &&
+    //     !isUndefined(editingLessonIndex) &&
+    //     newIndexLessonEditing !== editingLessonIndex
+    //   ) {
+    //     onLessonClick?.(sectionIndex, newIndexLessonEditing);
+    //   }
+    // });
 
     return (
       <div className="section-item__body flex flex-col gap-2">
