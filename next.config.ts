@@ -5,7 +5,6 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone", // Enable standalone output for Docker
   reactStrictMode: false,
-  swcMinify: false,
   // typedRoutes: true,
   // compiler: {
   //   styledComponents: true, // Enable SWC transform for styled-components
@@ -76,24 +75,10 @@ const nextConfig: NextConfig = {
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
   },
-  webpack: (config, { dev }) => {
+  webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
     };
-
-    if (dev) {
-      const desiredDevtool = "source-map";
-      Object.defineProperty(config, "devtool", {
-        configurable: true,
-        get() {
-          return desiredDevtool;
-        },
-        set() {
-          // Next.js forces eval-based devtools in dev, which breaks pdf.js worker (react-pdf #1813).
-        },
-      });
-    }
-
     return config;
   },
   typescript: {
