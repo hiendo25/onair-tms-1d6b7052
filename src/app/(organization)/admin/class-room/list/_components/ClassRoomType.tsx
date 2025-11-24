@@ -26,8 +26,8 @@ const SESSION_TYPE_CONFIG: Record<
     },
     live: {
         label: "Phát trực tiếp (Live)",
-        color: "#D92D20",
-        background: "rgba(217, 45, 32, 0.14)",
+        color: "rgb(245, 22, 6)",
+        background: "rgba(245, 22, 6, 0.24)",
         Icon: LiveTvOutlinedIcon,
     },
 };

@@ -4670,13 +4670,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@yr/monotone-cubic-spline@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@yr/monotone-cubic-spline@npm:1.0.3"
-  checksum: 10c0/6098d2138dcf8b722c80f2e9167d24a064184c37fb5b3276e34c717351b496735777b71f7e69c3fa6b94f8a81eba309c4a1e37349a26b8541113b1afa84d7bf8
-  languageName: node
-  linkType: hard
-
 "@vidstack/react@npm:^1.12.13":
   version: 1.12.13
   resolution: "@vidstack/react@npm:1.12.13"
@@ -4687,6 +4680,13 @@ __metadata:
     "@types/react": ^18.0.0 || ^19.0.0
     react: ^18.0.0 || ^19.0.0
   checksum: 10c0/b86f9ad1026b041eae54ba9f0840a826805252083bc6add75490ac243d316b19e937cf2e72db5a527193e1fb65adf73a1cd9ef58523559207947b7123dc4d11a
+  languageName: node
+  linkType: hard
+
+"@yr/monotone-cubic-spline@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "@yr/monotone-cubic-spline@npm:1.0.3"
+  checksum: 10c0/6098d2138dcf8b722c80f2e9167d24a064184c37fb5b3276e34c717351b496735777b71f7e69c3fa6b94f8a81eba309c4a1e37349a26b8541113b1afa84d7bf8
   languageName: node
   linkType: hard
 
@@ -8860,8 +8860,8 @@ __metadata:
     "@types/node": "npm:^20"
     "@types/react": "npm:^19"
     "@types/react-dom": "npm:^19"
-    apexcharts: "npm:^5.3.6"
     "@vidstack/react": "npm:^1.12.13"
+    apexcharts: "npm:^5.3.6"
     axios: "npm:^1.12.2"
     clsx: "npm:^2.1.1"
     dayjs: "npm:^1.11.18"
