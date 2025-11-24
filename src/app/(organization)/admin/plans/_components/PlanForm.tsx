@@ -18,6 +18,8 @@ import StepAssignCourses from "./StepAssignCourses";
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
   isLoading?: boolean;
+  mode?: "create" | "edit";
+  initialData?: PlanFormSchema;
 }
 
 const STEPS: Step[] = [
@@ -48,11 +50,51 @@ const STEPS: Step[] = [
   },
 ];
 
-export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps) {
+export default function PlanForm({
+  onSubmit,
+  isLoading = false,
+  mode = "create",
+  initialData,
+}: PlanFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
-  const defaultValues: PlanFormSchema = {
+  // Helper function to determine which steps should be marked as completed based on initialData
+  const getInitialCompletedSteps = (): number[] => {
+    if (!initialData || mode === "create") return [];
+
+    const completed: number[] = [];
+
+    // Step 1: Check if plan info is filled
+    if (initialData.info?.name && initialData.info?.objective) {
+      completed.push(1);
+    }
+
+    // Step 2: Check if programs exist
+    if (initialData.programs && initialData.programs.length > 0) {
+      completed.push(2);
+    }
+
+    // Step 3: Check if all programs have topics
+    if (initialData.programs && initialData.programs.length > 0) {
+      const allProgramsHaveTopics = initialData.programs.every(
+        program => program.topics && program.topics.length > 0
+      );
+      if (allProgramsHaveTopics) {
+        completed.push(3);
+      }
+    }
+
+    // Step 4: In edit mode, if we have data for steps 1-3, mark step 4 as completed too
+    if (completed.includes(1) && completed.includes(2) && completed.includes(3)) {
+      completed.push(4);
+    }
+
+    return completed;
+  };
+
+  const [completedSteps, setCompletedSteps] = useState<number[]>(getInitialCompletedSteps());
+
+  const defaultValues: PlanFormSchema = initialData || {
     info: {
       name: "",
       objective: "",
@@ -149,6 +191,10 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
 
   const isStepAccessible = (stepId: number) => {
     if (stepId === 1) return true;
+    // Step 5 (Gán môn học) is only accessible in edit mode
+    if (stepId === 5) {
+      return mode === "edit" && completedSteps.includes(stepId - 1);
+    }
     return completedSteps.includes(stepId - 1);
   };
 
@@ -188,6 +234,7 @@ export default function PlanForm({ onSubmit, isLoading = false }: PlanFormProps)
             onBack={handleBack}
             onSubmit={handleSubmit(onSubmit)}
             isLoading={isLoading}
+            mode={mode}
           />
         );
       case 5:

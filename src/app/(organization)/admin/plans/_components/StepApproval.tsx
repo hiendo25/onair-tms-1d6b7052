@@ -10,6 +10,7 @@ interface StepApprovalProps {
   onBack: () => void;
   onSubmit: () => void;
   isLoading?: boolean;
+  mode?: "create" | "edit";
 }
 
 export default function StepApproval({
@@ -18,6 +19,7 @@ export default function StepApproval({
   onBack,
   onSubmit,
   isLoading = false,
+  mode = "create",
 }: StepApprovalProps) {
   // Watch form values to display summary
   const formValues = useWatch({ control });
@@ -85,7 +87,7 @@ export default function StepApproval({
         </Box>
 
         {/* Action Buttons */}
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: mode === "edit" ? "flex-start" : "space-between", mt: 3 }}>
           <Button
             variant="outlined"
             onClick={onBack}
@@ -93,13 +95,15 @@ export default function StepApproval({
           >
             Quay lại
           </Button>
-          <Button
-            variant="contained"
-            onClick={onSubmit}
-            disabled={isLoading}
-          >
-            Gửi duyệt kế hoạch
-          </Button>
+          {mode === "create" && (
+            <Button
+              variant="contained"
+              onClick={onSubmit}
+              disabled={isLoading}
+            >
+              Gửi duyệt kế hoạch
+            </Button>
+          )}
         </Box>
       </CardContent>
     </Card>
