@@ -31,8 +31,6 @@ export const PATHS = {
     DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
     LIST_CLASSROOM: "/admin/class-room/list",
-    DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
-    COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
   },
   COURSES: {
     ROOT: "/admin/online-course",

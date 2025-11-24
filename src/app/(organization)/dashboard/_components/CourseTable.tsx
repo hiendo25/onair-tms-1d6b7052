@@ -122,7 +122,7 @@ const CourseTable = () => {
           Lớp học trong tháng
         </Typography>
         <Stack direction="row" spacing={1}>
-          <Link href={PATHS.SURVEYS.CREATE_SURVEY}>
+          <Link href={PATHS.SURVEYS.CREATE}>
             <Button variant="outlined" size="small" color="primary">
               Tạo khảo sát
             </Button>
