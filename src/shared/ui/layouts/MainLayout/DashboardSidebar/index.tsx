@@ -29,7 +29,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   className,
   menuItems,
 }) => {
-  console.log(menuItems);
+  // console.log(menuItems);
   const theme = useTheme();
 
   const isOverSmViewport = useMediaQuery(theme.breakpoints.up("sm"));

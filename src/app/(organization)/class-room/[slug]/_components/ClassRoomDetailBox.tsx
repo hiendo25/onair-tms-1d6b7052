@@ -128,7 +128,7 @@ export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) =>
     const session = data?.sessions?.[0];
 
     return {
-      isOnline: session?.is_online,
+      isOnline: session?.session_type !== "offline",
       location: session?.location,
       channel_provider: session?.channel_provider,
       channel_info: session?.channel_info,
@@ -138,11 +138,11 @@ export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) =>
   const lectures = useMemo(() => {
     return (
       data?.sessions
-        .flatMap((session) => session.teachers)
+        .flatMap((session) => session.courses_period.flatMap((coursePeriod) => coursePeriod.teacher))
         .map((teacher) => ({
-          id: teacher.employee?.employee_code,
-          fullName: teacher.employee?.profile?.full_name || "Unknown",
-          avatar: teacher.employee?.profile?.avatar,
+          id: teacher?.employee_code,
+          fullName: teacher?.profile?.full_name || "Unknown",
+          avatar: teacher?.profile?.avatar,
         })) || []
     ).filter((lecture, index, self) => index === self.findIndex((t) => t.id === lecture.id));
   }, [data?.sessions]);

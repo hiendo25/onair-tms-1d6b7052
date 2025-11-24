@@ -5,19 +5,23 @@ import PageContainer from "@/shared/ui/PageContainer";
 import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import ClassRoomAgenda from "./_components/ClassRoomAgenda";
-import ClassRoomDocuments from "./_components/ClassRoomDocuments";
-import ClassRoomHeader from "./_components/ClassRoomHeader";
-import ClassRoomJoinHorizontal from "./_components/ClassRoomJoinHorizontal";
-import ClassRoomSeries from "./_components/ClassRoomSeries";
-import { queryClassName } from "./_constants";
+import ClassRoomAgenda from "./ClassRoomAgenda";
+import ClassRoomDocuments from "./ClassRoomDocuments";
+import ClassRoomHeader from "./ClassRoomHeader";
+import ClassRoomJoinHorizontal from "./ClassRoomJoinHorizontal";
+import ClassRoomSeries from "./ClassRoomSeries";
+import { queryClassName } from "../_constants";
+import ClassRoomSubjects from "./ClassRoomSubjects";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 const offsetValue = -0.1;
 const outOfMainJoinZoneClassName = "join-horizontal-zone";
 
-export default function ClassRoomDetailPage() {
-  const params = useParams();
-  const slug = params.slug as string;
+interface ClassRoomDetailSectionProps {
+  data: NonNullable<GetClassRoomBySlugResponse["data"]>;
+}
+
+export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionProps) {
   const router = useRouter();
 
   const user = useUserOrganization((state) => state.data);
@@ -32,7 +36,6 @@ export default function ClassRoomDetailPage() {
     setTabValue(value);
   };
 
-  const { data, isLoading } = useGetClassRoomQuery(slug);
 
   const handleScroll = (e: Event) => {
     const scrollElement = document.querySelector(".main-layout__content");
@@ -71,27 +74,22 @@ export default function ClassRoomDetailPage() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!data || !data.data) return;
+  // useEffect(() => {
+  //   if (!data || !data) return;
 
-    const classRoomData = data.data;
+  //   const classRoomData = data;
 
-    const canAccess =
-      classRoomData.employees.find((employee) => employee.employee?.id === user.id) ||
-      classRoomData.owner?.id === user.id ||
-      user.employeeType === "admin" ||
-      classRoomData.sessions.find((section) => section.teachers?.some((teacher) => teacher.employee?.id === user.id));
+  //   const canAccess =
+  //     classRoomData.employees.find((employee) => employee.employee?.id === user.id) ||
+  //     classRoomData.owner?.id === user.id ||
+  //     user.employeeType === "admin" ||
+  //     classRoomData.sessions.find((section) => section.courses_period?.some((coursePeriod) => coursePeriod.teacher?.id === user.id));
 
-    if (!canAccess) return window.history.length > 2 ? router.back() : router.push("/");
-  }, [data]);
+  //   if (!canAccess) return window.history.length > 2 ? router.back() : router.push("/");
+  // }, [data]);
 
-  if (isLoading && !data) return <div>Loading...</div>;
 
-  if (!isLoading && ((data && !data.data) || !data)) return <div>Class room not found</div>;
-
-  const classRoomData = data?.data;
-
-  if (!classRoomData) return <div>Class room not found</div>;
+  const classRoomData = data;
 
   const isAdminView =
     classRoomData.owner?.id === user.id || user.employeeType === "admin" || user.employeeType === "teacher";
@@ -101,10 +99,10 @@ export default function ClassRoomDetailPage() {
       title="Chi tiết lớp học"
       breadcrumbs={[
         { title: "Lớp học", path: "/class-room/list" },
-        { title: classRoomData.title || "Chi tiết", path: `/class-room/${slug}` },
+        { title: classRoomData.title || "Chi tiết", path: `/class-room/${data.slug}` },
       ]}
     >
-      <Stack position="relative">
+      <Stack position="relative" pb={4}>
         <ClassRoomHeader data={classRoomData} isAdminView={isAdminView} />
         <ClassRoomSeries data={classRoomData} isAdminView={isAdminView} />
         <Divider className={`${outOfMainJoinZoneClassName} invisible`} />
@@ -114,6 +112,8 @@ export default function ClassRoomDetailPage() {
             <ClassRoomJoinHorizontal data={classRoomData} />
           </Box>
         )}
+
+        <ClassRoomSubjects data={data}/>
 
         <Box sx={{ width: "100%", mt: 3 }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

@@ -6,10 +6,25 @@ import dayjs from "dayjs";
 import { useState } from "react";
 
 interface ClassRoomAgendaProps {
-  data: GetClassRoomBySlugResponse["data"];
+  data: NonNullable<GetClassRoomBySlugResponse["data"]>;
 }
 
 const ClassRoomAgenda = ({ data }: ClassRoomAgendaProps) => {
+
+  // if (!data?.sessions || data.sessions.length === 0) return null;
+
+  if (data.sessions.every((session) => session.agendas.length === 0)) 
+    return (
+      <Stack alignItems={"center"}>
+        <Typography variant="h5" fontWeight="bold" mb={3} color="#002880">
+          Agenda (Lịch trình lớp học)
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Chưa có lịch trình cho lớp học này.
+        </Typography>
+      </Stack>
+    );
+
   const isSingle = data?.room_type === "single";
   const sessions = data?.sessions || [];
 

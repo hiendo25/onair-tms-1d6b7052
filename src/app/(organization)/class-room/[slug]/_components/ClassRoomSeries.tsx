@@ -47,7 +47,7 @@ const ClassRoomSerieCard = ({
   >;
   onClickJoin: (sessionId: string) => void;
 }) => {
-  const isOnline = session.is_online;
+  const isOnline = session.session_type !== "offline";
 
   // const handleSelectSession = (sessionId: string) => {
   //   if (!isOnline) {
@@ -156,7 +156,7 @@ const ClassRoomSerieCard = ({
             )}
           </Stack>
           <Stack flexDirection="row" alignItems="center" gap={0.5}>
-            {session.is_online ? (
+            {session.session_type !== "offline" ? (
               <>
                 <VideocamOutlined sx={{ width: 20, height: 20 }} />
                 <Typography variant="body2" maxWidth={174} className="line-clamp-1" textOverflow={"ellipsis"}>
@@ -248,7 +248,7 @@ const SessionDetail = ({
             {session.title}
           </Typography>
           <Stack flexDirection="row" alignItems="center" gap={0.5}>
-            {session.is_online ? (
+            {session.session_type !== "offline" ? (
               <>
                 <VideocamOutlined sx={{ width: 20, height: 20 }} />
                 <Typography variant="body2" maxWidth={174} className="line-clamp-1" textOverflow={"ellipsis"}>
@@ -270,7 +270,11 @@ const SessionDetail = ({
         <Button onClick={onClose} color="primary" variant="outlined">
           Đóng
         </Button>
-        <JoinButton isOnline={session.is_online} isAdminView={isAdminView} onClick={() => onClickJoin(session.id)} />
+        <JoinButton
+          isOnline={session.session_type !== "offline"}
+          isAdminView={isAdminView}
+          onClick={() => onClickJoin(session.id)}
+        />
       </DialogActions>
     </Dialog>
   );
@@ -295,7 +299,10 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
     }));
   }, [data?.sessions, data?.thumbnail_url]);
 
-  const { joinSession, qrDialogOpen, qrViewOpen, selectedSessionForQR, closeQRDialog, closeQRView } = useClassRoomJoin({ data, isAdminView });
+  const { joinSession, qrDialogOpen, qrViewOpen, selectedSessionForQR, closeQRDialog, closeQRView } = useClassRoomJoin({
+    data,
+    isAdminView,
+  });
 
   const isSingle = data?.room_type === "single";
 
@@ -305,11 +312,11 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
     setSelectedSession(null);
 
     const selectedSessionData = data?.sessions.find((session) => session.id === sessionId);
-    const isOnline = selectedSessionData?.is_online ?? true;
+    const isOnline = selectedSessionData?.session_type !== "offline";
 
     joinSession({ sessionId, isOnline });
   };
-  
+
   return (
     <>
       <Box sx={{ mt: 4 }}>
@@ -357,17 +364,19 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
           <QRCodeViewDialog
             open={qrViewOpen}
             onClose={closeQRView}
-            classRoom={{
-              id: data.id,
-              title: data.title,
-              class_sessions: data.sessions?.map((s) => ({
-                id: s.id,
-                title: s.title,
-                start_at: s.start_at,
-                end_at: s.end_at,
-                is_online: s.is_online,
-              })),
-            } as any}
+            classRoom={
+              {
+                id: data.id,
+                title: data.title,
+                class_sessions: data.sessions?.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  start_at: s.start_at,
+                  end_at: s.end_at,
+                  is_online: s.session_type !== "offline",
+                })),
+              } as any
+            }
           />
         )
       ) : (
