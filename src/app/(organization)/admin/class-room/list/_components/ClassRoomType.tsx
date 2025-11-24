@@ -1,35 +1,47 @@
+import { ClassSessionType } from "@/model/class-session.model";
+import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
+import LiveTvOutlinedIcon from "@mui/icons-material/LiveTvOutlined";
+import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Stack, Typography } from "@mui/material";
-import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
-import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 
 interface IClassRoomType {
-    isOnline: boolean;
-
+    sessionType?: ClassSessionType | null;
 }
 
-const ClassRoomType = ({ isOnline }: IClassRoomType) => {
+const SESSION_TYPE_CONFIG: Record<
+    ClassSessionType,
+    { label: string; color: string; background: string; Icon: typeof VideocamOutlinedIcon }
+> = {
+    online: {
+        label: "Trực tuyến (Online)",
+        color: "#9A3E1A",
+        background: "rgba(255, 102, 43, 0.16)",
+        Icon: VideocamOutlinedIcon,
+    },
+    offline: {
+        label: "Trực tiếp (Offline)",
+        color: "#6E05C6",
+        background: "rgba(151, 35, 249, 0.24)",
+        Icon: FmdGoodOutlinedIcon,
+    },
+    live: {
+        label: "Phát trực tiếp (Live)",
+        color: "rgb(245, 22, 6)",
+        background: "rgba(245, 22, 6, 0.24)",
+        Icon: LiveTvOutlinedIcon,
+    },
+};
 
-    if (typeof isOnline !== "boolean") {
+const ClassRoomType = ({ sessionType }: IClassRoomType) => {
+    const typeConfig = sessionType ? SESSION_TYPE_CONFIG[sessionType] : undefined;
+
+    if (!typeConfig) {
         return (
             <Typography variant="body2" color="text.secondary">
                 --
             </Typography>
         );
     }
-
-    const typeConfig = isOnline
-        ? {
-            label: "Trực tuyến (Online)",
-            color: "#9A3E1A",
-            background: "rgba(255, 102, 43, 0.16)",
-            Icon: VideocamOutlinedIcon,
-        }
-        : {
-            label: "Trực tiếp (Offline)",
-            color: "#6E05C6",
-            background: "rgba(151, 35, 249, 0.24)",
-            Icon: FmdGoodOutlinedIcon,
-        };
 
     const { Icon, label, color, background } = typeConfig;
 
@@ -53,6 +65,6 @@ const ClassRoomType = ({ isOnline }: IClassRoomType) => {
             </Typography>
         </Stack>
     );
-}
+};
 
 export default ClassRoomType;

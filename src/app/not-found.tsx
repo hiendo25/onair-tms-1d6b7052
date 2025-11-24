@@ -9,7 +9,7 @@ export async function generateMetadata() {
 export default function NotFound() {
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_20%_20%,#F5F9FF_0%,#E1EBFF_45%,#F6F8FF_100%)] px-6 py-10 text-[#103D9E]">
-      <div className="absolute inset-0 rounded-4xl border border-[#1D4ED8] opacity-30" />
+      <div className="absolute inset-0 opacity-30" />
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute right-[14%] top-[16%] h-[55vh] w-[55vw] rounded-[80px] bg-linear-to-br from-white/60 via-[#D3E3FF]/70 to-[#8BB5FF]/60 blur-2xl" />
         <div className="absolute right-[-18%] top-[34%] h-[50vh] w-[50vw] rounded-[80px] bg-linear-to-br from-white/20 via-[#C8DBFF]/40 to-[#6EA6FF]/50 blur-3xl" />

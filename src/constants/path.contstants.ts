@@ -28,9 +28,9 @@ export const PATHS = {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
-    LIST_CLASSROOM: "/admin/class-room/list",
     DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
+    LIST_CLASSROOM: "/admin/class-room/list",
   },
   COURSES: {
     ROOT: "/admin/online-course",
@@ -63,10 +63,15 @@ export const PATHS = {
   },
   SURVEYS: {
     ROOT: "/admin/surveys",
-    CREATE_SURVEY: "/admin/surveys/create",
-    EDIT_SURVEY: (id: string = ":id") => `/admin/surveys/${id}/edit`,
+    CREATE: "/admin/surveys/create",
+    EDIT: (id: string = ":id") => `/admin/surveys/${id}/edit`,
     STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
     SUBMIT: (id: string = ":id") => `/surveys/${id}/submit`,
     THANK_YOU: (id: string = ":id") => `/surveys/${id}/submit/thank-you`,
+  },
+  PLANS: {
+    ROOT: "/admin/plans",
+    CREATE: "/admin/plans/create",
+    EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
 };

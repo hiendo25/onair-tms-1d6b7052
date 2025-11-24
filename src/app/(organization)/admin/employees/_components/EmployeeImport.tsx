@@ -223,7 +223,9 @@ const EmployeeImport = () => {
     <Box sx={{ py: 3 }}>
       <Stack spacing={3}>
         {/* File Upload Area */}
-        <Card>
+        <Card sx={{
+          p: 2,
+        }}>
           <Stack sx={{
             gap: 2,
           }}>
@@ -309,7 +311,9 @@ const EmployeeImport = () => {
 
         {/* Statistics Cards - Only show if file is uploaded */}
         {file && validationResult && (
-          <Card>
+          <Card sx={{
+            p: 2,
+          }}>
             <Grid container spacing={2}>
               <Grid size={4}>
                 <Card sx={{

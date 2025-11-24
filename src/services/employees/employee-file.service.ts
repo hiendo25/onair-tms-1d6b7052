@@ -1,9 +1,11 @@
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import { createSVClient } from "@/services/supabase/server";
 import type { Database } from "@/types/supabase.types";
 import type {
   ValidateEmployeeFileResultDto,
   ImportEmployeesResultDto,
   EmployeeImportData,
+  CreateEmployeeDto,
 } from "@/types/dto/employees";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
 import {
@@ -11,6 +13,8 @@ import {
   profilesRepository,
   organizationUnitsRepository,
 } from "@/repository";
+import { getOrganizationUnitsByOrganizationId } from "@/repository/organization-units";
+import { createEmployeeCore } from "./employee.service";
 
 interface ValidationResult {
   totalCount: number;
@@ -43,7 +47,7 @@ function mapHeaderToFieldKey(headerName: string): string {
     "Ngày bắt đầu": "start_date",
     "Chức vụ": "position",
     "Người quản lý": "manager",
-    "Vai trò": "role",
+    "Vai trò": "employee_type",
   };
 
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, "_");
@@ -155,7 +159,7 @@ async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
 
 const EmployeeImportSchema = EmployeeFormSchema.partial({
   manager_id: true,
-  role: true,
+  employee_type: true,
   position_id: true,
   employee_code: true,
   branch: true,
@@ -198,7 +202,7 @@ function validateParsedData(data: any[]): ValidationResult {
       employee_code: row.employee_code,
       start_date: row.start_date,
       manager_id: undefined,
-      role: undefined,
+      employee_type: row.employee_type,
       position_id: undefined,
     };
 
@@ -249,6 +253,7 @@ function validateParsedData(data: any[]): ValidationResult {
         department: String(row.department).trim(),
         branch: row.branch ? String(row.branch).trim() : undefined,
         start_date: row.start_date ? String(row.start_date).trim() : undefined,
+        employee_type: row.employee_type ? String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"] : undefined,
       };
       validRecords.push(validRecord);
       if (index < 3) {
@@ -274,26 +279,31 @@ function validateParsedData(data: any[]): ValidationResult {
 
 async function validateAgainstDatabase(
   validRecords: EmployeeImportData[],
+  organizationId: string,
 ): Promise<{
-  invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>
+  invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>;
+  departmentNameToIdMap: Map<string, string>;
+  branchNameToIdMap: Map<string, string>;
 }> {
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
+  const departmentNameToIdMap = new Map<string, string>();
+  const branchNameToIdMap = new Map<string, string>();
 
   if (validRecords.length === 0) {
-    return { invalidRecords };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap };
   }
 
   try {
     const employeeCodes = validRecords.map(r => r.employee_code);
     const emails = validRecords.map(r => r.email);
-    const departments = [...new Set(validRecords.map(r => r.department).filter(Boolean))];
-    const branches = [...new Set(validRecords.map(r => r.branch).filter(Boolean))];
+    const departmentNames = [...new Set(validRecords.map(r => r.department).filter(Boolean))];
+    const branchNames = [...new Set(validRecords.map(r => r.branch).filter(Boolean))];
 
     console.log("Checking database for:", {
       employeeCodes: employeeCodes.length,
       emails: emails.length,
-      departments: departments.length,
-      branches: branches.length,
+      departmentNames: departmentNames.length,
+      branchNames: branchNames.length,
     });
 
     const existingEmployees = await employeesRepository.findEmployeesByEmployeeCodes(employeeCodes);
@@ -308,17 +318,25 @@ async function validateAgainstDatabase(
     );
     console.log("Existing emails found:", existingEmails.size);
 
-    const allOrgUnits = [...departments, ...branches];
-    let existingOrgUnits = new Set<string>();
-
-    if (allOrgUnits.length > 0) {
+    if (departmentNames.length > 0 || branchNames.length > 0) {
       try {
-        const orgUnits = await organizationUnitsRepository.getAllOrganizationUnitsWithDetails();
-        existingOrgUnits = new Set(orgUnits.map(u => u.id));
-        console.log("Existing organization units found:", existingOrgUnits.size);
+        const orgUnits = await getOrganizationUnitsByOrganizationId(organizationId);
+
+        orgUnits.forEach(unit => {
+          if (unit.type === "department") {
+            departmentNameToIdMap.set(unit.name, unit.id);
+          } else if (unit.type === "branch") {
+            branchNameToIdMap.set(unit.name, unit.id);
+          }
+        });
+
+        console.log("Organization units loaded:", {
+          departments: departmentNameToIdMap.size,
+          branches: branchNameToIdMap.size,
+        });
       } catch (error) {
         console.error("Error checking organization units:", error);
-        console.warn("Skipping organization unit validation due to error");
+        throw new Error("Không thể tải danh sách phòng ban và chi nhánh");
       }
     }
 
@@ -339,17 +357,17 @@ async function validateAgainstDatabase(
         fieldErrors["email"] = errorMsg;
       }
 
-      if (existingOrgUnits.size > 0 && record.department) {
-        if (!existingOrgUnits.has(record.department)) {
-          const errorMsg = `Phòng ban không tồn tại: ${record.department}`;
+      if (record.department) {
+        if (!departmentNameToIdMap.has(record.department)) {
+          const errorMsg = `Phòng ban không tồn tại trong tổ chức: ${record.department}`;
           errors.push(errorMsg);
           fieldErrors["department"] = errorMsg;
         }
       }
 
-      if (existingOrgUnits.size > 0 && record.branch) {
-        if (!existingOrgUnits.has(record.branch)) {
-          const errorMsg = `Chi nhánh không tồn tại: ${record.branch}`;
+      if (record.branch) {
+        if (!branchNameToIdMap.has(record.branch)) {
+          const errorMsg = `Chi nhánh không tồn tại trong tổ chức: ${record.branch}`;
           errors.push(errorMsg);
           fieldErrors["branch"] = errorMsg;
         }
@@ -369,11 +387,10 @@ async function validateAgainstDatabase(
       invalid: invalidRecords.length,
     });
 
-    return { invalidRecords };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap };
   } catch (error) {
     console.error("Database validation error:", error);
-    console.warn("Skipping database validation due to error");
-    return { invalidRecords: [] };
+    throw error;
   }
 }
 
@@ -435,15 +452,62 @@ async function validateEmployeeFile(file: File): Promise<ValidateEmployeeFileRes
     throw new Error("File không chứa dữ liệu hoặc định dạng không đúng");
   }
 
+  const supabase = await createSVClient();
+  const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+
   const formatValidation = validateParsedData(parsedData);
-  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords);
+  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords, organizationId);
   const validationResult = mergeValidationResults(formatValidation, databaseValidation);
 
   return validationResult;
 }
 
 async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
-  const validationResult = await validateEmployeeFile(file);
+  const fileName = file.name.toLowerCase();
+  const isCSV = fileName.endsWith(".csv");
+  const isXLSX = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
+
+  if (!isCSV && !isXLSX) {
+    throw new Error("Định dạng file không được hỗ trợ. Vui lòng tải lên file CSV hoặc XLSX");
+  }
+
+  const maxSize = 4 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error("File quá lớn. Kích thước tối đa là 4MB");
+  }
+
+  let parsedData: any[];
+
+  if (isCSV) {
+    const text = await file.text();
+    parsedData = parseCSVOnServer(text);
+  } else {
+    const buffer = await file.arrayBuffer();
+    parsedData = await parseXLSXOnServer(buffer);
+  }
+
+  if (!parsedData || parsedData.length === 0) {
+    throw new Error("File không chứa dữ liệu hoặc định dạng không đúng");
+  }
+
+  const supabase = await createSVClient();
+  const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+
+  const formatValidation = validateParsedData(parsedData);
+  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords, organizationId);
+  const validationResult = mergeValidationResults(formatValidation, databaseValidation);
 
   console.log("Validation result:", {
     totalCount: validationResult.totalCount,
@@ -464,7 +528,8 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     throw new Error(`File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`);
   }
 
-  const adminSupabase = createServiceRoleClient();
+  console.log(`Importing employees to organization: ${organizationId}`);
+
   const records = validationResult.validRecords;
   let successCount = 0;
   let failedCount = 0;
@@ -482,33 +547,32 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     }
 
     try {
-      const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+      const departmentId = record.department ? databaseValidation.departmentNameToIdMap.get(record.department) : undefined;
+      const branchId = record.branch ? databaseValidation.branchNameToIdMap.get(record.branch) : undefined;
+
+      if (record.department && !departmentId) {
+        throw new Error(`Phòng ban không tồn tại: ${record.department}`);
+      }
+
+      const employeePayload: CreateEmployeeDto = {
         email: record.email,
-        password: "123456",
-        email_confirm: true,
-        user_metadata: {
-          full_name: record.full_name,
-          phone_number: record.phone_number || "",
-          gender: record.gender,
-          birthday: record.birthday || null,
-          employee_code: record.employee_code || "",
-          start_date: record.start_date || null,
-          department_id: record.department,
-          branch_id: record.branch || null,
-          manager_id: null,
-        },
-      });
+        full_name: record.full_name,
+        phone_number: record.phone_number,
+        gender: record.gender,
+        birthday: record.birthday || null,
+        department: departmentId || "",
+        branch: branchId,
+        employee_code: record.employee_code,
+        start_date: record.start_date || new Date().toISOString().split('T')[0],
+        manager_id: "",
+        position_id: undefined,
+        employee_type: record.employee_type,
+      };
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user");
-      }
+      const result = await createEmployeeCore(employeePayload, organizationId);
 
       successCount++;
-      console.log(`Successfully imported employee ${record.employee_code} (${successCount}/${records.length})`);
+      console.log(`Successfully imported employee ${result.employeeCode} (${successCount}/${records.length})`);
     } catch (error) {
       failedCount++;
       const errorMessage = error instanceof Error ? error.message : "Unknown error";

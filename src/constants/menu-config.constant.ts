@@ -106,15 +106,27 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     ],
   },
   {
-    title: "Quản lý kế hoạch",
+    title: "Kế hoạch đào tạo",
     icon: React.createElement(StickyNote2OutlinedIcon),
-    key: "planning",
-    path: PATHS.SURVEYS.ROOT,
+    key: "plans",
+    path: PATHS.PLANS.ROOT,
     children: [
+      {
+        title: "Quản lý kế hoạch",
+        icon: React.createElement(ClipboardIcon),
+        key: "plans",
+        path: PATHS.PLANS.ROOT,
+      },
+      {
+        title: "Tạo kế hoạch",
+        icon: React.createElement(ClipboardIcon),
+        key: "plans/create",
+        path: PATHS.PLANS.CREATE,
+      },
       {
         title: "Quản lý khảo sát",
         icon: React.createElement(ClipboardIcon),
-        key: "planning/surveys",
+        key: "plans/surveys",
         path: PATHS.SURVEYS.ROOT,
       },
     ],
