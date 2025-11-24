@@ -106,7 +106,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
         return;
       }
 
-      const isOnline = selectedClassRoom.class_sessions?.[0]?.is_online;
+      const isOnline = selectedClassRoom.class_sessions?.[0]?.session_type;
       if (!isOnline) {
         //  xử lý btn quét mã qr khi là lớp học offline chuỗi
         return;
@@ -122,9 +122,12 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   );
 
   const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
+    if (room.class_sessions[0]?.session_type === "online") {
+      return router.push(PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string));
+    }
     setSelectedClassRoom(room);
     setDialogOpen(true);
-  }, []);
+  }, [router]);
 
   const handleOpenQRDialog = useCallback((room: ClassRoomPriorityDto) => {
     setSelectedQRClassRoom(room);
@@ -139,7 +142,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const selectedSessions = selectedClassRoom?.class_sessions ?? [];
   const selectedThumbnail = selectedClassRoom?.thumbnail_url;
   const selectedTitle = selectedClassRoom?.title;
-  const selectedIsOnline = selectedClassRoom?.class_sessions?.[0]?.is_online;
+  const selectedIsOnline = selectedClassRoom?.class_sessions?.[0]?.session_type === "online" || selectedClassRoom?.class_sessions?.[0]?.session_type === "live";
   const selectedActionLabel = selectedIsOnline === false ? "Quét mã QR" : undefined;
 
   return (
@@ -217,7 +220,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                 });
 
                 const teachers = Array.from(teacherMap.values());
-                const isOnline = room?.class_sessions?.[0]?.is_online;
+                const isOnline = room?.class_sessions?.[0]?.session_type === "online" || room?.class_sessions?.[0]?.session_type === "live";
 
                 return (
                   <TableRow
@@ -246,7 +249,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
-                      <ClassRoomType isOnline={isOnline!} />
+                      <ClassRoomType sessionType={room?.class_sessions?.[0]?.session_type} />
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" alignItems="center" spacing={0.5}>

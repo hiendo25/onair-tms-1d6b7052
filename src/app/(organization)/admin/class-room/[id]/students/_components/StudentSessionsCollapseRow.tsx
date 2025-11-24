@@ -45,7 +45,7 @@ export const StudentSessionsCollapseRow = ({
   onMarkAttendance,
 }: StudentSessionsCollapseRowProps) => {
   const disableManualAttendance =
-    Boolean(sessions?.[0]?.is_online) || isMarkingAttendance;
+    Boolean(sessions?.[0]?.session_type === "online") || Boolean(sessions?.[0]?.session_type === "live") || isMarkingAttendance;
 
   return (
     <TableRow
@@ -127,8 +127,8 @@ export const StudentSessionsCollapseRow = ({
                           <Chip
                             size="small"
                             variant="outlined"
-                            color={session.is_online ? "warning" : "secondary"}
-                            label={session.is_online ? "Trực tuyến" : "Trực tiếp"}
+                            color={session.session_type === "online" ? "warning" : "secondary"}
+                            label={session.session_type === "online" ? "Trực tuyến" : session.session_type === "live" ? "Live" : "Trực tiếp"}
                           />
                         </TableCell>
                         <TableCell>{fDateTime(session.start_at)}</TableCell>
