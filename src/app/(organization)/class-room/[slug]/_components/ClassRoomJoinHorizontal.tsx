@@ -36,13 +36,15 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
     <>
       <Stack flexDirection="row" alignItems="center" justifyContent="space-between" bgcolor={"white"}>
         <Stack direction="row" spacing={1} alignItems="center">
-          <Image
-            src={data?.thumbnail_url || ""}
-            alt={data?.title || "thumbnail"}
-            width={135}
-            height={56}
-            style={{ objectFit: "cover", borderRadius: 8 }}
-          />
+          {data?.thumbnail_url && (
+            <Image
+              src={data?.thumbnail_url || ""}
+              alt={"thumbnail"}
+              width={135}
+              height={56}
+              style={{ objectFit: "cover", borderRadius: 8 }}
+            />
+          )}
 
           <Stack justifyContent={"space-between"}>
             <Typography variant="h6" fontWeight={600} noWrap>
@@ -114,17 +116,19 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
           <QRCodeViewDialog
             open={qrViewOpen}
             onClose={closeQRView}
-            classRoom={{
-              id: data.id,
-              title: data.title,
-              class_sessions: data.sessions?.map((s) => ({
-                id: s.id,
-                title: s.title,
-                start_at: s.start_at,
-                end_at: s.end_at,
-                is_online: s.is_online,
-              })),
-            } as any}
+            classRoom={
+              {
+                id: data.id,
+                title: data.title,
+                class_sessions: data.sessions?.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  start_at: s.start_at,
+                  end_at: s.end_at,
+                  is_online: s.session_type !== "offline",
+                })),
+              } as any
+            }
           />
         )
       ) : (

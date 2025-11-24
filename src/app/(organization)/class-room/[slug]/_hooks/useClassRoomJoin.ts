@@ -23,7 +23,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
 
   const isSingleSession = useMemo(() => data?.room_type === "single", [data?.room_type]);
 
-  const isAllOnline = useMemo(() => data?.sessions.every((session) => session.is_online) ?? true, [data?.sessions]);
+  const isAllOnline = useMemo(() => data?.sessions.every((session) => session.session_type !== 'offline') ?? true, [data?.sessions]);
 
   const firstSessionId = useMemo(() => data?.sessions[0]?.id, [data?.sessions]);
 
@@ -97,7 +97,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
       setDialogOpen(false);
 
       const selectedSession = data?.sessions.find((session) => session.id === sessionId);
-      const isOnline = selectedSession?.is_online ?? true;
+      const isOnline = selectedSession?.session_type !== 'offline';
 
       joinSession({
         sessionId,
