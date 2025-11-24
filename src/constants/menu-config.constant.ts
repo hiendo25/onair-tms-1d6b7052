@@ -112,7 +112,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     path: PATHS.PLANS.ROOT,
     children: [
       {
-        title: "Quản lý kế hoạch",
+        title: "Danh sách kế hoạch",
         icon: React.createElement(ClipboardIcon),
         key: "plans",
         path: PATHS.PLANS.ROOT,
@@ -124,7 +124,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
         path: PATHS.PLANS.CREATE,
       },
       {
-        title: "Quản lý khảo sát",
+        title: "Khảo sát kế hoạch",
         icon: React.createElement(ClipboardIcon),
         key: "plans/surveys",
         path: PATHS.SURVEYS.ROOT,
