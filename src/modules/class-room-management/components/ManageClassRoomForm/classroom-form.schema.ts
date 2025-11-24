@@ -42,6 +42,7 @@ const classRoomSessionSchema = zod
     }),
     coursesPeriod: zod.array(
       zod.object({
+        id: zod.number().optional(),
         course: zod.object({
           id: zod.string(),
           title: zod.string(),
