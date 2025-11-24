@@ -57,6 +57,8 @@ import Trash01Icon from "./TrashIcon1";
 import VideoIcon from "./VideoIcon";
 import FilePdf02Icon from "./FilePdf02Icon";
 import FileWord02Icon from "./FileWord02Icon";
+import Edit02Icon from "./Edit02Icon";
+import Download01Icon from "./Download01Icon";
 export {
   BarChart10Icon,
   BellIcon,
@@ -74,7 +76,9 @@ export {
   ClipboardIcon,
   ClassIcon,
   Dot2RowVerticalIcon,
+  Download01Icon,
   Edit05Icon,
+  Edit02Icon,
   EmptyBoxIcon,
   EyeIcon,
   EyeOffIcon,

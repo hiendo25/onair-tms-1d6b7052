@@ -142,11 +142,13 @@ export type GetCoursesQueryParams = {
   pageSize?: number;
   excludes?: string[];
   search?: string;
+  organizationId?: string;
+  createdBy?: string;
 };
 const getCourses = async (queryParams?: GetCoursesQueryParams) => {
   try {
-    const { page = 1, pageSize = 20, excludes, search } = queryParams || {};
-    const from = (page - 1) * pageSize;
+    const { page = 1, pageSize = 20, excludes, search, organizationId, createdBy } = queryParams || {};
+    const from = page > 0 ? (page - 1) * pageSize : page;
     const to = from + pageSize - 1;
 
     let courseQuery = supabase.from("courses").select(
@@ -184,16 +186,24 @@ const getCourses = async (queryParams?: GetCoursesQueryParams) => {
           id,
           employee_code,
           profiles(id, full_name, avatar, email)
-        )
+        ),
+        created_at
       `,
       { count: "exact" },
     );
+
+    if (organizationId) {
+      courseQuery = courseQuery.eq("organization_id", organizationId);
+    }
+    if (createdBy) {
+      courseQuery = courseQuery.eq("created_by", createdBy);
+    }
 
     if (excludes?.length) {
       courseQuery = courseQuery.not("id", "in", `(${excludes.join(",")})`);
     }
     if (search) {
-      courseQuery = courseQuery.ilike("profiles.full_name", `%${search}%`);
+      courseQuery = courseQuery.ilike("title", `%${search}%`);
     }
 
     return await courseQuery.order("created_at", { ascending: false }).range(from, to);

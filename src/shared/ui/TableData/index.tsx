@@ -14,6 +14,7 @@ import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableDataHeader from "./TableDataHeader";
 import TableRowFixedWidth from "./TableRowFixedWith";
 import TableRowDataProvider from "./TableRowDataProvider";
+import { EmptyBoxIcon } from "@/shared/assets/icons";
 
 export type TableDataProps<T> = {
   rowKey?: string;
@@ -30,14 +31,15 @@ export type TableDataProps<T> = {
     total?: number;
     totalPages?: number;
     perPageOptions?: number[];
-    onPagination?: (page: number, pageSize: number) => void;
+    onChangePage?: (page: number) => void;
+    onChangePageSize?: (pageSize: number) => void;
   };
   onRowClick?: TableRowDataProps<T>["onRowClick"];
   onCellClick?: TableRowDataProps<T>["onCellClick"];
 };
 
 const initPagination = {
-  page: 0,
+  page: 1,
   pageSize: 10,
   total: 0,
   totalPages: 0,
@@ -68,34 +70,30 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
       perPageOptions: pagination?.perPageOptions || initPagination.perPageOptions,
     };
   });
-  const { page, pageSize, total, totalPages, perPageOptions } = tablePagination;
+  const { page, pageSize, total, perPageOptions } = tablePagination;
 
-  const items = useMemo(() => {
-    // const start = page > 0 ? (page - 1) * pageSize : 0;
-    // const end = page > 0 ? page * pageSize : pageSize;
+  const rowsList = useMemo(() => {
     return rows?.slice(0, pageSize) || [];
   }, [pageSize, page, rows]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
-    if (pagination?.onPagination) {
-      pagination.onPagination(newPage + 1, pageSize);
-    } else {
-      setTablePaginations((prev) => ({
+    setTablePaginations((prev) => {
+      pagination?.onChangePage?.(newPage + 1);
+      return {
         ...prev,
-        page: newPage,
-      }));
-    }
+        page: newPage + 1,
+      };
+    });
   };
   const onChangePageSize: TablePaginationOwnProps["onRowsPerPageChange"] = (evt) => {
     const newPageSize = parseInt(evt.target.value);
-    if (pagination?.onPagination) {
-      pagination.onPagination(page, newPageSize);
-    } else {
-      setTablePaginations((prev) => ({
+    setTablePaginations((prev) => {
+      pagination?.onChangePageSize?.(newPageSize);
+      return {
         ...prev,
         pageSize: newPageSize,
-      }));
-    }
+      };
+    });
   };
   const genRowkey = useCallback(
     (row: T) => {
@@ -110,6 +108,10 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     },
     [rowKey],
   );
+  const columnCount = useMemo(() => {
+    return showRowCount ? columns.length + 1 : columns.length;
+  }, [showRowCount]);
+
   useLayoutEffect(() => {
     if (!pagination) return;
 
@@ -117,7 +119,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
       let newPaginations = { ...prev };
       const { page, ...restPaginationUpdate } = pagination;
       if (page) {
-        newPaginations = { ...newPaginations, page: page - 1 };
+        newPaginations = { ...newPaginations, page: page };
       }
       return { ...newPaginations, ...restPaginationUpdate };
     });
@@ -125,7 +127,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
 
   return (
     <TableRowDataProvider>
-      <TableContainer component={Paper} className="table-container shadow-none">
+      <TableContainer component={Paper} className="table-container shadow-none bg-transparent">
         <Box
           component="div"
           className="container-wraper w-full overflow-x-auto"
@@ -140,55 +142,87 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
               <TableDataHeader showRowCount={showRowCount} columns={columns} />
             </TableHead>
             <TableBody>
-              {loading ? (
-                <TableRowFixedWidth columnCount={columns.length}>
+              {loading && (
+                <TableRowFixedWidth columnCount={columnCount}>
                   <Box component="div" className="flex items-center justify-center py-20">
-                    <Typography component="p" className="opacity-60 text-sm">
-                      Loading...
+                    <Typography component="p" className="text-sm">
+                      Đang tải...
                     </Typography>
                   </Box>
                 </TableRowFixedWidth>
-              ) : !items?.length ? (
-                <TableRowFixedWidth columnCount={columns.length}>
+              )}
+
+              {!loading && !rowsList?.length && (
+                <TableRowFixedWidth columnCount={columnCount}>
                   <Box component="div" className="flex items-center justify-center py-20">
                     <Box component="div" className="flex flex-col gap-3 items-center">
-                      {/* <Iconify
-											icon="hugeicons:inbox"
-											className="w-12 h-12 opacity-60"
-										/> */}
+                      <EmptyBoxIcon className="w-20 h-20" />
                       <Typography component="p" className="opacity-60 text-sm">
                         Đang trống.
                       </Typography>
                     </Box>
                   </Box>
                 </TableRowFixedWidth>
-              ) : (
-                items.map((row, _index) => (
+              )}
+
+              {!loading &&
+                rowsList.length &&
+                rowsList.map((row, _index) => (
                   <TableDataRow
                     key={genRowkey(row)}
                     showRowCount={showRowCount}
                     hoverRow={hoverRow}
                     indexRow={_index}
-                    page={page + 1}
+                    page={page}
                     pageSize={pageSize}
                     row={row}
                     columns={columns}
                     onRowClick={onRowClick}
                     onCellClick={onCellClick}
                   />
-                ))
-              )}
+                ))}
             </TableBody>
           </Table>
         </Box>
         <TablePagination
+          id="12"
+          className="table-pagination"
           component="div"
           count={total}
           rowsPerPageOptions={perPageOptions}
           rowsPerPage={pageSize}
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangePageSize}
-          page={page}
+          page={page - 1}
+          slotProps={{
+            select: {
+              popoverTargetAction: "toggle",
+              popoverTarget: "table-pagination",
+              popover: "manual",
+              MenuProps: {
+                sx: (theme) => ({
+                  ".MuiPaper-root": {
+                    minWidth: "52px !important",
+                  },
+                  ".MuiList-root": {
+                    padding: "6px",
+                  },
+                  ".MuiButtonBase-root": {
+                    display: "inline-block",
+                    textAlign: "center",
+
+                    "&.Mui-selected": {
+                      background: theme.palette.grey[200],
+                      "&.Mui-focusVisible": {
+                        background: theme.palette.grey[200],
+                        outline: "none",
+                      },
+                    },
+                  },
+                }),
+              },
+            },
+          }}
         />
       </TableContainer>
     </TableRowDataProvider>
