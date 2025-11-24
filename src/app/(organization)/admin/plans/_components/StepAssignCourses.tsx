@@ -7,6 +7,7 @@ import {
   Card,
   CardContent,
   Checkbox,
+  Chip,
   Stack,
   TextField,
   Typography,
@@ -15,6 +16,8 @@ import { Control, FieldErrors, useFieldArray, useWatch } from "react-hook-form";
 import { Course, PlanFormSchema } from "@/modules/plans/plan-form.schema";
 import dayjs, { Dayjs } from "dayjs";
 import TopicCard from "./shared/TopicCard";
+import CreateCourseDialog from "./CreateCourseDialog";
+import { useState } from "react";
 
 interface StepAssignCoursesProps {
   control: Control<PlanFormSchema>;
@@ -24,18 +27,18 @@ interface StepAssignCoursesProps {
   isLoading?: boolean;
 }
 
-// Mock data for available courses
-const MOCK_COURSES: Course[] = [
+// Initial mock data for available courses
+const INITIAL_MOCK_COURSES: Course[] = [
   { id: "1", title: "4 buổi làm sao quản lý kỹ năng giao tiếp" },
   { id: "2", title: "Môn học Kỹ năng làm việc đội nhóm" },
-  { id: "3", title: "Môn học làm sao chuyển đổi số" },
-  { id: "4", title: "Kỹ năng lãnh đạo cơ bản" },
-  { id: "5", title: "Quản lý thời gian hiệu quả" },
-  { id: "6", title: "Kỹ năng thuyết trình" },
-  { id: "7", title: "Tư duy phản biện" },
-  { id: "8", title: "Kỹ năng giải quyết vấn đề" },
-  { id: "9", title: "Làm việc nhóm hiệu quả" },
-  { id: "10", title: "Kỹ năng đàm phán" },
+  { id: "3", title: "Môn học làm sao chuyển đổi số", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6"] },
+  { id: "4", title: "Môn học làm sao sử dụng AI doanh nghiệp B2B", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6", "Lớp 2,4,6"] },
+  { id: "5", title: "Ứng dụng AI vào tối ưu giao tiếp", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6", "Lớp 2,4,6"] },
+  { id: "6", title: "Làm sao chuyển đổi được nhân viên" },
+  { id: "7", title: "Kỹ năng lãnh đạo cơ bản" },
+  { id: "8", title: "Quản lý thời gian hiệu quả" },
+  { id: "9", title: "Kỹ năng thuyết trình" },
+  { id: "10", title: "Tư duy phản biện" },
 ];
 
 export default function StepAssignCourses({
@@ -45,10 +48,17 @@ export default function StepAssignCourses({
   onSave,
   isLoading = false,
 }: StepAssignCoursesProps) {
+  // State for available courses (allows adding new courses)
+  const [availableCourses, setAvailableCourses] = useState<Course[]>(INITIAL_MOCK_COURSES);
+
   const { fields: programs } = useFieldArray({
     control,
     name: "programs",
   });
+
+  const handleAddCourse = (course: Course) => {
+    setAvailableCourses((prev) => [...prev, course]);
+  };
 
   const formatDateRange = (startDate?: string | Dayjs, endDate?: string | Dayjs) => {
     if (!startDate || !endDate) return null;
@@ -82,6 +92,8 @@ export default function StepAssignCourses({
                 dateRange={dateRange}
                 control={control}
                 errors={errors}
+                availableCourses={availableCourses}
+                onAddCourse={handleAddCourse}
               />
             );
           })}
@@ -114,6 +126,8 @@ interface ProgramCardProps {
   dateRange: string | null;
   control: Control<PlanFormSchema>;
   errors: FieldErrors<PlanFormSchema>;
+  availableCourses: Course[];
+  onAddCourse: (course: Course) => void;
 }
 
 function ProgramCard({
@@ -122,6 +136,8 @@ function ProgramCard({
   dateRange,
   control,
   errors,
+  availableCourses,
+  onAddCourse,
 }: ProgramCardProps) {
   const { fields: topics } = useFieldArray({
     control,
@@ -157,6 +173,8 @@ function ProgramCard({
             programIndex={programIndex}
             topicIndex={topicIndex}
             control={control}
+            availableCourses={availableCourses}
+            onAddCourse={onAddCourse}
           />
         ))}
       </Stack>
@@ -170,6 +188,8 @@ interface TopicCardProps {
   programIndex: number;
   topicIndex: number;
   control: Control<PlanFormSchema>;
+  availableCourses: Course[];
+  onAddCourse: (course: Course) => void;
 }
 
 function TopicCardWithCourses({
@@ -177,7 +197,11 @@ function TopicCardWithCourses({
   programIndex,
   topicIndex,
   control,
+  availableCourses,
+  onAddCourse,
 }: TopicCardProps) {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const { fields: courses, replace } = useFieldArray({
     control,
     name: `programs.${programIndex}.topics.${topicIndex}.courses` as const,
@@ -194,8 +218,26 @@ function TopicCardWithCourses({
   };
 
   const handleCreateCourse = () => {
-    // TODO: Implement create course functionality
-    console.log("Create course clicked - to be implemented");
+    setIsDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleCreateCourseSubmit = (courseData: Omit<Course, "id">) => {
+    // Generate unique ID for new course
+    const newCourse: Course = {
+      id: `course-${Date.now()}`,
+      ...courseData,
+    };
+
+    // Add to available courses list
+    onAddCourse(newCourse);
+
+    // Auto-select the new course in current topic
+    const updatedCourses = [...(selectedCourses || []), newCourse];
+    replace(updatedCourses);
   };
 
   // Custom renderTags to show selected courses as text with +N indicator
@@ -235,7 +277,7 @@ function TopicCardWithCourses({
         {/* Course Selection Autocomplete with Checkboxes */}
         <Autocomplete
           multiple
-          options={MOCK_COURSES}
+          options={availableCourses}
           disableCloseOnSelect
           getOptionLabel={(option) => option.title}
           value={selectedCourses || []}
@@ -248,7 +290,21 @@ function TopicCardWithCourses({
                 style={{ marginRight: 8 }}
                 checked={selected}
               />
-              {option.title}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, flex: 1 }}>
+                <Typography variant="body2">{option.title}</Typography>
+                {option.labels && option.labels.length > 0 && (
+                  <Box sx={{ display: "flex", gap: 0.5, flexWrap: "wrap" }}>
+                    {option.labels.map((label, index) => (
+                      <Chip
+                        key={`${option.id}-${label}-${index}`}
+                        label={label}
+                        size="small"
+                        color="success"
+                      />
+                    ))}
+                  </Box>
+                )}
+              </Box>
             </li>
           )}
           renderInput={(params) => (
@@ -260,6 +316,13 @@ function TopicCardWithCourses({
           )}
         />
       </Box>
+
+      {/* Create Course Dialog */}
+      <CreateCourseDialog
+        open={isDialogOpen}
+        onClose={handleCloseDialog}
+        onCreateCourse={handleCreateCourseSubmit}
+      />
     </TopicCard>
   );
 }

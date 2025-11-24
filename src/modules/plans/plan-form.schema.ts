@@ -16,6 +16,7 @@ const dateFieldSchema = zod
 export const courseSchema = zod.object({
   id: zod.string(),
   title: zod.string(),
+  labels: zod.array(zod.string()).optional(), // Optional labels/badges for course items
 });
 
 // Topic schema for training topics within programs
