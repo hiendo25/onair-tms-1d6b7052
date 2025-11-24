@@ -12,6 +12,12 @@ const dateFieldSchema = zod
   ])
   .optional();
 
+// Survey schema for optional survey selection
+export const surveySchema = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+});
+
 // Course schema for assigned courses
 export const courseSchema = zod.object({
   id: zod.string(),
@@ -41,10 +47,12 @@ export const planSchema = zod.object({
     startDate: dateFieldSchema,
     endDate: dateFieldSchema,
     budget: zod.number().optional(),
+    survey: surveySchema.optional(), // Optional survey selection
   }),
   programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
 });
 
+export type Survey = zod.infer<typeof surveySchema>;
 export type Course = zod.infer<typeof courseSchema>;
 export type Topic = zod.infer<typeof topicSchema>;
 export type TrainingProgram = zod.infer<typeof trainingProgramSchema>;
