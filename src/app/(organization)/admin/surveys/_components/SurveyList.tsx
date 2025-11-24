@@ -120,7 +120,7 @@ export default function SurveyList() {
 
   const handleEdit = () => {
     if (selectedSurveyId) {
-      router.push(PATHS.SURVEYS.EDIT_SURVEY(selectedSurveyId));
+      router.push(PATHS.SURVEYS.EDIT(selectedSurveyId));
     }
     handleMenuClose();
   };
