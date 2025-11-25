@@ -3,7 +3,11 @@ import * as React from "react";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Drawer from "@mui/material/Drawer";
-import type {} from "@mui/material/themeCssVarsAugmentation";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import type { } from "@mui/material/themeCssVarsAugmentation";
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
 import MenuList, { MenuListProps } from "../MenuList";
@@ -49,7 +53,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyExpanded(false);
 
-    return () => {};
+    return () => { };
   }, [expanded, theme.transitions.duration.enteringScreen]);
 
   React.useEffect(() => {
@@ -63,10 +67,12 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyCollapsed(false);
 
-    return () => {};
+    return () => { };
   }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;
+
+  const canToggleSidebar = !!setExpanded && !disableCollapsibleSidebar;
 
   const handleSetSidebarExpanded = React.useCallback(
     (newExpanded: boolean) => () => {
@@ -74,6 +80,11 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     },
     [setExpanded],
   );
+
+  const handleToggleSidebarExpanded = React.useCallback(() => {
+    if (!setExpanded) return;
+    setExpanded(!expanded);
+  }, [expanded, setExpanded]);
 
   const hasDrawerTransitions = isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
@@ -103,20 +114,36 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       return (
         <>
           <div
-            className={cn({
+            className={cn("flex items-center gap-2", {
               "py-6 px-6": !mini,
               "py-4 px-3": mini,
             })}
           >
-            <Link href="/">
+            <Link href="/" className="flex-1 block">
               {mini ? (
                 <LogoOnairShortIcon className="mx-auto block w-8 h-8" />
               ) : (
                 <LogoOnairIcon className="h-10 w-auto" />
               )}
             </Link>
+            {canToggleSidebar ? (
+              <Tooltip title={mini ? "Mở rộng menu" : "Thu gọn menu"}>
+                <IconButton
+                  size="small"
+                  aria-label={mini ? "Mở rộng menu" : "Thu gọn menu"}
+                  onClick={handleToggleSidebarExpanded}
+                >
+                  {mini ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
+                </IconButton>
+              </Tooltip>
+            ) : null}
           </div>
-          <MenuList items={menuItems} mini={mini} isFullyExpanded={isFullyExpanded} />
+          <MenuList
+            items={menuItems}
+            mini={mini}
+            isFullyExpanded={isFullyExpanded}
+            hasDrawerTransitions={hasDrawerTransitions}
+          />
           {/* {!mini ? <CardAlert /> : null} */}
           <div className="p-3">
             <SignOutButton className="w-full" type={mini ? "icon" : undefined} />
@@ -124,14 +151,14 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </>
       );
     },
-    [mini, isFullyExpanded, menuItems],
+    [mini, isFullyExpanded, menuItems, canToggleSidebar, handleToggleSidebarExpanded, hasDrawerTransitions],
   );
   return (
     <React.Fragment>
       <Drawer
         container={container}
         variant="temporary"
-        open={false}
+        open={!isOverMdViewport && expanded}
         onClose={handleSetSidebarExpanded(false)}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.

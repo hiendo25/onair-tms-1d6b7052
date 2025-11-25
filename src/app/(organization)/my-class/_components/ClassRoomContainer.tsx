@@ -235,6 +235,7 @@ const ClassRoomContainer = () => {
                                     classRoomId={item.id ?? undefined}
                                     roomType={(item.room_type as ClassRoomTypeFilter) ?? ClassRoomTypeFilter.Single}
                                     sessions={item.class_sessions ?? []}
+                                    classRoomSlug={item.slug!}
                                 />
                             </Grid>
                         );
