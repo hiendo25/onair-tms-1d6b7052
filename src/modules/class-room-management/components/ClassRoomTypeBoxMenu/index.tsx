@@ -43,13 +43,13 @@ const ClassRoomTypeBoxMenu: React.FC<ClassRoomTypeBoxMenuProps> = ({ items }) =>
           onClick={handleSelectManageType("live")}
         />
         <BoxMenuClassItem
-          title="Lớp học E-learning"
+          title="Lớp học E-learning (Online)"
           description="Khóa học học qua video và tài liệu số. Học viên có thể học bất cứ lúc nào, theo tiến độ riêng của mình."
           isActive={platform === "online"}
           onClick={handleSelectManageType("online")}
         />
         <BoxMenuClassItem
-          title="Lớp học trực tiếp (In-house)"
+          title="Lớp học trực tiếp (Offline)"
           description="Buổi học tổ chức tại địa điểm thực tế. Học viên tham gia gặp gỡ, trao đổi và trải nghiệm trực tiếp cùng
             giảng viên."
           isActive={platform === "offline"}

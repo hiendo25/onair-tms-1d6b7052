@@ -30,7 +30,7 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
     platform === "online"
       ? "E-learning"
       : platform === "offline"
-      ? "trực tiếp (In-house)"
+      ? "trực tiếp (Offline)"
       : platform === "live"
       ? "trực tuyến (Live)"
       : ""
@@ -45,7 +45,7 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
           path: PATHS.CLASSROOMS.ROOT,
         },
         {
-          title: "Tạo lớp học trực tuyến",
+          title: pageTitle,
         },
       ]}
     >
