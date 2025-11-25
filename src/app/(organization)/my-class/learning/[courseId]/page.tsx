@@ -29,27 +29,28 @@ const LearningScreenPage = async ({ params }: ILearningScreenPage) => {
     return (
         <PageContainer
             actions={
-                <Box>
-                    <div className="flex items-center gap-2">
-                        <IconButton component={Link} href="/my-class?tab=ElearningTab" sx={{ color: "#636365" }}>
+                <div className="flex items-center gap-2 w-full">
+                    <Link href="/my-class">
+                        <IconButton>
                             <ArrowBackIcon className="h-6 w-6" />
                         </IconButton>
-                        <p className="text-2xl font-semibold">{courseDetail.title ?? "--"}</p>
-                    </div>
-                </Box>
+                    </Link>
+                    <p className="text-2xl font-semibold">{courseDetail.title ?? "--"}</p>
+                </div>
             }
-            breadcrumbs={[
-                {
-                    title: "LMS",
-                    path: "/dashboard",
-                },
-                {
-                    title: "Lớp học của tôi",
-                },
-            ]}
+            breadcrumbs={
+                [
+                    {
+                        title: "LMS",
+                        path: "/dashboard",
+                    },
+                    {
+                        title: "Lớp học của tôi",
+                    },
+                ]}
         >
             <LearningScreenSection />
-        </PageContainer>
+        </PageContainer >
     );
 };
 

@@ -242,6 +242,7 @@ const LearningScreenSection = () => {
         sx={{
           display: "grid",
           gap: 2,
+          alignItems: "start",
           gridTemplateColumns: {
             xs: "1fr",
             lg: "minmax(0, 2.3fr) minmax(340px, 1fr)",
@@ -264,12 +265,19 @@ const LearningScreenSection = () => {
           studentId={studentId}
         />
 
-        <LessonNavigator
-          sections={sections}
-          selectedLessonId={selectedLessonId}
-          onSelectLesson={handleSelectLesson}
-          progressMap={lessonProgressMap}
-        />
+        <Box
+          sx={{
+            position: { lg: "sticky" },
+            top: { lg: 24 },
+          }}
+        >
+          <LessonNavigator
+            sections={sections}
+            selectedLessonId={selectedLessonId}
+            onSelectLesson={handleSelectLesson}
+            progressMap={lessonProgressMap}
+          />
+        </Box>
       </Box>
     </Stack>
   );

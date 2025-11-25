@@ -75,7 +75,7 @@ export const getClassRoomRuntimeStatusLabel = (status: ClassRoomRuntimeStatusFil
 export const getColorClassRoomRuntimeStatus = (status: ClassRoomRuntimeStatusFilter) =>
   RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatusFilter.All];
 
-export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, isOnline: boolean): { label: string, disabled: boolean } => {
+export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, type: "live" | "offline" | "online"): { label: string, disabled: boolean } => {
   switch (status) {
     case ClassRoomRuntimeStatusFilter.Draft:
       return {
@@ -85,7 +85,7 @@ export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, i
     case ClassRoomRuntimeStatusFilter.Upcoming:
     case ClassRoomRuntimeStatusFilter.Today:
     case ClassRoomRuntimeStatusFilter.Ongoing:
-      if (isOnline) {
+      if (type === "online" || type === "live") {
         return {
           label: "Vào lớp học",
           disabled: false,

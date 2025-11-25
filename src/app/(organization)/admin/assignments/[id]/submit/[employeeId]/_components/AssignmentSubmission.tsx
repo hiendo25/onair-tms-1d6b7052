@@ -43,21 +43,34 @@ interface SubmissionFormData {
 
 interface AssignmentSubmissionProps {
   basePath?: string;
+  assignmentId?: string;
+  employeeId?: string;
+  variant?: "page" | "embedded";
+  onSubmitted?: (payload: { assignmentId: string; employeeId: string }) => void;
+  onCancel?: () => void;
 }
 
-export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT }: AssignmentSubmissionProps) {
-  const params = useParams();
+export default function AssignmentSubmission({
+  basePath = PATHS.ASSIGNMENTS.ROOT,
+  assignmentId: assignmentIdProp,
+  employeeId: employeeIdProp,
+  variant = "page",
+  onSubmitted,
+  onCancel,
+}: AssignmentSubmissionProps) {
+  const params = useParams<{ id?: string; employeeId?: string }>();
   const router = useRouter();
   const { confirm } = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
 
-  const assignmentId = params.id as string;
-  const employeeId = params.employeeId as string;
+  const assignmentId = assignmentIdProp ?? (params?.id as string | undefined);
+  const employeeId = employeeIdProp ?? (params?.employeeId as string | undefined);
+  const isEmbedded = variant === "embedded";
 
-  const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId);
-  const { data: questions, isLoading: isLoadingQuestions, error: questionsError } = useGetAssignmentQuestionsQuery(assignmentId);
-  const { data: employee, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId);
+  const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId || "");
+  const { data: questions, isLoading: isLoadingQuestions, error: questionsError } = useGetAssignmentQuestionsQuery(assignmentId || "");
+  const { data: employee, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId || "");
 
   const { control, handleSubmit, watch, setValue } = useForm<SubmissionFormData>({
     defaultValues: {
@@ -86,12 +99,21 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
   }, [questions, setValue]);
 
   const handleBack = React.useCallback(() => {
+    if (onCancel) {
+      onCancel();
+      return;
+    }
+
+    if (isEmbedded || !assignmentId) {
+      return;
+    }
+
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
       router.push(basePath);
     } else {
       router.push(`${basePath}/${assignmentId}/students`);
     }
-  }, [router, assignmentId, basePath]);
+  }, [onCancel, isEmbedded, router, assignmentId, basePath]);
 
   const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -240,6 +262,13 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
   };
 
   const onSubmit = async (data: SubmissionFormData) => {
+    if (!assignmentId || !employeeId) {
+      notifications.show("Không tìm thấy thông tin bài kiểm tra hoặc người học.", {
+        severity: "error",
+      });
+      return;
+    }
+
     const confirmed = await confirm(
       "Bạn có chắc chắn muốn nộp bài? Sau khi nộp bài, bạn không thể chỉnh sửa.",
       {
@@ -414,6 +443,12 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
         queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
       });
 
+      onSubmitted?.({ assignmentId, employeeId });
+
+      if (isEmbedded) {
+        return;
+      }
+
       if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
         router.push(PATHS.MY_ASSIGNMENTS.RESULT(assignmentId, employeeId));
       } else {
@@ -436,6 +471,10 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
   };
 
   const breadcrumbs = React.useMemo(() => {
+    if (isEmbedded) {
+      return undefined;
+    }
+
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
       return [
         { title: "Bài kiểm tra của tôi", path: basePath },
@@ -447,15 +486,133 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
       { title: assignment?.name || "...", path: `${basePath}/${assignmentId}/students` },
       { title: "Nộp bài" },
     ];
-  }, [basePath, assignment, assignmentId]);
+  }, [isEmbedded, basePath, assignment, assignmentId]);
 
-  return (
-    <PageContainer
-      title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
-      breadcrumbs={breadcrumbs}
-    >
-      <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3 }}>
+  const showBackButton = !isEmbedded;
+
+  const renderBody = () => {
+    if (!assignmentId) {
+      return (
+        <Alert severity="warning">
+          Không tìm thấy thông tin bài kiểm tra.
+        </Alert>
+      );
+    }
+
+    if (!employeeId) {
+      return (
+        <Alert severity="warning">
+          Không xác định được thông tin người học.
+        </Alert>
+      );
+    }
+
+    if (isLoading) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 400,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      );
+    }
+
+    if (questionsError) {
+      return (
+        <Alert severity="error">
+          Có lỗi xảy ra khi tải danh sách câu hỏi
+        </Alert>
+      );
+    }
+
+    if (!questions || questions.length === 0) {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 400,
+          }}
+        >
+          <Typography variant="body2" color="text.secondary">
+            Bài kiểm tra chưa có câu hỏi nào
+          </Typography>
+        </Box>
+      );
+    }
+
+    return (
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack spacing={3}>
+          {/* Upload Progress */}
+          {isSubmitting && uploadProgress > 0 && (
+            <Box>
+              <LinearProgress variant="determinate" value={uploadProgress} />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                Đang tải lên... {uploadProgress}%
+              </Typography>
+            </Box>
+          )}
+
+          {questions.map((question, index) => {
+            const answer = answers?.find((a) => a.questionId === question.id);
+
+            return (
+              <QuestionCard
+                key={question.id}
+                question={question}
+                questionNumber={index + 1}
+                // File type props
+                files={answer?.files}
+                onFileSelect={(files) => handleFileSelect(question.id, files)}
+                onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
+                // Text type props
+                textAnswer={answer?.textAnswer}
+                onTextChange={(text) => handleTextChange(question.id, text)}
+                // Radio type props
+                radioAnswer={answer?.radioAnswer}
+                onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
+                // Checkbox type props
+                checkboxAnswers={answer?.checkboxAnswers}
+                onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
+                // Attachment props
+                attachments={answer?.attachments}
+                onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
+                onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
+              />
+            );
+          })}
+
+          <SubmissionActions
+            onCancel={handleBack}
+            onSubmit={() => {}}
+            isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
+            isSubmitting={isSubmitting}
+            hideCancelButton={isEmbedded && !onCancel}
+          />
+        </Stack>
+      </form>
+    );
+  };
+
+  const content = (
+    <Box sx={{ py: isEmbedded ? 0 : 3 }}>
+      <Card
+        sx={{
+          p: isEmbedded ? 2.5 : 3,
+          borderRadius: isEmbedded ? 3 : undefined,
+          boxShadow: isEmbedded ? "none" : undefined,
+          border: isEmbedded ? "1px solid" : undefined,
+          borderColor: isEmbedded ? "divider" : undefined,
+        }}
+      >
+        {showBackButton && (
           <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center">
             <Button
               variant="outlined"
@@ -465,89 +622,23 @@ export default function AssignmentSubmission({ basePath = PATHS.ASSIGNMENTS.ROOT
               Quay lại
             </Button>
           </Stack>
+        )}
 
-          {isLoading ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 400,
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : questionsError ? (
-            <Alert severity="error">
-              Có lỗi xảy ra khi tải danh sách câu hỏi
-            </Alert>
-          ) : !questions || questions.length === 0 ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 400,
-              }}
-            >
-              <Typography variant="body2" color="text.secondary">
-                Bài kiểm tra chưa có câu hỏi nào
-              </Typography>
-            </Box>
-          ) : (
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <Stack spacing={3}>
-                {/* Upload Progress */}
-                {isSubmitting && uploadProgress > 0 && (
-                  <Box>
-                    <LinearProgress variant="determinate" value={uploadProgress} />
-                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                      Đang tải lên... {uploadProgress}%
-                    </Typography>
-                  </Box>
-                )}
+        {renderBody()}
+      </Card>
+    </Box>
+  );
 
-                {questions.map((question, index) => {
-                  const answer = answers?.find((a) => a.questionId === question.id);
+  if (isEmbedded) {
+    return content;
+  }
 
-                  return (
-                    <QuestionCard
-                      key={question.id}
-                      question={question}
-                      questionNumber={index + 1}
-                      // File type props
-                      files={answer?.files}
-                      onFileSelect={(files) => handleFileSelect(question.id, files)}
-                      onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
-                      // Text type props
-                      textAnswer={answer?.textAnswer}
-                      onTextChange={(text) => handleTextChange(question.id, text)}
-                      // Radio type props
-                      radioAnswer={answer?.radioAnswer}
-                      onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
-                      // Checkbox type props
-                      checkboxAnswers={answer?.checkboxAnswers}
-                      onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
-                      // Attachment props
-                      attachments={answer?.attachments}
-                      onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
-                      onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
-                    />
-                  );
-                })}
-
-                <SubmissionActions
-                  onCancel={handleBack}
-                  onSubmit={() => {}}
-                  isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
-                  isSubmitting={isSubmitting}
-                />
-              </Stack>
-            </form>
-          )}
-        </Card>
-      </Box>
+  return (
+    <PageContainer
+      title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
+      breadcrumbs={breadcrumbs}
+    >
+      {content}
     </PageContainer>
   );
 }
-

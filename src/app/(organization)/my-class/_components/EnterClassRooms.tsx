@@ -1,4 +1,4 @@
-import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
+import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
 import { fDateTime } from "@/lib";
 import {
     Box,
@@ -18,6 +18,7 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { Image } from "@/shared/ui/Image";
 import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room";;
 import { getRuntimeStatusDisplay } from "../helper";
+import { ClassSessionType } from "@/model/class-session.model";
 
 interface EnterClassRoomsDialogProps {
     open: boolean;
@@ -25,7 +26,7 @@ interface EnterClassRoomsDialogProps {
     sessions?: ClassRoomPriorityDto["class_sessions"];
     thumbnail?: string | null;
     classTitle?: string | null;
-    onSelectSession: (sessionId: string) => void;
+    onSelectSession: (session: ClassRoomSessionDetailDto, sessionType: ClassSessionType) => void;
     actionLabel?: string;
 }
 
@@ -156,7 +157,7 @@ const EnterClassRoomsDialog = ({
                                             variant="contained"
                                             color="primary"
                                             disabled={!canJoin}
-                                            onClick={() => canJoin && session.id && onSelectSession(session.id)}
+                                            onClick={() => canJoin && session.id && onSelectSession(session, session.session_type)}
                                             sx={{ minWidth: 120 }}
                                         >
                                             {actionLabel}

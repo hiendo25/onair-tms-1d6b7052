@@ -1,10 +1,10 @@
 import {
   Alert,
-  Box,
-  Button,
   Stack,
   Typography,
 } from "@mui/material";
+import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
+import { PATHS } from "@/constants/path.contstants";
 
 interface AssessmentLessonFrameProps {
   assignmentId: string | null;
@@ -29,32 +29,19 @@ const AssessmentLessonFrame = ({
     );
   }
 
-  const submissionUrl = `/assignments/${assignmentId}/submit/${studentId}?embed=learning`;
-
   return (
     <Stack spacing={2}>
       <Typography variant="body2" color="text.secondary">
         Bài kiểm tra sẽ tự động nộp khi hết thời gian làm bài (nếu có quy định giới hạn).
       </Typography>
-      <Box className="h-[520px] overflow-hidden rounded-2xl border border-[#EFF0F3]">
-        <iframe
-          src={submissionUrl}
-          title="Assignment submission"
-          className="h-full w-full border-0"
-        />
-      </Box>
 
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
-        <Button
-          variant="outlined"
-          onClick={() => window.open(submissionUrl, "_blank")}
-        >
-          Mở toàn màn hình
-        </Button>
-        <Button variant="contained" onClick={() => onToggleCompletion(true)}>
-          Đánh dấu đã hoàn thành
-        </Button>
-      </Stack>
+      <AssignmentSubmission
+        assignmentId={assignmentId}
+        employeeId={studentId}
+        basePath={PATHS.MY_ASSIGNMENTS.ROOT}
+        variant="embedded"
+        onSubmitted={() => onToggleCompletion(true)}
+      />
     </Stack>
   );
 };

@@ -117,7 +117,7 @@ export default function ClassRoomFilters({
             size="small"
           />
         </Box>
-        <Box>
+        {/* <Box>
           <SelectOption
             inputLabel="Trạng thái xuất bản"
             onChange={(status) => onStausChange(status)}
@@ -125,7 +125,7 @@ export default function ClassRoomFilters({
             options={PUBLICATION_STATUS_OPTIONS}
             size="small"
           />
-        </Box>
+        </Box> */}
         <Box>
           <SelectOption
             inputLabel="Loại lớp học"

@@ -75,56 +75,56 @@ export const completionRateByRange: Record<TimeRange, CompletionSnapshot> = {
 
 export type RankingCourse = {
   title: string;
-  score: number;
+  rating: number;
 };
 
 export const courseRankingByRange: Record<TimeRange, { top: RankingCourse[]; low: RankingCourse[] }> = {
   year: {
     top: [
-      { title: "Chuyển đổi số doanh nghiệp", score: 92 },
-      { title: "Khai thác dữ liệu nâng cao", score: 88 },
-      { title: "Xây dựng văn hóa học tập", score: 85 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 82 },
-      { title: "Tối ưu vận hành số", score: 79 },
+      { title: "Chuyển đổi số doanh nghiệp", rating: 4.6 },
+      { title: "Khai thác dữ liệu nâng cao", rating: 4.4 },
+      { title: "Xây dựng văn hóa học tập", rating: 4.3 },
+      { title: "Huấn luyện lãnh đạo trẻ", rating: 4.1 },
+      { title: "Tối ưu vận hành số", rating: 4.0 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 64 },
-      { title: "Kỹ năng thuyết trình", score: 61 },
-      { title: "Vận hành dự án", score: 59 },
-      { title: "Quản trị rủi ro", score: 57 },
-      { title: "Kỹ năng bán hàng", score: 54 },
+      { title: "Tư duy phản biện", rating: 3.2 },
+      { title: "Kỹ năng thuyết trình", rating: 3.1 },
+      { title: "Vận hành dự án", rating: 3.0 },
+      { title: "Quản trị rủi ro", rating: 2.9 },
+      { title: "Kỹ năng bán hàng", rating: 2.7 },
     ],
   },
   month: {
     top: [
-      { title: "Chuyển đổi số doanh nghiệp", score: 90 },
-      { title: "Khai thác dữ liệu nâng cao", score: 86 },
-      { title: "Xây dựng văn hóa học tập", score: 83 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 80 },
-      { title: "Tối ưu vận hành số", score: 77 },
+      { title: "Chuyển đổi số doanh nghiệp", rating: 4.5 },
+      { title: "Khai thác dữ liệu nâng cao", rating: 4.3 },
+      { title: "Xây dựng văn hóa học tập", rating: 4.2 },
+      { title: "Huấn luyện lãnh đạo trẻ", rating: 4.0 },
+      { title: "Tối ưu vận hành số", rating: 3.9 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 60 },
-      { title: "Kỹ năng thuyết trình", score: 58 },
-      { title: "Vận hành dự án", score: 56 },
-      { title: "Quản trị rủi ro", score: 54 },
-      { title: "Kỹ năng bán hàng", score: 51 },
+      { title: "Tư duy phản biện", rating: 3.0 },
+      { title: "Kỹ năng thuyết trình", rating: 2.9 },
+      { title: "Vận hành dự án", rating: 2.8 },
+      { title: "Quản trị rủi ro", rating: 2.7 },
+      { title: "Kỹ năng bán hàng", rating: 2.6 },
     ],
   },
   week: {
     top: [
-      { title: "Chuyển đổi số doanh nghiệp", score: 88 },
-      { title: "Khai thác dữ liệu nâng cao", score: 84 },
-      { title: "Xây dựng văn hóa học tập", score: 81 },
-      { title: "Huấn luyện lãnh đạo trẻ", score: 78 },
-      { title: "Tối ưu vận hành số", score: 74 },
+      { title: "Chuyển đổi số doanh nghiệp", rating: 4.4 },
+      { title: "Khai thác dữ liệu nâng cao", rating: 4.2 },
+      { title: "Xây dựng văn hóa học tập", rating: 4.1 },
+      { title: "Huấn luyện lãnh đạo trẻ", rating: 3.9 },
+      { title: "Tối ưu vận hành số", rating: 3.7 },
     ],
     low: [
-      { title: "Tư duy phản biện", score: 58 },
-      { title: "Kỹ năng thuyết trình", score: 56 },
-      { title: "Vận hành dự án", score: 54 },
-      { title: "Quản trị rủi ro", score: 52 },
-      { title: "Kỹ năng bán hàng", score: 49 },
+      { title: "Tư duy phản biện", rating: 2.9 },
+      { title: "Kỹ năng thuyết trình", rating: 2.8 },
+      { title: "Vận hành dự án", rating: 2.7 },
+      { title: "Quản trị rủi ro", rating: 2.6 },
+      { title: "Kỹ năng bán hàng", rating: 2.5 },
     ],
   },
 };
@@ -334,7 +334,7 @@ export const mockEvents = [
   {
     id: "event-9",
     title: "Đổi Mới Sáng Tạo Trong Doanh Nghiệp",
-    start: buildDate(25, 16, 0).toISOString(),
+    start: buildDate(26, 16, 0).toISOString(),
     frames: [{ id: "frame-9" }],
     status: CalenderStatus.APPROVED,
     mode: "Online",
@@ -344,7 +344,7 @@ export const mockEvents = [
   {
     id: "event-10",
     title: "Thiết Lập KPIs Cho Đội Ngũ Đào Tạo",
-    start: buildDate(27, 9, 0).toISOString(),
+    start: buildDate(26, 9, 0).toISOString(),
     frames: [{ id: "frame-10" }],
     status: CalenderStatus.APPROVED,
     mode: "Offline",

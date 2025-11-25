@@ -212,15 +212,15 @@ const ClassRoomContainer = () => {
                         const runtimeStatusLabel =
                             CLASSROOM_RUNTIME_STATUS_LABEL[runtimeStatusKey] ?? item.runtime_status ?? "Chưa xác định";
                         const runtimeStatusColor = getRuntimeStatusColor(runtimeStatusKey)
-                        const { label: sessionModeLabel, isOnline } = getSessionMode(item.class_sessions);
+                        const { label: sessionModeLabel, sessionType } = getSessionMode(item.class_sessions);
                         const participantCount = item.studentCount?.[0]?.count ?? 0;
                         const { label: actionLabel, disabled: actionDisabled } =
-                            getStatusAndLabelBtnJoin(runtimeStatusKey, isOnline);
+                            getStatusAndLabelBtnJoin(runtimeStatusKey, sessionType!);
 
                         return (
                             <Grid key={item.id ?? item.slug} size={{ xs: 12, md: 6, lg: 3 }}>
                                 <ClassRoomCard
-                                    isOnline={isOnline}
+                                    sessionType={sessionType!}
                                     actionDisabled={actionDisabled}
                                     actionLabel={actionLabel}
                                     end_at={item.end_at!}

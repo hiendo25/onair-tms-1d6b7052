@@ -4,7 +4,7 @@ import { PATHS } from "@/constants/path.contstants";
 import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
-import { ClassRoomPriorityDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
+import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import {
@@ -101,7 +101,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   }, []);
 
   const handleSelectSession = useCallback(
-    (sessionId: string) => {
+    (session: ClassRoomSessionDetailDto, sessionType: "online" | "offline" | "live") => {
       if (!selectedClassRoom) {
         return;
       }
@@ -115,7 +115,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
       const slug = selectedClassRoom.slug ?? undefined;
 
       setDialogOpen(false);
-      navigateToSession(sessionId, slug);
+      navigateToSession(session.id, slug);
       setSelectedClassRoom(null);
     },
     [navigateToSession, selectedClassRoom],
@@ -180,12 +180,19 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
             >
               <TableRow>
                 {TABLE_HEAD_CLASS_ROOM.map((item) => {
+                  const isActionColumn = item.id === "action";
                   return (
                     <TableCell
                       key={item.id}
                       sx={{
                         width: item.width,
                         whiteSpace: "nowrap",
+                        ...(isActionColumn && {
+                          position: "sticky",
+                          right: 0,
+                          backgroundColor: grey[100],
+                          zIndex: 2,
+                        }),
                       }}
                       align={item.align}
                     >
@@ -260,7 +267,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                     <TableCell align="center">
                       <ClassRoomRuntimeStatus runtimeStatus={room?.runtime_status as any} />
                     </TableCell>
-                    <TableCell align="center">
+                    {/* <TableCell align="center">
                       <AvatarGroup sx={{ justifyContent: "center" }} variant="circular" max={4}>
                         {teachers.map((teacher) => {
                           return (
@@ -274,8 +281,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                           );
                         })}
                       </AvatarGroup>
-                    </TableCell>
-                    <TableCell align="center">
+                    </TableCell> */}
+                    {/* <TableCell align="center">
                       <Chip
                         label={getClassRoomStatusLabel(room?.status as ClassRoomStatusFilter)}
                         size="small"
@@ -283,12 +290,21 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                         variant="outlined"
                         sx={{ fontWeight: 500 }}
                       />
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell align="center">
                       {fDate(room.start_at, FORMAT_DATE_TIME_CLEANER)} <br />
                       {fDate(room.end_at, FORMAT_DATE_TIME_CLEANER)}
                     </TableCell>
-                    <TableCell align="center">
+                    <TableCell
+                      align="center"
+                      sx={{
+                        position: "sticky",
+                        right: 0,
+                        backgroundColor: "#fff",
+                        zIndex: 1,
+                        boxShadow: "-8px 0 12px rgba(0,0,0,0.04)",
+                      }}
+                    >
                       <PopupState variant="popover" popupId="demo-popup-menu">
                         {(popupState) => (
                           <>

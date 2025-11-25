@@ -6,8 +6,8 @@ export const TABLE_HEAD_CLASS_ROOM = [
     { id: "type", label: "Loại lớp học", width: 200, align: "center" as const },
     { id: "students", label: "Học viên", width: 50, align: "center" as const },
     { id: "runtimeStatus", label: "Trạng thái diễn ra", width: 180, align: "center" as const },
-    { id: "teachers", label: "Giảng viên", width: 100, align: "center" as const },
-    { id: "status", label: "Trạng thái xuất bản", width: 180, align: "center" as const },
+    // { id: "teachers", label: "Giảng viên", width: 100, align: "center" as const },
+    // { id: "status", label: "Trạng thái xuất bản", width: 180, align: "center" as const },
     { id: "time", label: "Thời gian", width: 150, align: "center" as const },
     { id: "action", label: "Hành động", width: 100, align: "center" as const },
 ];

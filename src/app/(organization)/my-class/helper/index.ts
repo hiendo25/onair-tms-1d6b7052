@@ -3,8 +3,9 @@ import { CLASSROOM_RUNTIME_STATUS_LABEL, RUNTIME_STATUS_COLOR_MAP } from "../../
 import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room";;
 
 const SESSION_MODE_BADGE_LABEL = {
-    online: "Trực tuyến (Live)",
-    offline: "Trực tiếp (In-House)",
+    online: "Online",
+    offline: "Offline",
+    live: "Live",
     mixed: "Kết hợp",
     pending: "Chưa xác định",
 } as const;
@@ -32,23 +33,15 @@ export const getSessionMode = (
     if (!sessions || sessions.length === 0) {
         return {
             label: SESSION_MODE_BADGE_LABEL.pending,
-            isOnline: false,
-        };
-    }
-
-    const hasOnline = sessions.some((session) => Boolean(session?.is_online));
-    const hasOffline = sessions.some((session) => session?.is_online === false);
-
-    if (hasOnline && hasOffline) {
-        return {
-            label: SESSION_MODE_BADGE_LABEL.mixed,
+            sessionType: null,
             isOnline: false,
         };
     }
 
     return {
-        label: hasOnline ? SESSION_MODE_BADGE_LABEL.online : SESSION_MODE_BADGE_LABEL.offline,
-        isOnline: hasOnline
+        label: SESSION_MODE_BADGE_LABEL[sessions?.[0]?.session_type || 'live'],
+        sessionType: sessions?.[0]?.session_type,
+        isOnline: sessions?.[0]?.session_type === 'live' || sessions?.[0]?.session_type === 'online'
     };
 };
 

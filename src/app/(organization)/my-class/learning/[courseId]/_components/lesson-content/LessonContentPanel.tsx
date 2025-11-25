@@ -189,7 +189,7 @@ const LessonContentPanel = ({
     }
 
     if (contentKind === "assessment") {
-      const assignmentId = lesson.assignment?.id ?? lesson.main_resource ?? null;
+      const assignmentId = lesson.assignment_id;
       return (
         <AssessmentLessonFrame
           assignmentId={assignmentId}
