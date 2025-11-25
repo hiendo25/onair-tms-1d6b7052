@@ -66,7 +66,7 @@ const CourseTable = () => {
         : undefined;
     }
 
-    return { ...baseFilters, employeeId: user.id, organizationId: user.organization?.id };
+    return { ...baseFilters, employeeId: undefined, organizationId: user.organization?.id };
   }, [monthRange.from, monthRange.to, user]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } = useGetClassRoomsPriorityQuery(queryInput ?? {});

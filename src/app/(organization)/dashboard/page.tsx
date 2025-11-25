@@ -8,9 +8,9 @@ import { redirect } from "next/navigation";
 const DashboardPage = () => {
 
     const { ...rest } = useUserOrganization((state) => state.data);
-    const isHasAccess = rest.employeeType !== "admin"
+    const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
 
-    if (isHasAccess) {
+    if (!isHasAccess) {
         redirect('/my-class');
     }
 
