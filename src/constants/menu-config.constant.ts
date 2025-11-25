@@ -146,12 +146,6 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
       },
     ],
   },
-  {
-    title: "Lớp học của tôi",
-    icon: React.createElement(UsersIcon2),
-    key: "my-class",
-    path: PATHS.STUDENTS.ROOT,
-  },
 ];
 
 const STUDENTS_MENU_LIST: MenuItemType[] = [

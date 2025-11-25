@@ -179,6 +179,13 @@ export default function PlansTable() {
     setSelectedPlanId(null);
   };
 
+  const handleViewDetail = () => {
+    if (selectedPlanId) {
+      router.push(PATHS.PLANS.DETAIL(selectedPlanId));
+    }
+    handleMenuClose();
+  };
+
   const handleEdit = () => {
     if (selectedPlanId) {
       router.push(PATHS.PLANS.EDIT(selectedPlanId));
@@ -220,8 +227,7 @@ export default function PlansTable() {
     <PageContainer
       title="Kế hoạch đào tạo"
       breadcrumbs={[
-        { title: "LMS", path: PATHS.PLANS.ROOT },
-        { title: "Kế hoạch đào tạo", path: "" },
+        { title: "Kế hoạch đào tạo", path: PATHS.PLANS.ROOT },
       ]}
     >
       <Box>
@@ -361,6 +367,9 @@ export default function PlansTable() {
             horizontal: "right",
           }}
         >
+          <MenuItem onClick={handleViewDetail}>
+            <ListItemText>Xem chi tiết</ListItemText>
+          </MenuItem>
           {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.status === "approved" && (
             <MenuItem onClick={handleAssignCourses}>
               <ListItemText>Gán môn học</ListItemText>

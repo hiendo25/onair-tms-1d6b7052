@@ -72,6 +72,7 @@ export const PATHS = {
   PLANS: {
     ROOT: "/admin/plans",
     CREATE: "/admin/plans/create",
+    DETAIL: (id: string = ":id") => `/admin/plans/${id}`,
     EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
 };
