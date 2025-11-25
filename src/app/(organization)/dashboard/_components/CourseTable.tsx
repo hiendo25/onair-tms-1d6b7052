@@ -1,7 +1,5 @@
 import * as React from "react";
 import {
-  Avatar,
-  AvatarGroup,
   Box,
   Button,
   Chip,
@@ -9,7 +7,6 @@ import {
   Divider,
   Paper,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
@@ -150,25 +147,23 @@ const CourseTable = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr 1fr",
+            gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr",
             bgcolor: "#f8fafc",
             px: 2,
             py: 1.5,
             gap: 1,
           }}
         >
-          {["Tên lớp học", "Loại lớp học", "Học viên", "Giảng viên", "Thời gian diễn ra"].map(
-            (col) => (
-              <Typography
-                key={col}
-                variant="body2"
-                color="text.secondary"
-                fontWeight={700}
-              >
-                {col}
-              </Typography>
-            ),
-          )}
+          {["Tên lớp học", "Loại lớp học", "Học viên", "Thời gian diễn ra"].map((col) => (
+            <Typography
+              key={col}
+              variant="body2"
+              color="text.secondary"
+              fontWeight={700}
+            >
+              {col}
+            </Typography>
+          ))}
         </Box>
 
         <Stack spacing={0} divider={<Divider />}>
@@ -214,7 +209,7 @@ const CourseTable = () => {
                 <Box
                   sx={{
                     display: "grid",
-                    gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr 1fr",
+                    gridTemplateColumns: "1.6fr 1fr 0.8fr 1.2fr",
                     px: 2,
                     py: 1.75,
                     gap: 1,
@@ -278,22 +273,6 @@ const CourseTable = () => {
                     <Typography className="font-normal text-xs text-[#212B36]">
                       {row.students}
                     </Typography>
-                  </Stack>
-
-                  <Stack direction="row" spacing={1.5} alignItems="center">
-                    <AvatarGroup sx={{ justifyContent: "center" }} variant="circular" max={4}>
-                      {row.teachers.map((teacher) => {
-                        return (
-                          <Tooltip key={teacher.profile?.id || teacher.id} title={teacher.profile?.full_name}>
-                            <Avatar
-                              alt={teacher.profile?.full_name}
-                              src={teacher.profile?.avatar as string}
-                              sx={{ width: 24, height: 24 }}
-                            />
-                          </Tooltip>
-                        );
-                      })}
-                    </AvatarGroup>
                   </Stack>
 
                   <Stack spacing={0.5}>

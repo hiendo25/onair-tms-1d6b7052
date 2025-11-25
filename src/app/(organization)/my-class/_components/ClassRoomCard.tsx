@@ -31,7 +31,8 @@ interface IClassRoomCard {
   classRoomId?: string;
   roomType?: ClassRoomTypeFilter;
   sessions?: ClassRoomPriorityDto["class_sessions"];
-  sessionType: ClassSessionType
+  sessionType: ClassSessionType;
+  classRoomSlug: string;
 }
 
 const ClassRoomCard = ({
@@ -50,6 +51,7 @@ const ClassRoomCard = ({
   roomType = ClassRoomTypeFilter.Single,
   sessions = [],
   sessionType,
+  classRoomSlug,
 }: IClassRoomCard) => {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -65,10 +67,10 @@ const ClassRoomCard = ({
       if (sessionType === "live") {
         router.push(`/class-room/cd/${slug}/${sessions.id}`);
       } else {
-        router.push(`/class-room/detail/${sessions.class_room_id}`);
+        router.push(`/class-room/${classRoomSlug}`);
       }
     },
-    [router, slug],
+    [classRoomSlug, router, slug],
   );
 
   const handleJoinClass = useCallback(
