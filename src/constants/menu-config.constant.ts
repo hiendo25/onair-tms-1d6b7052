@@ -11,7 +11,7 @@ import {
   BarChart10Icon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined';import React from "react";
+import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'; import React from "react";
 import { PATHS } from "./path.contstants";
 
 const ADMIN_MENU_LIST: MenuItemType[] = [

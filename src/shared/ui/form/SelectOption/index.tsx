@@ -9,7 +9,7 @@ interface OPTION {
 }
 
 interface PropTypes {
-    inputLabel: string;
+    inputLabel?: string;
     name?: string,
     value: string;
     onChange: (v) => void,
@@ -46,7 +46,7 @@ export const SelectOption: React.FC<PropTypes> = (props) => {
             fullWidth
             error={!!error}
         >
-            <InputLabel id={labelId}>{inputLabel}</InputLabel>
+            {inputLabel && <InputLabel id={labelId}>{inputLabel}</InputLabel>}
             <Select
                 label={inputLabel}
                 labelId={labelId}

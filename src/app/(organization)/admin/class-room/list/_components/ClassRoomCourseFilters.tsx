@@ -1,13 +1,13 @@
 "use client";
 import dayjs, { Dayjs } from "dayjs";
-import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
+import { Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { viVN } from "@mui/x-date-pickers/locales";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "@/repository/class-room";
-import { PUBLICATION_STATUS_OPTIONS, RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
+import { RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
 import Link from "next/link";
 import { SearchIcon } from "@/shared/assets/icons";
 interface ClassRoomFiltersProps {
@@ -49,26 +49,74 @@ export default function ClassRoomFilters({
   onRuntimeStatusChange,
   onStausChange,
 }: ClassRoomFiltersProps) {
+  const fieldBaseSx = {
+    "& .MuiOutlinedInput-root": {
+      bgcolor: "#fff",
+      borderRadius: 1.5,
+      "& fieldset": { borderColor: "divider" },
+      "&:hover fieldset": { borderColor: "primary.light" },
+      "&.Mui-focused fieldset": {
+        borderColor: "primary.main",
+        boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.12)",
+      },
+    },
+  };
+
+  const selectSx = {
+    "& .MuiOutlinedInput-root": {
+      bgcolor: "#fff",
+      borderRadius: 1.5,
+      "& .MuiOutlinedInput-notchedOutline": { borderColor: "divider" },
+      "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "primary.light" },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: "primary.main",
+        boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.12)",
+      },
+    },
+  };
+
+  const filterItemSx = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 0.75,
+    minWidth: 0,
+  };
+
   return (
     <LocalizationProvider
       dateAdapter={AdapterDayjs}
       adapterLocale="vi"
       localeText={viVN.components.MuiLocalizationProvider.defaultProps.localeText}
     >
-      <Stack
-        direction={{ xs: "column", lg: "row" }}
-        spacing={{ xs: 2, md: 2.5 }}
-        alignItems={{ xs: "stretch", lg: "center" }}
-        sx={{ flexWrap: "wrap" }}
-        useFlexGap
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "repeat(auto-fit, minmax(220px, 1fr))",
+            sm: "repeat(auto-fit, minmax(200px, 1fr))",
+            lg: "repeat(7, minmax(0, 1fr))",
+          },
+          gap: { xs: 1.5, md: 2 },
+          alignItems: "end",
+          p: { xs: 2, md: 2.5 },
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "#f8fafc",
+          boxShadow: "0 8px 24px rgba(15, 23, 42, 0.05)",
+        }}
       >
-        <Box>
+        <Box sx={filterItemSx}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Tìm kiếm
+          </Typography>
           <TextField
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Tìm kiếm..."
             size="small"
             fullWidth
+            sx={fieldBaseSx}
             slotProps={{
               input: {
                 endAdornment: (
@@ -80,9 +128,11 @@ export default function ClassRoomFilters({
             }}
           />
         </Box>
-        <Box>
+        <Box sx={filterItemSx}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Ngày bắt đầu
+          </Typography>
           <DatePicker
-            label="Ngày bắt đầu"
             value={parseDate(startDate)}
             onChange={(newValue) => onDateChange("startDate", newValue ? newValue.toISOString() : null)}
             format="DD/MM/YYYY"
@@ -90,13 +140,16 @@ export default function ClassRoomFilters({
               textField: {
                 size: "small",
                 fullWidth: true,
+                sx: fieldBaseSx,
               },
             }}
           />
         </Box>
-        <Box>
+        <Box sx={filterItemSx}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Ngày kết thúc
+          </Typography>
           <DatePicker
-            label="Ngày kết thúc"
             value={parseDate(endDate)}
             onChange={(newValue) => onDateChange("endDate", newValue ? newValue.toISOString() : null)}
             format="DD/MM/YYYY"
@@ -104,13 +157,16 @@ export default function ClassRoomFilters({
               textField: {
                 size: "small",
                 fullWidth: true,
+                sx: fieldBaseSx,
               },
             }}
           />
         </Box>
-        <Box>
+        <Box sx={{ ...filterItemSx, ...selectSx }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Trạng thái diễn ra
+          </Typography>
           <SelectOption
-            inputLabel="Trạng thái diễn ra"
             onChange={(runtimeStatus) => onRuntimeStatusChange(runtimeStatus)}
             value={runtimeStatus}
             options={RUNTIME_STATUS_OPTIONS}
@@ -118,47 +174,65 @@ export default function ClassRoomFilters({
           />
         </Box>
         {/* <Box>
+            <SelectOption
+              inputLabel="Trạng thái xuất bản"
+              onChange={(status) => onStausChange(status)}
+              value={status}
+              options={PUBLICATION_STATUS_OPTIONS}
+              size="small"
+            />
+          </Box> */}
+        <Box sx={{ ...filterItemSx, ...selectSx }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Loại lớp học
+          </Typography>
           <SelectOption
-            inputLabel="Trạng thái xuất bản"
-            onChange={(status) => onStausChange(status)}
-            value={status}
-            options={PUBLICATION_STATUS_OPTIONS}
-            size="small"
-          />
-        </Box> */}
-        <Box>
-          <SelectOption
-            inputLabel="Loại lớp học"
             onChange={(type) => onTypeChange(type)}
             value={type}
             options={TYPE_OPTIONS}
             size="small"
           />
         </Box>
-        <Box>
+        <Box sx={{ ...filterItemSx, ...selectSx }}>
+          <Typography variant="caption" color="text.secondary" fontWeight={600}>
+            Hình thức buổi học
+          </Typography>
           <SelectOption
-            inputLabel="Hình thức buổi học"
             onChange={(mode) => onSessionModeChange(mode)}
             value={sessionMode}
             options={SESSION_MODE_OPTIONS}
             size="small"
           />
         </Box>
-        <Link href="/admin/class-room/create">
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              minWidth: { xs: "100%", lg: 160 },
-              flex: { xs: "1 1 100%", lg: "0 0 auto" },
-              alignSelf: { xs: "stretch", lg: "center" },
-              py: 1.1,
-            }}
-          >
-            Tạo lớp học
-          </Button>
-        </Link>
-      </Stack>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "stretch",
+            justifyContent: { xs: "stretch", lg: "flex-end" },
+            gridColumn: { xs: "1 / -1", lg: "auto" },
+          }}
+        >
+          <Link href="/admin/class-room/create" style={{ width: "100%" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{
+                height: 42,
+                borderRadius: 1.5,
+                fontWeight: 700,
+                textTransform: "none",
+                boxShadow: "none",
+                "&:hover": {
+                  boxShadow: "0 6px 14px rgba(25, 118, 210, 0.2)",
+                },
+              }}
+            >
+              Tạo lớp học
+            </Button>
+          </Link>
+        </Box>
+      </Box>
     </LocalizationProvider>
   );
 }

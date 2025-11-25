@@ -30,7 +30,7 @@ const LearningScreenPage = async ({ params }: ILearningScreenPage) => {
         <PageContainer
             actions={
                 <div className="flex items-center gap-2 w-full">
-                    <Link href="/my-class">
+                    <Link href="/">
                         <IconButton>
                             <ArrowBackIcon className="h-6 w-6" />
                         </IconButton>
