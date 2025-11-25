@@ -12,7 +12,7 @@ interface MainLayoutProps extends PropsWithChildren {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, className, menuItems }) => {
   const theme = useTheme();
-  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] = useState(true);
+  const [isDesktopNavigationExpanded, setIsDesktopNavigationExpanded] = useState(false);
   const [isMobileNavigationExpanded, setIsMobileNavigationExpanded] = useState(false);
 
   const isOverLGViewport = useMediaQuery(theme.breakpoints.up("lg"), {

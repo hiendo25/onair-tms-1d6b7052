@@ -26,7 +26,7 @@ export interface DashboardSidebarProps {
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
-  expanded = true,
+  expanded = false,
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
