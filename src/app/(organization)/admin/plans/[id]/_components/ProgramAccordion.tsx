@@ -13,6 +13,8 @@ import {
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import PersonIcon from "@mui/icons-material/Person";
 import { ProgramDetail } from "../../_components/mock-data";
 
 interface ProgramAccordionProps {
@@ -77,10 +79,126 @@ export default function ProgramAccordion({
                   </Typography>
                 </Box>
               </AccordionSummary>
-              <AccordionDetails sx={{ bgcolor: "white", borderTop: "1px solid #e0e0e0", pt: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Nội dung chương trình sẽ được hiển thị ở đây
-                </Typography>
+              <AccordionDetails sx={{ bgcolor: "white", borderTop: "1px solid #e0e0e0", p: 0, borderRadius: 1, mt: 0.5 }}>
+                {program.topics && program.topics.length > 0 ? (
+                  <Stack spacing={0}>
+                    {program.topics.map((topic, topicIndex) => (
+                      <Box key={topic.id}>
+                        {/* Topic Header - Level 1 (No left padding, Chip + Title) */}
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                            px: 0,
+                            py: 1.5,
+                            pl: 2,
+                            borderTop: topicIndex === 0 ? "none" : "1px solid #e0e0e0",
+                          }}
+                        >
+                          {/* Topic Chip */}
+                          <Chip
+                            label={topic.name}
+                            size="small"
+                            variant="filled"
+                            sx={{
+                              bgcolor: "#212B36",
+                              '& span': {
+                                color: "white !important"
+                              }
+                            }}
+                          />
+                          {/* Topic Title */}
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {topic.title}
+                          </Typography>
+                        </Box>
+
+                        {/* Courses within Topic - Level 2 (Indented 32px, no gray background) */}
+                        <Stack spacing={0}>
+                          {topic.courses.map((course) => (
+                            <Box key={course.id}>
+                              {/* Course Header */}
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1,
+                                  pl: 6,
+                                  pr: 2,
+                                  py: 1.5,
+                                }}
+                              >
+                                <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                  {course.title}
+                                </Typography>
+                                <Typography variant="body2" color="text.secondary">
+                                  ({course.classesCount} lớp)
+                                </Typography>
+                              </Box>
+
+                              {/* Classes List - Level 3 (Indented 64px total) */}
+                              <Stack spacing={0}>
+                                {course.classes.map((classInstance, classIndex) => (
+                                  <Box
+                                    key={classInstance.id}
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                      pl: 10,
+                                      pr: 2,
+                                      py: 1.5,
+                                    }}
+                                  >
+                                    {/* Lớp Label */}
+                                    <Typography
+                                      variant="body2"
+                                      sx={{ minWidth: "30px", color: "text.secondary" }}
+                                    >
+                                      Lớp
+                                    </Typography>
+
+                                    {/* Class Code Chip */}
+                                    <Chip
+                                      label={classInstance.classCode}
+                                      size="small"
+                                      variant="outlined"
+                                      color="primary"
+                                    />
+
+                                    {/* Delivery Mode */}
+                                    <Typography variant="body2" sx={{ minWidth: "60px" }}>
+                                      {classInstance.deliveryMode}
+                                    </Typography>
+
+                                    {/* Instructor */}
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
+                                      <PersonIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                                      <Typography variant="body2">{classInstance.instructor}</Typography>
+                                    </Box>
+
+                                    {/* Date */}
+                                    <Typography variant="body2" sx={{ minWidth: "90px", textAlign: "right" }}>
+                                      {classInstance.date}
+                                    </Typography>
+                                  </Box>
+                                ))}
+                              </Stack>
+                            </Box>
+                          ))}
+                        </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                ) : (
+                  <Box sx={{ p: 2 }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Chưa có nội dung chương trình
+                    </Typography>
+                  </Box>
+                )}
               </AccordionDetails>
             </Accordion>
           ))}
