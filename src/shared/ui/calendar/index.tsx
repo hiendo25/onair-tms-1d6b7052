@@ -201,11 +201,15 @@ export const CalendarSidebar = (props: PropTypes) => {
                     sx={{
                         borderRadius: 1.5,
                         bgcolor: "white",
+                        minWidth: "unset",
                         '& .MuiDateCalendar-root': {
                             height: 300,
                         },
                         "& .MuiPickersCalendarHeader-label": {
                             textTransform: "capitalize",
+                        },
+                        "& .onair-5wchs2-MuiDateCalendar-root": {
+                            width: "100%"
                         },
                     }}
                 />

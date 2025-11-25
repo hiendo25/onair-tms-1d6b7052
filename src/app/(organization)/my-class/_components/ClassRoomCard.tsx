@@ -8,12 +8,13 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { fDateTime } from "@/lib";
 import EnterClassRoomsDialog from "./EnterClassRooms";
-import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
+import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { PATHS } from "@/constants/path.contstants";
 import Link from "next/link";
 import { ClassRoomTypeFilter } from "@/repository/class-room";
+import { ClassSessionType } from "@/model/class-session.model";
 
 interface IClassRoomCard {
   start_at: string;
@@ -30,7 +31,7 @@ interface IClassRoomCard {
   classRoomId?: string;
   roomType?: ClassRoomTypeFilter;
   sessions?: ClassRoomPriorityDto["class_sessions"];
-  isOnline: boolean;
+  sessionType: ClassSessionType
 }
 
 const ClassRoomCard = ({
@@ -48,7 +49,7 @@ const ClassRoomCard = ({
   classRoomId,
   roomType = ClassRoomTypeFilter.Single,
   sessions = [],
-  isOnline,
+  sessionType,
 }: IClassRoomCard) => {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -57,11 +58,15 @@ const ClassRoomCard = ({
   const employeeId = useUserOrganization((state) => state.data.id);
 
   const navigateToSession = useCallback(
-    (sessionId?: string) => {
-      if (!sessionId || !slug) {
+    (sessions: ClassRoomSessionDetailDto, sessionType?: ClassSessionType) => {
+      if (!sessions || !slug) {
         return;
       }
-      router.push(`/class-room/cd/${slug}/${sessionId}`);
+      if (sessionType === "live") {
+        router.push(`/class-room/cd/${slug}/${sessions.id}`);
+      } else {
+        router.push(`/class-room/detail/${sessions.class_room_id}`);
+      }
     },
     [router, slug],
   );
@@ -74,14 +79,14 @@ const ClassRoomCard = ({
         return;
       }
 
-      if (isOnline) {
-        if (roomType === ClassRoomTypeFilter.Multiple) {
+      if (sessionType === "live" || sessionType === "online") {
+        if (roomType === ClassRoomTypeFilter.Multiple && sessionType === "live") {
           setDialogOpen(true);
           return;
         }
 
         if (sessions?.[0]?.id) {
-          navigateToSession(sessions?.[0]?.id);
+          navigateToSession(sessions?.[0], sessions?.[0]?.session_type);
         }
       } else {
         if (roomType === ClassRoomTypeFilter.Multiple) {
@@ -94,7 +99,7 @@ const ClassRoomCard = ({
         setQrScannerOpen(true);
       }
     },
-    [actionDisabled, isOnline, navigateToSession, roomType, sessions],
+    [actionDisabled, navigateToSession, roomType, sessionType, sessions],
   );
 
   const handleCloseDialog = useCallback(() => {
@@ -102,17 +107,17 @@ const ClassRoomCard = ({
   }, []);
 
   const handleSelectSession = useCallback(
-    (sessionId: string) => {
-      if (!isOnline) {
+    (session: ClassRoomSessionDetailDto) => {
+      if (sessionType === "offline") {
         setDialogOpen(false);
-        setSelectedSessionId(sessionId);
+        setSelectedSessionId(session.id);
         setQrScannerOpen(true);
         return;
       }
       setDialogOpen(false);
-      navigateToSession(sessionId);
+      navigateToSession(session, sessions?.[0]?.session_type);
     },
-    [isOnline, navigateToSession],
+    [navigateToSession, sessionType, sessions],
   );
 
   return (
@@ -183,7 +188,7 @@ const ClassRoomCard = ({
         sessions={sessions}
         thumbnail={thumbnail}
         classTitle={title}
-        actionLabel={!isOnline ? "Quét mã QR" : undefined}
+        actionLabel={sessionType === "offline" ? "Quét mã QR" : undefined}
         onSelectSession={handleSelectSession}
       />
       <QRScannerDialog

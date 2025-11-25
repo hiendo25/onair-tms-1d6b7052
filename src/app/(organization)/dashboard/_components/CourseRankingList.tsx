@@ -8,12 +8,17 @@ import { panelSx } from "./mock/panelSx";
 type CourseListItemProps = {
   text: string;
   color: any;
-  score: number;
+  rating: number;
   accent: "primary" | "danger";
 };
 
-const CourseListItem = ({ text, color, score, accent }: CourseListItemProps) => {
+const MAX_RATING = 5;
+
+const CourseListItem = ({ text, color, rating, accent }: CourseListItemProps) => {
   const trackColor = accent === "primary" ? "#dbeafe" : "#fee2e2";
+  const percentage = (rating / MAX_RATING) * 100;
+  const displayRating = Number.isInteger(rating) ? rating.toFixed(0) : rating.toFixed(1);
+
   return (
     <Stack spacing={0.75}>
       <Stack direction="row" alignItems="center" spacing={1}>
@@ -25,11 +30,11 @@ const CourseListItem = ({ text, color, score, accent }: CourseListItemProps) => 
           fontWeight={700}
           color={accent === "primary" ? "primary.main" : "#ef4444"}
         >
-          {score}%
+          {displayRating}/{MAX_RATING}
         </Typography>
       </Stack>
       <Box sx={{ height: 6, bgcolor: trackColor, borderRadius: 999 }}>
-        <Box sx={{ width: `${score}%`, height: "100%", borderRadius: 999, bgcolor: color }} />
+        <Box sx={{ width: `${percentage}%`, height: "100%", borderRadius: 999, bgcolor: color }} />
       </Box>
     </Stack>
   );
@@ -63,7 +68,7 @@ const CourseRankingList = ({ variant = "top" }: Props) => {
           <CourseListItem
             key={`${course.title}-${index}`}
             text={course.title}
-            score={course.score}
+            rating={course.rating}
             color={palette}
             accent={accent}
           />

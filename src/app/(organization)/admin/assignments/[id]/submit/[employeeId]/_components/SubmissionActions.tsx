@@ -6,6 +6,7 @@ interface SubmissionActionsProps {
   onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting?: boolean;
+  hideCancelButton?: boolean;
 }
 
 export default function SubmissionActions({
@@ -13,12 +14,15 @@ export default function SubmissionActions({
   onSubmit,
   isSubmitDisabled,
   isSubmitting = false,
+  hideCancelButton = false,
 }: SubmissionActionsProps) {
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-      <Button variant="outlined" onClick={onCancel} disabled={isSubmitting}>
-        Hủy
-      </Button>
+      {!hideCancelButton && (
+        <Button variant="outlined" onClick={onCancel} disabled={isSubmitting}>
+          Hủy
+        </Button>
+      )}
       <Button
         type="submit"
         variant="contained"
@@ -31,4 +35,3 @@ export default function SubmissionActions({
     </Box>
   );
 }
-

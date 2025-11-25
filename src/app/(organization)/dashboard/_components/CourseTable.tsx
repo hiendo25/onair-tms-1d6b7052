@@ -28,7 +28,7 @@ type DashboardCourseRow = {
   slug?: string | null;
   label: string;
   name: string;
-  mode: "Trực tuyến (Online)" | "Trực tiếp (Offline)" | "Lớp học live";
+  mode: "Online" | "Offline" | "Live";
   students: number;
   teachers: EmployeeWithProfileDto[];
   start_at: string | null;
@@ -92,7 +92,7 @@ const CourseTable = () => {
       ].filter(Boolean) as EmployeeWithProfileDto[];
 
       const sessionForMode = sessions.find((session) => session.session_type !== null && session.session_type !== undefined);
-      const mode = sessionForMode?.session_type === "online" ? "Trực tuyến (Online)" : sessionForMode?.session_type === "offline" ? "Trực tiếp (Offline)" : "Lớp học live";
+      const mode = sessionForMode?.session_type === "online" ? "Online" : sessionForMode?.session_type === "offline" ? "Offline" : "Live";
 
       return {
         id: classRoom.id,
@@ -127,7 +127,7 @@ const CourseTable = () => {
               Tạo khảo sát
             </Button>
           </Link>
-          <Link href={PATHS.CLASSROOMS.ROOT}>
+          <Link href={PATHS.COURSES.CREATE}>
             <Button variant="outlined" size="small" color="primary">
               Tạo môn học
             </Button>
@@ -229,7 +229,7 @@ const CourseTable = () => {
                   }}
                 >
                   <Stack spacing={0.6}>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    {/* <Stack direction="row" spacing={1} alignItems="center">
                       <Chip
                         label={row.label}
                         size="small"
@@ -242,22 +242,33 @@ const CourseTable = () => {
                           },
                         }}
                       />
-                    </Stack>
-                    <Typography className="font-normal text-xs text-[#212B36] line-clamp-2">
+                    </Stack> */}
+                    <Typography className="font-normal text-sm text-[#212B36] line-clamp-2">
                       {row.name}
                     </Typography>
                   </Stack>
 
                   <Chip
-                    label={row.mode}
+                    label={`${row.mode} - ${row.label}`}
                     size="small"
                     sx={{
-                      bgcolor: row.mode === "Trực tuyến (Online)" ? "#FF662B29" : "#9723F93D",
-                      color: row.mode === "Trực tuyến (Online)" ? "#9A3E1A" : "#6E05C6",
                       height: 26,
                       justifySelf: "flex-start",
+                      bgcolor:
+                        row.mode === "Online"
+                          ? "rgba(155, 206, 255, 0.28) "     // LIVE - pastel red
+                          : row.mode === "Offline"
+                            ? "rgba(255, 179, 71, 0.28)"     // OFFLINE - pastel orange
+                            : "rgba(255, 107, 107, 0.28)",   // OTHER - pastel blue
+                      color:
+                        row.mode === "Online"
+                          ? "#64A9FF"
+                          : row.mode === "Offline"
+                            ? "#FFB347"
+                            : "#FF6B6B",
+                      fontWeight: 600,
                       "& .MuiChip-label": {
-                        color: "unset",
+                        color: "inherit",
                       },
                     }}
                   />

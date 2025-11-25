@@ -45,7 +45,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                   display: "flex",
                   flexDirection: "row",
                   gap: 1,
-                  marginLeft: "auto",
+                  // marginLeft: "auto",
                 }}
               >
                 {actions}

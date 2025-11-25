@@ -2,14 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { learningScreenService } from "@/services";
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     lessonId: string;
-  };
+  }>;
 }
 
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const lessonId = context.params.lessonId ?? "";
+    const { lessonId = "" } = await context.params;
+
     if (!lessonId.trim()) {
       return NextResponse.json(
         { error: "lessonId is required" },
