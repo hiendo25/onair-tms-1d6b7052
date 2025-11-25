@@ -401,7 +401,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
                     <FormLabel htmlFor="employee_type" sx={{ mb: 1 }}>
-                      Vai trò
+                      Vai trò <span style={{ color: "red" }}>*</span>
                     </FormLabel>
                     <Select
                       {...field}

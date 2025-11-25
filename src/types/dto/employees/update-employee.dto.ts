@@ -12,7 +12,7 @@ export class UpdateEmployeeDto {
   branch?: string;
   manager_id!: string;
   position_id?: string;
-  employee_type?: Database["public"]["Enums"]["employee_type"];
+  employee_type!: Database["public"]["Enums"]["employee_type"];
   start_date?: string | null;
 }
 

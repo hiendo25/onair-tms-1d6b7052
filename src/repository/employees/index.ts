@@ -238,7 +238,7 @@ export async function createEmployee(data: {
   employee_order: number;
   start_date: string;
   position_id?: string | null;
-  employee_type?: Database["public"]["Enums"]["employee_type"] | null;
+  employee_type: Database["public"]["Enums"]["employee_type"];
   organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
 }) {
@@ -263,7 +263,7 @@ export async function updateEmployeeById(
     employee_code?: string;
     start_date?: string;
     position_id?: string | null;
-    employee_type?: Database["public"]["Enums"]["employee_type"] | null;
+    employee_type?: Database["public"]["Enums"]["employee_type"];
   },
 ) {
   const supabase = await createSVClient();

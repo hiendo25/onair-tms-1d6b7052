@@ -97,23 +97,13 @@ export default function StepApproval({
           >
             Quay lại
           </Button>
-          {mode === "create" ? (
-            <Button
-              variant="contained"
-              onClick={onSubmit}
-              disabled={isLoading}
-            >
-              Gửi duyệt kế hoạch
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              onClick={onContinue}
-              disabled={isLoading}
-            >
-              Tiếp tục
-            </Button>
-          )}
+          <Button
+            variant="contained"
+            onClick={onContinue}
+            disabled={isLoading}
+          >
+            Tiếp tục
+          </Button>
         </Box>
       </CardContent>
     </Card>
