@@ -32,7 +32,11 @@ const INITIAL_MOCK_COURSES: Course[] = [
   { id: "1", title: "4 buổi làm sao quản lý kỹ năng giao tiếp" },
   { id: "2", title: "Môn học Kỹ năng làm việc đội nhóm" },
   { id: "3", title: "Môn học làm sao chuyển đổi số", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6"] },
-  { id: "4", title: "Môn học làm sao sử dụng AI doanh nghiệp B2B", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6", "Lớp 2,4,6"] },
+  {
+    id: "4",
+    title: "Môn học làm sao sử dụng AI doanh nghiệp B2B",
+    labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6", "Lớp 2,4,6"],
+  },
   { id: "5", title: "Ứng dụng AI vào tối ưu giao tiếp", labels: ["Lớp Sáng", "Lớp Tối", "Lớp 2,4,6", "Lớp 2,4,6"] },
   { id: "6", title: "Làm sao chuyển đổi được nhân viên" },
   { id: "7", title: "Kỹ năng lãnh đạo cơ bản" },
@@ -42,12 +46,12 @@ const INITIAL_MOCK_COURSES: Course[] = [
 ];
 
 export default function StepAssignCourses({
-  control,
-  errors,
-  onBack,
-  onSave,
-  isLoading = false,
-}: StepAssignCoursesProps) {
+                                            control,
+                                            errors,
+                                            onBack,
+                                            onSave,
+                                            isLoading = false,
+                                          }: StepAssignCoursesProps) {
   // State for available courses (allows adding new courses)
   const [availableCourses, setAvailableCourses] = useState<Course[]>(INITIAL_MOCK_COURSES);
 
@@ -131,14 +135,14 @@ interface ProgramCardProps {
 }
 
 function ProgramCard({
-  program,
-  programIndex,
-  dateRange,
-  control,
-  errors,
-  availableCourses,
-  onAddCourse,
-}: ProgramCardProps) {
+                       program,
+                       programIndex,
+                       dateRange,
+                       control,
+                       errors,
+                       availableCourses,
+                       onAddCourse,
+                     }: ProgramCardProps) {
   const { fields: topics } = useFieldArray({
     control,
     name: `programs.${programIndex}.topics` as const,
@@ -193,13 +197,13 @@ interface TopicCardProps {
 }
 
 function TopicCardWithCourses({
-  topic,
-  programIndex,
-  topicIndex,
-  control,
-  availableCourses,
-  onAddCourse,
-}: TopicCardProps) {
+                                topic,
+                                programIndex,
+                                topicIndex,
+                                control,
+                                availableCourses,
+                                onAddCourse,
+                              }: TopicCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { fields: courses, replace } = useFieldArray({
@@ -285,7 +289,7 @@ function TopicCardWithCourses({
           isOptionEqualToValue={(option, value) => option.id === value.id}
           renderTags={(value) => renderTags(value)}
           renderOption={(props, option, { selected }) => (
-            <li {...props}>
+            <li {...props} key={option.id}>
               <Checkbox
                 style={{ marginRight: 8 }}
                 checked={selected}

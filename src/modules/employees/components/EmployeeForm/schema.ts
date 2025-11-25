@@ -36,7 +36,9 @@ export const EmployeeFormSchema = z.object({
   employee_code: z.string().optional(),
   manager_id: z.string().min(1, { message: "Vui lòng chọn người quản lý" }),
   position_id: z.string().optional(),
-  employee_type: z.enum(employeeTypeValues).optional(),
+  employee_type: z.enum(employeeTypeValues, {
+    message: "Vui lòng chọn vai trò",
+  }),
   start_date: z.string().min(1, { message: "Vui lòng chọn ngày bắt đầu" }),
 });
 

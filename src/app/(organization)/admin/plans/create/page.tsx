@@ -7,7 +7,6 @@ export default async function CreatePlanPage() {
     <PageContainer
       title="Tạo kế hoạch đào tạo"
       breadcrumbs={[
-        { title: "LMS", path: PATHS.PLANS.ROOT },
         { title: "Kế hoạch đào tạo", path: PATHS.PLANS.ROOT },
         { title: "Tạo kế hoạch đào tạo" },
       ]}

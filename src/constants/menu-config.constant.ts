@@ -131,27 +131,21 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
       },
     ],
   },
-  // {
-  //   title: "Báo cáo",
-  //   icon: React.createElement(BarChart10Icon),
-  //   key: "manage-report",
-  //   path: PATHS.REPORTS.ROOT,
-  //   type: "item",
-  //   children: [
-  //     {
-  //       title: "Báo cáo tổng quan",
-  //       key: "report-overview",
-  //       path: PATHS.REPORTS.OVER_VIEW,
-  //       type: "item",
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: "Lớp học của tôi",
-  //   icon: React.createElement(UsersIcon2),
-  //   key: "my-class",
-  //   path: PATHS.STUDENTS.ROOT,
-  // },
+  {
+    title: "Báo cáo",
+    icon: React.createElement(BarChart10Icon),
+    key: "manage-report",
+    path: PATHS.REPORTS.ROOT,
+    type: "item",
+    children: [
+      {
+        title: "Báo cáo tổng quan",
+        key: "report-overview",
+        path: PATHS.REPORTS.OVER_VIEW,
+        type: "item",
+      },
+    ],
+  },
 ];
 
 const STUDENTS_MENU_LIST: MenuItemType[] = [

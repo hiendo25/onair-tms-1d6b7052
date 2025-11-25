@@ -159,7 +159,6 @@ async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
 
 const EmployeeImportSchema = EmployeeFormSchema.partial({
   manager_id: true,
-  employee_type: true,
   position_id: true,
   employee_code: true,
   branch: true,
@@ -171,6 +170,7 @@ const EmployeeImportSchema = EmployeeFormSchema.partial({
   full_name: true,
   gender: true,
   department: true,
+  employee_type: true,
 });
 
 function validateParsedData(data: any[]): ValidationResult {
@@ -253,7 +253,7 @@ function validateParsedData(data: any[]): ValidationResult {
         department: String(row.department).trim(),
         branch: row.branch ? String(row.branch).trim() : undefined,
         start_date: row.start_date ? String(row.start_date).trim() : undefined,
-        employee_type: row.employee_type ? String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"] : undefined,
+        employee_type: String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"],
       };
       validRecords.push(validRecord);
       if (index < 3) {
