@@ -191,10 +191,7 @@ export default function PlanForm({
 
   const isStepAccessible = (stepId: number) => {
     if (stepId === 1) return true;
-    // Step 5 (Gán môn học) is only accessible in edit mode
-    if (stepId === 5) {
-      return mode === "edit" && completedSteps.includes(stepId - 1);
-    }
+    // Step 5 (Gán môn học) is now accessible in both create and edit mode
     return completedSteps.includes(stepId - 1);
   };
 
@@ -233,7 +230,13 @@ export default function PlanForm({
             errors={errors}
             onBack={handleBack}
             onSubmit={handleSubmit(onSubmit)}
-            onContinue={() => setCurrentStep(5)}
+            onContinue={() => {
+              // Mark Step 4 as completed before navigating to Step 5
+              if (!completedSteps.includes(4)) {
+                setCompletedSteps([...completedSteps, 4]);
+              }
+              setCurrentStep(5);
+            }}
             isLoading={isLoading}
             mode={mode}
           />
