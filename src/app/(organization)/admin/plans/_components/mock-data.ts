@@ -183,6 +183,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "2",
         name: "Quản lý dự án và Agile",
+        description: "Chương trình đào tạo cơ bản",
         startDate: "15/01/2026",
         endDate: "15/04/2026",
         topicsCount: 3,

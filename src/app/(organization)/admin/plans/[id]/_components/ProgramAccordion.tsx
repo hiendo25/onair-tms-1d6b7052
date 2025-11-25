@@ -29,12 +29,36 @@ export default function ProgramAccordion({
   // State to track which program descriptions are expanded
   const [expandedDescriptions, setExpandedDescriptions] = React.useState<Record<string, boolean>>({});
 
+  // State to track which descriptions are actually truncated
+  const [truncatedDescriptions, setTruncatedDescriptions] = React.useState<Record<string, boolean>>({});
+
+  // Refs to measure description elements
+  const descriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
+
   const toggleDescription = (programId: string) => {
     setExpandedDescriptions(prev => ({
       ...prev,
       [programId]: !prev[programId],
     }));
   };
+
+  // Check if description is truncated
+  React.useEffect(() => {
+    const newTruncatedState: Record<string, boolean> = {};
+
+    programs.forEach(program => {
+      if (program.description) {
+        const element = descriptionRefs.current[program.id];
+        if (element) {
+          // Compare scrollHeight with clientHeight to detect overflow
+          const isTruncated = element.scrollHeight > element.clientHeight;
+          newTruncatedState[program.id] = isTruncated;
+        }
+      }
+    });
+
+    setTruncatedDescriptions(newTruncatedState);
+  }, [programs]);
 
   return (
     <Card sx={{ mb: 3, bgcolor: "white" }}>
@@ -96,48 +120,82 @@ export default function ProgramAccordion({
                       <Box sx={{ mt: 1 }}>
                         <Typography
                           variant="body2"
-                          component="div"
                           sx={{
                             color: "text.primary",
                             fontSize: "0.875rem",
+                            display: "inline",
                           }}
                         >
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            sx={{
-                              color: "text.primary",
-                              fontSize: "0.875rem",
-                              display: isDescriptionExpanded ? "inline" : "-webkit-box",
-                              WebkitLineClamp: isDescriptionExpanded ? "unset" : 1,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                            }}
-                          >
-                            {program.description}
-                          </Typography>
-                          {" "}
-                          <Typography
-                            component="span"
-                            variant="body2"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleDescription(program.id);
-                            }}
-                            sx={{
-                              color: "primary.main",
-                              cursor: "pointer",
-                              fontSize: "0.875rem",
-                              fontWeight: 500,
-                              whiteSpace: "nowrap",
-                              "&:hover": {
-                                textDecoration: "underline",
-                              },
-                            }}
-                          >
-                            {isDescriptionExpanded ? "Thu gọn" : "Xem thêm"}
-                          </Typography>
+                          {isDescriptionExpanded ? (
+                            <>
+                              {program.description}{" "}
+                              {truncatedDescriptions[program.id] && (
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleDescription(program.id);
+                                  }}
+                                  sx={{
+                                    color: "primary.main",
+                                    cursor: "pointer",
+                                    fontSize: "0.875rem",
+                                    fontWeight: 500,
+                                    whiteSpace: "nowrap",
+                                    "&:hover": {
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                >
+                                  Thu gọn
+                                </Typography>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                ref={(el) => {
+                                  descriptionRefs.current[program.id] = el;
+                                }}
+                                sx={{
+                                  color: "text.primary",
+                                  fontSize: "0.875rem",
+                                  display: "-webkit-box",
+                                  WebkitLineClamp: 1,
+                                  WebkitBoxOrient: "vertical",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {program.description}
+                              </Typography>{" "}
+                              {truncatedDescriptions[program.id] && (
+                                <Typography
+                                  component="span"
+                                  variant="body2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleDescription(program.id);
+                                  }}
+                                  sx={{
+                                    color: "primary.main",
+                                    cursor: "pointer",
+                                    fontSize: "0.875rem",
+                                    fontWeight: 500,
+                                    whiteSpace: "nowrap",
+                                    "&:hover": {
+                                      textDecoration: "underline",
+                                    },
+                                  }}
+                                >
+                                  Xem thêm
+                                </Typography>
+                              )}
+                            </>
+                          )}
                         </Typography>
                       </Box>
                     )}
