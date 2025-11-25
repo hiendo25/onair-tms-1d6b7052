@@ -34,6 +34,7 @@ export interface Course {
 export interface Topic {
   id: string;
   title: string;
+  description?: string;
   coursesCount: number;
   courses: Course[];
 }
@@ -76,6 +77,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
           {
             id: "1",
             title: "Kỹ năng bán hàng B2B cơ bản",
+            description: "Chủ đề này tập trung vào việc xây dựng nền tảng kỹ năng bán hàng B2B cho đội ngũ, bao gồm kỹ năng giao tiếp hiệu quả, xây dựng mối quan hệ lâu dài với khách hàng doanh nghiệp, và các kỹ thuật thuyết phục chuyên nghiệp trong môi trường B2B.",
             coursesCount: 2,
             courses: [
               {
@@ -125,6 +127,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
           {
             id: "2",
             title: "Chiến lược Marketing B2B",
+            description: "Khóa học ngắn",
             coursesCount: 2,
             courses: [
               {
@@ -191,6 +194,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
           {
             id: "3",
             title: "Agile và Scrum cơ bản",
+            description: "Chủ đề này giới thiệu phương pháp Agile và Scrum Framework, giúp đội ngũ hiểu rõ các nguyên tắc cơ bản của phát triển phần mềm linh hoạt, vai trò trong Scrum team, và cách tổ chức các Sprint hiệu quả để tăng năng suất làm việc nhóm.",
             coursesCount: 2,
             courses: [
               {
@@ -247,6 +251,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
           {
             id: "4",
             title: "Quản lý rủi ro và chất lượng",
+            description: "Học cách nhận diện và quản lý rủi ro",
             coursesCount: 1,
             courses: [
               {

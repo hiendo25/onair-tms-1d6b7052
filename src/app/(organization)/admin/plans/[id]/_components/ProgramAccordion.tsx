@@ -35,10 +35,26 @@ export default function ProgramAccordion({
   // Refs to measure description elements
   const descriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
 
+  // State to track which topic descriptions are expanded
+  const [expandedTopicDescriptions, setExpandedTopicDescriptions] = React.useState<Record<string, boolean>>({});
+
+  // State to track which topic descriptions are actually truncated
+  const [truncatedTopicDescriptions, setTruncatedTopicDescriptions] = React.useState<Record<string, boolean>>({});
+
+  // Refs to measure topic description elements
+  const topicDescriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
+
   const toggleDescription = (programId: string) => {
     setExpandedDescriptions(prev => ({
       ...prev,
       [programId]: !prev[programId],
+    }));
+  };
+
+  const toggleTopicDescription = (topicId: string) => {
+    setExpandedTopicDescriptions(prev => ({
+      ...prev,
+      [topicId]: !prev[topicId],
     }));
   };
 
@@ -58,6 +74,28 @@ export default function ProgramAccordion({
     });
 
     setTruncatedDescriptions(newTruncatedState);
+  }, [programs]);
+
+  // Check if topic description is truncated
+  React.useEffect(() => {
+    const newTruncatedState: Record<string, boolean> = {};
+
+    programs.forEach(program => {
+      if (program.topics) {
+        program.topics.forEach(topic => {
+          if (topic.description) {
+            const element = topicDescriptionRefs.current[topic.id];
+            if (element) {
+              // Compare scrollHeight with clientHeight to detect overflow
+              const isTruncated = element.scrollHeight > element.clientHeight;
+              newTruncatedState[topic.id] = isTruncated;
+            }
+          }
+        });
+      }
+    });
+
+    setTruncatedTopicDescriptions(newTruncatedState);
   }, [programs]);
 
   return (
@@ -234,6 +272,91 @@ export default function ProgramAccordion({
                             {topic.title}
                           </Typography>
                         </Box>
+
+                        {/* Topic Description with Expand/Collapse */}
+                        {topic.description && (
+                          <Box sx={{ bgcolor: "grey.200", p: 1, mx: 2, mb: 1.5, borderRadius: 1 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "text.primary",
+                                fontSize: "0.875rem",
+                                display: "inline",
+                              }}
+                            >
+                              {expandedTopicDescriptions[topic.id] ? (
+                                <>
+                                  {topic.description}{" "}
+                                  {truncatedTopicDescriptions[topic.id] && (
+                                    <Typography
+                                      component="span"
+                                      variant="body2"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleTopicDescription(topic.id);
+                                      }}
+                                      sx={{
+                                        color: "primary.main",
+                                        cursor: "pointer",
+                                        fontSize: "0.875rem",
+                                        fontWeight: 500,
+                                        whiteSpace: "nowrap",
+                                        "&:hover": {
+                                          textDecoration: "underline",
+                                        },
+                                      }}
+                                    >
+                                      Thu gọn
+                                    </Typography>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  <Typography
+                                    component="span"
+                                    variant="body2"
+                                    ref={(el) => {
+                                      topicDescriptionRefs.current[topic.id] = el;
+                                    }}
+                                    sx={{
+                                      color: "text.primary",
+                                      fontSize: "0.875rem",
+                                      display: "-webkit-box",
+                                      WebkitLineClamp: 1,
+                                      WebkitBoxOrient: "vertical",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                  >
+                                    {topic.description}
+                                  </Typography>{" "}
+                                  {truncatedTopicDescriptions[topic.id] && (
+                                    <Typography
+                                      component="span"
+                                      variant="body2"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleTopicDescription(topic.id);
+                                      }}
+                                      sx={{
+                                        color: "primary.main",
+                                        cursor: "pointer",
+                                        fontSize: "0.875rem",
+                                        fontWeight: 500,
+                                        whiteSpace: "nowrap",
+                                        "&:hover": {
+                                          textDecoration: "underline",
+                                        },
+                                      }}
+                                    >
+                                      Xem thêm
+                                    </Typography>
+                                  )}
+                                </>
+                              )}
+                            </Typography>
+                          </Box>
+                        )}
 
                         {/* Courses within Topic - Level 2 (Indented 32px, no gray background) */}
                         <Stack spacing={0}>
