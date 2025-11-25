@@ -15,11 +15,7 @@ const ClassRoomHeader = ({ data, isAdminView }: ClassRoomHeaderProps) => {
   const mdDown = useResponsive("down", "md");
   return (
     <Box>
-      <Box
-        sx={{
-          background: "linear-gradient(180deg, #dfe9ff 37.72%, rgb(255 255 255 / 57%) 100%)",
-        }}
-      >
+      <Box>
         <Container component={Box} disableGutters={mdDown} position="relative">
           <Image
             src={data?.thumbnail_url}
@@ -52,7 +48,7 @@ const ClassRoomHeader = ({ data, isAdminView }: ClassRoomHeaderProps) => {
               </Typography>
               <ClassRoomDetailBox data={data} />
             </Stack>
-            <ClassRoomJoin data={data} isAdminView={isAdminView}/>
+            <ClassRoomJoin data={data} isAdminView={isAdminView} />
           </Stack>
         </Container>
       </Box>

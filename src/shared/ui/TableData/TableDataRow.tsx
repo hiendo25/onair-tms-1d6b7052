@@ -2,7 +2,9 @@ import { EventHandler, MouseEvent, MouseEventHandler, useCallback, useEffect, us
 import { TableCell, TableCellProps, TableRow } from "@mui/material";
 import { TableRowStyled } from "./table-row-styled";
 import { getClientInfo } from "./utils";
+
 type FieldKey<T> = keyof T | (string & {});
+
 export type TableDataColumn<T> = TableCellProps & {
   id: string;
   field: FieldKey<T>;
@@ -91,14 +93,21 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
   }, []);
 
   return (
-    <TableRowStyled className="table-data-row" hover={hoverRow} onClick={handleClickRow(row)}>
-      {showRowCount && <TableCell className="w-20">{indexRow + 1 + (page - 1) * pageSize}</TableCell>}
+    <TableRowStyled className="table-data-row h-14" hover={hoverRow} onClick={handleClickRow(row)}>
+      {showRowCount && (
+        <TableCell className="w-20" sx={{ padding: "8px 12px" }}>
+          {indexRow + 1 + (page - 1) * pageSize}
+        </TableCell>
+      )}
       {columns.map(({ headerName, field, renderCell, id, ...restProps }, _index) => (
         <TableCell
           ref={splitCellsRefs(restProps.fixed)}
           key={field.toString()}
           onClick={(evt) => handleClickCell(field, row, evt)}
           {...restProps}
+          sx={{
+            padding: "8px 12px",
+          }}
         >
           {renderCell
             ? renderCell(row[field], row)
@@ -107,7 +116,7 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
               typeof row[field] === "bigint" ||
               typeof row[field] === "boolean"
             ? row[field]
-            : ""}
+            : row[field]}
         </TableCell>
       ))}
     </TableRowStyled>

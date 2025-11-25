@@ -121,7 +121,7 @@ export default function ClassRoomJoin({ data, isAdminView }: ClassRoomJoinProps)
                 title: s.title,
                 start_at: s.start_at,
                 end_at: s.end_at,
-                is_online: s.is_online,
+                is_online: s.session_type !== "offline",
               })),
             } as any}
           />

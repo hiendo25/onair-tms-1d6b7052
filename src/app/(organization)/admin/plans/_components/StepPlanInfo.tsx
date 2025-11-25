@@ -1,11 +1,21 @@
 "use client";
 
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
-import { Control, FieldErrors } from "react-hook-form";
-import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { Autocomplete, Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
+import { Control, Controller, FieldErrors } from "react-hook-form";
+import { PlanFormSchema, Survey } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
+
+// Mock surveys data
+const MOCK_SURVEYS: Survey[] = [
+  { id: "1", title: "Khảo sát đầu khóa" },
+  { id: "2", title: "Khảo sát giữa khóa" },
+  { id: "3", title: "Khảo sát cuối khóa" },
+  { id: "4", title: "Khảo sát đánh giá giảng viên" },
+  { id: "5", title: "Khảo sát mức độ hài lòng" },
+  { id: "6", title: "Khảo sát nhu cầu đào tạo" },
+];
 
 interface StepPlanInfoProps {
   control: Control<PlanFormSchema>;
@@ -69,6 +79,35 @@ export default function StepPlanInfo({
             placeholder="VD: 50.000.000"
             type="number"
           />
+
+          {/* Survey Selection Field */}
+          <Box>
+            <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
+              Khảo sát
+            </Typography>
+            <Controller
+              name="info.survey"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <Autocomplete
+                  options={MOCK_SURVEYS}
+                  getOptionLabel={(option) => option.title}
+                  value={value || null}
+                  onChange={(_event, newValue) => {
+                    onChange(newValue);
+                  }}
+                  size="small"
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Chọn khảo sát"
+                    />
+                  )}
+                />
+              )}
+            />
+          </Box>
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
             <Button

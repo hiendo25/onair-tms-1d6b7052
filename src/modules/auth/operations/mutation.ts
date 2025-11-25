@@ -1,10 +1,6 @@
 import { useTMutation } from "@/lib";
 import { authRepository } from "@/repository";
-import {
-  AuthSignInWithGoogleOptions,
-  AuthSignInWithPasswordPayload,
-} from "@/repository/auth";
-import { tryCatch } from "@/utils/try-catch";
+import { AuthSignInWithGoogleOptions, AuthSignInWithPasswordPayload } from "@/repository/auth";
 export const useSignOutMutation = () => {
   return useTMutation({
     mutationFn: () => authRepository.authSignOut(),
@@ -19,8 +15,7 @@ export const useSignInWithPasswordMutation = () => {
 
 export const useSignInWithGoogleMutation = () => {
   return useTMutation({
-    mutationFn: (options: AuthSignInWithGoogleOptions) =>
-      authRepository.authSignInWithGoogle(options),
+    mutationFn: (options: AuthSignInWithGoogleOptions) => authRepository.authSignInWithGoogle(options),
   });
 };
 

@@ -3,11 +3,26 @@ import { FilePdfIcon } from "@/shared/assets/icons";
 import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 
 interface ClassRoomDocumentsProps {
-  data: GetClassRoomBySlugResponse["data"];
+  data: NonNullable<GetClassRoomBySlugResponse["data"]>;
 }
 
 const ClassRoomDocuments = ({ data }: ClassRoomDocumentsProps) => {
-  const documents = (data?.documents as any[]) || [];
+
+  if(data.resources.length === 0) {
+    return (
+      <Stack alignItems={"center"}>
+        <Typography variant="h5" fontWeight="bold" mb={3} color="#002880">
+          Tài liệu
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Chưa có tài liệu cho lớp học này.
+        </Typography>
+      </Stack>
+    );
+  }
+
+  const documents = data.resources;
+
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -16,11 +31,11 @@ const ClassRoomDocuments = ({ data }: ClassRoomDocumentsProps) => {
       </Typography>
       <Stack gap={2} direction="row" flexWrap="wrap">
         {documents.map((doc, index) => (
-          <div key={doc.url + index}>
+          <div key={doc.id + index}>
             <Card sx={{ padding: "20px" }}>
               <CardContent>
                 <a
-                  href={doc.url.startsWith("http") ? doc.url : `${process.env.NEXT_PUBLIC_STORAGE_URL}/${doc.url}`}
+                  href={doc.resource.path || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer w-full h-full"
@@ -36,7 +51,7 @@ const ClassRoomDocuments = ({ data }: ClassRoomDocumentsProps) => {
                     textOverflow={"ellipsis"}
                     fontWeight={600}
                   >
-                    {doc.name || `Tài liệu ${index + 1}`}
+                    {doc.resource.name || `Tài liệu ${index + 1}`}
                   </Typography>
                 </a>
               </CardContent>

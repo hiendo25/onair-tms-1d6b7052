@@ -220,14 +220,37 @@ const getClassRoomBySlug = async (slug: string) => {
           slug,
           description,
           room_type,
-          comunity_info,
           thumbnail_url,
-          documents,
           start_at,
           end_at,
           status,
           employee_id,
+          class_room_metadata(id, key, value, class_room_id),
+          class_rooms_resources(
+            id,
+            resource:resources(
+              id,
+              path,
+              size, 
+              kind, 
+              mime_type, 
+              name
+            )
+          ),
+          class_hash_tag(
+            id,
+            hash_tags(
+              id, name, slug, type
+            )
+          ),
+          class_room_field(
+            id,
+            categories(
+              id, name, slug
+            )
+          ),
           employees:class_room_employee(
+            id,
             employee:employees(
               id,
               employee_type,
@@ -253,9 +276,20 @@ const getClassRoomBySlug = async (slug: string) => {
               avatar
             )
           ),
-          organizations(
+          organization:organizations(
             id, 
             name
+          ),
+          resources:class_rooms_resources(
+            id,
+            resource:resources(
+              id,
+              path,
+              size, 
+              kind, 
+              mime_type, 
+              name
+            )
           ),
           sessions:class_sessions(
             id,
@@ -265,14 +299,24 @@ const getClassRoomBySlug = async (slug: string) => {
             end_at,
             class_room_id,
             location,
-            is_online,
             channel_provider,
             channel_info,
-            limit_person,
-            teachers:class_session_teacher(
+            priority,
+            session_type,
+            courses_period:class_sessions_courses_period(
               id,
-              employee:employees!class_session_teacher_teacher_id_fkey(
-                id,
+              course:courses(
+                id, 
+                title, 
+                slug,
+                sections_count:sections(count),
+                lessons_count:sections(
+                  lessons(count)
+                )
+              ),
+              start_at,
+              end_at,
+              teacher:employees(id,
                 employee_type,
                 employee_code,
                 profile:profiles(
@@ -284,6 +328,13 @@ const getClassRoomBySlug = async (slug: string) => {
                 )
               )
             ),
+            session_assignment:class_session_assignment(
+              id,
+              assignments(
+                id,
+                name
+              )
+            ),
             agendas:class_sessions_agendas(
               id,
               title,
@@ -292,6 +343,12 @@ const getClassRoomBySlug = async (slug: string) => {
               start_at,
               end_at,
               class_session_id
+            ),
+            metadata:class_session_metadata(
+              id,
+              class_session_id,
+              key,
+              value
             ),
             class_qr_codes(
               id,
@@ -305,6 +362,7 @@ const getClassRoomBySlug = async (slug: string) => {
       )
       .eq("slug", slug)
       .single();
+
     return { data, error };
   } catch (err: any) {
     throw new Error(err?.message ?? "Fetching ClassRoom Detail failed not found");

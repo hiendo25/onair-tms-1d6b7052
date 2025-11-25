@@ -136,6 +136,10 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
       [remove],
     );
 
+    const handleEditLesson: CourseLessonsProps["onLessonClick"] = (sectionIndex, lessonIndex) => {
+      onEditLesson?.({ sectionIndex, lessonIndex });
+    };
+
     useImperativeHandle(ref, () => ({
       appendSection: (title) => {
         const sectionData = initSectionFormData();
@@ -156,20 +160,20 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
     /**
      * update new index position for Editting Lesson after Drag Section
      */
-    useEffect(() => {
-      if (!editingSectionId) return;
+    // useEffect(() => {
+    //   if (!editingSectionId) return;
 
-      console.log("checking section...");
+    //   console.log("checking section...");
 
-      const newIndexSectionEditting = sections.findIndex((section) => section._sectionId === editingSectionId);
-      if (
-        newIndexSectionEditting !== -1 &&
-        !isUndefined(editingLesson) &&
-        newIndexSectionEditting !== editingLesson.sectionIndex
-      ) {
-        onEditLesson?.({ sectionIndex: newIndexSectionEditting, lessonIndex: editingLesson.lessonIndex });
-      }
-    });
+    //   const newIndexSectionEditting = sections.findIndex((section) => section._sectionId === editingSectionId);
+    //   if (
+    //     newIndexSectionEditting !== -1 &&
+    //     !isUndefined(editingLesson) &&
+    //     newIndexSectionEditting !== editingLesson.sectionIndex
+    //   ) {
+    //     onEditLesson?.({ sectionIndex: newIndexSectionEditting, lessonIndex: editingLesson.lessonIndex });
+    //   }
+    // });
     if (!sections.length) return <BoxEmptySection />;
 
     return (
@@ -194,10 +198,11 @@ const CourseSections = forwardRef<CourseSectionsRef, CourseSectionsProps>(
                     sectionIndex={_indexSection}
                     editingLessonIndex={editingLesson?.lessonIndex}
                     editingSectionIndex={editingLesson?.sectionIndex}
-                    onLessonClick={(sectionIndex, lessonIndex) => {
-                      setEditingSectionId(section._sectionId);
-                      onEditLesson?.({ sectionIndex, lessonIndex });
-                    }}
+                    // onLessonClick={(sectionIndex, lessonIndex) => {
+                    //   // setEditingSectionId(section._sectionId);
+                    //   onEditLesson?.({ sectionIndex, lessonIndex });
+                    // }}
+                    onLessonClick={handleEditLesson}
                     hasLessonEditing={hasLessonEditing}
                     onLessonDragStart={onLessonDragStart}
                   />

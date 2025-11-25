@@ -20,15 +20,15 @@ export const PATHS = {
     IMPORT_EMPLOYEES: "/admin/employees/import",
   },
   ROLE: {
-    ROOT: "/roles",
-    ROLES_ID: (id: string = ":id") => `/roles/${id}`,
-    CREATE: "/roles/create",
+    ROOT: "/admin/roles",
+    ROLES_ID: (id: string = ":id") => `/admin/roles/${id}`,
+    CREATE: "/admin/roles/create",
   },
   CLASSROOMS: {
     ROOT: "/admin/class-room",
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
-    DETAIL_CLASSROOM: (slug: string) => `/class-room/detail/${slug}`,
+    DETAIL_CLASSROOM: (slug: string) => `/class-room/${slug}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
     LIST_CLASSROOM: "/admin/class-room/list",
   },
@@ -41,6 +41,7 @@ export const PATHS = {
   },
   STUDENTS: {
     ROOT: "/my-class",
+    LEARNINNG: (courseId : string) => `/my-class/learning/${courseId}`,
   },
   ASSIGNMENTS: {
     ROOT: "/admin/assignments",
