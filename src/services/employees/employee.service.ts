@@ -73,7 +73,7 @@ async function createEmployeeCore(
       employee_order: employeeOrder,
       start_date: payload.start_date,
       position_id: payload.position_id || null,
-      employee_type: payload.employee_type || null,
+      employee_type: payload.employee_type,
       organization_id: organizationId,
       status: "active",
     });
@@ -183,7 +183,7 @@ async function updateEmployeeWithRelations(
     employee_code: payload.employee_code,
     start_date: payload.start_date,
     position_id: payload.position_id || null,
-    employee_type: payload.employee_type || null,
+    employee_type: payload.employee_type,
   });
 
   await profilesRepository.updateProfileByEmployeeId(payload.id, {
