@@ -93,12 +93,11 @@ export default function ProgramAccordion({
                             px: 0,
                             py: 1.5,
                             pl: 2,
-                            borderTop: topicIndex === 0 ? "none" : "1px solid #e0e0e0",
                           }}
                         >
-                          {/* Topic Chip */}
+                          {/* Topic Chip - Dynamically generated name */}
                           <Chip
-                            label={topic.name}
+                            label={`Chủ đề ${topicIndex + 1}`}
                             size="small"
                             variant="filled"
                             sx={{
