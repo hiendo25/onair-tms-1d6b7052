@@ -26,6 +26,16 @@ export default function ProgramAccordion({
   programs,
   programsCount,
 }: ProgramAccordionProps) {
+  // State to track which program descriptions are expanded
+  const [expandedDescriptions, setExpandedDescriptions] = React.useState<Record<string, boolean>>({});
+
+  const toggleDescription = (programId: string) => {
+    setExpandedDescriptions(prev => ({
+      ...prev,
+      [programId]: !prev[programId],
+    }));
+  };
+
   return (
     <Card sx={{ mb: 3, bgcolor: "white" }}>
       <CardContent>
@@ -37,48 +47,102 @@ export default function ProgramAccordion({
         </Typography>
 
         <Stack spacing={2}>
-          {programs.map((program, index) => (
-            <Accordion
-              key={program.id}
-              sx={{
-                bgcolor: "rgba(0, 80, 255, 0.12)",
-                "&:before": { display: "none" },
-                boxShadow: "none",
-                border: "1px solid rgba(145, 158, 171, 0.40)",
-                borderRadius: "8px",
-              }}
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon sx={{ color: "#000" }} />}
+          {programs.map((program, index) => {
+            const isDescriptionExpanded = expandedDescriptions[program.id] || false;
+
+            return (
+              <Accordion
+                key={program.id}
                 sx={{
-                  minHeight: "auto",
-                  "&:hover": {
-                    bgcolor: "rgba(0, 80, 255, 0.12)",
-                  },
-                  "& .MuiAccordionSummary-content": {
-                    my: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                  },
+                  bgcolor: "rgba(0, 80, 255, 0.12)",
+                  "&:before": { display: "none" },
+                  boxShadow: "none",
+                  border: "1px solid rgba(145, 158, 171, 0.40)",
+                  borderRadius: "8px",
                 }}
               >
-                <Box>
-                  <Chip
-                    label={`Chương trình ${index + 1}`}
-                    size="small"
-                    color="primary"
-                  />
-                </Box>
-                <Box>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#000", mb: 0.5 }}>
-                    {program.name}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                    {program.startDate} - {program.endDate}
-                  </Typography>
-                </Box>
-              </AccordionSummary>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon sx={{ color: "#000" }} />}
+                  sx={{
+                    minHeight: "auto",
+                    "&:hover": {
+                      bgcolor: "rgba(0, 80, 255, 0.12)",
+                    },
+                    "& .MuiAccordionSummary-content": {
+                      my: 2,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1,
+                    },
+                  }}
+                >
+                  <Box>
+                    <Chip
+                      label={`Chương trình ${index + 1}`}
+                      size="small"
+                      color="primary"
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#000", mb: 0.5 }}>
+                      {program.name}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
+                      {program.startDate} - {program.endDate}
+                    </Typography>
+
+                    {/* Program Description with Expand/Collapse */}
+                    {program.description && (
+                      <Box sx={{ mt: 1 }}>
+                        <Typography
+                          variant="body2"
+                          component="div"
+                          sx={{
+                            color: "text.primary",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{
+                              color: "text.primary",
+                              fontSize: "0.875rem",
+                              display: isDescriptionExpanded ? "inline" : "-webkit-box",
+                              WebkitLineClamp: isDescriptionExpanded ? "unset" : 1,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                            }}
+                          >
+                            {program.description}
+                          </Typography>
+                          {" "}
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleDescription(program.id);
+                            }}
+                            sx={{
+                              color: "primary.main",
+                              cursor: "pointer",
+                              fontSize: "0.875rem",
+                              fontWeight: 500,
+                              whiteSpace: "nowrap",
+                              "&:hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                          >
+                            {isDescriptionExpanded ? "Thu gọn" : "Xem thêm"}
+                          </Typography>
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </AccordionSummary>
               <AccordionDetails sx={{ bgcolor: "white", borderTop: "1px solid #e0e0e0", p: 0, borderRadius: 1, mt: 0.5 }}>
                 {program.topics && program.topics.length > 0 ? (
                   <Stack spacing={0}>
@@ -200,7 +264,8 @@ export default function ProgramAccordion({
                 )}
               </AccordionDetails>
             </Accordion>
-          ))}
+            );
+          })}
         </Stack>
       </CardContent>
     </Card>

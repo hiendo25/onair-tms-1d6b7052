@@ -68,7 +68,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "1",
         name: "Cách Sales B2b hiệu quả cho phòng MKT",
-        description: "Chương trình đào tạo toàn diện cho khối B2B",
+        description: "Chương trình \"Kế hoạch đào tạo 2026 cho khối B2B Edtech\" được xây dựng nhằm giúp đội ngũ nắm vững định hướng chiến lược đào tạo trong năm 2026, tập trung vào phát triển kỹ năng bán hàng B2B và marketing hiệu quả. Chương trình bao gồm các khóa học về kỹ năng giao tiếp, xây dựng mối quan hệ khách hàng, và chiến lược marketing số cho thị trường B2B.",
         startDate: "22/12/2025",
         endDate: "22/12/2026",
         topicsCount: 2,
@@ -183,7 +183,6 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "2",
         name: "Quản lý dự án và Agile",
-        description: "Chương trình đào tạo kỹ năng quản lý dự án hiện đại",
         startDate: "15/01/2026",
         endDate: "15/04/2026",
         topicsCount: 3,
@@ -319,7 +318,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "3",
         name: "Chuyển đổi số và AI trong doanh nghiệp",
-        description: "Chương trình đào tạo về chuyển đổi số và ứng dụng AI",
+        description: "Chương trình tập trung vào việc ứng dụng công nghệ AI và chuyển đổi số trong hoạt động kinh doanh, giúp doanh nghiệp tối ưu hóa quy trình và nâng cao hiệu quả làm việc. Các khóa học bao gồm nền tảng chuyển đổi số, công cụ AI thực tế, và cách triển khai Machine Learning trong các dự án thực tế.",
         startDate: "01/03/2026",
         endDate: "31/05/2026",
         topicsCount: 2,
@@ -451,6 +450,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "1",
         name: "AI Fundamentals",
+        description: "Chương trình giới thiệu nền tảng về trí tuệ nhân tạo, bao gồm các khái niệm cơ bản, ứng dụng thực tế và xu hướng phát triển của AI trong doanh nghiệp. Khóa học phù hợp cho mọi đối tượng nhân viên muốn hiểu rõ hơn về công nghệ AI và cách áp dụng vào công việc hàng ngày.",
         startDate: "15/10/2025",
         endDate: "17/10/2025",
         topicsCount: 1,
@@ -570,7 +570,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "1",
         name: "Kỹ năng lãnh đạo hiện đại",
-        description: "Chương trình đào tạo lãnh đạo cho quản lý cấp trung",
+        description: "Chương trình đào tạo toàn diện về kỹ năng lãnh đạo hiện đại, tập trung vào phát triển tư duy chiến lược và khả năng quản lý đội nhóm hiệu quả. Các khóa học giúp lãnh đạo nắm vững các kỹ năng ra quyết định, coaching, mentoring và xây dựng văn hóa làm việc tích cực trong tổ chức.",
         startDate: "01/01/2026",
         endDate: "28/02/2026",
         topicsCount: 2,
@@ -692,7 +692,6 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "2",
         name: "Quản lý hiệu suất và KPI",
-        description: "Đào tạo về đo lường và quản lý hiệu suất làm việc",
         startDate: "01/03/2026",
         endDate: "30/04/2026",
         topicsCount: 3,
@@ -835,7 +834,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "3",
         name: "Giao tiếp và thuyết trình cho lãnh đạo",
-        description: "Nâng cao kỹ năng giao tiếp và thuyết trình",
+        description: "Chương trình phát triển kỹ năng giao tiếp chuyên nghiệp và thuyết trình hiệu quả cho các vị trí lãnh đạo, bao gồm kỹ năng đàm phán, thương lượng và storytelling trong kinh doanh. Khóa học giúp lãnh đạo tự tin trình bày ý tưởng, thuyết phục đối tác và truyền cảm hứng cho đội nhóm.",
         startDate: "01/05/2026",
         endDate: "30/06/2026",
         topicsCount: 2,
@@ -967,7 +966,6 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "1",
         name: "Hội nhập và văn hóa doanh nghiệp",
-        description: "Giúp nhân viên mới hiểu và hòa nhập văn hóa công ty",
         startDate: "01/02/2026",
         endDate: "28/02/2026",
         topicsCount: 2,
@@ -1082,7 +1080,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "2",
         name: "Kỹ năng chuyên môn cơ bản",
-        description: "Trang bị kỹ năng làm việc thiết yếu",
+        description: "Chương trình trang bị các kỹ năng làm việc thiết yếu cho nhân viên mới, bao gồm quản lý thời gian, giao tiếp chuyên nghiệp và tư duy giải quyết vấn đề. Các khóa học giúp nhân viên nhanh chóng thích nghi với môi trường làm việc và nâng cao hiệu suất công việc ngay từ những ngày đầu.",
         startDate: "01/03/2026",
         endDate: "31/05/2026",
         topicsCount: 3,
@@ -1270,7 +1268,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "1",
         name: "Kỹ năng số cơ bản",
-        description: "Trang bị kỹ năng công nghệ thiết yếu cho mọi nhân viên",
+        description: "Chương trình đào tạo kỹ năng số thiết yếu cho toàn bộ nhân viên, tập trung vào việc sử dụng thành thạo các công cụ Microsoft Office và các nền tảng cộng tác trực tuyến. Khóa học giúp nhân viên nâng cao năng suất làm việc thông qua việc ứng dụng công nghệ vào công việc hàng ngày.",
         startDate: "01/03/2026",
         endDate: "30/04/2026",
         topicsCount: 2,
@@ -1392,7 +1390,6 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "2",
         name: "Phân tích dữ liệu và Business Intelligence",
-        description: "Đào tạo kỹ năng phân tích dữ liệu cho các vị trí quản lý",
         startDate: "01/05/2026",
         endDate: "30/06/2026",
         topicsCount: 2,
@@ -1514,7 +1511,7 @@ export const MOCK_PLAN_DETAILS: Record<string, PlanDetail> = {
       {
         id: "3",
         name: "An ninh mạng và bảo mật thông tin",
-        description: "Đào tạo nhận thức về an ninh mạng cho toàn bộ nhân viên",
+        description: "Chương trình nâng cao nhận thức về an ninh mạng và bảo mật thông tin cho toàn bộ nhân viên, giúp phòng ngừa các mối đe dọa an ninh mạng và bảo vệ dữ liệu doanh nghiệp. Các khóa học bao gồm nhận thức về tấn công mạng, GDPR, và các phương pháp quản lý mật khẩu an toàn.",
         startDate: "01/07/2026",
         endDate: "31/08/2026",
         topicsCount: 2,
