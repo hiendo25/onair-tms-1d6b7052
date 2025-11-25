@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Metadata } from "next";
-import { Grid, Stack } from "@mui/material";
+import { Box, Grid, Stack } from "@mui/material";
 
 import DashboardCalendarSidebar from "./DashboardCalendarSidebar";
 import SummaryCardsGrid from "./SummaryCardsGrid";
@@ -20,14 +20,26 @@ export const metadata: Metadata = {
 const DashboardSection = () => (
   <Stack spacing={3}>
     <SummaryCardsGrid />
-    <Grid container spacing={2} columns={12}>
-      <Grid size={{ xs: 12, lg: 9 }}>
+
+    <Stack
+      direction={{ xs: "column", lg: "row" }}
+      spacing={2}
+      alignItems="stretch"
+    >
+      <Box sx={{ flex: { xs: "1 1 100%", lg: "1 1 70%" }, minWidth: 0 }}>
         <CourseTable />
-      </Grid>
-      <Grid size={{ xs: 12, lg: 3 }}>
+      </Box>
+      <Box
+        sx={{
+          flex: { xs: "1 1 100%", lg: "0 0 30%" },
+          minWidth: { lg: 320 },
+          maxWidth: { lg: 380 },
+          width: "100%",
+        }}
+      >
         <DashboardCalendarSidebar />
-      </Grid>
-    </Grid>
+      </Box>
+    </Stack>
 
     <Grid container spacing={2} columns={12}>
       <Grid size={{ xs: 12, lg: 6 }}>

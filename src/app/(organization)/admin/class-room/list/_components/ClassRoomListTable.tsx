@@ -244,10 +244,6 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                     </TableCell>
                     <TableCell align="left">
                       <Stack direction="column" alignItems="flex-start">
-                        <Chip
-                          label={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)}
-                          color={room?.room_type === "single" ? "warning" : "primary"}
-                        />
                         <Tooltip title={room.title}>
                           <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
                             {room.title || "--"}
@@ -256,7 +252,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
-                      <ClassRoomType sessionType={room?.class_sessions?.[0]?.session_type} />
+                      <ClassRoomType sessionType={room?.class_sessions?.[0]?.session_type} roomType={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)} />
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" alignItems="center" spacing={0.5}>
