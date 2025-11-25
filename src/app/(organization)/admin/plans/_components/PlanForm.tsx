@@ -89,6 +89,12 @@ export default function PlanForm({
       completed.push(4);
     }
 
+    // Step 5: In edit mode, if we have data for steps 1-4, mark step 5 as completed too
+    // Step 5 has no validation requirements, so it's automatically completed in edit mode
+    if (completed.includes(1) && completed.includes(2) && completed.includes(3) && completed.includes(4)) {
+      completed.push(5);
+    }
+
     return completed;
   };
 
@@ -179,6 +185,12 @@ export default function PlanForm({
     }
 
     setCurrentStep(stepId);
+
+    // Mark Step 5 as completed when navigating to it in edit mode
+    // Step 5 has no validation requirements, so it's automatically completed
+    if (mode === "edit" && stepId === 5 && !completedSteps.includes(5)) {
+      setCompletedSteps([...completedSteps, 5]);
+    }
 
     if (completedSteps.includes(stepId)) {
       const stepFieldName = getStepFieldName(stepId);
