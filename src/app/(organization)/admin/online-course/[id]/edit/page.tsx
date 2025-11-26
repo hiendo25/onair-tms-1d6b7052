@@ -25,7 +25,6 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
   const { id: courseId } = await params;
   const courseDetail = await coursesRepository.getCourseById(courseId);
 
-  console.log(courseDetail);
   if (courseDetail.error || !courseDetail.data) {
     notFound();
   }
@@ -34,9 +33,9 @@ export default async function EditCoursePage({ params }: EditCoursePageProps) {
     <PageContainer
       title={courseDetail.data.title || "Sửa môn học"}
       breadcrumbs={[
-        { title: "Quản lý môn học", path: PATHS.CLASSROOMS.ROOT },
-        { title: "sửa môn học" },
+        { title: "Quản lý môn học", path: PATHS.COURSES.LIST },
         { title: courseDetail.data.title || "" },
+        { title: "sửa" },
       ]}
     >
       <UpdateCourseForm data={courseDetail.data} />

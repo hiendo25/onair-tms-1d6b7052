@@ -19,7 +19,7 @@ const CreateCourseForm = () => {
   const courseFormRef = useRef<ManageCourseFormRef>(null);
   const handleCancel = () => {
     startTransition(() => {
-      router.push(PATHS.CLASSROOMS.ROOT);
+      router.push(PATHS.COURSES.LIST);
     });
   };
 
@@ -30,7 +30,7 @@ const CreateCourseForm = () => {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
             enqueueSnackbar("Tạo môn học thành công", { variant: "success" });
-            router.push(PATHS.CLASSROOMS.ROOT);
+            router.push(PATHS.COURSES.LIST);
           });
         },
       },

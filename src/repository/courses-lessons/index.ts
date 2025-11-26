@@ -8,7 +8,12 @@ import {
 
 const createLessons = async (payload: CreateLessonPayload[]) => {
   try {
-    return await supabase.from("lessons").insert(payload).select("*");
+    const { data, error } = await supabase.from("lessons").insert(payload).select("*");
+
+    if (error) {
+      throw new Error(`Create Lessons failed.`);
+    }
+    return data;
   } catch (err: any) {
     console.log(err);
     throw new Error(err?.message);
@@ -57,7 +62,13 @@ const updateSection = async (payload: UpdateLessonPayload) => {
 
 const bulkCreatePivotLessonsWithResources = async (payload: CreatePivotLessonsWithResourcesPayload[]) => {
   try {
-    return await supabase.from("lessons_resources").insert(payload).select("*");
+    const { data, error } = await supabase.from("lessons_resources").insert(payload).select("*");
+
+    if (error) {
+      console.error(payload);
+      throw new Error("Sync Lessons with Resouces Failed");
+    }
+    return data;
   } catch (err: any) {
     console.log(err);
     throw new Error(err?.message);

@@ -41,7 +41,7 @@ export const PATHS = {
   },
   STUDENTS: {
     ROOT: "/my-class",
-    LEARNINNG: (courseId : string) => `/my-class/learning/${courseId}`,
+    LEARNINNG: (courseId: string) => `/my-class/learning/${courseId}`,
   },
   ASSIGNMENTS: {
     ROOT: "/admin/assignments",
@@ -59,8 +59,8 @@ export const PATHS = {
     RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/my-assignments/${id}/result/${employeeId}`,
   },
   REPORTS: {
-    ROOT: "/report",
-    OVER_VIEW: "/report/overview",
+    ROOT: "/admin/report",
+    OVER_VIEW: "/admin/report/overview",
   },
   SURVEYS: {
     ROOT: "/admin/surveys",

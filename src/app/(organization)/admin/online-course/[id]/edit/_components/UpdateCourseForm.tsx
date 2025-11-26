@@ -93,8 +93,8 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
-            enqueueSnackbar("Cập nhật lớp học thành công.", { variant: "success" });
-            router.push(PATHS.CLASSROOMS.ROOT);
+            enqueueSnackbar("Cập nhật môn học thành công.", { variant: "success" });
+            router.push(PATHS.COURSES.LIST);
           });
         },
       },
