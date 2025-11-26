@@ -173,7 +173,7 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
           })}
         >
           <Typography sx={{ flex: 1 }} variant="h6" component="div">
-            Chỉ định giảng viên phụ trách
+            Chọn môn học
           </Typography>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close" className="-mr-3">
             <CloseIcon />
