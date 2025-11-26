@@ -21,7 +21,18 @@ const createCourse = async (payload: CreateCoursePayload) => {
 const updateCourse = async (payload: UpdateCoursePayload) => {
   try {
     const { id: courseId, ...restPayload } = payload;
-    return await supabase.from("courses").update(restPayload).match({ id: courseId }).select("*").single();
+    const { data, error } = await supabase
+      .from("courses")
+      .update(restPayload)
+      .match({ id: courseId })
+      .select("*")
+      .single();
+
+    if (error) {
+      console.error(error);
+      throw new Error(error.message);
+    }
+    return data;
   } catch (err: any) {
     console.log(err);
     throw new Error(err?.message);
@@ -30,16 +41,24 @@ const updateCourse = async (payload: UpdateCoursePayload) => {
 
 const createPivotCoursesWithCategories = async (payload: CreatePivotCoursesWithCategoriesPayload[]) => {
   try {
-    return await supabase.from("courses_categories").insert(payload).select("*");
+    const { data, error } = await supabase.from("courses_categories").insert(payload).select("*");
+    if (error) {
+      throw new Error("Create pivot courses with categories failed.");
+    }
+    return data;
   } catch (err: any) {
     console.error("Unexpected error:", err);
-    throw new Error(err?.message ?? "Unknown error craete Class Room");
+    throw new Error(err?.message ?? "Unknown error craete course categories");
   }
 };
 
 const deletePivotCoursesWithCategories = async (ids: number[]) => {
   try {
-    return await supabase.from("courses_categories").delete().in("id", ids).select("*");
+    const { data, error } = await supabase.from("courses_categories").delete().in("id", ids).select("*");
+    if (error) {
+      throw new Error(`Delete pivot courses with categories failed.`);
+    }
+    return data;
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err?.message ?? "Unknown error Delete Pivot Courses With Categories");
