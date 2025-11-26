@@ -8,7 +8,15 @@ export type EmployeeQueryParams = {
   organizationUnitIds?: string[];
 };
 
-const getStudents = async (queryParams?: EmployeeQueryParams) => {
+export type GetStudentsQueryParams = {
+  page?: number;
+  pageSize?: number;
+  excludes?: string[];
+  search?: string;
+  organizationUnitIds?: string[];
+};
+
+const getStudents = async (queryParams?: GetStudentsQueryParams) => {
   const { page = 1, pageSize = 20, excludes, search, organizationUnitIds } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -66,5 +74,5 @@ const getStudents = async (queryParams?: EmployeeQueryParams) => {
     statusText,
   };
 };
-
+export type GetStudentsResponse = Awaited<ReturnType<typeof getStudents>>;
 export { getStudents };

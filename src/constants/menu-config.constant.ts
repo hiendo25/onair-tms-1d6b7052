@@ -11,7 +11,8 @@ import {
   BarChart10Icon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import StickyNote2OutlinedIcon from '@mui/icons-material/StickyNote2Outlined'; import React from "react";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import React from "react";
 import { PATHS } from "./path.contstants";
 
 const ADMIN_MENU_LIST: MenuItemType[] = [
@@ -130,7 +131,22 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
         path: PATHS.SURVEYS.ROOT,
       },
     ],
-  }
+  },
+  {
+    title: "Báo cáo",
+    icon: React.createElement(BarChart10Icon),
+    key: "manage-report",
+    path: PATHS.REPORTS.ROOT,
+    type: "item",
+    children: [
+      {
+        title: "Báo cáo tổng quan",
+        key: "report-overview",
+        path: PATHS.REPORTS.OVER_VIEW,
+        type: "item",
+      },
+    ],
+  },
 ];
 
 const STUDENTS_MENU_LIST: MenuItemType[] = [

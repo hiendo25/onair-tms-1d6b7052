@@ -13,9 +13,9 @@ import PageContainer from "@/shared/ui/PageContainer";
 
 const data: StatCardProps[] = [
   {
-    title: "Users",
-    value: "14k",
-    interval: "Last 30 days",
+    title: "Học viên đang hoạt động",
+    value: "4800/8600",
+    interval: "30 ngày gần nhất",
     trend: "up",
     data: [
       200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340, 320, 360, 340, 380, 360, 400, 380, 420, 400, 640, 340,
@@ -23,7 +23,7 @@ const data: StatCardProps[] = [
     ],
   },
   {
-    title: "Conversions",
+    title: "Tỉ lệ lớp học hoàn thành",
     value: "325",
     interval: "Last 30 days",
     trend: "down",
@@ -58,13 +58,13 @@ export default function OverViewReportPage() {
       <PureClient>
         <Grid container spacing={2} columns={12} marginBottom={2}>
           {data.map((card, index) => (
-            <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
+            <Grid key={index} size={{ xs: 12, sm: 6, lg: 4 }}>
               <StatCard {...card} />
             </Grid>
           ))}
-          <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+          {/* <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
             <HighlightedCard />
-          </Grid>
+          </Grid> */}
           <Grid size={{ xs: 12, md: 6 }}>
             <SessionsChart />
           </Grid>
@@ -75,7 +75,7 @@ export default function OverViewReportPage() {
       </PureClient>
 
       <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
-        Details
+        Danh sách học viên hoạt động
       </Typography>
       <PureClient>
         <Grid container spacing={2} columns={12}>
