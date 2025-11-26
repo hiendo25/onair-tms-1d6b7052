@@ -22,7 +22,7 @@ export default function CreateCoursePage({ searchParams }: CreateCoursePageProps
   return (
     <PageContainer
       title="Tạo môn học"
-      breadcrumbs={[{ title: "Quản lý lớp học", path: PATHS.CLASSROOMS.ROOT }, { title: "Tạo môn học" }]}
+      breadcrumbs={[{ title: "Quản lý môn học", path: PATHS.COURSES.LIST }, { title: "Tạo môn học" }]}
     >
       <CreateCourseForm />
     </PageContainer>

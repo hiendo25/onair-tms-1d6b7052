@@ -64,7 +64,7 @@ const bulkCreatePivotLessonsWithResources = async (payload: CreatePivotLessonsWi
   try {
     const { data, error } = await supabase.from("lessons_resources").insert(payload).select("*");
 
-    if (!error) {
+    if (error) {
       console.error(payload);
       throw new Error("Sync Lessons with Resouces Failed");
     }
