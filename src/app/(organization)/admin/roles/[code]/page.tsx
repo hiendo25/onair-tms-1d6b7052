@@ -1,4 +1,5 @@
 "use client";
+import { PATHS } from "@/constants/path.contstants";
 import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
 import { RoleFormContainer } from "@/modules/roles/components/RoleForm";
 import { useUpdateRolePermissions } from "@/modules/roles/operations/mutation";
@@ -17,7 +18,7 @@ const EditRolePage = () => {
       <PageContainer title="Lỗi">
         <Alert severity="error">Không tìm thấy mã vai trò. Vui lòng thử lại.</Alert>
         <Box sx={{ mt: 2 }} alignSelf={"center"}>
-          <Button variant="contained" onClick={() => router.push("/roles")}>
+          <Button variant="contained" onClick={() => router.push(PATHS.ROLE.ROOT)}>
             Quay về danh sách vai trò
           </Button>
         </Box>
@@ -39,7 +40,7 @@ const EditRolePage = () => {
       <PageContainer title="Lỗi">
         <Alert severity="error">Không tìm thấy dữ liệu vai trò. Vui lòng thử lại.</Alert>
         <Box sx={{ mt: 2 }} alignSelf={"center"}>
-          <Button variant="contained" onClick={() => router.push("/roles")}>
+          <Button variant="contained" onClick={() => router.push(PATHS.ROLE.ROOT)}>
             Quay về danh sách vai trò
           </Button>
         </Box>
@@ -57,7 +58,7 @@ const EditRolePage = () => {
       },
       {
         onSuccess: (data) => {
-          router.push("/roles");
+          router.push(PATHS.ROLE.ROOT);
         },
       },
     );

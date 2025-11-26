@@ -37,6 +37,7 @@ import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus
 import ClassRoomType from "./ClassRoomType";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+import Link from "next/link";
 
 interface ClassRoomListTableProps {
   classRooms: ClassRoomPriorityDto[];
@@ -82,8 +83,8 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   };
 
   const handleEditClassRoom = (isOnline: boolean, classRoomId: string) => {
-    return router.push(`/admin/class-room/${classRoomId}/edit`)
-  }
+    return router.push(`/admin/class-room/${classRoomId}/edit`);
+  };
 
   const navigateToSession = useCallback(
     (sessionId?: string, slug?: string | null) => {
@@ -121,13 +122,16 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
     [navigateToSession, selectedClassRoom],
   );
 
-  const handleEnterClassRoom = useCallback((room: ClassRoomPriorityDto) => {
-    if (room.class_sessions[0]?.session_type === "online") {
-      return router.push(PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string));
-    }
-    setSelectedClassRoom(room);
-    setDialogOpen(true);
-  }, [router]);
+  const handleEnterClassRoom = useCallback(
+    (room: ClassRoomPriorityDto) => {
+      if (room.class_sessions[0]?.session_type === "online") {
+        return router.push(PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string));
+      }
+      setSelectedClassRoom(room);
+      setDialogOpen(true);
+    },
+    [router],
+  );
 
   const handleOpenQRDialog = useCallback((room: ClassRoomPriorityDto) => {
     setSelectedQRClassRoom(room);
@@ -142,7 +146,9 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
   const selectedSessions = selectedClassRoom?.class_sessions ?? [];
   const selectedThumbnail = selectedClassRoom?.thumbnail_url;
   const selectedTitle = selectedClassRoom?.title;
-  const selectedIsOnline = selectedClassRoom?.class_sessions?.[0]?.session_type === "online" || selectedClassRoom?.class_sessions?.[0]?.session_type === "live";
+  const selectedIsOnline =
+    selectedClassRoom?.class_sessions?.[0]?.session_type === "online" ||
+    selectedClassRoom?.class_sessions?.[0]?.session_type === "live";
   const selectedActionLabel = selectedIsOnline === false ? "Quét mã QR" : undefined;
 
   return (
@@ -227,7 +233,9 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                 });
 
                 const teachers = Array.from(teacherMap.values());
-                const isOnline = room?.class_sessions?.[0]?.session_type === "online" || room?.class_sessions?.[0]?.session_type === "live";
+                const isOnline =
+                  room?.class_sessions?.[0]?.session_type === "online" ||
+                  room?.class_sessions?.[0]?.session_type === "live";
 
                 return (
                   <TableRow
@@ -308,12 +316,13 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                               <MoreVertIcon />
                             </IconButton>
                             <Menu {...bindMenu(popupState)}>
-                              <MenuItem
-                                onClick={() => {
-                                  router.push(PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string));
-                                }}
-                              >
-                                Xem chi tiết lớp học
+                              <MenuItem>
+                                <Link
+                                  href={PATHS.CLASSROOMS.DETAIL_CLASSROOM(room.slug as string)}
+                                  style={{ textDecoration: "none", color: "inherit" }}
+                                >
+                                  Xem chi tiết lớp học
+                                </Link>
                               </MenuItem>
                               <MenuItem onClick={() => handleEnterClassRoom(room)} disabled={!isOnline!}>
                                 Vào lớp học
@@ -385,11 +394,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
       />
 
       {selectedQRClassRoom && (
-        <QRCodeViewDialog
-          open={qrDialogOpen}
-          onClose={handleCloseQRDialog}
-          classRoom={selectedQRClassRoom}
-        />
+        <QRCodeViewDialog open={qrDialogOpen} onClose={handleCloseQRDialog} classRoom={selectedQRClassRoom} />
       )}
     </>
   );

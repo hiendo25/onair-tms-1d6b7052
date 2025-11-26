@@ -21,9 +21,7 @@ interface ClassRoomDetailSectionProps {
   data: NonNullable<GetClassRoomBySlugResponse["data"]>;
 }
 
-export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionProps) {
-  const router = useRouter();
-
+export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionProps) {
   const user = useUserOrganization((state) => state.data);
   const [showJoinHorizontal, setShowJoinHorizontal] = useState<boolean>(false);
 
@@ -35,7 +33,6 @@ export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionPro
 
     setTabValue(value);
   };
-
 
   const handleScroll = (e: Event) => {
     const scrollElement = document.querySelector(".main-layout__content");
@@ -88,12 +85,11 @@ export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionPro
   //   if (!canAccess) return window.history.length > 2 ? router.back() : router.push("/");
   // }, [data]);
 
-
   const classRoomData = data;
 
   const isAdminView =
     classRoomData.owner?.id === user.id || user.employeeType === "admin" || user.employeeType === "teacher";
-    
+
   return (
     <PageContainer
       title="Chi tiết lớp học"
@@ -102,9 +98,10 @@ export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionPro
         { title: classRoomData.title || "Chi tiết", path: `/class-room/${data.slug}` },
       ]}
     >
-      <Stack position="relative" pb={4}>
+      <Stack position="relative">
         <ClassRoomHeader data={classRoomData} isAdminView={isAdminView} />
         <ClassRoomSeries data={classRoomData} isAdminView={isAdminView} />
+        <ClassRoomSubjects data={data} />
         <Divider className={`${outOfMainJoinZoneClassName} invisible`} />
 
         {showJoinHorizontal && (
@@ -113,10 +110,8 @@ export default function ClassRoomDetailSection({data}: ClassRoomDetailSectionPro
           </Box>
         )}
 
-        <ClassRoomSubjects data={data}/>
-
         <Box sx={{ width: "100%", mt: 3 }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Box sx={{ borderBottom: 1, borderColor: "divider", pb: 4 }}>
             <Tabs
               value={tabValue}
               onChange={handleChangeTab}

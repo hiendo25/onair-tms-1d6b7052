@@ -174,10 +174,10 @@ const ClassRoomSerieCard = ({
           </Stack>
           <Box mt={2}>
             <JoinButton
-              isOnline={isOnline}
               isAdminView={isAdminView}
               onClick={() => onClickJoin(session.id)}
               disabled={dayjs().isAfter(dayjs(session.end_at))}
+              session_type={session.session_type}
             />
           </Box>
         </Stack>
@@ -271,9 +271,10 @@ const SessionDetail = ({
           Đóng
         </Button>
         <JoinButton
-          isOnline={session.session_type !== "offline"}
           isAdminView={isAdminView}
           onClick={() => onClickJoin(session.id)}
+          disabled={dayjs().isAfter(dayjs(session.end_at))}
+          session_type={session.session_type}
         />
       </DialogActions>
     </Dialog>

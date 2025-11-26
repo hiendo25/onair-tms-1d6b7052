@@ -15,21 +15,19 @@ const ClassRoomHeader = ({ data, isAdminView }: ClassRoomHeaderProps) => {
   const mdDown = useResponsive("down", "md");
   return (
     <Box>
-      <Box>
-        <Container component={Box} disableGutters={mdDown} position="relative">
-          <Image
-            src={data?.thumbnail_url}
-            alt="banner"
-            width="100%"
-            height="auto"
-            ratio="21/9"
-            sx={{ borderRadius: { xs: 1, md: 3 } }}
-          />
-        </Container>
-      </Box>
+      <Container component={Box} position="relative">
+        <Image
+          src={data?.thumbnail_url}
+          alt="banner"
+          width="100%"
+          height="auto"
+          ratio="21/9"
+          sx={{ borderRadius: { xs: 1, md: 3 } }}
+        />
+      </Container>
 
       <Box pt={{ xs: 2, md: 5 }} pb={{ xs: 0, md: 5 }}>
-        <Container>
+        <Box>
           <Stack direction="row" spacing={3}>
             <Stack
               sx={{
@@ -50,7 +48,7 @@ const ClassRoomHeader = ({ data, isAdminView }: ClassRoomHeaderProps) => {
             </Stack>
             <ClassRoomJoin data={data} isAdminView={isAdminView} />
           </Stack>
-        </Container>
+        </Box>
       </Box>
     </Box>
   );
