@@ -23,6 +23,7 @@ import {
 import { isUndefined } from "lodash";
 import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
 import dayjs from "dayjs";
+import { getErrorMessage } from "../supabase-error-message";
 
 export class UpsertClassRoomService {
   private userId: string;
@@ -76,8 +77,8 @@ export class UpsertClassRoomService {
     });
 
     if (error) {
-      console.log("Create Classroom Failed", error);
-      throw new Error("Create Class Room failed.");
+      console.log(error);
+      throw new Error(getErrorMessage(error));
     }
 
     /**

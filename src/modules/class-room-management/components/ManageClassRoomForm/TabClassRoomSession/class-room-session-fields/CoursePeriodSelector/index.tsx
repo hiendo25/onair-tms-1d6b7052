@@ -107,6 +107,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
    */
   const courseList = useMemo(() => {
     const sessions = getValues("classRoomSessions");
+    console.log(sessions);
     const courseSelectedIds = sessions.reduce<string[]>((acc, session) => {
       return [...acc, ...session.coursesPeriod.map((course) => course.course.id)];
     }, []);
