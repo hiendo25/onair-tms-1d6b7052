@@ -13,7 +13,6 @@ import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSes
 import TabClassRoomSetting from "./TabClassRoomSetting";
 import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { ClassRoomType } from "@/model/class-room.model";
-import { useSnackbar } from "notistack";
 import { getKeyFieldByTab } from "./utils";
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
@@ -79,7 +78,6 @@ export interface ClassRoomFormContainerProps {
 }
 const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
   ({ onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel }, ref) => {
-    const { enqueueSnackbar } = useSnackbar();
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
@@ -132,21 +130,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
     const submitForm: SubmitHandler<ClassRoom> = (data) => {
       console.log({ errors, data, selectedStudents });
-
-      // const sessionList = getValues("classRoomSessions");
-
-      // const isEverySessionHasTeacher = sessionList.every((session, _index) => {
-      //   const hasTeacher = !!selectedTeachers[_index]?.length;
-      //   if (!hasTeacher) {
-      //     enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
-      //     classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
-      //   }
-      //   return hasTeacher;
-      // });
-
-      // if (!isEverySessionHasTeacher) {
-      //   return;
-      // }
 
       onSubmit?.(data, selectedStudents);
     };

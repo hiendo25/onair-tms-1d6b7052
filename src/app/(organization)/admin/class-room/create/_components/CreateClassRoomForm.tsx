@@ -32,7 +32,6 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
             enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
-            formClassRoomRef.current?.resetForm();
             router.push(PATHS.CLASSROOMS.ROOT);
           });
         },
