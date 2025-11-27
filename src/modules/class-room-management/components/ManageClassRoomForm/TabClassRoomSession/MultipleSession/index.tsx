@@ -149,7 +149,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
                     helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
                   />
                   <ClassRoomSessionFromToDate index={_index} control={control} />
-                  <CoursePeriodSelector sessionIndex={_index} />
+                  <CoursePeriodSelector sessionIndex={_index} methods={methods} />
                   <AssessmentField sessionIndex={_index} control={control} />
                   {/* <QuantityPersonField control={control} fieldIndex={_index} /> */}
                   <RHFRichEditor

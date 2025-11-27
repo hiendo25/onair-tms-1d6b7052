@@ -10,7 +10,7 @@ export interface CustomDateTimePickerFieldProps extends DateTimePickerProps {
 }
 const CustomDateTimePickerField: React.FC<CustomDateTimePickerFieldProps> = ({
   label,
-  className,
+  className = "",
   helperText,
   error,
   required,

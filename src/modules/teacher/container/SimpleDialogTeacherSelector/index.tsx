@@ -15,7 +15,7 @@ import { columns } from "./columns";
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 
 export type SimpleDialogTeacherSelectorRef = {
-  openDialog: () => void;
+  openDialog: (variable?: { value?: string[] }, options?: { onOk: (data: EmployeeTeacherTypeItem[]) => void }) => void;
   closeDialog: () => void;
 };
 export interface SimpleDialogTeacherSelectorProps {
@@ -26,16 +26,18 @@ export interface SimpleDialogTeacherSelectorProps {
 const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, SimpleDialogTeacherSelectorProps>(
   ({ onOk, values = [], disableMultipleSelect = false }, ref) => {
     const [openDialog, setOpenDialog] = useState(false);
+    const [dialogConfirm, setDialogConfirm] = useState<(data: EmployeeTeacherTypeItem[]) => void>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
-    const searchDebouce = useDebounce(searchTeacherName, 600);
-    const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
     const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
-    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel | undefined>({
       ids: new Set(values),
       type: "include",
     });
 
+    const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
+
+    const searchDebouce = useDebounce(searchTeacherName, 600);
     const { data: teachersData, isPending } = useGetTeachersQuery({
       queryParams: {
         page: paginationModel.page + 1,
@@ -52,14 +54,15 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
     const handleClose = () => {
       //Reset State after close
       setPaginationModel((prev) => ({ ...prev, page: 0 }));
-      setRowSelectionModel((prev) => ({ ...prev, ids: new Set() }));
+      setRowSelectionModel((prev) => (prev ? { ...prev, ids: new Set() } : { ids: new Set(), type: "include" }));
       prevRowIdsSet.current = new Set();
       setSelectTeacherList([]);
       setOpenDialog(false);
     };
 
     const handleClickOk = useCallback(() => {
-      selectTeacherList && onOk?.(selectTeacherList);
+      if (selectTeacherList) onOk?.(selectTeacherList), dialogConfirm?.(selectTeacherList);
+
       handleClose();
     }, [rowSelectionModel]);
 
@@ -97,10 +100,14 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
            */
           prevRowIdsSet.current = updateRowModel;
 
-          setRowSelectionModel((prevModel) => ({
-            ...prevModel,
-            ids: updateRowModel,
-          }));
+          setRowSelectionModel((prevModel) =>
+            prevModel
+              ? {
+                  ...prevModel,
+                  ids: updateRowModel,
+                }
+              : { ids: updateRowModel, type: "include" },
+          );
         } else {
           const prevIdsSet = prevRowIdsSet.current || new Set();
           const addedRow = newRowSelectModel.ids.difference(prevIdsSet);
@@ -135,10 +142,14 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
            */
           prevRowIdsSet.current = updateRowModel;
 
-          setRowSelectionModel((prevModel) => ({
-            ...prevModel,
-            ids: updateRowModel,
-          }));
+          setRowSelectionModel((prevModel) =>
+            prevModel
+              ? {
+                  ...prevModel,
+                  ids: updateRowModel,
+                }
+              : { ids: updateRowModel, type: "include" },
+          );
         }
       },
       [teacherList, disableMultipleSelect],
@@ -151,11 +162,16 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
     };
 
     useImperativeHandle(ref, () => ({
-      openDialog: () => {
+      openDialog: (variables, options) => {
         setOpenDialog(true);
+        const confirmFn = options?.onOk;
+        const values = variables?.value;
+        if (confirmFn) setDialogConfirm(() => confirmFn);
+        if (values) setRowSelectionModel({ ids: new Set(values), type: "include" });
       },
       closeDialog: () => {
         setOpenDialog(false);
+        setRowSelectionModel(undefined);
       },
     }));
     return (

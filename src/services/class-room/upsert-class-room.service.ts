@@ -9,8 +9,8 @@ import {
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
   CreatePivotClassRoomWithResourcePayload,
-  GetClassRoomByIdResponse,
-} from "@/repository/class-room";
+} from "@/repository/class-room/type";
+import { GetClassRoomByIdResponse } from "@/repository/class-room";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
 import { ClassRoom } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { CreateQRCodePayload, UpSertQrCodePayload } from "@/repository/qr-attendance";
@@ -23,7 +23,6 @@ import {
 import { isUndefined } from "lodash";
 import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
 import dayjs from "dayjs";
-import { getErrorMessage } from "../supabase-error-message";
 
 export class UpsertClassRoomService {
   private userId: string;
@@ -77,8 +76,8 @@ export class UpsertClassRoomService {
     });
 
     if (error) {
-      console.log(error);
-      throw new Error(getErrorMessage(error));
+      console.error(error);
+      throw new Error(error.message, { cause: "db" });
     }
 
     /**
@@ -160,7 +159,7 @@ export class UpsertClassRoomService {
     );
     if (!classRoomDetail || classRoomDetailError) {
       console.error(classRoomDetailError);
-      throw new Error("ClassRoom not found.");
+      throw new Error(classRoomDetailError?.message || "Classroom not found.");
     }
 
     const { categories, classRoomSessions, description, thumbnailUrl, roomType, slug, status, title, forWhom, docs } =
@@ -189,7 +188,7 @@ export class UpsertClassRoomService {
 
     if (updateError) {
       console.error(updateError);
-      throw new Error("Cập nhật lớp học thất bại.");
+      throw new Error(updateError.message);
     }
 
     /**

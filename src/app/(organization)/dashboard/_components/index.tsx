@@ -21,11 +21,7 @@ const DashboardSection = () => (
   <Stack spacing={3}>
     <SummaryCardsGrid />
 
-    <Stack
-      direction={{ xs: "column", lg: "row" }}
-      spacing={2}
-      alignItems="stretch"
-    >
+    <Stack direction={{ xs: "column", lg: "row" }} spacing={2} alignItems="stretch">
       <Box sx={{ flex: { xs: "1 1 100%", lg: "1 1 70%" }, minWidth: 0 }}>
         <CourseTable />
       </Box>

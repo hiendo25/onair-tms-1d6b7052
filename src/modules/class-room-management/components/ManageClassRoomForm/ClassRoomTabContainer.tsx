@@ -48,6 +48,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
      * Trigger validate all field in current tab before process next action
      */
     const validateCurrentTabBeforeProceed = useCallback(async (tab: TabKeyType, callback?: () => void) => {
+      callback?.();
       const keyList = getKeyFieldByTab(tab);
 
       const isValid = (await Promise.allSettled(keyList.map((key) => trigger(key)))).every(
