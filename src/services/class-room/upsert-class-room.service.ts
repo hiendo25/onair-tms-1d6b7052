@@ -405,18 +405,14 @@ export class UpsertClassRoomService {
             const delList = oldCoursePeriods.filter((cp) => newCoursePeriods.every((ncp) => ncp.id !== cp.id));
             await classRoomSessionRepository.bulkDeletePivotClassSessionWithCoursePeriod(delList.map((cp) => cp.id));
           }
-
-          const payloadCouses = newCoursePeriods.reduce(
-            (
-              acc,
-              { teacher, course, startAt, endAt, id: sessionCoursePeriodId },
-            ): UpsertPivotClassSessionWithCoursePeriodPayload[] => {
-              const teacherId = teacher?.id;
-              if (teacherId) {
-                if (sessionCoursePeriodId) {
-                  acc = [
-                    ...acc,
-                    {
+          //
+          const payloadCouses = newCoursePeriods
+            .map<UpsertPivotClassSessionWithCoursePeriodPayload | undefined>(
+              ({ teacher, course, startAt, endAt, id: sessionCoursePeriodId }) => {
+                const teacherId = teacher?.id;
+                if (!teacherId) return;
+                return sessionCoursePeriodId
+                  ? {
                       action: "update",
                       payload: {
                         id: sessionCoursePeriodId,
@@ -424,12 +420,8 @@ export class UpsertClassRoomService {
                         start_at: dayjs(startAt).toISOString(),
                         end_at: dayjs(endAt).toISOString(),
                       },
-                    },
-                  ];
-                } else {
-                  acc = [
-                    ...acc,
-                    {
+                    }
+                  : {
                       action: "create",
                       payload: {
                         class_session_id: sessionData.id,
@@ -438,14 +430,10 @@ export class UpsertClassRoomService {
                         start_at: dayjs(startAt).toISOString(),
                         end_at: dayjs(endAt).toISOString(),
                       },
-                    },
-                  ];
-                }
-              }
-              return acc;
-            },
-            [],
-          );
+                    };
+              },
+            )
+            .filter((pl) => !!pl);
 
           Promise.all(
             payloadCouses.map(async (payloadCoursePeriod) => {
