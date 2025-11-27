@@ -405,32 +405,35 @@ export class UpsertClassRoomService {
             const delList = oldCoursePeriods.filter((cp) => newCoursePeriods.every((ncp) => ncp.id !== cp.id));
             await classRoomSessionRepository.bulkDeletePivotClassSessionWithCoursePeriod(delList.map((cp) => cp.id));
           }
-
-          const payloadCouses = newCoursePeriods.map((cp): UpsertPivotClassSessionWithCoursePeriodPayload => {
-            const sessionCoursePeriodId = cp.id;
-            if (sessionCoursePeriodId) {
-              return {
-                action: "update",
-                payload: {
-                  id: sessionCoursePeriodId,
-                  teacher_id: cp.teacher.id,
-                  start_at: dayjs(cp.startAt).toISOString(),
-                  end_at: dayjs(cp.endAt).toISOString(),
-                },
-              };
-            } else {
-              return {
-                action: "create",
-                payload: {
-                  class_session_id: sessionData.id,
-                  course_id: cp.course.id,
-                  teacher_id: cp.teacher.id,
-                  start_at: dayjs(cp.startAt).toISOString(),
-                  end_at: dayjs(cp.endAt).toISOString(),
-                },
-              };
-            }
-          });
+          //
+          const payloadCouses = newCoursePeriods
+            .map<UpsertPivotClassSessionWithCoursePeriodPayload | undefined>(
+              ({ teacher, course, startAt, endAt, id: sessionCoursePeriodId }) => {
+                const teacherId = teacher?.id;
+                if (!teacherId) return;
+                return sessionCoursePeriodId
+                  ? {
+                      action: "update",
+                      payload: {
+                        id: sessionCoursePeriodId,
+                        teacher_id: teacherId,
+                        start_at: dayjs(startAt).toISOString(),
+                        end_at: dayjs(endAt).toISOString(),
+                      },
+                    }
+                  : {
+                      action: "create",
+                      payload: {
+                        class_session_id: sessionData.id,
+                        course_id: course.id,
+                        teacher_id: teacherId,
+                        start_at: dayjs(startAt).toISOString(),
+                        end_at: dayjs(endAt).toISOString(),
+                      },
+                    };
+              },
+            )
+            .filter((pl) => !!pl);
 
           Promise.all(
             payloadCouses.map(async (payloadCoursePeriod) => {
@@ -543,15 +546,21 @@ export class UpsertClassRoomService {
            * Sync class Session to with course Period
            */
           const syncSessionWithCoursePeriodPromise = (async () => {
-            const payloadCouses = classSession.coursesPeriod.map<CreatePivotClassSessionWithCoursePeriodPayload>(
-              (cp) => ({
-                class_session_id: sessionData.id,
-                course_id: cp.course.id,
-                teacher_id: cp.teacher.id,
-                start_at: dayjs(cp.startAt).toISOString(),
-                end_at: dayjs(cp.endAt).toISOString(),
-              }),
-            );
+            const payloadCouses: CreatePivotClassSessionWithCoursePeriodPayload[] = classSession.coursesPeriod
+              .map(({ teacher, course, startAt, endAt }) => {
+                const teacherId = teacher?.id;
+                if (teacherId) {
+                  return {
+                    class_session_id: sessionData.id,
+                    course_id: course.id,
+                    teacher_id: teacher.id,
+                    start_at: dayjs(startAt).toISOString(),
+                    end_at: dayjs(endAt).toISOString(),
+                  };
+                }
+              })
+              .filter((pl) => !!pl);
+
             const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithCoursePeriod(
               payloadCouses,
             );
