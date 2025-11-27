@@ -1,7 +1,7 @@
 import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
 import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
-import { Constants, Database } from "@/types/supabase.types";
+import { Constants } from "@/types/supabase.types";
 
 export const ROOM_PROVIDERS = Constants.public.Enums.channel_provider.reduce(
   (acc, provider) => {
@@ -12,7 +12,7 @@ export const ROOM_PROVIDERS = Constants.public.Enums.channel_provider.reduce(
         break;
       case "google_meet":
         icon = GoogleMeetIcon;
-        break;
+        break;  
       case "microsoft_teams":
         icon = MicrosoftTeamIcon;
         break;

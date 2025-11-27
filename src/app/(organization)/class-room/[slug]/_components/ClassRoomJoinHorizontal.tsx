@@ -3,13 +3,14 @@ import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { QrCode } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import Image from "next/image";
+// import Image from "next/image";
 import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
 import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
 import JoinButton from "./JoinButton";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { Image } from "@/shared/ui/Image";
 
 interface ClassRoomJoinProps {
   data: GetClassRoomBySlugResponse["data"];
@@ -34,10 +35,10 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
 
   return (
     <>
-      <Stack flexDirection="row" alignItems="center" justifyContent="space-between" bgcolor={"white"}>
+      <Stack flexDirection="row" alignItems="center" justifyContent="space-between" bgcolor={"white"} px={2}>
         <Stack direction="row" spacing={1} alignItems="center">
           {data?.thumbnail_url && (
-            <Image
+            <Image 
               src={data?.thumbnail_url || ""}
               alt={"thumbnail"}
               width={135}
@@ -94,17 +95,16 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
           </Stack>
         </Stack>
         <JoinButton
-          isOnline={isAllOnline}
           onClick={handleClickJoin}
           disabled={dayjs().isAfter(dayjs(data?.end_at))}
           isAdminView={isAdminView}
+          session_type={data?.sessions?.[0]?.session_type}
         />
       </Stack>
 
       <EnterClassRoomsDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        isOnline={isAllOnline}
         thumbnail={data?.thumbnail_url || undefined}
         sessions={data?.sessions || []}
         isAdminView={isAdminView}

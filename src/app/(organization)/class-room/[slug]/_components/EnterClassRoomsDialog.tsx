@@ -2,7 +2,6 @@ import { FORMAT_DATE_LABEL_WITHOUT_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME }
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { CloseIcon } from "@/shared/assets/icons";
 import { Image } from "@/shared/ui/Image";
-import { QrCode } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -22,7 +21,6 @@ const EnterClassRoomsDialog = ({
   open,
   onClose,
   thumbnail,
-  isOnline,
   isAdminView = false,
   sessions = [],
   onClickJoin,
@@ -30,7 +28,6 @@ const EnterClassRoomsDialog = ({
   open: boolean;
   onClose: () => void;
   thumbnail?: string;
-  isOnline: boolean;
   isAdminView?: boolean;
   sessions: NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"];
   onClickJoin: (sessionId: string) => void;
@@ -89,10 +86,10 @@ const EnterClassRoomsDialog = ({
               </Box>
 
               <JoinButton
-                isOnline={isOnline}
                 onClick={() => { onClickJoin(session.id); }}
                 disabled={dayjs().isAfter(dayjs(session.end_at))}
                 isAdminView={isAdminView}
+                session_type={session.session_type}
               />
             </Stack>
           ))}

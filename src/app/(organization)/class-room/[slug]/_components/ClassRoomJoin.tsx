@@ -93,16 +93,15 @@ export default function ClassRoomJoin({ data, isAdminView }: ClassRoomJoinProps)
         </Stack>
 
         <JoinButton
-          isOnline={isAllOnline}
           onClick={handleClickJoin}
           disabled={dayjs().isAfter(dayjs(data?.end_at))}
           isAdminView={isAdminView}
+          session_type={data?.sessions?.[0]?.session_type}
         />
       </Stack>
       <EnterClassRoomsDialog
         open={dialogOpen}
         onClose={handleCloseDialog}
-        isOnline={isAllOnline}
         thumbnail={data?.thumbnail_url || undefined}
         sessions={data?.sessions || []}
         isAdminView={isAdminView}

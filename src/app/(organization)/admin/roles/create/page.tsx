@@ -7,6 +7,7 @@ import { RoleParams, RolePermissionsParams } from "@/repository/roles";
 import { useCreateRole } from "@/modules/roles/operations/mutation";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { PATHS } from "@/constants/path.contstants";
 
 const CreateRolePage = () => {
   const router = useRouter();
@@ -38,7 +39,7 @@ const CreateRolePage = () => {
       },
       {
         onSuccess: () => {
-          router.push("/roles");
+          router.push(PATHS.ROLE.ROOT);
         },
       },
     );
