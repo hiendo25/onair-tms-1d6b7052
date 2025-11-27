@@ -6,24 +6,18 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { redirect } from "next/navigation";
 
 const DashboardPage = () => {
+  const { ...rest } = useUserOrganization((state) => state.data);
+  const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher";
 
-    const { ...rest } = useUserOrganization((state) => state.data);
-    const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher"
+  if (!isHasAccess) {
+    redirect("/my-class");
+  }
 
-    if (!isHasAccess) {
-        redirect('/my-class');
-    }
-
-    return (
-        <PageContainer
-            title="Dashboard"
-            breadcrumbs={[
-                { title: "Dashboard", path: "/dashboard" }
-            ]}
-        >
-            <DashboardSection />
-        </PageContainer>
-    );
-}
+  return (
+    <PageContainer title="Dashboard" breadcrumbs={[{ title: "Dashboard", path: "/dashboard" }]}>
+      <DashboardSection />
+    </PageContainer>
+  );
+};
 
 export default DashboardPage;

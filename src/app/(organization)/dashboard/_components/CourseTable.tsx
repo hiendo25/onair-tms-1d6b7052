@@ -1,14 +1,5 @@
 import * as React from "react";
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Divider,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Chip, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
 import { panelSx } from "./mock/panelSx";
@@ -36,35 +27,20 @@ const CourseTable = () => {
   const user = useUserOrganization((state) => state.data);
   const formatDateLabel = (date?: string | null) => fDateTime(date, FORMAT_DATE_TIME_SHORTER) ?? "Chưa có lịch";
 
-  const monthRange = React.useMemo(
-    () => ({
+  const queryInput = React.useMemo(() => {
+    const baseFilters = {
       from: dayjs().startOf("month").toISOString(),
       to: dayjs().endOf("month").toISOString(),
-    }),
-    [],
-  );
-
-  const queryInput = React.useMemo(() => {
-    if (!user) {
-      return undefined;
-    }
-
-    const baseFilters = {
-      from: monthRange.from,
-      to: monthRange.to,
       limit: 7,
       orderField: "start_at",
       orderBy: "asc" as const,
     };
 
     if (user.employeeType === "admin") {
-      return user.organization?.id
-        ? { ...baseFilters, organizationId: user.organization.id }
-        : undefined;
+      return user.organization?.id ? { ...baseFilters, organizationId: user.organization.id } : undefined;
     }
-
     return { ...baseFilters, employeeId: undefined, organizationId: user.organization?.id };
-  }, [monthRange.from, monthRange.to, user]);
+  }, [user]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } = useGetClassRoomsPriorityQuery(queryInput ?? {});
 
@@ -88,8 +64,15 @@ const CourseTable = () => {
         ).values(),
       ].filter(Boolean) as EmployeeWithProfileDto[];
 
-      const sessionForMode = sessions.find((session) => session.session_type !== null && session.session_type !== undefined);
-      const mode = sessionForMode?.session_type === "online" ? "Online" : sessionForMode?.session_type === "offline" ? "Offline" : "Live";
+      const sessionForMode = sessions.find(
+        (session) => session.session_type !== null && session.session_type !== undefined,
+      );
+      const mode =
+        sessionForMode?.session_type === "online"
+          ? "Online"
+          : sessionForMode?.session_type === "offline"
+          ? "Offline"
+          : "Live";
 
       return {
         id: classRoom.id,
@@ -101,7 +84,6 @@ const CourseTable = () => {
         teachers: teachers,
         start_at: classRoom.start_at,
         end_at: classRoom.end_at,
-
       };
     });
   }, [classRoomsResult?.data]);
@@ -155,12 +137,7 @@ const CourseTable = () => {
           }}
         >
           {["Tên lớp học", "Loại lớp học", "Học viên", "Thời gian diễn ra"].map((col) => (
-            <Typography
-              key={col}
-              variant="body2"
-              color="text.secondary"
-              fontWeight={700}
-            >
+            <Typography key={col} variant="body2" color="text.secondary" fontWeight={700}>
               {col}
             </Typography>
           ))}
@@ -168,24 +145,14 @@ const CourseTable = () => {
 
         <Stack spacing={0} divider={<Divider />}>
           {isLoading ? (
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1.25}
-              sx={{ px: 2, py: 2 }}
-            >
+            <Stack direction="row" alignItems="center" spacing={1.25} sx={{ px: 2, py: 2 }}>
               <CircularProgress size={18} />
               <Typography variant="body2" color="text.secondary">
                 Đang tải danh sách lớp học...
               </Typography>
             </Stack>
           ) : isError ? (
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ px: 2, py: 2 }}
-            >
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 2, py: 2 }}>
               <Typography variant="body2" color="error">
                 Không thể tải dữ liệu lớp học. Vui lòng thử lại.
               </Typography>
@@ -238,9 +205,7 @@ const CourseTable = () => {
                         }}
                       />
                     </Stack> */}
-                    <Typography className="font-normal text-sm text-[#212B36] line-clamp-2">
-                      {row.name}
-                    </Typography>
+                    <Typography className="font-normal text-sm text-[#212B36] line-clamp-2">{row.name}</Typography>
                   </Stack>
 
                   <Chip
@@ -251,16 +216,11 @@ const CourseTable = () => {
                       justifySelf: "flex-start",
                       bgcolor:
                         row.mode === "Online"
-                          ? "rgba(155, 206, 255, 0.28) "     // LIVE - pastel red
+                          ? "rgba(155, 206, 255, 0.28) " // LIVE - pastel red
                           : row.mode === "Offline"
-                            ? "rgba(255, 179, 71, 0.28)"     // OFFLINE - pastel orange
-                            : "rgba(255, 107, 107, 0.28)",   // OTHER - pastel blue
-                      color:
-                        row.mode === "Online"
-                          ? "#64A9FF"
-                          : row.mode === "Offline"
-                            ? "#FFB347"
-                            : "#FF6B6B",
+                          ? "rgba(255, 179, 71, 0.28)" // OFFLINE - pastel orange
+                          : "rgba(255, 107, 107, 0.28)", // OTHER - pastel blue
+                      color: row.mode === "Online" ? "#64A9FF" : row.mode === "Offline" ? "#FFB347" : "#FF6B6B",
                       fontWeight: 600,
                       "& .MuiChip-label": {
                         color: "inherit",
@@ -270,9 +230,7 @@ const CourseTable = () => {
 
                   <Stack direction="row" alignItems="center" spacing={0.5}>
                     <PeopleAltOutlinedIcon className="w-4 h-4" />
-                    <Typography className="font-normal text-xs text-[#212B36]">
-                      {row.students}
-                    </Typography>
+                    <Typography className="font-normal text-xs text-[#212B36]">{row.students}</Typography>
                   </Stack>
 
                   <Stack spacing={0.5}>

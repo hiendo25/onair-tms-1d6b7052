@@ -7,6 +7,10 @@ import {
   UpSertClassRoomPayload,
   DeletePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomWithResourcePayload,
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
 } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
 import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
@@ -32,158 +36,14 @@ import {
 } from "./constants";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase.types";
-import {
-  ClassRoomRuntimeStatusFilter,
-  ClassRoomStatusFilter,
-  ClassRoomTypeFilter,
-  ClassSessionModeFilter,
-} from "@/repository/class-room";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
-export * from "./type";
+import { SELECT_CLASSROOM_DETAIL, SELECT_CLASSROOM_DETAIL_BY_SLUG } from "./query-select";
 
 const getClassRoomById = async (classRoomId: string) => {
   try {
     const { data, error } = await supabase
       .from("class_rooms")
-      .select(
-        `
-          id, 
-          title,
-          slug,
-          description,
-          room_type,
-          thumbnail_url,
-          start_at,
-          end_at,
-          status,
-          employee_id,
-          class_room_metadata(id, key, value, class_room_id),
-          class_rooms_resources(
-            id,
-            resource:resources(
-              id,
-              path,
-              size, 
-              kind, 
-              mime_type, 
-              name
-            )
-          ),
-          class_hash_tag(
-            id,
-            hash_tags(
-              id, name, slug, type
-            )
-          ),
-          class_room_field(
-            id,
-            categories(
-              id, name, slug
-            )
-          ),
-          employees:class_room_employee(
-            id,
-            employee:employees(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          owner:employees(
-            id,
-            employee_type,
-            employee_code,
-            profile:profiles(
-              id,
-              full_name,
-              email,
-              employee_id,
-              avatar
-            )
-          ),
-          organization:organizations(
-            id, 
-            name
-          ),
-          resources:class_rooms_resources(
-            id,
-            resource:resources(
-              id,
-              path,
-              size, 
-              kind, 
-              mime_type, 
-              name
-            )
-          ),
-          sessions:class_sessions(
-            id,
-            title,
-            description,
-            start_at,
-            end_at,
-            class_room_id,
-            location,
-            channel_provider,
-            channel_info,
-            priority,
-            session_type,
-            courses_period:class_sessions_courses_period(
-              id,
-              course:courses(id, title, slug),
-              start_at,
-              end_at,
-              teacher:employees(id,
-                employee_type,
-                employee_code,
-                profile:profiles(
-                  id,
-                  full_name,
-                  email,
-                  employee_id,
-                  avatar
-                )
-              )
-            ),
-            session_assignment:class_session_assignment(
-              id,
-              assignments(
-                id,
-                name
-              )
-            ),
-            agendas:class_sessions_agendas(
-              id,
-              title,
-              description,
-              thumbnail_url,
-              start_at,
-              end_at,
-              class_session_id
-            ),
-            metadata:class_session_metadata(
-              id,
-              class_session_id,
-              key,
-              value
-            ),
-            class_qr_codes(
-              id,
-              class_room_id, 
-              class_session_id, 
-              checkin_start_time, 
-              checkin_end_time
-            )
-          )
-        `,
-      )
+      .select(SELECT_CLASSROOM_DETAIL)
       .eq("id", classRoomId)
       .order("priority", { ascending: true, referencedTable: "class_sessions" })
       .single()
@@ -213,153 +73,7 @@ const getClassRoomBySlug = async (slug: string) => {
   try {
     const { data, error } = await supabase
       .from("class_rooms")
-      .select(
-        `
-          id, 
-          title,
-          slug,
-          description,
-          room_type,
-          thumbnail_url,
-          start_at,
-          end_at,
-          status,
-          employee_id,
-          class_room_metadata(id, key, value, class_room_id),
-          class_rooms_resources(
-            id,
-            resource:resources(
-              id,
-              path,
-              size, 
-              kind, 
-              mime_type, 
-              name
-            )
-          ),
-          class_hash_tag(
-            id,
-            hash_tags(
-              id, name, slug, type
-            )
-          ),
-          class_room_field(
-            id,
-            categories(
-              id, name, slug
-            )
-          ),
-          employees:class_room_employee(
-            id,
-            employee:employees(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          owner:employees(
-            id,
-            employee_type,
-            employee_code,
-            profile:profiles(
-              id,
-              full_name,
-              email,
-              employee_id,
-              avatar
-            )
-          ),
-          organization:organizations(
-            id, 
-            name
-          ),
-          resources:class_rooms_resources(
-            id,
-            resource:resources(
-              id,
-              path,
-              size, 
-              kind, 
-              mime_type, 
-              name
-            )
-          ),
-          sessions:class_sessions(
-            id,
-            title,
-            description,
-            start_at,
-            end_at,
-            class_room_id,
-            location,
-            channel_provider,
-            channel_info,
-            priority,
-            session_type,
-            courses_period:class_sessions_courses_period(
-              id,
-              course:courses(
-                id, 
-                title, 
-                slug,
-                sections_count:sections(count),
-                lessons_count:sections(
-                  lessons(count)
-                )
-              ),
-              start_at,
-              end_at,
-              teacher:employees(id,
-                employee_type,
-                employee_code,
-                profile:profiles(
-                  id,
-                  full_name,
-                  email,
-                  employee_id,
-                  avatar
-                )
-              )
-            ),
-            session_assignment:class_session_assignment(
-              id,
-              assignments(
-                id,
-                name
-              )
-            ),
-            agendas:class_sessions_agendas(
-              id,
-              title,
-              description,
-              thumbnail_url,
-              start_at,
-              end_at,
-              class_session_id
-            ),
-            metadata:class_session_metadata(
-              id,
-              class_session_id,
-              key,
-              value
-            ),
-            class_qr_codes(
-              id,
-              class_room_id, 
-              class_session_id, 
-              checkin_start_time, 
-              checkin_end_time
-            )
-          )
-        `,
-      )
+      .select(SELECT_CLASSROOM_DETAIL_BY_SLUG)
       .eq("slug", slug)
       .single();
 
