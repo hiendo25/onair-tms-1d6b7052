@@ -4,6 +4,7 @@ import { menuItemClasses } from "@mui/material/MenuItem";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
 import { grey, primary } from "../../theme-color";
 import { CalendarDateIcon2 } from "@/shared/assets/icons";
+import { theme } from "../../AppTheme";
 
 /* eslint-disable import/prefer-default-export */
 export const datePickersCustomizations: PickerComponents<Theme> = {
@@ -27,6 +28,40 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       }),
     },
   },
+
+  MuiDateCalendar: {
+    styleOverrides: {
+      root: {
+        width: "280px",
+        height: "310px",
+        maxHeight: "310px",
+        ".MuiDayCalendar-header": {
+          ".MuiTypography-root": {},
+        },
+      },
+      viewTransitionContainer: {},
+    },
+  },
+  MuiDayCalendar: {
+    styleOverrides: {
+      root: {
+        ".MuiButtonBase-root": {
+          width: "32px",
+          height: "32px",
+        },
+        ".MuiDayCalendar-header": {
+          ".MuiTypography-root": {
+            width: "32px",
+            height: "36px",
+          },
+        },
+      },
+      monthContainer: {},
+      weekDayLabel: {},
+      weekNumberLabel: {},
+    },
+  },
+
   MuiDateTimePicker: {
     defaultProps: {
       ampm: false,
@@ -51,6 +86,9 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       spacer: { width: 16 },
       button: ({ theme }) => ({
         backgroundColor: "transparent",
+        width: "32px",
+        height: "32px",
+        padding: "6px",
         color: (theme.vars || theme).palette.grey[500],
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[400],
@@ -63,6 +101,15 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       switchViewButton: {
         padding: 0,
         border: "none",
+        width: "32px",
+        height: "32px",
+      },
+    },
+  },
+  MuiPickersSlideTransition: {
+    styleOverrides: {
+      root: {
+        minHeight: "220px !important",
       },
     },
   },
@@ -110,12 +157,17 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
   },
   MuiYearCalendar: {
     styleOverrides: {
+      root: {
+        width: "280px",
+        maxHeight: "252px",
+      },
       button: ({ theme }) => ({
-        fontSize: theme.typography.body1.fontSize,
+        fontSize: theme.typography.body2.fontSize,
         color: (theme.vars || theme).palette.grey[800],
         padding: theme.spacing(0.5),
         borderRadius: theme.shape.borderRadius,
         height: "fit-content",
+        width: "62px",
         "&:hover": {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
@@ -124,10 +176,10 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           fontWeight: theme.typography.fontWeightMedium,
         },
         "&:focus": {
-          outline: `3px solid ${alpha(primary["main"], 0.5)}`,
-          outlineOffset: "2px",
-          backgroundColor: "transparent",
-          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: grey[700] },
+          // outline: `3px solid ${alpha(primary["main"], 0.5)}`,
+          // outlineOffset: "2px",
+          backgroundColor: theme.palette.grey[200],
+          [`&.${yearCalendarClasses.selected}`]: { backgroundColor: grey[600] },
         },
         ...theme.applyStyles("dark", {
           color: (theme.vars || theme).palette.grey[300],
@@ -140,15 +192,37 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
             backgroundColor: grey[300],
           },
           "&:focus": {
-            outline: `3px solid ${alpha(primary["main"], 0.5)}`,
-            outlineOffset: "2px",
-            backgroundColor: "transparent",
+            // outline: `3px solid ${alpha(primary["main"], 0.5)}`,
+            // outlineOffset: "2px",
+            // backgroundColor: "transparent",
             [`&.${yearCalendarClasses.selected}`]: {
               backgroundColor: grey[300],
             },
           },
         }),
       }),
+    },
+  },
+  MuiPickersLayout: {
+    styleOverrides: {
+      actionBar: {
+        padding: "8px",
+        ".MuiButtonBase-root": {
+          borderRadius: "0.425rem",
+          height: "2rem",
+        },
+      },
+    },
+  },
+  MuiPickersInputBase: {
+    styleOverrides: {
+      root: {
+        ".MuiInputAdornment-positionEnd": {
+          ".MuiButtonBase-root": {
+            marginRight: "-10px",
+          },
+        },
+      },
     },
   },
   MuiPickersDay: {
@@ -158,6 +232,8 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
         color: (theme.vars || theme).palette.grey[800],
         padding: theme.spacing(0.5),
         borderRadius: theme.shape.borderRadius,
+        width: "32px",
+        height: "32px",
         "&:hover": {
           backgroundColor: (theme.vars || theme).palette.action.hover,
         },
@@ -187,16 +263,24 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
           },
         }),
       }),
+      today: ({ theme }) => ({
+        borderColor: `${theme.palette.grey[500]} !important`,
+      }),
     },
   },
   MuiMultiSectionDigitalClock: {
     styleOverrides: {
       root: ({ theme }) => ({
         fontSize: "0.875rem",
+        maxHeight: "310px !important",
+        ".MuiButtonBase-root": {
+          padding: "4px",
+        },
         "& .MuiMultiSectionDigitalClockSection-root": {
           scrollbarWidth: "none",
           // scrollbarGutter: "stable both-edges",
           overflowY: "auto",
+          width: "48px",
           "&::-webkit-scrollbar": {
             with: "2px",
             backgroundColor: "red",
@@ -212,6 +296,7 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
             },
           },
         },
+
         "& .MuiMultiSectionDigitalClockSection-item": {
           fontSize: "0.875rem",
           width: "auto",

@@ -43,7 +43,7 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
              * Update BA no need teacher for class session 20/11/2025
              /*
             <TeacherSelector sessionIndex={_index} /> */}
-            <CoursePeriodSelector sessionIndex={_index} />
+            <CoursePeriodSelector sessionIndex={_index} methods={methods} />
             <AssessmentField sessionIndex={_index} control={control} />
             {sessionType === "live" && <RoomChannel control={control} index={_index} />}
             {sessionType === "offline" && (

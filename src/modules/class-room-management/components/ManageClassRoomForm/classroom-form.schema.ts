@@ -40,22 +40,36 @@ const classRoomSessionSchema = zod
       startDate: zod.string(),
       endDate: zod.string(),
     }),
-    coursesPeriod: zod.array(
-      zod.object({
-        id: zod.number().optional(),
-        course: zod.object({
-          id: zod.string(),
-          title: zod.string(),
-        }),
-        teacher: zod.object({
-          id: zod.string(),
-          name: zod.string(),
-          departmentName: zod.string(),
-        }),
-        startAt: zod.string(),
-        endAt: zod.string(),
-      }),
-    ),
+    coursesPeriod: zod
+      .array(
+        zod
+          .object({
+            id: zod.number().optional(),
+            course: zod.object({
+              id: zod.string(),
+              title: zod.string(),
+            }),
+            teacher: zod
+              .object({
+                id: zod.string(),
+                name: zod.string(),
+                departmentName: zod.string(),
+              })
+              .optional(),
+            startAt: zod.string().min(1, "Không bỏ trống."),
+            endAt: zod.string().min(1, "Không bỏ trống."),
+          })
+          .superRefine(({ teacher }, ctx) => {
+            if (!teacher) {
+              ctx.addIssue({
+                code: "custom",
+                message: "Chọn giảng viên phụ trách.",
+                path: ["teacher"],
+              });
+            }
+          }),
+      )
+      .min(1, { error: "Chọn ít nhất 1 môn học." }),
     assessmentId: zod.string().optional(),
     sessionType: zod.enum([CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE, CLASS_ROOM_PLATFORM.LIVE]),
   })
