@@ -16,6 +16,7 @@ import type {
   ShowNotification,
   ShowNotificationOptions,
 } from "./useNotifications";
+import { SxProps, Theme } from "@mui/material";
 
 const RootPropsContext = React.createContext<NotificationsProviderProps | null>(
   null,
@@ -67,8 +68,9 @@ function Notification({
         title="Close"
         color="inherit"
         onClick={handleClose}
+				className="w-8 h-8"
       >
-        <CloseIcon fontSize="small" />
+        <CloseIcon fontSize="small" className="w-4 h-4" />
       </IconButton>
     </React.Fragment>
   );
@@ -84,13 +86,32 @@ function Notification({
       onClose: handleClose,
       action,
     },
+		
   });
 
+
+	 const baseSx = React.useMemo((): SxProps<Theme> => {
+			return (theme) => ({
+				backgroundColor: "white",
+				color: theme.palette.grey[800],
+				width: 320,
+				boxShadow: "0px 2px 3px -1px rgb(0,0,0,0.1), 0px 3px 6px -6px rgb(0,0,0,0.2)",
+				fontWeight: 500,
+				".MuiAlert-message": {
+					flex: 1,
+				},
+			});
+		}, []);
+
   return (
-    <Snackbar key={notificationKey} {...snackbarSlotProps}>
+    <Snackbar key={notificationKey} {...snackbarSlotProps} anchorOrigin={{vertical: 'top', 'horizontal': 'center'}} sx={{
+			".MuiAlert-action": {
+				paddingTop: '2px'
+			}
+		}}>
       <Badge badgeContent={badge} color="primary" sx={{ width: "100%" }}>
         {severity ? (
-          <Alert severity={severity} sx={{ width: "100%" }} action={action}>
+          <Alert severity={severity} sx={baseSx} action={action}>
             {message}
           </Alert>
         ) : (
