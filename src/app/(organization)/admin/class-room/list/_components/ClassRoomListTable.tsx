@@ -32,7 +32,7 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { TABLE_HEAD_CLASS_ROOM } from "../constants";
-import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room";
+import { ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { getClassRoomStatusLabel, getClassRoomTypeLabel, getColorClassRoomStatus } from "../utils/status";
 import ClassRoomType from "./ClassRoomType";
 import ClassRoomRuntimeStatus from "./ClassRoomRuntimeStatus";

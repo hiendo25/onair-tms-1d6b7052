@@ -13,7 +13,7 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { PATHS } from "@/constants/path.contstants";
 import Link from "next/link";
-import { ClassRoomTypeFilter } from "@/repository/class-room";
+import { ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { ClassSessionType } from "@/model/class-session.model";
 
 interface IClassRoomCard {

@@ -1,7 +1,7 @@
 "use client";
 import { Tabs, Tab, Stack, Box } from "@mui/material";
 import { CLASSROOM_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../../admin/class-room/list/utils/status";
-import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room";;
+import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room/type";
 import { ClassRoomStatusCountDto } from "@/types/dto/classRooms/classRoom.dto";
 
 interface ClassRoomStatusTabsProps {

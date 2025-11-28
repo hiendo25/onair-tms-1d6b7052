@@ -19,7 +19,7 @@ import {
     ClassRoomRuntimeStatusFilter,
     ClassRoomTypeFilter,
     ClassSessionModeFilter,
-} from "@/repository/class-room";;
+} from "@/repository/class-room/type";
 import SearchIcon from "@mui/icons-material/Search";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
