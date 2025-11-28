@@ -86,7 +86,9 @@ const EnterClassRoomsDialog = ({
               </Box>
 
               <JoinButton
-                onClick={() => { onClickJoin(session.id); }}
+                onClick={() => {
+                  onClickJoin(session.id);
+                }}
                 disabled={dayjs().isAfter(dayjs(session.end_at))}
                 isAdminView={isAdminView}
                 session_type={session.session_type}

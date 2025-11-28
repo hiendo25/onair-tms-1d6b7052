@@ -1,4 +1,4 @@
-import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room";
+import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter } from "@/repository/class-room/type";
 
 export const RUNTIME_STATUS_COLOR_MAP: Record<
   ClassRoomRuntimeStatusFilter,
@@ -24,7 +24,6 @@ const STATUS_COLOR_MAP: Record<
   [ClassRoomStatusFilter.Pending]: "info",
   [ClassRoomStatusFilter.Publish]: "success",
 };
-
 
 export const STATUS_ORDER: ClassRoomRuntimeStatusFilter[] = [
   ClassRoomRuntimeStatusFilter.All,
@@ -75,13 +74,16 @@ export const getClassRoomRuntimeStatusLabel = (status: ClassRoomRuntimeStatusFil
 export const getColorClassRoomRuntimeStatus = (status: ClassRoomRuntimeStatusFilter) =>
   RUNTIME_STATUS_COLOR_MAP[status] ?? RUNTIME_STATUS_COLOR_MAP[ClassRoomRuntimeStatusFilter.All];
 
-export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, type: "live" | "offline" | "online"): { label: string, disabled: boolean } => {
+export const getStatusAndLabelBtnJoin = (
+  status: ClassRoomRuntimeStatusFilter,
+  type: "live" | "offline" | "online",
+): { label: string; disabled: boolean } => {
   switch (status) {
     case ClassRoomRuntimeStatusFilter.Draft:
       return {
         label: "Đăng tải",
         disabled: false,
-      }
+      };
     case ClassRoomRuntimeStatusFilter.Upcoming:
     case ClassRoomRuntimeStatusFilter.Today:
     case ClassRoomRuntimeStatusFilter.Ongoing:
@@ -89,22 +91,22 @@ export const getStatusAndLabelBtnJoin = (status: ClassRoomRuntimeStatusFilter, t
         return {
           label: "Vào lớp học",
           disabled: false,
-        }
+        };
       } else {
         return {
           label: "Quét mã QR",
           disabled: false,
-        }
+        };
       }
     case ClassRoomRuntimeStatusFilter.Past:
       return {
         label: "Đã diễn ra",
         disabled: true,
-      }
+      };
     default:
       return {
         label: "Mặc định",
         disabled: false,
-      }
+      };
   }
-} 
+};
