@@ -1,17 +1,19 @@
 import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
-import { getEmployeeDetailInfoByUserId } from "../actions/getOrganization";
-import { ensureGetCurrentUser } from "../../auth/actions/getCurrentUser";
 import { redirect, RedirectType } from "next/navigation";
-import { createSVClient } from "@/services";
+import { PermissionProvider } from "@/modules/roles/store/PermissionsProvider";
+import { getUserPermissions } from "@/repository/permissions";
+import { authRepository } from "@/repository";
+import { organizationsRepository } from "@/repository";
 
 const UserOrganizationWraper = async ({ children }: { readonly children: React.ReactNode }) => {
-  const supabase = await createSVClient();
-  const currentUser = await ensureGetCurrentUser();
-  const employeeDetail = await getEmployeeDetailInfoByUserId(currentUser.id);
+  const currentUser = await authRepository.ensureGetCurrentUser();
+  const employeeDetail = await organizationsRepository.getEmployeeDetailInfoByUserId(currentUser.id);
+
+  const permissions = await getUserPermissions(currentUser.id);
 
   if (!employeeDetail || !employeeDetail.organizations) {
-    await supabase.auth.signOut();
-    redirect("auth/signin", RedirectType.replace);
+    await authRepository.authServerSignOut();
+    redirect("/auth/signin", RedirectType.replace);
   }
 
   return (
@@ -37,7 +39,7 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
           : null,
       }}
     >
-      {children}
+      <PermissionProvider initialData={permissions}>{children}</PermissionProvider>;
     </UserOrganizationProvider>
   );
 };

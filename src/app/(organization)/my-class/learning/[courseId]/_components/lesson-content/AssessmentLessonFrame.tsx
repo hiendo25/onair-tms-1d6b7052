@@ -1,8 +1,4 @@
-import {
-  Alert,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Stack, Typography } from "@mui/material";
 import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
 import { PATHS } from "@/constants/path.contstants";
 
@@ -12,21 +8,13 @@ interface AssessmentLessonFrameProps {
   onToggleCompletion: (completed: boolean) => void;
 }
 
-const AssessmentLessonFrame = ({
-  assignmentId,
-  studentId,
-  onToggleCompletion,
-}: AssessmentLessonFrameProps) => {
+const AssessmentLessonFrame = ({ assignmentId, studentId, onToggleCompletion }: AssessmentLessonFrameProps) => {
   if (!assignmentId) {
     return <Alert severity="warning">Chưa gắn bài kiểm tra cho bài học này.</Alert>;
   }
 
   if (!studentId) {
-    return (
-      <Alert severity="warning">
-        Không xác định được thông tin người học. Vui lòng đăng nhập lại.
-      </Alert>
-    );
+    return <Alert severity="warning">Không xác định được thông tin người học. Vui lòng đăng nhập lại.</Alert>;
   }
 
   return (

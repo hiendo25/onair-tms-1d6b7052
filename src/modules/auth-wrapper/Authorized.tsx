@@ -1,13 +1,13 @@
 import React from "react";
 import { AuthProvider } from "@/modules/auth/store/AuthProvider";
-import { getCurrentUser } from "@/modules/auth/actions/getCurrentUser";
+import { authRepository } from "@/repository";
 import { redirect, RedirectType } from "next/navigation";
 import { AuthData } from "../auth/types";
 interface Props {
   children: React.ReactNode;
 }
 const Authorized: React.FC<Props> = async ({ children }) => {
-  const currentUser = await getCurrentUser();
+  const currentUser = await authRepository.getCurrentUser();
 
   if (!currentUser) {
     redirect("/auth/signin", RedirectType.replace);
