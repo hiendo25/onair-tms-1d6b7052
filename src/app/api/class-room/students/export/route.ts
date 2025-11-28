@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { classRoomRepository } from "@/repository";
 import { createServiceRoleClient } from "@/services";
 import type { ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
-import { fDateTime } from "@/lib";
+import { fDateTime } from "@/lib/dayjs";
 
 export const dynamic = "force-dynamic";
 
@@ -26,15 +26,15 @@ const resolveOrganizationUnitName = (
   );
 };
 
-const resolveAttendanceStatus = (
-  student: ClassRoomStudentDto,
-): keyof typeof ATTENDANCE_LABELS => {
-  const hasCheckIn = student.class_room_attendance?.some(
-    (attendanceRecord) => Boolean(attendanceRecord.check_in_at),
-  );
+// const resolveAttendanceStatus = (
+//   student: ClassRoomStudentDto,
+// ): keyof typeof ATTENDANCE_LABELS => {
+//   const hasCheckIn = student.class_room_attendance?.some(
+//     (attendanceRecord) => Boolean(attendanceRecord.check_in_at),
+//   );
 
-  return hasCheckIn ? "attended" : "absent";
-};
+//   return hasCheckIn ? "attended" : "absent";
+// };
 
 const formatDateTimeValue = (value?: string | null) => {
   if (!value) {
@@ -146,12 +146,12 @@ export async function GET(request: NextRequest) {
     }
 
     const rows = students.map((student, index) => {
-      const attendanceStatusKey = resolveAttendanceStatus(student);
-      const attendanceLabel = ATTENDANCE_LABELS[attendanceStatusKey];
-      const attendanceRecord =
-        student.class_room_attendance?.find(
-          (record) => record.check_in_at || record.check_out_at,
-        ) ?? student.class_room_attendance?.[0];
+      // const attendanceStatusKey = resolveAttendanceStatus(student);
+      // const attendanceLabel = ATTENDANCE_LABELS[attendanceStatusKey];
+      // const attendanceRecord =
+      //   student.class_room_attendance?.find(
+      //     (record) => record.check_in_at || record.check_out_at,
+      //   ) ?? student.class_room_attendance?.[0];
 
       return {
         STT: index + 1,
@@ -162,9 +162,9 @@ export async function GET(request: NextRequest) {
         "Chi nhánh": resolveOrganizationUnitName(student, "branch"),
         "Phòng ban": resolveOrganizationUnitName(student, "department"),
         "Thời gian gán": formatDateTimeValue(student.created_at),
-        "Điểm danh": attendanceLabel,
-        "Vào lớp": formatDateTimeValue(attendanceRecord?.check_in_at),
-        "Kết thúc": formatDateTimeValue(attendanceRecord?.check_out_at),
+        // "Điểm danh": attendanceLabel,
+        // "Vào lớp": formatDateTimeValue(attendanceRecord?.check_in_at),
+        // "Kết thúc": formatDateTimeValue(attendanceRecord?.check_out_at),
       };
     });
 
