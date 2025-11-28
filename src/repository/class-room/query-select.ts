@@ -55,8 +55,8 @@ const selectCourse = `
 const selectCourseWithLessonSectionCount = `
   id,
   title,
-  slug
-	sections_count:sections(count),
+  slug,
+  sections_count:sections(count),
   lessons_count:sections(
     lessons(count)
   )
@@ -160,67 +160,67 @@ export const SELECT_CLASSROOM_DETAIL = `
 `;
 
 export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
-  id,
-  title,
-  slug,
-  description,
-  room_type,
-  thumbnail_url,
-  start_at,
-  end_at,
-  status,
-  employee_id,
-  class_room_metadata(id, key, value, class_room_id),
-  class_rooms_resources(
-    id,
-    resource:resources(${selectResource})
-  ),
-  class_hash_tag(
-    id,
-    hash_tags(${selectHashTag})
-  ),
-  class_room_field(
-    id,
-    categories(${selectCategory})
-  ),
-  employees:class_room_employee(
-    id,
-    employee:employees(${selectEmployee})
-  ),
-  owner:employees(${selectEmployee}),
-  organization:organizations(
-    id,
-    name
-  ),
-  resources:class_rooms_resources(
-    id,
-    resource:resources(${selectResource})
-  ),
-  sessions:class_sessions(
-		  id,
-			title,
-			description,
-			start_at,
-			end_at,
-			class_room_id,
-			location,
-			channel_provider,
-			channel_info,
-			priority,
-			session_type,
-			courses_period:class_sessions_courses_period(
-				id,
-				start_at,
-				end_at,
-				course:courses(${selectCourseWithLessonSectionCount}),
-				teacher:employees(${selectEmployee})
-			),
-			session_assignment:class_session_assignment(
-				id,
-				assignments(${selectAssignment})
-			),
-			agendas:class_sessions_agendas(${selectAgenda}),
-			metadata:class_session_metadata(${selectMetadata}),
-			class_qr_codes(${selectQRCode})	
-	)
-`;
+      id,
+      title,
+      slug,
+      description,
+      room_type,
+      thumbnail_url,
+      start_at,
+      end_at,
+      status,
+      employee_id,
+      class_room_metadata(id, key, value, class_room_id),
+      class_rooms_resources(
+        id,
+        resource:resources(${selectResource})
+      ),
+      class_hash_tag(
+        id,
+        hash_tags(${selectHashTag})
+      ),
+      class_room_field(
+        id,
+        categories(${selectCategory})
+      ),
+      employees:class_room_employee(
+        id,
+        employee:employees(${selectEmployee})
+      ),
+      owner:employees(${selectEmployee}),
+      organization:organizations(
+        id,
+        name
+      ),
+      resources:class_rooms_resources(
+        id,
+        resource:resources(${selectResource})
+      ),
+      sessions:class_sessions(
+          id,
+          title,
+          description,
+          start_at,
+          end_at,
+          class_room_id,
+          location,
+          channel_provider,
+          channel_info,
+          priority,
+          session_type,
+          courses_period:class_sessions_courses_period(
+            id,
+            start_at,
+            end_at,
+            course:courses(${selectCourseWithLessonSectionCount}),
+            teacher:employees(${selectEmployee})
+          ),
+          session_assignment:class_session_assignment(
+            id,
+            assignments(${selectAssignment})
+          ),
+          agendas:class_sessions_agendas(${selectAgenda}),
+          metadata:class_session_metadata(${selectMetadata}),
+          class_qr_codes(${selectQRCode})	
+      )
+    `;
