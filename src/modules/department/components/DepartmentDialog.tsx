@@ -92,7 +92,8 @@ export function DepartmentDialog({
       newErrors.name = "Tên phòng ban không được vượt quá 100 ký tự";
     } else {
       try {
-        const nameExists = await departmentRepository.checkNameExists(
+				
+        const nameExists = await departmentRepository.departmentRepository.checkNameExists(
           formData.name,
           formData.organization_id,
           department?.id
