@@ -73,6 +73,9 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
   const { field: startDateField } = useController({ control: control, name: `classRoomSessions.${index}.startDate` });
   const { field: endDateField } = useController({ control: control, name: `classRoomSessions.${index}.endDate` });
 
+  const minEndDate = startDateField.value ? dayjs(startDateField.value).add(15, "minute") : dayjs();
+
+  const maxEndDate = minDateRight ? dayjs(minDateRight) : undefined;
   return (
     <div className="date">
       <FormLabel component="div">
@@ -91,8 +94,8 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
           control={control}
           name={`classRoomSessions.${index}.endDate`}
           // label="Thời gian kết thúc"
-          minDateTime={startDateField.value ? dayjs(startDateField.value) : undefined}
-          maxDateTime={minDateRight ? dayjs(minDateRight) : undefined}
+          minDateTime={minEndDate}
+          maxDateTime={maxEndDate}
           // required
         />
       </div>

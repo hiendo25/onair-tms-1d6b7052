@@ -29,8 +29,8 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = () => {
             required
             helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
           />
-          <div className="h-3"></div>
-          <ClassRoomSlugField control={control} />
+          {/* <div className="h-3"></div>
+          <ClassRoomSlugField control={control} /> */}
         </div>
         <ThumbnailUploader
           label="Ảnh bìa đại diện"

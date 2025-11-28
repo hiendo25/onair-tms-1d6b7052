@@ -82,7 +82,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
       ".MuiPickersInputBase-root": {
         paddingLeft: 1.5,
         paddingRight: 1.5,
-        borderRadius: 6,
+        borderRadius: "6px",
       },
       ".MuiPickersSectionList-root": {
         paddingTop: "4px",
