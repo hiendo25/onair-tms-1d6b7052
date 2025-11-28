@@ -38,6 +38,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/types/supabase.types";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 import { SELECT_CLASSROOM_DETAIL, SELECT_CLASSROOM_DETAIL_BY_SLUG } from "./query-select";
+export * from './type'
 
 const getClassRoomById = async (classRoomId: string) => {
   try {
