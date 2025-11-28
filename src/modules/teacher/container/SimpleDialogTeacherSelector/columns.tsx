@@ -50,8 +50,9 @@ export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
     field: "branch",
     headerName: "Chi nhánh",
     width: 220,
-    renderCell: ({ row }) => {
-      return row.employments[0]?.organization_units?.branch ? row.employments[0]?.organization_units?.branch.name : "-";
+    renderCell: ({  row }) => {
+			console.log(row)
+      return row.employments[0]?.organization_units?.branch?.name ?? "-";
     },
   },
 ];

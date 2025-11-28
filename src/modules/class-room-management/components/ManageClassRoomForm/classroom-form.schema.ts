@@ -3,6 +3,12 @@ import { EmployeeType } from "@/model/employee.model";
 import dayjs from "dayjs";
 import * as zod from "zod";
 
+const googleMeetRegex = /^https?:\/\/meet\.google\.com\//i;
+
+const zoomRegex = /^https?:\/\/([a-z0-9-]+\.)?zoom\.us\//i;
+
+const teamsRegex = /^https?:\/\/teams\.microsoft\.com\//i;
+
 const courseResourceSchema = zod.object({
   id: zod.string(),
   url: zod.string(),
@@ -24,8 +30,10 @@ const classRoomSessionSchema = zod
     title: zod.string(),
     description: zod.string(),
     thumbnailUrl: zod.string(),
-    startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
-    endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
+    // startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
+    // endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
+    startDate: zod.string().min(1, "Ngày bắt đầu không bỏ trống."),
+    endDate: zod.string().min(1, "Ngày kết thúc không bỏ trống."),
     location: zod.string(), //only for CLASS_ROOM_PLATFORM.OFFLINE
     channelProvider: zod.enum(["zoom", "google_meet", "microsoft_teams"]), //only for CLASS_ROOM_PLATFORM.LIVE class room
     channelInfo: zod.object({
@@ -73,12 +81,41 @@ const classRoomSessionSchema = zod
     assessmentId: zod.string().optional(),
     sessionType: zod.enum([CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE, CLASS_ROOM_PLATFORM.LIVE]),
   })
-  .superRefine(({ startDate, endDate, qrCode, sessionType, location, channelInfo }, ctx) => {
+  .superRefine(({ startDate, endDate, qrCode, sessionType, location, channelInfo, channelProvider }, ctx) => {
+    if (startDate && !dayjs(startDate).isValid()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ngày bắt đầu không hợp lệ.",
+        path: ["startDate"],
+      });
+    }
+
+    if (endDate && !dayjs(endDate).isValid()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ngày kết thúc không hợp lệ.",
+        path: ["startDate"],
+      });
+    }
+    if (dayjs(startDate).isBefore(dayjs())) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ngày bắt đầu phải lớn hơn ngày hiện tại",
+        path: ["startDate"],
+      });
+    }
+    if (dayjs(endDate).isBefore(dayjs())) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Ngày kết thúc phải lớn hơn ngày hiện tại",
+        path: ["endDate"],
+      });
+    }
     if (dayjs(startDate).isAfter(endDate)) {
       ctx.addIssue({
         code: "custom",
         message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
-        path: ["startDate"],
+        path: ["endDate"],
       });
     }
     /**
@@ -93,8 +130,34 @@ const classRoomSessionSchema = zod
           path: ["channelInfo", "url"],
         });
       }
-      if (channelInfo.url.length) {
-        if (!channelInfo.url.startsWith("http://") && !channelInfo.url.startsWith("https://")) {
+      //   https://meet.google.com/
+      // https://app.zoom.us/
+
+      const isTeams = teamsRegex.test(channelInfo.url);
+      if (channelProvider === "zoom") {
+        const isZoom = zoomRegex.test(channelInfo.url);
+        if (!isZoom) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Link tham dự không hợp lệ.",
+            path: ["channelInfo", "url"],
+          });
+        }
+      }
+      if (channelProvider === "google_meet") {
+        const isGoogleMeet = googleMeetRegex.test(channelInfo.url);
+        if (!isGoogleMeet) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Link tham dự không hợp lệ.",
+            path: ["channelInfo", "url"],
+          });
+        }
+      }
+      if (channelProvider === "microsoft_teams") {
+        const isTeams = teamsRegex.test(channelInfo.url);
+
+        if (!isTeams) {
           ctx.addIssue({
             code: "custom",
             message: "Link tham dự không hợp lệ.",
@@ -153,11 +216,14 @@ const classRoomSessionSchema = zod
       }
     }
   });
-
+const TITLE_CLASS_ROOM_MAX_LENGTH = 100;
 const classRoomSchema = zod
   .object({
     classRoomId: zod.string(),
-    title: zod.string().min(1, { message: "Tên lớp học không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
+    title: zod
+      .string()
+      .min(1, { message: "Tên lớp học không bỏ trống." })
+      .max(TITLE_CLASS_ROOM_MAX_LENGTH, `Tiêu đề tối đa ${TITLE_CLASS_ROOM_MAX_LENGTH} ký tự.`),
     slug: zod.string(),
     description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),
     thumbnailUrl: zod

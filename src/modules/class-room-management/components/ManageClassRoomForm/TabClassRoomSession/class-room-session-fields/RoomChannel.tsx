@@ -7,6 +7,7 @@ import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
 import RHFSelectField from "@/shared/ui/form/RHFSelectField";
 import { alpha, FormControl, FormLabel, MenuItem, MenuList, Select, styled } from "@mui/material";
+import { LinkIcon } from "@/shared/assets/icons";
 
 interface RoomChannelProps {
   control: Control<ClassRoom>;
@@ -89,6 +90,7 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
         control={control}
         required
         label="Link tham dự"
+        startAdornment={<LinkIcon className="w-5 h-5" />}
         placeholder="https://..."
       />
       {value !== "google_meet" ? (
