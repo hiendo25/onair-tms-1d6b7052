@@ -1,5 +1,5 @@
-import { Permission, Resources } from "@/constants/permission.constant";
-import { employeesRepository, organizationsRepository, permissionRepository } from "@/repository";
+import { buildPermission, Permission, Resources } from "@/constants/permission.constant";
+import { employeesRepository, permissionRepository } from "@/repository";
 export class UserOrganizationService {
   private userId;
 
@@ -14,22 +14,17 @@ export class UserOrganizationService {
   }
 
   async getPermissions() {
-    const { data: userRoles, error } = await permissionRepository.getUserRolesByUserId(this.userId);
+    const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
 
-    const permissions: Permission[] = [];
-
-    if (userRoles) {
-      userRoles.forEach((ur) => {
-        ur.role.role_permissions.forEach((rolePer) => {
-          const resource = rolePer.group_permission.resource_code as Resources;
-          const resourceAction = `${resource}:${rolePer.action_code}` as Permission;
-          permissions.push(resourceAction);
-        });
-      });
-    }
-
-    return permissions;
+    return userRoles
+      ? userRoles.reduce((sumPers, ur): Permission[] => {
+          const pers = ur.role.role_permissions.reduce((subPers, rolePer): Permission[] => {
+            const resource = rolePer.group_permission.resource_code as Resources;
+            const perAction = buildPermission(resource, rolePer.action_code);
+            return [...subPers, perAction];
+          }, []);
+          return [...sumPers, ...pers];
+        }, [])
+      : [];
   }
-
-  private buildResourceAction(resource: Resources, action: any) {}
 }

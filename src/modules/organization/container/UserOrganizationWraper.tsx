@@ -1,6 +1,6 @@
 import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
 import { redirect, RedirectType } from "next/navigation";
-import { PermissionProvider2 } from "@/modules/roles/store/PermissionsProvider";
+import { PermissionProviderV2 } from "@/modules/roles/store/PermissionsProvider";
 import { authRepository } from "@/repository";
 import { UserOrganizationService } from "@/services/organization/user-organization.service";
 
@@ -39,7 +39,7 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
           : null,
       }}
     >
-      <PermissionProvider2 permissions={permissions}>{children}</PermissionProvider2>;
+      <PermissionProviderV2 permissions={permissions}>{children}</PermissionProviderV2>;
     </UserOrganizationProvider>
   );
 };

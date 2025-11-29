@@ -59,13 +59,14 @@ export const PermissionProvider: React.FC<{
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
 };
 
-type PermissionContextValue2 = {
+type PermissionContextValueV2 = {
   permissions: Permission[];
-  hasPermissions: (condition: ResourcePermission) => boolean;
+  hasPermissions: (conditions: ResourcePermission) => boolean;
+  hasPermission: (resource: Resources, action: PermissionActions) => boolean;
 };
 
-export const PermissionContext2 = createContext<PermissionContextValue2 | null>(null);
-export const PermissionProvider2: React.FC<{
+export const PermissionContextV2 = createContext<PermissionContextValueV2 | null>(null);
+export const PermissionProviderV2: React.FC<{
   children: React.ReactNode;
   permissions: Permission[];
 }> = ({ children, permissions }) => {
@@ -79,26 +80,25 @@ export const PermissionProvider2: React.FC<{
     [persMap],
   );
 
-  const checkCondition = useCallback(
-    (condition: ResourcePermission): boolean => {
-      return condition.every((item) => {
-        if ("$or" in item) {
-          // If it has $or, at least one of the nested conditions must be true
-          return checkCondition(item.$or);
-        }
-        // Regular permission check
-        return hasOnePer(item.resource, item.action);
-      });
+  const checkOneCond = useCallback(
+    (condition: ResourcePermission[number]): boolean => {
+      if ("$or" in condition) {
+        return condition.$or.reduce((hasPer, cond) => hasPer || checkOneCond(cond), false);
+      }
+      return hasOnePer(condition.resource, condition.action);
     },
     [hasOnePer],
   );
 
   const hasPermissions = useCallback(
-    (condition: ResourcePermission) => {
-      return checkCondition(condition);
+    (conditions: ResourcePermission) => {
+      return conditions.reduce((hasPer, cond) => hasPer && checkOneCond(cond), false);
     },
-    [checkCondition],
+    [checkOneCond],
   );
-
-  return <PermissionContext2.Provider value={{ permissions, hasPermissions }}>{children}</PermissionContext2.Provider>;
+  return (
+    <PermissionContextV2.Provider value={{ permissions, hasPermissions, hasPermission: hasOnePer }}>
+      {children}
+    </PermissionContextV2.Provider>
+  );
 };
