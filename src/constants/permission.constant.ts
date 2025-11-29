@@ -7,9 +7,13 @@ export type TPermissionActions = Database["public"]["Enums"]["action_code_enum"]
 import { PermissionActions as PerActions } from "@/model/permission.model";
 
 export type Resources = keyof typeof RESOURCES;
+
 export const RESOURCES = {
   classroom: "classroom",
+  employee: "employee",
   department: "department",
+  course: "course",
+  assignment: "assignment",
 } as const;
 
 export type Permission = BuildPermission<Resources, TPermissionActions>;

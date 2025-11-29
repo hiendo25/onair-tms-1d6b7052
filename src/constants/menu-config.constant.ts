@@ -14,7 +14,11 @@ import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import React from "react";
 import { PATHS } from "./path.contstants";
+import { ResourcePermission } from "./permission.constant";
 
+type MenuItemTypeWithPer = MenuItemType & {
+  resourcePers?: ResourcePermission;
+};
 const ADMIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Dashboard",
@@ -22,6 +26,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     key: "dashboard",
     path: PATHS.DASHBOARD,
     type: "item",
+    // resourcePers: [],
   },
   {
     title: "Quản lý tổ chức",
@@ -29,6 +34,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     key: "manage-organization",
     path: "/manage-organization",
     type: "item",
+    // resourcePers: [],
     children: [
       {
         title: "Quản lý Chi nhánh",
@@ -62,6 +68,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     key: "manage-class",
     path: PATHS.CLASSROOMS.ROOT,
     type: "item",
+    // resourcePers: [],
     children: [
       {
         title: "Tạo lớp học",
@@ -91,6 +98,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     icon: React.createElement(ClipboardIcon),
     key: "assignments",
     path: PATHS.ASSIGNMENTS.ROOT,
+    // resourcePers: [],
     children: [
       {
         title: "Tạo bài kiểm tra",
@@ -111,6 +119,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     icon: React.createElement(StickyNote2OutlinedIcon),
     key: "plans",
     path: PATHS.PLANS.ROOT,
+    // resourcePers: [],
     children: [
       {
         title: "Danh sách kế hoạch",
