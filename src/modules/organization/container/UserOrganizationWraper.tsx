@@ -1,15 +1,15 @@
 import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
 import { redirect, RedirectType } from "next/navigation";
-import { PermissionProvider } from "@/modules/roles/store/PermissionsProvider";
-import { getUserPermissions } from "@/repository/permissions";
+import { PermissionProvider2 } from "@/modules/roles/store/PermissionsProvider";
 import { authRepository } from "@/repository";
-import { organizationsRepository } from "@/repository";
+import { UserOrganizationService } from "@/services/organization/user-organization.service";
 
 const UserOrganizationWraper = async ({ children }: { readonly children: React.ReactNode }) => {
   const currentUser = await authRepository.ensureGetCurrentUser();
-  const employeeDetail = await organizationsRepository.getEmployeeDetailInfoByUserId(currentUser.id);
+  const userOrganization = new UserOrganizationService(currentUser.id);
 
-  const permissions = await getUserPermissions(currentUser.id);
+  const employeeDetail = await userOrganization.getEmployeeDetail();
+  const permissions = await userOrganization.getPermissions();
 
   if (!employeeDetail || !employeeDetail.organizations) {
     await authRepository.authServerSignOut();
@@ -39,7 +39,7 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
           : null,
       }}
     >
-      <PermissionProvider initialData={permissions}>{children}</PermissionProvider>;
+      <PermissionProvider2 permissions={permissions}>{children}</PermissionProvider2>;
     </UserOrganizationProvider>
   );
 };
