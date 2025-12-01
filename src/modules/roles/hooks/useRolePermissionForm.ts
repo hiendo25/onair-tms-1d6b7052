@@ -100,7 +100,7 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
       permSet.forEach((permCode) => {
         if (!originalPermSet.has(permCode)) {
           created.push({
-            group_permission_id: moduleId,
+            resource_code: moduleId,
             action_code: permCode,
           });
         }
@@ -113,7 +113,7 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
       permSet.forEach((permCode) => {
         if (!currentPermSet.has(permCode)) {
           deleted.push({
-            group_permission_id: moduleId,
+            resource_code: moduleId,
             action_code: permCode,
           });
         }

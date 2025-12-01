@@ -8,7 +8,6 @@ import { useCreateRole } from "@/modules/roles/operations/mutation";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { PATHS } from "@/constants/path.contstants";
-import ManageRoleForm from "@/modules/roles/components/ManageRoleForm";
 
 const CreateRolePage = () => {
   const router = useRouter();
@@ -16,8 +15,6 @@ const CreateRolePage = () => {
   const userInfo = useUserOrganization((state) => state.data);
 
   const { data: permissionModules, isLoading } = useGetGroupPermissionList();
-
-  console.log({ permissionModules });
   const { mutate: createRoleMutate, isPending } = useCreateRole();
 
   const handleSubmit = (data: RoleParams & RolePermissionsParams) => {
@@ -42,24 +39,35 @@ const CreateRolePage = () => {
   };
 
   return (
-    <PageContainer
-      title="Tạo mới vai trò & phân quyền"
-      breadcrumbs={[
-        { title: "Quản lý vai trò", path: PATHS.ROLE.ROOT },
-        { title: "Tạo vai trò", path: PATHS.ROLE.CREATE },
-      ]}
-    >
-      <ManageRoleForm />
-      <RoleFormContainer
-        isEditMode={false}
-        initialData={{
-          id: "",
-          name: "",
-          description: "",
-          // modules: [],
+    <PageContainer title="Tạo mới vai trò & phân quyền">
+      <Backdrop
+        open={isPending}
+        sx={{
+          position: "absolute",
+          zIndex: 1,
+          bgcolor: "rgba(255, 255, 255, 0.7)",
+          borderRadius: 1,
         }}
-        onSubmit={handleSubmit}
-      />
+      >
+        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+          <CircularProgress size={40} />
+          <Typography variant="body2" color="text.secondary">
+            Đang cập nhật quyền...
+          </Typography>
+        </Box>
+      </Backdrop>
+      {permissionModules && (
+        <RoleFormContainer
+          isEditMode={false}
+          initialData={{
+            id: "",
+            name: "",
+            description: "",
+            modules: permissionModules || [],
+          }}
+          onSubmit={handleSubmit}
+        />
+      )}
     </PageContainer>
   );
 };
