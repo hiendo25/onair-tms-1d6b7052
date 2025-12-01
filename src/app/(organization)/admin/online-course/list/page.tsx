@@ -1,8 +1,8 @@
 "use server";
 import PageContainer from "@/shared/ui/PageContainer";
-import CourseListContainer from "./_components/CourseListContainer";
 import { PATHS } from "@/constants/path.contstants";
 import { Metadata, ResolvingMetadata } from "next";
+import CourseTableList from "./_components/CourseTableList";
 
 type CreateCoursePageProps = {
   searchParams: Promise<Record<string, any>>;
@@ -33,7 +33,7 @@ const OnlineCourseListPage = () => {
         },
       ]}
     >
-      <CourseListContainer />
+      <CourseTableList />
     </PageContainer>
   );
 };

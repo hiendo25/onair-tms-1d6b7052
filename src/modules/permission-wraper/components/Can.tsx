@@ -1,4 +1,5 @@
 "use client";
+import { memo } from "react";
 import { usePermissions } from "../store/permission-context";
 import { PermissionsCheck } from "@/constants/permission.constant";
 
@@ -9,6 +10,7 @@ interface CanProps {
 const Can: React.FC<CanProps> = ({ children, pers }) => {
   const { hasPermissions } = usePermissions();
   const hasPer = hasPermissions(pers);
-  return hasPer ? null : children;
+
+  return hasPer ? children : null;
 };
-export default Can;
+export default memo(Can);

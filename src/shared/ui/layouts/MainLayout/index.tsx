@@ -55,7 +55,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className, menuItems 
     >
       <DashboardSidebar
         expanded={isNavigationExpanded}
-        setExpanded={setIsNavigationExpanded}
+        setExpanded={handleToggleHeaderMenu}
         container={layoutRef.current ?? undefined}
         className="main-layout__sider"
         menuItems={menuItems}

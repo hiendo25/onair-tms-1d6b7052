@@ -1,8 +1,8 @@
-import { PermissionActions, TPermissionActions } from "@/constants/permission.constant";
+import { PermissionActions } from "@/model/permission.model";
 
 export interface ActionOption {
   label: string;
-  code: TPermissionActions;
+  code: PermissionActions;
 }
 
 export interface PermissionModule {
@@ -18,16 +18,14 @@ export interface RoleFormData {
   description: string;
   // selectedPermissions: Set<string> // Set of `${moduleId}_${permCode}`
   // originalSelectedPermissions: Set<string>; // For tracking changes
-  selectedPermissions: Map<string, Set<TPermissionActions>>; // Map of moduleId to Set of permCodes
-  originalSelectedPermissions: Map<string, Set<TPermissionActions>>; // For tracking changes
-  modules: Record<string, PermissionModule>
+  selectedPermissions: Map<string, Set<PermissionActions>>; // Map of moduleId to Set of permCodes
+  originalSelectedPermissions: Map<string, Set<PermissionActions>>; // For tracking changes
+  modules: Record<string, PermissionModule>;
 }
 
-export const ACTION_OPTIONS = [
-   { label: "Xem", code: PermissionActions.READ },
-   { label: "Thêm", code: PermissionActions.CREATE },
-   { label: "Chỉnh sửa", code: PermissionActions.UPDATE },
-   { label: "Xoá", code: PermissionActions.DELETE },
-]
-
-
+export const ACTION_OPTIONS: ActionOption[] = [
+  { label: "Xem", code: "read" },
+  { label: "Thêm", code: "create" },
+  { label: "Chỉnh sửa", code: "update" },
+  { label: "Xoá", code: "delete" },
+];

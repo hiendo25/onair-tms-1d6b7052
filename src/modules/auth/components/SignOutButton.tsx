@@ -9,21 +9,12 @@ interface SignOutButtonProps {
   btnText?: string;
   className?: string;
 }
-const SignOutButton: React.FC<SignOutButtonProps> = ({
-  type,
-  btnText = "Đăng xuất",
-  className,
-}) => {
+const SignOutButton: React.FC<SignOutButtonProps> = ({ type, btnText = "Đăng xuất", className }) => {
   const { signOut, isPending } = useAuthSignOut();
 
   if (type === "icon") {
     return (
-      <IconButton
-        size="small"
-        onClick={signOut}
-        loading={isPending}
-        className={cn("", className)}
-      >
+      <IconButton size="small" onClick={signOut} loading={isPending} className={cn("", className)}>
         <LogoutRoundedIcon fontSize="small" />
       </IconButton>
     );
@@ -35,7 +26,7 @@ const SignOutButton: React.FC<SignOutButtonProps> = ({
       variant="fill"
       color="inherit"
       startIcon={<LogoutRoundedIcon fontSize="small" />}
-      className={cn("h-12 justify-self-start", className)}
+      className={cn("h-10 justify-self-start", className)}
     >
       {btnText}
     </Button>

@@ -27,4 +27,21 @@ export class UserOrganizationService {
         }, [])
       : [];
   }
+
+  async getRolesPermissions() {
+    const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
+    const pers = userRoles?.reduce<Permissions[]>((sumPers, ur) => {
+      const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
+        const resource = rolePer.group_permission.resource_code as Resources;
+        const perAction = buildPermission(resource, rolePer.action_code);
+        return [...subPers, perAction];
+      }, []);
+      return [...sumPers, ...pers];
+    }, []);
+
+    return {
+      permissions: pers || [],
+      roles: userRoles?.map((urRole) => urRole.role.code) || [],
+    };
+  }
 }

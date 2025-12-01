@@ -1,5 +1,5 @@
-import { TPermissionActions } from "@/constants/permission.constant";
 import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
+import { PermissionActions } from "@/model/permission.model";
 import { supabase } from "@/services";
 import { slugify } from "@/utils/slugify";
 
@@ -76,15 +76,15 @@ export async function getRolePermissions(roleCode: string): Promise<RoleFormData
   if (groupPermsError) return Promise.reject(groupPermsError);
   if (!groupPerms) return Promise.reject("No group permissions found");
 
-  const selectedPermissions = new Map<string, Set<TPermissionActions>>();
+  const selectedPermissions = new Map<string, Set<PermissionActions>>();
 
   const grouped = groupPerms.reduce((acc, gp) => {
     (gp.role_permissions || []).forEach((rp) => {
       const exist = selectedPermissions.get(gp.id);
       if (exist) {
-        exist.add(rp.action_code as TPermissionActions);
+        exist.add(rp.action_code as PermissionActions);
       } else {
-        selectedPermissions.set(gp.id, new Set([rp.action_code as TPermissionActions]));
+        selectedPermissions.set(gp.id, new Set([rp.action_code as PermissionActions]));
       }
     });
 
@@ -115,7 +115,7 @@ export interface RoleParams {
 
 export interface PermissionParams {
   group_permission_id: string;
-  action_code: TPermissionActions;
+  action_code: PermissionActions;
 }
 export interface RolePermissionsParams {
   roleId?: string;

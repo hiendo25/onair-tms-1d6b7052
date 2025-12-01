@@ -1,3 +1,4 @@
+"use client";
 import { buildPermission, Resources, ResourcesActions } from "@/constants/permission.constant";
 import { PermissionActions } from "@/model/permission.model";
 import { useCallback, useMemo } from "react";
@@ -8,7 +9,9 @@ import PermissionGuard from "../components/PermissionGuard";
 export const PermissionProvider: React.FC<{
   children: React.ReactNode;
   permissions: Permissions[];
-}> = ({ children, permissions }) => {
+  roles: string[];
+}> = ({ children, permissions, roles }) => {
+  const isSuperAdmin = roles.some((it) => it === "super_admin");
   const persMap = useMemo(() => new Map(permissions.map((per) => [per, per])), [permissions]);
 
   const hasOnePer = useCallback(
@@ -31,19 +34,24 @@ export const PermissionProvider: React.FC<{
 
   const hasResources = useCallback(
     (conditions: ResourcesActions) => {
+      if (isSuperAdmin) return true;
       return conditions.reduce((hasPer, cond) => hasPer && checkOneCond(cond), false);
     },
-    [checkOneCond],
+    [checkOneCond, isSuperAdmin],
   );
 
-  const hasPermissions = useCallback((persCheck: PermissionsCheck) => {
-    return persCheck.reduce((hasPer, per) => {
-      if (typeof per === "object" && "$or" in per) {
-        return hasPer || persMap.has(per.$or);
-      }
-      return hasPer && persMap.has(per);
-    }, false);
-  }, []);
+  const hasPermissions = useCallback(
+    (persCheck: PermissionsCheck) => {
+      if (isSuperAdmin) return true;
+      return persCheck.reduce((hasPer, per) => {
+        if (typeof per === "object" && "$or" in per) {
+          return hasPer || persMap.has(per.$or);
+        }
+        return hasPer && persMap.has(per);
+      }, false);
+    },
+    [isSuperAdmin, persMap],
+  );
 
   return (
     <PermissionContext.Provider value={{ permissions, hasPermissions, hasResources }}>

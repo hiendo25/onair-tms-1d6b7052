@@ -9,7 +9,7 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
   const userOrganization = new UserOrganizationService(currentUser.id);
 
   const employeeDetail = await userOrganization.getEmployeeDetail();
-  const permissions = await userOrganization.getPermissions();
+  const { roles, permissions } = await userOrganization.getRolesPermissions();
 
   if (!employeeDetail || !employeeDetail.organizations) {
     await authRepository.authServerSignOut();
@@ -39,7 +39,10 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
           : null,
       }}
     >
-      <PermissionProvider permissions={permissions}>{children}</PermissionProvider>;
+      <PermissionProvider permissions={permissions} roles={roles}>
+        {children}
+      </PermissionProvider>
+      ;
     </UserOrganizationProvider>
   );
 };
