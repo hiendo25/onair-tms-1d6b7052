@@ -1,16 +1,9 @@
 import { useTMutation } from "@/lib";
 import { classRoomRepository } from "@/repository";
+import chunk from "lodash/chunk";
 
 const DELETE_BATCH_SIZE = 500;
 const DELETE_BATCH_CONCURRENCY = 3;
-
-const chunkIds = (ids: string[], size: number) => {
-    const chunks: string[][] = [];
-    for (let i = 0; i < ids.length; i += size) {
-        chunks.push(ids.slice(i, i + size));
-    }
-    return chunks;
-};
 
 export const useDeleteClassRoomMutation = () => {
     return useTMutation({
@@ -30,7 +23,7 @@ export const useDeleteUserInClassRoomMutation = () => {
 
             const uniqueIds = Array.from(new Set(validIds));
 
-            const batches = chunkIds(uniqueIds, DELETE_BATCH_SIZE);
+            const batches = chunk(uniqueIds, DELETE_BATCH_SIZE);
 
             for (let i = 0; i < batches.length; i += DELETE_BATCH_CONCURRENCY) {
                 const parallelBatches = batches.slice(i, i + DELETE_BATCH_CONCURRENCY);
