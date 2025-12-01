@@ -19,7 +19,7 @@ export class UserOrganizationService {
     return userRoles
       ? userRoles.reduce<Permissions[]>((sumPers, ur) => {
           const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
-            const resource = rolePer.group_permission.resource_code as Resources;
+            const resource = rolePer.resource_code as Resources;
             const perAction = buildPermission(resource, rolePer.action_code);
             return [...subPers, perAction];
           }, []);
@@ -32,7 +32,7 @@ export class UserOrganizationService {
     const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
     const pers = userRoles?.reduce<Permissions[]>((sumPers, ur) => {
       const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
-        const resource = rolePer.group_permission.resource_code as Resources;
+        const resource = rolePer.resource_code as Resources;
         const perAction = buildPermission(resource, rolePer.action_code);
         return [...subPers, perAction];
       }, []);

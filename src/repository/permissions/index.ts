@@ -11,7 +11,7 @@ export async function getUserRolesByUserId(userId: string) {
 				role:roles (
 					id, title, code,
 					role_permissions (
-						group_permission (resource_code),
+						resource_code,
 						action_code
 					)
 				)
