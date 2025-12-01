@@ -1,6 +1,17 @@
 import { useTMutation } from "@/lib";
 import { classRoomRepository } from "@/repository";
 
+const DELETE_BATCH_SIZE = 500;
+const DELETE_BATCH_CONCURRENCY = 3;
+
+const chunkIds = (ids: string[], size: number) => {
+    const chunks: string[][] = [];
+    for (let i = 0; i < ids.length; i += size) {
+        chunks.push(ids.slice(i, i + size));
+    }
+    return chunks;
+};
+
 export const useDeleteClassRoomMutation = () => {
     return useTMutation({
         mutationFn: (classRoomId: string) => classRoomRepository.deleteClassRoomById(classRoomId),
@@ -9,7 +20,30 @@ export const useDeleteClassRoomMutation = () => {
 
 export const useDeleteUserInClassRoomMutation = () => {
     return useTMutation({
-        mutationFn: (payload: { class_room_id: string, employeeIds: string[] }) => classRoomRepository.deletePivotClassRoomAndEmployeeByEmployeeId(payload),
+        mutationFn: async (payload: { class_room_id: string, employeeIds: string[] }) => {
+            const { class_room_id, employeeIds } = payload;
+            const validIds = (employeeIds ?? []).filter(Boolean);
+
+            if (validIds.length === 0) {
+                return;
+            }
+
+            const uniqueIds = Array.from(new Set(validIds));
+
+            const batches = chunkIds(uniqueIds, DELETE_BATCH_SIZE);
+
+            for (let i = 0; i < batches.length; i += DELETE_BATCH_CONCURRENCY) {
+                const parallelBatches = batches.slice(i, i + DELETE_BATCH_CONCURRENCY);
+                await Promise.all(
+                    parallelBatches.map((batch) =>
+                        classRoomRepository.deletePivotClassRoomAndEmployeeByEmployeeId({
+                            class_room_id,
+                            employeeIds: batch,
+                        }),
+                    ),
+                );
+            }
+        },
     });
 };
 
