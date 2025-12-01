@@ -1,201 +1,59 @@
-"use client";
-import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
-import { UserPermissions } from "@/repository/permissions";
-import React, {
-  createContext,
-  memo,
-  PropsWithChildren,
-  use,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { buildPermission, Permission, ResourcePermission, Resources } from "@/constants/permission.constant";
-import { PermissionActions } from "@/model/permission.model";
-import { useParams, usePathname, useRouter } from "next/navigation";
-import { PATHS_WITH_PERMISSIONS } from "@/constants/path-with-permissions";
-import { PATHS } from "@/constants/path.contstants";
-export type PemissionCheck = {
-  resource: string;
-  action: string;
-};
+// "use client";
+// import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
+// import { UserPermissions } from "@/repository/permissions";
+// import React, { createContext, useContext, useMemo, useRef } from "react";
 
-type PermissionContextValue = {
-  roles: string[];
-  permissions: Set<string>;
-  hasPermission: (resource: string, action: string) => boolean;
-  hasPermissions: (perms: PemissionCheck[]) => boolean;
-  isInRole: (role: string) => boolean;
-};
+// export type PemissionCheck = {
+//   resource: string;
+//   action: string;
+// };
 
-export const PermissionContext = createContext<PermissionContextValue | null>(null);
+// type PermissionContextValue = {
+//   roles: string[];
+//   permissions: Set<string>;
+//   hasPermission: (resource: string, action: string) => boolean;
+//   hasPermissions: (perms: PemissionCheck[]) => boolean;
+//   isInRole: (role: string) => boolean;
+// };
 
-export function usePermissions() {
-  const ctx = useContext(PermissionContext);
-  if (!ctx) throw new Error("usePermissions must be used within PermissionProvider");
-  return ctx;
-}
+// export const PermissionContext = createContext<PermissionContextValue | null>(null);
 
-export const PermissionProvider: React.FC<{
-  children: React.ReactNode;
-  initialData: UserPermissions;
-}> = ({ children, initialData }) => {
-  const roles = useRef(initialData.roles).current;
-  const permissions = useRef(initialData.permissions).current;
-
-  const hasPermission = (resource: string, action: string) => {
-    if (roles.includes(IMMUTABLE_ROLES.SUPER_ADMIN)) return true;
-    return permissions.has(`${resource}:${action}`);
-  };
-
-  const hasPermissions = (perms: PemissionCheck[]) => {
-    if (roles.includes(IMMUTABLE_ROLES.SUPER_ADMIN)) return true;
-    if (perms.length === 0) return true;
-    return perms.every((perm) => hasPermission(perm.resource, perm.action));
-  };
-
-  const isInRole = (role: string) => roles.some((r) => r === role);
-
-  const value = useMemo<PermissionContextValue>(
-    () => ({
-      roles,
-      permissions,
-      hasPermission,
-      hasPermissions,
-      isInRole,
-    }),
-    [roles, permissions],
-  );
-
-  return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
-};
-
-type PermissionContextValueV2 = {
-  permissions: Permission[];
-  hasPermissions: (conditions: ResourcePermission) => boolean;
-  hasPermission: (resource: Resources, action: PermissionActions) => boolean;
-};
-
-export const PermissionContextV2 = createContext<PermissionContextValueV2 | null>(null);
-export const PermissionProviderV2: React.FC<{
-  children: React.ReactNode;
-  permissions: Permission[];
-}> = ({ children, permissions }) => {
-  const persMap = new Map(permissions.map((per) => [per, per]));
-
-  const hasOnePer = useCallback(
-    (resource: Resources, action: PermissionActions) => {
-      const perAction = buildPermission(resource, action);
-      return persMap.has(perAction);
-    },
-    [persMap],
-  );
-
-  const checkOneCond = useCallback(
-    (condition: ResourcePermission[number]): boolean => {
-      if ("$or" in condition) {
-        return condition.$or.reduce((hasPer, cond) => hasPer || checkOneCond(cond), false);
-      }
-      return hasOnePer(condition.resource, condition.action);
-    },
-    [hasOnePer],
-  );
-
-  const hasPermissions = useCallback(
-    (conditions: ResourcePermission) => {
-      return conditions.reduce((hasPer, cond) => hasPer && checkOneCond(cond), false);
-    },
-    [checkOneCond],
-  );
-  console.log("render");
-  return (
-    <PermissionContextV2.Provider value={{ permissions, hasPermissions, hasPermission: hasOnePer }}>
-      <ProtectRoute>{children}</ProtectRoute>
-    </PermissionContextV2.Provider>
-  );
-};
-const userPermissionsV2 = () => {
-  const context = use(PermissionContextV2);
-  if (!context) {
-    throw new Error(`userPermissionsV2 must use under PermissionProviderV2`);
-  }
-  return context;
-};
-interface ProtectRouteProps extends PropsWithChildren {}
-const ProtectRoute: React.FC<ProtectRouteProps> = memo(({ children }) => {
-  const { hasPermissions } = userPermissionsV2();
-  const [isValidPerm, setIsValidPerm] = useState(true);
-  const pathname = usePathname();
-  const params = useParams();
-  console.log(params);
-  const router = useRouter();
-
-  const pathhhhh = getPathPermissions(pathname);
-  console.log(pathhhhh);
-  useEffect(() => {
-    const perms = PATHS_WITH_PERMISSIONS[pathname] || [];
-
-    if (!perms || !perms.length) {
-      setIsValidPerm(true);
-      return;
-    }
-
-    if (!hasPermissions(perms)) {
-      setIsValidPerm(false);
-      router.push(PATHS.DASHBOARD);
-    } else {
-      setIsValidPerm(true);
-    }
-  }, [pathname]);
-
-  return isValidPerm ? children : null;
-});
-
-/**
- * Get permissions required for a given path
- * Supports both exact match and pattern matching for dynamic routes
- */
-export function getPathPermissions(pathname: string): ResourcePermission | null | undefined {
-  // First try exact match
-  if (pathname in PATHS_WITH_PERMISSIONS) {
-    const perm = PATHS_WITH_PERMISSIONS[pathname];
-    return typeof perm === "function" ? perm() : perm;
-  }
-
-  // Then try pattern matching for dynamic routes
-  for (const [pattern, permissions] of Object.entries(PATHS_WITH_PERMISSIONS)) {
-    if (pattern.includes(":")) {
-      // Convert route pattern to regex (e.g., "/classrooms/:id/edit" -> /^\/classrooms\/[^\/]+\/edit$/)
-      const regexPattern = pattern.replace(/:[^\/]+/g, "[^/]+");
-      const regex = new RegExp(`^${regexPattern}$`);
-
-      if (regex.test(pathname)) {
-        return typeof permissions === "function" ? permissions() : permissions;
-      }
-    }
-  }
-
-  return null;
-}
-
-// /**
-//  * Check if user has access to a path
-//  * @param pathname - The path to check
-//  * @param hasPermissions - Function from usePermissions hook to check permissions
-//  * @returns true if user has access, false otherwise
-//  */
-// export function canAccessPath(pathname: string, hasPermissions: (perms: ResourcePermission) => boolean): boolean {
-//   const requiredPermissions = getPathPermissions(pathname);
-
-//   // If no permissions defined, path is not configured (deny by default)
-//   if (requiredPermissions === null) return false;
-
-//   // Empty array means public access
-//   if (requiredPermissions.length === 0) return true;
-
-//   // Check if user has required permissions
-//   return hasPermissions(requiredPermissions);
+// export function usePermissions() {
+//   const ctx = useContext(PermissionContext);
+//   if (!ctx) throw new Error("usePermissions must be used within PermissionProvider");
+//   return ctx;
 // }
+
+// export const PermissionProvider: React.FC<{
+//   children: React.ReactNode;
+//   initialData: UserPermissions;
+// }> = ({ children, initialData }) => {
+//   const roles = useRef(initialData.roles).current;
+//   const permissions = useRef(initialData.permissions).current;
+
+//   const hasPermission = (resource: string, action: string) => {
+//     if (roles.includes(IMMUTABLE_ROLES.SUPER_ADMIN)) return true;
+//     return permissions.has(`${resource}:${action}`);
+//   };
+
+//   const hasPermissions = (perms: PemissionCheck[]) => {
+//     if (roles.includes(IMMUTABLE_ROLES.SUPER_ADMIN)) return true;
+//     if (perms.length === 0) return true;
+//     return perms.every((perm) => hasPermission(perm.resource, perm.action));
+//   };
+
+//   const isInRole = (role: string) => roles.some((r) => r === role);
+
+//   const value = useMemo<PermissionContextValue>(
+//     () => ({
+//       roles,
+//       permissions,
+//       hasPermission,
+//       hasPermissions,
+//       isInRole,
+//     }),
+//     [roles, permissions],
+//   );
+
+//   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
+// };

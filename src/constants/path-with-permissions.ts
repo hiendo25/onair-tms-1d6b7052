@@ -30,7 +30,7 @@ export const PATHS_WITH_PERMISSIONS: PathWithPermissions = {
   [PATHS.CLASSROOMS.CREATE_CLASSROOM]: [{ resource: "classroom", action: "create" }],
   [PATHS.COURSES.CREATE]: [{ resource: "course", action: "create" }],
   // For dynamic paths, you can use a function
-  "/admin/online-course/:id/edit": [{ resource: "course", action: "update" }],
+  [PATHS.COURSES.EDIT()]: [{ resource: "course", action: "update" }],
   //  "/admin/online-course/:id/edit": () => [{ resource: "course", action: "update" }],
   // Or if EDIT_CLASSROOM is a function that returns a path:
   // You can define it as a pattern matcher
