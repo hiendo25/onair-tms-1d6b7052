@@ -1,4 +1,4 @@
-import { buildPermission, Permission, Resources } from "@/constants/permission.constant";
+import { buildPermission, Permissions, Resources } from "@/constants/permission.constant";
 import { employeesRepository, permissionRepository } from "@/repository";
 export class UserOrganizationService {
   private userId;
@@ -17,8 +17,8 @@ export class UserOrganizationService {
     const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
 
     return userRoles
-      ? userRoles.reduce((sumPers, ur): Permission[] => {
-          const pers = ur.role.role_permissions.reduce((subPers, rolePer): Permission[] => {
+      ? userRoles.reduce<Permissions[]>((sumPers, ur) => {
+          const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
             const resource = rolePer.group_permission.resource_code as Resources;
             const perAction = buildPermission(resource, rolePer.action_code);
             return [...subPers, perAction];

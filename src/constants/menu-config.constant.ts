@@ -2,7 +2,6 @@ import {
   ClassIcon,
   ClipboardIcon,
   GitIcon,
-  HelpIcon,
   SquareFourIcon,
   UsersIcon,
   MonitorIcon,
@@ -14,19 +13,20 @@ import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import React from "react";
 import { PATHS } from "./path.contstants";
-import { ResourcePermission } from "./permission.constant";
+import { PermissionsCheck } from "./permission.constant";
+import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions";
 
 type MenuItemTypeWithPer = MenuItemType & {
-  resourcePers?: ResourcePermission;
+  persCheck?: (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_PERMISSIONS];
 };
-const ADMIN_MENU_LIST: MenuItemType[] = [
+const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
     key: "dashboard",
     path: PATHS.DASHBOARD,
     type: "item",
-    // resourcePers: [],
+    persCheck: PATHS_WITH_PERMISSIONS["DASHBOARD"],
   },
   {
     title: "Quản lý tổ chức",
@@ -34,7 +34,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     key: "manage-organization",
     path: "/manage-organization",
     type: "item",
-    // resourcePers: [],
+    persCheck: [],
     children: [
       {
         title: "Quản lý Chi nhánh",
@@ -68,7 +68,6 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     key: "manage-class",
     path: PATHS.CLASSROOMS.ROOT,
     type: "item",
-    // resourcePers: [],
     children: [
       {
         title: "Tạo lớp học",
@@ -98,7 +97,6 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     icon: React.createElement(ClipboardIcon),
     key: "assignments",
     path: PATHS.ASSIGNMENTS.ROOT,
-    // resourcePers: [],
     children: [
       {
         title: "Tạo bài kiểm tra",
@@ -119,7 +117,6 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     icon: React.createElement(StickyNote2OutlinedIcon),
     key: "plans",
     path: PATHS.PLANS.ROOT,
-    // resourcePers: [],
     children: [
       {
         title: "Danh sách kế hoạch",
