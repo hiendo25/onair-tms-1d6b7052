@@ -114,9 +114,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       return (
         <>
           <div
-            className={cn("gap-3 border-b border-gray-200", {
+            className={cn("gap-3 border-b border-gray-200 mb-3", {
               "py-6 px-6 flex justify-between items-center": !mini,
-              "py-6 px-3 text-center": mini,
+              "pt-6 pb-4 px-3 text-center": mini,
             })}
           >
             <Link href="/" className="flex-1 block">

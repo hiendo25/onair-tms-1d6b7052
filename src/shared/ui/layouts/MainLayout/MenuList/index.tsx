@@ -105,7 +105,7 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
           flexDirection: "column",
           gap: 0,
           marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
-          borderLeft: mini ? undefined : "2px solid #cdcdcd",
+          // borderLeft: mini ? undefined : "2px solid #cdcdcd",
           padding: mini ? 1 : 0.5,
           width: mini ? 220 : "auto",
         };

@@ -14,7 +14,7 @@ const SignOutButton: React.FC<SignOutButtonProps> = ({ type, btnText = "Đăng x
 
   if (type === "icon") {
     return (
-      <IconButton size="small" onClick={signOut} loading={isPending} className={cn("", className)}>
+      <IconButton size="small" onClick={signOut} loading={isPending} className={cn("rounded-lg", className)}>
         <LogoutRoundedIcon fontSize="small" />
       </IconButton>
     );

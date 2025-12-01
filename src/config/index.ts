@@ -1,1 +1,1 @@
-export const SITE_NAME = "LMS" as const;
+export const SITE_NAME = "TMS" as const;

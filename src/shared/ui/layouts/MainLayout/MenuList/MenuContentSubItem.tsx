@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Typography, Paper, ListItemText, ListItemButton, Collapse, Grow, Box, ListItem } from "@mui/material";
-import { type Theme, SxProps } from "@mui/material/styles";
+import { type Theme, alpha, SxProps } from "@mui/material/styles";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -78,49 +78,75 @@ export default function MenuContentSubItem({
     };
   }, [onMenuItemClick]);
 
-  const getListItemSx = React.useCallback((): SxProps<Theme> => {
-    let listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2 };
+  const getListItemSx = React.useCallback(
+    (mini: boolean, selected: boolean): SxProps<Theme> => {
+      let listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2 };
 
-    if (mini) {
-      listItemSx = {
-        ...listItemSx,
-        width: "auto",
-        padding: "4px 8px",
-        "& .MuiButtonBase-root": {
-          minHeight: "auto",
-          padding: "6px 20px 6px 12px",
-          textAlign: "left",
-          borderRadius: 1,
-          opacity: 0.6,
-        },
-      };
-    } else {
-      listItemSx = {
-        ...listItemSx,
-        overflowX: "hidden",
-        marginLeft: "-2px",
-        "& .MuiButtonBase-root": {
-          minHeight: 42,
-          padding: "6px 6px 6px 18px",
-          borderRadius: 0,
-          opacity: 0.7,
-          borderLeft: "2px solid transparent",
-          ["&:hover"]: {
-            backgroundColor: "transparent",
-          },
-          [`&.Mui-selected`]: {
-            backgroundColor: "transparent",
-            borderLeftColor: "black",
-            opacity: 1,
-            ["&:hover"]: {
-              backgroundColor: "transparent",
-            },
-          },
-        },
-      };
-    }
-    return listItemSx;
-  }, [mini]);
+      return (theme) => ({
+        ...(mini
+          ? {
+              ...listItemSx,
+              width: "auto",
+              padding: "4px 8px",
+              "& .MuiButtonBase-root": {
+                minHeight: "auto",
+                padding: "6px 20px 6px 12px",
+                textAlign: "left",
+                borderRadius: 1,
+                opacity: 0.6,
+              },
+            }
+          : {
+              ...listItemSx,
+              overflowX: "hidden",
+              // marginLeft: "-2px",
+              "& .MuiButtonBase-root": {
+                minHeight: 42,
+                padding: "6px 6px 6px 18px",
+                borderRadius: 1,
+                opacity: 0.7,
+                // borderLeft: "2px solid transparent",
+                ["&:hover"]: {
+                  backgroundColor: "transparent",
+                  opacity: 1,
+                },
+                // "&.Mui-selected": {
+                //   backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                //   opacity: 1,
+                //   ".MuiTypography-root": {
+                //     color: theme.palette.primary.main,
+                //     fontWeight: 500,
+                //   },
+                //   svg: {
+                //     color: theme.palette.primary.main,
+                //   },
+                // },
+                [`&.Mui-selected`]: {
+                  backgroundColor: "transparent",
+                  borderLeftColor: "black",
+                  opacity: 1,
+                  ["&:hover"]: {
+                    backgroundColor: "transparent",
+                  },
+                },
+              },
+              position: "relative",
+              [":after"]: {
+                content: '" "',
+                width: selected ? "8px" : "4px",
+                height: selected ? "8px" : "4px",
+                background: selected ? theme.palette.primary["main"] : theme.palette.grey[600],
+                borderRadius: "50%",
+                display: "table",
+                top: "calc(50% - 2px)",
+                left: 0,
+                position: "absolute",
+              },
+            }),
+      });
+    },
+    [mini],
+  );
   return (
     <React.Fragment>
       <ListItem
@@ -135,7 +161,7 @@ export default function MenuContentSubItem({
               },
             }
           : {})}
-        sx={getListItemSx()}
+        sx={getListItemSx(mini, selected)}
       >
         <ListItemButton
           selected={selected}
@@ -183,7 +209,7 @@ export default function MenuContentSubItem({
           {!mini ? (
             <ListItemText
               primary={title}
-              sx={{
+              sx={(theme) => ({
                 WebkitLineClamp: 2,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
@@ -192,7 +218,7 @@ export default function MenuContentSubItem({
                 textAlign: "left",
                 zIndex: 1,
                 margin: 0,
-              }}
+              })}
             />
           ) : null}
           {nestedNavigation ? <ExpandMoreIcon sx={nestedNavigationCollapseSx} /> : null}
