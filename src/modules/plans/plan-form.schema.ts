@@ -1,16 +1,4 @@
 import * as zod from "zod";
-import { Dayjs } from "dayjs";
-
-// Helper schema to accept both Dayjs objects and strings for date fields
-const dateFieldSchema = zod
-  .union([
-    zod.string(),
-    zod.custom<Dayjs>((val) => {
-      // Check if it's a Dayjs object by checking for the format method
-      return val && typeof val === "object" && "format" in val;
-    }),
-  ])
-  .optional();
 
 // Survey schema for optional survey selection
 export const surveySchema = zod.object({
@@ -34,18 +22,19 @@ export const topicSchema = zod.object({
 
 export const trainingProgramSchema = zod.object({
   name: zod.string().min(1, { message: "Tên chương trình không được bỏ trống." }),
-  startDate: dateFieldSchema,
-  endDate: dateFieldSchema,
+  startDate: zod.string().optional().nullable(),
+  endDate: zod.string().optional().nullable(),
   description: zod.string().optional(),
   topics: zod.array(topicSchema).optional(),
+  courses: zod.array(courseSchema).optional(), // Cho phép gán môn học trực tiếp khi không có chủ đề
 });
 
 export const planSchema = zod.object({
   info: zod.object({
     name: zod.string().min(1, { message: "Tên kế hoạch không được bỏ trống." }),
     objective: zod.string().optional(),
-    startDate: dateFieldSchema,
-    endDate: dateFieldSchema,
+    startDate:  zod.string().optional().nullable(),
+    endDate: zod.string().optional().nullable(),
     budget: zod.number().optional(),
     survey: surveySchema.optional(), // Optional survey selection
   }),
@@ -57,4 +46,3 @@ export type Course = zod.infer<typeof courseSchema>;
 export type Topic = zod.infer<typeof topicSchema>;
 export type TrainingProgram = zod.infer<typeof trainingProgramSchema>;
 export type PlanFormSchema = zod.infer<typeof planSchema>;
-

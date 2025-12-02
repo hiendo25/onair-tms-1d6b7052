@@ -4,10 +4,10 @@ import * as React from "react";
 import { Box, Typography } from "@mui/material";
 
 interface PlanStatisticsProps {
-  programsCount: number;
-  topicsCount: number;
-  coursesCount: number;
-  instructorsCount: number;
+  programsCount?: number;
+  topicsCount?: number;
+  coursesCount?: number;
+  instructorsCount?: number;
 }
 
 export default function PlanStatistics({
@@ -30,7 +30,7 @@ export default function PlanStatistics({
     >
       <Box sx={{ textAlign: "center" }}>
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-          {programsCount}
+          {programsCount ?? 0}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           Chương trình
@@ -38,7 +38,7 @@ export default function PlanStatistics({
       </Box>
       <Box sx={{ textAlign: "center" }}>
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-          {topicsCount}
+          {topicsCount ?? 0}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           Chủ đề
@@ -46,7 +46,7 @@ export default function PlanStatistics({
       </Box>
       <Box sx={{ textAlign: "center" }}>
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-          {coursesCount}
+          {coursesCount ?? 0}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           Môn học
@@ -54,7 +54,7 @@ export default function PlanStatistics({
       </Box>
       <Box sx={{ textAlign: "center" }}>
         <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-          {instructorsCount}
+          {instructorsCount ?? 0}
         </Typography>
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           Giảng viên
@@ -63,4 +63,3 @@ export default function PlanStatistics({
     </Box>
   );
 }
-

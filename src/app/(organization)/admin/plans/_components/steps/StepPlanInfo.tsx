@@ -6,6 +6,7 @@ import { PlanFormSchema, Survey } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 
 // Mock surveys data
 const MOCK_SURVEYS: Survey[] = [
@@ -59,15 +60,13 @@ export default function StepPlanInfo({
               Từ ngày - Đến ngày
             </Typography>
             <Box sx={{ display: "flex", gap: 2 }}>
-              <RHFDatePicker
+              <RHFDateTimePicker
                 control={control}
                 name="info.startDate"
-                placeholder="Chọn ngày bắt đầu"
               />
-              <RHFDatePicker
+              <RHFDateTimePicker
                 control={control}
                 name="info.endDate"
-                placeholder="Chọn ngày kết thúc"
               />
             </Box>
           </Box>

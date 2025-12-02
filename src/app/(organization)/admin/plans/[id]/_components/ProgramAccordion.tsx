@@ -14,11 +14,10 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PersonIcon from "@mui/icons-material/Person";
-import { ProgramDetail } from "../../_components/mock-data";
+import { PlanProgramDetail } from "@/modules/plans/types";
 
 interface ProgramAccordionProps {
-  programs: ProgramDetail[];
+  programs: PlanProgramDetail[];
   programsCount: number;
 }
 
@@ -150,7 +149,7 @@ export default function ProgramAccordion({
                       {program.name}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                      {program.startDate} - {program.endDate}
+                      {program.startDate && program.endDate ? `${program.startDate} - ${program.endDate}` : "Chưa có lịch"}
                     </Typography>
 
                     {/* Program Description with Expand/Collapse */}
@@ -254,11 +253,11 @@ export default function ProgramAccordion({
                             py: 1.5,
                             pl: 2,
                           }}
-                        >
-                          {/* Topic Chip - Dynamically generated name */}
-                          <Chip
-                            label={`Chủ đề ${topicIndex + 1}`}
-                            size="small"
+                          >
+                            {/* Topic Chip - Dynamically generated name */}
+                            <Chip
+                              label={`Chủ đề ${topicIndex + 1}`}
+                              size="small"
                             variant="filled"
                             sx={{
                               bgcolor: "#212B36",
@@ -269,7 +268,7 @@ export default function ProgramAccordion({
                           />
                           {/* Topic Title */}
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {topic.title}
+                            {topic.name}
                           </Typography>
                         </Box>
 
@@ -377,62 +376,21 @@ export default function ProgramAccordion({
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                   {course.title}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  ({course.classesCount} lớp)
-                                </Typography>
                               </Box>
-
-                              {/* Classes List - Level 3 (Indented 64px total) */}
-                              <Stack spacing={0}>
-                                {course.classes.map((classInstance, classIndex) => (
-                                  <Box
-                                    key={classInstance.id}
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 1,
-                                      pl: 10,
-                                      pr: 2,
-                                      py: 1.5,
-                                    }}
-                                  >
-                                    {/* Lớp Label */}
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ minWidth: "30px", color: "text.secondary" }}
-                                    >
-                                      Lớp
-                                    </Typography>
-
-                                    {/* Class Code Chip */}
-                                    <Chip
-                                      label={classInstance.classCode}
-                                      size="small"
-                                      variant="outlined"
-                                      color="primary"
-                                    />
-
-                                    {/* Delivery Mode */}
-                                    <Typography variant="body2" sx={{ minWidth: "60px" }}>
-                                      {classInstance.deliveryMode}
-                                    </Typography>
-
-                                    {/* Instructor */}
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-                                      <PersonIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                                      <Typography variant="body2">{classInstance.instructor}</Typography>
-                                    </Box>
-
-                                    {/* Date */}
-                                    <Typography variant="body2" sx={{ minWidth: "90px", textAlign: "right" }}>
-                                      {classInstance.date}
-                                    </Typography>
-                                  </Box>
-                                ))}
-                              </Stack>
                             </Box>
                           ))}
                         </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                ) : program.courses && program.courses.length > 0 ? (
+                  <Stack spacing={1} sx={{ p: 2 }}>
+                    {program.courses.map((course) => (
+                      <Box key={course.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {course.title}
+                        </Typography>
                       </Box>
                     ))}
                   </Stack>
@@ -452,4 +410,3 @@ export default function ProgramAccordion({
     </Card>
   );
 }
-

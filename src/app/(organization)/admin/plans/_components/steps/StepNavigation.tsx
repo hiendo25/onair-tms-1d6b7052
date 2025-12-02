@@ -3,6 +3,7 @@
 import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CheckIcon from "@mui/icons-material/Check";
+import { PlanStepId } from "@/modules/plans/plan-step.utils";
 
 export interface Step {
   id: number;
@@ -14,8 +15,8 @@ interface StepNavigationProps {
   steps: Step[];
   currentStep: number;
   completedSteps: number[];
-  onStepClick: (stepId: number) => void;
-  isStepAccessible: (stepId: number) => boolean;
+  onStepClick: (stepId: PlanStepId) => void;
+  isStepAccessible: (stepId: PlanStepId) => boolean;
 }
 
 export default function StepNavigation({
@@ -31,7 +32,7 @@ export default function StepNavigation({
         <CardContent>
           <Stack spacing={2}>
             {steps.map((step) => {
-              const accessible = isStepAccessible(step.id);
+              const accessible = isStepAccessible(step.id as PlanStepId);
               const isCompleted = completedSteps.includes(step.id);
               const isCurrent = currentStep === step.id;
 
@@ -47,7 +48,7 @@ export default function StepNavigation({
                     cursor: accessible ? "pointer" : "not-allowed",
                     opacity: accessible ? 1 : 0.5,
                   }}
-                  onClick={() => onStepClick(step.id)}
+                  onClick={() => onStepClick(step.id as PlanStepId)}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <Box

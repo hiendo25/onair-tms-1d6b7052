@@ -6,25 +6,20 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PersonIcon from "@mui/icons-material/Person";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import { formatCurrencyV2 } from "@/utils/format-number";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 
 interface PlanInfoCardsProps {
-  budget: number;
-  approver: string;
-  startDate: string;
-  objective: string;
+  budget: number | null;
+  approver: string | null;
+  createdAt: string | null;
+  objective: string | null;
 }
-
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
-};
 
 export default function PlanInfoCards({
   budget,
   approver,
-  startDate,
+  createdAt,
   objective,
 }: PlanInfoCardsProps) {
   return (
@@ -51,9 +46,15 @@ export default function PlanInfoCards({
               <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
                 Ngân sách dự kiến
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {formatCurrency(budget)}
-              </Typography>
+              {budget ? (
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {formatCurrencyV2(budget)}
+                </Typography>
+              ) : (
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  —
+                </Typography>
+              )}
             </Box>
           </Box>
 
@@ -77,7 +78,7 @@ export default function PlanInfoCards({
                 Người phê duyệt
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {approver}
+                {approver ?? "Chưa xác định"}
               </Typography>
             </Box>
           </Box>
@@ -103,7 +104,7 @@ export default function PlanInfoCards({
               Ngày tạo
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {startDate}
+              {fDateTime(createdAt,FORMAT_DATE_TIME_CLEANER) ?? "Chưa xác định"}
             </Typography>
           </Box>
         </Box>
@@ -128,7 +129,7 @@ export default function PlanInfoCards({
               Mục tiêu hội nhập
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              {objective}
+              {objective ?? "Chưa cập nhật"}
             </Typography>
           </Box>
         </Box>
@@ -136,4 +137,3 @@ export default function PlanInfoCards({
     </Card>
   );
 }
-

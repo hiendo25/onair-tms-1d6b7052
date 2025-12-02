@@ -6,14 +6,21 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
 import { planSchema, PlanFormSchema } from "@/modules/plans/plan-form.schema";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import StepNavigation, { Step } from "./StepNavigation";
-import StepPlanInfo from "./StepPlanInfo";
-import StepTrainingProgram from "./StepTrainingProgram";
-import StepTrainingTopics from "./StepTrainingTopics";
-import StepApproval from "./StepApproval";
-import StepAssignCourses from "./StepAssignCourses";
+import StepPlanInfo from "./steps/StepPlanInfo";
+import StepTrainingProgram from "./steps/StepTrainingProgram";
+import StepApproval from "./steps/StepApproval";
+import StepAssignCourses from "./steps/StepAssignCourses";
+import StepNavigation from "./steps/StepNavigation";
+import {
+  canAccessPlanStep,
+  getNextPlanStepId,
+  getPlanInitialCompletedSteps,
+  getPrevPlanStepId,
+  PLAN_STEPS,
+  PlanStepId,
+  validatePlanStep,
+} from "@/modules/plans/plan-step.utils";
+import StepTrainingTopics from "./steps/StepTrainingTopics";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
@@ -22,189 +29,94 @@ interface PlanFormProps {
   initialData?: PlanFormSchema;
 }
 
-const STEPS: Step[] = [
-  {
-    id: 1,
-    label: "Thông tin kế hoạch",
-    description: "Mục tiêu, thời gian và ngân sách",
-  },
-  {
-    id: 2,
-    label: "Chương trình đào tạo",
-    description: "Chương trình đào tạo của bạn",
-  },
-  {
-    id: 3,
-    label: "Chủ đề",
-    description: "Chương trình đào tạo của bạn",
-  },
-  {
-    id: 4,
-    label: "Gửi duyệt đề xuất",
-    description: "Gửi duyệt lên cấp phê duyệt",
-  },
-  {
-    id: 5,
-    label: "Gán môn học",
-    description: "Gán môn học vào kế hoạch được duyệt",
-  },
-];
-
 export default function PlanForm({
   onSubmit,
   isLoading = false,
   mode = "create",
   initialData,
 }: PlanFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-
-  // Helper function to determine which steps should be marked as completed based on initialData
-  const getInitialCompletedSteps = (): number[] => {
-    if (!initialData || mode === "create") return [];
-
-    const completed: number[] = [];
-
-    // Step 1: Check if plan info is filled
-    if (initialData.info?.name && initialData.info?.objective) {
-      completed.push(1);
-    }
-
-    // Step 2: Check if programs exist
-    if (initialData.programs && initialData.programs.length > 0) {
-      completed.push(2);
-    }
-
-    // Step 3: Check if all programs have topics
-    if (initialData.programs && initialData.programs.length > 0) {
-      const allProgramsHaveTopics = initialData.programs.every(
-        program => program.topics && program.topics.length > 0
-      );
-      if (allProgramsHaveTopics) {
-        completed.push(3);
-      }
-    }
-
-    // Step 4: In edit mode, if we have data for steps 1-3, mark step 4 as completed too
-    if (completed.includes(1) && completed.includes(2) && completed.includes(3)) {
-      completed.push(4);
-    }
-
-    // Step 5: In edit mode, if we have data for steps 1-4, mark step 5 as completed too
-    // Step 5 has no validation requirements, so it's automatically completed in edit mode
-    if (completed.includes(1) && completed.includes(2) && completed.includes(3) && completed.includes(4)) {
-      completed.push(5);
-    }
-
-    return completed;
-  };
-
-  const [completedSteps, setCompletedSteps] = useState<number[]>(getInitialCompletedSteps());
+  const [currentStep, setCurrentStep] = useState<PlanStepId>(PLAN_STEPS[0]?.id as PlanStepId);
+  const [completedSteps, setCompletedSteps] = useState<PlanStepId[]>(
+    getPlanInitialCompletedSteps(mode, initialData),
+  );
 
   const defaultValues: PlanFormSchema = initialData || {
     info: {
       name: "",
       objective: "",
-      startDate: undefined,
-      endDate: undefined,
+      startDate: null,
+      endDate: null,
       budget: undefined,
     },
     programs: [],
   };
 
-  const { control, handleSubmit, formState: { errors }, trigger, getValues, setError, clearErrors } = useForm<PlanFormSchema>({
+  const methods = useForm<PlanFormSchema>({
     resolver: zodResolver(planSchema),
     defaultValues,
   });
 
-  const getStepFieldName = (stepId: number): "info" | "programs" | undefined => {
-    switch (stepId) {
-      case 1:
-        return "info";
-      case 2:
-      case 3:
-        return "programs";
-      default:
-        return undefined;
-    }
-  };
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    trigger,
+  } = methods;
+
+  const triggerStepValidation = React.useCallback(
+    (stepId: PlanStepId) => validatePlanStep(stepId, trigger),
+    [trigger],
+  );
 
   const handleContinue = async () => {
-    // Step 3: Custom validation to ensure all programs have at least 1 topic
-    if (currentStep === 3) {
-      const programs = getValues("programs");
-      let hasError = false;
+    const isValid = await triggerStepValidation(currentStep);
+    if (!isValid) return;
 
-      // Clear previous errors
-      programs.forEach((_, index) => {
-        clearErrors(`programs.${index}.topics`);
-      });
+    setCompletedSteps((prev) => (prev.includes(currentStep) ? prev : [...prev, currentStep]));
 
-      // Check each program for topics
-      programs.forEach((program, index) => {
-        if (!program.topics || program.topics.length === 0) {
-          setError(`programs.${index}.topics`, {
-            type: "manual",
-            message: "Mỗi chương trình cần có ít nhất 1 chủ đề.",
-          });
-          hasError = true;
-        }
-      });
-
-      if (hasError) {
-        return; // Don't proceed if validation fails
-      }
-    }
-
-    // Standard validation for other steps
-    const fieldName = getStepFieldName(currentStep);
-    const isValid = fieldName ? await trigger(fieldName) : true;
-    if (isValid) {
-      if (!completedSteps.includes(currentStep)) {
-        setCompletedSteps([...completedSteps, currentStep]);
-      }
-      setCurrentStep(currentStep + 1);
+    const nextStep = getNextPlanStepId(currentStep);
+    if (nextStep) {
+      setCurrentStep(nextStep);
     }
   };
 
   const handleBack = () => {
-    setCurrentStep(currentStep - 1);
+    const previousStep = getPrevPlanStepId(currentStep);
+    if (previousStep) {
+      setCurrentStep(previousStep);
+    }
   };
 
-  const handleStepClick = async (stepId: number) => {
-    const accessible = isStepAccessible(stepId);
+  const handleStepClick = async (stepId: PlanStepId) => {
+    const accessible = canAccessPlanStep(stepId, completedSteps);
     if (!accessible) return;
 
     if (stepId !== currentStep) {
-      const currentFieldName = getStepFieldName(currentStep);
-      const isValid = currentFieldName ? await trigger(currentFieldName) : true;
-      if (!isValid && completedSteps.includes(currentStep)) {
-        setCompletedSteps(completedSteps.filter(s => s !== currentStep));
-      } else if (isValid && !completedSteps.includes(currentStep)) {
-        setCompletedSteps([...completedSteps, currentStep]);
-      }
+      const isValid = await triggerStepValidation(currentStep);
+      setCompletedSteps((prev) => {
+        const hasStep = prev.includes(currentStep);
+        if (isValid && !hasStep) {
+          return [...prev, currentStep];
+        }
+        if (!isValid && hasStep) {
+          return prev.filter((s) => s !== currentStep);
+        }
+        return prev;
+      });
     }
 
     setCurrentStep(stepId);
 
-    // Mark Step 5 as completed when navigating to it in edit mode
-    // Step 5 has no validation requirements, so it's automatically completed
     if (mode === "edit" && stepId === 5 && !completedSteps.includes(5)) {
-      setCompletedSteps([...completedSteps, 5]);
+      setCompletedSteps((prev) => [...prev, 5]);
     }
 
     if (completedSteps.includes(stepId)) {
-      const stepFieldName = getStepFieldName(stepId);
-      const isStepValid = stepFieldName ? await trigger(stepFieldName) : true;
+      const isStepValid = await triggerStepValidation(stepId);
       if (!isStepValid) {
-        setCompletedSteps(completedSteps.filter(s => s !== stepId));
+        setCompletedSteps((prev) => prev.filter((s) => s !== stepId));
       }
     }
-  };
-
-  const isStepAccessible = (stepId: number) => {
-    if (stepId === 1) return true;
-    // Step 5 (Gán môn học) is now accessible in both create and edit mode
-    return completedSteps.includes(stepId - 1);
   };
 
   const renderStepContent = () => {
@@ -243,10 +155,7 @@ export default function PlanForm({
             onBack={handleBack}
             onSubmit={handleSubmit(onSubmit)}
             onContinue={() => {
-              // Mark Step 4 as completed before navigating to Step 5
-              if (!completedSteps.includes(4)) {
-                setCompletedSteps([...completedSteps, 4]);
-              }
+              setCompletedSteps((prev) => (prev.includes(4) ? prev : [...prev, 4]));
               setCurrentStep(5);
             }}
             isLoading={isLoading}
@@ -269,23 +178,20 @@ export default function PlanForm({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-      <Box sx={{ display: "flex", gap: 3 }}>
-        <StepNavigation
-          steps={STEPS}
-          currentStep={currentStep}
-          completedSteps={completedSteps}
-          onStepClick={handleStepClick}
-          isStepAccessible={isStepAccessible}
-        />
+    <Box sx={{ display: "flex", gap: 3 }}>
+      <StepNavigation
+        steps={PLAN_STEPS}
+        currentStep={currentStep}
+        completedSteps={completedSteps}
+        onStepClick={handleStepClick}
+        isStepAccessible={(stepId) => canAccessPlanStep(stepId as PlanStepId, completedSteps)}
+      />
 
-        <Box sx={{ flex: 1 }}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {renderStepContent()}
-          </form>
-        </Box>
+      <Box sx={{ flex: 1 }}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+        {renderStepContent()}
+        </form>
       </Box>
-    </LocalizationProvider>
+    </Box>
   );
 }
-

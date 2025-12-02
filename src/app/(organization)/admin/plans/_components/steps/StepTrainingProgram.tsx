@@ -18,8 +18,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { PlanFormSchema, TrainingProgram, trainingProgramSchema } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
-import dayjs, { Dayjs } from "dayjs";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import { formatDateRange } from "../../helper";
 
 interface StepTrainingProgramProps {
   control: Control<PlanFormSchema>;
@@ -48,6 +48,7 @@ export default function StepTrainingProgram({
       endDate: undefined,
       description: "",
       topics: [],
+      courses: [],
     },
   });
 
@@ -58,6 +59,7 @@ export default function StepTrainingProgram({
       endDate: "",
       description: "",
       topics: [],
+      courses: [],
     });
     setEditingIndex(null);
     setShowForm(true);
@@ -78,26 +80,25 @@ export default function StepTrainingProgram({
 
   const handleSaveProgram = programForm.handleSubmit((data) => {
     if (editingIndex !== null) {
-      update(editingIndex, data);
+      const current = fields[editingIndex];
+      update(editingIndex, {
+        ...current,
+        ...data,
+        topics: current?.topics || [],
+        courses: current?.courses || [],
+      });
     } else {
-      append(data);
+      append({
+        ...data,
+        topics: data.topics || [],
+        courses: data.courses || [],
+      });
     }
     handleCancelForm();
   });
 
   const handleDeleteProgram = (index: number) => {
     remove(index);
-  };
-
-  const formatDateRange = (startDate?: string | Dayjs, endDate?: string | Dayjs) => {
-    if (!startDate || !endDate) return null;
-
-    // Convert to Dayjs if it's a string, or use directly if it's already a Dayjs object
-    const start = typeof startDate === "string" ? dayjs(startDate) : startDate;
-    const end = typeof endDate === "string" ? dayjs(endDate) : endDate;
-
-    if (!start.isValid() || !end.isValid()) return null;
-    return `${start.format("DD/MM/YYYY")} - ${end.format("DD/MM/YYYY")}`;
   };
 
   return (
@@ -152,20 +153,18 @@ export default function StepTrainingProgram({
                         <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
                           Ngày bắt đầu
                         </Typography>
-                        <RHFDatePicker
+                        <RHFDateTimePicker
                           control={programForm.control}
                           name="startDate"
-                          placeholder="22/12/2025"
                         />
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
                           Ngày kết thúc
                         </Typography>
-                        <RHFDatePicker
+                        <RHFDateTimePicker
                           control={programForm.control}
                           name="endDate"
-                          placeholder="22/12/2026"
                         />
                       </Box>
                     </Box>
@@ -307,20 +306,18 @@ export default function StepTrainingProgram({
                     <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
                       Ngày bắt đầu
                     </Typography>
-                    <RHFDatePicker
+                    <RHFDateTimePicker
                       control={programForm.control}
                       name="startDate"
-                      placeholder="22/12/2025"
                     />
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
                       Ngày kết thúc
                     </Typography>
-                    <RHFDatePicker
+                    <RHFDateTimePicker
                       control={programForm.control}
                       name="endDate"
-                      placeholder="22/12/2026"
                     />
                   </Box>
                 </Box>
@@ -379,4 +376,3 @@ export default function StepTrainingProgram({
     </Card>
   );
 }
-
