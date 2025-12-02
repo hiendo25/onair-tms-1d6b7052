@@ -1,12 +1,12 @@
 "use client";
 
 import { Autocomplete, Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
-import { Control, Controller, FieldErrors } from "react-hook-form";
-import { PlanFormSchema, Survey } from "@/modules/plans/plan-form.schema";
+import { Controller } from "react-hook-form";
+import { Survey } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 // Mock surveys data
 const MOCK_SURVEYS: Survey[] = [
@@ -19,18 +19,16 @@ const MOCK_SURVEYS: Survey[] = [
 ];
 
 interface StepPlanInfoProps {
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   onContinue: () => void;
   isLoading?: boolean;
 }
 
 export default function StepPlanInfo({
-  control,
-  errors,
   onContinue,
   isLoading = false,
 }: StepPlanInfoProps) {
+  const { control } = usePlanFormContext();
+
   return (
     <Card>
       <CardContent>
@@ -122,4 +120,3 @@ export default function StepPlanInfo({
     </Card>
   );
 }
-

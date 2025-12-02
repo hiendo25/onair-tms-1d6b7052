@@ -25,6 +25,7 @@ const getPlans = async ({ search, organizationId }: GetPlansParams) => {
     `,
     )
     .eq("organization_id", organizationId)
+    .not("status", "in", "(deleted)")
     .order("created_at", { ascending: false });
 
   if (search) {
@@ -124,7 +125,7 @@ const updatePlanRow = async (id: string, plan: TablesUpdate<"training_plans">) =
 };
 
 const deletePlan = async (id: string) => {
-  const { error } = await supabase.from("training_plans").delete().eq("id", id);
+  const { error } = await supabase.from("training_plans").update({status:"deleted"}).eq("id", id);
   if (error) throw new Error(error.message);
 };
 

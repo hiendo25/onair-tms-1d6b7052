@@ -10,28 +10,29 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { Control, FieldErrors, useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { PlanFormSchema, TrainingProgram, trainingProgramSchema } from "@/modules/plans/plan-form.schema";
+import { TrainingProgram, trainingProgramSchema } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { formatDateRange } from "../../helper";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface StepTrainingProgramProps {
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   onContinue: () => void;
 }
 
 export default function StepTrainingProgram({
-  control,
-  errors,
   onContinue,
 }: StepTrainingProgramProps) {
+  const {
+    control,
+    formState: { errors },
+  } = usePlanFormContext();
   const [showForm, setShowForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 

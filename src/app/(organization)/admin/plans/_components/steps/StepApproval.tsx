@@ -1,28 +1,21 @@
 "use client";
 
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
-import { Control, FieldErrors, useWatch } from "react-hook-form";
-import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { useWatch } from "react-hook-form";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface StepApprovalProps {
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   onBack: () => void;
-  onSubmit: () => void;
   onContinue?: () => void;
   isLoading?: boolean;
-  mode?: "create" | "edit";
 }
 
 export default function StepApproval({
-  control,
-  errors,
   onBack,
-  onSubmit,
   onContinue,
   isLoading = false,
-  mode = "create",
 }: StepApprovalProps) {
+  const { control } = usePlanFormContext();
   // Watch form values to display summary
   const formValues = useWatch({ control });
   const planName = formValues.info?.name || "";
@@ -109,4 +102,3 @@ export default function StepApproval({
     </Card>
   );
 }
-

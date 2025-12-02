@@ -11,28 +11,26 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Control, FieldErrors, useFieldArray, useWatch } from "react-hook-form";
-import { Course, PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { useFieldArray, useWatch } from "react-hook-form";
+import { Course } from "@/modules/plans/plan-form.schema";
 import TopicCard from "../shared/TopicCard";
 import { useGetPlanCourseOptionsQuery } from "@/modules/plans/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { formatDateRange } from "../../helper";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface StepAssignCoursesProps {
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   onBack: () => void;
   onSave: () => void;
   isLoading?: boolean;
 }
 
 export default function StepAssignCourses({
-  control,
-  errors,
   onBack,
   onSave,
   isLoading = false,
 }: StepAssignCoursesProps) {
+  const { control } = usePlanFormContext();
   const organizationId = useUserOrganization((state) => state.data.organization.id);
   const { data: availableCourses = [] } = useGetPlanCourseOptionsQuery(organizationId);
   const { fields: programs } = useFieldArray({
@@ -59,8 +57,6 @@ export default function StepAssignCourses({
                 program={program}
                 programIndex={programIndex}
                 dateRange={dateRange}
-                control={control}
-                errors={errors}
                 availableCourses={availableCourses}
               />
             );
@@ -92,8 +88,6 @@ interface ProgramCardProps {
   program: any;
   programIndex: number;
   dateRange: string | null;
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   availableCourses: Course[];
 }
 
@@ -101,10 +95,9 @@ function ProgramCard({
   program,
   programIndex,
   dateRange,
-  control,
-  errors,
   availableCourses,
 }: ProgramCardProps) {
+  const { control } = usePlanFormContext();
   const { fields: topics } = useFieldArray({
     control,
     name: `programs.${programIndex}.topics` as const,
@@ -156,7 +149,6 @@ function ProgramCard({
               topic={topic}
               programIndex={programIndex}
               topicIndex={topicIndex}
-              control={control}
               availableCourses={availableCourses}
             />
           ))
@@ -216,7 +208,6 @@ interface TopicCardProps {
   topic: any;
   programIndex: number;
   topicIndex: number;
-  control: Control<PlanFormSchema>;
   availableCourses: Course[];
 }
 
@@ -224,9 +215,9 @@ function TopicCardWithCourses({
   topic,
   programIndex,
   topicIndex,
-  control,
   availableCourses,
 }: TopicCardProps) {
+  const { control } = usePlanFormContext();
   const { replace } = useFieldArray({
     control,
     name: `programs.${programIndex}.topics.${topicIndex}.courses` as const,

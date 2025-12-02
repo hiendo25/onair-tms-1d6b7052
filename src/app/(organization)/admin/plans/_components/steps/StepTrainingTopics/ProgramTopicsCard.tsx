@@ -2,18 +2,17 @@
 
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import { Control, FieldArrayWithId, FieldErrors, useFieldArray, UseFormReturn } from "react-hook-form";
+import { FieldArrayWithId, useFieldArray, UseFormReturn } from "react-hook-form";
 import { PlanFormSchema, Topic } from "@/modules/plans/plan-form.schema";
 import { TopicForm } from "./TopicForm";
 import { EditingTopicState } from "./types";
 import TopicCard from "../../shared/TopicCard";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface ProgramTopicsCardProps {
   program: FieldArrayWithId<PlanFormSchema, "programs", "id">;
   programIndex: number;
   dateRange: string | null;
-  control: Control<PlanFormSchema>;
-  errors: FieldErrors<PlanFormSchema>;
   showFormForProgram: number | null;
   editingTopic: EditingTopicState;
   topicForm: UseFormReturn<Topic>;
@@ -26,8 +25,6 @@ export default function ProgramTopicsCard({
   program,
   programIndex,
   dateRange,
-  control,
-  errors,
   showFormForProgram,
   editingTopic,
   topicForm,
@@ -35,6 +32,10 @@ export default function ProgramTopicsCard({
   onEditTopic,
   onCancelForm,
 }: ProgramTopicsCardProps) {
+  const {
+    control,
+    formState: { errors },
+  } = usePlanFormContext();
   const { fields: topics, append, update, remove } = useFieldArray({
     control,
     name: `programs.${programIndex}.topics` as const,
