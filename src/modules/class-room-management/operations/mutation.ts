@@ -1,5 +1,9 @@
 import { useTMutation } from "@/lib";
 import { classRoomRepository } from "@/repository";
+import chunk from "lodash/chunk";
+
+const DELETE_BATCH_SIZE = 500;
+const DELETE_BATCH_CONCURRENCY = 3;
 
 export const useDeleteClassRoomMutation = () => {
     return useTMutation({
@@ -9,7 +13,30 @@ export const useDeleteClassRoomMutation = () => {
 
 export const useDeleteUserInClassRoomMutation = () => {
     return useTMutation({
-        mutationFn: (payload: { class_room_id: string, employeeIds: string[] }) => classRoomRepository.deletePivotClassRoomAndEmployeeByEmployeeId(payload),
+        mutationFn: async (payload: { class_room_id: string, employeeIds: string[] }) => {
+            const { class_room_id, employeeIds } = payload;
+            const validIds = (employeeIds ?? []).filter(Boolean);
+
+            if (validIds.length === 0) {
+                return;
+            }
+
+            const uniqueIds = Array.from(new Set(validIds));
+
+            const batches = chunk(uniqueIds, DELETE_BATCH_SIZE);
+
+            for (let i = 0; i < batches.length; i += DELETE_BATCH_CONCURRENCY) {
+                const parallelBatches = batches.slice(i, i + DELETE_BATCH_CONCURRENCY);
+                await Promise.all(
+                    parallelBatches.map((batch) =>
+                        classRoomRepository.deletePivotClassRoomAndEmployeeByEmployeeId({
+                            class_room_id,
+                            employeeIds: batch,
+                        }),
+                    ),
+                );
+            }
+        },
     });
 };
 

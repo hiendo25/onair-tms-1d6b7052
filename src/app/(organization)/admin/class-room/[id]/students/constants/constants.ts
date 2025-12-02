@@ -1,4 +1,5 @@
 export const STUDENT_TABLE_HEAD = [
+  { id: "select", label: "", width: 64, align: "center" as const },
   { id: "name", label: "Họ và tên", width: 240, align: "left" as const },
   { id: "email", label: "Email", width: 220, align: "left" as const },
   { id: "phone", label: "Số điện thoại", width: 160, align: "left" as const },

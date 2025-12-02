@@ -1,9 +1,10 @@
 "use client";
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
   Button,
+  Checkbox,
   Chip,
   CircularProgress,
   IconButton,
@@ -23,6 +24,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { grey } from "@mui/material/colors";
 import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "../constants/constants";
 import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
@@ -38,7 +40,7 @@ import { useDeleteUserInClassRoomMutation, useExportStudentsMutation, useMarkAtt
 import { useQueryClient } from "@tanstack/react-query";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from "@mui/icons-material/Download";
 import { SearchIcon } from "@/shared/assets/icons";
 import { StudentSessionsCollapseRow } from "./StudentSessionsCollapseRow";
 
@@ -78,9 +80,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const [page, setPage] = useState(1);
 
   const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE);
-  const [deletedComfirm, setDeleteConfirm] = useState(false);
-  const [employeeIds, setEmployeeIds] = useState<string[]>([]);
-  const [isAllowDeleteUser, setIsAllowDeleteUser] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set<string>());
+  const [classRoomRuntimeStatus, setClassRoomRuntimeStatus] = useState<string | null>(null);
   const [expandedStudentRows, setExpandedStudentRows] = useState<
     Record<string, boolean>
   >({});
@@ -91,7 +94,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
 
   const { data: organizationUnits = [] } = useGetOrganizationUnitsQuery();
 
-  const { mutateAsync: deleteUserInClassRoom, isPending } = useDeleteUserInClassRoomMutation();
+  const { mutateAsync: deleteUserInClassRoom, isPending: isDeletingStudents } = useDeleteUserInClassRoomMutation();
   const { mutateAsync: markAttendance, isPending: isMarkingAttendance } = useMarkAttendanceMutation();
   const { mutateAsync: exportStudents, isPending: isExporting } = useExportStudentsMutation();
 
@@ -151,6 +154,35 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const students = studentsResult?.data ?? [];
   const totalStudents = studentsResult?.total ?? 0;
 
+  useEffect(() => {
+    const runtimeStatus = students?.[0]?.class_rooms_priority?.runtime_status ?? null;
+    if (runtimeStatus) {
+      setClassRoomRuntimeStatus(runtimeStatus);
+    }
+  }, [students]);
+
+  useEffect(() => {
+    setSelectedEmployeeIds(new Set<string>());
+  }, [normalizedSearch, normalizedBranchId, normalizedDepartmentId, normalizedAttendance]);
+
+  const pageEmployeeIds = useMemo(
+    () =>
+      students
+        .map((student) => student.employee?.id)
+        .filter((employeeId): employeeId is string => Boolean(employeeId)),
+    [students],
+  );
+
+  const selectedCount = selectedEmployeeIds.size;
+  const isAllCurrentPageSelected =
+    pageEmployeeIds.length > 0 &&
+    pageEmployeeIds.every((employeeId) => selectedEmployeeIds.has(employeeId));
+  const isSomeCurrentPageSelected =
+    pageEmployeeIds.length > 0 &&
+    pageEmployeeIds.some((employeeId) => selectedEmployeeIds.has(employeeId));
+  const isDeleteLocked =
+    classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing";
+
   const exportFilters = useMemo(
     () => ({
       search: normalizedSearch,
@@ -199,26 +231,117 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     }));
   };
 
-  const handleOpenDialogDeleteUser = (employeeId: string, classRoomRuntimeStatus: any) => {
-    setDeleteConfirm(true);
-    if (classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing") {
-      setIsAllowDeleteUser(false);
-    } else {
-      setIsAllowDeleteUser(true);
+  const handleToggleStudentSelection = (employeeId?: string) => {
+    if (!employeeId) {
+      return;
     }
-    setEmployeeIds([employeeId]);
-  }
+    setSelectedEmployeeIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(employeeId)) {
+        next.delete(employeeId);
+      } else {
+        next.add(employeeId);
+      }
+      return next;
+    });
+  };
+
+  const handleToggleSelectAllCurrentPage = (checked: boolean) => {
+    if (pageEmployeeIds.length === 0) {
+      return;
+    }
+
+    setSelectedEmployeeIds((prev) => {
+      const next = new Set(prev);
+      pageEmployeeIds.forEach((employeeId) => {
+        if (checked) {
+          next.add(employeeId);
+        } else {
+          next.delete(employeeId);
+        }
+      });
+      return next;
+    });
+  };
+
+  const handleClearSelection = () => {
+    setSelectedEmployeeIds(new Set<string>());
+  };
+
+  const handleOpenDialogDeleteUser = (employeeId?: string, runtimeStatus?: string | null) => {
+    if (!employeeId) {
+      notifications.show("Không thể xác định học viên để gỡ.", {
+        severity: "error",
+      });
+      return;
+    }
+
+    if (runtimeStatus) {
+      setClassRoomRuntimeStatus(runtimeStatus);
+    }
+
+    setDeleteTargetIds([employeeId]);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedEmployeeIds.size === 0) {
+      return;
+    }
+    setDeleteTargetIds(Array.from(selectedEmployeeIds));
+    setDeleteConfirmOpen(true);
+  };
 
   const handleDeleteUser = async () => {
+    if (deleteTargetIds.length === 0) {
+      setDeleteConfirmOpen(false);
+      return;
+    }
+
+    if (isDeleteLocked) {
+      setDeleteConfirmOpen(false);
+      return;
+    }
+
     const payload = {
       class_room_id: classRoomId,
-      employeeIds,
+      employeeIds: deleteTargetIds,
+    };
+
+    try {
+      await deleteUserInClassRoom(payload);
+      queryClient.invalidateQueries({ queryKey: ["class-room-students"] });
+      queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] });
+      setSelectedEmployeeIds((prev) => {
+        const next = new Set(prev);
+        deleteTargetIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setDeleteTargetIds([]);
+      setDeleteConfirmOpen(false);
+      notifications.show(
+        `Đã gỡ ${payload.employeeIds.length} học viên khỏi lớp học.`,
+        {
+          severity: "success",
+        },
+      );
+    } catch (error) {
+      const fallbackMessage = "Không thể gỡ học viên. Vui lòng thử lại.";
+      const message =
+        error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
+      notifications.show(message, { severity: "error" });
     }
-    await deleteUserInClassRoom(payload);
-    queryClient.invalidateQueries({ queryKey: ["class-room-students"] })
-    queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] })
-    setDeleteConfirm(false);
-  }
+  };
+
+  const deleteConfirmationTitle = isDeleteLocked
+    ? "Không thể gỡ học viên khỏi lớp học"
+    : deleteTargetIds.length > 1
+      ? `Gỡ ${deleteTargetIds.length} học viên khỏi lớp học`
+      : "Xác nhận gỡ học viên khỏi lớp học";
+
+  const deleteConfirmationContent = isDeleteLocked
+    ? "Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khóa chức năng gỡ học viên để đảm bảo ổn định buổi học."
+    : `Bạn có chắc muốn gỡ ${deleteTargetIds.length > 1 ? `${deleteTargetIds.length} học viên` : "học viên này"} khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học.`;
 
   const handleMarkAttendance = async (classSessionId: string, employeeId?: string) => {
     if (!employeeId) {
@@ -416,6 +539,45 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
         </Alert>
       ) : null}
 
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        justifyContent="space-between"
+        spacing={1}
+      >
+        <Typography variant="body2" color="text.secondary">
+          {selectedCount > 0
+            ? `Đã chọn ${selectedCount} học viên`
+            : "Chưa chọn học viên nào"}
+        </Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleClearSelection}
+            disabled={selectedCount === 0}
+          >
+            Bỏ chọn
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            startIcon={<DeleteOutlineIcon />}
+            onClick={handleDeleteSelected}
+            disabled={selectedCount === 0 || isDeleteLocked || isDeletingStudents}
+          >
+            Gỡ học viên đã chọn
+          </Button>
+        </Stack>
+      </Stack>
+
+      {isDeleteLocked ? (
+        <Typography variant="body2" color="error">
+          Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khóa chức năng gỡ học viên.
+        </Typography>
+      ) : null}
+
       <Box
         sx={{
           border: "1px solid",
@@ -457,7 +619,19 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                     }}
                     align={column.align}
                   >
-                    {column.label}
+                    {column.id === "select" ? (
+                      <Checkbox
+                        checked={isAllCurrentPageSelected && pageEmployeeIds.length > 0}
+                        indeterminate={isSomeCurrentPageSelected && !isAllCurrentPageSelected}
+                        onChange={(event) =>
+                          handleToggleSelectAllCurrentPage(event.target.checked)
+                        }
+                        disabled={students.length === 0}
+                        inputProps={{ "aria-label": "Chọn tất cả học viên trong trang" }}
+                      />
+                    ) : (
+                      column.label
+                    )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -508,6 +682,8 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                   const sessions = student.class_rooms?.sessions ?? [];
                   const hasSessions = sessions.length > 0;
                   const isExpanded = Boolean(expandedStudentRows[student.id]);
+                  const employeeId = student.employee?.id;
+                  const isSelected = employeeId ? selectedEmployeeIds.has(employeeId) : false;
 
                   const toggleSessions = () => {
                     if (!hasSessions) {
@@ -526,6 +702,20 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                           },
                         }}
                       >
+                        <TableCell align="center">
+                          <Checkbox
+                            checked={isSelected}
+                            disabled={!employeeId}
+                            onChange={() => handleToggleStudentSelection(employeeId)}
+                            slotProps={
+                              {
+                                input:{
+                                  "aria-label": `Chọn ${student.employee?.profile?.full_name ?? "học viên"}`,
+                                }
+                              }
+                            }
+                          />
+                        </TableCell>
                         <TableCell>
                           <Stack
                             direction="row"
@@ -596,7 +786,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                                   <MenuItem
                                     onClick={() =>
                                       handleOpenDialogDeleteUser(
-                                        student.employee?.id as string,
+                                        student.employee?.id,
                                         student?.class_rooms_priority
                                           ?.runtime_status,
                                       )
@@ -658,16 +848,31 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       />
 
       <ConfirmDialog
-        open={deletedComfirm}
-        onClose={() => setDeleteConfirm(false)}
-        title={isAllowDeleteUser ? "Xác nhận gỡ học viên khỏi lớp học" : "Không thể gỡ học viên khỏi lớp học"}
-        content={isAllowDeleteUser ? "Bạn có chắc muốn gỡ học viên này khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học." : "Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khoá chức năng gỡ học viên để đảm bảo ổn định buổi học."}
+        open={deleteConfirmOpen}
+        onClose={() => {
+          if (!isDeletingStudents) {
+            setDeleteTargetIds([]);
+            setDeleteConfirmOpen(false);
+          }
+        }}
+        title={deleteConfirmationTitle}
+        content={deleteConfirmationContent}
         action={
-          <>
-            <Button variant="contained" color="error" onClick={handleDeleteUser} disabled={!isAllowDeleteUser}>
-              Gỡ học viên
-            </Button>
-          </>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteUser}
+            disabled={
+              isDeleteLocked || isDeletingStudents || deleteTargetIds.length === 0
+            }
+            startIcon={
+              isDeletingStudents ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+          >
+            {isDeletingStudents ? "Đang gỡ..." : "Gỡ học viên"}
+          </Button>
         }
       />
     </Stack>
