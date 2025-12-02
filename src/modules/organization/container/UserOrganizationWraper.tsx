@@ -42,7 +42,6 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
       <PermissionProvider permissions={permissions} roles={roles}>
         {children}
       </PermissionProvider>
-      ;
     </UserOrganizationProvider>
   );
 };
