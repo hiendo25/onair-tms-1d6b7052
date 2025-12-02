@@ -23,6 +23,7 @@ import {
 import { isUndefined } from "lodash";
 import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
 import dayjs from "dayjs";
+import { notificationService } from "..";
 
 export class UpsertClassRoomService {
   private userId: string;
@@ -55,6 +56,7 @@ export class UpsertClassRoomService {
       docs,
     } = formData;
 
+    const uniqueSlug = `${slug}-${new Date().getTime()}`;
     const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
     /**
      * Step 1: Create ClassRoom
@@ -64,7 +66,7 @@ export class UpsertClassRoomService {
       payload: {
         description: description,
         room_type: roomType,
-        slug: slug,
+        slug: uniqueSlug,
         status: status,
         thumbnail_url: thumbnailUrl,
         title: title,
@@ -133,6 +135,23 @@ export class UpsertClassRoomService {
     });
 
     console.log("Create Classroom", classRoomData);
+
+    Promise.allSettled(
+      students.map(async (student) => {
+        return notificationService.sendClassAssignedStudentNotification(student.id, student.email, {
+          userName: student.fullName,
+          className: title,
+          teacherName: "",
+          dateTime: dayjs().format("DD/MM/YYYY HH:mm"),
+          classDetailUrl: "",
+        });
+      }),
+    ).then((results) => {
+      const successCount = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
+      const failCount = results.length - successCount;
+      console.log(`[Notification] Class "${title}" - Sent: ${successCount}, Failed: ${failCount}`);
+    });
+
     return classRoomData;
   }
 
@@ -494,7 +513,7 @@ export class UpsertClassRoomService {
 
           if (sessionError) {
             console.log("Create Session failed", sessionError, _sessionIndex);
-            throw new Error("Create Classroom Session Failed");
+            throw new Error(`Create classroom session ${_sessionIndex} failed`);
           }
 
           /**
