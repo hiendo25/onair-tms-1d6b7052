@@ -1,9 +1,3 @@
-//  import { Constants, Database } from "@/types/supabase.types";
-// import { createEnum } from "@/utils";
-
-// export const PermissionActions = createEnum(Constants.public.Enums.action_code_enum);
-// export type TPermissionActions = Database["public"]["Enums"]["action_code_enum"];
-
 import { PermissionActions as PerActions } from "@/model/permission.model";
 type BuildPermission<R extends string, A extends string> = `${R}:${A}`;
 
@@ -15,7 +9,10 @@ export const RESOURCES = {
   department: "department",
   course: "course",
   assignment: "assignment",
-  role: "roles",
+  role: "role",
+  plan: "plan",
+  survey: "survey",
+  report: "report",
 } as const;
 
 export type Permissions = BuildPermission<Resources, PerActions>;

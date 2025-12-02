@@ -169,14 +169,14 @@ const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
     icon: React.createElement(ClipboardIcon),
     key: "my-assignments",
     path: PATHS.MY_ASSIGNMENTS.ROOT,
-    persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
+    persCheck: [],
   },
   {
     title: "Lớp học của tôi",
     icon: React.createElement(UsersIcon2),
     key: "my-class",
     path: PATHS.STUDENTS.ROOT,
-    persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
+    persCheck: [],
   },
 ];
 
