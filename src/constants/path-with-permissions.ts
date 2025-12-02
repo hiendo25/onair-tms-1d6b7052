@@ -73,5 +73,20 @@ export const PATHS_WITH_PERMISSIONS = {
   ],
   [PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT]: ["assignment:create"],
   [PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT()]: ["assignment:update"],
-  [PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT()]: ["assignment:update"],
+  [PATHS.ROLE.ROOT]: [
+    {
+      $or: "role:update",
+    },
+    {
+      $or: "role:read",
+    },
+    {
+      $or: "role:create",
+    },
+    {
+      $or: "role:delete",
+    },
+  ],
+  [PATHS.ROLE.ROLES_ID()]: ["role:update"],
+  [PATHS.ROLE.CREATE]: ["role:create"],
 } as const satisfies PathWithPermissionsCheck;
