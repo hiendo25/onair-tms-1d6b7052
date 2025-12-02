@@ -26,6 +26,7 @@ type AddPermissionCheck<T> = T extends { children?: infer C }
   : T & { persCheck?: PermissionValue };
 
 type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
+
 const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Dashboard",
@@ -37,31 +38,31 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Quản lý tổ chức",
     icon: React.createElement(GitIcon),
-    key: "manage-organization",
+    key: "manage-org",
     path: "/manage-organization",
     persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
     children: [
       {
         title: "Quản lý Chi nhánh",
-        key: "manage-branch",
+        key: "manage-org/branch",
         path: PATHS.BRANCHES.ROOT,
         type: "item",
       },
       {
         title: "Quản lý Phòng ban",
-        key: "manage-department",
+        key: "manage-org/department",
         path: PATHS.DEPARTMENTS.ROOT,
         type: "item",
       },
       {
         title: "Quản lý người dùng",
-        key: "manage-employee",
+        key: "manage-org/employee",
         path: PATHS.EMPLOYEES.ROOT,
         type: "item",
       },
       {
         title: "Vai trò & phân quyền",
-        key: "manage-employee",
+        key: "manage-org/role",
         path: PATHS.ROLE.ROOT,
         type: "item",
       },
@@ -90,7 +91,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
       },
       {
         title: "Môn học",
-        key: "manage-course",
+        key: "class-room/course",
         path: PATHS.COURSES.LIST,
         persCheck: PATHS_WITH_PERMISSIONS["/admin/online-course/create"],
         type: "item",
@@ -128,7 +129,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
       {
         title: "Danh sách kế hoạch",
         icon: React.createElement(ClipboardIcon),
-        key: "plans",
+        key: "plans/list",
         path: PATHS.PLANS.ROOT,
       },
       {

@@ -40,28 +40,27 @@ export default function MenuContentSubItem({
     }
   }, [onMenuItemClick, id, nestedNavigation]);
 
-  let nestedNavigationCollapseSx: SxProps<Theme> = { display: "none" };
-
-  if (mini) {
-    nestedNavigationCollapseSx = {
-      fontSize: 18,
-      position: "absolute",
-      top: "50%",
-      right: "6px",
-      transform: "translateY(-50%) rotate(-90deg)",
-    };
-  } else if (!mini) {
-    nestedNavigationCollapseSx = {
-      ml: 0.5,
-      fontSize: 20,
-      transform: `rotate(${expanded ? 0 : -90}deg)`,
-      transition: (theme: Theme) =>
-        theme.transitions.create("transform", {
-          easing: theme.transitions.easing.sharp,
-          duration: 100,
-        }),
-    };
-  }
+  const nestedNavigationCollapseSx = React.useMemo<SxProps<Theme>>(() => {
+    //  let nestedNavigationCollapseSx: SxProps<Theme> = { display: "none" };
+    return mini
+      ? {
+          fontSize: 18,
+          position: "absolute",
+          top: "50%",
+          right: "6px",
+          transform: "translateY(-50%) rotate(-90deg)",
+        }
+      : {
+          ml: 0.5,
+          fontSize: 20,
+          transform: `rotate(${expanded ? 0 : -90}deg)`,
+          transition: (theme: Theme) =>
+            theme.transitions.create("transform", {
+              easing: theme.transitions.easing.sharp,
+              duration: 100,
+            }),
+        };
+  }, [mini]);
 
   const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
 

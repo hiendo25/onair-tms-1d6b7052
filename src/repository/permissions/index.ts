@@ -4,7 +4,7 @@ import { createSVClient } from "@/services";
 export async function getUserRolesByUserId(userId: string) {
   try {
     const supabaseSv = await createSVClient();
-    return await supabaseSv
+    const { data, error } = await supabaseSv
       .from("user_roles")
       .select(
         `
@@ -18,8 +18,14 @@ export async function getUserRolesByUserId(userId: string) {
   		`,
       )
       .eq("user_id", userId);
-  } catch (error) {
-    throw new Error("Get permission error.");
+
+    if (error) console.error(error);
+    return {
+      data,
+      error,
+    };
+  } catch (err) {
+    throw new Error("Get user roles failed");
   }
 }
 export type GetUsersRolesByUserIdResponse = Awaited<ReturnType<typeof getUserRolesByUserId>>;
