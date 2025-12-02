@@ -25,7 +25,7 @@ type AddPermissionCheck<T> = T extends { children?: infer C }
     }
   : T & { persCheck?: PermissionValue };
 
-type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
+export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
 
 const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
@@ -163,19 +163,20 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   // },
 ];
 
-const STUDENTS_MENU_LIST: MenuItemType[] = [
+const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Bài kiểm tra của tôi",
     icon: React.createElement(ClipboardIcon),
     key: "my-assignments",
     path: PATHS.MY_ASSIGNMENTS.ROOT,
-    type: "item",
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
   },
   {
     title: "Lớp học của tôi",
     icon: React.createElement(UsersIcon2),
     key: "my-class",
     path: PATHS.STUDENTS.ROOT,
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
   },
 ];
 

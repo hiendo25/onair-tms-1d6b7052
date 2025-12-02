@@ -4,7 +4,7 @@ import { Permissions, ResourcesActions } from "@/constants/permission.constant";
 
 import { PermissionsCheck } from "@/constants/permission.constant";
 
-type PermissionContextApi = {
+export type PermissionContextApi = {
   permissions: Permissions[];
   hasPermissions: (persCheck: PermissionsCheck) => boolean;
   hasResources: (conditions: ResourcesActions) => boolean;
