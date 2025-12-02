@@ -14,14 +14,14 @@ import React from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { ActionOption } from "../../types";
 import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
-import { PermissionActions } from "@/model/permission.model";
+import { TPermissionActions } from "@/constants/permission.constant";
 
 interface PermissionModuleItemProps extends Pick<UseRolePermissionsReturn, "setSelectedPermissions" | "toggleAction"> {
   moduleId: string;
   moduleName: string;
   availableActions: ActionOption[];
   defaultExpanded?: boolean;
-  selectedActions: Set<PermissionActions>;
+  selectedActions: Set<TPermissionActions>;
 }
 
 const PermissionModuleItem: React.FC<PermissionModuleItemProps> = ({
@@ -44,7 +44,7 @@ const PermissionModuleItem: React.FC<PermissionModuleItemProps> = ({
       if (isFullySelected) {
         newMap.delete(moduleId);
       } else {
-        const allPerms = new Set<PermissionActions>(availableActions.map((action) => action.code));
+        const allPerms = new Set<TPermissionActions>(availableActions.map((action) => action.code));
         newMap.set(moduleId, allPerms);
       }
       return newMap;

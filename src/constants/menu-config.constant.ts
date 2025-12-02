@@ -2,7 +2,6 @@ import {
   ClassIcon,
   ClipboardIcon,
   GitIcon,
-  HelpIcon,
   SquareFourIcon,
   UsersIcon,
   MonitorIcon,
@@ -14,43 +13,56 @@ import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 import React from "react";
 import { PATHS } from "./path.contstants";
+import { PermissionsCheck } from "./permission.constant";
+import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions";
 
-const ADMIN_MENU_LIST: MenuItemType[] = [
+type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_PERMISSIONS];
+
+type AddPermissionCheck<T> = T extends { children?: infer C }
+  ? Omit<T, "children"> & {
+      persCheck?: PermissionValue;
+      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+    }
+  : T & { persCheck?: PermissionValue };
+
+type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
+
+const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Dashboard",
     icon: React.createElement(SquareFourIcon),
     key: "dashboard",
     path: PATHS.DASHBOARD,
-    type: "item",
+    persCheck: PATHS_WITH_PERMISSIONS["/dashboard"],
   },
   {
     title: "Quản lý tổ chức",
     icon: React.createElement(GitIcon),
-    key: "manage-organization",
+    key: "manage-org",
     path: "/manage-organization",
-    type: "item",
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/employees/create"],
     children: [
       {
         title: "Quản lý Chi nhánh",
-        key: "manage-branch",
+        key: "manage-org/branch",
         path: PATHS.BRANCHES.ROOT,
         type: "item",
       },
       {
         title: "Quản lý Phòng ban",
-        key: "manage-department",
+        key: "manage-org/department",
         path: PATHS.DEPARTMENTS.ROOT,
         type: "item",
       },
       {
         title: "Quản lý người dùng",
-        key: "manage-employee",
+        key: "manage-org/employee",
         path: PATHS.EMPLOYEES.ROOT,
         type: "item",
       },
       {
         title: "Vai trò & phân quyền",
-        key: "manage-employee",
+        key: "manage-org/role",
         path: PATHS.ROLE.ROOT,
         type: "item",
       },
@@ -59,29 +71,29 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
   {
     title: "Quản lý lớp học",
     icon: React.createElement(MonitorIcon),
-    key: "manage-class",
+    key: "class-room",
     path: PATHS.CLASSROOMS.ROOT,
-    type: "item",
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
     children: [
       {
         title: "Tạo lớp học",
-        icon: React.createElement(SquareFourIcon),
-        key: "manage-branch",
+        key: "class-room/create",
         path: PATHS.CLASSROOMS.ROOT,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room/create"],
         type: "item",
       },
       {
         title: "Danh sách lớp học",
-        icon: React.createElement(SquareFourIcon),
-        key: "manage-department",
+        key: "class-room/list",
         path: PATHS.CLASSROOMS.LIST_CLASSROOM,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
         type: "item",
       },
       {
         title: "Môn học",
-        icon: React.createElement(SquareFourIcon),
-        key: "manage-department",
+        key: "class-room/course",
         path: PATHS.COURSES.LIST,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/online-course/create"],
         type: "item",
       },
     ],
@@ -91,17 +103,19 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
     icon: React.createElement(ClipboardIcon),
     key: "assignments",
     path: PATHS.ASSIGNMENTS.ROOT,
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments"],
     children: [
       {
         title: "Tạo bài kiểm tra",
         icon: React.createElement(ClipboardIcon),
         key: "assignments/create",
         path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
       },
       {
         title: "Danh sách bài kiểm tra",
         icon: React.createElement(ClipboardIcon),
-        key: "assignments",
+        key: "assignments/list",
         path: PATHS.ASSIGNMENTS.ROOT,
       },
     ],
@@ -115,7 +129,7 @@ const ADMIN_MENU_LIST: MenuItemType[] = [
       {
         title: "Danh sách kế hoạch",
         icon: React.createElement(ClipboardIcon),
-        key: "plans",
+        key: "plans/list",
         path: PATHS.PLANS.ROOT,
       },
       {

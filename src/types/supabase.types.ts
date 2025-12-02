@@ -790,15 +790,7 @@ export type Database = {
           key?: string | null
           value?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "class_session_metadata_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       class_session_teacher: {
         Row: {
@@ -1206,24 +1198,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      group_permission: {
-        Row: {
-          id: string
-          resource_code: string
-          title: string | null
-        }
-        Insert: {
-          id?: string
-          resource_code: string
-          title?: string | null
-        }
-        Update: {
-          id?: string
-          resource_code?: string
-          title?: string | null
-        }
-        Relationships: []
       }
       hash_tags: {
         Row: {
@@ -1707,29 +1681,22 @@ export type Database = {
         Row: {
           action_code: Database["public"]["Enums"]["action_code_enum"]
           assigned_at: string | null
-          group_permission_id: string
+          resource_code: string
           role_id: string
         }
         Insert: {
           action_code: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
-          group_permission_id: string
+          resource_code: string
           role_id: string
         }
         Update: {
           action_code?: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
-          group_permission_id?: string
+          resource_code?: string
           role_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "role_permissions_group_permission_id_fkey"
-            columns: ["group_permission_id"]
-            isOneToOne: false
-            referencedRelation: "group_permission"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "role_permissions_role_id_fkey"
             columns: ["role_id"]

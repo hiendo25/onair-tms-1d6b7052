@@ -14,6 +14,8 @@ import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
 import { columnsCourse, CourseRowItem } from "./column-course";
 import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
+import Can from "@/modules/permission-wraper/components/Can";
+import { usePermissions } from "@/modules/permission-wraper";
 
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 
@@ -22,6 +24,9 @@ interface CourseTableListProps {
 }
 export default function CourseTableList({ className }: CourseTableListProps) {
   const dialogDeleteRef = useRef<DialogDeleteCourseConfirmationRef>(null);
+  const { hasPermissions } = usePermissions();
+  const canCreateOrDeleteCourse = hasPermissions([{ $or: "course:create" }, { $or: "course:delete" }]);
+  console.log({ canCreateOrDeleteCourse });
   const {
     organization: { id: organizationId },
     employeeType,
@@ -90,37 +95,46 @@ export default function CourseTableList({ className }: CourseTableListProps) {
       },
     );
   };
-  const mergeColumns: TableDataProps<CourseRowItem>["columns"] = [
-    ...columnsCourse,
-    {
-      id: "action",
-      field: "action",
-      headerName: "Hành động",
-      fixed: "right",
-      width: 140,
-      renderCell: (value, { id: courseId, title: courseName }) => {
-        return (
-          <>
-            <IconButton
-              size="small"
-              href={PATHS.COURSES.EDIT(courseId)}
-              LinkComponent={Link}
-              className="text-blue-600 bg-transparent hover:bg-blue-50"
-            >
-              <Edit02Icon className="w-4 h-4" />
-            </IconButton>
-            <IconButton
-              size="small"
-              className="text-red-600 bg-transparent hover:bg-red-50"
-              onClick={handleDeleteCourse(courseId, courseName ?? "")}
-            >
-              <Trash01Icon className="w-4 h-4" />
-            </IconButton>
-          </>
-        );
-      },
-    },
-  ];
+
+  const mergeColumns: TableDataProps<CourseRowItem>["columns"] = useMemo(() => {
+    return canCreateOrDeleteCourse
+      ? [
+          ...columnsCourse,
+          {
+            id: "action",
+            field: "action",
+            headerName: "Hành động",
+            fixed: "right",
+            width: 140,
+            renderCell: (value, { id: courseId, title: courseName }) => {
+              return (
+                <>
+                  <Can pers={["course:update"]}>
+                    <IconButton
+                      size="small"
+                      href={PATHS.COURSES.EDIT(courseId)}
+                      LinkComponent={Link}
+                      className="text-blue-600 bg-transparent hover:bg-blue-50"
+                    >
+                      <Edit02Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                  <Can pers={["course:delete"]}>
+                    <IconButton
+                      size="small"
+                      className="text-red-600 bg-transparent hover:bg-red-50"
+                      onClick={handleDeleteCourse(courseId, courseName ?? "")}
+                    >
+                      <Trash01Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                </>
+              );
+            },
+          },
+        ]
+      : columnsCourse;
+  }, [canCreateOrDeleteCourse]);
 
   return (
     <Box
@@ -149,9 +163,11 @@ export default function CourseTableList({ className }: CourseTableListProps) {
             }}
           />
         </Box>
-        <Button variant="contained" color="primary" LinkComponent={Link} href={PATHS.COURSES.CREATE} size="large">
-          Tạo môn học
-        </Button>
+        <Can pers={["course:create"]}>
+          <Button variant="contained" color="primary" LinkComponent={Link} href={PATHS.COURSES.CREATE} size="large">
+            Tạo môn học
+          </Button>
+        </Can>
       </div>
 
       <Stack spacing={3}>

@@ -49,7 +49,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     // Use LEFT JOIN for employments to get ALL employment records
     let employeeQuery = supabase
       .from("employees")
-      .select(`
+      .select(
+        `
         id,
         employee_code,
         start_date,
@@ -83,15 +84,15 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         managers_employees!managers_employees_employee_id_fkey (
           manager_id
         )
-      `)
+      `,
+      )
       .in("id", employeeIds);
 
     if (status) {
       employeeQuery = employeeQuery.eq("status", status);
     }
 
-    const { data: fullEmployeeData, error: dataError } = await employeeQuery
-      .order("created_at", { ascending: false });
+    const { data: fullEmployeeData, error: dataError } = await employeeQuery.order("created_at", { ascending: false });
 
     if (dataError) {
       throw new Error(`Failed to fetch employee data: ${dataError.message}`);
@@ -106,9 +107,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   }
 
   // No filters - use simple query with LEFT JOIN
-  let query = supabase
-    .from("employees")
-    .select(`
+  let query = supabase.from("employees").select(
+    `
       id,
       employee_code,
       start_date,
@@ -142,7 +142,9 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       managers_employees!managers_employees_employee_id_fkey (
         manager_id
       )
-    `, { count: "exact" });
+    `,
+    { count: "exact" },
+  );
 
   // Apply status filter if present
   if (status) {
@@ -152,9 +154,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const from = page * limit;
   const to = from + limit - 1;
 
-  const { data, error, count } = await query
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  const { data, error, count } = await query.order("created_at", { ascending: false }).range(from, to);
 
   if (error) {
     throw new Error(`Failed to fetch employees: ${error.message}`);
@@ -171,7 +171,8 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
 const getEmployeeById = async (id: string) => {
   const { data, error } = await supabase
     .from("employees")
-    .select(`
+    .select(
+      `
       id,
       employee_code,
       start_date,
@@ -204,7 +205,8 @@ const getEmployeeById = async (id: string) => {
       managers_employees!managers_employees_employee_id_fkey (
         manager_id
       )
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
@@ -244,11 +246,7 @@ export async function createEmployee(data: {
 }) {
   const supabase = await createSVClient();
 
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .insert(data)
-    .select()
-    .single();
+  const { data: employee, error } = await supabase.from("employees").insert(data).select().single();
 
   if (error) {
     throw new Error(`Failed to create employee: ${error.message}`);
@@ -268,10 +266,7 @@ export async function updateEmployeeById(
 ) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employees")
-    .update(data)
-    .eq("id", id);
+  const { error } = await supabase.from("employees").update(data).eq("id", id);
 
   if (error) {
     throw new Error(`Failed to update employee: ${error.message}`);
@@ -301,11 +296,7 @@ export async function getEmployeeByUserId(userId: string) {
 export async function getEmployeeUserId(employeeId: string) {
   const supabase = await createSVClient();
 
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .select("user_id")
-    .eq("id", employeeId)
-    .single();
+  const { data: employee, error } = await supabase.from("employees").select("user_id").eq("id", employeeId).single();
 
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
@@ -321,10 +312,7 @@ export async function getEmployeeUserId(employeeId: string) {
 export async function deleteEmployeeById(employeeId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employees")
-    .delete()
-    .eq("id", employeeId);
+  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete employee: ${error.message}`);
@@ -334,10 +322,7 @@ export async function deleteEmployeeById(employeeId: string) {
 export async function findEmployeesByEmployeeCodes(employeeCodes: string[]) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("employees")
-    .select("employee_code")
-    .in("employee_code", employeeCodes);
+  const { data, error } = await supabase.from("employees").select("employee_code").in("employee_code", employeeCodes);
 
   if (error) {
     throw new Error(`Failed to check employee codes: ${error.message}`);
@@ -366,7 +351,53 @@ export async function getEmployeeOrganizationIdByUserId(userId: string): Promise
   return employee.organization_id;
 }
 
-export {
-  getEmployees,
-  getEmployeeById,
+export const getEmployeeDetailByUserId = async (userId: string) => {
+  try {
+    const supabase = await createSVClient();
+    const { data, error } = await supabase
+      .from("employees")
+      .select(
+        `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization_id,
+				organizations(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain
+				),
+				positions(
+					id,
+					title, 
+					organization_id
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+      )
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Can't get user Info");
+  }
 };
+export type GetEmployeeDetailByUserIdResponse = Awaited<ReturnType<typeof getEmployeeDetailByUserId>>;
+
+export { getEmployees, getEmployeeById };

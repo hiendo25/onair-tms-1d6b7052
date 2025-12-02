@@ -3,15 +3,13 @@ interface MenuContentItemType {
   subTitle?: string;
   icon?: React.ReactNode;
   path: string;
-  key: string;
-  children?: (MenuContentItemType | MenuGroupItemType)[];
+  key: string; // for handle active menu item
+  children?: MenuContentItemType[];
   type?: "item";
 }
 interface MenuGroupItemType {
   title: string;
-  subTitle?: string;
-  icon?: React.ReactNode;
-  key: string;
+  key: string; // for handle active menu item
   children: MenuContentItemType[];
   type: "group";
 }

@@ -1,10 +1,10 @@
 import { redirect, RedirectType } from "next/navigation";
-import { getCurrentUser } from "../auth/actions/getCurrentUser";
+import { authRepository } from "@/repository";
 interface UnAuthorizedProps {
   children?: React.ReactNode;
 }
 const UnAuthorized = async ({ children }: UnAuthorizedProps) => {
-  const currentUser = await getCurrentUser();
+  const currentUser = await authRepository.getCurrentUser();
   if (currentUser) {
     redirect("/dashboard", RedirectType.replace);
   }

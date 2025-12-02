@@ -1,4 +1,5 @@
 import { supabase } from "@/services";
+import { createSVClient } from "@/services";
 
 const authSignOut = async () => {
   return await supabase.auth.signOut();
@@ -34,4 +35,29 @@ const authSignUp = async (payload: AuthSignUpPayload) => {
   });
 };
 
-export { authSignOut, authSignInWithPassword, authSignInWithGoogle, authSignUp };
+const authServerSignOut = async () => {
+  const supabase = await createSVClient();
+  return await supabase.auth.signOut();
+};
+const getServerSession = async () => {
+  const supabase = await createSVClient();
+  return await supabase.auth.getSession();
+};
+export type GetServerSessionResponse = Awaited<ReturnType<typeof getServerSession>>;
+
+export const getCurrentUser = async () => {
+  const supabase = await createSVClient();
+  const { data, error } = await supabase.auth.getUser();
+  return data.user;
+};
+
+export const ensureGetCurrentUser = async () => {
+  const supabase = await createSVClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    throw new Error(error.message);
+  }
+  return data.user;
+};
+
+export { authSignOut, authSignInWithPassword, authSignInWithGoogle, authSignUp, authServerSignOut, getServerSession };
