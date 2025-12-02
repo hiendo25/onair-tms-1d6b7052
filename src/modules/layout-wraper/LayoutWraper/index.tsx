@@ -1,6 +1,6 @@
 "use client";
 import MainLayout from "@/shared/ui/layouts/MainLayout";
-import { ADMIN_MENU_LIST, STUDENTS_MENU_LIST } from "@/constants/menu-config.constant";
+import { ADMIN_MENU_LIST, MenuItemTypeWithPer, STUDENTS_MENU_LIST } from "@/constants/menu-config.constant";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { usePermissions } from "@/modules/permission-wraper";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
@@ -13,73 +13,40 @@ const LayoutWraper: React.FC<LayoutWraperProps> = ({ children }) => {
 
   const { hasPermissions } = usePermissions();
 
-  const menuList = data.employeeType === "student" ? STUDENTS_MENU_LIST : ADMIN_MENU_LIST;
+  const mappingPathWithRolePermissions = (items: MenuItemTypeWithPer[]): MenuItemType[] => {
+    return items.reduce<MenuItemType[]>((allMenuItems, { persCheck, children, ...menuItem }) => {
+      /**
+       * Default no handle pers, empty pers can be bypass check.
+       */
+      if (!persCheck || !persCheck.length || (persCheck && hasPermissions(persCheck))) {
+        const childItems = mappingPathWithRolePermissions(children || []);
 
-  const getChilds = (item: (typeof ADMIN_MENU_LIST)[number]): MenuItemType[] => {
-    const { persCheck, children, ...restItem } = item;
-
-    if (!item.children) return [];
-
-    return item.children.reduce<MenuItemType[]>((allChildItems, childItem) => {
-      const { persCheck, children, ...restChild } = childItem;
-
-      const childrentItems = getChilds(childItem);
-
-      if (!childItem.persCheck || (childItem.persCheck && hasPermissions(childItem.persCheck))) {
-        allChildItems = [
-          ...allChildItems,
-          {
-            ...restChild,
-            children: childrentItems || [],
-          } as MenuItemType,
-        ];
-      }
-      return allChildItems;
-    }, []);
-  };
-  const mappingPathWithRolePers = (items: typeof ADMIN_MENU_LIST) => {
-    return items.reduce<MenuItemType[]>((allMenuItems, item) => {
-      const { persCheck, children, ...restItem } = item;
-
-      const childItems = getChilds(item);
-      // const childItems = item.children?.reduce<MenuItemType[]>((accChilItems, childItem) => {
-      //   const { persCheck, children, ...restChild } = childItem;
-
-      //   if (!childItem.persCheck || (childItem.persCheck && hasPermissions(childItem.persCheck))) {
-      //     accChilItems = [...accChilItems, restChild];
-      //   }
-      //   return accChilItems;
-      // }, []);
-
-      if (!item.persCheck || !item.persCheck.length || (item.persCheck && hasPermissions(item.persCheck))) {
-        const menuItem =
-          restItem.type === "group"
+        const correctMenuItem: MenuItemType =
+          menuItem.type === "group"
             ? {
-                // icon: restItem.icon,
-                key: restItem.key,
-                // subTitle: restItem.subTitle,
-                title: restItem.title,
-                type: restItem.type,
-                // path: "",
-                children: [],
+                key: menuItem.key,
+                title: menuItem.title,
+                type: "group",
+                children: childItems.filter((item) => item.type !== "group"),
               }
             : {
-                icon: restItem.icon,
-                key: restItem.key,
-                subTitle: restItem.subTitle,
-                title: restItem.title,
-                path: restItem.path,
+                icon: menuItem.icon,
+                key: menuItem.key,
+                subTitle: menuItem.subTitle,
+                title: menuItem.title,
+                path: menuItem.path,
                 type: "item",
-                children: [],
+                children: childItems || [],
               };
 
-        allMenuItems = [...allMenuItems, { ...menuItem, children: [] }];
+        allMenuItems = [...allMenuItems, correctMenuItem];
       }
-
       return allMenuItems;
     }, []);
   };
 
-  return <MainLayout menuItems={menuList}>{children}</MainLayout>;
+  const menuList = data.employeeType === "student" ? STUDENTS_MENU_LIST : ADMIN_MENU_LIST;
+
+  return <MainLayout menuItems={mappingPathWithRolePermissions(menuList)}>{children}</MainLayout>;
 };
 export default LayoutWraper;

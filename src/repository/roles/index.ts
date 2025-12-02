@@ -8,10 +8,15 @@ export interface GetRoleListParams {
   page?: number;
   pageSize?: number;
 }
-
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
 export const getRoleList = async (params?: GetRoleListParams) => {
-  const { page = 0, pageSize = 10 } = params || {};
-  const from = page * pageSize;
+  const { page = DEFAULT_PAGE, pageSize = DEFAULT_LIMIT } = params || {};
+
+  const safePage = Number.isFinite(page) ? Math.floor(page) : DEFAULT_PAGE;
+  const safeLimit = Number.isFinite(pageSize) ? Math.floor(pageSize) : DEFAULT_LIMIT;
+
+  const from = (safePage - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const { count } = await supabase.from("roles").select("*", { count: "exact", head: true });
@@ -34,7 +39,7 @@ export const getRoleList = async (params?: GetRoleListParams) => {
       };
     });
 };
-
+export type GetRoleListResponse = Awaited<ReturnType<typeof getRoleList>>;
 export const getGroupPermissionList = async () => {
   return Object.fromEntries(
     RESOURCE_OPTIONS.map((res) => [

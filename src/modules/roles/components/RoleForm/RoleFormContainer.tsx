@@ -99,8 +99,8 @@ const RoleFormContainer: React.FC<RoleFormContainerProps> = ({
           </Grid>
         </Box>
       ) : (
-        <Box sx={{ mt: 3 }} alignSelf={'center'}>
-          <Typography variant="body1" color="text.secondary" textAlign={'center'}>
+        <Box sx={{ mt: 3 }} alignSelf={"center"}>
+          <Typography variant="body1" color="text.secondary" textAlign={"center"}>
             Vai trò Super Admin có toàn quyền truy cập hệ thống và không thể chỉnh sửa phân quyền.
           </Typography>
         </Box>

@@ -1,7 +1,7 @@
 "use client";
 import React, { memo, useCallback, useState } from "react";
 import { Box, List, SxProps, Theme } from "@mui/material";
-import MenuContextProvider from "./MenuContext";
+import MenuContextProvider, { MenuContextApi } from "./MenuContext";
 import { usePathname } from "next/navigation";
 import MenuContentItem from "./MenuContentItem";
 import { useMenuContext } from "./MenuContext";
@@ -46,8 +46,10 @@ const MenuList: React.FC<MenuListProps> = ({
   );
 
   const matchPath = useCallback(
-    (pathname: string) => (path: string) => {
-      return pathname.includes(path);
+    (pathname: string) => (pathCheck: string) => {
+      console.log({ pathname, pathCheck });
+
+      return pathname.includes(pathCheck);
     },
     [pathname],
   );
@@ -100,23 +102,18 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
 
   const getMenuListSx = useCallback(
     (isSubNavigation: boolean): SxProps<Theme> => {
-      if (isSubNavigation) {
-        return {
-          display: "flex",
-          flexDirection: "column",
-          gap: 0,
-          marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
-          // borderLeft: mini ? undefined : "2px solid #cdcdcd",
-          padding: mini ? 1 : 0.5,
-          width: mini ? 220 : "auto",
-        };
-      }
       return {
         display: "flex",
         flexDirection: "column",
-        gap: 0.5,
-        padding: mini ? 1 : 0.5,
-        width: mini ? MINI_DRAWER_WIDTH : "auto",
+        ...(isSubNavigation
+          ? {
+              gap: 0,
+              marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
+              // borderLeft: mini ? undefined : "2px solid #cdcdcd",
+              padding: mini ? 1 : 0.5,
+              width: mini ? 220 : "auto",
+            }
+          : { gap: 0.5, padding: mini ? 1 : 0.5, width: mini ? MINI_DRAWER_WIDTH : "auto" }),
       };
     },
     [mini],
@@ -134,7 +131,7 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
                 title={item.title}
                 href={item.path}
                 selected={matchPath(item.path)}
-                defaultExpanded={!!matchPath(item.path)}
+                defaultExpanded={matchPath(item.path)}
                 expanded={hasExpanded(item.key)}
                 nestedNavigation={
                   item.children?.length ? <MenuContentList items={item.children} depth={depth + 1} /> : undefined
