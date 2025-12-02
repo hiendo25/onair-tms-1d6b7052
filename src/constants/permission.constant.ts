@@ -15,6 +15,7 @@ export const RESOURCES = {
   department: "department",
   course: "course",
   assignment: "assignment",
+  role: "roles",
 } as const;
 
 export type Permissions = BuildPermission<Resources, PerActions>;

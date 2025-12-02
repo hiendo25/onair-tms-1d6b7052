@@ -176,7 +176,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
               )}
 
               {!loading &&
-                rowsList.length &&
+                rowsList.length > 0 &&
                 rowsList.map((row, _index) => (
                   <TableDataRow
                     key={genRowkey(row)}
