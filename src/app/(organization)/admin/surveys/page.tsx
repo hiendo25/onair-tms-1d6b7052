@@ -1,8 +1,7 @@
-import SurveyList from "@/app/(organization)/admin/surveys/_components/SurveyList";
-
+import { PATHS } from "@/constants/path.contstants";
+import { redirect } from "next/navigation";
 const SurveysPage = async () => {
-  return <SurveyList />;
+  redirect(PATHS.SURVEYS.LIST);
 };
 
 export default SurveysPage;
-

@@ -8,6 +8,8 @@ import {
   BookOpenIcon,
   UsersIcon2,
   BarChart10Icon,
+  FolderShieldIcon,
+  FileAttachmentIcon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
@@ -122,7 +124,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   },
   {
     title: "Kế hoạch đào tạo",
-    icon: React.createElement(StickyNote2OutlinedIcon),
+    icon: React.createElement(FolderShieldIcon),
     key: "plans",
     path: PATHS.PLANS.ROOT,
     children: [
@@ -143,6 +145,24 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         icon: React.createElement(ClipboardIcon),
         key: "plans/surveys",
         path: PATHS.SURVEYS.ROOT,
+      },
+    ],
+  },
+  {
+    title: "Khảo sát",
+    icon: React.createElement(FileAttachmentIcon),
+    key: "surveys",
+    path: PATHS.SURVEYS.ROOT,
+    children: [
+      {
+        title: "Danh sách khảo sát",
+        key: "surveys/list",
+        path: PATHS.SURVEYS.LIST,
+      },
+      {
+        title: "Tạo khảo sát",
+        key: "surveys/create",
+        path: PATHS.SURVEYS.CREATE,
       },
     ],
   },
