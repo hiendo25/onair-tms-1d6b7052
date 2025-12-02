@@ -45,13 +45,25 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
         name: assignmentData.name,
         description: assignmentData.description,
         assignmentCategories: assignmentData.assignment_categories.map((ac) => ac.category_id),
-        questions: assignmentData.questions.map((q) => ({
-          type: q.type,
-          label: q.label,
-          score: q.score,
-          options: q.options ? (q.options as any) : undefined,
-          attachments: q.attachments || undefined,
-        })),
+        questions: assignmentData.questions.map((q) => {
+          const question: any = {
+            type: q.type,
+            label: q.label,
+            score: q.score,
+            attachments: q.attachments || undefined,
+          };
+
+          // Transform options based on question type
+          if (q.type === "matching") {
+            question.matchingPairs = q.options ? (q.options as any) : undefined;
+          } else if (q.type === "order") {
+            question.orderItems = q.options ? (q.options as any) : undefined;
+          } else {
+            question.options = q.options ? (q.options as any) : undefined;
+          }
+
+          return question;
+        }),
         assignedEmployees: assignmentData.assignment_employees.map((ae) => ({
           id: ae.employee_id,
           fullName: ae.employees?.profiles?.full_name || "",

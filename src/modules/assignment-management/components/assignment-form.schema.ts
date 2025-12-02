@@ -9,6 +9,20 @@ const optionSchema = zod.object({
   correct: zod.boolean(),
 });
 
+// Schema for matching question type - pairs from Column A and Column B
+const matchingPairSchema = zod.object({
+  id: zod.string(),
+  columnA: zod.string().min(1, { message: "Nội dung cột A không được bỏ trống." }),
+  columnB: zod.string().min(1, { message: "Nội dung cột B không được bỏ trống." }),
+});
+
+// Schema for order question type - items with correct sequence
+const orderItemSchema = zod.object({
+  id: zod.string(),
+  content: zod.string().min(1, { message: "Nội dung không được bỏ trống." }),
+  correctOrder: zod.number(), // 1-based position in correct sequence
+});
+
 const questionSchema = zod
   .object({
     type: zod.enum(questionTypeValues),
@@ -18,6 +32,8 @@ const questionSchema = zod
       .positive({ message: "Điểm phải là số dương." })
       .min(0.1, { message: "Điểm phải lớn hơn 0." }),
     options: zod.array(optionSchema).optional(),
+    matchingPairs: zod.array(matchingPairSchema).optional(),
+    orderItems: zod.array(orderItemSchema).optional(),
     attachments: zod.array(zod.string()).optional(),
   })
   .superRefine((data, ctx) => {
@@ -56,6 +72,59 @@ const questionSchema = zod
         }
       }
     }
+
+    // Validation for true_false type
+    if (data.type === "true_false") {
+      if (!data.options || data.options.length !== 2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi Đúng/Sai phải có đúng 2 tùy chọn.",
+          path: ["options"],
+        });
+      } else {
+        const correctAnswers = data.options.filter((opt) => opt.correct);
+        if (correctAnswers.length !== 1) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng chọn đúng 1 đáp án đúng.",
+            path: ["options"],
+          });
+        }
+      }
+    }
+
+    // Validation for matching type
+    if (data.type === "matching") {
+      if (!data.matchingPairs || data.matchingPairs.length === 0) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi ghép đôi phải có ít nhất 1 cặp.",
+          path: ["matchingPairs"],
+        });
+      }
+    }
+
+    // Validation for order type
+    if (data.type === "order") {
+      if (!data.orderItems || data.orderItems.length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi sắp xếp thứ tự phải có ít nhất 2 mục.",
+          path: ["orderItems"],
+        });
+      } else {
+        // Check for duplicate correctOrder values
+        const orders = data.orderItems.map(item => item.correctOrder);
+        const uniqueOrders = new Set(orders);
+        if (orders.length !== uniqueOrders.size) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thứ tự các mục không được trùng lặp.",
+            path: ["orderItems"],
+          });
+        }
+      }
+    }
   });
 
 const employeeItemSchema = zod.object({
@@ -81,7 +150,9 @@ const assignmentSchema = zod.object({
 type Assignment = zod.infer<typeof assignmentSchema>;
 type Question = zod.infer<typeof questionSchema>;
 type QuestionOption = zod.infer<typeof optionSchema>;
+type MatchingPair = zod.infer<typeof matchingPairSchema>;
+type OrderItem = zod.infer<typeof orderItemSchema>;
 type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
-export { assignmentSchema, type Assignment, type Question, type QuestionOption, type EmployeeItem };
+export { assignmentSchema, type Assignment, type Question, type QuestionOption, type MatchingPair, type OrderItem, type EmployeeItem };
 

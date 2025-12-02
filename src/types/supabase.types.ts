@@ -1896,7 +1896,16 @@ export type Database = {
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
-      question_type: "file" | "text" | "checkbox" | "radio"
+      question_type:
+        | "file"
+        | "text"
+        | "checkbox"
+        | "radio"
+        | "matching"
+        | "drag_and_drop"
+        | "true_false"
+        | "order"
+        | "fill"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
     }
@@ -2056,7 +2065,17 @@ export const Constants = {
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
-      question_type: ["file", "text", "checkbox", "radio"],
+      question_type: [
+        "file",
+        "text",
+        "checkbox",
+        "radio",
+        "matching",
+        "drag_and_drop",
+        "true_false",
+        "order",
+        "fill",
+      ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
     },

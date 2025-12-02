@@ -31,15 +31,33 @@ async function createAssignmentWithRelations(
 
     // Create questions
     if (payload.questions && payload.questions.length > 0) {
-      const questionsToCreate = payload.questions.map((question) => ({
-        assignment_id: assignmentId as string,
-        type: question.type,
-        label: question.label,
-        score: question.score,
-        options: question.options || null,
-        attachments: question.attachments || null,
-        created_by: createdBy,
-      }));
+      const questionsToCreate = payload.questions.map((question) => {
+        let options = question.options || null;
+
+        // Transform matchingPairs to options for matching type
+        if (question.type === "matching" && question.matchingPairs) {
+          options = question.matchingPairs as any;
+        }
+
+        // Transform orderItems to options for order type
+        // Ensure correctOrder is assigned based on array index
+        if (question.type === "order" && question.orderItems) {
+          options = question.orderItems.map((item, index) => ({
+            ...item,
+            correctOrder: index, // 0-based index represents the correct order
+          })) as any;
+        }
+
+        return {
+          assignment_id: assignmentId as string,
+          type: question.type,
+          label: question.label,
+          score: question.score,
+          options,
+          attachments: question.attachments || null,
+          created_by: createdBy,
+        };
+      });
 
       await assignmentsRepository.createQuestions(questionsToCreate);
       console.log(`Created ${questionsToCreate.length} question(s)`);
@@ -105,15 +123,33 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
   await assignmentsRepository.deleteQuestionsByAssignmentId(payload.id);
 
   if (payload.questions && payload.questions.length > 0) {
-    const questionsToCreate = payload.questions.map((question) => ({
-      assignment_id: payload.id,
-      type: question.type,
-      label: question.label,
-      score: question.score,
-      options: question.options || null,
-      attachments: question.attachments || null,
-      created_by: updatedBy,
-    }));
+    const questionsToCreate = payload.questions.map((question) => {
+      let options = question.options || null;
+
+      // Transform matchingPairs to options for matching type
+      if (question.type === "matching" && question.matchingPairs) {
+        options = question.matchingPairs as any;
+      }
+
+      // Transform orderItems to options for order type
+      // Ensure correctOrder is assigned based on array index
+      if (question.type === "order" && question.orderItems) {
+        options = question.orderItems.map((item, index) => ({
+          ...item,
+          correctOrder: index, // 0-based index represents the correct order
+        })) as any;
+      }
+
+      return {
+        assignment_id: payload.id,
+        type: question.type,
+        label: question.label,
+        score: question.score,
+        options,
+        attachments: question.attachments || null,
+        created_by: updatedBy,
+      };
+    });
 
     await assignmentsRepository.createQuestions(questionsToCreate);
   }
