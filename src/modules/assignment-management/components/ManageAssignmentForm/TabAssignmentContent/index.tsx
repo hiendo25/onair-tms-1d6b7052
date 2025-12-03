@@ -175,7 +175,13 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
       correctOrder: idx,
     }));
 
-    setValue(`questions.${questionIndex}.orderItems`, itemsWithUpdatedOrder);
+    console.log('itemsWithUpdatedOrder', itemsWithUpdatedOrder);
+
+    setValue(`questions.${questionIndex}.orderItems`, itemsWithUpdatedOrder, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
   }, [setValue]);
 
   return (
@@ -388,7 +394,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                               >
                                 <div className="flex flex-col gap-2">
                                   {orderItems.map((item, itemIndex) => (
-                                    <SortableOrderItem key={item.id} id={item.id}>
+                                    <SortableOrderItem key={`${item.id}-${itemIndex}`} id={item.id}>
                                       <div className="flex items-start gap-2">
                                         <Typography className="text-sm font-medium text-gray-700 mt-2 min-w-[20px]">
                                           {itemIndex + 1}.
@@ -398,6 +404,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                                           name={`questions.${index}.orderItems.${itemIndex}.content`}
                                           placeholder={`Mục ${itemIndex + 1}`}
                                           className="flex-1"
+                                          key={`${item.id}-${itemIndex}-field`}
                                         />
                                         <IconButton
                                           size="small"
