@@ -29,6 +29,7 @@ const CreateEmployeePage = () => {
       position_id: data.position_id,
       employee_type: data.employee_type,
       start_date: data.start_date,
+      role_id: data.role_id,
     };
 
     createEmployee(payload, {
@@ -43,13 +44,10 @@ const CreateEmployeePage = () => {
       },
       onError: (error) => {
         console.error("Error creating employee:", error);
-        notifications.show(
-          `Tạo nhân viên thất bại: ${error instanceof Error ? error.message : "Lỗi không xác định"}`,
-          {
-            severity: "error",
-            autoHideDuration: 5000,
-          }
-        );
+        notifications.show(`Tạo nhân viên thất bại: ${error instanceof Error ? error.message : "Lỗi không xác định"}`, {
+          severity: "error",
+          autoHideDuration: 5000,
+        });
       },
     });
   };
@@ -57,17 +55,10 @@ const CreateEmployeePage = () => {
   return (
     <PageContainer
       title={pageTitle}
-      breadcrumbs={[
-        { title: "Nhân viên", path: "/admin/employees" },
-        { title: pageTitle },
-      ]}
+      breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}
     >
       <Box sx={{ py: 3 }}>
-        <EmployeeForm
-          mode="create"
-          onSubmit={handleSubmit}
-          isSubmitting={isPending}
-        />
+        <EmployeeForm mode="create" onSubmit={handleSubmit} isSubmitting={isPending} />
       </Box>
     </PageContainer>
   );

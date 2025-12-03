@@ -1,8 +1,21 @@
 import { useTQuery } from "@/lib";
-import { getGroupPermissionList, getRoleList, GetRoleListParams, getRolePermissions } from "@/repository/roles";
+import {
+  getGroupPermissionList,
+  adminGetRoleList,
+  AdminGetRoleListParams,
+  getRolePermissions,
+  getRoleList,
+} from "@/repository/roles";
 import { GET_PERMISSIONS, GET_ROLE_PERMISSIONS, GET_ROLES } from "./key";
 
-export const useGetRoleList = (params?: GetRoleListParams) => {
+export const useAdminGetRoleList = (params?: AdminGetRoleListParams) => {
+  return useTQuery({
+    queryKey: [GET_ROLES, params?.page, params?.pageSize],
+    queryFn: async () => await adminGetRoleList(params),
+  });
+};
+
+export const useGetRoleList = (params?: AdminGetRoleListParams) => {
   return useTQuery({
     queryKey: [GET_ROLES, params?.page, params?.pageSize],
     queryFn: async () => await getRoleList(params),

@@ -1,9 +1,4 @@
-import type {
-  CreateEmployeeDto,
-  UpdateEmployeeDto,
-  GetEmployeesParams,
-  EmployeeDto,
-} from "@/types/dto/employees";
+import type { CreateEmployeeDto, UpdateEmployeeDto, GetEmployeesParams, EmployeeDto } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import {
   employeesRepository,
@@ -29,16 +24,13 @@ interface CreateEmployeeResult {
   profileId: string;
 }
 
-async function createEmployeeCore(
-  payload: CreateEmployeeDto,
-  organizationId: string,
-): Promise<CreateEmployeeResult> {
+async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: string): Promise<CreateEmployeeResult> {
   let userId: string | null = null;
   let employeeId: string | null = null;
   let profileId: string | null = null;
 
   try {
-    const adminSupabase = createServiceRoleClient();
+    const adminSupabase = await createServiceRoleClient();
 
     const temporaryPassword = "123456";
 
@@ -121,6 +113,18 @@ async function createEmployeeCore(
       });
       console.log("Manager relationship created");
     }
+    if (payload.role_id) {
+      await adminSupabase.from("user_roles").delete().eq("user_id", userId);
+
+      const { error: roleError } = await adminSupabase.from("user_roles").insert([
+        {
+          user_id: userId,
+          role_id: payload.role_id,
+        },
+      ]);
+
+      if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
+    }
 
     return {
       userId,
@@ -150,7 +154,7 @@ async function createEmployeeCore(
 
     if (userId) {
       console.log(`Rolling back: Deleting auth user ${userId}`);
-      const adminSupabase = createServiceRoleClient();
+      const adminSupabase = await createServiceRoleClient();
       await adminSupabase.auth.admin.deleteUser(userId);
     }
 
@@ -160,11 +164,12 @@ async function createEmployeeCore(
   }
 }
 
-async function createEmployeeWithRelations(
-  payload: CreateEmployeeDto,
-): Promise<CreateEmployeeResult> {
+async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<CreateEmployeeResult> {
   const supabase = await createSVClient();
-  const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+  const {
+    data: { user: currentUser },
+    error: userError,
+  } = await supabase.auth.getUser();
 
   if (userError || !currentUser) {
     throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
@@ -176,9 +181,7 @@ async function createEmployeeWithRelations(
   return createEmployeeCore(payload, organizationId);
 }
 
-async function updateEmployeeWithRelations(
-  payload: UpdateEmployeeDto,
-): Promise<void> {
+async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
     start_date: payload.start_date,
@@ -224,11 +227,23 @@ async function updateEmployeeWithRelations(
       manager_id: payload.manager_id,
     });
   }
+
+  if (payload.role_id) {
+    const adminSupabase = await createServiceRoleClient();
+    const employee = await employeesRepository.getEmployeeById(payload.id);
+    await adminSupabase.from("user_roles").delete().eq("user_id", employee.user_id);
+
+    const { error: roleError } = await adminSupabase.from("user_roles").insert([
+      {
+        user_id: employee.user_id,
+        role_id: payload.role_id,
+      },
+    ]);
+    if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
+  }
 }
 
-async function deleteEmployeeWithRelations(
-  employeeId: string,
-): Promise<void> {
+async function deleteEmployeeWithRelations(employeeId: string): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
   // Delete assignment-related relationships (child records first, then parent)
@@ -259,7 +274,7 @@ async function deleteEmployeeWithRelations(
   await employeesRepository.deleteEmployeeById(employeeId);
 
   // Delete auth user
-  const adminSupabase = createServiceRoleClient();
+  const adminSupabase = await createServiceRoleClient();
   const { error: authError } = await adminSupabase.auth.admin.deleteUser(userId);
 
   if (authError) {
