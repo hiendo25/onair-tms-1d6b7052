@@ -1,9 +1,18 @@
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
-import { PlanDetailDto, PlanListItem, PlanProgramDetail, PlanTopicDetail } from "@/modules/plans/types";
+import {
+  PlanDetailCounts,
+  PlanDetailDto,
+  PlanListItem,
+  PlanListResponse,
+  PlanProgramDetail,
+  PlanTopicDetail,
+} from "@/modules/plans/types";
 import { plansRepository } from "@/repository/plans";
 interface GetPlansInput {
   organizationId: string;
   search?: string;
+  page?: number;
+  limit?: number;
 }
 
 class PlanService {
@@ -25,8 +34,8 @@ class PlanService {
     const planPayload = {
       name: form.info.name,
       objective: form.info.objective || null,
-      start_date:form.info.startDate || null,
-      end_date:form.info.endDate || null,
+      start_date: form.info.startDate || null,
+      end_date: form.info.endDate || null,
       budget: form.info.budget ?? null,
       status: "pending" as const,
       organization_id: this.organizationId,
@@ -92,7 +101,7 @@ class PlanService {
       name: form.info.name,
       objective: form.info.objective || null,
       start_date: form.info.startDate || null,
-      end_date: form.info.endDate ||null,
+      end_date: form.info.endDate || null,
       budget: form.info.budget ?? null,
       status: "pending" as const,
       organization_id: this.organizationId,
@@ -165,11 +174,8 @@ class PlanService {
         })) || [],
     }));
   }
-  private static mapPlanList(rows: Awaited<ReturnType<typeof plansRepository.getPlans>>): PlanListItem[] {
+  private static mapPlanList(rows: Awaited<ReturnType<typeof plansRepository.getPlans>>["data"]): PlanListItem[] {
     return rows.map(row => {
-      const programs = row.training_plan_programs || [];
-      const topicsCount = programs.reduce((acc, program) => acc + (program.training_plan_topics?.length || 0), 0);
-
       return {
         id: row.id,
         name: row.name,
@@ -178,14 +184,13 @@ class PlanService {
         endDate: row.end_date,
         budget: row.budget,
         status: row.status,
-        programsCount: programs.length,
-        topicsCount,
       };
     });
   }
 
   private static mapPlanDetail(
     row: Awaited<ReturnType<typeof plansRepository.getPlanDetail>>,
+    counts?: PlanDetailCounts,
   ): PlanDetailDto {
     const programs: PlanProgramDetail[] =
       row.training_plan_programs?.map(program => {
@@ -224,12 +229,6 @@ class PlanService {
         };
       }) || [];
 
-    const topicsCount = programs.reduce((acc, p) => acc + (p.topics?.length || 0), 0);
-    const coursesCount = programs.reduce((acc, p) => {
-      const topicCourses = p.topics.reduce((topicAcc, t) => topicAcc + (t.courses?.length || 0), 0);
-      const programCourses = p.courses?.length || 0;
-      return acc + topicCourses + programCourses;
-    }, 0);
     const approverName = (row as any)?.approved_by_employee?.profile?.full_name;
 
     return {
@@ -238,26 +237,39 @@ class PlanService {
       objective: row.objective,
       startDate: row.start_date,
       endDate: row.end_date,
-      createdAt:row.created_at,
+      createdAt: row.created_at,
       budget: row.budget,
       status: row.status,
       approver: approverName || row.approved_by,
-      programsCount: programs.length,
-      topicsCount,
-      coursesCount,
-      instructorsCount: 0,
+      programsCount: counts?.programsCount ?? 0,
+      topicsCount: counts?.topicsCount ?? 0,
+      coursesCount: counts?.coursesCount ?? 0,
+      instructorsCount: counts?.instructorsCount ?? 0,
       programs,
     };
   }
 
   static async getPlans(params: GetPlansInput) {
-    const data = await plansRepository.getPlans(params);
-    return PlanService.mapPlanList(data);
+    const [{ data, total }, stats] = await Promise.all([
+      plansRepository.getPlans(params),
+      plansRepository.getPlanStatusCounts(params),
+    ]);
+
+    return {
+      data: PlanService.mapPlanList(data),
+      total,
+      page: params.page ?? 1,
+      limit: params.limit ?? 10,
+      stats,
+    } satisfies PlanListResponse;
   }
 
   static async getPlanDetail(id: string) {
-    const data = await plansRepository.getPlanDetail(id);
-    return PlanService.mapPlanDetail(data);
+    const [data, counts] = await Promise.all([
+      plansRepository.getPlanDetail(id),
+      plansRepository.getPlanDetailCounts(id),
+    ]);
+    return PlanService.mapPlanDetail(data, counts);
   }
 
   static async getCourseOptions(organizationId: string) {

@@ -15,6 +15,7 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { PlanProgramDetail } from "@/modules/plans/types";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 
 interface ProgramAccordionProps {
   programs: PlanProgramDetail[];
@@ -25,22 +26,11 @@ export default function ProgramAccordion({
   programs,
   programsCount,
 }: ProgramAccordionProps) {
-  // State to track which program descriptions are expanded
   const [expandedDescriptions, setExpandedDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // State to track which descriptions are actually truncated
   const [truncatedDescriptions, setTruncatedDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // Refs to measure description elements
   const descriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
-
-  // State to track which topic descriptions are expanded
   const [expandedTopicDescriptions, setExpandedTopicDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // State to track which topic descriptions are actually truncated
   const [truncatedTopicDescriptions, setTruncatedTopicDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // Refs to measure topic description elements
   const topicDescriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
 
   const toggleDescription = (programId: string) => {
@@ -110,9 +100,6 @@ export default function ProgramAccordion({
         <Stack spacing={2}>
           {programs.map((program, index) => {
             const isDescriptionExpanded = expandedDescriptions[program.id] || false;
-            const topicCount = program.topics?.length || 0;
-            const courseCount = program.topics?.reduce((total, topic) => total + (topic.courses?.length || 0), 0)
-              || (program.courses?.length || 0);
 
             return (
               <Accordion
@@ -152,12 +139,8 @@ export default function ProgramAccordion({
                       {program.name}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                      {program.startDate && program.endDate ? `${program.startDate} - ${program.endDate}` : "Chưa có lịch"}
+                      {program.startDate && program.endDate ? `${fDateTime(program.startDate,FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(program.endDate,FORMAT_DATE_TIME_CLEANER)}` : "Chưa có lịch"}
                     </Typography>
-                    <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
-                      <Chip label={`${topicCount} chủ đề`} size="small" variant="outlined" />
-                      <Chip label={`${courseCount} môn`} size="small" variant="outlined" />
-                    </Stack>
 
                     {/* Program Description with Expand/Collapse */}
                     {program.description && (
@@ -363,8 +346,6 @@ export default function ProgramAccordion({
                             </Typography>
                           </Box>
                         )}
-
-                        {/* Courses within Topic - Level 2 (Indented 32px, no gray background) */}
                         <Stack spacing={0}>
                           {topic.courses.map((course) => (
                             <Box key={course.id}>

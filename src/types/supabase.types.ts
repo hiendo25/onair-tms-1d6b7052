@@ -1182,24 +1182,6 @@ export type Database = {
           },
         ]
       }
-      group_permission: {
-        Row: {
-          id: string
-          resource_code: string
-          title: string | null
-        }
-        Insert: {
-          id?: string
-          resource_code: string
-          title?: string | null
-        }
-        Update: {
-          id?: string
-          resource_code?: string
-          title?: string | null
-        }
-        Relationships: []
-      }
       hash_tags: {
         Row: {
           created_at: string
@@ -1682,29 +1664,22 @@ export type Database = {
         Row: {
           action_code: Database["public"]["Enums"]["action_code_enum"]
           assigned_at: string | null
-          group_permission_id: string
+          resource_code: string
           role_id: string
         }
         Insert: {
           action_code: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
-          group_permission_id: string
+          resource_code: string
           role_id: string
         }
         Update: {
           action_code?: Database["public"]["Enums"]["action_code_enum"]
           assigned_at?: string | null
-          group_permission_id?: string
+          resource_code?: string
           role_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "role_permissions_group_permission_id_fkey"
-            columns: ["group_permission_id"]
-            isOneToOne: false
-            referencedRelation: "group_permission"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "role_permissions_role_id_fkey"
             columns: ["role_id"]
@@ -2110,6 +2085,24 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_training_plan_detail_counts: {
+        Args: { plan_id: string }
+        Returns: {
+          courses_count: number
+          instructors_count: number
+          programs_count: number
+          topics_count: number
+        }[]
+      }
+      get_training_plan_status_counts: {
+        Args: { org_id: string; search_text?: string }
+        Returns: {
+          approved: number
+          pending: number
+          rejected: number
+          total: number
+        }[]
+      }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
@@ -2156,7 +2149,16 @@ export type Database = {
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
-      question_type: "file" | "text" | "checkbox" | "radio"
+      question_type:
+        | "file"
+        | "text"
+        | "checkbox"
+        | "radio"
+        | "matching"
+        | "drag_and_drop"
+        | "true_false"
+        | "order"
+        | "fill"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       training_plan_status: "pending" | "approved" | "rejected" | "deleted"
@@ -2317,7 +2319,17 @@ export const Constants = {
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
-      question_type: ["file", "text", "checkbox", "radio"],
+      question_type: [
+        "file",
+        "text",
+        "checkbox",
+        "radio",
+        "matching",
+        "drag_and_drop",
+        "true_false",
+        "order",
+        "fill",
+      ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
       training_plan_status: ["pending", "approved", "rejected", "deleted"],

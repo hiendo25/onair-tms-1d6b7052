@@ -1,4 +1,5 @@
 import { PlanStatus } from "@/model/plan.model";
+import { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export interface PlanListItem {
   id: string;
@@ -8,8 +9,6 @@ export interface PlanListItem {
   endDate: string | null;
   budget: number | null;
   status: PlanStatus;
-  programsCount: number;
-  topicsCount: number;
 }
 
 export interface PlanTopicCourse {
@@ -51,4 +50,22 @@ export interface PlanDetailDto {
   coursesCount: number;
   instructorsCount: number;
   programs: PlanProgramDetail[];
+}
+
+export interface PlanListStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+}
+
+export type PlanListResponse = PaginatedResult<PlanListItem> & {
+  stats: PlanListStats;
+};
+
+export interface PlanDetailCounts {
+  programsCount: number;
+  topicsCount: number;
+  coursesCount: number;
+  instructorsCount: number;
 }

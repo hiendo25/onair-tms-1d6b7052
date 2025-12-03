@@ -91,33 +91,19 @@ export default function PlansTable() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedPlanId, setSelectedPlanId] = React.useState<string | null>(null);
 
-  const { data: plans = [], isLoading } = useGetPlansQuery({ organizationId, search: searchInput });
+  const { data, isLoading } = useGetPlansQuery({
+    organizationId,
+    search: searchInput,
+    page,
+    limit: rowsPerPage,
+  });
+  const plans = data?.data || [];
+  const planStats = data?.stats || { total: 0, approved: 0, pending: 0, rejected: 0 };
+  
   const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
   const menuOpen = Boolean(anchorEl);
-  const totalCount = plans.length;
-
-  const planStats = React.useMemo(() => {
-    const stats = {
-      total: plans.length,
-      approved: 0,
-      pending: 0,
-      rejected: 0,
-    };
-
-    plans.forEach((plan) => {
-      if (plan.status === "approved") stats.approved += 1;
-      if (plan.status === "pending") stats.pending += 1;
-      if (plan.status === "rejected") stats.rejected += 1;
-    });
-
-    return stats;
-  }, [plans]);
-
-  const pagedPlans = React.useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    return plans.slice(start, start + rowsPerPage);
-  }, [plans, page, rowsPerPage]);
+  const totalCount = data?.total || 0;
 
   const handleCreatePlan = () => {
     router.push(PATHS.PLANS.CREATE);
@@ -306,7 +292,7 @@ export default function PlansTable() {
         </Box>
 
         <TableData
-          rows={pagedPlans}
+          rows={plans}
           columns={columns}
           hoverRow
           loading={isLoading}

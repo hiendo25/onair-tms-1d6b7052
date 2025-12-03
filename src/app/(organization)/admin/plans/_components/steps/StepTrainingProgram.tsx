@@ -224,8 +224,6 @@ export default function StepTrainingProgram({
           {fields.map((field, index) => {
             const dateRange = formatDateRange(field.startDate, field.endDate);
             const isEditing = editingIndex === index;
-            const topicsCount = field.topics?.length || 0;
-            const coursesCount = field.courses?.length || 0;
 
             if (isEditing) {
               return (
@@ -285,16 +283,6 @@ export default function StepTrainingProgram({
                     variant="outlined"
                     size="small"
                     sx={{ borderColor: "primary.200" }}
-                  />
-                  <Chip
-                    label={`${topicsCount} chủ đề`}
-                    size="small"
-                    variant="outlined"
-                  />
-                  <Chip
-                    label={`${coursesCount} môn học`}
-                    size="small"
-                    variant="outlined"
                   />
                 </Box>
 

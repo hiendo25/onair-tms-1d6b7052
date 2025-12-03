@@ -4,9 +4,14 @@ import { TablesInsert, TablesUpdate } from "@/types/supabase.types";
 interface GetPlansParams {
   search?: string;
   organizationId: string;
+  page?: number;
+  limit?: number;
 }
 
-const getPlans = async ({ search, organizationId }: GetPlansParams) => {
+const getPlans = async ({ search, organizationId, page = 1, limit = 10 }: GetPlansParams) => {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
   let query = supabase
     .from("training_plans")
     .select(
@@ -17,24 +22,22 @@ const getPlans = async ({ search, organizationId }: GetPlansParams) => {
       start_date,
       end_date,
       budget,
-      status,
-      training_plan_programs (
-        id,
-        training_plan_topics:training_plan_topics!training_plan_topics_program_id_fkey ( id )
-      )
+      status
     `,
+      { count: "exact" },
     )
     .eq("organization_id", organizationId)
     .not("status", "in", "(deleted)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
   }
 
-  const { data, error } = await query;
+  const { data, error, count } = await query;
   if (error) throw new Error(error.message);
-  return data;
+  return { data: data || [], total: count || 0 };
 };
 
 const getPlanDetail = async (id: string) => {
@@ -98,6 +101,39 @@ const getPlanDetail = async (id: string) => {
 
   if (error) throw new Error(error.message);
   return data;
+};
+
+const getPlanStatusCounts = async ({ organizationId, search }: Pick<GetPlansParams, "organizationId" | "search">) => {
+  const { data, error } = await supabase.rpc("get_training_plan_status_counts" as any, {
+    org_id: organizationId,
+    search_text: search || null,
+  });
+
+  if (error) throw new Error(error.message);
+  const stats = (data?.[0] as any) || {};
+
+  return {
+    total: Number(stats.total) || 0,
+    approved: Number(stats.approved) || 0,
+    pending: Number(stats.pending) || 0,
+    rejected: Number(stats.rejected) || 0,
+  };
+};
+
+const getPlanDetailCounts = async (id: string) => {
+  const { data, error } = await supabase.rpc("get_training_plan_detail_counts" as any, {
+    plan_id: id,
+  });
+
+  if (error) throw new Error(error.message);
+  const counts = (data?.[0] as any) || {};
+
+  return {
+    programsCount: Number(counts.programs_count) || 0,
+    topicsCount: Number(counts.topics_count) || 0,
+    coursesCount: Number(counts.courses_count) || 0,
+    instructorsCount: Number(counts.instructors_count) || 0,
+  };
 };
 
 type CreateProgramInsert = TablesInsert<"training_plan_programs">;
@@ -165,6 +201,8 @@ const insertTopicCourses = async (payload: CreateTopicCourseInsert[]) => {
 export const plansRepository = {
   getPlans,
   getPlanDetail,
+  getPlanStatusCounts,
+  getPlanDetailCounts,
   getCourseOptions,
   insertPlan,
   updatePlanRow,

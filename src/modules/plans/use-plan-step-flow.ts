@@ -24,7 +24,7 @@ export const usePlanStepFlow = ({
   initialData,
   trigger,
 }: UsePlanStepFlowProps) => {
-  const [currentStep, setCurrentStep] = useState<PlanStepId>(PLAN_STEPS[0].id);
+  const [currentStep, setCurrentStep] = useState<PlanStepId>(PLAN_STEPS?.[0]?.id as PlanStepId);
   const [completedSteps, setCompletedSteps] = useState<PlanStepId[]>(() =>
     getPlanInitialCompletedSteps(mode, initialData),
   );

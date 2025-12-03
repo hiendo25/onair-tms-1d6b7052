@@ -1,9 +1,9 @@
 import PlanDetailPageClient from "./_components/PlanDetailPage";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default async function PlanDetailPage({ params }: PageProps) {
