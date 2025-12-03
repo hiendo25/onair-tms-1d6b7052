@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import { FieldArrayWithId, useFieldArray, UseFormReturn } from "react-hook-form";
 import { PlanFormSchema, Topic } from "@/modules/plans/plan-form.schema";
@@ -61,27 +61,31 @@ export default function ProgramTopicsCard({
   return (
     <Box
       sx={{
-        p: 2.5,
+        p: 2.75,
         border: "1px solid",
-        borderColor: hasError ? "error.main" : "#1976d2",
-        borderRadius: 1,
-        bgcolor: hasError ? "#ffebee" : "#e3f2fd",
+        borderColor: hasError ? "error.main" : "divider",
+        borderRadius: 2,
+        background: hasError ? "#fff5f5" : "linear-gradient(135deg, #f9fafb 0%, #eef2ff 100%)",
+        boxShadow: "0 12px 28px rgba(0,0,0,0.06)",
       }}
     >
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
-          {program.name}
-        </Typography>
-        {dateRange && (
-          <Typography variant="body2" color="text.secondary">
-            {dateRange}
+      <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 2, mb: 1.5 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Chip label={`Chương trình ${programIndex + 1}`} size="small" color="primary" />
+            {dateRange && (
+              <Chip label={dateRange} size="small" variant="outlined" sx={{ borderColor: "primary.200" }} />
+            )}
+          </Box>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700, lineHeight: 1.4 }}>
+            {program.name}
           </Typography>
-        )}
-        {hasError && (
-          <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-            {topicsError}
-          </Typography>
-        )}
+          {hasError && (
+            <Typography variant="body2" color="error" sx={{ mt: 0.5 }}>
+              {topicsError}
+            </Typography>
+          )}
+        </Box>
       </Box>
 
       <Stack spacing={2}>
@@ -121,17 +125,14 @@ export default function ProgramTopicsCard({
 
         {!isShowingAddForm && (
           <Button
-            variant="outlined"
+            variant="contained"
             startIcon={<AddIcon />}
             onClick={() => onShowAddForm(programIndex)}
             sx={{
-              bgcolor: "common.white",
-              borderColor: "text.primary",
-              color: "text.primary",
-              borderRadius: 1,
+              alignSelf: "flex-start",
+              borderRadius: 2,
               "&:hover": {
-                bgcolor: "grey.50",
-                borderColor: "text.primary",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
               },
             }}
           >

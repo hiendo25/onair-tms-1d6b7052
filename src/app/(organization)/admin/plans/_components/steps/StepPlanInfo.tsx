@@ -1,12 +1,26 @@
 "use client";
 
-import { Autocomplete, Box, Button, Card, CardContent, Stack, TextField, Typography } from "@mui/material";
-import { Controller } from "react-hook-form";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { Controller, useWatch } from "react-hook-form";
 import { Survey } from "@/modules/plans/plan-form.schema";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import dayjs from "dayjs";
+import { RHFInputDecimalField } from "@/shared/ui/form/RHFInputDecimal";
 
 // Mock surveys data
 const MOCK_SURVEYS: Survey[] = [
@@ -27,15 +41,35 @@ export default function StepPlanInfo({
   onContinue,
   isLoading = false,
 }: StepPlanInfoProps) {
-  const { control } = usePlanFormContext();
+  const { control, getValues, } = usePlanFormContext();
+
+  const startDate = getValues("info.startDate");
+
+  useWatch({
+    control,
+    name: [`info.startDate`],
+  });
+
 
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" sx={{ mb: 3 }}>
-          Bước 1: Thông tin kế hoạch
-        </Typography>
-        <Stack spacing={3}>
+    <Card sx={{ boxShadow: "0 14px 44px rgba(9, 30, 66, 0.08)", border: "1px solid", borderColor: "divider" }}>
+      <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+          <Box>
+            <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 0.6 }}>
+              Bước 1
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Thông tin kế hoạch
+            </Typography>
+            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+              Xác định mục tiêu, phạm vi thời gian và khảo sát liên quan trước khi bắt đầu.
+            </Typography>
+          </Box>
+          <Chip label="Bắt buộc" color="primary" size="small" />
+        </Box>
+
+        <Stack spacing={3} sx={{ mt: 1 }}>
           <RHFTextField
             control={control}
             name="info.name"
@@ -49,68 +83,86 @@ export default function StepPlanInfo({
             name="info.objective"
             label="Mục tiêu"
             placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo"
-            minRows={3}
+            minRows={4}
             maxRows={6}
           />
 
-          <Box>
-            <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
-              Từ ngày - Đến ngày
+          <Box sx={{ p: 2.5, borderRadius: 2, bgcolor: "grey.50", border: "1px dashed", borderColor: "divider" }}>
+            <Typography sx={{ mb: 1, fontSize: "0.9rem", fontWeight: 600 }}>
+              Thời gian triển khai
             </Typography>
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", mb: 1.5 }}>
+              Xác định thời gian bắt đầu và kết thúc để chúng tôi giúp bạn theo dõi tiến độ.
+            </Typography>
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
               <RHFDateTimePicker
                 control={control}
                 name="info.startDate"
+                minDate={dayjs()}
               />
               <RHFDateTimePicker
                 control={control}
                 name="info.endDate"
+                minDate={dayjs(startDate)}
               />
             </Box>
           </Box>
 
-          <RHFTextField
-            control={control}
-            name="info.budget"
-            label="Ngân sách (VND)"
-            placeholder="VD: 50.000.000"
-            type="number"
-          />
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
 
-          {/* Survey Selection Field */}
-          <Box>
-            <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
-              Khảo sát
-            </Typography>
-            <Controller
-              name="info.survey"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <Autocomplete
-                  options={MOCK_SURVEYS}
-                  getOptionLabel={(option) => option.title}
-                  value={value || null}
-                  onChange={(_event, newValue) => {
-                    onChange(newValue);
-                  }}
-                  size="small"
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="Chọn khảo sát"
-                    />
-                  )}
-                />
-              )}
-            />
+            <Box>
+              <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
+                Ngân sách
+              </Typography>
+              <RHFInputDecimalField
+                name="info.budget"
+                placeholder="VD: 50.000.000"
+                size="small"
+              />
+            </Box>
+
+            <Box>
+              <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
+                Khảo sát
+              </Typography>
+              <Controller
+                name="info.survey"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <Autocomplete
+                    options={MOCK_SURVEYS}
+                    getOptionLabel={(option) => option.title}
+                    value={value || null}
+                    onChange={(_event, newValue) => {
+                      onChange(newValue);
+                    }}
+                    size="small"
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Chọn khảo sát"
+                      />
+                    )}
+                  />
+                )}
+              />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+                <InfoOutlinedIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+                <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                  Liên kết khảo sát giúp theo dõi mức độ hài lòng của học viên.
+                </Typography>
+              </Box>
+            </Box>
           </Box>
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
             <Button
               variant="contained"
               onClick={onContinue}
               disabled={isLoading}
+              endIcon={<ArrowForwardIcon fontSize="small" />}
+              sx={{ px: 3.5, py: 1 }}
             >
               Tiếp tục
             </Button>

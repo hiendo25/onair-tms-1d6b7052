@@ -110,16 +110,19 @@ export default function ProgramAccordion({
         <Stack spacing={2}>
           {programs.map((program, index) => {
             const isDescriptionExpanded = expandedDescriptions[program.id] || false;
+            const topicCount = program.topics?.length || 0;
+            const courseCount = program.topics?.reduce((total, topic) => total + (topic.courses?.length || 0), 0)
+              || (program.courses?.length || 0);
 
             return (
               <Accordion
                 key={program.id}
                 sx={{
-                  bgcolor: "rgba(0, 80, 255, 0.12)",
+                  bgcolor: "white",
                   "&:before": { display: "none" },
-                  boxShadow: "none",
+                  boxShadow: "0 12px 28px rgba(0,0,0,0.06)",
                   border: "1px solid rgba(145, 158, 171, 0.40)",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                 }}
               >
                 <AccordionSummary
@@ -127,7 +130,7 @@ export default function ProgramAccordion({
                   sx={{
                     minHeight: "auto",
                     "&:hover": {
-                      bgcolor: "rgba(0, 80, 255, 0.12)",
+                      bgcolor: "grey.50",
                     },
                     "& .MuiAccordionSummary-content": {
                       my: 2,
@@ -151,6 +154,10 @@ export default function ProgramAccordion({
                     <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
                       {program.startDate && program.endDate ? `${program.startDate} - ${program.endDate}` : "Chưa có lịch"}
                     </Typography>
+                    <Stack direction="row" spacing={1} sx={{ mt: 0.75 }}>
+                      <Chip label={`${topicCount} chủ đề`} size="small" variant="outlined" />
+                      <Chip label={`${courseCount} môn`} size="small" variant="outlined" />
+                    </Stack>
 
                     {/* Program Description with Expand/Collapse */}
                     {program.description && (

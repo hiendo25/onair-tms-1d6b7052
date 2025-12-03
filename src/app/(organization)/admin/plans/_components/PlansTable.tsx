@@ -13,6 +13,7 @@ import {
   TextField,
   Typography,
   ListItemText,
+  Stack,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -29,6 +30,54 @@ import { PlanStatus } from "@/model/plan.model";
 import { formatCurrencyV2 } from "@/utils/format-number";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { getStatusColor, getStatusLabel } from "../helper";
+
+type StatTone = "default" | "success" | "warning" | "error";
+
+interface StatCardProps {
+  label: string;
+  value: number;
+  helper: string;
+  tone?: StatTone;
+}
+
+const getTone = (tone: StatTone = "default") => {
+  switch (tone) {
+    case "success":
+      return { bg: "success.50", text: "success.dark" };
+    case "warning":
+      return { bg: "warning.50", text: "warning.dark" };
+    case "error":
+      return { bg: "error.50", text: "error.dark" };
+    default:
+      return { bg: "grey.50", text: "text.primary" };
+  }
+};
+
+function StatCard({ label, value, helper, tone = "default" }: StatCardProps) {
+  const toneColor = getTone(tone);
+
+  return (
+    <Box
+      sx={{
+        p: 2.25,
+        borderRadius: 2,
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: toneColor.bg,
+      }}
+    >
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
+        {label}
+      </Typography>
+      <Typography variant="h4" sx={{ fontWeight: 800, color: toneColor.text, lineHeight: 1.1 }}>
+        {value}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+        {helper}
+      </Typography>
+    </Box>
+  );
+}
 
 export default function PlansTable() {
   const router = useRouter();
@@ -47,6 +96,23 @@ export default function PlansTable() {
 
   const menuOpen = Boolean(anchorEl);
   const totalCount = plans.length;
+
+  const planStats = React.useMemo(() => {
+    const stats = {
+      total: plans.length,
+      approved: 0,
+      pending: 0,
+      rejected: 0,
+    };
+
+    plans.forEach((plan) => {
+      if (plan.status === "approved") stats.approved += 1;
+      if (plan.status === "pending") stats.pending += 1;
+      if (plan.status === "rejected") stats.rejected += 1;
+    });
+
+    return stats;
+  }, [plans]);
 
   const pagedPlans = React.useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -185,24 +251,32 @@ export default function PlansTable() {
       <Box
         sx={{
           background: "white",
-          borderRadius: 1,
-          p: 3,
+          borderRadius: 2,
+          p: { xs: 2.5, md: 3 },
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)",
         }}
       >
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center", mb: 2 }}>
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems={{ xs: "stretch", md: "center" }}
+          sx={{ mb: 2.5 }}
+        >
           <TextField
             placeholder="Tìm kiếm"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             size="small"
-            sx={{ width: 320 }}
+            sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
             slotProps={{
               input:{
                 startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
               }
             }}
           />
@@ -211,9 +285,24 @@ export default function PlansTable() {
             variant="contained"
             startIcon={<AddIcon />}
             onClick={handleCreatePlan}
+            sx={{ alignSelf: { xs: "stretch", md: "center" }, borderRadius: 2 }}
           >
             Tạo kế hoạch
           </Button>
+        </Stack>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "repeat(auto-fit, minmax(180px, 1fr))", sm: "repeat(4, minmax(0, 1fr))" },
+            gap: 1.5,
+            mb: 2,
+          }}
+        >
+          <StatCard label="Tổng kế hoạch" value={planStats.total} helper="Danh sách hiện có" />
+          <StatCard label="Đang chờ duyệt" value={planStats.pending} helper="Chờ quyết định" tone="warning" />
+          <StatCard label="Đã duyệt" value={planStats.approved} helper="Có thể gán môn học" tone="success" />
+          <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />
         </Box>
 
         <TableData

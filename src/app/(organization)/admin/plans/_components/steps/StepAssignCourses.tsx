@@ -7,6 +7,8 @@ import {
   Card,
   CardContent,
   Checkbox,
+  Chip,
+  Divider,
   Stack,
   TextField,
   Typography,
@@ -38,14 +40,24 @@ export default function StepAssignCourses({
     name: "programs",
   });
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Bước 5: Gán môn học
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Gán môn học cho từng chủ đề (hoặc trực tiếp vào chương trình nếu không có chủ đề)
-        </Typography>
+    <Card sx={{ boxShadow: "0 14px 44px rgba(9, 30, 66, 0.08)", border: "1px solid", borderColor: "divider" }}>
+      <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+          <Box>
+            <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 0.6 }}>
+              Bước 5
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Gán môn học
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Gán môn học cho từng chủ đề hoặc trực tiếp vào chương trình.
+            </Typography>
+          </Box>
+          <Chip label="Hoàn tất" color="primary" variant="outlined" size="small" />
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
 
         <Stack spacing={2}>
           {programs.map((program, programIndex) => {
@@ -123,22 +135,24 @@ function ProgramCard({
   return (
     <Box
       sx={{
-        p: 2.5,
+        p: 2.75,
         border: "1px solid",
-        borderColor: "#1976d2",
-        borderRadius: 1,
-        bgcolor: "#e3f2fd",
+        borderColor: "divider",
+        borderRadius: 2,
+        background: "linear-gradient(135deg, #f6f8ff 0%, #eef3ff 100%)",
+        boxShadow: "0 12px 26px rgba(0,0,0,0.06)",
       }}
     >
       <Box sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 0.5 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Chip label={`Chương trình ${programIndex + 1}`} size="small" color="primary" />
+          {dateRange && (
+            <Chip label={dateRange} size="small" variant="outlined" sx={{ borderColor: "primary.200" }} />
+          )}
+        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 700, mt: 1 }}>
           {program.name}
         </Typography>
-        {dateRange && (
-          <Typography variant="body2" color="text.secondary">
-            {dateRange}
-          </Typography>
-        )}
       </Box>
 
       <Stack spacing={2}>
@@ -155,14 +169,14 @@ function ProgramCard({
         ) : (
           <Box
             sx={{
-              p: 2,
+              p: 2.5,
               border: "1px dashed",
-              borderColor: "divider",
-              borderRadius: 1,
-              bgcolor: "common.white",
+              borderColor: "primary.100",
+              borderRadius: 2,
+              bgcolor: "white",
             }}
           >
-            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 700 }}>
               Gán môn học cho chương trình (không có chủ đề)
             </Typography>
             <Autocomplete
@@ -174,6 +188,7 @@ function ProgramCard({
               onChange={(_e, newValue) => programCoursesArray.replace(newValue)}
               isOptionEqualToValue={(option, value) => option.id === value.id}
               renderValue={(value) => renderTags(value)}
+              size="small"
               renderOption={(props, option, { selected }) => {
                 const { key, ...rest } = props;
                 return (
@@ -252,7 +267,7 @@ function TopicCardWithCourses({
   return (
     <TopicCard topic={topic} mode="readonly">
       {/* Course Assignment Section */}
-      <Box>
+      <Box sx={{ mt: 1, p: 1.5, borderRadius: 2, border: "1px dashed", borderColor: "divider", bgcolor: "grey.50" }}>
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Môn học được gán
@@ -269,6 +284,7 @@ function TopicCardWithCourses({
           onChange={handleCoursesChange}
           isOptionEqualToValue={(option, value) => option.id === value.id}
           renderValue={(value) => renderTags(value)}
+          size="small"
           renderOption={(props, option, { selected }) => {
             const { key, ...rest } = props;
             return (

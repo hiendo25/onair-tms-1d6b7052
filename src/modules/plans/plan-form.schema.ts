@@ -33,10 +33,15 @@ export const planSchema = zod.object({
   info: zod.object({
     name: zod.string().min(1, { message: "Tên kế hoạch không được bỏ trống." }),
     objective: zod.string().optional(),
-    startDate:  zod.string().optional().nullable(),
+    startDate: zod.string().optional().nullable(),
     endDate: zod.string().optional().nullable(),
-    budget: zod.number().optional(),
-    survey: surveySchema.optional(), // Optional survey selection
+    budget: zod
+      .number({ message: "Vui lòng nhập giá vé" })
+      .min(0)
+      .transform((val) => (val === 0 ? null : val))
+      .nullable()
+      .optional(),
+    survey: surveySchema.optional(),
   }),
   programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
 });

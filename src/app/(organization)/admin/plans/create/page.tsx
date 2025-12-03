@@ -11,9 +11,7 @@ export default async function CreatePlanPage() {
         { title: "Tạo kế hoạch đào tạo" },
       ]}
     >
-      <div className="max-w-[1400px]">
-        <CreatePlanForm />
-      </div>
+      <CreatePlanForm />
     </PageContainer>
   );
 }

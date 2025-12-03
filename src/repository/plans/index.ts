@@ -89,6 +89,10 @@ const getPlanDetail = async (id: string) => {
       )
     `,
     )
+    .order("order_index", {
+      ascending: true,
+      referencedTable: "training_plan_programs",
+    })
     .eq("id", id)
     .single();
 
@@ -125,7 +129,7 @@ const updatePlanRow = async (id: string, plan: TablesUpdate<"training_plans">) =
 };
 
 const deletePlan = async (id: string) => {
-  const { error } = await supabase.from("training_plans").update({status:"deleted"}).eq("id", id);
+  const { error } = await supabase.from("training_plans").update({ status: "deleted" }).eq("id", id);
   if (error) throw new Error(error.message);
 };
 

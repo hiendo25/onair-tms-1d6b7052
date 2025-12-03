@@ -17,10 +17,11 @@ export function TopicForm({ form, onSubmit, onCancel }: TopicFormProps) {
     <Box
       sx={{
         p: 3,
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 1,
-        bgcolor: "common.white",
+        border: "1px dashed",
+        borderColor: "primary.200",
+        borderRadius: 2,
+        bgcolor: "primary.50",
+        boxShadow: "0 10px 26px rgba(0,0,0,0.06)",
       }}
     >
       <Stack spacing={2}>
@@ -46,6 +47,7 @@ export function TopicForm({ form, onSubmit, onCancel }: TopicFormProps) {
             onClick={onSubmit}
             variant="contained"
             size="medium"
+            sx={{ minWidth: 160 }}
           >
             Lưu chủ đề
           </Button>

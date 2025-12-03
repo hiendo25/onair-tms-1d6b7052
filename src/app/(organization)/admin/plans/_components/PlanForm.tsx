@@ -99,7 +99,14 @@ export default function PlanForm({
 
   return (
     <FormProvider {...methods}>
-      <Box sx={{ display: "flex", gap: 3 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "360px 1fr" },
+          gap: 3,
+          alignItems: "flex-start",
+        }}
+      >
         <StepNavigation
           steps={PLAN_STEPS}
           currentStep={currentStep}

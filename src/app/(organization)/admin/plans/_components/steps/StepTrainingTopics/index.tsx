@@ -6,6 +6,8 @@ import {
   Button,
   Card,
   CardContent,
+  Chip,
+  Divider,
   Stack,
   Typography,
 } from "@mui/material";
@@ -66,35 +68,60 @@ export default function StepTrainingTopics({
   };
 
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Bước 3: Chủ đề (không bắt buộc)
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Bạn có thể bỏ qua bước này nếu chương trình không cần phân tách chủ đề
-        </Typography>
+    <Card sx={{ boxShadow: "0 14px 44px rgba(9, 30, 66, 0.08)", border: "1px solid", borderColor: "divider" }}>
+      <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
+          <Box>
+            <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 0.6 }}>
+              Bước 3
+            </Typography>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              Chủ đề (không bắt buộc)
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Thêm chủ đề giúp bạn gán môn học chi tiết hơn cho từng chương trình.
+            </Typography>
+          </Box>
+          <Chip label="Tùy chọn" color="default" size="small" />
+        </Box>
 
-        <Stack spacing={2}>
-          {programs.map((program, programIndex) => {
-            const dateRange = formatDateRange(program.startDate, program.endDate);
+        <Divider sx={{ my: 2 }} />
 
-            return (
-              <ProgramTopicsCard
-                key={program.id}
-                program={program}
-                programIndex={programIndex}
-                dateRange={dateRange}
-                showFormForProgram={showFormForProgram}
-                editingTopic={editingTopic}
-                topicForm={topicForm}
-                onShowAddForm={handleShowAddForm}
-                onEditTopic={handleEditTopic}
-                onCancelForm={handleCancelForm}
-              />
-            );
-          })}
-        </Stack>
+        {programs.length === 0 ? (
+          <Box
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              border: "1px dashed",
+              borderColor: "divider",
+              bgcolor: "grey.50",
+              color: "text.secondary",
+            }}
+          >
+            Chưa có chương trình để gán chủ đề. Hãy tạo ít nhất một chương trình ở bước trước.
+          </Box>
+        ) : (
+          <Stack spacing={2}>
+            {programs.map((program, programIndex) => {
+              const dateRange = formatDateRange(program.startDate, program.endDate);
+
+              return (
+                <ProgramTopicsCard
+                  key={program.id}
+                  program={program}
+                  programIndex={programIndex}
+                  dateRange={dateRange}
+                  showFormForProgram={showFormForProgram}
+                  editingTopic={editingTopic}
+                  topicForm={topicForm}
+                  onShowAddForm={handleShowAddForm}
+                  onEditTopic={handleEditTopic}
+                  onCancelForm={handleCancelForm}
+                />
+              );
+            })}
+          </Stack>
+        )}
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button variant="outlined" onClick={onBack}>
