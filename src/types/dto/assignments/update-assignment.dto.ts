@@ -1,10 +1,20 @@
 import { Database } from "@/types/supabase.types";
 import { QuestionOption } from "./question-option.dto";
 
-export interface MatchingPair {
+export interface MatchingColumnItem {
   id: string;
-  columnA: string;
-  columnB: string;
+  content: string;
+}
+
+export interface MatchingMapping {
+  columnAId: string;
+  columnBId: string;
+}
+
+export interface MatchingQuestionData {
+  columnAItems: MatchingColumnItem[];
+  columnBItems: MatchingColumnItem[];
+  correctMappings: MatchingMapping[];
 }
 
 export interface OrderItem {
@@ -23,7 +33,7 @@ export class UpdateAssignmentDto {
     label: string;
     score: number;
     options?: QuestionOption[];
-    matchingPairs?: MatchingPair[];
+    matchingData?: MatchingQuestionData;
     orderItems?: OrderItem[];
     attachments?: string[];
   }>;

@@ -55,7 +55,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
 
           // Transform options based on question type
           if (q.type === "matching") {
-            question.matchingPairs = q.options ? (q.options as any) : undefined;
+            question.matchingData = q.options ? (q.options as any) : undefined;
           } else if (q.type === "order") {
             question.orderItems = q.options ? (q.options as any) : undefined;
           } else {

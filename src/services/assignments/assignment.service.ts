@@ -34,9 +34,16 @@ async function createAssignmentWithRelations(
       const questionsToCreate = payload.questions.map((question) => {
         let options = question.options || null;
 
-        // Transform matchingPairs to options for matching type
-        if (question.type === "matching" && question.matchingPairs) {
-          options = question.matchingPairs as any;
+        // Transform matchingData to options for matching type
+        if (question.type === "matching" && question.matchingData) {
+          const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+
+          // Store the matching data structure in options
+          options = {
+            columnAItems,
+            columnBItems,
+            correctMappings,
+          } as any;
         }
 
         // Transform orderItems to options for order type
@@ -126,9 +133,16 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
     const questionsToCreate = payload.questions.map((question) => {
       let options = question.options || null;
 
-      // Transform matchingPairs to options for matching type
-      if (question.type === "matching" && question.matchingPairs) {
-        options = question.matchingPairs as any;
+      // Transform matchingData to options for matching type
+      if (question.type === "matching" && question.matchingData) {
+        const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+
+        // Store the matching data structure in options
+        options = {
+          columnAItems,
+          columnBItems,
+          correctMappings,
+        } as any;
       }
 
       // Transform orderItems to options for order type

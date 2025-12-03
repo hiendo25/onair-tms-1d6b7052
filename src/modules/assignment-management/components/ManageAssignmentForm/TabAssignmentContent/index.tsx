@@ -1,7 +1,7 @@
 "use client";
 import { memo, useCallback } from "react";
 import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
-import { type Assignment, type Question, type QuestionOption, type MatchingPair, type OrderItem } from "../../assignment-form.schema";
+import { type Assignment, type Question, type QuestionOption, type MatchingQuestionData, type OrderItem } from "../../assignment-form.schema";
 import { Button, Divider, FormControl, FormLabel, IconButton, MenuItem, Select, Typography, Checkbox, FormControlLabel } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
@@ -12,6 +12,7 @@ import FileUpload from "@/shared/ui/form/FileUpload";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import SortableOrderItem from "./SortableOrderItem";
+import MatchingQuestionEditor from "./MatchingQuestionEditor";
 
 interface TabAssignmentContentProps {}
 
@@ -64,7 +65,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
 
     // Clear all type-specific fields first
     setValue(`questions.${index}.options`, undefined);
-    setValue(`questions.${index}.matchingPairs`, undefined);
+    setValue(`questions.${index}.matchingData`, undefined);
     setValue(`questions.${index}.orderItems`, undefined);
 
     // Initialize based on new type
@@ -78,9 +79,17 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
         { id: uuidv4(), label: "Sai", correct: false }
       ]);
     } else if (newType === "matching") {
-      setValue(`questions.${index}.matchingPairs`, [
-        { id: uuidv4(), columnA: "", columnB: "" }
-      ]);
+      setValue(`questions.${index}.matchingData`, {
+        columnAItems: [
+          { id: uuidv4(), content: "" },
+          { id: uuidv4(), content: "" }
+        ],
+        columnBItems: [
+          { id: uuidv4(), content: "" },
+          { id: uuidv4(), content: "" }
+        ],
+        correctMappings: []
+      });
     } else if (newType === "order") {
       setValue(`questions.${index}.orderItems`, [
         { id: uuidv4(), content: "", correctOrder: 0 },
@@ -123,19 +132,9 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     setValue(`questions.${questionIndex}.options`, newOptions);
   }, [setValue]);
 
-  // Matching pairs handlers
-  const handleAddMatchingPair = useCallback((questionIndex: number, currentPairs: MatchingPair[] = []) => {
-    const newPair: MatchingPair = {
-      id: uuidv4(),
-      columnA: "",
-      columnB: "",
-    };
-    setValue(`questions.${questionIndex}.matchingPairs`, [...currentPairs, newPair]);
-  }, [setValue]);
-
-  const handleRemoveMatchingPair = useCallback((questionIndex: number, pairIndex: number, currentPairs: MatchingPair[] = []) => {
-    const newPairs = currentPairs.filter((_, idx) => idx !== pairIndex);
-    setValue(`questions.${questionIndex}.matchingPairs`, newPairs);
+  // Matching data handler
+  const handleMatchingDataChange = useCallback((questionIndex: number, data: MatchingQuestionData) => {
+    setValue(`questions.${questionIndex}.matchingData`, data);
   }, [setValue]);
 
   // Order items handlers
@@ -348,69 +347,20 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
 
                     {/* Matching Question Type */}
                     {questionType === "matching" && (() => {
-                      const matchingPairs = watchedQuestions[index]?.matchingPairs || [];
+                      const matchingData = watchedQuestions[index]?.matchingData;
+
+                      // Provide default structure if matchingData is undefined
+                      const defaultMatchingData: MatchingQuestionData = {
+                        columnAItems: [],
+                        columnBItems: [],
+                        correctMappings: []
+                      };
+
                       return (
-                        <div className="flex flex-col gap-3">
-                          <FormLabel className="text-sm">
-                            Các cặp ghép đôi <span className="text-red-500">*</span>
-                          </FormLabel>
-
-                          {matchingPairs && matchingPairs.length > 0 && (
-                            <div className="flex flex-col gap-3">
-                              {matchingPairs.map((pair, pairIndex) => (
-                                <div key={pair.id} className="border border-gray-200 rounded-lg p-3">
-                                  <div className="flex items-start gap-3 mb-2">
-                                    <Typography className="text-xs text-gray-600 mt-2">
-                                      Cặp {pairIndex + 1}
-                                    </Typography>
-                                    <IconButton
-                                      size="small"
-                                      onClick={() => handleRemoveMatchingPair(index, pairIndex, matchingPairs)}
-                                      disabled={matchingPairs.length === 1}
-                                      className="ml-auto"
-                                    >
-                                      <TrashIcon1 className="w-4 h-4" />
-                                    </IconButton>
-                                  </div>
-                                  <div className="grid grid-cols-2 gap-3">
-                                    <div>
-                                      <FormLabel className="text-xs mb-1 block">
-                                        Cột A <span className="text-red-500">*</span>
-                                      </FormLabel>
-                                      <RHFTextField
-                                        control={control}
-                                        name={`questions.${index}.matchingPairs.${pairIndex}.columnA`}
-                                        placeholder="Nhập nội dung cột A"
-                                        size="small"
-                                      />
-                                    </div>
-                                    <div>
-                                      <FormLabel className="text-xs mb-1 block">
-                                        Cột B <span className="text-red-500">*</span>
-                                      </FormLabel>
-                                      <RHFTextField
-                                        control={control}
-                                        name={`questions.${index}.matchingPairs.${pairIndex}.columnB`}
-                                        placeholder="Nhập nội dung cột B"
-                                        size="small"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={() => handleAddMatchingPair(index, matchingPairs)}
-                            startIcon={<PlusIcon />}
-                            variant="outlined"
-                            size="small"
-                            className="self-start"
-                          >
-                            Thêm cặp
-                          </Button>
-                        </div>
+                        <MatchingQuestionEditor
+                          matchingData={matchingData || defaultMatchingData}
+                          onChange={(data) => handleMatchingDataChange(index, data)}
+                        />
                       );
                     })()}
 

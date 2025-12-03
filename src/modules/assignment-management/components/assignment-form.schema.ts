@@ -9,11 +9,21 @@ const optionSchema = zod.object({
   correct: zod.boolean(),
 });
 
-// Schema for matching question type - pairs from Column A and Column B
-const matchingPairSchema = zod.object({
+// Schema for matching question type - independent columns with mappings
+const matchingColumnItemSchema = zod.object({
   id: zod.string(),
-  columnA: zod.string().min(1, { message: "Nội dung cột A không được bỏ trống." }),
-  columnB: zod.string().min(1, { message: "Nội dung cột B không được bỏ trống." }),
+  content: zod.string().min(1, { message: "Nội dung không được bỏ trống." }),
+});
+
+const matchingMappingSchema = zod.object({
+  columnAId: zod.string(),
+  columnBId: zod.string(),
+});
+
+const matchingQuestionDataSchema = zod.object({
+  columnAItems: zod.array(matchingColumnItemSchema),
+  columnBItems: zod.array(matchingColumnItemSchema),
+  correctMappings: zod.array(matchingMappingSchema),
 });
 
 // Schema for order question type - items with correct sequence
@@ -32,7 +42,7 @@ const questionSchema = zod
       .positive({ message: "Điểm phải là số dương." })
       .min(0.1, { message: "Điểm phải lớn hơn 0." }),
     options: zod.array(optionSchema).optional(),
-    matchingPairs: zod.array(matchingPairSchema).optional(),
+    matchingData: matchingQuestionDataSchema.optional(),
     orderItems: zod.array(orderItemSchema).optional(),
     attachments: zod.array(zod.string()).optional(),
   })
@@ -95,12 +105,41 @@ const questionSchema = zod
 
     // Validation for matching type
     if (data.type === "matching") {
-      if (!data.matchingPairs || data.matchingPairs.length === 0) {
+      if (!data.matchingData) {
         ctx.addIssue({
           code: "custom",
-          message: "Câu hỏi ghép đôi phải có ít nhất 1 cặp.",
-          path: ["matchingPairs"],
+          message: "Câu hỏi ghép đôi phải có dữ liệu.",
+          path: ["matchingData"],
         });
+      } else {
+        const { columnAItems, columnBItems, correctMappings } = data.matchingData;
+
+        // Check minimum items
+        if (columnAItems.length === 0 || columnBItems.length === 0) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Câu hỏi ghép đôi phải có ít nhất 1 mục ở mỗi cột.",
+            path: ["matchingData"],
+          });
+        }
+
+        // Check equal length
+        if (columnAItems.length !== columnBItems.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Hai cột phải có cùng số lượng mục.",
+            path: ["matchingData"],
+          });
+        }
+
+        // Check all items have mappings
+        if (correctMappings.length !== columnAItems.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Tất cả các mục phải được ghép đôi.",
+            path: ["matchingData", "correctMappings"],
+          });
+        }
       }
     }
 
@@ -150,9 +189,21 @@ const assignmentSchema = zod.object({
 type Assignment = zod.infer<typeof assignmentSchema>;
 type Question = zod.infer<typeof questionSchema>;
 type QuestionOption = zod.infer<typeof optionSchema>;
-type MatchingPair = zod.infer<typeof matchingPairSchema>;
+type MatchingQuestionData = zod.infer<typeof matchingQuestionDataSchema>;
+type MatchingColumnItem = zod.infer<typeof matchingColumnItemSchema>;
+type MatchingMapping = zod.infer<typeof matchingMappingSchema>;
 type OrderItem = zod.infer<typeof orderItemSchema>;
 type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
-export { assignmentSchema, type Assignment, type Question, type QuestionOption, type MatchingPair, type OrderItem, type EmployeeItem };
+export {
+  assignmentSchema,
+  type Assignment,
+  type Question,
+  type QuestionOption,
+  type MatchingQuestionData,
+  type MatchingColumnItem,
+  type MatchingMapping,
+  type OrderItem,
+  type EmployeeItem
+};
 
