@@ -49,10 +49,15 @@ async function createAssignmentWithRelations(
         // Transform orderItems to options for order type
         // Ensure correctOrder is assigned based on array index
         if (question.type === "order" && question.orderItems) {
-          options = question.orderItems.map((item, index) => ({
+          const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
             ...item,
-            correctOrder: index, // 0-based index represents the correct order
-          })) as any;
+            correctOrder: index + 1, // 1-based index represents the correct order
+          }));
+
+          // Store the order data structure in options (similar to matching)
+          options = {
+            orderItems: orderItemsWithCorrectOrder,
+          } as any;
         }
 
         return {
@@ -148,10 +153,15 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
       // Transform orderItems to options for order type
       // Ensure correctOrder is assigned based on array index
       if (question.type === "order" && question.orderItems) {
-        options = question.orderItems.map((item, index) => ({
+        const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
           ...item,
-          correctOrder: index, // 0-based index represents the correct order
-        })) as any;
+          correctOrder: index + 1, // 1-based index represents the correct order
+        }));
+
+        // Store the order data structure in options (similar to matching)
+        options = {
+          orderItems: orderItemsWithCorrectOrder,
+        } as any;
       }
 
       return {

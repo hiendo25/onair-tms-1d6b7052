@@ -14,6 +14,9 @@ import CheckboxAnswerDisplay from "../../../_components/CheckboxAnswerDisplay";
 import TextAnswerDisplay from "../../../_components/TextAnswerDisplay";
 import FileAnswerDisplay from "../../../_components/FileAnswerDisplay";
 import AnswerAttachments from "../../../_components/AnswerAttachments";
+import MatchingAnswerDisplay from "../../../_components/MatchingAnswerDisplay";
+import OrderAnswerDisplay from "../../../_components/OrderAnswerDisplay";
+import TrueFalseAnswerDisplay from "../../../_components/TrueFalseAnswerDisplay";
 
 interface ResultQuestionCardProps {
   question: QuestionGradeDetail;
@@ -109,6 +112,29 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
 
           {question.feedback && <FeedbackDisplay feedback={question.feedback} />}
         </Box>
+      )}
+
+      {question.type === "matching" && question.options && (
+        <MatchingAnswerDisplay
+          studentMappings={question.answer.mappings}
+          columnAItems={(question.options as any).columnAItems || []}
+          columnBItems={(question.options as any).columnBItems || []}
+          correctMappings={(question.options as any).correctMappings || []}
+        />
+      )}
+
+      {question.type === "order" && question.options && (
+        <OrderAnswerDisplay
+          studentOrder={question.answer.orderedItems || []}
+          correctItems={(question.options as any).orderItems || []}
+        />
+      )}
+
+      {question.type === "true_false" && question.options && (
+        <TrueFalseAnswerDisplay
+          studentAnswer={question.answer.trueFalseAnswer ?? false}
+          correctAnswer={(question.options as any).correctAnswer === true}
+        />
       )}
     </Card>
   );

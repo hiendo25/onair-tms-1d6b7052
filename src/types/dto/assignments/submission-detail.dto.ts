@@ -17,6 +17,9 @@ export interface QuestionGradeDetail {
     text?: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];
+    mappings?: Array<{ columnAId: string; columnBId: string }>;
+    orderedItems?: Array<{ id: string; position: number }>;
+    trueFalseAnswer?: boolean;
   };
   answerAttachments?: FileMetadata[];
   earnedScore: number | null;

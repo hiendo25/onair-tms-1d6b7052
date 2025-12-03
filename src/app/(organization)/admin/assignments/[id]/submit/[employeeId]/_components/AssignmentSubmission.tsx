@@ -29,11 +29,14 @@ import SubmissionActions from "./SubmissionActions";
 
 interface QuestionAnswer {
   questionId: string;
-  questionType: "file" | "text" | "checkbox" | "radio";
+  questionType: "file" | "text" | "checkbox" | "radio" | "matching" | "order" | "true_false";
   files?: File[];
   textAnswer?: string;
   radioAnswer?: string;
   checkboxAnswers?: string[];
+  matchingMappings?: Array<{ columnAId: string; columnBId: string }>;
+  orderedItems?: Array<{ id: string; position: number }>;
+  trueFalseAnswer?: boolean;
   attachments?: File[];
 }
 
@@ -92,6 +95,9 @@ export default function AssignmentSubmission({
         textAnswer: q.type === "text" ? "" : undefined,
         radioAnswer: q.type === "radio" ? "" : undefined,
         checkboxAnswers: q.type === "checkbox" ? [] : undefined,
+        matchingMappings: q.type === "matching" ? [] : undefined,
+        orderedItems: q.type === "order" ? [] : undefined,
+        trueFalseAnswer: q.type === "true_false" ? undefined : undefined,
         attachments: q.type !== "file" ? [] : undefined,
       }));
       setValue("answers", initialAnswers);
@@ -205,6 +211,23 @@ export default function AssignmentSubmission({
     }
   }, [answers, setValue]);
 
+  const handleMatchingChange = React.useCallback((questionId: string, mappings: Array<{ columnAId: string; columnBId: string }>) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        ...currentAnswer,
+        matchingMappings: mappings,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  }, [answers, setValue]);
+
   const handleAttachmentSelect = React.useCallback((questionId: string, files: FileList | null) => {
     if (!files || files.length === 0) return;
 
@@ -244,6 +267,40 @@ export default function AssignmentSubmission({
     }
   }, [answers, setValue]);
 
+  const handleOrderChange = React.useCallback((questionId: string, orderedItems: Array<{ id: string; position: number }>) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        ...currentAnswer,
+        orderedItems,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  }, [answers, setValue]);
+
+  const handleTrueFalseChange = React.useCallback((questionId: string, answer: boolean) => {
+    const currentAnswers = answers || [];
+    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+
+    if (answerIndex >= 0) {
+      const currentAnswer = currentAnswers[answerIndex];
+      if (!currentAnswer) return;
+
+      const updatedAnswers = [...currentAnswers];
+      updatedAnswers[answerIndex] = {
+        ...currentAnswer,
+        trueFalseAnswer: answer,
+      };
+      setValue("answers", updatedAnswers);
+    }
+  }, [answers, setValue]);
+
   const hasAnyAnswers = () => {
     return answers?.some((answer) => {
       switch (answer.questionType) {
@@ -255,6 +312,12 @@ export default function AssignmentSubmission({
           return answer.radioAnswer && answer.radioAnswer.trim() !== "";
         case "checkbox":
           return answer.checkboxAnswers && answer.checkboxAnswers.length > 0;
+        case "matching":
+          return answer.matchingMappings && answer.matchingMappings.length > 0;
+        case "order":
+          return answer.orderedItems && answer.orderedItems.length > 0;
+        case "true_false":
+          return answer.trueFalseAnswer !== undefined;
         default:
           return false;
       }
@@ -294,6 +357,18 @@ export default function AssignmentSubmission({
             return !answer.radioAnswer || answer.radioAnswer.trim() === "";
           case "checkbox":
             return !answer.checkboxAnswers || answer.checkboxAnswers.length === 0;
+          case "matching":
+            // For matching questions, check if all Column A items have been mapped
+            const matchingQuestion = questions?.find(q => q.id === answer.questionId);
+            const columnAItems = (matchingQuestion?.options as any)?.columnAItems || [];
+            return !answer.matchingMappings || answer.matchingMappings.length !== columnAItems.length;
+          case "order":
+            // For order questions, check if all items have been ordered
+            const orderQuestion = questions?.find(q => q.id === answer.questionId);
+            const orderItems = (orderQuestion?.options as any)?.orderItems || [];
+            return !answer.orderedItems || answer.orderedItems.length !== orderItems.length;
+          case "true_false":
+            return answer.trueFalseAnswer === undefined;
           default:
             return true;
         }
@@ -373,6 +448,27 @@ export default function AssignmentSubmission({
                 throw new Error(`Vui lòng chọn ít nhất một đáp án cho câu hỏi: ${question.label}`);
               }
               answerData = answer.checkboxAnswers;
+              break;
+
+            case "matching":
+              if (!answer.matchingMappings || answer.matchingMappings.length === 0) {
+                throw new Error(`Vui lòng hoàn thành ghép đôi cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.matchingMappings;
+              break;
+
+            case "order":
+              if (!answer.orderedItems || answer.orderedItems.length === 0) {
+                throw new Error(`Vui lòng sắp xếp các mục cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.orderedItems;
+              break;
+
+            case "true_false":
+              if (answer.trueFalseAnswer === undefined) {
+                throw new Error(`Vui lòng chọn Đúng hoặc Sai cho câu hỏi: ${question.label}`);
+              }
+              answerData = answer.trueFalseAnswer;
               break;
 
             default:
@@ -581,6 +677,15 @@ export default function AssignmentSubmission({
                 // Checkbox type props
                 checkboxAnswers={answer?.checkboxAnswers}
                 onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
+                // Matching type props
+                matchingMappings={answer?.matchingMappings}
+                onMatchingChange={(mappings) => handleMatchingChange(question.id, mappings)}
+                // Order type props
+                orderedItems={answer?.orderedItems}
+                onOrderChange={(orderedItems) => handleOrderChange(question.id, orderedItems)}
+                // True/False type props
+                trueFalseAnswer={answer?.trueFalseAnswer}
+                onTrueFalseChange={(answer) => handleTrueFalseChange(question.id, answer)}
                 // Attachment props
                 attachments={answer?.attachments}
                 onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}

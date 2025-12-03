@@ -765,7 +765,15 @@ export type Database = {
           key?: string | null
           value?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_session_metadata_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_session_teacher: {
         Row: {
@@ -1754,6 +1762,233 @@ export type Database = {
           },
         ]
       }
+      training_plan_program_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          program_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          program_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_program_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_program_courses_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_programs: {
+        Row: {
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          order_index: number | null
+          plan_id: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          order_index?: number | null
+          plan_id: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          order_index?: number | null
+          plan_id?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_programs_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_topic_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          topic_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          topic_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_topic_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_topic_courses_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number | null
+          program_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index?: number | null
+          program_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number | null
+          program_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_topics_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          budget: number | null
+          created_at: string
+          created_by: string
+          end_date: string | null
+          id: string
+          name: string
+          objective: string | null
+          organization_id: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["training_plan_status"]
+          survey_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          budget?: number | null
+          created_at?: string
+          created_by: string
+          end_date?: string | null
+          id?: string
+          name: string
+          objective?: string | null
+          organization_id: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["training_plan_status"]
+          survey_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          budget?: number | null
+          created_at?: string
+          created_by?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          objective?: string | null
+          organization_id?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["training_plan_status"]
+          survey_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plans_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1908,6 +2143,7 @@ export type Database = {
         | "fill"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
+      training_plan_status: "pending" | "approved" | "rejected" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2078,6 +2314,7 @@ export const Constants = {
       ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
+      training_plan_status: ["pending", "approved", "rejected", "deleted"],
     },
   },
 } as const
