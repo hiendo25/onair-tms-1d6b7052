@@ -765,15 +765,7 @@ export type Database = {
           key?: string | null
           value?: Json | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "class_session_metadata_class_session_id_fkey"
-            columns: ["class_session_id"]
-            isOneToOne: false
-            referencedRelation: "class_sessions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       class_session_teacher: {
         Row: {

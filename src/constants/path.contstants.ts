@@ -36,7 +36,7 @@ export const PATHS = {
     ROOT: "/admin/online-course",
     CREATE: "/admin/online-course/create",
     LIST: "/admin/online-course/list",
-    STUDENTS: (courseId: string) => `/admin/online-course/${courseId}/students`,
+    STUDENTS: (courseId: string = ":courseId") => `/admin/online-course/${courseId}/students`,
     EDIT: (id: string = ":id") => `/admin/online-course/${id}/edit`,
   },
   STUDENTS: {
@@ -76,4 +76,4 @@ export const PATHS = {
     DETAIL: (id: string = ":id") => `/admin/plans/${id}`,
     EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
-};
+} as const;

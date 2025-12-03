@@ -111,11 +111,12 @@ export default function MenuContentItem({
           py: 0,
           px: mini ? 1 : 2,
           overflowX: "hidden",
+
           "& .MuiButtonBase-root": {
             minHeight: mini ? 58 : 42,
             padding: mini ? 0 : "6px 6px 6px 12px",
-            "&.Mui-selected": {
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+            ["&.Mui-selected, &:hover"]: {
+              backgroundColor: `${alpha(theme.palette.primary.main, 0.08)} !important`,
               ".menu-title .MuiTypography-root": {
                 color: theme.palette.primary.main,
               },

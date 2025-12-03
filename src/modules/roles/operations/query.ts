@@ -14,7 +14,7 @@ export const useGetGroupPermissionList = () => {
     queryKey: [GET_PERMISSIONS],
     queryFn: async () => await getGroupPermissionList(),
   });
-}
+};
 
 export const useGetRolePermissions = (roleCode: string) => {
   return useTQuery({
@@ -22,4 +22,4 @@ export const useGetRolePermissions = (roleCode: string) => {
     queryFn: async () => await getRolePermissions(roleCode),
     enabled: !!roleCode,
   });
-}
+};

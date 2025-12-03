@@ -1,4 +1,5 @@
-import { TPermissionActions } from "@/constants/permission.constant";
+// import { PermissionActions } from "@/constants/permission.constant";
+import { PermissionActions } from "@/model/permission.model";
 import { PermissionParams } from "@/repository/roles";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { PermissionModule, RoleFormData } from "../types";
@@ -8,32 +9,32 @@ export interface UseRolePermissionsReturn {
   modules: Record<string, PermissionModule>;
 
   // Mutable data
-  selectedPermissions: Map<string, Set<TPermissionActions>>;
-  setSelectedPermissions: React.Dispatch<React.SetStateAction<Map<string, Set<TPermissionActions>>>>;
+  selectedPermissions: Map<string, Set<PermissionActions>>;
+  setSelectedPermissions: React.Dispatch<React.SetStateAction<Map<string, Set<PermissionActions>>>>;
 
   // Actions
-  toggleAction: (moduleId: string, permCode: TPermissionActions) => void;
+  toggleAction: (moduleId: string, permCode: PermissionActions) => void;
   isFullySelected: boolean;
   isPartiallySelected: boolean;
   toggleAll: () => void;
   isPendingToggleAll: boolean;
   getChanges: () => { created: PermissionParams[]; deleted: PermissionParams[] };
-  selectedPermissionsArray: Record<string, { moduleId: string; permLabel: string; permCode: TPermissionActions }[]>;
+  selectedPermissionsArray: Record<string, { moduleId: string; permLabel: string; permCode: PermissionActions }[]>;
 }
 
 export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): UseRolePermissionsReturn => {
   const modules = useRef(initialData.modules || {}).current;
   const originalSelectedPermissions = useRef(
-    new Map<string, Set<TPermissionActions>>(initialData.originalSelectedPermissions),
+    new Map<string, Set<PermissionActions>>(initialData.originalSelectedPermissions),
   ).current;
 
   const [selectedPermissions, setSelectedPermissions] = useState(
-    new Map<string, Set<TPermissionActions>>(initialData.selectedPermissions),
+    new Map<string, Set<PermissionActions>>(initialData.selectedPermissions),
   );
 
   const [isPendingToggleAll, toggleAllTransition] = useTransition();
 
-  const toggleAction = useCallback((moduleId: string, permCode: TPermissionActions) => {
+  const toggleAction = useCallback((moduleId: string, permCode: PermissionActions) => {
     setSelectedPermissions((prev) => {
       const newMap = new Map(prev);
       const permCodes = new Set(newMap.get(moduleId) || []);
@@ -66,12 +67,12 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
   const toggleAll = useCallback(() => {
     toggleAllTransition(() => {
       setSelectedPermissions((_) => {
-        const newMap = new Map<string, Set<TPermissionActions>>();
+        const newMap = new Map<string, Set<PermissionActions>>();
         if (isFullySelected) {
           return newMap;
         } else {
           Object.values(modules).forEach((module) => {
-            const allPermCodes = new Set<TPermissionActions>(module.actions.map((action) => action.code));
+            const allPermCodes = new Set<PermissionActions>(module.actions.map((action) => action.code));
             newMap.set(module.id, allPermCodes);
           });
           return newMap;
@@ -94,12 +95,12 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
     const deleted: PermissionParams[] = [];
 
     selected.forEach((permSet, moduleId) => {
-      const originalPermSet = originalSelectedPermissions.get(moduleId) || new Set<TPermissionActions>();
+      const originalPermSet = originalSelectedPermissions.get(moduleId) || new Set<PermissionActions>();
 
       permSet.forEach((permCode) => {
         if (!originalPermSet.has(permCode)) {
           created.push({
-            group_permission_id: moduleId,
+            resource_code: moduleId,
             action_code: permCode,
           });
         }
@@ -107,12 +108,12 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
     });
 
     originalSelectedPermissions.forEach((permSet, moduleId) => {
-      const currentPermSet = selected.get(moduleId) || new Set<TPermissionActions>();
+      const currentPermSet = selected.get(moduleId) || new Set<PermissionActions>();
 
       permSet.forEach((permCode) => {
         if (!currentPermSet.has(permCode)) {
           deleted.push({
-            group_permission_id: moduleId,
+            resource_code: moduleId,
             action_code: permCode,
           });
         }
@@ -123,7 +124,7 @@ export const useRolePermissionFormData = (initialData: Partial<RoleFormData>): U
   };
 
   const selectedPermissionsArray = useMemo(() => {
-    const result: Record<string, { moduleId: string; permLabel: string; permCode: TPermissionActions }[]> = {};
+    const result: Record<string, { moduleId: string; permLabel: string; permCode: PermissionActions }[]> = {};
 
     selectedPermissions.forEach((permSet, moduleId) => {
       const module = modules[moduleId];

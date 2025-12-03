@@ -27,4 +27,6 @@ export * as coursesSectionsRepository from "./courses-sections";
 export * as coursesLessonsRepository from "./courses-lessons";
 export * as learningScreenRepository from "./learning-screen";
 export * as learningScreenServerRepository from "./learning-screen/server";
+export * as permissionRepository from "./permissions";
+export * as notificationsRepository from "./notifications";
 export * as plansRepository from "./plans";

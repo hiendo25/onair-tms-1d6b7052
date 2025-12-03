@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import type { } from "@mui/material/themeCssVarsAugmentation";
+import type {} from "@mui/material/themeCssVarsAugmentation";
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
 import MenuList, { MenuListProps } from "../MenuList";
@@ -53,7 +53,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyExpanded(false);
 
-    return () => { };
+    return () => {};
   }, [expanded, theme.transitions.duration.enteringScreen]);
 
   React.useEffect(() => {
@@ -67,7 +67,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
     setIsFullyCollapsed(false);
 
-    return () => { };
+    return () => {};
   }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;
@@ -114,9 +114,9 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       return (
         <>
           <div
-            className={cn("flex items-center gap-2", {
-              "py-6 px-6": !mini,
-              "py-4 px-3": mini,
+            className={cn("gap-3 border-b border-gray-200 mb-3", {
+              "py-6 px-6 flex justify-between items-center": !mini,
+              "pt-6 pb-4 px-3 text-center": mini,
             })}
           >
             <Link href="/" className="flex-1 block">
@@ -132,6 +132,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
                   size="small"
                   aria-label={mini ? "Mở rộng menu" : "Thu gọn menu"}
                   onClick={handleToggleSidebarExpanded}
+                  className="w-6 h-6"
                 >
                   {mini ? <ChevronRightIcon fontSize="small" /> : <ChevronLeftIcon fontSize="small" />}
                 </IconButton>

@@ -17,13 +17,6 @@ const CreateRolePage = () => {
   const { data: permissionModules, isLoading } = useGetGroupPermissionList();
   const { mutate: createRoleMutate, isPending } = useCreateRole();
 
-  if (isLoading)
-    return (
-      <PageContainer title="Đang tải...">
-        <div>Đang tải dữ liệu phân quyền...</div>
-      </PageContainer>
-    );
-
   const handleSubmit = (data: RoleParams & RolePermissionsParams) => {
     if (!data.title || data.title.trim() === "") return alert("Vui lòng nhập tên vai trò.");
 
