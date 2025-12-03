@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -24,16 +24,6 @@ const MatchingQuestionInput: React.FC<MatchingQuestionInputProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedColumnAId, setSelectedColumnAId] = useState<string | null>(null);
   const [, setForceUpdate] = useState(0);
-
-  // Shuffle Column B items on mount (only once)
-  const shuffledColumnBItems = useMemo(() => {
-    const items = [...columnBItems];
-    for (let i = items.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [items[i], items[j]] = [items[j], items[i]];
-    }
-    return items;
-  }, [columnBItems]);
 
   // Force re-render to update connection lines when mappings change
   useEffect(() => {
@@ -225,7 +215,7 @@ const MatchingQuestionInput: React.FC<MatchingQuestionInputProps> = ({
             <Typography variant="body2" sx={{ fontWeight: 600, color: "text.secondary" }}>
               Cột B
             </Typography>
-            {shuffledColumnBItems.map((item, index) => {
+            {columnBItems.map((item, index) => {
               const isMapped = isColumnBMapped(item.id);
 
               return (
