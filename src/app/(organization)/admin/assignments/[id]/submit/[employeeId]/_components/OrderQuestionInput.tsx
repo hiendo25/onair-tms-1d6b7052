@@ -27,6 +27,7 @@ interface OrderItem {
   id: string;
   content: string;
   correctOrder: number;
+  displayOrder: number; // Shuffled display position from database
 }
 
 interface OrderQuestionInputProps {
@@ -130,22 +131,18 @@ export default function OrderQuestionInput({
 
   React.useEffect(() => {
     if (orderedItems.length === 0) {
-      // Fisher-Yates shuffle algorithm
-      const shuffled = [...items];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      setShuffledItems(shuffled);
+      // Use the stored displayOrder from database (no client-side randomization)
+      const sortedByDisplayOrder = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
+      setShuffledItems(sortedByDisplayOrder);
 
-      // Initialize orderedItems with shuffled positions
-      const initialOrder = shuffled.map((item, index) => ({
+      // Initialize orderedItems with display positions
+      const initialOrder = sortedByDisplayOrder.map((item, index) => ({
         id: item.id,
         position: index + 1,
       }));
       onOrderChange(initialOrder);
     } else {
-      // Reconstruct the order from orderedItems
+      // Reconstruct the order from orderedItems (student has already started)
       const sortedItems = [...items].sort((a, b) => {
         const posA = orderedItems.find(oi => oi.id === a.id)?.position || 0;
         const posB = orderedItems.find(oi => oi.id === b.id)?.position || 0;

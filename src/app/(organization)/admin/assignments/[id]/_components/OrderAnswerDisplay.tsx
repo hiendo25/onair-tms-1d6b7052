@@ -9,6 +9,7 @@ interface OrderItem {
   id: string;
   content: string;
   correctOrder: number;
+  displayOrder?: number; // Optional for backward compatibility
 }
 
 interface OrderAnswerDisplayProps {

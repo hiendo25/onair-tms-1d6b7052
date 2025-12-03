@@ -21,6 +21,7 @@ export interface OrderItem {
   id: string;
   content: string;
   correctOrder: number;
+  displayOrder: number; // Shuffled display position (generated once, consistent for all students)
 }
 
 export class CreateAssignmentDto {

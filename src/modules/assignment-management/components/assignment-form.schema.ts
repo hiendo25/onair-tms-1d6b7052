@@ -31,6 +31,7 @@ const orderItemSchema = zod.object({
   id: zod.string(),
   content: zod.string().min(1, { message: "Nội dung không được bỏ trống." }),
   correctOrder: zod.number(), // 1-based position in correct sequence
+  displayOrder: zod.number(), // 1-based shuffled display position (consistent for all students)
 });
 
 const questionSchema = zod

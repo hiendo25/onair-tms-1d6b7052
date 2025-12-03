@@ -47,16 +47,28 @@ async function createAssignmentWithRelations(
         }
 
         // Transform orderItems to options for order type
-        // Ensure correctOrder is assigned based on array index
+        // Ensure correctOrder and displayOrder are assigned
         if (question.type === "order" && question.orderItems) {
           const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
             ...item,
             correctOrder: index + 1, // 1-based index represents the correct order
           }));
 
+          // Generate shuffled displayOrder using Fisher-Yates algorithm
+          const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
+          for (let i = shuffledIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+          }
+
+          const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
+            ...item,
+            displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
+          }));
+
           // Store the order data structure in options (similar to matching)
           options = {
-            orderItems: orderItemsWithCorrectOrder,
+            orderItems: orderItemsWithDisplayOrder,
           } as any;
         }
 
@@ -151,16 +163,28 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
       }
 
       // Transform orderItems to options for order type
-      // Ensure correctOrder is assigned based on array index
+      // Ensure correctOrder and displayOrder are assigned
       if (question.type === "order" && question.orderItems) {
         const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
           ...item,
           correctOrder: index + 1, // 1-based index represents the correct order
         }));
 
+        // Generate shuffled displayOrder using Fisher-Yates algorithm
+        const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
+        for (let i = shuffledIndices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+        }
+
+        const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
+          ...item,
+          displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
+        }));
+
         // Store the order data structure in options (similar to matching)
         options = {
-          orderItems: orderItemsWithCorrectOrder,
+          orderItems: orderItemsWithDisplayOrder,
         } as any;
       }
 

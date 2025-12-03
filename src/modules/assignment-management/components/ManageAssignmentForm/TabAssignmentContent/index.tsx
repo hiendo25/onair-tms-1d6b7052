@@ -92,8 +92,8 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
       });
     } else if (newType === "order") {
       setValue(`questions.${index}.orderItems`, [
-        { id: uuidv4(), content: "", correctOrder: 0 },
-        { id: uuidv4(), content: "", correctOrder: 1 }
+        { id: uuidv4(), content: "", correctOrder: 0, displayOrder: 0 },
+        { id: uuidv4(), content: "", correctOrder: 1, displayOrder: 1 }
       ]);
     }
   }, [setValue]);
@@ -143,6 +143,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
       id: uuidv4(),
       content: "",
       correctOrder: currentItems.length, // 0-based index
+      displayOrder: currentItems.length, // Will be shuffled on save
     };
     setValue(`questions.${questionIndex}.orderItems`, [...currentItems, newItem]);
   }, [setValue]);
@@ -153,6 +154,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     const reorderedItems = newItems.map((item, idx) => ({
       ...item,
       correctOrder: idx,
+      displayOrder: idx, // Will be shuffled on save
     }));
     setValue(`questions.${questionIndex}.orderItems`, reorderedItems);
   }, [setValue]);
@@ -173,6 +175,7 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
     const itemsWithUpdatedOrder = reorderedItems.map((item, idx) => ({
       ...item,
       correctOrder: idx,
+      displayOrder: idx, // Will be shuffled on save
     }));
 
     console.log('itemsWithUpdatedOrder', itemsWithUpdatedOrder);
