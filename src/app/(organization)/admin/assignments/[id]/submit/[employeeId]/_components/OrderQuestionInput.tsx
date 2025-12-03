@@ -130,25 +130,28 @@ export default function OrderQuestionInput({
   const [activeId, setActiveId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (orderedItems.length === 0) {
-      // Use the stored displayOrder from database (no client-side randomization)
-      const sortedByDisplayOrder = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
-      setShuffledItems(sortedByDisplayOrder);
-
-      // Initialize orderedItems with display positions
-      const initialOrder = sortedByDisplayOrder.map((item, index) => ({
-        id: item.id,
-        position: index + 1,
-      }));
-      onOrderChange(initialOrder);
-    } else {
-      // Reconstruct the order from orderedItems (student has already started)
+    // Always reconstruct the display order from orderedItems if it exists
+    // The parent component (AssignmentSubmission) initializes orderedItems with display order
+    if (orderedItems.length > 0) {
+      // Reconstruct the order from orderedItems (already initialized or student has interacted)
       const sortedItems = [...items].sort((a, b) => {
         const posA = orderedItems.find(oi => oi.id === a.id)?.position || 0;
         const posB = orderedItems.find(oi => oi.id === b.id)?.position || 0;
         return posA - posB;
       });
       setShuffledItems(sortedItems);
+    } else {
+      // Fallback: Use the stored displayOrder from database if orderedItems is empty
+      // This shouldn't happen in normal flow since parent initializes orderedItems
+      const sortedByDisplayOrder = [...items].sort((a, b) => a.displayOrder - b.displayOrder);
+      setShuffledItems(sortedByDisplayOrder);
+
+      // Initialize orderedItems with display positions as fallback
+      const initialOrder = sortedByDisplayOrder.map((item, index) => ({
+        id: item.id,
+        position: index + 1,
+      }));
+      onOrderChange(initialOrder);
     }
   }, []);
 

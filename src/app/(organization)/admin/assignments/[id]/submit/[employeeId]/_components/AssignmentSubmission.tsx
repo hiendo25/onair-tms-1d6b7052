@@ -88,18 +88,34 @@ export default function AssignmentSubmission({
 
   React.useEffect(() => {
     if (questions && questions.length > 0) {
-      const initialAnswers = questions.map((q) => ({
-        questionId: q.id,
-        questionType: q.type,
-        files: q.type === "file" ? [] : undefined,
-        textAnswer: q.type === "text" ? "" : undefined,
-        radioAnswer: q.type === "radio" ? "" : undefined,
-        checkboxAnswers: q.type === "checkbox" ? [] : undefined,
-        matchingMappings: q.type === "matching" ? [] : undefined,
-        orderedItems: q.type === "order" ? [] : undefined,
-        trueFalseAnswer: q.type === "true_false" ? undefined : undefined,
-        attachments: q.type !== "file" ? [] : undefined,
-      }));
+      const initialAnswers = questions.map((q) => {
+        const answer: any = {
+          questionId: q.id,
+          questionType: q.type,
+          files: q.type === "file" ? [] : undefined,
+          textAnswer: q.type === "text" ? "" : undefined,
+          radioAnswer: q.type === "radio" ? "" : undefined,
+          checkboxAnswers: q.type === "checkbox" ? [] : undefined,
+          matchingMappings: q.type === "matching" ? [] : undefined,
+          trueFalseAnswer: q.type === "true_false" ? undefined : undefined,
+          attachments: q.type !== "file" ? [] : undefined,
+        };
+
+        // Initialize order questions with the display order from database
+        if (q.type === "order" && q.options) {
+          const orderItems = (q.options as any).orderItems || [];
+          // Sort by displayOrder and create initial orderedItems
+          const sortedByDisplayOrder = [...orderItems].sort((a: any, b: any) => a.displayOrder - b.displayOrder);
+          answer.orderedItems = sortedByDisplayOrder.map((item: any, index: number) => ({
+            id: item.id,
+            position: index + 1,
+          }));
+        } else {
+          answer.orderedItems = q.type === "order" ? [] : undefined;
+        }
+
+        return answer;
+      });
       setValue("answers", initialAnswers);
     }
   }, [questions, setValue]);

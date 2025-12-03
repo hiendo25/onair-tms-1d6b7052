@@ -35,10 +35,10 @@ export default function OrderAnswerDisplay({
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, fontSize: "0.875rem" }}>
         Câu trả lời của học viên:
       </Typography>
-      <Stack spacing={1.5}>
+      <Stack spacing={0.75}>
         {sortedByStudentOrder.map((item, index) => {
           const studentPosition = index + 1;
           const isCorrect = item.correctOrder === studentPosition;
@@ -46,40 +46,45 @@ export default function OrderAnswerDisplay({
           return (
             <Paper
               key={item.id}
-              elevation={1}
+              elevation={0}
               sx={{
-                p: 2,
+                px: 1.5,
+                py: 1,
                 display: "flex",
                 alignItems: "center",
-                gap: 2,
+                gap: 1.5,
                 border: "1px solid",
                 borderColor: isCorrect ? "success.main" : "error.main",
                 bgcolor: isCorrect ? "success.50" : "error.50",
+                borderRadius: 1,
               }}
             >
               <Box
                 sx={{
-                  minWidth: 40,
-                  height: 40,
+                  minWidth: 28,
+                  height: 28,
                   borderRadius: "50%",
                   bgcolor: isCorrect ? "success.main" : "error.main",
                   color: "white",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontWeight: "bold",
+                  fontWeight: 600,
+                  fontSize: "0.875rem",
                 }}
               >
                 {studentPosition}
               </Box>
-              <Typography sx={{ flex: 1 }}>{item.content}</Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="body2" sx={{ flex: 1, lineHeight: 1.5 }}>
+                {item.content}
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                 {isCorrect ? (
-                  <CheckCircleIcon color="success" />
+                  <CheckCircleIcon fontSize="small" color="success" />
                 ) : (
                   <>
-                    <CancelIcon color="error" />
-                    <Typography variant="body2" color="error">
+                    <CancelIcon fontSize="small" color="error" />
+                    <Typography variant="caption" color="error" sx={{ fontSize: "0.75rem" }}>
                       Đúng: {item.correctOrder}
                     </Typography>
                   </>
