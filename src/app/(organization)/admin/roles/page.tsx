@@ -5,7 +5,7 @@ import { Box, Button, IconButton } from "@mui/material";
 import { useRouter } from "next/navigation";
 import React, { useMemo, useRef, useState } from "react";
 import { PATHS } from "@/constants/path.contstants";
-import { useGetRoleList } from "@/modules/roles/operations/query";
+import { useAdminGetRoleList } from "@/modules/roles/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
 import Link from "next/link";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
@@ -36,7 +36,7 @@ const RolesPage = () => {
     page: 1,
     pageSize: 10,
   });
-  const { data, isLoading, isPending } = useGetRoleList(queryParams);
+  const { data, isLoading, isPending } = useAdminGetRoleList(queryParams);
   const { mutate: deleteRoleMutate, isPending: isDeleting } = useDeleteRole();
 
   const roleList = useMemo(() => {

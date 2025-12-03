@@ -213,8 +213,19 @@ const getEmployeeById = async (id: string) => {
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
   }
+  const { data: userRolesData, error: userRolesError } = await supabase
+    .from("user_roles")
+    .select("role_id")
+    .eq("user_id", data?.user_id);
 
-  return data as unknown as EmployeeDto;
+  if (userRolesError) {
+    throw new Error(`Failed to fetch user roles: ${userRolesError.message}`);
+  }
+
+  return {
+    ...data,
+    role_ids: userRolesData?.map((ur) => ur.role_id) || [],
+  } as unknown as EmployeeDto;
 };
 
 export async function getLastEmployeeOrder() {
