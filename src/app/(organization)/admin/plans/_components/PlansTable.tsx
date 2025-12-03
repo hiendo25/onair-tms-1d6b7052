@@ -30,54 +30,7 @@ import { PlanStatus } from "@/model/plan.model";
 import { formatCurrencyV2 } from "@/utils/format-number";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { getStatusColor, getStatusLabel } from "../helper";
-
-type StatTone = "default" | "success" | "warning" | "error";
-
-interface StatCardProps {
-  label: string;
-  value: number;
-  helper: string;
-  tone?: StatTone;
-}
-
-const getTone = (tone: StatTone = "default") => {
-  switch (tone) {
-    case "success":
-      return { bg: "success.50", text: "success.dark" };
-    case "warning":
-      return { bg: "warning.50", text: "warning.dark" };
-    case "error":
-      return { bg: "error.50", text: "error.dark" };
-    default:
-      return { bg: "grey.50", text: "text.primary" };
-  }
-};
-
-function StatCard({ label, value, helper, tone = "default" }: StatCardProps) {
-  const toneColor = getTone(tone);
-
-  return (
-    <Box
-      sx={{
-        p: 2.25,
-        borderRadius: 2,
-        border: "1px solid",
-        borderColor: "divider",
-        bgcolor: toneColor.bg,
-      }}
-    >
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
-        {label}
-      </Typography>
-      <Typography variant="h4" sx={{ fontWeight: 800, color: toneColor.text, lineHeight: 1.1 }}>
-        {value}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-        {helper}
-      </Typography>
-    </Box>
-  );
-}
+import StatCard from "./StatCard";
 
 export default function PlansTable() {
   const router = useRouter();
@@ -99,7 +52,7 @@ export default function PlansTable() {
   });
   const plans = data?.data || [];
   const planStats = data?.stats || { total: 0, approved: 0, pending: 0, rejected: 0 };
-  
+
   const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
   const menuOpen = Boolean(anchorEl);
@@ -191,15 +144,15 @@ export default function PlansTable() {
     },
     {
       id: "time",
-      field:"time",
+      field: "time",
       headerName: "Thời gian",
       width: 220,
       renderCell: (_value, row) =>
-        row.startDate && row.endDate ? `${fDateTime(row.startDate,FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(row.endDate,FORMAT_DATE_TIME_CLEANER)}` : "Chưa có",
+        row.startDate && row.endDate ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(row.endDate, FORMAT_DATE_TIME_CLEANER)}` : "Chưa có",
     },
     {
       id: "budget",
-      field:"budget",
+      field: "budget",
       headerName: "Ngân sách",
       width: 180,
       renderCell: (_value, row) => (row.budget ? formatCurrencyV2(row.budget) : "—"),
@@ -215,7 +168,7 @@ export default function PlansTable() {
     },
     {
       id: "action",
-      field:"action",
+      field: "action",
       headerName: "Hành động",
       width: 120,
       fixed: "right",
@@ -257,7 +210,7 @@ export default function PlansTable() {
             size="small"
             sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
             slotProps={{
-              input:{
+              input: {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon />

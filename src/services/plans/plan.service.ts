@@ -49,43 +49,44 @@ class PlanService {
     try {
       await Promise.all(
         programs.map(async (program) => {
-          const { topics, courses, ...programFields } = program;
+          const { topics = [], courses = [], ...programFields } = program;
+
           const programRow = await plansRepository.insertProgram({
             ...programFields,
             plan_id: planRow.id,
           });
 
-          const tasks: Promise<unknown>[] = [];
+          const programCoursesTask =
+            courses.length > 0
+              ? plansRepository.insertProgramCourses(
+                courses.map((courseId) => ({
+                  program_id: programRow.id,
+                  course_id: courseId,
+                })),
+              )
+              : Promise.resolve();
 
-          if (courses.length > 0) {
-            tasks.push(
-              plansRepository.insertProgramCourses(
-                courses.map(courseId => ({ program_id: programRow.id, course_id: courseId })),
-              ),
-            );
-          }
+          const topicsTask = Promise.all(
+            topics.map(async (topic) => {
+              const { courses: topicCourses = [], ...topicFields } = topic;
 
-          if (topics.length > 0) {
-            tasks.push(
-              Promise.all(
-                topics.map(async (topic) => {
-                  const { courses: topicCourses, ...topicFields } = topic;
-                  const topicRow = await plansRepository.insertTopic({
-                    ...topicFields,
-                    program_id: programRow.id,
-                  });
+              const topicRow = await plansRepository.insertTopic({
+                ...topicFields,
+                program_id: programRow.id,
+              });
 
-                  if (topicCourses.length > 0) {
-                    await plansRepository.insertTopicCourses(
-                      topicCourses.map(courseId => ({ topic_id: topicRow.id, course_id: courseId })),
-                    );
-                  }
-                }),
-              ),
-            );
-          }
+              if (topicCourses.length > 0) {
+                await plansRepository.insertTopicCourses(
+                  topicCourses.map((courseId) => ({
+                    topic_id: topicRow.id,
+                    course_id: courseId,
+                  })),
+                );
+              }
+            }),
+          );
 
-          await Promise.all(tasks);
+          await Promise.all([programCoursesTask, topicsTask]);
         }),
       );
 
@@ -116,43 +117,44 @@ class PlanService {
 
     await Promise.all(
       programs.map(async (program) => {
-        const { topics, courses, ...programFields } = program;
+        const { topics = [], courses = [], ...programFields } = program;
+
         const programRow = await plansRepository.insertProgram({
           ...programFields,
           plan_id: id,
         });
 
-        const tasks: Promise<unknown>[] = [];
+        const programCoursesPromise =
+          courses.length > 0
+            ? plansRepository.insertProgramCourses(
+              courses.map((courseId) => ({
+                program_id: programRow.id,
+                course_id: courseId,
+              })),
+            )
+            : Promise.resolve();
 
-        if (courses.length > 0) {
-          tasks.push(
-            plansRepository.insertProgramCourses(
-              courses.map(courseId => ({ program_id: programRow.id, course_id: courseId })),
-            ),
-          );
-        }
+        const topicsPromise = Promise.all(
+          topics.map(async (topic) => {
+            const { courses: topicCourses = [], ...topicFields } = topic;
 
-        if (topics.length > 0) {
-          tasks.push(
-            Promise.all(
-              topics.map(async (topic) => {
-                const { courses: topicCourses, ...topicFields } = topic;
-                const topicRow = await plansRepository.insertTopic({
-                  ...topicFields,
-                  program_id: programRow.id,
-                });
+            const topicRow = await plansRepository.insertTopic({
+              ...topicFields,
+              program_id: programRow.id,
+            });
 
-                if (topicCourses.length > 0) {
-                  await plansRepository.insertTopicCourses(
-                    topicCourses.map(courseId => ({ topic_id: topicRow.id, course_id: courseId })),
-                  );
-                }
-              }),
-            ),
-          );
-        }
+            if (topicCourses.length > 0) {
+              await plansRepository.insertTopicCourses(
+                topicCourses.map((courseId) => ({
+                  topic_id: topicRow.id,
+                  course_id: courseId,
+                })),
+              );
+            }
+          }),
+        );
 
-        await Promise.all(tasks);
+        await Promise.all([programCoursesPromise, topicsPromise]);
       }),
     );
   }

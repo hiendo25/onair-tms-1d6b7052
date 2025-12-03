@@ -6,7 +6,7 @@ import { FieldArrayWithId, useFieldArray, UseFormReturn } from "react-hook-form"
 import { PlanFormSchema, Topic } from "@/modules/plans/plan-form.schema";
 import { TopicForm } from "./TopicForm";
 import { EditingTopicState } from "./types";
-import TopicCard from "../../shared/TopicCard";
+import TopicCard from "../../TopicCard";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface ProgramTopicsCardProps {

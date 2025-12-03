@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { useFieldArray, useWatch } from "react-hook-form";
 import { Course } from "@/modules/plans/plan-form.schema";
-import TopicCard from "../shared/TopicCard";
+import TopicCard from "../TopicCard";
 import { useGetPlanCourseOptionsQuery } from "@/modules/plans/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { formatDateRange } from "../../helper";

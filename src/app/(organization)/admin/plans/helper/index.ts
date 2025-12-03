@@ -2,6 +2,8 @@ import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { PlanStatus } from "@/model/plan.model";
 import { Dayjs } from "dayjs";
 
+export type StatTone = "default" | "success" | "warning" | "error";
+
 export const formatDateRange = (startDate?: string | Dayjs | null, endDate?: string | Dayjs | null) => {
   if (!startDate || !endDate) return null;
 
@@ -31,5 +33,18 @@ export const getStatusColor = (status: PlanStatus): "warning" | "success" | "err
       return "error";
     default:
       return "warning";
+  }
+};
+
+export const getTone = (tone: StatTone = "default") => {
+  switch (tone) {
+    case "success":
+      return { bg: "success.50", text: "success.dark" };
+    case "warning":
+      return { bg: "warning.50", text: "warning.dark" };
+    case "error":
+      return { bg: "error.50", text: "error.dark" };
+    default:
+      return { bg: "grey.50", text: "text.primary" };
   }
 };
