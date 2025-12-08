@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
   AccordionDetails,
@@ -10,18 +12,17 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import React from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { ActionOption } from "../../types";
+
+import { Permissions } from "@/constants/permission.constant";
 import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
-import { TPermissionActions } from "@/constants/permission.constant";
+import { ActionOption } from "../../types";
 
 interface PermissionModuleItemProps extends Pick<UseRolePermissionsReturn, "setSelectedPermissions" | "toggleAction"> {
   moduleId: string;
   moduleName: string;
   availableActions: ActionOption[];
   defaultExpanded?: boolean;
-  selectedActions: Set<TPermissionActions>;
+  selectedActions: Set<Permissions>;
 }
 
 const PermissionModuleItem: React.FC<PermissionModuleItemProps> = ({
@@ -44,7 +45,7 @@ const PermissionModuleItem: React.FC<PermissionModuleItemProps> = ({
       if (isFullySelected) {
         newMap.delete(moduleId);
       } else {
-        const allPerms = new Set<TPermissionActions>(availableActions.map((action) => action.code));
+        const allPerms = new Set<Permissions>(availableActions.map((action) => action.code));
         newMap.set(moduleId, allPerms);
       }
       return newMap;
