@@ -2073,16 +2073,43 @@ export type Database = {
         }[]
       }
       get_filtered_employees: {
-        Args: {
-          p_branch_id?: string
-          p_department_id?: string
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
+        Args:
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_employee_type?: Database["public"]["Enums"]["employee_type"]
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
         Returns: {
           employee_id: string
           total_count: number
+        }[]
+      }
+      get_training_plan_detail_counts: {
+        Args: { plan_id: string }
+        Returns: {
+          courses_count: number
+          instructors_count: number
+          programs_count: number
+          topics_count: number
+        }[]
+      }
+      get_training_plan_status_counts: {
+        Args: { org_id: string; search_text?: string }
+        Returns: {
+          approved: number
+          pending: number
+          rejected: number
+          total: number
         }[]
       }
       has_permission: {
