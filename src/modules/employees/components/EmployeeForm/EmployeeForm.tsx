@@ -33,6 +33,7 @@ import { Constants } from "@/types/supabase.types";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
 import "dayjs/locale/vi";
+import { useGetRoleList } from "@/modules/roles/operations/query";
 
 export interface EmployeeFormProps {
   onSubmit?: (data: EmployeeFormData) => void | Promise<void>;
@@ -52,6 +53,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
   const { data: employeesResult, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
+  const { data: roles, isLoading: isLoadingRoles } = useGetRoleList();
 
   const employees = employeesResult?.data || [];
 
@@ -59,11 +61,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
   const branches = React.useMemo(
     () => organizationUnits?.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
-    [organizationUnits]
+    [organizationUnits],
   );
   const departments = React.useMemo(
     () => organizationUnits?.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[1]),
-    [organizationUnits]
+    [organizationUnits],
   );
 
   const {
@@ -85,6 +87,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       position_id: defaultValues?.position_id || "",
       employee_type: defaultValues?.employee_type || undefined,
       start_date: defaultValues?.start_date || "",
+      role_id: defaultValues?.role_id || "",
     },
     resolver: zodResolver(EmployeeFormSchema),
   });
@@ -94,11 +97,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={handleSubmit(submitForm)}
-      sx={{ width: "100%", maxWidth: "1200px" }}
-    >
+    <Box component="form" onSubmit={handleSubmit(submitForm)} sx={{ width: "100%", maxWidth: "1200px" }}>
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -154,12 +153,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
             <Grid size={{ xs: 12, md: 6 }}>
               <FormControl fullWidth>
                 <FormLabel sx={{ mb: 1 }}>Trạng thái</FormLabel>
-                <TextField
-                  placeholder="Hoạt động"
-                  disabled
-                  fullWidth
-                  helperText=""
-                />
+                <TextField placeholder="Hoạt động" disabled fullWidth helperText="" />
               </FormControl>
             </Grid>
 
@@ -172,26 +166,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel sx={{ mb: 1 }}>
                       Giới tính <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <RadioGroup
-                      {...field}
-                      row
-                      sx={{ gap: 2 }}
-                    >
-                      <FormControlLabel
-                        value="male"
-                        control={<Radio />}
-                        label="Nam"
-                      />
-                      <FormControlLabel
-                        value="female"
-                        control={<Radio />}
-                        label="Nữ"
-                      />
-                      <FormControlLabel
-                        value="other"
-                        control={<Radio />}
-                        label="Khác"
-                      />
+                    <RadioGroup {...field} row sx={{ gap: 2 }}>
+                      <FormControlLabel value="male" control={<Radio />} label="Nam" />
+                      <FormControlLabel value="female" control={<Radio />} label="Nữ" />
+                      <FormControlLabel value="other" control={<Radio />} label="Khác" />
                     </RadioGroup>
                     {error && (
                       <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
@@ -233,16 +211,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
                     <FormLabel sx={{ mb: 1 }}>Ngày sinh</FormLabel>
-                    <LocalizationProvider
-                      dateAdapter={AdapterDayjs}
-                      adapterLocale="vi"
-                    >
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
                       <DatePicker
                         value={field.value ? dayjs(field.value) : null}
                         onChange={(newValue: Dayjs | null) => {
-                          field.onChange(
-                            newValue ? newValue.format("YYYY-MM-DD") : null
-                          );
+                          field.onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
                         }}
                         slotProps={{
                           textField: {
@@ -279,12 +252,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel htmlFor="branch" sx={{ mb: 1 }}>
                       Chi nhánh
                     </FormLabel>
-                    <Select
-                      {...field}
-                      id="branch"
-                      displayEmpty
-                      disabled={isLoadingOrgUnits}
-                    >
+                    <Select {...field} id="branch" displayEmpty disabled={isLoadingOrgUnits}>
                       <MenuItem value="">
                         <em>Chọn chi nhánh</em>
                       </MenuItem>
@@ -313,12 +281,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel htmlFor="department" sx={{ mb: 1 }}>
                       Phòng ban <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <Select
-                      {...field}
-                      id="department"
-                      displayEmpty
-                      disabled={isLoadingOrgUnits}
-                    >
+                    <Select {...field} id="department" displayEmpty disabled={isLoadingOrgUnits}>
                       <MenuItem value="">
                         <em>Chọn phòng ban</em>
                       </MenuItem>
@@ -344,9 +307,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth>
-                    <FormLabel htmlFor="employee_code">
-                      Mã nhân viên
-                    </FormLabel>
+                    <FormLabel htmlFor="employee_code">Mã nhân viên</FormLabel>
                     <TextField
                       {...field}
                       id="employee_code"
@@ -369,12 +330,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel htmlFor="manager_id" sx={{ mb: 1 }}>
                       Người quản lý <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <Select
-                      {...field}
-                      id="manager_id"
-                      displayEmpty
-                      disabled={isLoadingEmployees}
-                    >
+                    <Select {...field} id="manager_id" displayEmpty disabled={isLoadingEmployees}>
                       <MenuItem value="">
                         <em>Chọn người quản lý</em>
                       </MenuItem>
@@ -396,21 +352,45 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
+                name="role_id"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <FormControl fullWidth error={!!error}>
+                    <FormLabel htmlFor="role_id" sx={{ mb: 1 }}>
+                      Vai trò <span style={{ color: "red" }}>*</span>
+                    </FormLabel>
+                    <Select {...field} id="role_id" displayEmpty value={field.value || ""} disabled={isLoadingRoles}>
+                      <MenuItem value="">
+                        <em>Chọn vai trò</em>
+                      </MenuItem>
+                      {roles?.map((role) => (
+                        <MenuItem key={role.id} value={role.id}>
+                          {role.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {error && (
+                      <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                        {error.message}
+                      </Typography>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
                 name="employee_type"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
                     <FormLabel htmlFor="employee_type" sx={{ mb: 1 }}>
-                      Vai trò <span style={{ color: "red" }}>*</span>
+                      Loại người dùng <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <Select
-                      {...field}
-                      id="employee_type"
-                      displayEmpty
-                      value={field.value || ""}
-                    >
+                    <Select {...field} id="employee_type" displayEmpty value={field.value || ""}>
                       <MenuItem value="">
-                        <em>Chọn vai trò</em>
+                        <em>Chọn loại người dùng</em>
                       </MenuItem>
                       {EMPLOYEE_TYPE_OPTIONS.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
@@ -449,13 +429,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                         autoHideDuration: 3000,
                       });
                     } catch (error) {
-                      notifications.show(
-                        error instanceof Error ? error.message : "Không thể tạo chức danh mới",
-                        {
-                          severity: "error",
-                          autoHideDuration: 5000,
-                        }
-                      );
+                      notifications.show(error instanceof Error ? error.message : "Không thể tạo chức danh mới", {
+                        severity: "error",
+                        autoHideDuration: 5000,
+                      });
                     }
                   };
 
@@ -500,7 +477,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
                                 if (inputValue) {
                                   const existingPosition = positions?.find(
-                                    (p) => p.title.toLowerCase() === inputValue.toLowerCase()
+                                    (p) => p.title.toLowerCase() === inputValue.toLowerCase(),
                                   );
 
                                   if (!existingPosition) {
@@ -530,18 +507,13 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
                     <FormLabel sx={{ mb: 1 }}>
-                      Ngày bắt đầu làm việc <span style={{ color: 'red' }}>*</span>
+                      Ngày bắt đầu làm việc <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <LocalizationProvider
-                      dateAdapter={AdapterDayjs}
-                      adapterLocale="vi"
-                    >
+                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
                       <DatePicker
                         value={field.value ? dayjs(field.value) : null}
                         onChange={(newValue: Dayjs | null) => {
-                          field.onChange(
-                            newValue ? newValue.format("YYYY-MM-DD") : ""
-                          );
+                          field.onChange(newValue ? newValue.format("YYYY-MM-DD") : "");
                         }}
                         slotProps={{
                           textField: {
@@ -579,4 +551,3 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 };
 
 export default React.memo(EmployeeForm);
-

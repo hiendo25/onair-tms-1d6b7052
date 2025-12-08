@@ -1,40 +1,23 @@
 "use client";
 
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import EditIcon from "@mui/icons-material/Edit";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import {
-  Box,
-  Button,
-  Chip,
-  IconButton,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { grey } from "@mui/material/colors";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
+import { Box, Button, IconButton } from "@mui/material";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { PATHS } from "@/constants/path.contstants";
-import { useGetRoleList } from "@/modules/roles/operations/query";
+import { useAdminGetRoleList } from "@/modules/roles/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
 import Link from "next/link";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useDeleteRole } from "@/modules/roles/operations/mutation";
-import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
-import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
-
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+import Can from "@/modules/permission-wraper/components/Can";
+import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
+import { usePermissions } from "@/modules/permission-wraper";
+import DialogDeleteRoleConfirmation, {
+  DialogDeleteRoleConfirmationRef,
+} from "./components/DialogDeleteRoleConfirmation";
+import { rolesColumns } from "./role-columns";
 interface RoleData {
   id: string;
   title: string;
@@ -44,23 +27,28 @@ interface RoleData {
   created_at: string | null;
 }
 
-const formatOrder = (index: number) => index.toString().padStart(2, "0");
-
 const RolesPage = () => {
   const router = useRouter();
   const dialogs = useDialogs();
 
-  const { data, isLoading } = useGetRoleList({
-    page: 0,
-    pageSize: 1000,
+  const dialogDeleteRef = useRef<DialogDeleteRoleConfirmationRef>(null);
+  const [queryParams, setQueryParams] = useState({
+    page: 1,
+    pageSize: 10,
   });
-
+  const { data, isLoading, isPending } = useAdminGetRoleList(queryParams);
   const { mutate: deleteRoleMutate, isPending: isDeleting } = useDeleteRole();
 
-  const handleEdit = (role: RoleData) => {
-    router.push(PATHS.ROLE.ROLES_ID(role.code));
-  };
+  const roleList = useMemo(() => {
+    return data?.items;
+  }, [data]);
 
+  const totalRoleCount = useMemo(() => {
+    return data?.itemCount || 0;
+  }, [data]);
+
+  const { hasPermissions } = usePermissions();
+  const canCreateOrDeleteRole = hasPermissions([{ $or: "role:create" }, { $or: "role:delete" }]);
   const handleDelete = async (role: RoleData) => {
     const confirmed = await dialogs.confirm(`Bạn có chắc chắn muốn xóa vai trò "${role.title}" không?`, {
       title: "Xác nhận xóa",
@@ -73,210 +61,106 @@ const RolesPage = () => {
       return;
     }
 
-    deleteRoleMutate(role.id, {
-      onSuccess: () => {},
-      onError: (error) => {
-        alert(`Xóa vai trò thất bại: ${error}`);
-      },
-    });
+    deleteRoleMutate(role.id);
   };
+
+  const handleChangePagegination = (newPage: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      page: newPage,
+    }));
+  };
+
+  const handleChangePageSize = (newPageSize: number) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      pageSize: newPageSize,
+    }));
+  };
+
+  const handleDeleteRole = (roleId: string, roleName: string) => () => {
+    dialogDeleteRef.current?.open(
+      {
+        title: `Xóa "${roleName}"`,
+        description: "Dữ liệu đã xóa không thể khôi phục, bạn vẫn muốn xóa.",
+      },
+      {
+        onOk: () => {
+          deleteRoleMutate(roleId);
+        },
+      },
+    );
+  };
+
+  type ColumnType = Exclude<Exclude<typeof data, undefined>["items"], undefined>[number];
+
+  const mergeColumns: TableDataProps<ColumnType>["columns"] = useMemo(() => {
+    return canCreateOrDeleteRole
+      ? [
+          ...rolesColumns,
+          {
+            id: "action",
+            field: "action",
+            headerName: "Hành động",
+            fixed: "right",
+            width: 140,
+            renderCell: (value, row) => {
+              return (
+                <>
+                  <Can pers={["role:update"]}>
+                    <IconButton
+                      size="small"
+                      href={PATHS.ROLE.ROLES_ID(row.code)}
+                      LinkComponent={Link}
+                      className="text-blue-600 bg-transparent hover:bg-blue-50"
+                    >
+                      <Edit02Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                  <Can pers={["role:delete"]}>
+                    <IconButton
+                      size="small"
+                      className="text-red-600 bg-transparent hover:bg-red-50"
+                      onClick={handleDeleteRole(row.id, row.title)}
+                    >
+                      <Trash01Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                </>
+              );
+            },
+          },
+        ]
+      : rolesColumns;
+  }, [canCreateOrDeleteRole]);
 
   return (
     <PageContainer title="Quản lý vai trò & phân quyền" breadcrumbs={[{ title: "Quản lý vai trò & phân quyền" }]}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-        <Button variant="contained" startIcon={<AddIcon />} LinkComponent={Link} href={PATHS.ROLE.CREATE}>
-          Tạo vai trò
-        </Button>
-      </Box>
-
-      <Box
-        sx={{
-          border: "1px solid",
-          borderColor: "divider",
-          borderRadius: 2,
-          overflow: "hidden",
-          backgroundColor: "#fff",
-        }}
-      >
-        <TableContainer>
-          <Table
-            aria-label="Danh sách vai trò"
-            sx={{
-              tableLayout: "fixed",
-              "& .MuiTableCell-root": {
-                py: 2,
-                px: 2,
-              },
-            }}
-          >
-            <TableHead
-              sx={{
-                backgroundColor: grey[100],
-                "& .MuiTableCell-head": {
-                  fontWeight: 600,
-                  fontSize: 13,
-                  letterSpacing: 0.2,
-                  color: grey[700],
-                },
-              }}
-            >
-              <TableRow>
-                <TableCell sx={{ width: "80px" }} align="center">
-                  STT
-                </TableCell>
-                <TableCell sx={{ width: "200px" }} align="left">
-                  Tên vai trò
-                </TableCell>
-                <TableCell sx={{ width: "150px" }} align="center">
-                  Mã vai trò
-                </TableCell>
-                <TableCell sx={{ width: "auto" }} align="left">
-                  Mô tả
-                </TableCell>
-                <TableCell sx={{ width: "150px" }} align="center">
-                  Số lượng user
-                </TableCell>
-                <TableCell
-                  sx={{
-                    width: "80px",
-                    position: "sticky",
-                    right: 0,
-                    backgroundColor: grey[100],
-                    zIndex: 2,
-                  }}
-                  align="center"
-                >
-                  Thao tác
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody
-              sx={{
-                "& .MuiTableCell-root": {
-                  borderBottomColor: grey[200],
-                  verticalAlign: "middle",
-                },
-              }}
-            >
-              {isLoading || isDeleting ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                    <Typography>Đang tải...</Typography>
-                  </TableCell>
-                </TableRow>
-              ) : data?.items && data.items.length > 0 ? (
-                data.items.map((role, index) => {
-                  const order = formatOrder(index + 1);
-                  const isImmutable = Object.values(IMMUTABLE_ROLES).includes(role.code as IMMUTABLE_ROLES);
-
-                  return (
-                    <TableRow
-                      key={role.id}
-                      sx={{
-                        "&:last-child td": { borderBottom: "none" },
-                        "&:hover": {
-                          backgroundColor: grey[50],
-                        },
-                      }}
-                    >
-                      <TableCell align="center" sx={{ fontWeight: 600 }}>
-                        {order}
-                      </TableCell>
-                      <TableCell align="left">
-                        <Tooltip title={role.title}>
-                          <Typography variant="subtitle2" fontWeight={600} className="line-clamp-2">
-                            {role.title || "--"}
-                          </Typography>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={role.code}
-                          size="medium"
-                          sx={{
-                            backgroundColor: "#0050FF29",
-                            borderRadius: "6px",
-                            "& .MuiChip-label": { color: "#0050FF", fontWeight: 600 },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell align="left">
-                        <Typography variant="body2" className="line-clamp-2">
-                          {role.description || "--"}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="center">
-                        <Chip
-                          label={role.user_count || 0}
-                          size="medium"
-                          sx={{
-                            backgroundColor: "#263238",
-                            borderRadius: "6px",
-                            "& .MuiChip-label": { color: "white", fontWeight: 600 },
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          position: "sticky",
-                          right: 0,
-                          backgroundColor: "#fff",
-                          zIndex: 1,
-                          boxShadow: "-8px 0 12px rgba(0,0,0,0.04)",
-                        }}
-                      >
-                        <PopupState variant="popover" popupId={`role-menu-${role.id}`}>
-                          {(popupState) => (
-                            <>
-                              <IconButton {...bindTrigger(popupState)}>
-                                <MoreVertIcon />
-                              </IconButton>
-                              <Menu {...bindMenu(popupState)}>
-                                <MenuItem
-                                  onClick={() => {
-                                    handleEdit(role);
-                                    popupState.close();
-                                  }}
-                                >
-                                  <ListItemIcon>
-                                    <EditIcon fontSize="small" />
-                                  </ListItemIcon>
-                                  <ListItemText>Chỉnh sửa vai trò</ListItemText>
-                                </MenuItem>
-                                {!isImmutable && (
-                                  <MenuItem
-                                    onClick={() => {
-                                      handleDelete(role);
-                                      popupState.close();
-                                    }}
-                                    sx={{ color: "error.main" }}
-                                  >
-                                    <ListItemIcon>
-                                      <DeleteIcon fontSize="small" color="error" />
-                                    </ListItemIcon>
-                                    <ListItemText>Xoá vai trò</ListItemText>
-                                  </MenuItem>
-                                )}
-                              </Menu>
-                            </>
-                          )}
-                        </PopupState>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                    <Typography>Không có dữ liệu</Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+      <div className="bg-white rounded-lg">
+        <div className="header px-4 py-3">
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
+            <Button variant="contained" startIcon={<AddIcon />} LinkComponent={Link} href={PATHS.ROLE.CREATE}>
+              Tạo vai trò
+            </Button>
+          </Box>
+        </div>
+        <TableData
+          rows={roleList}
+          columns={mergeColumns}
+          hoverRow
+          loading={isLoading || isPending}
+          showRowCount
+          pagination={{
+            page: queryParams.page,
+            pageSize: queryParams.pageSize,
+            total: totalRoleCount,
+            onChangePage: handleChangePagegination,
+            onChangePageSize: handleChangePageSize,
+          }}
+          minWidth={1200}
+        />
+      </div>
+      <DialogDeleteRoleConfirmation ref={dialogDeleteRef} />
     </PageContainer>
   );
 };

@@ -1,6 +1,4 @@
 "use client";
-
-import { enqueueSnackbar } from "notistack";
 import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useTMutation } from "@/lib";
@@ -20,9 +18,6 @@ const useCRUDClassRoom = () => {
       const { formData, students } = payload;
       return await classRoomService.create({ formData, students });
     },
-    onError: (error) => {
-      enqueueSnackbar({ message: error.message, variant: "error" });
-    },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
     },
@@ -38,9 +33,6 @@ const useCRUDClassRoom = () => {
       const { formData, students, classRoomId } = payload;
 
       return await classRoomService.update(classRoomId, { formData, students });
-    },
-    onError: (error) => {
-      enqueueSnackbar({ message: error.message, variant: "error" });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });

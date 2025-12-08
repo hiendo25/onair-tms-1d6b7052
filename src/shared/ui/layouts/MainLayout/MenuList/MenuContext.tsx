@@ -14,10 +14,7 @@ interface MenuContextProviderProps {
   children?: React.ReactNode;
   value: MenuContextApi | null;
 }
-const MenuContextProvider: React.FC<MenuContextProviderProps> = ({
-  children,
-  value,
-}) => {
+const MenuContextProvider: React.FC<MenuContextProviderProps> = ({ children, value }) => {
   return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;
 };
 export default MenuContextProvider;
@@ -25,9 +22,7 @@ export default MenuContextProvider;
 export const useMenuContext = () => {
   const menuContext = React.useContext(MenuContext);
   if (!menuContext) {
-    throw new Error(
-      "useMenuContext context was used without a MenuContextProvider.",
-    );
+    throw new Error("useMenuContext context was used without a MenuContextProvider.");
   }
   return menuContext;
 };

@@ -34,5 +34,5 @@ export class EmployeeDto {
   managers_employees!: Array<{
     manager_id: string;
   }>;
+  role_ids!: string[];
 }
-

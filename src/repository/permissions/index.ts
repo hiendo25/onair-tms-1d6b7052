@@ -1,9 +1,9 @@
 "use server";
-import { createSVClient } from "@/services";
+import { createServiceRoleClient, createSVClient } from "@/services";
 
 export async function getUserRolesByUserId(userId: string) {
   try {
-    const supabaseSv = await createSVClient();
+    const supabaseSv = await createServiceRoleClient();
     const { data, error } = await supabaseSv
       .from("user_roles")
       .select(

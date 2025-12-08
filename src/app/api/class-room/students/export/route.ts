@@ -14,15 +14,10 @@ const ATTENDANCE_LABELS: Record<"attended" | "absent" | "pending", string> = {
 
 const MAX_PAGE_SIZE = 1000;
 
-const resolveOrganizationUnitName = (
-  student: ClassRoomStudentDto,
-  unitType: "branch" | "department",
-) => {
+const resolveOrganizationUnitName = (student: ClassRoomStudentDto, unitType: "branch" | "department") => {
   const employments = student.employee?.employments ?? [];
   return (
-    employments.find(
-      (employment) => employment.organizationUnit?.type === unitType,
-    )?.organizationUnit?.name ?? "-"
+    employments.find((employment) => employment.organizationUnit?.type === unitType)?.organizationUnit?.name ?? "-"
   );
 };
 
@@ -50,11 +45,7 @@ const formatDateTimeValue = (value?: string | null) => {
 };
 
 const buildFileName = () => {
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[:.]/g, "-")
-    .split("T")
-    .join("_");
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T").join("_");
   return `danh_sach_hoc_vien_${timestamp}.xlsx`;
 };
 
@@ -66,16 +57,14 @@ const normalizeParam = (value: string | null) => {
   return trimmed.length > 0 ? trimmed : undefined;
 };
 
-async function collectStudents(
-  input: {
-    classRoomId: string;
-    search?: string;
-    branchId?: string;
-    departmentId?: string;
-    attendanceStatus?: "attended" | "absent" | "pending";
-  },
-) {
-  const supabaseClient = createServiceRoleClient();
+async function collectStudents(input: {
+  classRoomId: string;
+  search?: string;
+  branchId?: string;
+  departmentId?: string;
+  attendanceStatus?: "attended" | "absent" | "pending";
+}) {
+  const supabaseClient = await createServiceRoleClient();
   let page = 1;
   const allStudents: ClassRoomStudentDto[] = [];
 
@@ -112,19 +101,18 @@ export async function GET(request: NextRequest) {
 
     const classRoomId = normalizeParam(searchParams.get("classRoomId"));
     if (!classRoomId) {
-      return NextResponse.json(
-        { error: "Thiếu classRoomId" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Thiếu classRoomId" }, { status: 400 });
     }
 
     const search = normalizeParam(searchParams.get("search"));
     const branchId = normalizeParam(searchParams.get("branchId"));
     const departmentId = normalizeParam(searchParams.get("departmentId"));
 
-    const attendanceParam = normalizeParam(
-      searchParams.get("attendanceStatus"),
-    ) as "attended" | "absent" | "pending" | undefined;
+    const attendanceParam = normalizeParam(searchParams.get("attendanceStatus")) as
+      | "attended"
+      | "absent"
+      | "pending"
+      | undefined;
     const attendanceStatus =
       attendanceParam && ["attended", "absent", "pending"].includes(attendanceParam)
         ? (attendanceParam as "attended" | "absent" | "pending")
@@ -139,10 +127,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (students.length === 0) {
-      return NextResponse.json(
-        { error: "Không tìm thấy dữ liệu phù hợp để xuất." },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Không tìm thấy dữ liệu phù hợp để xuất." }, { status: 404 });
     }
 
     const rows = students.map((student, index) => {
@@ -182,17 +167,13 @@ export async function GET(request: NextRequest) {
     return new NextResponse(buffer, {
       status: 200,
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${fileName}"`,
       },
     });
   } catch (error) {
     console.error("Export class room students failed:", error);
 
-    return NextResponse.json(
-      { error: "Xuất danh sách học viên thất bại. Vui lòng thử lại." },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: "Xuất danh sách học viên thất bại. Vui lòng thử lại." }, { status: 500 });
   }
 }
