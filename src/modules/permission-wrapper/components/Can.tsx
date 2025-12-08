@@ -1,7 +1,8 @@
 "use client";
-import { memo } from "react";
-import { usePermissions } from "../store/permission-context";
+import React, { memo } from "react";
+
 import { PermissionsCheck } from "@/constants/permission.constant";
+import { usePermissions } from "../store/permission-context";
 
 interface CanProps {
   children: React.ReactNode;

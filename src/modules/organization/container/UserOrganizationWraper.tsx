@@ -1,6 +1,6 @@
 import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
 import { RedirectType, redirect } from "next/navigation";
-import { PermissionProvider } from "@/modules/permission-wraper/store/PermissionProvider";
+import { PermissionProvider } from "@/modules/permission-wrapper/store/PermissionProvider";
 import { authRepository } from "@/repository";
 import { UserOrganizationService } from "@/services/organization/user-organization.service";
 
