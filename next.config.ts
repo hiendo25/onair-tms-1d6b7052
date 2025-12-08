@@ -1,10 +1,11 @@
 import type { NextConfig } from "next";
-import { fa } from "zod/v4/locales";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone", // Enable standalone output for Docker
   reactStrictMode: false,
+  // Add empty turbopack config to silence the warning
+  turbopack: {},
   // typedRoutes: true,
   // compiler: {
   //   styledComponents: true, // Enable SWC transform for styled-components
@@ -69,11 +70,6 @@ const nextConfig: NextConfig = {
       //   pathname: '/storage/v1/object/public/**',
       // },
     ],
-  },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
   },
   webpack: (config) => {
     config.resolve.alias = {
