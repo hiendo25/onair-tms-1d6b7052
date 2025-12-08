@@ -1,9 +1,9 @@
 import { useTMutation } from "@/lib/queryClient";
 import type {
   CreateAssignmentDto,
-  UpdateAssignmentDto,
   SaveGradeDto,
   SaveGradeResponse,
+  UpdateAssignmentDto,
 } from "@/types/dto/assignments";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "./key";

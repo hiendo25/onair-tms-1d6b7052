@@ -1,4 +1,4 @@
-import { RESOURCE_OPTIONS, PERMISSION_ACTION_OPTIONS } from "@/constants/permission.constant";
+import { PERMISSION_ACTION_OPTIONS, RESOURCE_OPTIONS } from "@/constants/permission.constant";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { CheckBox } from "@mui/icons-material";
 import { FormControlLabel, Typography } from "@mui/material";

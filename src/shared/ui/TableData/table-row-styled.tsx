@@ -1,4 +1,4 @@
-import { styled, TableRow } from "@mui/material";
+import { TableRow, styled } from "@mui/material";
 
 export const TableRowStyled = styled(TableRow)`
 	&.table-data-row {

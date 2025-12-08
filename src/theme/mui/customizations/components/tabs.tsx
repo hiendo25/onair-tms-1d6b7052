@@ -1,7 +1,7 @@
-import { Theme, Components } from "@mui/material/styles";
+import { Components, Theme } from "@mui/material/styles";
 import { tabClasses, tabsClasses } from "@mui/material";
 import { grey } from "../../theme-color";
-/* eslint-disable import/prefer-default-export */
+ 
 export const tabsCustomization: Components<Theme> = {
   MuiTab: {
     styleOverrides: {

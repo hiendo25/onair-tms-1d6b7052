@@ -1,9 +1,9 @@
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 
-import { primary, grey, secondary, success, warning, error, info } from "../../theme-color";
+import { error, grey, info, primary, secondary, success, warning } from "../../theme-color";
 
-/* eslint-disable import/prefer-default-export */
+ 
 
 const getBoxShadowShapeButton = (color: string) => {
   return `0px 6px 9px -6px ${alpha(color, 0.4)}, 0px 6px 12px -4px ${alpha(color, 0.3)}`;

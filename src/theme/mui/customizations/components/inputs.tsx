@@ -1,9 +1,9 @@
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { grey, primary, error } from "../../theme-color";
+import { error, grey, primary } from "../../theme-color";
 import { filledInputClasses, formLabelClasses, inputBaseClasses } from "@mui/material";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const inputsCustomizations: Components<Theme> = {
   MuiInputBase: {
     styleOverrides: {

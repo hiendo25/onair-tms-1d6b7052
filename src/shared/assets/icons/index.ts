@@ -61,6 +61,9 @@ import Edit02Icon from "./Edit02Icon";
 import Download01Icon from "./Download01Icon";
 import FileAttachmentIcon from "./FileAttachmentIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
+import Star01Icon from "./Star01Icon";
+import FaceSadIcon from "./FaceSadIcon";
+import FaceSmileIcon from "./FaceSmileIcon.tsx";
 export {
   BarChart10Icon,
   BellIcon,
@@ -98,6 +101,8 @@ export {
   FilterFunnelIcon,
   FileAttachmentIcon,
   FolderShieldIcon,
+  FaceSadIcon,
+  FaceSmileIcon,
   GoogleIcon,
   GlobeIcon,
   GitIcon,
@@ -116,6 +121,7 @@ export {
   SquareFourIcon,
   SettingIcon,
   Setting02Icon,
+  Star01Icon,
   UsersIcon2,
   UsersIcon,
   UsersPlusIcon,

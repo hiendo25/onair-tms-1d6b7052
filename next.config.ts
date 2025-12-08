@@ -74,8 +74,9 @@ const nextConfig: NextConfig = {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors.
     ignoreDuringBuilds: true,
+    // dirs: ['pages', 'utils']
   },
-  webpack: (config) => {
+  webpack: (config, options) => {
     config.resolve.alias = {
       ...config.resolve.alias,
     };

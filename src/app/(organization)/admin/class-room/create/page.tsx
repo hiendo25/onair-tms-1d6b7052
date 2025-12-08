@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import PageContainer from "@/shared/ui/PageContainer";
 import CreateClassRoomForm from "./_components/CreateClassRoomForm";
-import { ClassRoomPlatformType, CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
+import { CLASS_ROOM_PLATFORM, ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import { PATHS } from "@/constants/path.contstants";
 interface CreateClassRoomPageProps {

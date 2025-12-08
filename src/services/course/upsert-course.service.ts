@@ -1,11 +1,11 @@
-import { coursesRepository, coursesLessonsRepository, coursesSectionsRepository } from "@/repository";
+import { coursesLessonsRepository, coursesRepository, coursesSectionsRepository } from "@/repository";
 import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
 
 import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
 import {
   CreateLessonPayload,
-  UpsertLessonPayload,
   CreatePivotLessonsWithResourcesPayload,
+  UpsertLessonPayload,
 } from "@/repository/courses-lessons/type";
 
 import { isUndefined } from "lodash";

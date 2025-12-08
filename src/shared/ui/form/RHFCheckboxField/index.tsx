@@ -1,16 +1,6 @@
-import {
-  Checkbox,
-  FormControl,
-  FormControlLabel,
-  FormHelperText,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  Typography,
-} from "@mui/material";
+import { Checkbox, CheckboxProps, FormControl, FormControlLabel, FormHelperText } from "@mui/material";
 import React, { memo } from "react";
-import { useId } from "react";
-import type { Control, PathValue, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 interface RHFCheckboxFieldProps<T extends FieldValues> {
@@ -18,14 +8,19 @@ interface RHFCheckboxFieldProps<T extends FieldValues> {
   label?: React.ReactNode;
   control: Control<T>;
   name: Path<T>;
+  slotProps?: {
+    checkbox?: {
+      size: CheckboxProps["size"];
+    };
+  };
 }
 const RHFCheckboxField = <T extends FieldValues>({
   className,
   control,
   name,
   label,
+  slotProps: { checkbox } = {},
 }: RHFCheckboxFieldProps<T>) => {
-  const fieldId = useId();
   return (
     <Controller
       name={name}
@@ -34,7 +29,7 @@ const RHFCheckboxField = <T extends FieldValues>({
         <FormControl className={className} error={!!error}>
           <FormControlLabel
             {...field}
-            control={<Checkbox />}
+            control={<Checkbox {...checkbox} />}
             name={name}
             label={label}
             sx={{
@@ -43,9 +38,7 @@ const RHFCheckboxField = <T extends FieldValues>({
               },
             }}
           />
-          {error?.message ? (
-            <FormHelperText error={!!error}>{error.message}</FormHelperText>
-          ) : null}
+          {error?.message ? <FormHelperText error={!!error}>{error.message}</FormHelperText> : null}
         </FormControl>
       )}
     />

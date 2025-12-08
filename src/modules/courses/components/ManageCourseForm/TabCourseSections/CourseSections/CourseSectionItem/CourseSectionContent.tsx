@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { Accordion, AccordionSummary, AccordionDetails } from "./CourseSectionAccordion";
+import { Accordion, AccordionDetails, AccordionSummary } from "./CourseSectionAccordion";
 import { ChevronDownIcon, Edit05Icon, Trash01Icon } from "@/shared/assets/icons";
 
 interface CourseSectionContentProps extends PropsWithChildren {

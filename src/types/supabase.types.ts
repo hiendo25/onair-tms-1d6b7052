@@ -790,7 +790,15 @@ export type Database = {
           key?: string | null
           value?: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "class_session_metadata_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_session_teacher: {
         Row: {
@@ -1779,6 +1787,205 @@ export type Database = {
           },
         ]
       }
+      surveys: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          organization_id: string
+          survey_type: Database["public"]["Enums"]["survey_type"] | null
+          title: string
+          update_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          organization_id?: string
+          survey_type?: Database["public"]["Enums"]["survey_type"] | null
+          title: string
+          update_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          organization_id?: string
+          survey_type?: Database["public"]["Enums"]["survey_type"] | null
+          title?: string
+          update_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys_answers: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: number
+          option_id: string
+          question_id: string
+          response_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          option_id?: string
+          question_id?: string
+          response_id?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: number
+          option_id?: string
+          question_id?: string
+          response_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_answers_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "surveys_questions_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "surveys_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "surveys_response"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys_questions: {
+        Row: {
+          created_at: string
+          id: string
+          is_required: boolean
+          name: string | null
+          priority: number
+          question_type: Database["public"]["Enums"]["survey_question_type"]
+          survey_id: string
+          update_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          name?: string | null
+          priority?: number
+          question_type: Database["public"]["Enums"]["survey_question_type"]
+          survey_id?: string
+          update_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          name?: string | null
+          priority?: number
+          question_type?: Database["public"]["Enums"]["survey_question_type"]
+          survey_id?: string
+          update_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys_questions_options: {
+        Row: {
+          created_at: string
+          id: string
+          is_other: boolean | null
+          option_text: string | null
+          priority: number | null
+          survey_question_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_other?: boolean | null
+          option_text?: string | null
+          priority?: number | null
+          survey_question_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_other?: boolean | null
+          option_text?: string | null
+          priority?: number | null
+          survey_question_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_questions_options_survey_question_id_fkey"
+            columns: ["survey_question_id"]
+            isOneToOne: false
+            referencedRelation: "surveys_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys_response: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          survey_id?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "surveys_response_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "surveys_response_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -1921,9 +2128,25 @@ export type Database = {
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
-      question_type: "file" | "text" | "checkbox" | "radio"
+      question_type:
+        | "file"
+        | "text"
+        | "checkbox"
+        | "radio"
+        | "matching"
+        | "drag_and_drop"
+        | "boolean"
+        | "order"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
+      survey_question_type:
+        | "text"
+        | "rating"
+        | "rating_sort"
+        | "checkbox"
+        | "radio"
+        | "yes_no"
+      survey_type: "planning" | "classroom"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2084,9 +2307,27 @@ export const Constants = {
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
-      question_type: ["file", "text", "checkbox", "radio"],
+      question_type: [
+        "file",
+        "text",
+        "checkbox",
+        "radio",
+        "matching",
+        "drag_and_drop",
+        "boolean",
+        "order",
+      ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
+      survey_question_type: [
+        "text",
+        "rating",
+        "rating_sort",
+        "checkbox",
+        "radio",
+        "yes_no",
+      ],
+      survey_type: ["planning", "classroom"],
     },
   },
 } as const

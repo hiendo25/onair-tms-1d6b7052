@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Stack, Typography, Chip } from "@mui/material";
+import { Chip, Stack, Typography } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 

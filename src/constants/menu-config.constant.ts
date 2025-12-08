@@ -1,15 +1,15 @@
 import {
+  BarChart10Icon,
+  BookOpenIcon,
   ClassIcon,
   ClipboardIcon,
+  FileAttachmentIcon,
+  FolderShieldIcon,
   GitIcon,
+  MonitorIcon,
   SquareFourIcon,
   UsersIcon,
-  MonitorIcon,
-  BookOpenIcon,
   UsersIcon2,
-  BarChart10Icon,
-  FolderShieldIcon,
-  FileAttachmentIcon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";

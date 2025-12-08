@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetAssignmentsParams, GetMyAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto, SubmissionDetailDto, MyAssignmentDto, AssignmentDto } from "@/types/dto/assignments";
+import type { AssignmentDto, AssignmentQuestionDto, AssignmentStudentDto, GetAssignmentsParams, GetMyAssignmentsParams, MyAssignmentDto, SubmissionDetailDto } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import * as assignmentService from "@/services/assignments/assignment.service";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";

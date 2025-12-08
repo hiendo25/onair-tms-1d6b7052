@@ -7,6 +7,10 @@ import {
   Button,
   Card,
   IconButton,
+  InputAdornment,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -15,18 +19,14 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
-  Menu,
-  MenuItem,
-  ListItemText,
   TextField,
-  InputAdornment,
+  Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
-import { MOCK_SURVEYS } from "@/constants/survey.constants";
+// import { MOCK_SURVEYS } from "@/constants/survey.constants";
 import { Survey } from "@/types/survey.types";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -39,7 +39,7 @@ export default function SurveyList() {
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
-  const [surveys, setSurveys] = React.useState<Survey[]>(MOCK_SURVEYS);
+  const [surveys, setSurveys] = React.useState<Survey[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedSurveyId, setSelectedSurveyId] = React.useState<string | null>(null);
@@ -51,9 +51,7 @@ export default function SurveyList() {
     }
     const query = searchQuery.toLowerCase();
     return surveys.filter(
-      (survey) =>
-        survey.name.toLowerCase().includes(query) ||
-        survey.description.toLowerCase().includes(query)
+      (survey) => survey.name.toLowerCase().includes(query) || survey.description.toLowerCase().includes(query),
     );
   }, [surveys, searchQuery]);
 
@@ -168,10 +166,7 @@ export default function SurveyList() {
   };
 
   return (
-    <PageContainer
-      title="Danh sách khảo sát"
-      breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}
-    >
+    <PageContainer title="Danh sách khảo sát" breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}>
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
           <Stack
@@ -296,4 +291,3 @@ export default function SurveyList() {
     </PageContainer>
   );
 }
-

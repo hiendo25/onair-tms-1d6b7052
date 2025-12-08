@@ -20,8 +20,8 @@ import clsx from "clsx";
 import type { LearningSectionOutline } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import {
-  LessonContentKind,
   inferLessonContentKind,
+  LessonContentKind,
 } from "@/modules/learning-screen/utils/resource";
 import { Image } from "@/shared/ui/Image";
 import { formatFileSize } from "@/utils";

@@ -1,7 +1,7 @@
 import * as React from "react";
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const popoverCustomizations: Components<Theme> = {
   MuiPopover: {
     defaultProps: {},

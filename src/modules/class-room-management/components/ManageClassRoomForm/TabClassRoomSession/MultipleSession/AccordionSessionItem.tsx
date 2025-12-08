@@ -4,7 +4,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { alpha, styled, Typography, TypographyProps } from "@mui/material";
+import { Typography, TypographyProps, alpha, styled } from "@mui/material";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 export interface AccordionSessionItemProps extends React.PropsWithChildren {

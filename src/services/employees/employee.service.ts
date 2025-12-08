@@ -1,23 +1,23 @@
 import type {
   CreateEmployeeDto,
-  UpdateEmployeeDto,
-  GetEmployeesParams,
   EmployeeDto,
+  GetEmployeesParams,
+  UpdateEmployeeDto,
 } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import {
-  employeesRepository,
-  profilesRepository,
-  employmentsRepository,
-  managersEmployeesRepository,
-  organizationsRepository,
-  assignmentsRepository,
   assignmentResultsRepository,
-  qrAttendanceRepository,
+  assignmentsRepository,
   classRoomRepository,
   classRoomSessionRepository,
   coursesRepository,
+  employeesRepository,
+  employmentsRepository,
   libraryRepository,
+  managersEmployeesRepository,
+  organizationsRepository,
+  profilesRepository,
+  qrAttendanceRepository,
 } from "@/repository";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { createSVClient } from "@/services/supabase/server";

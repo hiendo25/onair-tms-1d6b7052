@@ -1,5 +1,5 @@
 "use client";
-import { buildPermission, Resources, ResourcesActions } from "@/constants/permission.constant";
+import { Resources, ResourcesActions, buildPermission } from "@/constants/permission.constant";
 import { PermissionActions } from "@/model/permission.model";
 import { useCallback, useMemo } from "react";
 import { Permissions, PermissionsCheck } from "@/constants/permission.constant";

@@ -1,7 +1,7 @@
 import * as React from "react";
 import Link from "next/link";
-import { Typography, Paper, ListItemText, ListItemButton, Collapse, Grow, Box, ListItem } from "@mui/material";
-import { type Theme, alpha, SxProps } from "@mui/material/styles";
+import { Box, Collapse, Grow, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
+import { SxProps, type Theme, alpha } from "@mui/material/styles";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -79,7 +79,7 @@ export default function MenuContentSubItem({
 
   const getListItemSx = React.useCallback(
     (mini: boolean, selected: boolean): SxProps<Theme> => {
-      let listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2 };
+      const listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2 };
 
       return (theme) => ({
         ...(mini
