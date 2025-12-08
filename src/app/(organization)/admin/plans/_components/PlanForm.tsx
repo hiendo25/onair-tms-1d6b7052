@@ -13,16 +13,20 @@ import StepAssignCourses from "./steps/StepAssignCourses";
 import StepNavigation from "./steps/StepNavigation";
 import {
   PLAN_STEPS,
+  PlanStepId,
 } from "@/modules/plans/plan-step.utils";
 import StepTrainingTopics from "./steps/StepTrainingTopics";
 import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
 import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
+import { PlanStatus } from "@/model/plan.model";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
   isLoading?: boolean;
   mode?: "create" | "edit";
   initialData?: PlanFormSchema;
+  planStatus?: PlanStatus;
+  initialStep?: PlanStepId;
 }
 
 export default function PlanForm({
@@ -30,6 +34,8 @@ export default function PlanForm({
   isLoading = false,
   mode = "create",
   initialData,
+  planStatus = "pending",
+  initialStep,
 }: PlanFormProps) {
   const defaultValues = useMemo(
     () => buildPlanFormDefaultValues(initialData),
@@ -52,7 +58,12 @@ export default function PlanForm({
     mode,
     initialData: defaultValues,
     trigger: methods.trigger,
+    planStatus,
+    initialStep,
   });
+
+  const handleFormSubmit = methods.handleSubmit(onSubmit);
+  const canAssignCourses = planStatus === "approved";
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -80,15 +91,17 @@ export default function PlanForm({
         return (
           <StepApproval
             onBack={goBack}
-            onContinue={goNext}
+            onContinue={canAssignCourses ? goNext : undefined}
+            onSubmit={!canAssignCourses ? handleFormSubmit : undefined}
             isLoading={isLoading}
+            status={planStatus}
           />
         );
       case 5:
         return (
           <StepAssignCourses
             onBack={goBack}
-            onSave={methods.handleSubmit(onSubmit)}
+            onSave={handleFormSubmit}
             isLoading={isLoading}
           />
         );

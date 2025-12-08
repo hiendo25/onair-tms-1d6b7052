@@ -74,10 +74,10 @@ export default function StepNavigation({
               const indicatorColor = !accessible
                 ? "grey.300"
                 : isCompleted
-                ? "success.main"
-                : isCurrent
-                ? "primary.main"
-                : "grey.400";
+                  ? "success.main"
+                  : isCurrent
+                    ? "primary.main"
+                    : "grey.400";
 
               return (
                 <Box
@@ -96,9 +96,9 @@ export default function StepNavigation({
                     boxShadow: isCurrent ? "0 6px 16px rgba(0,0,0,0.06)" : "none",
                     "&:hover": accessible
                       ? {
-                          borderColor: "primary.main",
-                          boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
-                        }
+                        borderColor: "primary.main",
+                        boxShadow: "0 6px 16px rgba(0,0,0,0.06)",
+                      }
                       : {},
                   }}
                   onClick={() => {

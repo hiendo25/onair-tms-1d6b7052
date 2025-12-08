@@ -5,17 +5,23 @@ import { useWatch } from "react-hook-form";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+import { PlanStatus } from "@/model/plan.model";
+import { getStatusColor, getStatusLabel } from "../../helper";
 
 interface StepApprovalProps {
   onBack: () => void;
   onContinue?: () => void;
+  onSubmit?: () => void;
   isLoading?: boolean;
+  status: PlanStatus;
 }
 
 export default function StepApproval({
   onBack,
   onContinue,
+  onSubmit,
   isLoading = false,
+  status,
 }: StepApprovalProps) {
   const { control } = usePlanFormContext();
   // Watch form values to display summary
@@ -27,6 +33,34 @@ export default function StepApproval({
   const topicsCount = formValues.programs?.reduce((total, program) => {
     return total + (program.topics?.length || 0);
   }, 0) || 0;
+
+  const isApproved = status === "approved";
+  const isRejected = status === "rejected";
+  const primaryAction = isApproved ? onContinue : onSubmit;
+  const primaryLabel = isApproved
+    ? "Tiếp tục gán môn học"
+    : isRejected
+      ? "Gửi duyệt lại"
+      : "Lưu & gửi duyệt";
+
+  const tone = getStatusColor(status);
+  const tonePalette = {
+    success: { bg: "success.50", border: "success.100", icon: "success.main" },
+    warning: { bg: "warning.50", border: "warning.100", icon: "warning.dark" },
+    error: { bg: "error.50", border: "error.100", icon: "error.main" },
+  }[tone] ?? { bg: "grey.50", border: "divider", icon: "text.primary" };
+
+  const statusDescription = isApproved
+    ? "Kế hoạch đã được phê duyệt, bạn có thể gán môn học ở bước tiếp theo."
+    : isRejected
+      ? "Kế hoạch đang bị từ chối, hãy cập nhật thông tin và gửi duyệt lại. Chỉ khi được duyệt mới gán môn học."
+      : "Kế hoạch đang chờ duyệt. Lưu kế hoạch để gửi duyệt và chờ phê duyệt trước khi gán môn học.";
+
+  const statusHeadline = isApproved
+    ? `Kế hoạch "${planName || "Chưa đặt tên"}" đã được duyệt`
+    : isRejected
+      ? `Kế hoạch "${planName || "Chưa đặt tên"}" cần gửi duyệt lại`
+      : `Kế hoạch "${planName || "Chưa đặt tên"}" đã sẵn sàng gửi duyệt`;
 
   return (
     <Card sx={{ boxShadow: "0 14px 44px rgba(9, 30, 66, 0.08)", border: "1px solid", borderColor: "divider" }}>
@@ -43,7 +77,7 @@ export default function StepApproval({
               Chốt lại thông tin trước khi gửi cấp phê duyệt.
             </Typography>
           </Box>
-          <Chip label="Kiểm tra lại" color="success" variant="outlined" size="small" />
+          <Chip label={getStatusLabel(status)} color={tone} variant="outlined" size="small" />
         </Box>
 
         <Divider sx={{ my: 2 }} />
@@ -52,25 +86,25 @@ export default function StepApproval({
           sx={{
             p: 2.75,
             borderRadius: 2,
-            bgcolor: "success.50",
+            bgcolor: tonePalette.bg,
             border: "1px solid",
-            borderColor: "success.100",
+            borderColor: tonePalette.border,
             display: "flex",
             gap: 2,
             alignItems: "flex-start",
             boxShadow: "0 12px 26px rgba(0,0,0,0.05)",
           }}
         >
-          <CheckCircleOutlineIcon sx={{ color: "success.main", mt: 0.5 }} />
+          <CheckCircleOutlineIcon sx={{ color: tonePalette.icon, mt: 0.5 }} />
           <Box sx={{ flex: 1 }}>
             <Typography
               variant="h6"
-              sx={{ mb: 0.5, color: "success.main", fontWeight: 700 }}
+              sx={{ mb: 0.5, color: tonePalette.icon, fontWeight: 700 }}
             >
-              Kế hoạch &quot;{planName || "Chưa đặt tên"}&quot; đã sẵn sàng gửi duyệt
+              {statusHeadline}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Khi được phê duyệt, bạn có thể gán khóa học và mở lớp đào tạo ngay lập tức.
+            <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+              {statusDescription}
             </Typography>
           </Box>
         </Box>
@@ -100,7 +134,7 @@ export default function StepApproval({
           </Box>
         </Stack>
 
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 3, gap: 2 }}>
           <Button
             variant="outlined"
             onClick={onBack}
@@ -108,14 +142,21 @@ export default function StepApproval({
           >
             Quay lại
           </Button>
-          <Button
-            variant="contained"
-            onClick={onContinue}
-            disabled={isLoading}
-            endIcon={<ArrowForwardIcon fontSize="small" />}
-          >
-            Tiếp tục
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            {!isApproved && (
+              <Typography variant="body2" color="text.secondary">
+                Chỉ khi kế hoạch được duyệt mới gán môn học ở bước 5.
+              </Typography>
+            )}
+            <Button
+              variant="contained"
+              onClick={primaryAction}
+              disabled={isLoading || !primaryAction}
+              endIcon={isApproved ? <ArrowForwardIcon fontSize="small" /> : undefined}
+            >
+              {primaryLabel}
+            </Button>
+          </Box>
         </Box>
       </CardContent>
     </Card>

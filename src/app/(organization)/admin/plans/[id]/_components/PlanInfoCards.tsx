@@ -6,14 +6,18 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PersonIcon from "@mui/icons-material/Person";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import { formatCurrencyV2 } from "@/utils/format-number";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { PlanStatus } from "@/model/plan.model";
+import { getStatusColor, getStatusLabel } from "../../helper";
 
 interface PlanInfoCardsProps {
   budget: number | null;
   approver: string | null;
   createdAt: string | null;
   objective: string | null;
+  status: PlanStatus;
 }
 
 interface InfoTileProps {
@@ -21,13 +25,14 @@ interface InfoTileProps {
   label: string;
   value: string;
   helper?: string;
-  tone: "success" | "info" | "warning" | "default";
+  tone: "success" | "info" | "warning" | "default" | "error";
 }
 
 const toneStyle = {
   success: { bg: "success.50", icon: "#2e7d32" },
   info: { bg: "#e3f2fd", icon: "#1976d2" },
   warning: { bg: "#fff3e0", icon: "#f57c00" },
+  error: { bg: "#ffebee", icon: "#c62828" },
   default: { bg: "#f3e5f5", icon: "#7b1fa2" },
 };
 
@@ -82,8 +87,18 @@ export default function PlanInfoCards({
   approver,
   createdAt,
   objective,
+  status,
 }: PlanInfoCardsProps) {
+  const statusTone = getStatusColor(status);
+
   const infoTiles: InfoTileProps[] = [
+    {
+      icon: CheckCircleOutlineIcon,
+      label: "Trạng thái",
+      value: getStatusLabel(status),
+      helper: status === "approved" ? "Có thể gán môn học" : "Chưa thể gán môn học",
+      tone: statusTone,
+    },
     {
       icon: AttachMoneyIcon,
       label: "Ngân sách dự kiến",
@@ -141,7 +156,7 @@ export default function PlanInfoCards({
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "repeat(auto-fit, minmax(240px, 1fr))" },
-            gap:2
+            gap: 2
           }}
         >
           {infoTiles.map((tile) => (

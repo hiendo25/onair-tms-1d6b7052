@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useTMutation } from "@/lib/queryClient";
 import { CREATE_PLAN, DELETE_PLAN, GET_PLAN_DETAIL, GET_PLANS, UPDATE_PLAN } from "./key";
 import { planService } from "@/services/plans/plan.service";
+import { PlanStatus } from "@/model/plan.model";
 
 export const useCreatePlanMutation = () => {
   const queryClient = useQueryClient();
@@ -45,6 +46,7 @@ export const useUpdatePlanMutation = () => {
       form: any;
       organizationId: string;
       createdBy: string;
+      status?: PlanStatus;
     }) => planService.updatePlan(id, payload as any),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: [GET_PLANS] });

@@ -1,8 +1,10 @@
 import { FieldPath, UseFormTrigger } from "react-hook-form";
+import { PlanStatus } from "@/model/plan.model";
 
 import { PlanFormSchema } from "./plan-form.schema";
 
 export type PlanStepId = 1 | 2 | 3 | 4 | 5;
+export const ASSIGN_COURSE_STEP_ID: PlanStepId = 5;
 
 export interface PlanStepConfig {
   id: PlanStepId;
@@ -65,6 +67,7 @@ export const validatePlanStep = async (
 export const getPlanInitialCompletedSteps = (
   mode: "create" | "edit",
   data?: PlanFormSchema,
+  planStatus?: PlanStatus,
 ): PlanStepId[] => {
   if (!data || mode === "create") return [];
 
@@ -75,15 +78,11 @@ export const getPlanInitialCompletedSteps = (
   }
 
   if (data.programs && data.programs.length > 0) {
-    completedSteps.push(2);
-  }
+    completedSteps.push(2, 3, 4);
 
-  if (completedSteps.includes(2)) {
-    completedSteps.push(3);
-  }
-
-  if (completedSteps.includes(3)) {
-    completedSteps.push(4, 5);
+    if (planStatus === "approved") {
+      completedSteps.push(5);
+    }
   }
 
   return completedSteps;
@@ -103,7 +102,15 @@ export const getNextPlanStepId = (stepId: PlanStepId) => {
   return PLAN_STEP_ORDER[currentIndex + 1];
 };
 
-export const canAccessPlanStep = (stepId: PlanStepId, completedSteps: PlanStepId[]) => {
+export const canAccessPlanStep = (
+  stepId: PlanStepId,
+  completedSteps: PlanStepId[],
+  options?: { planStatus?: PlanStatus },
+) => {
+  if (stepId === 5 && options?.planStatus !== "approved") {
+    return false;
+  }
+
   if (stepId === PLAN_STEP_ORDER[0]) return true;
 
   const previousStep = getPrevPlanStepId(stepId);

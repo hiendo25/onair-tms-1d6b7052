@@ -8,6 +8,7 @@ import {
   PlanTopicDetail,
 } from "@/modules/plans/types";
 import { plansRepository } from "@/repository/plans";
+import { PlanStatus } from "@/model/plan.model";
 interface GetPlansInput {
   organizationId: string;
   search?: string;
@@ -97,14 +98,14 @@ class PlanService {
     }
   }
 
-  async update(id: string, form: PlanFormSchema) {
+  async update(id: string, form: PlanFormSchema, status?: PlanStatus) {
     const planPayload = {
       name: form.info.name,
       objective: form.info.objective || null,
       start_date: form.info.startDate || null,
       end_date: form.info.endDate || null,
       budget: form.info.budget ?? null,
-      status: "pending" as const,
+      status: status === "approved" ? "approved" as const : "pending" as const,
       organization_id: this.organizationId,
       created_by: this.userId,
       survey_id: form.info.survey?.id ?? null,
@@ -294,8 +295,11 @@ export const planService = {
   deletePlan: PlanService.deletePlan,
   createPlan: (payload: { form: PlanFormSchema; organizationId: string; createdBy: string }) =>
     new PlanService(payload.organizationId, payload.createdBy).create(payload.form),
-  updatePlan: (id: string, payload: { form: PlanFormSchema; organizationId: string; createdBy: string }) =>
-    new PlanService(payload.organizationId, payload.createdBy).update(id, payload.form),
+  updatePlan: (
+    id: string,
+    payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },
+  ) =>
+    new PlanService(payload.organizationId, payload.createdBy).update(id, payload.form, payload.status),
 };
 
 export { PlanService };

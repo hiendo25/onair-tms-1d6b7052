@@ -29,5 +29,11 @@ export default function CreatePlanForm() {
     }
   };
 
-  return <PlanForm onSubmit={handleSubmit} isLoading={isPending} />;
+  return (
+    <PlanForm
+      onSubmit={handleSubmit}
+      isLoading={isPending}
+      planStatus="pending"
+    />
+  );
 }

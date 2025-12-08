@@ -114,8 +114,7 @@ export default function PlansTable() {
 
   const handleAssignCourses = () => {
     if (selectedPlanId) {
-      router.push(PATHS.PLANS.EDIT(selectedPlanId));
-      // notifications.show("Chức năng gán môn học đang được phát triển", { severity: "info" });
+      router.push(`${PATHS.PLANS.EDIT(selectedPlanId)}?step=5`);
     }
     handleMenuClose();
   };

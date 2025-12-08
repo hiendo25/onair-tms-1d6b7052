@@ -29,6 +29,7 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
           approver={planDetail.approver}
           createdAt={planDetail.createdAt}
           objective={planDetail.objective}
+          status={planDetail.status}
         />
 
         {/* Statistics Section */}
