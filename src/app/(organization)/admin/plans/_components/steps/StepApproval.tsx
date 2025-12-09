@@ -10,15 +10,13 @@ import { getStatusColor, getStatusLabel } from "../../helper";
 
 interface StepApprovalProps {
   onBack: () => void;
-  onContinue?: () => void;
-  onSubmit?: () => void;
+  onSubmit: () => void;
   isLoading?: boolean;
   status: PlanStatus;
 }
 
 export default function StepApproval({
   onBack,
-  onContinue,
   onSubmit,
   isLoading = false,
   status,
@@ -36,9 +34,9 @@ export default function StepApproval({
 
   const isApproved = status === "approved";
   const isRejected = status === "rejected";
-  const primaryAction = isApproved ? onContinue : onSubmit;
+  const primaryAction = onSubmit;
   const primaryLabel = isApproved
-    ? "Tiếp tục gán môn học"
+    ? "Lưu thay đổi"
     : isRejected
       ? "Gửi duyệt lại"
       : "Lưu & gửi duyệt";
@@ -51,10 +49,10 @@ export default function StepApproval({
   }[tone] ?? { bg: "grey.50", border: "divider", icon: "text.primary" };
 
   const statusDescription = isApproved
-    ? "Kế hoạch đã được phê duyệt, bạn có thể gán môn học ở bước tiếp theo."
+    ? "Kế hoạch đã được phê duyệt, hãy lưu lại nếu bạn vừa cập nhật thông tin hoặc môn học."
     : isRejected
-      ? "Kế hoạch đang bị từ chối, hãy cập nhật thông tin và gửi duyệt lại. Chỉ khi được duyệt mới gán môn học."
-      : "Kế hoạch đang chờ duyệt. Lưu kế hoạch để gửi duyệt và chờ phê duyệt trước khi gán môn học.";
+      ? "Kế hoạch đang bị từ chối, hãy cập nhật thông tin và môn học rồi gửi duyệt lại."
+      : "Kiểm tra thông tin và môn học đã gán trước khi gửi duyệt kế hoạch.";
 
   const statusHeadline = isApproved
     ? `Kế hoạch "${planName || "Chưa đặt tên"}" đã được duyệt`
@@ -68,13 +66,13 @@ export default function StepApproval({
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
           <Box>
             <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 0.6 }}>
-              Bước 4
+              Bước 5
             </Typography>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Gửi duyệt đề xuất
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Chốt lại thông tin trước khi gửi cấp phê duyệt.
+              Chốt lại thông tin và môn học trước khi gửi cấp phê duyệt.
             </Typography>
           </Box>
           <Chip label={getStatusLabel(status)} color={tone} variant="outlined" size="small" />
@@ -143,16 +141,11 @@ export default function StepApproval({
             Quay lại
           </Button>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            {!isApproved && (
-              <Typography variant="body2" color="text.secondary">
-                Chỉ khi kế hoạch được duyệt mới gán môn học ở bước 5.
-              </Typography>
-            )}
             <Button
               variant="contained"
               onClick={primaryAction}
-              disabled={isLoading || !primaryAction}
-              endIcon={isApproved ? <ArrowForwardIcon fontSize="small" /> : undefined}
+              disabled={isLoading}
+              endIcon={<ArrowForwardIcon fontSize="small" />}
             >
               {primaryLabel}
             </Button>

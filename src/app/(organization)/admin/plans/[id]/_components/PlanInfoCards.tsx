@@ -90,13 +90,19 @@ export default function PlanInfoCards({
   status,
 }: PlanInfoCardsProps) {
   const statusTone = getStatusColor(status);
+  const statusHelper =
+    status === "approved"
+      ? "Đã duyệt, có thể triển khai"
+      : status === "rejected"
+        ? "Cần chỉnh sửa và gửi duyệt lại"
+        : "Chờ duyệt sau khi gán môn học";
 
   const infoTiles: InfoTileProps[] = [
     {
       icon: CheckCircleOutlineIcon,
       label: "Trạng thái",
       value: getStatusLabel(status),
-      helper: status === "approved" ? "Có thể gán môn học" : "Chưa thể gán môn học",
+      helper: statusHelper,
       tone: statusTone,
     },
     {

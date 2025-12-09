@@ -1,4 +1,6 @@
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { Course } from "@/modules/plans/plan-form.schema";
+
 import { PlanStatus } from "@/model/plan.model";
 import { Dayjs } from "dayjs";
 
@@ -47,4 +49,11 @@ export const getTone = (tone: StatTone = "default") => {
     default:
       return { bg: "grey.50", text: "text.primary" };
   }
+};
+
+export const renderCourseTags = (value: Course[]) => {
+  if (!value || value.length === 0) return null;
+  if (value.length === 1) return value[0]?.title || "";
+  if (value.length === 2) return `${value[0]?.title || ""}, ${value[1]?.title || ""}`;
+  return `${value[0]?.title || ""}, ${value[1]?.title || ""} +${value.length - 2}`;
 };

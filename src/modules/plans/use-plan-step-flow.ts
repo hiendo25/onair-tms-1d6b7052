@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormTrigger } from "react-hook-form";
 import {
-  ASSIGN_COURSE_STEP_ID,
   canAccessPlanStep,
   getNextPlanStepId,
   getPlanInitialCompletedSteps,
@@ -39,10 +38,10 @@ export const usePlanStepFlow = ({
     const defaultStep = PLAN_STEPS?.[0]?.id as PlanStepId;
     if (!initialStep) return defaultStep;
 
-    return canAccessPlanStep(initialStep, initialCompletedSteps, { planStatus })
+    return canAccessPlanStep(initialStep, initialCompletedSteps)
       ? initialStep
       : defaultStep;
-  }, [initialCompletedSteps, initialStep, planStatus]);
+  }, [initialCompletedSteps, initialStep]);
 
   const [currentStep, setCurrentStep] = useState<PlanStepId>(initialStepId);
   const [completedSteps, setCompletedSteps] = useState<PlanStepId[]>(initialCompletedSteps);
@@ -84,12 +83,9 @@ export const usePlanStepFlow = ({
     const next = getNextPlanStepId(currentStep);
     if (!next) return true;
 
-    // Only gate step 5 by approval status; prior steps are validated above.
-    if (next === ASSIGN_COURSE_STEP_ID && planStatus !== "approved") return false;
-
     setCurrentStep(next);
     return true;
-  }, [currentStep, planStatus, updateCompletion]);
+  }, [currentStep, updateCompletion]);
 
   const goBack = useCallback(() => {
     const previousStep = getPrevPlanStepId(currentStep);
@@ -98,7 +94,7 @@ export const usePlanStepFlow = ({
 
   const goToStep = useCallback(
     async (stepId: PlanStepId) => {
-      if (!canAccessPlanStep(stepId, completedSteps, { planStatus })) return false;
+      if (!canAccessPlanStep(stepId, completedSteps)) return false;
 
       if (stepId !== currentStep) {
         await updateCompletion(currentStep);
@@ -116,8 +112,8 @@ export const usePlanStepFlow = ({
   );
 
   const isStepAccessible = useCallback(
-    (stepId: PlanStepId) => canAccessPlanStep(stepId, completedSteps, { planStatus }),
-    [completedSteps, planStatus],
+    (stepId: PlanStepId) => canAccessPlanStep(stepId, completedSteps),
+    [completedSteps],
   );
 
   return {

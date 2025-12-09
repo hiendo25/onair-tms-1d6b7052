@@ -4,7 +4,6 @@ import { PlanStatus } from "@/model/plan.model";
 import { PlanFormSchema } from "./plan-form.schema";
 
 export type PlanStepId = 1 | 2 | 3 | 4 | 5;
-export const ASSIGN_COURSE_STEP_ID: PlanStepId = 5;
 
 export interface PlanStepConfig {
   id: PlanStepId;
@@ -34,14 +33,14 @@ export const PLAN_STEPS: PlanStepConfig[] = [
   },
   {
     id: 4,
-    label: "Gửi duyệt đề xuất",
-    description: "Gửi duyệt lên cấp phê duyệt",
+    label: "Gán môn học",
+    description: "Gán môn học cho chương trình và chủ đề",
     validateKeys: [],
   },
   {
     id: 5,
-    label: "Gán môn học",
-    description: "Gán môn học vào kế hoạch được duyệt",
+    label: "Gửi duyệt đề xuất",
+    description: "Kiểm tra và gửi kế hoạch để phê duyệt",
     validateKeys: [],
   },
 ];
@@ -72,17 +71,29 @@ export const getPlanInitialCompletedSteps = (
   if (!data || mode === "create") return [];
 
   const completedSteps: PlanStepId[] = [];
+  const hasPrograms = data.programs && data.programs.length > 0;
+  const hasAssignedCourses = hasPrograms
+    ? data.programs.some((program) => {
+      const programHasCourses = !!program.courses?.length;
+      const topicHasCourses = program.topics?.some((topic) => !!topic.courses?.length);
+      return programHasCourses || topicHasCourses;
+    })
+    : false;
 
   if (data.info?.name) {
     completedSteps.push(1);
   }
 
-  if (data.programs && data.programs.length > 0) {
-    completedSteps.push(2, 3, 4);
+  if (hasPrograms) {
+    completedSteps.push(2, 3);
 
-    if (planStatus === "approved") {
-      completedSteps.push(5);
+    if (hasAssignedCourses || planStatus === "approved") {
+      completedSteps.push(4);
     }
+  }
+
+  if (planStatus === "approved") {
+    completedSteps.push(5);
   }
 
   return completedSteps;
@@ -105,12 +116,7 @@ export const getNextPlanStepId = (stepId: PlanStepId) => {
 export const canAccessPlanStep = (
   stepId: PlanStepId,
   completedSteps: PlanStepId[],
-  options?: { planStatus?: PlanStatus },
 ) => {
-  if (stepId === 5 && options?.planStatus !== "approved") {
-    return false;
-  }
-
   if (stepId === PLAN_STEP_ORDER[0]) return true;
 
   const previousStep = getPrevPlanStepId(stepId);

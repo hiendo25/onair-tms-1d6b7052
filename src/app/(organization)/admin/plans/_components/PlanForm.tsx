@@ -6,19 +6,19 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
 import { planSchema, PlanFormSchema } from "@/modules/plans/plan-form.schema";
-import StepPlanInfo from "./steps/StepPlanInfo";
-import StepTrainingProgram from "./steps/StepTrainingProgram";
-import StepApproval from "./steps/StepApproval";
-import StepAssignCourses from "./steps/StepAssignCourses";
-import StepNavigation from "./steps/StepNavigation";
 import {
   PLAN_STEPS,
   PlanStepId,
 } from "@/modules/plans/plan-step.utils";
-import StepTrainingTopics from "./steps/StepTrainingTopics";
 import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
 import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
 import { PlanStatus } from "@/model/plan.model";
+import StepPlanInfo from "./Steps/StepPlanInfo";
+import StepTrainingProgram from "./Steps/StepTrainingProgram";
+import StepTrainingTopics from "./Steps/StepTrainingTopics";
+import StepAssignCourses from "./Steps/StepAssignCourses";
+import StepApproval from "./Steps/StepApproval";
+import StepNavigation from "./Steps/StepNavigation";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
@@ -63,7 +63,6 @@ export default function PlanForm({
   });
 
   const handleFormSubmit = methods.handleSubmit(onSubmit);
-  const canAssignCourses = planStatus === "approved";
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -89,20 +88,19 @@ export default function PlanForm({
         );
       case 4:
         return (
-          <StepApproval
+          <StepAssignCourses
             onBack={goBack}
-            onContinue={canAssignCourses ? goNext : undefined}
-            onSubmit={!canAssignCourses ? handleFormSubmit : undefined}
+            onContinue={goNext}
             isLoading={isLoading}
-            status={planStatus}
           />
         );
       case 5:
         return (
-          <StepAssignCourses
+          <StepApproval
             onBack={goBack}
-            onSave={handleFormSubmit}
+            onSubmit={handleFormSubmit}
             isLoading={isLoading}
+            status={planStatus}
           />
         );
       default:
@@ -129,7 +127,7 @@ export default function PlanForm({
         />
 
         <Box sx={{ flex: 1 }}>
-          <form onSubmit={methods.handleSubmit(onSubmit)}>
+          <form onSubmit={handleFormSubmit}>
             {renderStepContent()}
           </form>
         </Box>

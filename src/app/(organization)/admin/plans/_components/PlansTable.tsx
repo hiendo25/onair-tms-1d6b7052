@@ -239,7 +239,7 @@ export default function PlansTable() {
         >
           <StatCard label="Tổng kế hoạch" value={planStats.total} helper="Danh sách hiện có" />
           <StatCard label="Đang chờ duyệt" value={planStats.pending} helper="Chờ quyết định" tone="warning" />
-          <StatCard label="Đã duyệt" value={planStats.approved} helper="Có thể gán môn học" tone="success" />
+          <StatCard label="Đã duyệt" value={planStats.approved} helper="Hoàn tất phê duyệt" tone="success" />
           <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />
         </Box>
 
