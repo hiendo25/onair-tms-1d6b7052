@@ -1,8 +1,8 @@
 "use client";
-import { type ReactNode, createContext, useContext, useRef } from "react";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { useStore } from "zustand";
 
-import { OrganizationStoreApi, UserOrganizationState, createOrganizationStore } from "./user-organization-store";
+import { createOrganizationStore, OrganizationStoreApi, UserOrganizationState } from "./user-organization-store";
 
 type UserOrganizationStoreContextApi = ReturnType<typeof createOrganizationStore>;
 

@@ -1,12 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Control, useFieldArray, useWatch } from "react-hook-form";
-import { UpsertSurveyFormData } from "../../../survey-form.schema";
-import { Box, Button, FormLabel, IconButton, Stack } from "@mui/material";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { Trash01Icon } from "@/shared/assets/icons";
-
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-
 import {
   DndContext,
   DragEndEvent,
@@ -17,9 +9,16 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { Box, Button, FormLabel, IconButton, Stack } from "@mui/material";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 
+import { Trash01Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { UpsertSurveyFormData } from "../../../survey-form.schema";
 import SortableItem from "../SortableItem";
+
 import OptionContentItem from "./OptionContentItem";
 
 interface QuestionOptionsContainerProps {
@@ -125,17 +124,16 @@ const QuestionOptionsContainer = ({ control, questionIndex }: QuestionOptionsCon
       </DndContext>
       <Stack spacing={2} sx={{ mt: 1 }}>
         <div className="flex gap-2 items-center">
-          <Button variant="outlined" size="small" startIcon={<PlusIcon />} onClick={handleAddOption()}>
-            Thêm tùy chọn
-          </Button>
           {!alreadyHasOtherType && (
             <>
-              <span className="text-center bg-blue-200 rounded-lg text-xs px-1 py-0.5">Hoặc</span>
               <Button variant="outlined" size="small" onClick={handleAddOption("other")}>
                 Tự nhập
               </Button>
             </>
-          )}
+          )}{" "}
+          <Button variant="outlined" size="small" startIcon={<PlusIcon />} onClick={handleAddOption()}>
+            Thêm tùy chọn
+          </Button>
         </div>
         {/* {error?.message ? <FormHelperText error>{error.message}</FormHelperText> : null} */}
       </Stack>

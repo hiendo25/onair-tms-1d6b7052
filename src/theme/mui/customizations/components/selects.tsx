@@ -1,7 +1,8 @@
 import React from "react";
-import { Components, Theme, alpha } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import { SvgIconProps, inputBaseClasses, selectClasses } from "@mui/material";
+import { inputBaseClasses, selectClasses, SvgIconProps } from "@mui/material";
+import { alpha, Components, Theme } from "@mui/material/styles";
+
 import { grey } from "../../theme-color";
 export const selectsCustomizations: Components<Theme> = {
   MuiSelect: {

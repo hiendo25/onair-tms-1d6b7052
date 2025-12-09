@@ -1,8 +1,10 @@
-import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
-import { RedirectType, redirect } from "next/navigation";
+import React from "react";
+import { redirect, RedirectType } from "next/navigation";
+
 import { PermissionProvider } from "@/modules/permission-wrapper/store/PermissionProvider";
 import { authRepository } from "@/repository";
 import { UserOrganizationService } from "@/services/organization/user-organization.service";
+import { UserOrganizationProvider } from "../store/UserOrganizationProvider";
 
 const UserOrganizationWraper = async ({ children }: { readonly children: React.ReactNode }) => {
   const currentUser = await authRepository.ensureGetCurrentUser();
@@ -25,9 +27,9 @@ const UserOrganizationWraper = async ({ children }: { readonly children: React.R
         employeeType: employeeDetail.employee_type || "student",
         userId: currentUser.id,
         organization: {
-          id: employeeDetail.organizations?.id,
-          name: employeeDetail.organizations?.name,
-          subdomain: employeeDetail.organizations?.subdomain,
+          id: employeeDetail.organizations.id,
+          name: employeeDetail.organizations.name,
+          subdomain: employeeDetail.organizations.subdomain,
         },
         profile: employeeDetail.profiles
           ? {

@@ -1,49 +1,48 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  InputAdornment,
-  ListItemText,
-  Menu,
-  MenuItem,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TextField,
-  Typography,
-} from "@mui/material";
+import { useTransition } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import PageContainer from "@/shared/ui/PageContainer";
-// import { MOCK_SURVEYS } from "@/constants/survey.constants";
-import { Survey } from "@/types/survey.types";
+import { Box, Button, Card, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.contstants";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { PATHS } from "@/constants/path.contstants";
+import { usePermissions } from "@/modules/permission-wrapper";
+import Can from "@/modules/permission-wrapper/components/Can";
+import { useGetSurveysQuery } from "@/modules/surveys/operation/queries";
+import { Edit02Icon, EyeIcon, Trash01Icon } from "@/shared/assets/icons";
+import PageContainer from "@/shared/ui/PageContainer";
+import TableData from "@/shared/ui/TableData";
+import { Survey } from "@/types/survey.types";
 
-export default function SurveyList() {
+import { surveyColumns } from "./survey-columns";
+interface SurveyListContainerProps {
+  className?: string;
+}
+const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) => {
+  const { data: surveysData, isPending } = useGetSurveysQuery();
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
 
+  const [isTransition, startTransition] = useTransition();
+  const surveyList = React.useMemo(() => {
+    return surveysData?.data || [];
+  }, [surveysData]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
   const [surveys, setSurveys] = React.useState<Survey[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedSurveyId, setSelectedSurveyId] = React.useState<string | null>(null);
-  const menuOpen = Boolean(anchorEl);
+
+  const { hasPermissions } = usePermissions();
+
+  const canCreateOrUpdate = hasPermissions([{ $or: "survey:create" }, { $or: "survey:update" }]);
 
   const filteredSurveys = React.useMemo(() => {
     if (!searchQuery.trim()) {
@@ -76,7 +75,9 @@ export default function SurveyList() {
   };
 
   const handleCreateSurvey = () => {
-    router.push("/admin/surveys/create");
+    startTransition(() => {
+      router.push(PATHS.SURVEYS.CREATE);
+    });
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, surveyId: string) => {
@@ -165,6 +166,57 @@ export default function SurveyList() {
     return `${dateStr}, ${timeStr}`;
   };
 
+  const handleDeleteSurvey = (surveyId: string, surveyName: string) => () => {};
+  const mergedColumns = React.useMemo((): typeof surveyColumns => {
+    return canCreateOrUpdate
+      ? [
+          ...surveyColumns,
+          {
+            id: "action",
+            field: "action",
+            headerName: "Hành động",
+            fixed: "right",
+            width: 140,
+            renderCell: (value, { id: surveyId, title }) => {
+              return (
+                <>
+                  <Can pers={["survey:read"]}>
+                    <IconButton
+                      size="small"
+                      className="text-blue-600 bg-transparent hover:bg-blue-50"
+                      title="View"
+                      onClick={handleDeleteSurvey(surveyId, title)}
+                    >
+                      <EyeIcon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                  <Can pers={["survey:update"]}>
+                    <IconButton
+                      size="small"
+                      href={PATHS.SURVEYS.EDIT(surveyId)}
+                      LinkComponent={Link}
+                      className="text-blue-600 bg-transparent hover:bg-blue-50"
+                    >
+                      <Edit02Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                  <Can pers={["survey:delete"]}>
+                    <IconButton
+                      size="small"
+                      className="text-red-600 bg-transparent hover:bg-red-50"
+                      onClick={handleDeleteSurvey(surveyId, title)}
+                    >
+                      <Trash01Icon className="w-4 h-4" />
+                    </IconButton>
+                  </Can>
+                </>
+              );
+            },
+          },
+        ]
+      : surveyColumns;
+  }, []);
+
   return (
     <PageContainer title="Danh sách khảo sát" breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}>
       <Box sx={{ py: 3 }}>
@@ -182,112 +234,39 @@ export default function SurveyList() {
               onChange={handleSearchChange}
               size="small"
               sx={{ width: { xs: "100%", sm: 300 } }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                },
               }}
             />
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateSurvey}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleCreateSurvey}
+              loading={isTransition}
+              disabled={isTransition}
+            >
               Tạo khảo sát
             </Button>
           </Stack>
-
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Tên khảo sát</TableCell>
-                  <TableCell>Số lượng phản hồi</TableCell>
-                  <TableCell>Ngày tạo</TableCell>
-                  <TableCell align="center"></TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedSurveys.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 8 }}>
-                      <Typography variant="body2" color="text.secondary">
-                        Không tìm thấy khảo sát nào
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedSurveys.map((survey) => (
-                    <TableRow key={survey.id} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontWeight={600}>
-                          {survey.name}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            maxWidth: 500,
-                          }}
-                        >
-                          {survey.description}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{survey.total_submissions}</TableCell>
-                      <TableCell>{formatDate(survey.created_at)}</TableCell>
-                      <TableCell align="center">
-                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, survey.id)}>
-                          <MoreVertIcon fontSize="small" />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <TablePagination
-            component="div"
-            count={filteredSurveys.length}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            rowsPerPageOptions={[12, 25, 50, 100]}
-            labelRowsPerPage="Số hàng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+          <TableData
+            rows={surveyList}
+            showRowCount
+            columns={mergedColumns}
+            rowKey="id"
+            loading={isPending}
+            bordered={false}
+            minWidth={1200}
           />
-
-          <Menu
-            anchorEl={anchorEl}
-            open={menuOpen}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <MenuItem onClick={handleViewStatistics}>
-              <ListItemText>Xem thống kê</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleCopyLink}>
-              <ListItemText>Sao chép liên kết</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleEdit}>
-              <ListItemText>Chỉnh sửa</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleDelete}>
-              <ListItemText>Xóa khảo sát</ListItemText>
-            </MenuItem>
-          </Menu>
         </Card>
       </Box>
     </PageContainer>
   );
-}
+};
+
+export default SurveyListContainer;

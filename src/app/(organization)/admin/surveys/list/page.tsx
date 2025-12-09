@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
-import SurveyList from "@/app/(organization)/admin/surveys/_components/SurveyList";
 
+import SurveyListContainer from "@/app/(organization)/admin/surveys/_components/SurveyListContainer";
 type PageSurveyListProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -18,6 +18,6 @@ export async function generateMetadata(
 }
 
 const PageSurveyList: React.FC<PageSurveyListProps> = () => {
-  return <SurveyList />;
+  return <SurveyListContainer />;
 };
 export default PageSurveyList;

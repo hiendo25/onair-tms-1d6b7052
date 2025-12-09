@@ -11,3 +11,4 @@ export * as learningScreenService from "./learning-screen/learning-screen.servic
 export * as branchService from "./branches/branch.service";
 export * as departmentService from "./departments/department.service";
 export * as notificationService from "./notifications/notification.service";
+export * as serveyService from "./survey";

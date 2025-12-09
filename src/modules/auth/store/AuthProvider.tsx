@@ -1,5 +1,5 @@
 "use client";
-import { type ReactNode, createContext, useContext, useRef } from "react";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { useStore } from "zustand";
 
 import { AuthStore, AuthStoreState, createAuthStore } from "./authStore";

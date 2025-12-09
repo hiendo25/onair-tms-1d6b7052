@@ -1,5 +1,5 @@
-import { Checkbox, CheckboxProps, FormControl, FormControlLabel, FormHelperText } from "@mui/material";
 import React, { memo } from "react";
+import { Checkbox, CheckboxProps, FormControl, FormControlLabel, FormHelperText } from "@mui/material";
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
@@ -29,6 +29,12 @@ const RHFCheckboxField = <T extends FieldValues>({
         <FormControl className={className} error={!!error}>
           <FormControlLabel
             {...field}
+            {...(typeof field.value === "boolean"
+              ? {
+                  checked: field.value,
+                }
+              : {})}
+            // checked={field.value}
             control={<Checkbox {...checkbox} />}
             name={name}
             label={label}

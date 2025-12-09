@@ -1790,32 +1790,45 @@ export type Database = {
       surveys: {
         Row: {
           created_at: string
+          created_by: string | null
           description: string | null
           id: string
           organization_id: string
+          slug: string
           survey_type: Database["public"]["Enums"]["survey_type"] | null
           title: string
           update_at: string | null
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           organization_id?: string
+          slug: string
           survey_type?: Database["public"]["Enums"]["survey_type"] | null
           title: string
           update_at?: string | null
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           description?: string | null
           id?: string
           organization_id?: string
+          slug?: string
           survey_type?: Database["public"]["Enums"]["survey_type"] | null
           title?: string
           update_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "surveys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "surveys_organization_id_fkey"
             columns: ["organization_id"]
@@ -2070,13 +2083,22 @@ export type Database = {
         }[]
       }
       get_filtered_employees: {
-        Args: {
-          p_branch_id?: string
-          p_department_id?: string
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
+        Args:
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_employee_type?: Database["public"]["Enums"]["employee_type"]
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
         Returns: {
           employee_id: string
           total_count: number

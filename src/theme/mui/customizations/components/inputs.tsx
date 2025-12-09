@@ -1,9 +1,9 @@
-import { Components, Theme, alpha } from "@mui/material/styles";
-import { outlinedInputClasses } from "@mui/material/OutlinedInput";
-import { error, grey, primary } from "../../theme-color";
 import { filledInputClasses, formLabelClasses, inputBaseClasses } from "@mui/material";
+import { outlinedInputClasses } from "@mui/material/OutlinedInput";
+import { alpha, Components, Theme } from "@mui/material/styles";
 
- 
+import { error, grey } from "../../theme-color";
+
 export const inputsCustomizations: Components<Theme> = {
   MuiInputBase: {
     styleOverrides: {
@@ -42,12 +42,17 @@ export const inputsCustomizations: Components<Theme> = {
       root: ({ theme }) => ({
         color: (theme.vars || theme).palette.text.primary,
         fontSize: theme.typography.fontSize,
-        // backgroundColor: alpha(theme.palette.grey[100], 0.3),
         ".MuiOutlinedInput-notchedOutline": {
           borderColor: theme.palette.grey[300],
         },
         "&:hover .MuiOutlinedInput-notchedOutline": {
-          borderColor: theme.palette.grey[500],
+          borderColor: theme.palette.grey[400],
+        },
+        "&.Mui-disabled": {
+          backgroundColor: theme.palette.grey[100],
+          ".MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.grey[300],
+          },
         },
         [`&.${outlinedInputClasses.focused}`]: {
           // borderColor: theme.palette.primary["main"],

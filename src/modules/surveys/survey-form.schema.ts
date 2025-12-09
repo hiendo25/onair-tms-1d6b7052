@@ -1,4 +1,5 @@
 import * as zod from "zod";
+
 import { SurveyQuestionType } from "@/model/survey";
 
 const questionTypeValues: SurveyQuestionType[] = ["text", "radio", "checkbox", "rating", "yes_no", "rating_sort"];
@@ -17,24 +18,26 @@ const surveyQuestionSchema = zod
       }),
     ),
   })
-  .refine(
-    (data) => {
-      if (data.type === "radio" || data.type === "checkbox") {
-        return data.options && data.options.length >= 2;
+  .superRefine(({ type, options }, ctx) => {
+    const questionMultipleOptionsKeys: SurveyQuestionType[] = ["radio", "checkbox", "rating_sort"];
+    if (questionMultipleOptionsKeys.includes(type)) {
+      console.log({ options });
+      if (options.length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi loại lựa chọn phải có ít nhất 2 tùy chọn.",
+          path: ["options"],
+        });
       }
-      return true;
-    },
-    {
-      message: "Câu hỏi loại lựa chọn phải có ít nhất 2 tùy chọn.",
-      path: ["options"],
-    },
-  );
+    }
+  });
 
 export const upsertSurveyFormSchema = zod.object({
   name: zod
     .string()
     .min(1, { message: "Tên khảo sát không được bỏ trống." })
     .max(200, "Vui lòng nhập tối đa 200 ký tự"),
+  slug: zod.string().min(1, { message: "Slug không được bỏ trống." }),
   description: zod.string().min(1, { message: "Mô tả khảo sát không được bỏ trống." }),
   questions: zod.array(surveyQuestionSchema).min(1, { message: "Tạo ít nhất 1 câu hỏi." }),
 });

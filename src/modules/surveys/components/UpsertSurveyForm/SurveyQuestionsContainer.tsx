@@ -11,20 +11,26 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@mui/material";
-import { useFieldArray } from "react-hook-form";
+import { Control, FieldErrors, useFieldArray } from "react-hook-form";
 
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { useUpsertSurveyHookForm } from ".";
+import { UpsertSurveyFormData } from "../../survey-form.schema";
+import { useUpsertServeyFormContext } from ".";
 
 import QuestionContentItem from "./QuestionContentItem";
 import SortableItem from "./SortableItem";
 
 interface SurveyQuestionContainerProps {
   className?: string;
+  control: Control<UpsertSurveyFormData>;
+  errors: FieldErrors<UpsertSurveyFormData>;
 }
-const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = () => {
-  const { control } = useUpsertSurveyHookForm();
+const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ control, errors }) => {
+  // const {
+  //   formState: { errors },
+  // } = useUpsertServeyFormContext();
   const [activeDragQuestionId, setActiveDragQuestionId] = useState<UniqueIdentifier>();
+  console.log(errors);
   const {
     fields: questionsFields,
     append,
@@ -75,7 +81,7 @@ const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = () => {
   }, [activeDragQuestionId, questionsFields]);
 
   const handleAddQuestion = () => {
-    append({ label: "", type: "checkbox", is_required: false, options: [] });
+    append([{ label: "", type: "checkbox", is_required: false, options: [] }]);
   };
 
   return (
@@ -87,7 +93,12 @@ const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = () => {
         >
           {questionsFields.map((field, _questionIndex) => (
             <SortableItem key={field._questionId} id={field._questionId}>
-              <QuestionContentItem questionIndex={_questionIndex} control={control} onRemove={remove} />
+              <QuestionContentItem
+                questionIndex={_questionIndex}
+                control={control}
+                onRemove={remove}
+                error={errors["questions"]?.[_questionIndex]}
+              />
             </SortableItem>
           ))}
         </SortableContext>
