@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
       "Phòng ban",
       "Chi nhánh",
       "Ngày bắt đầu",
-      "Vai trò"
+      "Loại nhân viên",
+      "Mã vai trò"
     ];
 
     const rows = sampleData.map(employee => [
@@ -46,23 +47,25 @@ export async function GET(request: NextRequest) {
       employee.department,
       employee.branch,
       employee.start_date,
-      employee.employee_type
+      employee.employee_type,
+      employee.role_code
     ]);
 
     const worksheetData = [headers, ...rows];
     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
     worksheet['!cols'] = [
-      { wch: 15 },
-      { wch: 25 },
-      { wch: 30 },
-      { wch: 15 },
-      { wch: 12 },
-      { wch: 15 },
-      { wch: 40 },
-      { wch: 40 },
-      { wch: 15 },
-      { wch: 15 }
+      { wch: 15 },  // Mã nhân viên
+      { wch: 25 },  // Họ và tên
+      { wch: 30 },  // Email
+      { wch: 15 },  // Số điện thoại
+      { wch: 12 },  // Giới tính
+      { wch: 15 },  // Ngày sinh
+      { wch: 40 },  // Phòng ban
+      { wch: 40 },  // Chi nhánh
+      { wch: 15 },  // Ngày bắt đầu
+      { wch: 15 },  // Loại nhân viên
+      { wch: 20 }   // Mã vai trò
     ];
 
     const workbook = XLSX.utils.book_new();

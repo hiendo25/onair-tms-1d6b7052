@@ -81,6 +81,20 @@ export const DEFAULT_TEMPLATE_STRUCTURE: TemplateStructure = {
       required: false,
       width: 130,
     },
+    {
+      headerName: "Loại nhân viên*",
+      fieldName: "Loại nhân viên",
+      fieldKey: "employee_type",
+      required: true,
+      width: 150,
+    },
+    {
+      headerName: "Mã vai trò",
+      fieldName: "Mã vai trò",
+      fieldKey: "role_code",
+      required: false,
+      width: 150,
+    },
   ],
 };
 
