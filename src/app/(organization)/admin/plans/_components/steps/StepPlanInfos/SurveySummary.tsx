@@ -2,7 +2,8 @@ import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Survey } from "@/modules/plans/plan-form.schema";
-import { formatSurveyDateTime, getSurveyStatusLabel, getSurveyStatusTone, getSurveyTargetLabel } from "../../../helper";
+import { getSurveyStatusLabel, getSurveyStatusTone, getSurveyTargetLabel } from "../../../helper";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 
 interface SurveySummaryProps {
   survey?: Survey;
@@ -19,7 +20,7 @@ export function SurveySummary({
 }: SurveySummaryProps) {
   if (!survey) {
     return (
-      <Button variant="outlined" onClick={onOpenPicker} startIcon={<SearchIcon />} size="small">
+      <Button variant="outlined" onClick={onOpenPicker} startIcon={<SearchIcon />} size="large">
         Chọn khảo sát
       </Button>
     );
@@ -53,7 +54,7 @@ export function SurveySummary({
           Đối tượng: {getSurveyTargetLabel(survey.targetType)}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Thời gian: {formatSurveyDateTime(survey.startDate)} - {formatSurveyDateTime(survey.endDate)}
+          Thời gian: {fDateTime(survey.startDate, FORMAT_DATE_TIME_CLEANER)} - {fDateTime(survey.endDate, FORMAT_DATE_TIME_CLEANER)}
         </Typography>
       </Box>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>

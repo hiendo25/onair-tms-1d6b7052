@@ -11,13 +11,13 @@ import {
   validatePlanStep,
   PLAN_STEPS,
 } from "./plan-step.utils";
-import { PlanFormSchema, Survey } from "./plan-form.schema";
+import { PlanFormSchema, PlanFormValues, Survey } from "./plan-form.schema";
 import { PlanStatus } from "@/model/plan.model";
 
 interface UsePlanStepFlowProps {
   mode: "create" | "edit";
   initialData?: PlanFormSchema;
-  trigger: UseFormTrigger<PlanFormSchema>;
+  trigger: UseFormTrigger<PlanFormValues>;
   planStatus?: PlanStatus;
   initialStep?: PlanStepId;
   survey?: Survey | undefined;

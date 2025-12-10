@@ -85,7 +85,9 @@ export const planSchema = zod.object({
 });
 
 export type Survey = zod.infer<typeof surveySchema>;
+export type SurveyFormValues = zod.input<typeof surveySchema>;
 export type Course = zod.infer<typeof courseSchema>;
 export type Topic = zod.infer<typeof topicSchema>;
 export type TrainingProgram = zod.infer<typeof trainingProgramSchema>;
 export type PlanFormSchema = zod.infer<typeof planSchema>;
+export type PlanFormValues = zod.input<typeof planSchema>;

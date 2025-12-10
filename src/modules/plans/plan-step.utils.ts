@@ -1,7 +1,7 @@
 import { FieldPath, UseFormTrigger } from "react-hook-form";
 import { PlanStatus } from "@/model/plan.model";
 
-import { PlanFormSchema } from "./plan-form.schema";
+import { PlanFormSchema, PlanFormValues } from "./plan-form.schema";
 
 export type PlanStepId = 1 | 2 | 3 | 4 | 5;
 
@@ -9,7 +9,7 @@ export interface PlanStepConfig {
   id: PlanStepId;
   label: string;
   description: string;
-  validateKeys: FieldPath<PlanFormSchema>[];
+  validateKeys: FieldPath<PlanFormValues>[];
 }
 
 export const PLAN_STEPS: PlanStepConfig[] = [
@@ -55,7 +55,7 @@ export const getPlanStepValidationKeys = (stepId: PlanStepId) => PLAN_STEP_MAP[s
 
 export const validatePlanStep = async (
   stepId: PlanStepId,
-  trigger: UseFormTrigger<PlanFormSchema>,
+  trigger: UseFormTrigger<PlanFormValues>,
 ) => {
   const fields = getPlanStepValidationKeys(stepId);
   if (!fields.length) return true;

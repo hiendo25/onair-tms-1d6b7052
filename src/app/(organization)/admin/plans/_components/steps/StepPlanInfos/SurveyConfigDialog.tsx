@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -20,22 +21,24 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import TaskAltIcon from "@mui/icons-material/TaskAlt";
 import dayjs from "dayjs";
-import { Controller, UseFormReturn } from "react-hook-form";
+import { Controller, UseFormReturn, useWatch } from "react-hook-form";
 import CustomDateTimePickerField from "@/shared/ui/form/CustomDateTimePickerField";
-import { PlanSurveyTarget, Survey } from "@/modules/plans/plan-form.schema";
-import { formatSurveyDate } from "../../../helper";
+import { PlanSurveyTarget, Survey, SurveyFormValues } from "@/modules/plans/plan-form.schema";
 import { UnitOption } from "./survey-options";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 
 interface SurveyConfigDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: () => void;
-  form: UseFormReturn<Survey>;
+  form: UseFormReturn<SurveyFormValues, any, Survey>;
   surveyTitle?: string;
   surveyCreatedAt?: string | null;
   targetOptions: { value: PlanSurveyTarget; label: string }[];
-  departments: UnitOption[];
-  branches: UnitOption[];
+  unitOptions: UnitOption[];
+  unitSearch: string;
+  onUnitSearchChange: (value: string) => void;
+  unitLoading?: boolean;
   isSaving?: boolean;
 }
 
@@ -58,16 +61,42 @@ export function SurveyConfigDialog({
   surveyTitle,
   surveyCreatedAt,
   targetOptions,
-  branches,
-  departments,
+  unitOptions,
+  unitSearch,
+  onUnitSearchChange,
+  unitLoading = false,
   isSaving = false,
 }: SurveyConfigDialogProps) {
   const targetType = form.watch("targetType");
-  const unitOptions = useMemo(() => {
-    if (targetType === "branch") return branches;
-    if (targetType === "department") return departments;
-    return [];
-  }, [branches, departments, targetType]);
+  const selectedUnitIds = useWatch({ control: form.control, name: "targetUnitIds" }) ?? [];
+  const [cachedUnitOptions, setCachedUnitOptions] = useState<UnitOption[]>([]);
+  const previousTargetTypeRef = useRef<PlanSurveyTarget>(null);
+
+  useEffect(() => {
+    // Reset cache when switching between branch/department to avoid mixing data.
+    if (previousTargetTypeRef.current && previousTargetTypeRef.current !== targetType) {
+      setCachedUnitOptions([]);
+      onUnitSearchChange("");
+      form.setValue("targetUnitIds", []);
+    }
+    previousTargetTypeRef.current = targetType!;
+  }, [form, targetType, onUnitSearchChange]);
+
+  useEffect(() => {
+    setCachedUnitOptions((prev) => {
+      const map = new Map<string, UnitOption>();
+      selectedUnitIds.forEach((id) => {
+        const fromNew = unitOptions.find((item) => item.id === id);
+        const fromPrev = prev.find((item) => item.id === id);
+        const fallbackType = targetType === "branch" || targetType === "department" ? targetType : undefined;
+        map.set(id, fromNew || fromPrev || { id, name: id, type: fallbackType });
+      });
+      unitOptions.forEach((item) => map.set(item.id, item));
+      return Array.from(map.values());
+    });
+  }, [selectedUnitIds, targetType, unitOptions]);
+
+  const resolvedUnitOptions = useMemo(() => cachedUnitOptions, [cachedUnitOptions]);
 
   const shouldShowUnits = targetType === "branch" || targetType === "department";
 
@@ -99,7 +128,7 @@ export function SurveyConfigDialog({
               {surveyTitle}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Tạo ngày: {formatSurveyDate(surveyCreatedAt)}
+              Tạo ngày: {fDateTime(surveyCreatedAt, FORMAT_DATE_TIME_CLEANER)}
             </Typography>
           </Box>
         )}
@@ -130,11 +159,20 @@ export function SurveyConfigDialog({
             name="targetUnitIds"
             render={({ field, fieldState }) => (
               <Autocomplete
+                key={targetType}
                 multiple
-                options={unitOptions}
+                options={resolvedUnitOptions}
                 getOptionLabel={(opt) => opt.name}
-                value={unitOptions.filter((opt) => field.value?.includes(opt.id))}
+                value={resolvedUnitOptions.filter((opt) => field.value?.includes(opt.id))}
                 onChange={(_e, newValue) => field.onChange(newValue.map((item) => item.id))}
+                inputValue={unitSearch}
+                onInputChange={(_e, newValue, reason) => {
+                  if (reason === "input") onUnitSearchChange(newValue);
+                  if (reason === "clear") onUnitSearchChange("");
+                }}
+                filterOptions={(options) => options}
+                loading={unitLoading}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -142,6 +180,17 @@ export function SurveyConfigDialog({
                     placeholder={`Chọn ${targetType === "branch" ? "chi nhánh" : "phòng ban"}`}
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
+                    slotProps={{
+                      input: {
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {unitLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }
+                    }}
                   />
                 )}
                 sx={{ mb: 2 }}

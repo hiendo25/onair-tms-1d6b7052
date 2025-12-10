@@ -1,18 +1,5 @@
-import dayjs from "dayjs";
 import { PlanStatus } from "@/model/plan.model";
 import { PlanSurveyTarget, Survey } from "@/modules/plans/plan-form.schema";
-
-export const formatSurveyDateTime = (value?: string | null, fallback = "Chưa đặt") => {
-  if (!value) return fallback;
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format("DD/MM/YYYY HH:mm") : fallback;
-};
-
-export const formatSurveyDate = (value?: string | null, fallback = "—") => {
-  if (!value) return fallback;
-  const parsed = dayjs(value);
-  return parsed.isValid() ? parsed.format("YYYY-MM-DD") : fallback;
-};
 
 export const getSurveyStatusLabel = (status?: Survey["status"]) => {
   switch (status) {

@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useDebounce from "@/hooks/useDebounce";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
-import { Survey, surveySchema } from "@/modules/plans/plan-form.schema";
+import { Survey, SurveyFormValues, surveySchema } from "@/modules/plans/plan-form.schema";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { useGetPlanningSurveysQuery } from "@/modules/plans/operations/query";
 import { PlanningSurveyOption } from "@/services/surveys/survey.service";
@@ -39,36 +39,58 @@ export function PlanSurveySection() {
   const [isPickerOpen, setPickerOpen] = useState(false);
   const [isConfigOpen, setConfigOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [unitSearch, setUnitSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedSurvey, setSelectedSurvey] = useState<PlanningSurveyOption | null>(null);
+  const pageSize = 10;
+  const unitPageSize = 10;
 
   const debouncedSearch = useDebounce(search, 400);
+  const debouncedUnitSearch = useDebounce(unitSearch, 400);
 
-  const { data: surveys = [], isLoading: isLoadingSurveys } = useGetPlanningSurveysQuery(
-    userInfo?.organization?.id,
-    debouncedSearch,
-  );
-
-  const { data: organizationUnits = [] } = useGetOrganizationUnitsByOrgQuery(userInfo?.organization?.id);
-
-  const branches = useMemo<UnitOption[]>(
-    () => organizationUnits.filter((unit: any) => unit.type === "branch").map((u: any) => ({ id: u.id, name: u.name, type: u.type })),
-    [organizationUnits],
-  );
-  const departments = useMemo<UnitOption[]>(
-    () => organizationUnits.filter((unit: any) => unit.type === "department").map((u: any) => ({ id: u.id, name: u.name, type: u.type })),
-    [organizationUnits],
-  );
-
-  const configForm = useForm({
+  const configForm = useForm<SurveyFormValues, undefined, Survey>({
     resolver: zodResolver(surveySchema),
     defaultValues: buildSurveyDefaults(surveyValue),
   });
 
-  const activeSurvey = selectedSurvey ?? (surveyValue
-    ? { id: surveyValue.id, title: surveyValue.title, createdAt: surveyValue.createdAt ?? null }
-    : null);
+  const targetType = configForm.watch("targetType");
+
+  useEffect(() => {
+    setUnitSearch("");
+  }, [targetType]);
+
+  const { data: surveyList, isLoading: isLoadingSurveys } = useGetPlanningSurveysQuery({
+    organizationId: userInfo?.organization?.id,
+    search: debouncedSearch,
+    page,
+    limit: pageSize,
+  });
+
+  const { data: unitList, isLoading: isLoadingUnits, isFetching: isFetchingUnits } = useGetOrganizationUnitsByOrgQuery({
+    organizationId: userInfo?.organization?.id,
+    type: targetType === "branch" || targetType === "department" ? targetType : undefined,
+    search: debouncedUnitSearch,
+    page: 1,
+    limit: unitPageSize,
+    enabled: isConfigOpen && (targetType === "branch" || targetType === "department"),
+  });
+
+  const surveys = surveyList?.data ?? [];
+  const totalSurveys = surveyList?.total ?? 0;
+
+  const unitOptions = useMemo<UnitOption[]>(
+    () => (unitList?.data ?? []).map((unit: any) => ({ id: unit.id, name: unit.name, type: unit.type })),
+    [unitList],
+  );
+
+  const activeSurvey =
+    selectedSurvey ??
+    (surveyValue
+      ? { id: surveyValue.id, title: surveyValue.title, createdAt: surveyValue.createdAt ?? null }
+      : null);
 
   const handleOpenPicker = () => {
+    setPage(1);
     setPickerOpen(true);
     setSelectedSurvey(null);
   };
@@ -85,6 +107,7 @@ export function PlanSurveySection() {
       setPickerOpen(true);
       return;
     }
+    setUnitSearch("");
     setSelectedSurvey(null);
     configForm.reset(buildSurveyDefaults(surveyValue));
     setConfigOpen(true);
@@ -119,8 +142,15 @@ export function PlanSurveySection() {
         loading={isLoadingSurveys}
         surveys={surveys}
         search={search}
+        page={page}
+        limit={pageSize}
+        total={totalSurveys}
         onClose={() => setPickerOpen(false)}
-        onSearchChange={setSearch}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        onPageChange={setPage}
         onSelect={handleSelectSurvey}
       />
 
@@ -132,8 +162,10 @@ export function PlanSurveySection() {
         surveyTitle={activeSurvey?.title}
         surveyCreatedAt={activeSurvey?.createdAt ?? null}
         targetOptions={SURVEY_TARGET_OPTIONS}
-        departments={departments}
-        branches={branches}
+        unitOptions={unitOptions}
+        unitSearch={unitSearch}
+        onUnitSearchChange={setUnitSearch}
+        unitLoading={isLoadingUnits || isFetchingUnits}
         isSaving={isSavingSurvey}
       />
     </>

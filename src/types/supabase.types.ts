@@ -2394,6 +2394,7 @@ export type Database = {
         Returns: {
           approved: number
           pending: number
+          pending_survey: number
           rejected: number
           total: number
         }[]

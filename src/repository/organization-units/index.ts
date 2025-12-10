@@ -7,17 +7,56 @@ const getOrganizationUnits = async () => {
   return response.data;
 };
 
-const getOrganizationUnitsByOrg = async (organizationId?: string) => {
-  if (!organizationId) return [];
+interface GetOrganizationUnitsByOrgParams {
+  organizationId?: string;
+  type?: "department" | "branch";
+  search?: string;
+  page?: number;
+  limit?: number;
+}
 
-  const { data, error } = await supabase
+const getOrganizationUnitsByOrg = async ({
+  organizationId,
+  type,
+  search,
+  page = 1,
+  limit = 10,
+}: GetOrganizationUnitsByOrgParams) => {
+  if (!organizationId) {
+    return { data: [], total: 0, page, limit };
+  }
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
     .from("organization_units")
-    .select("id, name, type, organization_id")
-    .eq("organization_id", organizationId);
+    .select("id, name, type, organization_id", { count: "exact" })
+    .eq("organization_id", organizationId)
+    .order("name", { ascending: true })
+    .range(from, to);
 
+  if (type) {
+    query = query.eq("type", type);
+  }
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  const { data, error, count } = await query;
   if (error) throw new Error(error.message);
 
-  return data || [];
+  return {
+    data: (data || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      type: item.type,
+    })),
+    total: count || 0,
+    page,
+    limit,
+  };
 };
 
 export async function getAllOrganizationUnitsWithDetails() {

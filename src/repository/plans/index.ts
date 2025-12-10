@@ -137,6 +137,7 @@ const getPlanStatusCounts = async ({ organizationId, search }: Pick<GetPlansPara
     total: Number(stats.total) || 0,
     approved: Number(stats.approved) || 0,
     pending: Number(stats.pending) || 0,
+    pending_survey: Number(stats.pending_survey) || 0,
     rejected: Number(stats.rejected) || 0,
   };
 };

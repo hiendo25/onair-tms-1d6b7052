@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { planSchema, PlanFormSchema, Survey } from "@/modules/plans/plan-form.schema";
+import { planSchema, PlanFormSchema, PlanFormValues, Survey } from "@/modules/plans/plan-form.schema";
 import {
   PLAN_STEPS,
   PlanStepId,
@@ -42,7 +42,7 @@ export default function PlanForm({
     [initialData],
   );
 
-  const methods = useForm<PlanFormSchema>({
+  const methods = useForm<PlanFormValues, undefined, PlanFormSchema>({
     resolver: zodResolver(planSchema),
     defaultValues,
   });

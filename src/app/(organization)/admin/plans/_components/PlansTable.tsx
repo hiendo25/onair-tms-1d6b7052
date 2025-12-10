@@ -51,7 +51,7 @@ export default function PlansTable() {
     limit: rowsPerPage,
   });
   const plans = data?.data || [];
-  const planStats = data?.stats || { total: 0, approved: 0, pending: 0, rejected: 0 };
+  const planStats = data?.stats || { total: 0, approved: 0, pending: 0, pending_survey: 0, rejected: 0 };
 
   const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
@@ -232,12 +232,16 @@ export default function PlansTable() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "repeat(auto-fit, minmax(180px, 1fr))", sm: "repeat(4, minmax(0, 1fr))" },
+            gridTemplateColumns: {
+              xs: "repeat(auto-fit, minmax(180px, 1fr))",
+              lg: "repeat(5, minmax(0, 1fr))",
+            },
             gap: 1.5,
             mb: 2,
           }}
         >
           <StatCard label="Tổng kế hoạch" value={planStats.total} helper="Danh sách hiện có" />
+          <StatCard label="Chờ khảo sát" value={planStats.pending_survey} helper="Đang thu thập khảo sát" tone="warning" />
           <StatCard label="Đang chờ duyệt" value={planStats.pending} helper="Chờ quyết định" tone="warning" />
           <StatCard label="Đã duyệt" value={planStats.approved} helper="Hoàn tất phê duyệt" tone="success" />
           <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />

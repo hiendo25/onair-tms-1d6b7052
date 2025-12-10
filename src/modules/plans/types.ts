@@ -70,6 +70,7 @@ export interface PlanListStats {
   total: number;
   approved: number;
   pending: number;
+  pending_survey: number;
   rejected: number;
 }
 
