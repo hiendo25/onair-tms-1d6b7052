@@ -51,7 +51,7 @@ jobs:
             git push dev $GITHUB_BRANCH -f
             exit
           EOF
-
+    
   notify-slack:
     needs: build
     runs-on: ubuntu-latest
@@ -75,16 +75,19 @@ jobs:
             STATUS_TEXT="FAILED"
           else
             STATUS_ICON="⚠️"
-            STATUS_TEXT="$(echo "$JOB_STATUS" | tr '[:lower:]' '[:upper:]')" # ví dụ: cancelled
+            STATUS_TEXT=$(echo "$JOB_STATUS" | tr '[:lower:]' '[:upper:]')
           fi
 
-          TEXT="$STATUS_ICON CI/CD $STATUS_TEXT
-Repo: $REPO
-Branch: $BRANCH
-Actor: $ACTOR
-Workflow: $WORKFLOW
-Run: $RUN_URL"
+          TEXT=$(printf "%s\n%s\n%s\n%s\n%s\n%s" \
+            "$STATUS_ICON CI/CD $STATUS_TEXT" \
+            "Repo: $REPO" \
+            "Branch: $BRANCH" \
+            "Actor: $ACTOR" \
+            "Workflow: $WORKFLOW" \
+            "Run: $RUN_URL")
 
           payload=$(printf '%s' "$TEXT" | jq -Rs '{text:.}')
 
-          curl -X POST -H --data-urlencode "$payload" \ "$SLACK_WEBHOOK_URL"
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$payload" \
+            "$SLACK_WEBHOOK_URL"
