@@ -63,9 +63,12 @@ export const usePlanStepFlow = ({
     async (stepId: PlanStepId) => {
       const isValid = await validatePlanStep(stepId, trigger);
       const hasStep = completedSteps.includes(stepId);
+      const isLastStep = stepId === PLAN_STEPS[PLAN_STEPS.length - 1]?.id;
+      const shouldMarkComplete = isValid && !isLastStep; // Không tự đánh dấu hoàn thành cho bước cuối khi chưa submit
+
       let nextCompletedSteps = completedSteps;
 
-      if (isValid && !hasStep) {
+      if (shouldMarkComplete && !hasStep) {
         nextCompletedSteps = [...completedSteps, stepId];
       } else if (!isValid && hasStep) {
         nextCompletedSteps = completedSteps.filter((id) => id !== stepId);

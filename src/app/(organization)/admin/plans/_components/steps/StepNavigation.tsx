@@ -130,7 +130,7 @@ export default function StepNavigation({
                         step.id
                       )}
                     </Box>
-                    {index < steps.length - 1 && (
+                    {/* {index < steps.length - 1 && (
                       <Box
                         sx={{
                           width: 2,
@@ -139,7 +139,7 @@ export default function StepNavigation({
                           borderRadius: 1,
                         }}
                       />
-                    )}
+                    )} */}
                   </Box>
 
                   <Box sx={{ flex: 1, minWidth: 0 }}>

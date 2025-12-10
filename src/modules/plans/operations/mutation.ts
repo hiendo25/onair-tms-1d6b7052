@@ -19,7 +19,17 @@ export const useCreatePlanMutation = () => {
 
   return useTMutation({
     mutationKey: [CREATE_PLAN],
-    mutationFn: planService.createPlan,
+    mutationFn: ({
+      form,
+      organizationId,
+      createdBy,
+      status,
+    }: {
+      form: any;
+      organizationId: string;
+      createdBy: string;
+      status?: PlanStatus;
+    }) => planService.createPlanWithStatus({ form, organizationId, createdBy, status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [GET_PLANS] });
     },

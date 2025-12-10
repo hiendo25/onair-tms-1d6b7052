@@ -27,6 +27,8 @@ interface PlanFormProps {
   initialData?: PlanFormSchema;
   planStatus?: PlanStatus;
   initialStep?: PlanStepId;
+  onExecutePlan?: (data: PlanFormSchema) => void | Promise<void>;
+  isExecuteLoading?: boolean;
 }
 
 export default function PlanForm({
@@ -36,6 +38,8 @@ export default function PlanForm({
   initialData,
   planStatus = "pending",
   initialStep,
+  onExecutePlan,
+  isExecuteLoading = false,
 }: PlanFormProps) {
   const defaultValues = useMemo(
     () => buildPlanFormDefaultValues(initialData),
@@ -66,6 +70,7 @@ export default function PlanForm({
   });
 
   const handleFormSubmit = methods.handleSubmit(onSubmit);
+  const handleExecutePlan = onExecutePlan ? methods.handleSubmit(onExecutePlan) : undefined;
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -75,6 +80,8 @@ export default function PlanForm({
             onContinue={goNext}
             isLoading={isLoading}
             planStatus={planStatus}
+            onExecutePlan={handleExecutePlan}
+            isExecuting={isExecuteLoading}
           />
         );
       case 2:

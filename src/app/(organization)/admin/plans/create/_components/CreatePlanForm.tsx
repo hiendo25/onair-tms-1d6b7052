@@ -14,25 +14,30 @@ export default function CreatePlanForm() {
   const { mutateAsync: createPlan, isPending } = useCreatePlanMutation();
   const userInfo = useUserOrganization((state) => state.data);
 
-  const handleSubmit = async (data: PlanFormSchema) => {
+  const createPlanAndRedirect = async (data: PlanFormSchema, successMessage: string, status?: "pending" | "pending_survey") => {
     try {
       await createPlan({
         form: data,
         organizationId: userInfo.organization.id,
         createdBy: userInfo.id,
+        status,
       });
-      enqueueSnackbar("Tạo kế hoạch thành công", { variant: "success" });
+      enqueueSnackbar(successMessage, { variant: "success" });
       router.push(PATHS.PLANS.ROOT);
-      
     } catch (error: any) {
       enqueueSnackbar(error?.message || "Tạo kế hoạch thất bại", { variant: "error" });
     }
   };
 
+  const handleSubmit = (data: PlanFormSchema) => createPlanAndRedirect(data, "Tạo kế hoạch thành công", "pending");
+  const handleExecutePlan = (data: PlanFormSchema) => createPlanAndRedirect(data, "Đã tạo kế hoạch (khảo sát)", "pending_survey");
+
   return (
     <PlanForm
       onSubmit={handleSubmit}
       isLoading={isPending}
+      onExecutePlan={handleExecutePlan}
+      isExecuteLoading={isPending}
       planStatus="pending"
     />
   );

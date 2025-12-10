@@ -11,6 +11,7 @@ import { plansRepository } from "@/repository/plans";
 import { PlanStatus } from "@/model/plan.model";
 import { createCourse } from "@/repository/courses";
 import { slugify } from "@/utils/slugify";
+import { mapPlanDetailToFormValues } from "@/modules/plans/plan-form.utils";
 interface GetPlansInput {
   organizationId: string;
   search?: string;
@@ -29,84 +30,31 @@ class PlanService {
     this.userId = userId;
   }
 
-  async create(form: PlanFormSchema) {
+  async create(form: PlanFormSchema, statusOverride?: PlanStatus) {
     const hasSurvey = !!form.info.survey;
     const surveyClosed = form.info.survey?.status === "closed";
     const canSkipPrograms = hasSurvey && !surveyClosed;
     if (!canSkipPrograms && (!form.programs || form.programs.length === 0)) {
       throw new Error("Kế hoạch cần ít nhất 1 chương trình đào tạo");
     }
-    const planPayload = {
-      name: form.info.name,
-      objective: form.info.objective || null,
-      start_date: form.info.startDate || null,
-      end_date: form.info.endDate || null,
-      budget: form.info.budget ?? null,
-      status: hasSurvey ? (surveyClosed ? "pending" as const : "pending_survey" as const) : "pending" as const,
-      organization_id: this.organizationId,
-      created_by: this.userId,
-      survey_id: form.info.survey?.id ?? null,
-    };
+
+    const nextStatus: PlanStatus =
+      statusOverride
+        ? statusOverride
+        : hasSurvey
+          ? (surveyClosed ? "pending" as const : "pending_survey" as const)
+          : "pending";
+
+    const planPayload = this.buildPlanRowPayload(form, nextStatus);
 
     const programs = this.buildProgramsPayload(form);
     const planRow = await plansRepository.insertPlan(planPayload);
 
     try {
-      await Promise.all(
-        programs.map(async (program) => {
-          const { topics = [], courses = [], ...programFields } = program;
-
-          const programRow = await plansRepository.insertProgram({
-            ...programFields,
-            plan_id: planRow.id,
-          });
-
-          const programCoursesTask =
-            courses.length > 0
-              ? plansRepository.insertProgramCourses(
-                courses.map((courseId) => ({
-                  program_id: programRow.id,
-                  course_id: courseId,
-                })),
-              )
-              : Promise.resolve();
-
-          const topicsTask = Promise.all(
-            topics.map(async (topic) => {
-              const { courses: topicCourses = [], ...topicFields } = topic;
-
-              const topicRow = await plansRepository.insertTopic({
-                ...topicFields,
-                program_id: programRow.id,
-              });
-
-              if (topicCourses.length > 0) {
-                await plansRepository.insertTopicCourses(
-                  topicCourses.map((courseId) => ({
-                    topic_id: topicRow.id,
-                    course_id: courseId,
-                  })),
-                );
-              }
-            }),
-          );
-
-          await Promise.all([programCoursesTask, topicsTask]);
-        }),
-      );
+      await this.insertProgramsWithRelations(planRow.id, programs);
 
       if (form.info.survey) {
-        await plansRepository.replacePlanSurvey(planRow.id, {
-          plan_id: planRow.id,
-          survey_id: form.info.survey.id,
-          organization_id: this.organizationId,
-          created_by: this.userId,
-          start_date: form.info.survey.startDate ?? null,
-          end_date: form.info.survey.endDate ?? null,
-          status: form.info.survey.status ?? "pending",
-          target_type: form.info.survey.targetType ?? "all",
-          target_unit_ids: form.info.survey.targetUnitIds?.length ? form.info.survey.targetUnitIds : null,
-        });
+        await plansRepository.replacePlanSurvey(planRow.id, this.buildSurveyPayload(planRow.id, form.info.survey));
       } else {
         await plansRepository.deletePlanSurveyByPlan(planRow.id);
       }
@@ -144,41 +92,61 @@ class PlanService {
   }
 
   async update(id: string, form: PlanFormSchema, status?: PlanStatus) {
+    const originalDetail = await PlanService.getPlanDetail(id);
+    const originalForm = mapPlanDetailToFormValues(originalDetail);
+
     const hasSurvey = !!form.info.survey;
     const surveyClosed = form.info.survey?.status === "closed";
     const nextStatus: PlanStatus =
-      status === "approved"
-        ? "approved"
+      status
+        ? status
         : hasSurvey
           ? surveyClosed
             ? "pending"
             : "pending_survey"
           : "pending";
 
-    const planPayload = {
-      name: form.info.name,
-      objective: form.info.objective || null,
-      start_date: form.info.startDate || null,
-      end_date: form.info.endDate || null,
-      budget: form.info.budget ?? null,
-      status: nextStatus,
-      organization_id: this.organizationId,
-      created_by: this.userId,
-      survey_id: form.info.survey?.id ?? null,
-    };
+    const planPayload = this.buildPlanRowPayload(form, nextStatus);
 
     const programs = this.buildProgramsPayload(form);
 
-    await plansRepository.updatePlanRow(id, planPayload);
-    await plansRepository.deleteProgramsByPlan(id);
+    try {
+      await plansRepository.updatePlanRow(id, planPayload);
+      await plansRepository.deleteProgramsByPlan(id);
 
+      await this.insertProgramsWithRelations(id, programs);
+
+      if (form.info.survey) {
+        await plansRepository.replacePlanSurvey(id, this.buildSurveyPayload(id, form.info.survey));
+      } else {
+        await plansRepository.deletePlanSurveyByPlan(id);
+      }
+    } catch (error) {
+      // Attempt best-effort rollback to original state
+      await plansRepository.deleteProgramsByPlan(id);
+      const originalPrograms = this.buildProgramsPayload(originalForm);
+      await this.insertProgramsWithRelations(id, originalPrograms);
+
+      const originalPlanPayload = this.buildPlanRowPayload(originalForm, originalDetail.status);
+      await plansRepository.updatePlanRow(id, originalPlanPayload);
+
+      if (originalForm.info.survey) {
+        await plansRepository.replacePlanSurvey(id, this.buildSurveyPayload(id, originalForm.info.survey));
+      } else {
+        await plansRepository.deletePlanSurveyByPlan(id);
+      }
+      throw error;
+    }
+  }
+
+  private async insertProgramsWithRelations(planId: string, programs: ReturnType<PlanService["buildProgramsPayload"]>) {
     await Promise.all(
       programs.map(async (program) => {
         const { topics = [], courses = [], ...programFields } = program;
 
         const programRow = await plansRepository.insertProgram({
           ...programFields,
-          plan_id: id,
+          plan_id: planId,
         });
 
         const programCoursesPromise =
@@ -214,22 +182,6 @@ class PlanService {
         await Promise.all([programCoursesPromise, topicsPromise]);
       }),
     );
-
-    if (form.info.survey) {
-      await plansRepository.replacePlanSurvey(id, {
-        plan_id: id,
-        survey_id: form.info.survey.id,
-        organization_id: this.organizationId,
-        created_by: this.userId,
-        start_date: form.info.survey.startDate ?? null,
-        end_date: form.info.survey.endDate ?? null,
-        status: form.info.survey.status ?? "pending",
-        target_type: form.info.survey.targetType ?? "all",
-        target_unit_ids: form.info.survey.targetUnitIds?.length ? form.info.survey.targetUnitIds : null,
-      });
-    } else {
-      await plansRepository.deletePlanSurveyByPlan(id);
-    }
   }
 
   private buildProgramsPayload(form: PlanFormSchema) {
@@ -248,6 +200,34 @@ class PlanService {
           courses: topic.courses?.map(course => course.id).filter(Boolean) || [],
         })) || [],
     }));
+  }
+
+  private buildPlanRowPayload(form: PlanFormSchema, status: PlanStatus) {
+    return {
+      name: form.info.name,
+      objective: form.info.objective || null,
+      start_date: form.info.startDate || null,
+      end_date: form.info.endDate || null,
+      budget: form.info.budget ?? null,
+      status,
+      organization_id: this.organizationId,
+      created_by: this.userId,
+      survey_id: form.info.survey?.id ?? null,
+    };
+  }
+
+  private buildSurveyPayload(planId: string, survey: NonNullable<PlanFormSchema["info"]["survey"]>) {
+    return {
+      plan_id: planId,
+      survey_id: survey.id,
+      organization_id: this.organizationId,
+      created_by: this.userId,
+      start_date: survey.startDate ?? null,
+      end_date: survey.endDate ?? null,
+      status: survey.status ?? "pending",
+      target_type: survey.targetType ?? "all",
+      target_unit_ids: survey.targetUnitIds?.length ? survey.targetUnitIds : null,
+    };
   }
   private static mapPlanList(rows: Awaited<ReturnType<typeof plansRepository.getPlans>>["data"]): PlanListItem[] {
     return rows.map(row => {
@@ -382,6 +362,10 @@ export const planService = {
   deletePlan: PlanService.deletePlan,
   createPlan: (payload: { form: PlanFormSchema; organizationId: string; createdBy: string }) =>
     new PlanService(payload.organizationId, payload.createdBy).create(payload.form),
+  createPlanWithStatus: (
+    payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },
+  ) =>
+    new PlanService(payload.organizationId, payload.createdBy).create(payload.form, payload.status),
   createDraftCourse: (
     payload: { title: string; description?: string | null; organizationId: string; createdBy: string },
   ) =>

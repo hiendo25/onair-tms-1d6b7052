@@ -21,6 +21,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { PATHS } from "@/constants/path.contstants";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import useDebounce from "@/hooks/useDebounce";
 import PageContainer from "@/shared/ui/PageContainer";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import { useGetPlansQuery } from "@/modules/plans/operations/query";
@@ -43,10 +44,11 @@ export default function PlansTable() {
   const [searchInput, setSearchInput] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedPlanId, setSelectedPlanId] = React.useState<string | null>(null);
+  const debouncedSearch = useDebounce(searchInput, 400);
 
   const { data, isLoading } = useGetPlansQuery({
     organizationId,
-    search: searchInput,
+    search: debouncedSearch,
     page,
     limit: rowsPerPage,
   });
@@ -205,7 +207,10 @@ export default function PlansTable() {
           <TextField
             placeholder="Tìm kiếm"
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setPage(1);
+            }}
             size="small"
             sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
             slotProps={{

@@ -22,12 +22,8 @@ import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 import { PlanStatus } from "@/model/plan.model";
 import { Survey } from "@/modules/plans/plan-form.schema";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { useCreatePlanMutation, useUpdatePlanMutation } from "@/modules/plans/operations/mutation";
 import { useSnackbar } from "notistack";
 import { validatePlanStep } from "@/modules/plans/plan-step.utils";
-import { PATHS } from "@/constants/path.contstants";
-import { useRouter } from "next/navigation";
 import { PlanSurveySection } from "./PlanSurveySection";
 import { isSurveyLocked } from "../../../helper";
 
@@ -35,112 +31,49 @@ interface StepPlanInfoProps {
   onContinue: () => void;
   isLoading?: boolean;
   planStatus?: PlanStatus;
-  mode?: "create" | "edit";
-  planId?: string;
+  onExecutePlan?: (event?: any) => void | Promise<void>;
+  isExecuting?: boolean;
 }
 
 export default function StepPlanInfo({
   onContinue,
   isLoading = false,
   planStatus,
-  mode = "create",
-  planId,
+  onExecutePlan,
+  isExecuting = false,
 }: StepPlanInfoProps) {
-  const { control, getValues, trigger } = usePlanFormContext();
+  const { control, trigger } = usePlanFormContext();
   const planStartDate = useWatch({ control, name: "info.startDate" });
   const surveyValue = useWatch({ control, name: "info.survey" }) as Survey | undefined;
-  const userInfo = useUserOrganization((state) => state.data);
   const { enqueueSnackbar } = useSnackbar();
-  const router = useRouter();
-  const { mutateAsync: createPlan, isPending: isCreatingPlan } = useCreatePlanMutation();
-  const { mutateAsync: updatePlan, isPending: isUpdatingPlan } = useUpdatePlanMutation();
   const surveyLocked = isSurveyLocked(planStatus, surveyValue);
-  const isPendingSurveyPlan = planStatus === "pending_survey";
-  const isSavingPlan = isCreatingPlan || isUpdatingPlan;
 
   const handleExecutePlan = useCallback(async () => {
-    const survey = getValues("info.survey") as Survey | undefined;
-    if (!survey) {
-      enqueueSnackbar("Vui lòng chọn và lưu khảo sát trước khi thực hiện kế hoạch.", { variant: "warning" });
+    if (!onExecutePlan) return;
+
+    if (!surveyValue) {
+      enqueueSnackbar("Vui lòng chọn khảo sát trước khi thực hiện kế hoạch.", { variant: "warning" });
       return;
     }
-    if (survey.status === "closed") {
+
+    if (surveyValue.status === "closed") {
       enqueueSnackbar("Khảo sát đã hoàn thành, không thể thực hiện kế hoạch mới.", { variant: "warning" });
       return;
     }
 
     const isValidInfo = await validatePlanStep(1, trigger);
+
     if (!isValidInfo) {
       enqueueSnackbar("Vui lòng hoàn thành thông tin kế hoạch trước khi thực hiện.", { variant: "warning" });
       return;
     }
 
-    if (!userInfo?.organization?.id || !userInfo?.id) {
-      enqueueSnackbar("Không thể thực hiện kế hoạch do thiếu thông tin tổ chức hoặc người dùng.", { variant: "error" });
-      return;
-    }
-
-    const formValues = getValues();
-    const payload = {
-      ...formValues,
-      info: {
-        ...formValues.info,
-        survey,
-      },
-      programs: formValues.programs ?? [],
-    };
-
-    try {
-      if (mode === "create") {
-        await createPlan({
-          form: payload,
-          organizationId: userInfo.organization.id,
-          createdBy: userInfo.id,
-        });
-        enqueueSnackbar("Đã tạo kế hoạch với trạng thái chờ khảo sát.", { variant: "success" });
-        router.push(PATHS.PLANS.ROOT);
-        return;
-      }
-
-      if (mode === "edit" && !planId) {
-        enqueueSnackbar("Thiếu mã kế hoạch để cập nhật.", { variant: "error" });
-        return;
-      }
-
-      if (mode === "edit" && planId && !isPendingSurveyPlan) {
-        enqueueSnackbar("Chỉ có thể cập nhật khảo sát khi kế hoạch đang chờ khảo sát.", { variant: "warning" });
-        return;
-      }
-
-      if (mode === "edit" && planId && isPendingSurveyPlan) {
-        await updatePlan({
-          id: planId,
-          form: payload,
-          organizationId: userInfo.organization.id,
-          createdBy: userInfo.id,
-          status: planStatus,
-        });
-        enqueueSnackbar("Đã cập nhật khảo sát cho kế hoạch.", { variant: "success" });
-        router.push(PATHS.PLANS.ROOT);
-      }
-    } catch (error: any) {
-      const fallbackMessage = mode === "create"
-        ? "Không thể tạo kế hoạch chờ khảo sát"
-        : "Không thể cập nhật khảo sát";
-      enqueueSnackbar(error?.message || fallbackMessage, { variant: "error" });
-    }
+    await onExecutePlan();
   }, [
-    createPlan,
     enqueueSnackbar,
-    getValues,
-    isPendingSurveyPlan,
-    mode,
-    planId,
-    planStatus,
-    router,
+    onExecutePlan,
+    surveyValue,
     trigger,
-    updatePlan,
-    userInfo,
   ]);
 
   return (
@@ -227,15 +160,17 @@ export default function StepPlanInfo({
           )}
 
           <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1, gap: 1.5, flexWrap: "wrap" }}>
-            <Button
-              variant="outlined"
-              onClick={handleExecutePlan}
-              disabled={isSavingPlan}
-              startIcon={<PlayCircleOutlineIcon fontSize="small" />}
-              sx={{ px: 3.5, py: 1 }}
-            >
-              Thực hiện kế hoạch
-            </Button>
+            {onExecutePlan && (
+              <Button
+                variant="outlined"
+                onClick={handleExecutePlan}
+                disabled={isExecuting}
+                startIcon={<PlayCircleOutlineIcon fontSize="small" />}
+                sx={{ px: 3.5, py: 1 }}
+              >
+                Thực hiện kế hoạch
+              </Button>
+            )}
             <Button
               variant="contained"
               onClick={onContinue}

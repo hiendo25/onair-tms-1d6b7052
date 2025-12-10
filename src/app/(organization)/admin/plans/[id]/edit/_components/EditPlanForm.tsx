@@ -13,6 +13,7 @@ import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PlanStepId } from "@/modules/plans/plan-step.utils";
 import { PATHS } from "@/constants/path.contstants";
+import { PlanStatus } from "@/model/plan.model";
 
 interface EditPlanFormProps {
   planId: string;
@@ -40,18 +41,40 @@ export default function EditPlanForm({ planId }: EditPlanFormProps) {
   );
 
   const handleSubmit = async (data: PlanFormSchema) => {
+    const targetStatus: PlanStatus = planDetail?.status === "approved" ? "approved" : "pending";
     try {
       await updatePlan({
         id: planId,
         form: data,
         organizationId: user.organization.id,
         createdBy: user.id,
-        status: planDetail?.status,
+        status: targetStatus,
       });
       show("Cập nhật kế hoạch đào tạo thành công!", { severity: "success" });
       router.push(PATHS.PLANS.ROOT);
     } catch (error: any) {
       show(error?.message || "Cập nhật kế hoạch thất bại", { severity: "error" });
+    }
+  };
+
+  const handleExecutePlan = async (data: PlanFormSchema) => {
+    if (planDetail?.status !== "pending_survey") {
+      show("Chỉ cập nhật khảo sát khi kế hoạch đang chờ khảo sát.", { severity: "warning" });
+      return;
+    }
+
+    try {
+      await updatePlan({
+        id: planId,
+        form: data,
+        organizationId: user.organization.id,
+        createdBy: user.id,
+        status: "pending_survey",
+      });
+      show("Đã cập nhật khảo sát cho kế hoạch.", { severity: "success" });
+      router.push(PATHS.PLANS.ROOT);
+    } catch (error: any) {
+      show(error?.message || "Không thể cập nhật khảo sát", { severity: "error" });
     }
   };
 
@@ -91,7 +114,8 @@ export default function EditPlanForm({ planId }: EditPlanFormProps) {
         isLoading={isPending}
         planStatus={planDetail?.status}
         initialStep={initialStepFromQuery}
-        planId={planId}
+        onExecutePlan={handleExecutePlan}
+        isExecuteLoading={isPending}
       />
     </PageContainer>
   );

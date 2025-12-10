@@ -81,7 +81,19 @@ export const planSchema = zod.object({
       .optional(),
     survey: surveySchema.optional().nullable(),
   }),
-  programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
+  programs: zod.array(trainingProgramSchema).default([]),
+}).superRefine((values, ctx) => {
+  const hasSurvey = !!values.info.survey;
+  const surveyClosed = values.info.survey?.status === "closed";
+  const hasPrograms = Array.isArray(values.programs) && values.programs.length > 0;
+
+  if (!hasPrograms && (!hasSurvey || surveyClosed)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["programs"],
+      message: "Cần có ít nhất 1 chương trình đào tạo.",
+    });
+  }
 });
 
 export type Survey = zod.infer<typeof surveySchema>;
