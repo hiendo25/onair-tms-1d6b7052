@@ -49,10 +49,10 @@ export default function StepApproval({
   }[tone] ?? { bg: "grey.50", border: "divider", icon: "text.primary" };
 
   const statusDescription = isApproved
-    ? "Kế hoạch đã được phê duyệt, hãy lưu lại nếu bạn vừa cập nhật thông tin hoặc môn học."
+    ? "Kế hoạch đã được phê duyệt, hãy lưu lại nếu bạn vừa cập nhật thông tin hoặc môn học (nếu có)."
     : isRejected
-      ? "Kế hoạch đang bị từ chối, hãy cập nhật thông tin và môn học rồi gửi duyệt lại."
-      : "Kiểm tra thông tin và môn học đã gán trước khi gửi duyệt kế hoạch.";
+      ? "Kế hoạch đang bị từ chối, hãy cập nhật thông tin hoặc bổ sung môn học (nếu cần) rồi gửi duyệt lại."
+      : "Kiểm tra thông tin, và rà soát môn học đã gán nếu có, trước khi gửi duyệt kế hoạch.";
 
   const statusHeadline = isApproved
     ? `Kế hoạch "${planName || "Chưa đặt tên"}" đã được duyệt`
@@ -72,7 +72,7 @@ export default function StepApproval({
               Gửi duyệt đề xuất
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Chốt lại thông tin và môn học trước khi gửi cấp phê duyệt.
+              Chốt lại thông tin, bổ sung môn học nếu cần rồi gửi cấp phê duyệt.
             </Typography>
           </Box>
           <Chip label={getStatusLabel(status)} color={tone} variant="outlined" size="small" />

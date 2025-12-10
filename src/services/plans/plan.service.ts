@@ -9,6 +9,8 @@ import {
 } from "@/modules/plans/types";
 import { plansRepository } from "@/repository/plans";
 import { PlanStatus } from "@/model/plan.model";
+import { createCourse } from "@/repository/courses";
+import { slugify } from "@/utils/slugify";
 interface GetPlansInput {
   organizationId: string;
   search?: string;
@@ -116,6 +118,29 @@ class PlanService {
       await plansRepository.deletePlan(planRow.id);
       throw error;
     }
+  }
+
+  async createDraftCourse(title: string, description?: string | null) {
+    const trimmedTitle = title?.trim();
+    if (!trimmedTitle) {
+      throw new Error("Tên môn học không được bỏ trống");
+    }
+
+    const slug = `${slugify(trimmedTitle) || "course"}-${Date.now()}`;
+    const { data, error } = await createCourse({
+      title: trimmedTitle,
+      description: description?.trim() || null,
+      organization_id: this.organizationId,
+      created_by: this.userId,
+      status: "draft",
+      slug,
+    });
+
+    if (error || !data) {
+      throw new Error(error?.message || "Không thể tạo môn học nháp");
+    }
+
+    return data;
   }
 
   async update(id: string, form: PlanFormSchema, status?: PlanStatus) {
@@ -357,6 +382,10 @@ export const planService = {
   deletePlan: PlanService.deletePlan,
   createPlan: (payload: { form: PlanFormSchema; organizationId: string; createdBy: string }) =>
     new PlanService(payload.organizationId, payload.createdBy).create(payload.form),
+  createDraftCourse: (
+    payload: { title: string; description?: string | null; organizationId: string; createdBy: string },
+  ) =>
+    new PlanService(payload.organizationId, payload.createdBy).createDraftCourse(payload.title, payload.description),
   updatePlan: (
     id: string,
     payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },

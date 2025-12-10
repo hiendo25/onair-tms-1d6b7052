@@ -24,8 +24,8 @@ import dayjs from "dayjs";
 import { Controller, UseFormReturn, useWatch } from "react-hook-form";
 import CustomDateTimePickerField from "@/shared/ui/form/CustomDateTimePickerField";
 import { PlanSurveyTarget, Survey, SurveyFormValues } from "@/modules/plans/plan-form.schema";
-import { UnitOption } from "./survey-options";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { UnitOption } from "./PlanSurveySection";
 
 interface SurveyConfigDialogProps {
   open: boolean;

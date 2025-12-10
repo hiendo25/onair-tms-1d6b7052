@@ -1,5 +1,5 @@
 
-import { Chip, ChipProps, IconButton, Menu, MenuItem } from "@mui/material";
+import { Chip, ChipProps, IconButton, Menu, MenuItem, Stack } from "@mui/material";
 import { GridColDef, GridMoreVertIcon } from "@mui/x-data-grid";
 import { PATHS } from "@/constants/path.contstants";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
@@ -54,16 +54,28 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
         return STATUS_COLOR_MAP[status] ?? "default";
       };
 
+      const needsContentTag = row.status === "draft";
+
       return (
-        <Chip
-          label={labelChip}
-          color={getChipColor(row.status)}
-          sx={(theme) => ({
-            color: theme.palette.primary["dark"],
-            borderRadius: "0.375rem",
-            borderColor: "transparent",
-          })}
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            label={labelChip}
+            color={getChipColor(row.status)}
+            sx={(theme) => ({
+              color: theme.palette.primary["dark"],
+              borderRadius: "0.375rem",
+              borderColor: "transparent",
+            })}
+          />
+          {needsContentTag && (
+            <Chip
+              label="Cần hoàn thiện tài liệu"
+              color="warning"
+              variant="outlined"
+              size="small"
+            />
+          )}
+        </Stack>
       );
     },
   },

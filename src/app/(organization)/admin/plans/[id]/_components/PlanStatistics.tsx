@@ -86,12 +86,12 @@ export default function PlanStatistics({
       value: topicsCount ?? 0,
       color: iconStyle.topics.bg,
     },
-    {
-      icon: MenuBookIcon,
-      label: "Môn học",
-      value: coursesCount ?? 0,
-      color: iconStyle.courses.bg,
-    },
+    // {
+    //   icon: MenuBookIcon,
+    //   label: "Môn học",
+    //   value: coursesCount ?? 0,
+    //   color: iconStyle.courses.bg,
+    // },
     {
       icon: PeopleIcon,
       label: "Giảng viên",
@@ -119,7 +119,7 @@ export default function PlanStatistics({
           sx={{
             display: "grid",
             gridTemplateColumns: { xs: "repeat(auto-fit, minmax(180px, 1fr))" },
-            gap:2,
+            gap: 2,
           }}
         >
           {stats.map((stat) => (

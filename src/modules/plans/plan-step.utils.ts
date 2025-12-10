@@ -33,8 +33,8 @@ export const PLAN_STEPS: PlanStepConfig[] = [
   },
   {
     id: 4,
-    label: "Gán môn học",
-    description: "Gán môn học cho chương trình và chủ đề",
+    label: "Gán môn học (tùy chọn)",
+    description: "Gán môn học cho chương trình và chủ đề khi cần",
     validateKeys: [],
   },
   {
@@ -72,6 +72,7 @@ export const getPlanInitialCompletedSteps = (
 
   const completedSteps: PlanStepId[] = [];
   const hasPrograms = data.programs && data.programs.length > 0;
+  const isFinalizedStatus = planStatus === "approved" || planStatus === "pending" || planStatus === "rejected";
   const hasAssignedCourses = hasPrograms
     ? data.programs.some((program) => {
       const programHasCourses = !!program.courses?.length;
@@ -87,12 +88,12 @@ export const getPlanInitialCompletedSteps = (
   if (hasPrograms) {
     completedSteps.push(2, 3);
 
-    if (hasAssignedCourses || planStatus === "approved") {
+    if (hasAssignedCourses || isFinalizedStatus) {
       completedSteps.push(4);
     }
   }
 
-  if (planStatus === "approved") {
+  if (isFinalizedStatus) {
     completedSteps.push(5);
   }
 

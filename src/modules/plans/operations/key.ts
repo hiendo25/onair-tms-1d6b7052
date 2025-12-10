@@ -5,3 +5,4 @@ export const DELETE_PLAN = "plans/delete";
 export const GET_COURSES_OPTIONS = "plans/course-options";
 export const UPDATE_PLAN = "plans/update";
 export const GET_PLANNING_SURVEYS = "plans/planning-surveys";
+export const CREATE_PLAN_DRAFT_COURSE = "plans/create-draft-course";

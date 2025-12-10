@@ -95,9 +95,9 @@ export default function PlanInfoCards({
       ? "Đã duyệt, có thể triển khai"
       : status === "pending_survey"
         ? "Cần hoàn thành khảo sát trước khi xây dựng các bước tiếp theo"
-      : status === "rejected"
-        ? "Cần chỉnh sửa và gửi duyệt lại"
-        : "Chờ duyệt sau khi gán môn học";
+        : status === "rejected"
+          ? "Cần chỉnh sửa và gửi duyệt lại"
+          : "Đang chờ duyệt kế hoạch";
 
   const infoTiles: InfoTileProps[] = [
     {
