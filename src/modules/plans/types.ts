@@ -1,4 +1,5 @@
 import { PlanStatus } from "@/model/plan.model";
+import { PlanSurveyStatus, PlanSurveyTarget } from "./plan-form.schema";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export interface PlanListItem {
@@ -35,6 +36,18 @@ export interface PlanProgramDetail {
   topics: PlanTopicDetail[];
 }
 
+export interface PlanSurveyDetail {
+  id: string;
+  surveyId: string;
+  surveyTitle: string;
+  surveyCreatedAt?: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: PlanSurveyStatus;
+  targetType: PlanSurveyTarget;
+  targetUnitIds: string[] | null;
+}
+
 export interface PlanDetailDto {
   id: string;
   name: string;
@@ -50,6 +63,7 @@ export interface PlanDetailDto {
   coursesCount: number;
   instructorsCount: number;
   programs: PlanProgramDetail[];
+  survey?: PlanSurveyDetail | null;
 }
 
 export interface PlanListStats {

@@ -1,9 +1,47 @@
 import * as zod from "zod";
+import { Enums } from "@/types/supabase.types";
+
+export type PlanSurveyTarget = Enums<"plan_survey_target">;
+export type PlanSurveyStatus = Enums<"training_plan_survey_status">;
+const planSurveyTargets = ["all", "department", "branch"] as [PlanSurveyTarget, ...PlanSurveyTarget[]];
+const planSurveyStatuses = ["pending", "collecting", "closed"] as [PlanSurveyStatus, ...PlanSurveyStatus[]];
 
 // Survey schema for optional survey selection
 export const surveySchema = zod.object({
   id: zod.string(),
   title: zod.string(),
+  planSurveyId: zod.string().optional(),
+  startDate: zod.string().optional().nullable(),
+  endDate: zod.string().optional().nullable(),
+  targetType: zod.enum(planSurveyTargets).default("all"),
+  targetUnitIds: zod.array(zod.string()).optional(),
+  status: zod.enum(planSurveyStatuses).optional(),
+  createdAt: zod.string().optional().nullable(),
+}).superRefine((values, ctx) => {
+  if (!values.startDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["startDate"],
+      message: "Vui lòng chọn ngày bắt đầu khảo sát",
+    });
+  }
+
+  if (!values.endDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "Vui lòng chọn ngày kết thúc khảo sát",
+    });
+  }
+
+  const requiresUnits = values.targetType === "branch" || values.targetType === "department";
+  if (requiresUnits && (!values.targetUnitIds || values.targetUnitIds.length === 0)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["targetUnitIds"],
+      message: "Vui lòng chọn đơn vị áp dụng",
+    });
+  }
 });
 
 // Course schema for assigned courses
@@ -41,7 +79,7 @@ export const planSchema = zod.object({
       .transform((val) => (val === 0 ? null : val))
       .nullable()
       .optional(),
-    survey: surveySchema.optional(),
+    survey: surveySchema.optional().nullable(),
   }),
   programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
 });

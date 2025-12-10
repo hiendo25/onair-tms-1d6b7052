@@ -28,17 +28,19 @@ class PlanService {
   }
 
   async create(form: PlanFormSchema) {
-    if (!form.programs || form.programs.length === 0) {
+    const hasSurvey = !!form.info.survey;
+    const surveyClosed = form.info.survey?.status === "closed";
+    const canSkipPrograms = hasSurvey && !surveyClosed;
+    if (!canSkipPrograms && (!form.programs || form.programs.length === 0)) {
       throw new Error("Kế hoạch cần ít nhất 1 chương trình đào tạo");
     }
-
     const planPayload = {
       name: form.info.name,
       objective: form.info.objective || null,
       start_date: form.info.startDate || null,
       end_date: form.info.endDate || null,
       budget: form.info.budget ?? null,
-      status: "pending" as const,
+      status: hasSurvey ? (surveyClosed ? "pending" as const : "pending_survey" as const) : "pending" as const,
       organization_id: this.organizationId,
       created_by: this.userId,
       survey_id: form.info.survey?.id ?? null,
@@ -91,21 +93,50 @@ class PlanService {
         }),
       );
 
+      if (form.info.survey) {
+        await plansRepository.replacePlanSurvey(planRow.id, {
+          plan_id: planRow.id,
+          survey_id: form.info.survey.id,
+          organization_id: this.organizationId,
+          created_by: this.userId,
+          start_date: form.info.survey.startDate ?? null,
+          end_date: form.info.survey.endDate ?? null,
+          status: form.info.survey.status ?? "pending",
+          target_type: form.info.survey.targetType ?? "all",
+          target_unit_ids: form.info.survey.targetUnitIds?.length ? form.info.survey.targetUnitIds : null,
+        });
+      } else {
+        await plansRepository.deletePlanSurveyByPlan(planRow.id);
+      }
+
       return planRow;
     } catch (error) {
+      await plansRepository.deleteProgramsByPlan(planRow.id);
+      await plansRepository.deletePlanSurveyByPlan(planRow.id);
       await plansRepository.deletePlan(planRow.id);
       throw error;
     }
   }
 
   async update(id: string, form: PlanFormSchema, status?: PlanStatus) {
+    const hasSurvey = !!form.info.survey;
+    const surveyClosed = form.info.survey?.status === "closed";
+    const nextStatus: PlanStatus =
+      status === "approved"
+        ? "approved"
+        : hasSurvey
+          ? surveyClosed
+            ? "pending"
+            : "pending_survey"
+          : "pending";
+
     const planPayload = {
       name: form.info.name,
       objective: form.info.objective || null,
       start_date: form.info.startDate || null,
       end_date: form.info.endDate || null,
       budget: form.info.budget ?? null,
-      status: status === "approved" ? "approved" as const : "pending" as const,
+      status: nextStatus,
       organization_id: this.organizationId,
       created_by: this.userId,
       survey_id: form.info.survey?.id ?? null,
@@ -158,6 +189,22 @@ class PlanService {
         await Promise.all([programCoursesPromise, topicsPromise]);
       }),
     );
+
+    if (form.info.survey) {
+      await plansRepository.replacePlanSurvey(id, {
+        plan_id: id,
+        survey_id: form.info.survey.id,
+        organization_id: this.organizationId,
+        created_by: this.userId,
+        start_date: form.info.survey.startDate ?? null,
+        end_date: form.info.survey.endDate ?? null,
+        status: form.info.survey.status ?? "pending",
+        target_type: form.info.survey.targetType ?? "all",
+        target_unit_ids: form.info.survey.targetUnitIds?.length ? form.info.survey.targetUnitIds : null,
+      });
+    } else {
+      await plansRepository.deletePlanSurveyByPlan(id);
+    }
   }
 
   private buildProgramsPayload(form: PlanFormSchema) {
@@ -233,6 +280,20 @@ class PlanService {
       }) || [];
 
     const approverName = (row as any)?.approved_by_employee?.profile?.full_name;
+    const planSurvey = (row as any)?.training_plan_surveys?.[0];
+    const surveyDetail = planSurvey
+      ? {
+        id: planSurvey.id,
+        surveyId: planSurvey.survey_id,
+        surveyTitle: planSurvey?.survey?.title || "",
+        surveyCreatedAt: planSurvey?.survey?.created_at ?? null,
+        startDate: planSurvey.start_date,
+        endDate: planSurvey.end_date,
+        status: planSurvey.status,
+        targetType: planSurvey.target_type,
+        targetUnitIds: planSurvey.target_unit_ids,
+      }
+      : null;
 
     return {
       id: row.id,
@@ -249,6 +310,7 @@ class PlanService {
       coursesCount: counts?.coursesCount ?? 0,
       instructorsCount: counts?.instructorsCount ?? 0,
       programs,
+      survey: surveyDetail,
     };
   }
 

@@ -52,6 +52,7 @@ const getPlanDetail = async (id: string) => {
       end_date,
       budget,
       status,
+      survey_id,
       approved_by,
       created_at,
       approved_by_employee:employees!training_plans_approved_by_fkey (
@@ -90,11 +91,31 @@ const getPlanDetail = async (id: string) => {
           )
         )
       )
+      ,
+      training_plan_surveys (
+        id,
+        created_at,
+        survey_id,
+        start_date,
+        end_date,
+        status,
+        target_type,
+        target_unit_ids,
+        survey:surveys (
+          id,
+          title,
+          created_at
+        )
+      )
     `,
     )
     .order("order_index", {
       ascending: true,
       referencedTable: "training_plan_programs",
+    })
+    .order("created_at", {
+      ascending: false,
+      referencedTable: "training_plan_surveys",
     })
     .eq("id", id)
     .single();
@@ -140,6 +161,7 @@ type CreateProgramInsert = TablesInsert<"training_plan_programs">;
 type CreateTopicInsert = TablesInsert<"training_plan_topics">;
 type CreateTopicCourseInsert = TablesInsert<"training_plan_topic_courses">;
 type CreateProgramCourseInsert = TablesInsert<"training_plan_program_courses">;
+type CreatePlanSurveyInsert = TablesInsert<"training_plan_surveys">;
 
 const getCourseOptions = async (organizationId: string) => {
   const { data, error } = await supabase
@@ -198,6 +220,23 @@ const insertTopicCourses = async (payload: CreateTopicCourseInsert[]) => {
   if (error) throw new Error(error.message);
 };
 
+const insertPlanSurvey = async (payload: CreatePlanSurveyInsert) => {
+  const { data, error } = await supabase.from("training_plan_surveys").insert(payload).select("*").single();
+  if (error || !data) throw new Error(error?.message || "Không thể lưu khảo sát");
+  return data;
+};
+
+const deletePlanSurveyByPlan = async (planId: string) => {
+  const { error } = await supabase.from("training_plan_surveys").delete().eq("plan_id", planId);
+  if (error) throw new Error(error.message);
+};
+
+const replacePlanSurvey = async (planId: string, payload?: CreatePlanSurveyInsert) => {
+  await deletePlanSurveyByPlan(planId);
+  if (!payload) return;
+  return insertPlanSurvey(payload);
+};
+
 export const plansRepository = {
   getPlans,
   getPlanDetail,
@@ -212,4 +251,7 @@ export const plansRepository = {
   insertProgramCourses,
   insertTopic,
   insertTopicCourses,
+  insertPlanSurvey,
+  deletePlanSurveyByPlan,
+  replacePlanSurvey,
 };

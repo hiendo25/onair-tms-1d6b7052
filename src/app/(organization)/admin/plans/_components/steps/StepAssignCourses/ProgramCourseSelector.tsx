@@ -2,7 +2,7 @@
 
 import { Autocomplete, Box, Checkbox, TextField, Typography } from "@mui/material";
 import { Course } from "@/modules/plans/plan-form.schema";
-import { renderCourseTags } from "./courseTags";
+import { renderCourseTags } from "../../../helper";
 
 interface ProgramCourseSelectorProps {
   courses: Course[];
@@ -36,7 +36,7 @@ export default function ProgramCourseSelector({
         value={courses || []}
         onChange={(_e, newValue) => onChange(newValue)}
         isOptionEqualToValue={(option, value) => option.id === value.id}
-        renderTags={(value) => renderCourseTags(value as Course[])}
+        renderValue={(value) => renderCourseTags(value as Course[])}
         size="small"
         renderOption={(props, option, { selected }) => {
           const { key, ...rest } = props;

@@ -23,7 +23,14 @@ export const buildPlanFormDefaultValues = (initialData?: PlanFormSchema): PlanFo
       startDate: initialData.info?.startDate ?? null,
       endDate: initialData.info?.endDate ?? null,
       budget: initialData.info?.budget,
-      survey: initialData.info?.survey,
+      survey: initialData.info?.survey
+        ? {
+          ...initialData.info.survey,
+          targetType: initialData.info.survey.targetType ?? "all",
+          targetUnitIds: initialData.info.survey.targetUnitIds ?? [],
+          createdAt: initialData.info.survey.createdAt ?? null,
+        }
+        : undefined,
     },
     programs: (initialData.programs ?? []).map((program) => ({
       name: program.name ?? "",
@@ -47,6 +54,19 @@ export const mapPlanDetailToFormValues = (planDetail: PlanDetailDto): PlanFormSc
     startDate: planDetail.startDate,
     endDate: planDetail.endDate,
     budget: planDetail.budget ?? undefined,
+    survey: planDetail.survey
+      ? {
+        id: planDetail.survey.surveyId,
+        title: planDetail.survey.surveyTitle,
+        planSurveyId: planDetail.survey.id,
+        createdAt: planDetail.survey.surveyCreatedAt ?? null,
+        startDate: planDetail.survey.startDate,
+        endDate: planDetail.survey.endDate,
+        status: planDetail.survey.status,
+        targetType: planDetail.survey.targetType ?? "all",
+        targetUnitIds: planDetail.survey.targetUnitIds ?? [],
+      }
+      : undefined,
   },
   programs:
     planDetail.programs?.map((program) => {
@@ -70,4 +90,3 @@ export const mapPlanDetailToFormValues = (planDetail: PlanDetailDto): PlanFormSc
       };
     }) || [],
 });
-

@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { planSchema, PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { planSchema, PlanFormSchema, Survey } from "@/modules/plans/plan-form.schema";
 import {
   PLAN_STEPS,
   PlanStepId,
@@ -13,7 +13,7 @@ import {
 import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
 import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
 import { PlanStatus } from "@/model/plan.model";
-import StepPlanInfo from "./Steps/StepPlanInfo";
+import StepPlanInfo from "./Steps/StepPlanInfos";
 import StepTrainingProgram from "./Steps/StepTrainingProgram";
 import StepTrainingTopics from "./Steps/StepTrainingTopics";
 import StepAssignCourses from "./Steps/StepAssignCourses";
@@ -47,6 +47,8 @@ export default function PlanForm({
     defaultValues,
   });
 
+  const survey = methods.watch("info.survey") as Survey | undefined;
+
   const {
     currentStep,
     completedSteps,
@@ -60,6 +62,7 @@ export default function PlanForm({
     trigger: methods.trigger,
     planStatus,
     initialStep,
+    survey,
   });
 
   const handleFormSubmit = methods.handleSubmit(onSubmit);
@@ -71,6 +74,7 @@ export default function PlanForm({
           <StepPlanInfo
             onContinue={goNext}
             isLoading={isLoading}
+            planStatus={planStatus}
           />
         );
       case 2:

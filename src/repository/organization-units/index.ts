@@ -7,6 +7,19 @@ const getOrganizationUnits = async () => {
   return response.data;
 };
 
+const getOrganizationUnitsByOrg = async (organizationId?: string) => {
+  if (!organizationId) return [];
+
+  const { data, error } = await supabase
+    .from("organization_units")
+    .select("id, name, type, organization_id")
+    .eq("organization_id", organizationId);
+
+  if (error) throw new Error(error.message);
+
+  return data || [];
+};
+
 export async function getAllOrganizationUnitsWithDetails() {
   const supabase = await createSVClient();
 
@@ -53,3 +66,4 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
   }
 };
 export { getOrganizationUnits };
+export { getOrganizationUnitsByOrg };

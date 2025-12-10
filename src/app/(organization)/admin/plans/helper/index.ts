@@ -16,6 +16,8 @@ export const getStatusLabel = (status: PlanStatus): string => {
   switch (status) {
     case "pending":
       return "Chờ duyệt";
+    case "pending_survey":
+      return "Chờ khảo sát";
     case "approved":
       return "Đã duyệt";
     case "rejected":
@@ -28,6 +30,7 @@ export const getStatusLabel = (status: PlanStatus): string => {
 export const getStatusColor = (status: PlanStatus): "warning" | "success" | "error" => {
   switch (status) {
     case "pending":
+    case "pending_survey":
       return "warning";
     case "approved":
       return "success";
@@ -57,3 +60,5 @@ export const renderCourseTags = (value: Course[]) => {
   if (value.length === 2) return `${value[0]?.title || ""}, ${value[1]?.title || ""}`;
   return `${value[0]?.title || ""}, ${value[1]?.title || ""} +${value.length - 2}`;
 };
+
+export * from "./survey";

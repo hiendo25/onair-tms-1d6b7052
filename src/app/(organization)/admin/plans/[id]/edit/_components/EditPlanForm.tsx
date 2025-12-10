@@ -91,6 +91,7 @@ export default function EditPlanForm({ planId }: EditPlanFormProps) {
         isLoading={isPending}
         planStatus={planDetail?.status}
         initialStep={initialStepFromQuery}
+        planId={planId}
       />
     </PageContainer>
   );

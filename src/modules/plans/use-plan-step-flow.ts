@@ -11,7 +11,7 @@ import {
   validatePlanStep,
   PLAN_STEPS,
 } from "./plan-step.utils";
-import { PlanFormSchema } from "./plan-form.schema";
+import { PlanFormSchema, Survey } from "./plan-form.schema";
 import { PlanStatus } from "@/model/plan.model";
 
 interface UsePlanStepFlowProps {
@@ -20,6 +20,7 @@ interface UsePlanStepFlowProps {
   trigger: UseFormTrigger<PlanFormSchema>;
   planStatus?: PlanStatus;
   initialStep?: PlanStepId;
+  survey?: Survey | undefined;
 }
 
 export const usePlanStepFlow = ({
@@ -28,7 +29,9 @@ export const usePlanStepFlow = ({
   trigger,
   planStatus,
   initialStep,
+  survey,
 }: UsePlanStepFlowProps) => {
+  const surveyLocked = !!survey && (planStatus === "pending_survey" || survey.status !== "closed");
   const initialCompletedSteps = useMemo(
     () => getPlanInitialCompletedSteps(mode, initialData, planStatus),
     [initialData, mode, planStatus],
@@ -36,12 +39,13 @@ export const usePlanStepFlow = ({
 
   const initialStepId = useMemo(() => {
     const defaultStep = PLAN_STEPS?.[0]?.id as PlanStepId;
+    if (surveyLocked) return defaultStep;
     if (!initialStep) return defaultStep;
 
     return canAccessPlanStep(initialStep, initialCompletedSteps)
       ? initialStep
       : defaultStep;
-  }, [initialCompletedSteps, initialStep]);
+  }, [initialCompletedSteps, initialStep, surveyLocked]);
 
   const [currentStep, setCurrentStep] = useState<PlanStepId>(initialStepId);
   const [completedSteps, setCompletedSteps] = useState<PlanStepId[]>(initialCompletedSteps);
@@ -77,6 +81,8 @@ export const usePlanStepFlow = ({
   );
 
   const goNext = useCallback(async () => {
+    if (surveyLocked) return false;
+
     const { isValid } = await updateCompletion(currentStep);
     if (!isValid) return false;
 
@@ -85,16 +91,17 @@ export const usePlanStepFlow = ({
 
     setCurrentStep(next);
     return true;
-  }, [currentStep, updateCompletion]);
+  }, [currentStep, surveyLocked, updateCompletion]);
 
   const goBack = useCallback(() => {
+    if (surveyLocked) return;
     const previousStep = getPrevPlanStepId(currentStep);
     if (previousStep) setCurrentStep(previousStep);
-  }, [currentStep]);
+  }, [currentStep, surveyLocked]);
 
   const goToStep = useCallback(
     async (stepId: PlanStepId) => {
-      if (!canAccessPlanStep(stepId, completedSteps)) return false;
+      if ((surveyLocked && stepId !== 1) || !canAccessPlanStep(stepId, completedSteps)) return false;
 
       if (stepId !== currentStep) {
         await updateCompletion(currentStep);
@@ -108,12 +115,15 @@ export const usePlanStepFlow = ({
 
       return true;
     },
-    [completedSteps, currentStep, planStatus, updateCompletion],
+    [completedSteps, currentStep, planStatus, surveyLocked, updateCompletion],
   );
 
   const isStepAccessible = useCallback(
-    (stepId: PlanStepId) => canAccessPlanStep(stepId, completedSteps),
-    [completedSteps],
+    (stepId: PlanStepId) => {
+      if (surveyLocked && stepId !== 1) return false;
+      return canAccessPlanStep(stepId, completedSteps);
+    },
+    [completedSteps, surveyLocked],
   );
 
   return {

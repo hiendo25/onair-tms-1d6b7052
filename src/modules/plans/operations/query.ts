@@ -1,7 +1,8 @@
 import { useTQuery } from "@/lib/queryClient";
 import { PlanDetailDto, PlanListResponse, PlanTopicCourse } from "@/modules/plans/types";
-import { GET_PLAN_DETAIL, GET_PLANS, GET_COURSES_OPTIONS } from "./key";
+import { GET_PLAN_DETAIL, GET_PLANS, GET_COURSES_OPTIONS, GET_PLANNING_SURVEYS } from "./key";
 import { planService } from "@/services/plans/plan.service";
+import { surveyService, PlanningSurveyOption } from "@/services/surveys/survey.service";
 
 interface UsePlanListParams {
   organizationId?: string;
@@ -31,5 +32,14 @@ export const useGetPlanCourseOptionsQuery = (organizationId?: string) => {
     queryKey: [GET_COURSES_OPTIONS, organizationId],
     queryFn: () => planService.getCourseOptions(organizationId!),
     enabled: !!organizationId,
+  });
+};
+
+export const useGetPlanningSurveysQuery = (organizationId?: string, search?: string) => {
+  return useTQuery<PlanningSurveyOption[]>({
+    queryKey: [GET_PLANNING_SURVEYS, organizationId, search],
+    queryFn: () => surveyService.getPlanningSurveys({ organizationId: organizationId!, search }),
+    enabled: !!organizationId,
+    staleTime: 30_000,
   });
 };

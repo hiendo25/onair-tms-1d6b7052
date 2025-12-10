@@ -9,6 +9,15 @@ export const useGetOrganizationUnitsQuery = () => {
   });
 };
 
+export const useGetOrganizationUnitsByOrgQuery = (organizationId?: string, enabled = true) => {
+  return useTQuery({
+    queryKey: ["organization-units-by-org", organizationId],
+    queryFn: () => organizationUnitsRepository.getOrganizationUnitsByOrg(organizationId),
+    enabled: enabled && !!organizationId,
+    staleTime: 30_000,
+  });
+};
+
 export const useGetOrganizationUnitDepartmentOrBranchQuery = (options?: {
   queryParams: { type: "department" | "branch" };
   enabled?: boolean;
