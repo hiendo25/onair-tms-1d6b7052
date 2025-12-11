@@ -4,18 +4,18 @@ import * as React from "react";
 import {
   Box,
   Card,
-  Typography,
+  Stack,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Stack,
+  Typography,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import StarIcon from "@mui/icons-material/Star";
-import { Survey, QuestionAnswer } from "@/types/survey.types";
+import { QuestionAnswer, Survey } from "@/types/survey.types";
 
 interface SurveyStatisticsProps {
   survey: Survey;

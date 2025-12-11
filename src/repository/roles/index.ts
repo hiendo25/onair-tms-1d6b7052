@@ -168,7 +168,7 @@ const generateCode = async (title: string) => {
 };
 
 export const createRole = async (data: RoleParams & { permissions: PermissionParams[] }) => {
-  let code = await generateCode(data.title);
+  const code = await generateCode(data.title);
 
   if (!code) return Promise.reject("Failed to generate role code");
   if (!data.organization_id) return Promise.reject("Organization ID is required");

@@ -8,28 +8,28 @@ import {
   Box,
   Button,
   Card,
-  Typography,
-  Stack,
-  FormControl,
-  FormLabel,
-  OutlinedInput,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Checkbox,
-  FormGroup,
-  Select,
-  MenuItem,
-  Rating,
-  FormHelperText,
   CircularProgress,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  FormLabel,
+  MenuItem,
+  OutlinedInput,
+  Radio,
+  RadioGroup,
+  Rating,
+  Select,
+  Stack,
+  Typography,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import StarIcon from "@mui/icons-material/Star";
 import PublicPageContainer from "@/shared/ui/PageContainer/PublicPageContainer";
 import { MOCK_SURVEYS } from "@/constants/survey.constants";
-import { Survey, Question, QuestionAnswer } from "@/types/survey.types";
-import { surveySubmissionSchema, SurveySubmissionSchema } from "@/modules/surveys/survey-submission.schema";
+import { Question, QuestionAnswer, Survey } from "@/types/survey.types";
+import { SurveySubmissionSchema, surveySubmissionSchema } from "@/modules/surveys/survey-submission.schema";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { PATHS } from "@/constants/path.contstants";
 

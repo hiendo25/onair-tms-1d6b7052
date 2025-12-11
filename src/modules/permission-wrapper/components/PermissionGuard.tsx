@@ -1,9 +1,10 @@
 "use client";
-import { memo, PropsWithChildren, useEffect, useState } from "react";
-import { PATHS_WITH_PERMISSIONS } from "@/constants/path-with-permissions";
+import React, { memo, PropsWithChildren, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { usePermissions } from "../store/permission-context";
+
 import { PATHS } from "@/constants/path.contstants";
+import { PATHS_WITH_PERMISSIONS } from "@/constants/path-with-permissions";
+import { usePermissions } from "../store/permission-context";
 
 type PermissionGuardProps = PropsWithChildren;
 const PermissionGuard: React.FC<PermissionGuardProps> = memo(({ children }) => {

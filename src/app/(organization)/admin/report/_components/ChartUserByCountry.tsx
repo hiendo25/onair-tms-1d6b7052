@@ -12,10 +12,10 @@ import LinearProgress, {
   linearProgressClasses,
 } from "@mui/material/LinearProgress";
 import {
-  IndiaFlag,
-  UsaFlag,
   BrazilFlag,
   GlobeFlag,
+  IndiaFlag,
+  UsaFlag,
 } from "@/shared/assets/flags";
 
 const data = [

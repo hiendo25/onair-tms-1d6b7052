@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Typography, CircularProgress, Alert, Grid } from "@mui/material";
+import { Alert, Box, CircularProgress, Grid, Typography } from "@mui/material";
 import { useGetResourcesByIds } from "../operations/query";
 import { ResourceCard } from "./ResourceCard";
 

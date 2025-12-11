@@ -1,41 +1,78 @@
 "use client";
 
+import { useMemo } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
-import { useMemo } from "react";
-import SurveyForm from "../../../_components/SurveyForm";
-import { SurveyFormSchema } from "@/modules/surveys/survey-form.schema";
-import { MOCK_SURVEYS } from "@/constants/survey.constants";
-import { Alert, CircularProgress, Box } from "@mui/material";
+
 import { PATHS } from "@/constants/path.contstants";
+import UpsertSurveyForm, { UpsertSurveyFormProps } from "@/modules/surveys/components/UpsertSurveyForm";
+import { useUpsertSurvey } from "@/modules/surveys/hooks/useUpsertSurvey";
+import { GetSurveyByIdResponse } from "@/repository/surveys";
 
 interface EditSurveyFormProps {
-  surveyId: string;
+  data: NonNullable<GetSurveyByIdResponse["data"]>;
 }
 
-export default function EditSurveyForm({ surveyId }: EditSurveyFormProps) {
+type SurveyFormDataInitial = Exclude<UpsertSurveyFormProps["initialData"], undefined>;
+export default function EditSurveyForm({ data }: EditSurveyFormProps) {
+  const { update, isLoading } = useUpsertSurvey();
   const router = useRouter();
+  console.log({ data });
   const { enqueueSnackbar } = useSnackbar();
+  const [isTransition, startTransition] = useTransition();
+  const initFormData: UpsertSurveyFormProps["initialData"] = useMemo(() => {
+    const questions = data["surveys_questions"].reduce<SurveyFormDataInitial["questions"]>((allQuestions, question) => {
+      const questionItem: SurveyFormDataInitial["questions"][number] = {
+        id: question.id,
+        is_required: question.is_required,
+        label: question.name || "",
+        type: question.question_type,
+        options: [],
+      };
 
-  const survey = useMemo(() => {
-    return MOCK_SURVEYS.find((s) => s.id === surveyId);
-  }, [surveyId]);
+      type OptionItemType = SurveyFormDataInitial["questions"][number]["options"][number];
+      const options = question.surveys_questions_options.reduce<OptionItemType[]>((acc, option): OptionItemType[] => {
+        return [
+          ...acc,
+          {
+            id: option.id,
+            is_other: option.is_other || false,
+            content: option.option_text || "",
+          },
+        ];
+      }, []);
 
-  const handleSubmit = (data: SurveyFormSchema) => {
-    console.log("Updating survey:", surveyId, data);
+      return [
+        ...allQuestions,
+        {
+          ...questionItem,
+          options: options,
+        },
+      ];
+    }, []);
+    return {
+      name: data.title,
+      description: data.description || "",
+      slug: data.slug,
+      questions: questions,
+    };
+  }, [data]);
 
-    enqueueSnackbar("Cập nhật khảo sát thành công", { variant: "success" });
-    router.push(PATHS.SURVEYS.ROOT);
-  };
-
-  if (!survey) {
-    return (
-      <Alert severity="error">
-        Không tìm thấy khảo sát
-      </Alert>
+  const handleUpdateSurvey: UpsertSurveyFormProps["onSubmit"] = (formData) => {
+    update(
+      { surveyId: data.id, formData },
+      {
+        onSuccess(data, variables) {
+          startTransition(() => {
+            enqueueSnackbar("Cập nhật khảo sát thành công", { variant: "success" });
+            router.push(PATHS.SURVEYS.LIST);
+          });
+        },
+      },
     );
-  }
-
-  return <SurveyForm initialData={survey} onSubmit={handleSubmit} />;
+  };
+  return (
+    <UpsertSurveyForm initialData={initFormData} onSubmit={handleUpdateSurvey} isLoading={isLoading || isTransition} />
+  );
 }
-

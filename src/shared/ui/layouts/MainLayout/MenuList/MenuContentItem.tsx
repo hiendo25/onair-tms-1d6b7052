@@ -1,5 +1,5 @@
 import * as React from "react";
-import { type Theme, alpha, styled, SxProps } from "@mui/material/styles";
+import { SxProps, type Theme, alpha, styled } from "@mui/material/styles";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";

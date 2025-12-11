@@ -1,4 +1,4 @@
-import { Toolbar, Stack, Box, Typography, Avatar } from "@mui/material";
+import { Avatar, Box, Stack, Toolbar, Typography } from "@mui/material";
 import Link from "next/link";
 import PageContentHeader from "./PageContentHeader";
 import PageHeaderBreadcrumbs from "./PageHeaderBreadCrumb";

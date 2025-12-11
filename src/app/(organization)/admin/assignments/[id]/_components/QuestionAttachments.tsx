@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Box, Typography, Stack, Link } from "@mui/material";
+import { Box, Link, Stack, Typography } from "@mui/material";
 
 interface QuestionAttachmentsProps {
   attachments: string[];

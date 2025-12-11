@@ -14,8 +14,8 @@ import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
 import { columnsCourse, CourseRowItem } from "./column-course";
 import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
-import Can from "@/modules/permission-wraper/components/Can";
-import { usePermissions } from "@/modules/permission-wraper";
+import Can from "@/modules/permission-wrapper/components/Can";
+import { usePermissions } from "@/modules/permission-wrapper";
 
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 

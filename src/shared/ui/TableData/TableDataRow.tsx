@@ -1,5 +1,6 @@
-import { EventHandler, MouseEvent, MouseEventHandler, useCallback, useEffect, useRef } from "react";
+import React, { EventHandler, MouseEvent, MouseEventHandler, useCallback, useEffect, useRef } from "react";
 import { TableCell, TableCellProps, TableRow } from "@mui/material";
+
 import { TableRowStyled } from "./table-row-styled";
 import { getClientInfo } from "./utils";
 
@@ -74,12 +75,12 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
       cellNode.style.background = "#fff";
     });
 
-    const nodelistRightReverse = [...nodeListRight.current].reverse();
+    const nodeListRightReverse = [...nodeListRight.current].reverse();
 
-    nodelistRightReverse.forEach((cellNode, _index) => {
+    nodeListRightReverse.forEach((cellNode, _index) => {
       let rightPosition = 0;
       for (let i = 0; i < _index; i++) {
-        const el = nodelistRightReverse[i];
+        const el = nodeListRightReverse[i];
         if (el) {
           const { width } = getClientInfo(el);
           rightPosition += width;

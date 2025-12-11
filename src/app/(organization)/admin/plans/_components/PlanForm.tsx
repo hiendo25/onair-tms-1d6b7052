@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { planSchema, PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { PlanFormSchema, planSchema } from "@/modules/plans/plan-form.schema";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import StepNavigation, { Step } from "./StepNavigation";

@@ -1,5 +1,5 @@
 import { paperClasses } from "@mui/material/Paper";
-import { Theme, alpha, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { listItemIconClasses } from "@mui/material/ListItemIcon";
@@ -11,7 +11,7 @@ import { tablePaginationClasses } from "@mui/material/TablePagination";
 import { grey } from "../../theme-color";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const dataGridCustomizations: Components<Theme> = {
   MuiDataGrid: {
     styleOverrides: {

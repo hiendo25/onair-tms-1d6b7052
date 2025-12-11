@@ -35,10 +35,20 @@ export const PATHS_WITH_PERMISSIONS = {
   ],
   [PATHS.CLASSROOMS.LIST_CLASSROOM]: [
     {
-      $or: "course:read",
+      $or: "classroom:read",
+    },
+    {
+      $or: "classroom:create",
+    },
+    {
+      $or: "classroom:update",
+    },
+    {
+      $or: "classroom:delete",
     },
   ],
   [PATHS.CLASSROOMS.CREATE_CLASSROOM]: ["classroom:create"],
+  [PATHS.CLASSROOMS.EDIT_CLASSROOM()]: ["classroom:update"],
   [PATHS.COURSES.CREATE]: ["course:create"],
   [PATHS.COURSES.ROOT]: [
     {

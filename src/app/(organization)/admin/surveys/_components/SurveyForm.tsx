@@ -2,36 +2,36 @@
 
 import React, { useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
   FormControl,
+  FormControlLabel,
+  FormHelperText,
   FormLabel,
   IconButton,
   MenuItem,
   Select,
   Stack,
-  Typography,
-  Checkbox,
-  FormControlLabel,
   TextField,
-  FormHelperText,
+  Typography,
 } from "@mui/material";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { v4 as uuidv4 } from "uuid";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import { surveySchema, SurveyFormSchema } from "@/modules/surveys/survey-form.schema";
+import { SurveyFormSchema, surveySchema } from "@/modules/surveys/survey-form.schema";
 import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constants";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import SortableQuestionItem from "./SortableQuestionItem";
-import { Survey, QuestionType } from "@/types/survey.types";
+import { QuestionType, Survey } from "@/types/survey.types";
 
 interface QuestionOptionsSectionProps {
   control: any;
@@ -44,7 +44,12 @@ function QuestionOptionsSection({ control, questionIndex }: QuestionOptionsSecti
     name: `questions.${questionIndex}.type`,
   }) as QuestionType;
 
-  const { fields: optionFields, append: appendOption, remove: removeOption, replace } = useFieldArray({
+  const {
+    fields: optionFields,
+    append: appendOption,
+    remove: removeOption,
+    replace,
+  } = useFieldArray({
     control,
     name: `questions.${questionIndex}.options`,
   });
@@ -108,7 +113,7 @@ function QuestionOptionsSection({ control, questionIndex }: QuestionOptionsSecti
         >
           Thêm tùy chọn
         </Button>
-        <Controller
+        {/* <Controller
           control={control}
           name={`questions.${questionIndex}.options`}
           render={({ fieldState: { error } }) =>
@@ -116,7 +121,7 @@ function QuestionOptionsSection({ control, questionIndex }: QuestionOptionsSecti
               <FormHelperText error>{error.message}</FormHelperText>
             ) : null
           }
-        />
+        /> */}
       </Stack>
     </Box>
   );
@@ -143,7 +148,11 @@ export default function SurveyForm({ initialData, onSubmit, isLoading = false }:
         questions: [{ id: uuidv4(), label: "", type: "text", is_required: false }],
       };
 
-  const { control, handleSubmit, formState: { errors } } = useForm<SurveyFormSchema>({
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SurveyFormSchema>({
     resolver: zodResolver(surveySchema),
     defaultValues,
   });
@@ -214,12 +223,7 @@ export default function SurveyForm({ initialData, onSubmit, isLoading = false }:
             <Stack spacing={2}>
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <Typography variant="h6">Câu hỏi</Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<PlusIcon />}
-                  onClick={handleAddQuestion}
-                  size="small"
-                >
+                <Button variant="outlined" startIcon={<PlusIcon />} onClick={handleAddQuestion} size="small">
                   Thêm câu hỏi
                 </Button>
               </Box>
@@ -253,9 +257,7 @@ export default function SurveyForm({ initialData, onSubmit, isLoading = false }:
                                       error={!!error}
                                       sx={{ background: "white" }}
                                     />
-                                    {error && (
-                                      <FormHelperText error>{error.message}</FormHelperText>
-                                    )}
+                                    {error && <FormHelperText error>{error.message}</FormHelperText>}
                                   </FormControl>
                                 )}
                               />
@@ -297,12 +299,7 @@ export default function SurveyForm({ initialData, onSubmit, isLoading = false }:
                             name={`questions.${index}.is_required`}
                             render={({ field: checkboxField }) => (
                               <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    checked={checkboxField.value}
-                                    onChange={checkboxField.onChange}
-                                  />
-                                }
+                                control={<Checkbox checked={checkboxField.value} onChange={checkboxField.onChange} />}
                                 label="Bắt buộc"
                               />
                             )}
@@ -329,4 +326,3 @@ export default function SurveyForm({ initialData, onSubmit, isLoading = false }:
     </form>
   );
 }
-

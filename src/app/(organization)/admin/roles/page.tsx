@@ -11,9 +11,9 @@ import Link from "next/link";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useDeleteRole } from "@/modules/roles/operations/mutation";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
-import Can from "@/modules/permission-wraper/components/Can";
+import Can from "@/modules/permission-wrapper/components/Can";
 import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
-import { usePermissions } from "@/modules/permission-wraper";
+import { usePermissions } from "@/modules/permission-wrapper";
 import DialogDeleteRoleConfirmation, {
   DialogDeleteRoleConfirmationRef,
 } from "./components/DialogDeleteRoleConfirmation";

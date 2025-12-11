@@ -1,7 +1,7 @@
 import React, {
+  PropsWithChildren,
   forwardRef,
   memo,
-  PropsWithChildren,
   useCallback,
   useEffect,
   useImperativeHandle,

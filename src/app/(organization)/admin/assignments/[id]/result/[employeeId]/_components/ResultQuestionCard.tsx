@@ -2,8 +2,8 @@
 
 import React from "react";
 import {
-  Card,
   Box,
+  Card,
   Typography,
 } from "@mui/material";
 import { QuestionGradeDetail } from "@/types/dto/assignments";

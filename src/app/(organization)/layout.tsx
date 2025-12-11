@@ -1,8 +1,10 @@
+import React from "react";
+
 import Authorized from "@/modules/auth-wrapper/Authorized";
-import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
 import LayoutWraper from "@/modules/layout-wraper/LayoutWraper";
-import { LibraryProvider } from "@/modules/library/store/libraryProvider";
 import { LibraryDialog } from "@/modules/library/components/LibraryDialog";
+import { LibraryProvider } from "@/modules/library/store/libraryProvider";
+import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
 
 export default async function RootLayout({
   children,

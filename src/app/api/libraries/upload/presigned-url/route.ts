@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client, AWS_S3_PUBLIC_BUCKET } from "@/lib/aws-s3";
+import { AWS_S3_PUBLIC_BUCKET, s3Client } from "@/lib/aws-s3";
 import { createSVClient } from "@/services";
 import { v4 as uuidv4 } from "uuid";
 

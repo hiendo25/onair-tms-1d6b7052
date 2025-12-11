@@ -1,7 +1,7 @@
 "use client";
 import React, { createContext, use } from "react";
-import { Permissions, ResourcesActions } from "@/constants/permission.constant";
 
+import { Permissions, ResourcesActions } from "@/constants/permission.constant";
 import { PermissionsCheck } from "@/constants/permission.constant";
 
 export type PermissionContextApi = {

@@ -1,11 +1,11 @@
 import * as React from "react";
-import { Paper, Stack, Typography, Box } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 
 import PureClient from "@/shared/ui/PureClient";
 import ApexChart from "./ApexChart";
 import { panelSx } from "./mock/panelSx";
 import TimeRangeSwitcher from "./TimeRangeSwitcher";
-import { TimeRange, completionRateByRange } from "./mock/dashboardData";
+import { completionRateByRange, TimeRange } from "./mock/dashboardData";
 
 type LegendItemProps = {
   color: string;

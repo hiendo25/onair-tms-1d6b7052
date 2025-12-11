@@ -1,5 +1,5 @@
 import { supabase } from "@/services";
-import type { ResourceRow, LessonContentLike } from "@/modules/learning-screen/types";
+import type { LessonContentLike, ResourceRow } from "@/modules/learning-screen/types";
 
 const FALLBACK_BUCKET = "uploads";
 const DEFAULT_SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour

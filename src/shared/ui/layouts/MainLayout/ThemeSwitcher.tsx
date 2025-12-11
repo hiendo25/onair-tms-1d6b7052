@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useTheme, useColorScheme } from "@mui/material/styles";
+import { useColorScheme, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Card, Typography, Stack, Box, Avatar, Divider } from "@mui/material";
+import { Avatar, Box, Card, Divider, Stack, Typography } from "@mui/material";
 
 interface AssignmentSubmissionHeaderProps {
   // Student information
