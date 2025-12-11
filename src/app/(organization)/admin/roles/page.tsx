@@ -1,19 +1,21 @@
 "use client";
 
+import React, { useMemo, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, IconButton } from "@mui/material";
-import { useRouter } from "next/navigation";
-import React, { useMemo, useRef, useState } from "react";
-import { PATHS } from "@/constants/path.contstants";
-import { useAdminGetRoleList } from "@/modules/roles/operations/query";
-import PageContainer from "@/shared/ui/PageContainer";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.contstants";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
-import { useDeleteRole } from "@/modules/roles/operations/mutation";
-import TableData, { TableDataProps } from "@/shared/ui/TableData";
-import Can from "@/modules/permission-wrapper/components/Can";
-import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
 import { usePermissions } from "@/modules/permission-wrapper";
+import Can from "@/modules/permission-wrapper/components/Can";
+import { useDeleteRole } from "@/modules/roles/operations/mutation";
+import { useAdminGetRoleList } from "@/modules/roles/operations/query";
+import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
+import PageContainer from "@/shared/ui/PageContainer";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+
 import DialogDeleteRoleConfirmation, {
   DialogDeleteRoleConfirmationRef,
 } from "./components/DialogDeleteRoleConfirmation";
@@ -94,7 +96,7 @@ const RolesPage = () => {
 
   type ColumnType = Exclude<Exclude<typeof data, undefined>["items"], undefined>[number];
 
-  const mergeColumns: TableDataProps<ColumnType>["columns"] = useMemo(() => {
+  const mergeColumns = useMemo((): TableDataProps<ColumnType>["columns"] => {
     return canCreateOrDeleteRole
       ? [
           ...rolesColumns,

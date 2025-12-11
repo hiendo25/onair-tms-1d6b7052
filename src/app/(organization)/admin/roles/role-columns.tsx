@@ -1,7 +1,8 @@
-import { TableDataProps } from "@/shared/ui/TableData";
-import { GetRoleListResponse } from "@/repository/roles";
 import { Chip } from "@mui/material";
-export type RoleColumnType = GetRoleListResponse["items"][number];
+
+import { AdminGetRoleListResponse } from "@/repository/roles";
+import { TableDataProps } from "@/shared/ui/TableData";
+export type RoleColumnType = AdminGetRoleListResponse["items"][number];
 
 export const rolesColumns: TableDataProps<RoleColumnType>["columns"] = [
   {
