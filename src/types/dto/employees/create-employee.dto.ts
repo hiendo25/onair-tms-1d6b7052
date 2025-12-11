@@ -13,5 +13,5 @@ export class CreateEmployeeDto {
   position_id?: string;
   employee_type!: Database["public"]["Enums"]["employee_type"];
   start_date!: string;
+  role_id!: string;
 }
-

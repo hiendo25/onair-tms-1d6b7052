@@ -14,5 +14,5 @@ export class UpdateEmployeeDto {
   position_id?: string;
   employee_type!: Database["public"]["Enums"]["employee_type"];
   start_date?: string | null;
+  role_id?: string;
 }
-

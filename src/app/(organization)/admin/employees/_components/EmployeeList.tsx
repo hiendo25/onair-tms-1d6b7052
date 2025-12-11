@@ -91,13 +91,17 @@ export default function EmployeeList() {
     [organizationUnits],
   );
 
-  const { data: employeesResult, isLoading, error } = useGetEmployeesQuery({
+  const {
+    data: employeesResult,
+    isLoading,
+    error,
+  } = useGetEmployeesQuery({
     page,
     limit: rowsPerPage,
     search: debouncedSearch,
     departmentId: departmentFilter,
     branchId: branchFilter,
-    status: statusFilter !== "all" ? statusFilter as Database["public"]["Enums"]["employee_status"] : undefined,
+    status: statusFilter !== "all" ? (statusFilter as Database["public"]["Enums"]["employee_status"]) : undefined,
   });
 
   const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
@@ -175,30 +179,21 @@ export default function EmployeeList() {
       handleMenuClose();
     } catch (error) {
       console.error("Error deleting employee:", error);
-      notifications.show(
-        error instanceof Error
-          ? error.message
-          : "Có lỗi xảy ra khi xóa nhân viên",
-        {
-          severity: "error",
-          autoHideDuration: 5000,
-        },
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa nhân viên", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
       handleMenuClose();
     }
   };
 
   const getDepartmentName = (employee: EmployeeDto) => {
-    const dept = employee.employments.find(
-      (emp) => emp.organization_units?.type === "department",
-    );
+    const dept = employee.employments.find((emp) => emp.organization_units?.type === "department");
     return dept?.organization_units?.name || "-";
   };
 
   const getBranchName = (employee: EmployeeDto) => {
-    const branch = employee.employments.find(
-      (emp) => emp.organization_units?.type === "branch",
-    );
+    const branch = employee.employments.find((emp) => emp.organization_units?.type === "branch");
     return branch?.organization_units?.name || "-";
   };
 
@@ -229,10 +224,7 @@ export default function EmployeeList() {
   };
 
   return (
-    <PageContainer
-      title="Danh sách nhân viên"
-      breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}
-    >
+    <PageContainer title="Danh sách nhân viên" breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}>
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
           <Stack
@@ -242,11 +234,7 @@ export default function EmployeeList() {
             alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
           >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              spacing={2}
-              sx={{ flex: 1 }}
-            >
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ flex: 1 }}>
               <TextField
                 placeholder="Tìm kiếm..."
                 size="small"
@@ -306,18 +294,10 @@ export default function EmployeeList() {
             </Stack>
 
             <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                startIcon={<FileUploadIcon />}
-                onClick={handleImportEmployees}
-              >
+              <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportEmployees}>
                 Import người dùng
               </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleCreateEmployee}
-              >
+              <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateEmployee}>
                 Tạo người dùng
               </Button>
             </Stack>
@@ -335,9 +315,7 @@ export default function EmployeeList() {
               <CircularProgress />
             </Box>
           ) : error ? (
-            <Alert severity="error">
-              Có lỗi xảy ra khi tải danh sách nhân viên
-            </Alert>
+            <Alert severity="error">Có lỗi xảy ra khi tải danh sách nhân viên</Alert>
           ) : (
             <>
               <TableContainer>
@@ -348,7 +326,7 @@ export default function EmployeeList() {
                       <TableCell>Họ và tên</TableCell>
                       <TableCell>Email</TableCell>
                       <TableCell>Chức danh</TableCell>
-                      <TableCell>Vai trò</TableCell>
+                      <TableCell>Loại người dùng</TableCell>
                       <TableCell>Chi nhánh</TableCell>
                       <TableCell>Phòng ban</TableCell>
                       <TableCell>Trạng thái</TableCell>
@@ -366,15 +344,9 @@ export default function EmployeeList() {
                       </TableRow>
                     ) : (
                       employees.map((employee) => (
-                        <TableRow
-                          key={employee.id}
-                          hover
-                          sx={{ cursor: "pointer" }}
-                        >
+                        <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
                           <TableCell>{employee.employee_code}</TableCell>
-                          <TableCell>
-                            {employee.profiles?.full_name || "-"}
-                          </TableCell>
+                          <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
                           <TableCell>{employee.profiles?.email || "-"}</TableCell>
                           <TableCell>{getPositionTitle(employee)}</TableCell>
                           <TableCell>{getEmployeeTypeLabel(employee.employee_type)}</TableCell>
@@ -389,10 +361,7 @@ export default function EmployeeList() {
                             />
                           </TableCell>
                           <TableCell align="center">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => handleMenuOpen(e, employee.id)}
-                            >
+                            <IconButton size="small" onClick={(e) => handleMenuOpen(e, employee.id)}>
                               <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </TableCell>
@@ -412,9 +381,7 @@ export default function EmployeeList() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[12, 25, 50, 100]}
                 labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} của ${count}`
-                }
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
               />
             </>
           )}
