@@ -3,18 +3,20 @@ import { PlanDetailDto, PlanListResponse, PlanTopicCourse } from "@/modules/plan
 import { GET_PLAN_DETAIL, GET_PLANS, GET_COURSES_OPTIONS, GET_PLANNING_SURVEYS } from "./key";
 import { planService } from "@/services/plans/plan.service";
 import { surveyService, PlanningSurveyListResponse } from "@/services/surveys/survey.service";
+import { PlanStatus } from "@/model/plan.model";
 
 interface UsePlanListParams {
   organizationId?: string;
   search?: string;
   page?: number;
   limit?: number;
+  status?: PlanStatus | "all";
 }
 
-export const useGetPlansQuery = ({ organizationId, search, page, limit }: UsePlanListParams) => {
+export const useGetPlansQuery = ({ organizationId, search, page, limit, status }: UsePlanListParams) => {
   return useTQuery<PlanListResponse>({
-    queryKey: [GET_PLANS, organizationId, search, page, limit],
-    queryFn: () => planService.getPlans({ organizationId: organizationId!, search, page, limit }),
+    queryKey: [GET_PLANS, organizationId, search, page, limit, status],
+    queryFn: () => planService.getPlans({ organizationId: organizationId!, search, page, limit, status }),
     enabled: !!organizationId,
   });
 };

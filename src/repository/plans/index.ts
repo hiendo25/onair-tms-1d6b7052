@@ -1,14 +1,16 @@
 import { supabase } from "@/services";
 import { TablesInsert, TablesUpdate } from "@/types/supabase.types";
+import { PlanStatus } from "@/model/plan.model";
 
 interface GetPlansParams {
   search?: string;
   organizationId: string;
   page?: number;
   limit?: number;
+  status?: PlanStatus | "all";
 }
 
-const getPlans = async ({ search, organizationId, page = 1, limit = 10 }: GetPlansParams) => {
+const getPlans = async ({ search, organizationId, page = 1, limit = 10, status }: GetPlansParams) => {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -30,6 +32,10 @@ const getPlans = async ({ search, organizationId, page = 1, limit = 10 }: GetPla
     .not("status", "in", "(deleted)")
     .order("created_at", { ascending: false })
     .range(from, to);
+
+  if (status && status !== "all") {
+    query = query.eq("status", status);
+  }
 
   if (search) {
     query = query.ilike("name", `%${search}%`);

@@ -50,7 +50,7 @@ export const usePlanStepFlow = ({
   const [currentStep, setCurrentStep] = useState<PlanStepId>(initialStepId);
   const [completedSteps, setCompletedSteps] = useState<PlanStepId[]>(initialCompletedSteps);
 
-  // Keep state in sync if initial derived values change (e.g., query param or status update).
+  // Keep state in sync if initial derived values change
   useEffect(() => {
     setCompletedSteps(initialCompletedSteps);
   }, [initialCompletedSteps]);
@@ -64,7 +64,7 @@ export const usePlanStepFlow = ({
       const isValid = await validatePlanStep(stepId, trigger);
       const hasStep = completedSteps.includes(stepId);
       const isLastStep = stepId === PLAN_STEPS[PLAN_STEPS.length - 1]?.id;
-      const shouldMarkComplete = isValid && !isLastStep; // Không tự đánh dấu hoàn thành cho bước cuối khi chưa submit
+      const shouldMarkComplete = isValid && !isLastStep;
 
       let nextCompletedSteps = completedSteps;
 

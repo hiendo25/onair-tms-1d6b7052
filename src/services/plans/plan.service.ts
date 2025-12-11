@@ -17,6 +17,7 @@ interface GetPlansInput {
   search?: string;
   page?: number;
   limit?: number;
+  status?: PlanStatus | "all";
 }
 
 class PlanService {

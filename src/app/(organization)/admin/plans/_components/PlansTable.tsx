@@ -18,6 +18,7 @@ import {
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
 import { PATHS } from "@/constants/path.contstants";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -32,6 +33,7 @@ import { formatCurrencyV2 } from "@/utils/format-number";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { getStatusColor, getStatusLabel } from "../helper";
 import StatCard from "./StatCard";
+import { EmptyBoxIcon } from "@/shared/assets/icons";
 
 export default function PlansTable() {
   const router = useRouter();
@@ -42,6 +44,7 @@ export default function PlansTable() {
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchInput, setSearchInput] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<PlanStatus | "all">("all");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedPlanId, setSelectedPlanId] = React.useState<string | null>(null);
   const debouncedSearch = useDebounce(searchInput, 400);
@@ -51,17 +54,44 @@ export default function PlansTable() {
     search: debouncedSearch,
     page,
     limit: rowsPerPage,
+    status: statusFilter,
   });
   const plans = data?.data || [];
   const planStats = data?.stats || { total: 0, approved: 0, pending: 0, pending_survey: 0, rejected: 0 };
+  const statusFilters = React.useMemo(() => [
+    { value: "all" as const, label: "Tất cả", count: planStats.total, color: "default" as const },
+    { value: "pending_survey" as const, label: "Chờ khảo sát", count: planStats.pending_survey, color: "warning" as const },
+    { value: "pending" as const, label: "Đang chờ duyệt", count: planStats.pending, color: "warning" as const },
+    { value: "approved" as const, label: "Đã duyệt", count: planStats.approved, color: "success" as const },
+    { value: "rejected" as const, label: "Từ chối", count: planStats.rejected, color: "error" as const },
+  ], [planStats]);
 
   const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
   const menuOpen = Boolean(anchorEl);
   const totalCount = data?.total || 0;
+  const isEmpty = !isLoading && plans.length === 0;
+  const activeStatusLabel = statusFilter === "all" ? "Tất cả kế hoạch" : getStatusLabel(statusFilter as PlanStatus);
+  const hasFilter = statusFilter !== "all" || !!debouncedSearch;
 
   const handleCreatePlan = () => {
     router.push(PATHS.PLANS.CREATE);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (value: PlanStatus | "all") => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setStatusFilter("all");
+    setSearchInput("");
+    setPage(1);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, planId: string) => {
@@ -220,6 +250,13 @@ export default function PlansTable() {
                     <SearchIcon />
                   </InputAdornment>
                 ),
+                endAdornment: searchInput ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={handleClearSearch}>
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : undefined,
               }
             }}
           />
@@ -232,6 +269,34 @@ export default function PlansTable() {
           >
             Tạo kế hoạch
           </Button>
+        </Stack>
+
+        <Stack
+          direction={{ xs: "column", lg: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "flex-start", lg: "center" }}
+          justifyContent="space-between"
+          sx={{ mb: 2 }}
+        >
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {statusFilters.map((filter) => {
+              const isActive = statusFilter === filter.value;
+              return (
+                <Chip
+                  key={filter.value}
+                  label={`${filter.label}${typeof filter.count === "number" ? ` (${filter.count})` : ""}`}
+                  color={isActive ? filter.color : "default"}
+                  variant={isActive ? "filled" : "outlined"}
+                  onClick={() => handleStatusFilterChange(filter.value)}
+                  sx={{
+                    borderRadius: 999,
+                    fontWeight: 600,
+                    px: 0.5,
+                  }}
+                />
+              );
+            })}
+          </Stack>
         </Stack>
 
         <Box
@@ -252,26 +317,59 @@ export default function PlansTable() {
           <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />
         </Box>
 
-        <TableData
-          rows={plans}
-          columns={columns}
-          hoverRow
-          loading={isLoading}
-          showRowCount
-          bordered={false}
-          minWidth={960}
-          pagination={{
-            page,
-            pageSize: rowsPerPage,
-            total: totalCount,
-            perPageOptions: [10, 20, 30],
-            onChangePage: (newPage) => setPage(newPage),
-            onChangePageSize: (newPageSize) => {
-              setRowsPerPage(newPageSize);
-              setPage(1);
-            },
-          }}
-        />
+        {isEmpty ? (
+          <Box
+            sx={{
+              border: "1px dashed",
+              borderColor: "divider",
+              borderRadius: 2,
+              p: { xs: 3, md: 4 },
+              textAlign: "center",
+              bgcolor: "grey.50",
+            }}
+          >
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+              <EmptyBoxIcon className="w-20 h-20" />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+              {hasFilter ? "Không có kế hoạch khớp bộ lọc" : "Chưa có kế hoạch nào"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+              {hasFilter ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm." : "Tạo kế hoạch đầu tiên để bắt đầu quản lý đào tạo."}
+            </Typography>
+            <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap>
+              {hasFilter && (
+                <Button variant="outlined" onClick={handleResetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
+              <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreatePlan}>
+                Tạo kế hoạch
+              </Button>
+            </Stack>
+          </Box>
+        ) : (
+          <TableData
+            rows={plans}
+            columns={columns}
+            hoverRow
+            loading={isLoading}
+            showRowCount
+            bordered={false}
+            minWidth={960}
+            pagination={{
+              page,
+              pageSize: rowsPerPage,
+              total: totalCount,
+              perPageOptions: [10, 20, 30],
+              onChangePage: (newPage) => setPage(newPage),
+              onChangePageSize: (newPageSize) => {
+                setRowsPerPage(newPageSize);
+                setPage(1);
+              },
+            }}
+          />
+        )}
       </Box>
 
       <Menu
@@ -290,11 +388,11 @@ export default function PlansTable() {
         <MenuItem onClick={handleViewDetail}>
           <ListItemText>Xem chi tiết</ListItemText>
         </MenuItem>
-        {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.status === "approved" && (
+        {/* {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.status === "approved" && (
           <MenuItem onClick={handleAssignCourses}>
             <ListItemText>Gán môn học</ListItemText>
           </MenuItem>
-        )}
+        )} */}
         <MenuItem onClick={handleEdit}>
           <ListItemText>Chỉnh sửa</ListItemText>
         </MenuItem>
