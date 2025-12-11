@@ -51,3 +51,43 @@ jobs:
             git push dev $GITHUB_BRANCH -f
             exit
           EOF
+    
+  notify-slack:
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Send Slack notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          JOB_STATUS: ${{ needs.build.result }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          WORKFLOW: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ "$JOB_STATUS" = "success" ]; then
+            STATUS_ICON="✅"
+            STATUS_TEXT="SUCCESS"
+          elif [ "$JOB_STATUS" = "failure" ]; then
+            STATUS_ICON="❌"
+            STATUS_TEXT="FAILED"
+          else
+            STATUS_ICON="⚠️"
+            STATUS_TEXT=$(echo "$JOB_STATUS" | tr '[:lower:]' '[:upper:]')
+          fi
+
+          TEXT=$(printf "%s\n%s\n%s\n%s\n%s\n%s" \
+            "$STATUS_ICON CI/CD $STATUS_TEXT" \
+            "Repo: $REPO" \
+            "Branch: $BRANCH" \
+            "Actor: $ACTOR" \
+            "Workflow: $WORKFLOW" \
+            "Run: $RUN_URL")
+
+          payload=$(printf '%s' "$TEXT" | jq -Rs '{text:.}')
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data "$payload" \
+            "$SLACK_WEBHOOK_URL"

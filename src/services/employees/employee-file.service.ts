@@ -47,7 +47,9 @@ function mapHeaderToFieldKey(headerName: string): string {
     "Ngày bắt đầu": "start_date",
     "Chức vụ": "position",
     "Người quản lý": "manager",
+    "Loại nhân viên": "employee_type",
     "Vai trò": "employee_type",
+    "Mã vai trò": "role_code",
   };
 
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, "_");
@@ -165,6 +167,9 @@ const EmployeeImportSchema = EmployeeFormSchema.partial({
   phone_number: true,
   birthday: true,
   start_date: true,
+  role_id: true,
+}).extend({
+  role_code: EmployeeFormSchema.shape.role_id.optional(),
 }).required({
   email: true,
   full_name: true,
@@ -254,6 +259,7 @@ function validateParsedData(data: any[]): ValidationResult {
         branch: row.branch ? String(row.branch).trim() : undefined,
         start_date: row.start_date ? String(row.start_date).trim() : undefined,
         employee_type: String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"],
+        role_code: row.role_code ? String(row.role_code).trim() : undefined,
       };
       validRecords.push(validRecord);
       if (index < 3) {
@@ -284,13 +290,15 @@ async function validateAgainstDatabase(
   invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>;
   departmentNameToIdMap: Map<string, string>;
   branchNameToIdMap: Map<string, string>;
+  roleCodeToIdMap: Map<string, string>;
 }> {
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
   const departmentNameToIdMap = new Map<string, string>();
   const branchNameToIdMap = new Map<string, string>();
+  const roleCodeToIdMap = new Map<string, string>();
 
   if (validRecords.length === 0) {
-    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap, roleCodeToIdMap };
   }
 
   try {
@@ -298,12 +306,14 @@ async function validateAgainstDatabase(
     const emails = validRecords.map(r => r.email);
     const departmentNames = [...new Set(validRecords.map(r => r.department).filter(Boolean))];
     const branchNames = [...new Set(validRecords.map(r => r.branch).filter(Boolean))];
+    const roleCodes = [...new Set(validRecords.map(r => r.role_code).filter(Boolean))];
 
     console.log("Checking database for:", {
       employeeCodes: employeeCodes.length,
       emails: emails.length,
       departmentNames: departmentNames.length,
       branchNames: branchNames.length,
+      roleCodes: roleCodes.length,
     });
 
     const existingEmployees = await employeesRepository.findEmployeesByEmployeeCodes(employeeCodes);
@@ -340,6 +350,36 @@ async function validateAgainstDatabase(
       }
     }
 
+    // Fetch and validate role codes
+    if (roleCodes.length > 0) {
+      try {
+        const supabase = await createSVClient();
+        const { data: roles, error: rolesError } = await supabase
+          .from("roles")
+          .select("id, code")
+          .eq("organization_id", organizationId)
+          .in("code", roleCodes);
+
+        if (rolesError) {
+          console.error("Error fetching roles:", rolesError);
+          throw new Error("Không thể tải danh sách vai trò");
+        }
+
+        if (roles) {
+          roles.forEach(role => {
+            roleCodeToIdMap.set(role.code, role.id);
+          });
+        }
+
+        console.log("Roles loaded:", {
+          roles: roleCodeToIdMap.size,
+        });
+      } catch (error) {
+        console.error("Error checking roles:", error);
+        throw new Error("Không thể tải danh sách vai trò");
+      }
+    }
+
     validRecords.forEach((record, index) => {
       const errors: string[] = [];
       const fieldErrors: Record<string, string> = {};
@@ -373,6 +413,14 @@ async function validateAgainstDatabase(
         }
       }
 
+      if (record.role_code) {
+        if (!roleCodeToIdMap.has(record.role_code)) {
+          const errorMsg = `Mã vai trò không tồn tại trong tổ chức: ${record.role_code}`;
+          errors.push(errorMsg);
+          fieldErrors["role_code"] = errorMsg;
+        }
+      }
+
       if (errors.length > 0) {
         invalidRecords.push({ row: rowNumber, data: record, errors, fieldErrors });
         if (index < 3) {
@@ -387,7 +435,7 @@ async function validateAgainstDatabase(
       invalid: invalidRecords.length,
     });
 
-    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap, roleCodeToIdMap };
   } catch (error) {
     console.error("Database validation error:", error);
     throw error;
@@ -549,9 +597,14 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     try {
       const departmentId = record.department ? databaseValidation.departmentNameToIdMap.get(record.department) : undefined;
       const branchId = record.branch ? databaseValidation.branchNameToIdMap.get(record.branch) : undefined;
+      const roleId = record.role_code ? databaseValidation.roleCodeToIdMap.get(record.role_code) : undefined;
 
       if (record.department && !departmentId) {
         throw new Error(`Phòng ban không tồn tại: ${record.department}`);
+      }
+
+      if (record.role_code && !roleId) {
+        throw new Error(`Mã vai trò không tồn tại: ${record.role_code}`);
       }
 
       const employeePayload: CreateEmployeeDto = {
@@ -567,6 +620,7 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
         manager_id: "",
         position_id: undefined,
         employee_type: record.employee_type,
+        role_id: roleId || "",
       };
 
       const result = await createEmployeeCore(employeePayload, organizationId);

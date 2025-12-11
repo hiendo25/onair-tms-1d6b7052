@@ -16,7 +16,6 @@ const EditEmployeePage = () => {
   const employeeId = params.id as string;
 
   const { data: employee, isLoading, error } = useGetEmployeeQuery(employeeId);
-
   const { mutateAsync: updateEmployee, isPending } = useUpdateEmployeeMutation();
 
   const pageTitle = "Chỉnh sửa nhân viên";
@@ -42,6 +41,7 @@ const EditEmployeePage = () => {
       position_id: employee.position_id || "",
       employee_type: employee.employee_type || undefined,
       start_date: employee.start_date || null,
+      role_id: employee.role_ids?.[0] || "",
     };
   }, [employee]);
 
@@ -79,7 +79,10 @@ const EditEmployeePage = () => {
 
   if (isLoading) {
     return (
-      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
+      <PageContainer
+        title={pageTitle}
+        breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}
+      >
         <Box
           sx={{
             display: "flex",
@@ -96,7 +99,10 @@ const EditEmployeePage = () => {
 
   if (error || !employee) {
     return (
-      <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
+      <PageContainer
+        title={pageTitle}
+        breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}
+      >
         <Box sx={{ py: 3 }}>
           <Alert severity="error">Không tìm thấy thông tin nhân viên hoặc có lỗi xảy ra</Alert>
         </Box>
@@ -105,7 +111,10 @@ const EditEmployeePage = () => {
   }
 
   return (
-    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}>
+    <PageContainer
+      title={pageTitle}
+      breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }, { title: pageTitle }]}
+    >
       <Box sx={{ py: 3 }}>
         <EmployeeForm mode="edit" defaultValues={defaultValues} onSubmit={handleSubmit} isSubmitting={isPending} />
       </Box>

@@ -33,6 +33,7 @@ import { Constants } from "@/types/supabase.types";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
 import "dayjs/locale/vi";
+import { useGetRoleList } from "@/modules/roles/operations/query";
 
 export interface EmployeeFormProps {
   onSubmit?: (data: EmployeeFormData) => void | Promise<void>;
@@ -52,6 +53,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
   const { data: employeesResult, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
+  const { data: roles, isLoading: isLoadingRoles } = useGetRoleList();
 
   const employees = employeesResult?.data || [];
 
@@ -85,6 +87,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       position_id: defaultValues?.position_id || "",
       employee_type: defaultValues?.employee_type || undefined,
       start_date: defaultValues?.start_date || "",
+      role_id: defaultValues?.role_id || "",
     },
     resolver: zodResolver(EmployeeFormSchema),
   });
@@ -349,16 +352,45 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
             <Grid size={{ xs: 12, md: 6 }}>
               <Controller
+                name="role_id"
+                control={control}
+                render={({ field, fieldState: { error } }) => (
+                  <FormControl fullWidth error={!!error}>
+                    <FormLabel htmlFor="role_id" sx={{ mb: 1 }}>
+                      Vai trò <span style={{ color: "red" }}>*</span>
+                    </FormLabel>
+                    <Select {...field} id="role_id" displayEmpty value={field.value || ""} disabled={isLoadingRoles}>
+                      <MenuItem value="">
+                        <em>Chọn vai trò</em>
+                      </MenuItem>
+                      {roles?.map((role) => (
+                        <MenuItem key={role.id} value={role.id}>
+                          {role.title}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {error && (
+                      <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                        {error.message}
+                      </Typography>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Controller
                 name="employee_type"
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
                     <FormLabel htmlFor="employee_type" sx={{ mb: 1 }}>
-                      Loại nhân viên <span style={{ color: "red" }}>*</span>
+                      Loại người dùng <span style={{ color: "red" }}>*</span>
                     </FormLabel>
                     <Select {...field} id="employee_type" displayEmpty value={field.value || ""}>
                       <MenuItem value="">
-                        <em>Chọn loại nhân viên</em>
+                        <em>Chọn loại người dùng</em>
                       </MenuItem>
                       {EMPLOYEE_TYPE_OPTIONS.map((option) => (
                         <MenuItem key={option.value} value={option.value}>

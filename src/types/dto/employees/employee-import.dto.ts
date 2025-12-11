@@ -13,6 +13,7 @@ export class EmployeeImportData {
   branch_name?: string;
   start_date?: string;
   employee_type!: Database["public"]["Enums"]["employee_type"];
+  role_code?: string;
 }
 
 export class InvalidEmployeeRecord {

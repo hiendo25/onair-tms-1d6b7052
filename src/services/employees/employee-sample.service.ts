@@ -13,6 +13,7 @@ interface SampleEmployeeData {
   branch: string;
   start_date: string;
   employee_type: string;
+  role_code: string;
 }
 
 const VIETNAMESE_LAST_NAMES = [
@@ -96,6 +97,22 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
     throw new Error("Không tìm thấy phòng ban nào trong tổ chức của bạn. Vui lòng tạo phòng ban trước khi tạo file mẫu.");
   }
 
+  // Fetch roles for the organization
+  const { data: roles, error: rolesError } = await supabase
+    .from("roles")
+    .select("id, code, title")
+    .eq("organization_id", organizationId)
+    .neq("code", "super_admin")
+    .order("created_at", { ascending: false });
+
+  if (rolesError) {
+    throw new Error(`Failed to fetch roles: ${rolesError.message}`);
+  }
+
+  if (!roles || roles.length === 0) {
+    throw new Error("Không tìm thấy vai trò nào trong tổ chức của bạn. Vui lòng tạo vai trò trước khi tạo file mẫu.");
+  }
+
   const lastOrder = await employeesRepository.getLastEmployeeOrder();
   const startingOrder = lastOrder + 1;
 
@@ -107,6 +124,7 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
     const department = departments[Math.floor(Math.random() * departments.length)];
     const branch = branches.length > 0 ? branches[Math.floor(Math.random() * branches.length)] : null;
     const employeeType: "student" | "teacher" = Math.random() > 0.5 ? "student" : "teacher";
+    const role = roles.find(role => role.code === employeeType);
 
     const employeeOrder = startingOrder + i;
     const employeeCode = String(employeeOrder).padStart(5, "0");
@@ -118,10 +136,11 @@ async function generateSampleEmployeeData(count: number): Promise<SampleEmployee
       phone_number: generatePhoneNumber(),
       gender: gender,
       birthday: generateBirthday(),
-      department: department.name,
+      department: department!.name,
       branch: branch ? branch.name : "",
       start_date: generateStartDate(),
       employee_type: employeeType,
+      role_code: role!.code,
     });
   }
 

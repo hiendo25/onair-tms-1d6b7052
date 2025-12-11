@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone", // Enable standalone output for Docker
   reactStrictMode: false,
+  // Add empty turbopack config to silence the warning
+  turbopack: {},
   // typedRoutes: true,
   // compiler: {
   //   styledComponents: true, // Enable SWC transform for styled-components
