@@ -99,4 +99,14 @@ export const PATHS_WITH_PERMISSIONS = {
   ],
   [PATHS.ROLE.ROLES_ID()]: ["role:update"],
   [PATHS.ROLE.CREATE]: ["role:create"],
+  [PATHS.SURVEYS.ROOT]: [
+    { $or: "survey:read" },
+    { $or: "survey:create" },
+    { $or: "survey:update" },
+    { $or: "survey:delete" },
+  ],
+  [PATHS.SURVEYS.EDIT()]: ["survey:update"],
+  [PATHS.SURVEYS.CREATE]: ["survey:create"],
+  [PATHS.SURVEYS.STATISTICS()]: ["survey:read"],
+  [PATHS.SURVEYS.SUBMIT()]: ["survey:create"],
 } as const satisfies PathWithPermissionsCheck;

@@ -1,11 +1,6 @@
 import { createClient } from "@/services";
 
-import {
-  BulkUpsertSurveyQuestionPayload,
-  CreateSurveyQuestionPayload,
-  UpdateSurveyQuestionPayload,
-  UpsertSurveyQuestionPayload,
-} from "./type";
+import { CreateSurveyQuestionPayload, UpdateSurveyQuestionPayload, UpsertSurveyQuestionPayload } from "./type";
 
 const createSurveyQuestion = async (payload: CreateSurveyQuestionPayload) => {
   const supabase = createClient();
@@ -45,20 +40,4 @@ const upsertSurveyQuestion = async (upsertPayload: UpsertSurveyQuestionPayload) 
   }
 };
 
-const bulkUpsertSurveyQuestion = async (bulkUpsertPayload: BulkUpsertSurveyQuestionPayload) => {
-  const supabase = createClient();
-
-  try {
-    return await supabase.from("surveys_questions").upsert(bulkUpsertPayload).select("*").single();
-  } catch (err: any) {
-    throw new Error("Unable update survey question options for sv error.");
-  }
-};
-
-export {
-  upsertSurveyQuestion,
-  updateSurveyQuestion,
-  createSurveyQuestion,
-  bulkUpsertSurveyQuestion,
-  bulkCreateSurveyQuestion,
-};
+export { upsertSurveyQuestion, updateSurveyQuestion, createSurveyQuestion, bulkCreateSurveyQuestion };

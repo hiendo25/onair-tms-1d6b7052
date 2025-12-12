@@ -7,9 +7,8 @@ export type CreateSurveyQuestionPayload = Pick<
 
 export type UpdateSurveyQuestionPayload = Pick<
   SurveyQuestion,
-  "id" | "is_required" | "name" | "priority" | "question_type" | "survey_id"
+  "id" | "is_required" | "name" | "priority" | "question_type"
 >;
-export type BulkUpsertSurveyQuestionPayload = (UpdateSurveyQuestionPayload | CreateSurveyQuestionPayload)[];
 export type UpsertSurveyQuestionPayload =
   | {
       action: "create";

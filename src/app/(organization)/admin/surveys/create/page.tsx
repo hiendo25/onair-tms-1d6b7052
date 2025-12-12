@@ -9,7 +9,7 @@ export default async function CreateSurveyPage() {
       title="Tạo khảo sát"
       breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }, { title: "Tạo khảo sát" }]}
     >
-      <div className="max-w-[1200px]">
+      <div className="w-full max-w-[1080px] mx-auto">
         <CreateSurveyForm />
       </div>
     </PageContainer>

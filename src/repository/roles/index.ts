@@ -1,8 +1,8 @@
-import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
+import { RESOURCE_OPTIONS } from "@/constants/permission.constant";
 import { PermissionActions } from "@/model/permission.model";
+import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
 import { supabase } from "@/services";
 import { slugify } from "@/utils/slugify";
-import { RESOURCE_OPTIONS } from "@/constants/permission.constant";
 
 export interface AdminGetRoleListParams {
   page?: number;
@@ -51,7 +51,7 @@ export const adminGetRoleList = async (params?: AdminGetRoleListParams) => {
       };
     });
 };
-export type adminGetRoleListResponse = Awaited<ReturnType<typeof adminGetRoleList>>;
+export type AdminGetRoleListResponse = Awaited<ReturnType<typeof adminGetRoleList>>;
 export const getGroupPermissionList = async () => {
   return Object.fromEntries(
     RESOURCE_OPTIONS.map((res) => [
