@@ -5,167 +5,93 @@ import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
-  Card,
   Chip,
   IconButton,
   InputAdornment,
-  ListItemText,
   Menu,
   MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
   TextField,
   Typography,
+  ListItemText,
+  Stack,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
 import { PATHS } from "@/constants/path.contstants";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import useDebounce from "@/hooks/useDebounce";
 import PageContainer from "@/shared/ui/PageContainer";
-
-// Mock data type
-type PlanStatus = "pending" | "approved" | "rejected";
-
-interface MockPlan {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  programsCount: number;
-  topicsCount: number;
-  status: PlanStatus;
-  budget: number;
-}
-
-// Mock data
-const MOCK_PLANS: MockPlan[] = [
-  {
-    id: "1",
-    name: "Kế hoạch đào tạo 2026 cho khối B2B Edtech",
-    startDate: "15/10/2025",
-    endDate: "20/10/2025",
-    programsCount: 3,
-    topicsCount: 6,
-    status: "pending",
-    budget: 200000000,
-  },
-  {
-    id: "2",
-    name: "Khoá học cơ bản về AI dành cho Doanh nghiệp trong thời kỳ đổi mới trong năm 2025 nếu ...",
-    startDate: "15/10/2025",
-    endDate: "20/10/2025",
-    programsCount: 2,
-    topicsCount: 8,
-    status: "approved",
-    budget: 200000000,
-  },
-  {
-    id: "3",
-    name: "Kế hoạch training đi học B2B",
-    startDate: "15/10/2025",
-    endDate: "20/10/2025",
-    programsCount: 1,
-    topicsCount: 3,
-    status: "rejected",
-    budget: 200000000,
-  },
-  {
-    id: "4",
-    name: "Kế hoạch đào tạo Q1 2025",
-    startDate: "01/01/2025",
-    endDate: "31/03/2025",
-    programsCount: 4,
-    topicsCount: 10,
-    status: "approved",
-    budget: 150000000,
-  },
-  {
-    id: "5",
-    name: "Chương trình đào tạo kỹ năng mềm",
-    startDate: "10/02/2025",
-    endDate: "28/02/2025",
-    programsCount: 2,
-    topicsCount: 5,
-    status: "pending",
-    budget: 100000000,
-  },
-];
-
-const getStatusLabel = (status: PlanStatus): string => {
-  switch (status) {
-    case "pending":
-      return "Chờ duyệt";
-    case "approved":
-      return "Đã duyệt";
-    case "rejected":
-      return "Từ chối";
-    default:
-      return status;
-  }
-};
-
-const getStatusColor = (status: PlanStatus): "warning" | "success" | "error" => {
-  switch (status) {
-    case "pending":
-      return "warning";
-    case "approved":
-      return "success";
-    case "rejected":
-      return "error";
-    default:
-      return "warning";
-  }
-};
-
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(amount);
-};
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+import { useGetPlansQuery } from "@/modules/plans/operations/query";
+import { useDeletePlanMutation } from "@/modules/plans/operations/mutation";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { PlanStatus } from "@/model/plan.model";
+import { formatCurrencyV2 } from "@/utils/format-number";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { getStatusColor, getStatusLabel } from "../helper";
+import StatCard from "./StatCard";
+import { EmptyBoxIcon } from "@/shared/assets/icons";
 
 export default function PlansTable() {
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
+  const organizationId = useUserOrganization((state) => state.data.organization.id);
 
-  const [plans, setPlans] = React.useState<MockPlan[]>(MOCK_PLANS);
-  const [page, setPage] = React.useState(0);
+  const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchInput, setSearchInput] = React.useState("");
+  const [statusFilter, setStatusFilter] = React.useState<PlanStatus | "all">("all");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedPlanId, setSelectedPlanId] = React.useState<string | null>(null);
+  const debouncedSearch = useDebounce(searchInput, 400);
+
+  const { data, isLoading } = useGetPlansQuery({
+    organizationId,
+    search: debouncedSearch,
+    page,
+    limit: rowsPerPage,
+    status: statusFilter,
+  });
+  const plans = data?.data || [];
+  const planStats = data?.stats || { total: 0, approved: 0, pending: 0, pending_survey: 0, rejected: 0 };
+  const statusFilters = React.useMemo(() => [
+    { value: "all" as const, label: "Tất cả", count: planStats.total, color: "default" as const },
+    { value: "pending_survey" as const, label: "Chờ khảo sát", count: planStats.pending_survey, color: "warning" as const },
+    { value: "pending" as const, label: "Đang chờ duyệt", count: planStats.pending, color: "warning" as const },
+    { value: "approved" as const, label: "Đã duyệt", count: planStats.approved, color: "success" as const },
+    { value: "rejected" as const, label: "Từ chối", count: planStats.rejected, color: "error" as const },
+  ], [planStats]);
+
+  const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
   const menuOpen = Boolean(anchorEl);
-
-  // Filter plans based on search
-  const filteredPlans = React.useMemo(() => {
-    if (!searchInput) return plans;
-    return plans.filter((plan) =>
-      plan.name.toLowerCase().includes(searchInput.toLowerCase())
-    );
-  }, [plans, searchInput]);
-
-  const totalCount = filteredPlans.length;
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  const totalCount = data?.total || 0;
+  const isEmpty = !isLoading && plans.length === 0;
+  const activeStatusLabel = statusFilter === "all" ? "Tất cả kế hoạch" : getStatusLabel(statusFilter as PlanStatus);
+  const hasFilter = statusFilter !== "all" || !!debouncedSearch;
 
   const handleCreatePlan = () => {
     router.push(PATHS.PLANS.CREATE);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (value: PlanStatus | "all") => {
+    setStatusFilter(value);
+    setPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setStatusFilter("all");
+    setSearchInput("");
+    setPage(1);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, planId: string) => {
@@ -207,9 +133,12 @@ export default function PlansTable() {
     );
 
     if (confirmed) {
-      // Remove from local state (mock delete)
-      setPlans((prev) => prev.filter((plan) => plan.id !== selectedPlanId));
-      notifications.show("Xóa kế hoạch đào tạo thành công", { severity: "success" });
+      try {
+        await deletePlan(selectedPlanId);
+        notifications.show("Xóa kế hoạch đào tạo thành công", { severity: "success" });
+      } catch (error: any) {
+        notifications.show(error?.message || "Xóa kế hoạch đào tạo thất bại", { severity: "error" });
+      }
     }
 
     handleMenuClose();
@@ -217,11 +146,70 @@ export default function PlansTable() {
 
   const handleAssignCourses = () => {
     if (selectedPlanId) {
-      router.push(PATHS.PLANS.EDIT(selectedPlanId));
-      notifications.show("Chức năng gán môn học đang được phát triển", { severity: "info" });
+      router.push(`${PATHS.PLANS.EDIT(selectedPlanId)}?step=5`);
     }
     handleMenuClose();
   };
+
+  const columns: TableDataProps<any>["columns"] = [
+    {
+      id: "name",
+      field: "name",
+      headerName: "Tên kế hoạch",
+      width: 360,
+      renderCell: (value) => (
+        <Typography
+          variant="body2"
+          sx={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            wordBreak: "break-word",
+          }}
+        >
+          {value}
+        </Typography>
+      ),
+    },
+    {
+      id: "time",
+      field: "time",
+      headerName: "Thời gian",
+      width: 220,
+      renderCell: (_value, row) =>
+        row.startDate && row.endDate ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(row.endDate, FORMAT_DATE_TIME_CLEANER)}` : "Chưa có",
+    },
+    {
+      id: "budget",
+      field: "budget",
+      headerName: "Ngân sách",
+      width: 180,
+      renderCell: (_value, row) => (row.budget ? formatCurrencyV2(row.budget) : "—"),
+    },
+    {
+      id: "status",
+      field: "status",
+      headerName: "Trạng thái",
+      width: 140,
+      renderCell: (value) => (
+        <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
+      ),
+    },
+    {
+      id: "action",
+      field: "action",
+      headerName: "Hành động",
+      width: 120,
+      fixed: "right",
+      renderCell: (_value, row) => (
+        <IconButton size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
+          <MoreVertIcon fontSize="small" />
+        </IconButton>
+      ),
+    },
+  ];
 
   return (
     <PageContainer
@@ -230,160 +218,188 @@ export default function PlansTable() {
         { title: "Kế hoạch đào tạo", path: PATHS.PLANS.ROOT },
       ]}
     >
-      <Box>
-        <Card>
-          {/* Header with Search and Create Button */}
-          <Box sx={{ p: 3, display: "flex", gap: 2, alignItems: "center" }}>
-            <TextField
-              placeholder="Tìm kiếm"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              size="small"
-              sx={{ width: 300 }}
-              InputProps={{
+      <Box
+        sx={{
+          background: "white",
+          borderRadius: 2,
+          p: { xs: 2.5, md: 3 },
+          border: "1px solid",
+          borderColor: "divider",
+          boxShadow: "0 18px 48px rgba(15, 23, 42, 0.08)",
+        }}
+      >
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          alignItems={{ xs: "stretch", md: "center" }}
+          sx={{ mb: 2.5 }}
+        >
+          <TextField
+            placeholder="Tìm kiếm"
+            value={searchInput}
+            onChange={(e) => {
+              setSearchInput(e.target.value);
+              setPage(1);
+            }}
+            size="small"
+            sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
+            slotProps={{
+              input: {
                 startAdornment: (
                   <InputAdornment position="start">
                     <SearchIcon />
                   </InputAdornment>
                 ),
-              }}
-            />
-            <Box sx={{ flex: 1 }} />
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreatePlan}
-            >
-              Tạo kế hoạch
-            </Button>
-          </Box>
-
-          {/* Table */}
-          <TableContainer sx={{ px: 3, pb: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ width: "35%" }}>Tên kế hoạch</TableCell>
-                  <TableCell sx={{ width: "20%" }}>Thời gian</TableCell>
-                  <TableCell sx={{ width: "18%" }}>Ngân sách</TableCell>
-                  <TableCell sx={{ width: "15%" }}>Trạng thái</TableCell>
-                  <TableCell align="center" sx={{ width: "12%" }}>Hành Động</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {filteredPlans.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                      <Typography variant="h6" color="text.secondary" gutterBottom>
-                        Chưa có kế hoạch đào tạo nào
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        Hãy tạo kế hoạch đào tạo đầu tiên của bạn
-                      </Typography>
-                      <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={handleCreatePlan}
-                      >
-                        Tạo kế hoạch
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredPlans
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((plan) => (
-                      <TableRow key={plan.id} hover>
-                        <TableCell>
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {plan.name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {plan.startDate} - {plan.endDate}
-                        </TableCell>
-                        <TableCell>{formatCurrency(plan.budget)}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={getStatusLabel(plan.status)}
-                            color={getStatusColor(plan.status)}
-                            size="small"
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, plan.id)}
-                          >
-                            <MoreVertIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          {/* Pagination */}
-          {filteredPlans.length > 0 && (
-            <TablePagination
-              component="div"
-              count={totalCount}
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[10, 20, 30]}
-              labelRowsPerPage="Hiển thị"
-              labelDisplayedRows={({ from, to, count }) =>
-                `Hiển thị ${from}-${to} trên ${count !== -1 ? count : `hơn ${to}`}`
+                endAdornment: searchInput ? (
+                  <InputAdornment position="end">
+                    <IconButton size="small" onClick={handleClearSearch}>
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ) : undefined,
               }
-            />
-          )}
-        </Card>
+            }}
+          />
+          <Box sx={{ flex: 1 }} />
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleCreatePlan}
+            sx={{ alignSelf: { xs: "stretch", md: "center" }, borderRadius: 2 }}
+          >
+            Tạo kế hoạch
+          </Button>
+        </Stack>
 
-        {/* Action Menu */}
-        <Menu
-          anchorEl={anchorEl}
-          open={menuOpen}
-          onClose={handleMenuClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
+        <Stack
+          direction={{ xs: "column", lg: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "flex-start", lg: "center" }}
+          justifyContent="space-between"
+          sx={{ mb: 2 }}
+        >
+          <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+            {statusFilters.map((filter) => {
+              const isActive = statusFilter === filter.value;
+              return (
+                <Chip
+                  key={filter.value}
+                  label={`${filter.label}${typeof filter.count === "number" ? ` (${filter.count})` : ""}`}
+                  color={isActive ? filter.color : "default"}
+                  variant={isActive ? "filled" : "outlined"}
+                  onClick={() => handleStatusFilterChange(filter.value)}
+                  sx={{
+                    borderRadius: 999,
+                    fontWeight: 600,
+                    px: 0.5,
+                  }}
+                />
+              );
+            })}
+          </Stack>
+        </Stack>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "repeat(auto-fit, minmax(180px, 1fr))",
+              lg: "repeat(5, minmax(0, 1fr))",
+            },
+            gap: 1.5,
+            mb: 2,
           }}
         >
-          <MenuItem onClick={handleViewDetail}>
-            <ListItemText>Xem chi tiết</ListItemText>
-          </MenuItem>
-          {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.status === "approved" && (
-            <MenuItem onClick={handleAssignCourses}>
-              <ListItemText>Gán môn học</ListItemText>
-            </MenuItem>
-          )}
-          <MenuItem onClick={handleEdit}>
-            <ListItemText>Chỉnh sửa</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={handleDelete}>
-            <ListItemText>Xóa kế hoạch</ListItemText>
-          </MenuItem>
-        </Menu>
+          <StatCard label="Tổng kế hoạch" value={planStats.total} helper="Danh sách hiện có" />
+          <StatCard label="Chờ khảo sát" value={planStats.pending_survey} helper="Đang thu thập khảo sát" tone="warning" />
+          <StatCard label="Đang chờ duyệt" value={planStats.pending} helper="Chờ quyết định" tone="warning" />
+          <StatCard label="Đã duyệt" value={planStats.approved} helper="Hoàn tất phê duyệt" tone="success" />
+          <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />
+        </Box>
+
+        {isEmpty ? (
+          <Box
+            sx={{
+              border: "1px dashed",
+              borderColor: "divider",
+              borderRadius: 2,
+              p: { xs: 3, md: 4 },
+              textAlign: "center",
+              bgcolor: "grey.50",
+            }}
+          >
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+              <EmptyBoxIcon className="w-20 h-20" />
+            </Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
+              {hasFilter ? "Không có kế hoạch khớp bộ lọc" : "Chưa có kế hoạch nào"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
+              {hasFilter ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm." : "Tạo kế hoạch đầu tiên để bắt đầu quản lý đào tạo."}
+            </Typography>
+            <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap>
+              {hasFilter && (
+                <Button variant="outlined" onClick={handleResetFilters}>
+                  Xóa bộ lọc
+                </Button>
+              )}
+              <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreatePlan}>
+                Tạo kế hoạch
+              </Button>
+            </Stack>
+          </Box>
+        ) : (
+          <TableData
+            rows={plans}
+            columns={columns}
+            hoverRow
+            loading={isLoading}
+            showRowCount
+            bordered={false}
+            minWidth={960}
+            pagination={{
+              page,
+              pageSize: rowsPerPage,
+              total: totalCount,
+              perPageOptions: [10, 20, 30],
+              onChangePage: (newPage) => setPage(newPage),
+              onChangePageSize: (newPageSize) => {
+                setRowsPerPage(newPageSize);
+                setPage(1);
+              },
+            }}
+          />
+        )}
       </Box>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem onClick={handleViewDetail}>
+          <ListItemText>Xem chi tiết</ListItemText>
+        </MenuItem>
+        {/* {selectedPlanId && plans.find((p) => p.id === selectedPlanId)?.status === "approved" && (
+          <MenuItem onClick={handleAssignCourses}>
+            <ListItemText>Gán môn học</ListItemText>
+          </MenuItem>
+        )} */}
+        <MenuItem onClick={handleEdit}>
+          <ListItemText>Chỉnh sửa</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete}>
+          <ListItemText>Xóa kế hoạch</ListItemText>
+        </MenuItem>
+      </Menu>
     </PageContainer>
   );
 }
-

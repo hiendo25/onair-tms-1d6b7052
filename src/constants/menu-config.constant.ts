@@ -22,9 +22,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-      persCheck?: PermissionValue;
-      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-    }
+    persCheck?: PermissionValue;
+    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+  }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -140,12 +140,12 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         key: "plans/create",
         path: PATHS.PLANS.CREATE,
       },
-      {
-        title: "Khảo sát kế hoạch",
-        icon: React.createElement(ClipboardIcon),
-        key: "plans/surveys",
-        path: PATHS.SURVEYS.ROOT,
-      },
+      // {
+      //   title: "Khảo sát kế hoạch",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "plans/surveys",
+      //   path: PATHS.SURVEYS.ROOT,
+      // },
     ],
   },
   {

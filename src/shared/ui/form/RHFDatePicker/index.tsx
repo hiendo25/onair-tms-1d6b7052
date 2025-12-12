@@ -54,9 +54,9 @@ const DatePicker = <T extends FieldValues>({
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDatePickerField
           {...datePickerProps}
-          value={getValueDatePicker(value)}
+          value={getValueDatePicker(value)?? null}
           onChange={onChange}
-          helperText={error?.message}
+          helperText={error?.message} 
           error={!!error}
         />
       )}

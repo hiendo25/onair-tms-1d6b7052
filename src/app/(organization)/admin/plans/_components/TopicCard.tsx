@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, Chip, IconButton, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Topic } from "@/modules/plans/plan-form.schema";
@@ -24,11 +24,12 @@ export default function TopicCard({
   return (
     <Box
       sx={{
-        p: 2,
+        p: 2.5,
         border: "1px solid",
-        borderColor: "primary.main",
-        borderRadius: 1,
+        borderColor: "divider",
+        borderRadius: 2,
         bgcolor: "common.white",
+        boxShadow: "0 10px 26px rgba(0,0,0,0.06)",
       }}
     >
       {/* Topic Header */}
@@ -41,19 +42,13 @@ export default function TopicCard({
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-            <Box
-              sx={{
-                px: 1,
-                py: 0.25,
-                bgcolor: "text.primary",
-                borderRadius: 1,
-              }}
-            >
-              <Typography variant="caption" sx={{ color: "common.white", fontWeight: 500 }}>
-                Chủ đề
-              </Typography>
-            </Box>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5, flexWrap: "wrap" }}>
+            <Chip
+              label="Chủ đề"
+              size="small"
+              color="primary"
+              sx={{ height: 24 }}
+            />
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {topic.name}
             </Typography>
@@ -94,4 +89,3 @@ export default function TopicCard({
     </Box>
   );
 }
-

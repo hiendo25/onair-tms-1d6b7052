@@ -1,21 +1,47 @@
 import * as zod from "zod";
-import { Dayjs } from "dayjs";
+import { Enums } from "@/types/supabase.types";
 
-// Helper schema to accept both Dayjs objects and strings for date fields
-const dateFieldSchema = zod
-  .union([
-    zod.string(),
-    zod.custom<Dayjs>((val) => {
-      // Check if it's a Dayjs object by checking for the format method
-      return val && typeof val === "object" && "format" in val;
-    }),
-  ])
-  .optional();
+export type PlanSurveyTarget = Enums<"plan_survey_target">;
+export type PlanSurveyStatus = Enums<"training_plan_survey_status">;
+const planSurveyTargets = ["all", "department", "branch"] as [PlanSurveyTarget, ...PlanSurveyTarget[]];
+const planSurveyStatuses = ["pending", "collecting", "closed"] as [PlanSurveyStatus, ...PlanSurveyStatus[]];
 
 // Survey schema for optional survey selection
 export const surveySchema = zod.object({
   id: zod.string(),
   title: zod.string(),
+  planSurveyId: zod.string().optional(),
+  startDate: zod.string().optional().nullable(),
+  endDate: zod.string().optional().nullable(),
+  targetType: zod.enum(planSurveyTargets).default("all"),
+  targetUnitIds: zod.array(zod.string()).optional(),
+  status: zod.enum(planSurveyStatuses).optional(),
+  createdAt: zod.string().optional().nullable(),
+}).superRefine((values, ctx) => {
+  if (!values.startDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["startDate"],
+      message: "Vui lòng chọn ngày bắt đầu khảo sát",
+    });
+  }
+
+  if (!values.endDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "Vui lòng chọn ngày kết thúc khảo sát",
+    });
+  }
+
+  const requiresUnits = values.targetType === "branch" || values.targetType === "department";
+  if (requiresUnits && (!values.targetUnitIds || values.targetUnitIds.length === 0)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["targetUnitIds"],
+      message: "Vui lòng chọn đơn vị áp dụng",
+    });
+  }
 });
 
 // Course schema for assigned courses
@@ -34,27 +60,46 @@ export const topicSchema = zod.object({
 
 export const trainingProgramSchema = zod.object({
   name: zod.string().min(1, { message: "Tên chương trình không được bỏ trống." }),
-  startDate: dateFieldSchema,
-  endDate: dateFieldSchema,
+  startDate: zod.string().optional().nullable(),
+  endDate: zod.string().optional().nullable(),
   description: zod.string().optional(),
   topics: zod.array(topicSchema).optional(),
+  courses: zod.array(courseSchema).optional(), // Cho phép gán môn học trực tiếp khi không có chủ đề
 });
 
 export const planSchema = zod.object({
   info: zod.object({
     name: zod.string().min(1, { message: "Tên kế hoạch không được bỏ trống." }),
     objective: zod.string().optional(),
-    startDate: dateFieldSchema,
-    endDate: dateFieldSchema,
-    budget: zod.number().optional(),
-    survey: surveySchema.optional(), // Optional survey selection
+    startDate: zod.string().optional().nullable(),
+    endDate: zod.string().optional().nullable(),
+    budget: zod
+      .number({ message: "Vui lòng nhập giá vé" })
+      .min(0)
+      .transform((val) => (val === 0 ? null : val))
+      .nullable()
+      .optional(),
+    survey: surveySchema.optional().nullable(),
   }),
-  programs: zod.array(trainingProgramSchema).min(1, { message: "Cần có ít nhất 1 chương trình đào tạo." }),
+  programs: zod.array(trainingProgramSchema).default([]),
+}).superRefine((values, ctx) => {
+  const hasSurvey = !!values.info.survey;
+  const surveyClosed = values.info.survey?.status === "closed";
+  const hasPrograms = Array.isArray(values.programs) && values.programs.length > 0;
+
+  if (!hasPrograms && (!hasSurvey || surveyClosed)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["programs"],
+      message: "Cần có ít nhất 1 chương trình đào tạo.",
+    });
+  }
 });
 
 export type Survey = zod.infer<typeof surveySchema>;
+export type SurveyFormValues = zod.input<typeof surveySchema>;
 export type Course = zod.infer<typeof courseSchema>;
 export type Topic = zod.infer<typeof topicSchema>;
 export type TrainingProgram = zod.infer<typeof trainingProgramSchema>;
 export type PlanFormSchema = zod.infer<typeof planSchema>;
-
+export type PlanFormValues = zod.input<typeof planSchema>;
