@@ -1,14 +1,14 @@
 import { useMemo, useRef } from "react";
 import dayjs from "dayjs";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
-import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
+import { Controller, UseFormReturn, useFieldArray } from "react-hook-form";
+import { Box, Button, FormHelperText, FormLabel, IconButton, Typography, styled } from "@mui/material";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { CloseIcon, Edit05Icon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
 
 import SimpleDialogCourseSelector, {
-  SimpleDialogCourseSelectorRef,
   SimpleDialogCourseSelectorProps,
+  SimpleDialogCourseSelectorRef,
 } from "@/modules/courses/container/SimpleDialogCourseSelector";
 import { DateTimePickerProps } from "@mui/x-date-pickers";
 import SimpleDialogTeacherSelector, {

@@ -1,11 +1,12 @@
 import { useTQuery } from "@/lib";
 import {
-  getGroupPermissionList,
   adminGetRoleList,
   AdminGetRoleListParams,
-  getRolePermissions,
+  getGroupPermissionList,
   getRoleList,
+  getRolePermissions,
 } from "@/repository/roles";
+
 import { GET_PERMISSIONS, GET_ROLE_PERMISSIONS, GET_ROLES } from "./key";
 
 export const useAdminGetRoleList = (params?: AdminGetRoleListParams) => {

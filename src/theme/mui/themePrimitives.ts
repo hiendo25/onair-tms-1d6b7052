@@ -1,6 +1,6 @@
 "use client";
-import { createTheme, alpha, Shadows } from "@mui/material/styles";
-import { grey, primary, info, warning, error, success } from "./theme-color";
+import { Shadows, alpha, createTheme } from "@mui/material/styles";
+import { error, grey, info, primary, success, warning } from "./theme-color";
 export * from "./primitive/typography";
 
 const defaultTheme = createTheme();

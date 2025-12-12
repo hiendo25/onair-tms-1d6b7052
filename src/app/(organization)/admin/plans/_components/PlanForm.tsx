@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { planSchema, PlanFormSchema, PlanFormValues, Survey } from "@/modules/plans/plan-form.schema";
+import { PlanFormSchema, PlanFormValues, Survey, planSchema } from "@/modules/plans/plan-form.schema";
 import {
   PLAN_STEPS,
   PlanStepId,

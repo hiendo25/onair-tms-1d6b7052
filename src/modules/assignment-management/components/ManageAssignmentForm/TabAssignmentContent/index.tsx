@@ -1,8 +1,8 @@
 "use client";
 import { memo, useCallback } from "react";
-import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { type Assignment, type Question, type QuestionOption } from "../../assignment-form.schema";
-import { Button, Divider, FormControl, FormLabel, IconButton, MenuItem, Select, Typography, Checkbox, FormControlLabel } from "@mui/material";
+import { Button, Checkbox, Divider, FormControl, FormControlLabel, FormLabel, IconButton, MenuItem, Select, Typography } from "@mui/material";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import { TrashIcon1 } from "@/shared/assets/icons";

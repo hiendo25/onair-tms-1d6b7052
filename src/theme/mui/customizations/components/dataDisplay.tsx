@@ -1,12 +1,12 @@
-import { Theme, alpha, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 import { typographyClasses } from "@mui/material/Typography";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { chipClasses } from "@mui/material/Chip";
 import { iconButtonClasses } from "@mui/material/IconButton";
-import { grey, error, success, black, white } from "../../theme-color";
+import { black, error, grey, success, white } from "../../theme-color";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const dataDisplayCustomizations: Components<Theme> = {
   MuiList: {
     styleOverrides: {

@@ -11,11 +11,13 @@ import {
   TablePaginationOwnProps,
   Typography,
 } from "@mui/material";
-import TableDataRow, { TableRowDataProps } from "./TableDataRow";
-import TableDataHeader from "./TableDataHeader";
-import TableRowFixedWidth from "./TableRowFixedWith";
-import TableRowDataProvider from "./TableRowDataProvider";
+
 import { EmptyBoxIcon } from "@/shared/assets/icons";
+
+import TableDataHeader from "./TableDataHeader";
+import TableDataRow, { TableRowDataProps } from "./TableDataRow";
+import TableRowDataProvider from "./TableRowDataProvider";
+import TableRowFixedWidth from "./TableRowFixedWith";
 
 export type TableDataProps<T> = {
   rowKey?: string;
@@ -63,7 +65,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   onRowClick,
   onCellClick,
 }: TableDataProps<T>) => {
-  const [tablePagination, setTablePaginations] = useState<PaginationTable>(() => {
+  const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
       ...initPagination,
       page: pagination?.page ? pagination?.page : initPagination.page,
@@ -77,10 +79,10 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
 
   const rowsList = useMemo(() => {
     return rows?.slice(0, pageSize) || [];
-  }, [pageSize, page, rows]);
+  }, [pageSize, rows]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
-    setTablePaginations((prev) => {
+    setTablePagination((prev) => {
       pagination?.onChangePage?.(newPage + 1);
       return {
         ...prev,
@@ -90,7 +92,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   };
   const onChangePageSize: TablePaginationOwnProps["onRowsPerPageChange"] = (evt) => {
     const newPageSize = parseInt(evt.target.value);
-    setTablePaginations((prev) => {
+    setTablePagination((prev) => {
       pagination?.onChangePageSize?.(newPageSize);
       return {
         ...prev,
@@ -98,7 +100,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
       };
     });
   };
-  const genRowkey = useCallback(
+  const genRowKey = useCallback(
     (row: T) => {
       const currentRowKey = row[rowKey || "id"];
       if (!currentRowKey) {
@@ -113,20 +115,20 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   );
   const columnCount = useMemo(() => {
     return showRowCount ? columns.length + 1 : columns.length;
-  }, [showRowCount]);
+  }, [showRowCount, columns]);
 
   useLayoutEffect(() => {
     if (!pagination) return;
 
-    setTablePaginations((prev) => {
-      let newPaginations = { ...prev };
+    setTablePagination((prev) => {
+      let updatePagination = { ...prev };
       const { page, ...restPaginationUpdate } = pagination;
       if (page) {
-        newPaginations = { ...newPaginations, page: page };
+        updatePagination = { ...updatePagination, page: page };
       }
-      return { ...newPaginations, ...restPaginationUpdate };
+      return { ...updatePagination, ...restPaginationUpdate };
     });
-  }, [pagination?.page, pagination?.pageSize, pagination?.perPageOptions, pagination?.total, pagination?.totalPages]);
+  }, [pagination]);
 
   return (
     <TableRowDataProvider>
@@ -179,7 +181,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
                 rowsList.length > 0 &&
                 rowsList.map((row, _index) => (
                   <TableDataRow
-                    key={genRowkey(row)}
+                    key={genRowKey(row)}
                     showRowCount={showRowCount}
                     hoverRow={hoverRow}
                     indexRow={_index}
@@ -195,7 +197,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
           </Table>
         </Box>
         <TablePagination
-          id="12"
+          id="table-data-pagination"
           className="table-pagination"
           component="div"
           count={total}

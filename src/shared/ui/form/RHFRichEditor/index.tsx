@@ -1,6 +1,6 @@
 "use client";
 import { FormControl, FormLabel } from "@mui/material";
-import { Control, Controller, Path, PathValue, FieldValues } from "react-hook-form";
+import { Control, Controller, FieldValues, Path, PathValue } from "react-hook-form";
 import { useId } from "react";
 import dynamic from "next/dynamic";
 import EditorSkeleton from "../Editor/EditorSkeleton";

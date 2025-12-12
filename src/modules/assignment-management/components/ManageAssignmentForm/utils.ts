@@ -28,7 +28,7 @@ export const getStatusTabAssignment = (
   error: FieldErrors<Assignment>,
   tabKey: keyof typeof TAB_KEYS_ASSIGNMENT,
 ): AssignmentTabTypes => {
-  let tabStatus: AssignmentTabTypes = "idle";
+  const tabStatus: AssignmentTabTypes = "idle";
 
   const keyListByTab = getKeyFieldByTab(tabKey);
 

@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/modules/auth/actions/getCurrentUser";
 import { AuthData } from "@/modules/auth/types";
-import { redirect, RedirectType } from "next/navigation";
+import { RedirectType, redirect } from "next/navigation";
 
 export interface WithAuthorizedProps {
   data: { userId: string };

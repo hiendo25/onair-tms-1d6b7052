@@ -1,7 +1,9 @@
+import { toNonAccentVietnamese } from "./common";
 export const slugify = (text?: string) => {
   if (!text) return "";
 
-  return text
+  const textLatin = toNonAccentVietnamese(text);
+  return textLatin
     .toString()
     .toLowerCase()
     .trim() // Remove whitespace from both ends of a string

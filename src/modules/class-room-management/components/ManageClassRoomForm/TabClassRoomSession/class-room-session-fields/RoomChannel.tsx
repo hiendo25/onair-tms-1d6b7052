@@ -6,7 +6,7 @@ import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
 import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
 import RHFSelectField from "@/shared/ui/form/RHFSelectField";
-import { alpha, FormControl, FormLabel, MenuItem, MenuList, Select, styled } from "@mui/material";
+import { FormControl, FormLabel, MenuItem, MenuList, Select, alpha, styled } from "@mui/material";
 import { LinkIcon } from "@/shared/assets/icons";
 
 interface RoomChannelProps {

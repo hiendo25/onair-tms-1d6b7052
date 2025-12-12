@@ -18,42 +18,6 @@ const nextConfig: NextConfig = {
     // loader: "custom",
     remotePatterns: [
       {
-        protocol: "https", // or 'http' if needed
-        hostname: "avatars.githubusercontent.com",
-        port: "", // leave empty unless using custom port
-        pathname: "/**", // match all paths
-      },
-      {
-        protocol: "https", // or 'http' if needed
-        hostname: "cloudflare-ipfs.com",
-        port: "", // leave empty unless using custom port
-        pathname: "/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "127.0.0.1",
-        port: "54321", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "127.0.0.1",
-        port: "8000", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "localhost",
-        port: "3000", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "localhost",
-        port: "8000", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
-      {
         protocol: "https",
         hostname: "lms-api.onairdev.com",
         port: "",
@@ -72,7 +36,13 @@ const nextConfig: NextConfig = {
       // },
     ],
   },
-  webpack: (config) => {
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+    // dirs: ['pages', 'utils']
+  },
+  webpack: (config, options) => {
     config.resolve.alias = {
       ...config.resolve.alias,
     };

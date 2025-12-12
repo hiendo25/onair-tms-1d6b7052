@@ -1,5 +1,5 @@
-/* eslint-disable no-param-reassign */
-import inst, { UnitType, PluginFunc, ManipulateType } from "dayjs";
+ 
+import inst, { ManipulateType, PluginFunc, UnitType } from "dayjs";
 
 type ManipulateTypeN = ManipulateType;
 

@@ -65,6 +65,7 @@ export const PATHS = {
   SURVEYS: {
     ROOT: "/admin/surveys",
     CREATE: "/admin/surveys/create",
+    LIST: "/admin/surveys/list",
     EDIT: (id: string = ":id") => `/admin/surveys/${id}/edit`,
     STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
     SUBMIT: (id: string = ":id") => `/surveys/${id}/submit`,

@@ -198,14 +198,14 @@ export type Database = {
       class_attendances: {
         Row: {
           attendance_method:
-            | Database["public"]["Enums"]["attendance_method_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_method_enum"]
+          | null
           attendance_mode:
-            | Database["public"]["Enums"]["attendance_mode_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_mode_enum"]
+          | null
           attendance_status:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at: string | null
           class_room_id: string | null
           class_session_id: string | null
@@ -221,14 +221,14 @@ export type Database = {
         }
         Insert: {
           attendance_method?:
-            | Database["public"]["Enums"]["attendance_method_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_method_enum"]
+          | null
           attendance_mode?:
-            | Database["public"]["Enums"]["attendance_mode_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_mode_enum"]
+          | null
           attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -244,14 +244,14 @@ export type Database = {
         }
         Update: {
           attendance_method?:
-            | Database["public"]["Enums"]["attendance_method_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_method_enum"]
+          | null
           attendance_mode?:
-            | Database["public"]["Enums"]["attendance_mode_enum"]
-            | null
+          | Database["public"]["Enums"]["attendance_mode_enum"]
+          | null
           attendance_status?:
-            | Database["public"]["Enums"]["attendance_status"]
-            | null
+          | Database["public"]["Enums"]["attendance_status"]
+          | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -815,8 +815,8 @@ export type Database = {
         Row: {
           channel_info: Json | null
           channel_provider:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id: string
           created_at: string
           description: string | null
@@ -832,8 +832,8 @@ export type Database = {
         Insert: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -849,8 +849,8 @@ export type Database = {
         Update: {
           channel_info?: Json | null
           channel_provider?:
-            | Database["public"]["Enums"]["channel_provider"]
-            | null
+          | Database["public"]["Enums"]["channel_provider"]
+          | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -1974,307 +1974,6 @@ export type Database = {
           },
         ]
       }
-      training_plan_program_courses: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: string
-          program_id: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          id?: string
-          program_id: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: string
-          program_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_program_courses_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_program_courses_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_plan_programs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_programs: {
-        Row: {
-          created_at: string
-          description: string | null
-          end_date: string | null
-          id: string
-          name: string
-          order_index: number | null
-          plan_id: string
-          start_date: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          end_date?: string | null
-          id?: string
-          name: string
-          order_index?: number | null
-          plan_id: string
-          start_date?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          end_date?: string | null
-          id?: string
-          name?: string
-          order_index?: number | null
-          plan_id?: string
-          start_date?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_programs_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_surveys: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          end_date: string | null
-          id: string
-          organization_id: string
-          plan_id: string
-          result_summary: Json | null
-          start_date: string | null
-          status: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids: string[] | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id: string
-          plan_id: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id?: string
-          plan_id?: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id?: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_topic_courses: {
-        Row: {
-          course_id: string
-          created_at: string
-          id: string
-          topic_id: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          id?: string
-          topic_id: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          id?: string
-          topic_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_topic_courses_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_topic_courses_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "training_plan_topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_topics: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          name: string
-          order_index: number | null
-          program_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name: string
-          order_index?: number | null
-          program_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          name?: string
-          order_index?: number | null
-          program_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_topics_program_id_fkey"
-            columns: ["program_id"]
-            isOneToOne: false
-            referencedRelation: "training_plan_programs"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plans: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          budget: number | null
-          created_at: string
-          created_by: string
-          end_date: string | null
-          id: string
-          name: string
-          objective: string | null
-          organization_id: string
-          start_date: string | null
-          status: Database["public"]["Enums"]["training_plan_status"]
-          survey_id: string | null
-          updated_at: string
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          budget?: number | null
-          created_at?: string
-          created_by: string
-          end_date?: string | null
-          id?: string
-          name: string
-          objective?: string | null
-          organization_id: string
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_status"]
-          survey_id?: string | null
-          updated_at?: string
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          budget?: number | null
-          created_at?: string
-          created_by?: string
-          end_date?: string | null
-          id?: string
-          name?: string
-          objective?: string | null
-          organization_id?: string
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_status"]
-          survey_id?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plans_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plans_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plans_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -2360,21 +2059,21 @@ export type Database = {
       }
       get_filtered_employees: {
         Args:
-          | {
-              p_branch_id?: string
-              p_department_id?: string
-              p_employee_type?: Database["public"]["Enums"]["employee_type"]
-              p_limit?: number
-              p_page?: number
-              p_search?: string
-            }
-          | {
-              p_branch_id?: string
-              p_department_id?: string
-              p_limit?: number
-              p_page?: number
-              p_search?: string
-            }
+        | {
+          p_branch_id?: string
+          p_department_id?: string
+          p_employee_type?: Database["public"]["Enums"]["employee_type"]
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        | {
+          p_branch_id?: string
+          p_department_id?: string
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
         Returns: {
           employee_id: string
           total_count: number
@@ -2424,20 +2123,20 @@ export type Database = {
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
-        | "publish"
-        | "active"
-        | "deactive"
-        | "pending"
-        | "deleted"
-        | "draft"
+      | "publish"
+      | "active"
+      | "deactive"
+      | "pending"
+      | "deleted"
+      | "draft"
       class_room_type: "single" | "multiple"
       class_session_type: "online" | "offline" | "live"
       course_status:
-        | "published"
-        | "pending"
-        | "draft"
-        | "deleted"
-        | "unpublished"
+      | "published"
+      | "pending"
+      | "draft"
+      | "deleted"
+      | "unpublished"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
@@ -2447,31 +2146,24 @@ export type Database = {
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
       question_type:
-        | "file"
-        | "text"
-        | "checkbox"
-        | "radio"
-        | "matching"
-        | "drag_and_drop"
-        | "boolean"
-        | "order"
+      | "file"
+      | "text"
+      | "checkbox"
+      | "radio"
+      | "matching"
+      | "drag_and_drop"
+      | "boolean"
+      | "order"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
-        | "text"
-        | "rating"
-        | "rating_sort"
-        | "checkbox"
-        | "radio"
-        | "yes_no"
+      | "text"
+      | "rating"
+      | "rating_sort"
+      | "checkbox"
+      | "radio"
+      | "yes_no"
       survey_type: "planning" | "classroom"
-      training_plan_status:
-        | "pending"
-        | "approved"
-        | "rejected"
-        | "deleted"
-        | "pending_survey"
-      training_plan_survey_status: "pending" | "collecting" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2485,116 +2177,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {
@@ -2651,14 +2343,6 @@ export const Constants = {
         "yes_no",
       ],
       survey_type: ["planning", "classroom"],
-      training_plan_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "deleted",
-        "pending_survey",
-      ],
-      training_plan_survey_status: ["pending", "collecting", "closed"],
     },
   },
 } as const

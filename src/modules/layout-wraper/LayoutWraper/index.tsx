@@ -1,13 +1,15 @@
 "use client";
-import MainLayout from "@/shared/ui/layouts/MainLayout";
+import React from "react";
+
 import { ADMIN_MENU_LIST, MenuItemTypeWithPer, STUDENTS_MENU_LIST } from "@/constants/menu-config.constant";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { usePermissions } from "@/modules/permission-wraper";
+import { usePermissions } from "@/modules/permission-wrapper";
+import MainLayout from "@/shared/ui/layouts/MainLayout";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-interface LayoutWraperProps {
+interface LayoutWrapperProps {
   children: React.ReactNode;
 }
-const LayoutWraper: React.FC<LayoutWraperProps> = ({ children }) => {
+const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   //   const user = useAuthStore((state) => state);
   const { data } = useUserOrganization((state) => state);
 
@@ -49,4 +51,4 @@ const LayoutWraper: React.FC<LayoutWraperProps> = ({ children }) => {
 
   return <MainLayout menuItems={mappingPathWithRolePermissions(menuList)}>{children}</MainLayout>;
 };
-export default LayoutWraper;
+export default LayoutWrapper;

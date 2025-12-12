@@ -1,5 +1,5 @@
 "use client";
-import { alpha, Chip, Typography } from "@mui/material";
+import { Chip, Typography, alpha } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 import { GetCoursesResponse } from "@/repository/courses";

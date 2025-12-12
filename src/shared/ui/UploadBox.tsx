@@ -1,5 +1,5 @@
 import { useDropzone } from "react-dropzone";
-import { alpha, IconButton, SxProps, Theme } from "@mui/material";
+import { IconButton, SxProps, Theme, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
 import type { DropzoneOptions } from "react-dropzone";
 import { memo } from "react";

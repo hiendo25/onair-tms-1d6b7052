@@ -1,11 +1,11 @@
 import * as React from "react";
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import { primary, secondary, grey, success, warning, info, error } from "../../theme-color";
+import { error, grey, info, primary, secondary, success, warning } from "../../theme-color";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const checkboxCustomizations: Components<Theme> = {
   MuiCheckbox: {
     defaultProps: {

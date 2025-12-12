@@ -1,22 +1,22 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
   Box,
-  Typography,
-  Grid,
+  Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
   IconButton,
-  Menu,
-  MenuItem,
+  LinearProgress,
   ListItemIcon,
   ListItemText,
-  LinearProgress,
+  Menu,
+  MenuItem,
+  Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
@@ -29,11 +29,11 @@ import { CreateFolderDialog } from "./CreateFolderDialog";
 import { RenameResourceDialog } from "./RenameResourceDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import {
-  getLibraryResources,
-  createFolder,
-  renameResource,
-  deleteResource,
   createFileResource,
+  createFolder,
+  deleteResource,
+  getLibraryResources,
+  renameResource,
 } from "@/services/libraries/library.service";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 

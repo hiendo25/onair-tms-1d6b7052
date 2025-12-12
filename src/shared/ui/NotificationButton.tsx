@@ -1,7 +1,7 @@
 "use client";
 import { Badge, IconButton } from "@mui/material";
 import { Bell01Icon } from "../assets/icons";
-import { useTheme, useMediaQuery, useColorScheme } from "@mui/material";
+import { useColorScheme, useMediaQuery, useTheme } from "@mui/material";
 
 const NotifycationButton = () => {
   const theme = useTheme();

@@ -1,4 +1,4 @@
-import { QuestionAnswer, Question, QuestionType } from "@/types/survey.types";
+import { Question, QuestionAnswer, QuestionType } from "@/types/survey.types";
 import { MOCK_SURVEYS } from "./survey.constants";
 
 // Helper function to generate multiple responses

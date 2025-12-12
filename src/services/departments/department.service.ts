@@ -1,10 +1,10 @@
 import type {
   CreateDepartmentDto,
-  UpdateDepartmentDto,
-  GetDepartmentsParams,
   DepartmentDto,
-  ImportDepartmentsDto,
   DepartmentImportResult,
+  GetDepartmentsParams,
+  ImportDepartmentsDto,
+  UpdateDepartmentDto,
 } from "@/types/dto/departments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import { departmentRepository } from "@/repository/department";

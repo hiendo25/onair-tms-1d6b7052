@@ -1,4 +1,4 @@
-import { ClassQRCode, AttendanceStatus } from "@/model/qr-attendance.model";
+import { AttendanceStatus, ClassQRCode } from "@/model/qr-attendance.model";
 
 export type CreateQRCodePayload = Pick<
   ClassQRCode,

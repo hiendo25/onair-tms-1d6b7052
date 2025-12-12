@@ -1,8 +1,8 @@
 import axios from "axios";
 import type {
+  SendBulkNotificationsResponse,
   SendNotificationRequest,
   SendNotificationResponse,
-  SendBulkNotificationsResponse,
 } from "./type";
 
 

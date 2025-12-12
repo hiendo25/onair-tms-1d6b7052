@@ -4,7 +4,7 @@ import TabAssignmentInformation from "./TabAssignmentInformation";
 import TabAssignmentContent from "./TabAssignmentContent";
 import TabAssignmentSettings from "./TabAssignmentSettings";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { assignmentSchema, Assignment } from "../assignment-form.schema";
+import { Assignment, assignmentSchema } from "../assignment-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import AssignmentTabContainer from "./AssignmentTabContainer";
