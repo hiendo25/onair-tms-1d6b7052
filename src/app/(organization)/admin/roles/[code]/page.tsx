@@ -2,7 +2,7 @@
 import { Alert, Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
 import { RoleFormContainer } from "@/modules/roles/components/RoleForm";
 import { useUpdateRolePermissions } from "@/modules/roles/operations/mutation";

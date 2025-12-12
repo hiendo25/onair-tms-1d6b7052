@@ -11,7 +11,7 @@ import EnterClassRoomsDialog from "./EnterClassRooms";
 import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import Link from "next/link";
 import { ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { ClassSessionType } from "@/model/class-session.model";

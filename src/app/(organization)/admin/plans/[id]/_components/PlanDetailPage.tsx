@@ -2,7 +2,7 @@
 
 import { Box, CircularProgress, Typography } from "@mui/material";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { useGetPlanDetailQuery } from "@/modules/plans/operations/query";
 import PlanDetailView from "./PlanDetailView";
 
@@ -40,9 +40,7 @@ export default function PlanDetailPage({ id }: Props) {
         ]}
       >
         <Box sx={{ p: 3 }}>
-          <Typography>
-            {error instanceof Error ? error.message : "Không tìm thấy kế hoạch đào tạo"}
-          </Typography>
+          <Typography>{error instanceof Error ? error.message : "Không tìm thấy kế hoạch đào tạo"}</Typography>
         </Box>
       </PageContainer>
     );

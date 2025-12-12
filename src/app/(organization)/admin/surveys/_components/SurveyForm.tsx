@@ -27,7 +27,7 @@ import { v4 as uuidv4 } from "uuid";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import { SurveyFormSchema, surveySchema } from "@/modules/surveys/survey-form.schema";
-import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constants";
+import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constant";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import SortableQuestionItem from "./SortableQuestionItem";

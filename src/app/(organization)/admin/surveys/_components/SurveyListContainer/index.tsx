@@ -8,7 +8,7 @@ import { Box, Button, Card, IconButton, InputAdornment, Stack, TextField } from 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { usePermissions } from "@/modules/permission-wrapper";

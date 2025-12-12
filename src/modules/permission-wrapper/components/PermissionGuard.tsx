@@ -4,7 +4,7 @@ import { useEffectEvent } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { forbidden } from "next/navigation";
 
-import { PATHS_WITH_PERMISSIONS } from "@/constants/path-with-permissions";
+import { PATHS_WITH_PERMISSIONS } from "@/constants/path-with-permissions.constant";
 import { usePermissions } from "../store/permission-context";
 
 type PermissionGuardProps = PropsWithChildren;

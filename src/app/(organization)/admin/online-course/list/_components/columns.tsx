@@ -1,7 +1,6 @@
-
 import { Chip, ChipProps, IconButton, Menu, MenuItem, Stack } from "@mui/material";
 import { GridColDef, GridMoreVertIcon } from "@mui/x-data-grid";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import { CourseDto } from "@/types/dto/courses/course.dto";
 import Link from "next/link";
@@ -33,14 +32,14 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
         row.status === "published"
           ? "Đã xuất bản"
           : row.status === "unpublished"
-            ? "Đã hủy xuất bản"
-            : row.status === "draft"
-              ? "Bản nháp"
-              : row.status === "deleted"
-                ? "Đã xóa"
-                : row.status === "pending"
-                  ? "Chờ duyệt"
-                  : "Unknown";
+          ? "Đã hủy xuất bản"
+          : row.status === "draft"
+          ? "Bản nháp"
+          : row.status === "deleted"
+          ? "Đã xóa"
+          : row.status === "pending"
+          ? "Chờ duyệt"
+          : "Unknown";
 
       const STATUS_COLOR_MAP: Record<string, ChipProps["color"]> = {
         published: "success",
@@ -67,14 +66,7 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
               borderColor: "transparent",
             })}
           />
-          {needsContentTag && (
-            <Chip
-              label="Cần hoàn thiện tài liệu"
-              color="warning"
-              variant="outlined"
-              size="small"
-            />
-          )}
+          {needsContentTag && <Chip label="Cần hoàn thiện tài liệu" color="warning" variant="outlined" size="small" />}
         </Stack>
       );
     },
@@ -91,9 +83,7 @@ export const getColumns = ({ isAdmin, onDelete }: ColumnFactoryOptions): GridCol
               </IconButton>
               <Menu {...bindMenu(popupState)}>
                 <MenuItem disabled={!isAdmin}>
-                  <Link href={PATHS.COURSES.EDIT(courseId)}>
-                    Chỉnh sửa
-                  </Link>
+                  <Link href={PATHS.COURSES.EDIT(courseId)}>Chỉnh sửa</Link>
                 </MenuItem>
                 <MenuItem
                   disabled={!isAdmin}

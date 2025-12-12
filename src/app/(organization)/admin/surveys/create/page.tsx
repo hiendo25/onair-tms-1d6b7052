@@ -1,4 +1,4 @@
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import CreateSurveyForm from "./_components/CreateSurveyForm";

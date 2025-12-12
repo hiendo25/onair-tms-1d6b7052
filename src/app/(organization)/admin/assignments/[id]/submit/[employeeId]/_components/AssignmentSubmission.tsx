@@ -3,19 +3,13 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  LinearProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Card, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PageContainer from "@/shared/ui/PageContainer";
-import { useGetAssignmentQuery, useGetAssignmentQuestionsQuery } from "@/modules/assignment-management/operations/query";
+import {
+  useGetAssignmentQuery,
+  useGetAssignmentQuestionsQuery,
+} from "@/modules/assignment-management/operations/query";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
@@ -23,7 +17,7 @@ import { uploadFileToS3 } from "@/utils/s3-upload";
 import { useQueryClient } from "@tanstack/react-query";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 import { FileMetadata } from "@/types/dto/assignments";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
 
@@ -69,7 +63,11 @@ export default function AssignmentSubmission({
   const isEmbedded = variant === "embedded";
 
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId || "");
-  const { data: questions, isLoading: isLoadingQuestions, error: questionsError } = useGetAssignmentQuestionsQuery(assignmentId || "");
+  const {
+    data: questions,
+    isLoading: isLoadingQuestions,
+    error: questionsError,
+  } = useGetAssignmentQuestionsQuery(assignmentId || "");
   const { data: employee, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId || "");
 
   const { control, handleSubmit, watch, setValue } = useForm<SubmissionFormData>({
@@ -115,150 +113,173 @@ export default function AssignmentSubmission({
     }
   }, [onCancel, isEmbedded, router, assignmentId, basePath]);
 
-  const handleFileSelect = React.useCallback((questionId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleFileSelect = React.useCallback(
+    (questionId: string, files: FileList | null) => {
+      if (!files || files.length === 0) return;
 
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const newFiles = Array.from(files);
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        files: [...(currentAnswer.files || []), ...newFiles],
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const newFiles = Array.from(files);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          files: [...(currentAnswer.files || []), ...newFiles],
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleRemoveFile = React.useCallback((questionId: string, fileIndex: number) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleRemoveFile = React.useCallback(
+    (questionId: string, fileIndex: number) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer || !currentAnswer.files) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer || !currentAnswer.files) return;
 
-      const updatedAnswers = [...currentAnswers];
-      const updatedFiles = [...currentAnswer.files];
-      updatedFiles.splice(fileIndex, 1);
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        files: updatedFiles,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        const updatedFiles = [...currentAnswer.files];
+        updatedFiles.splice(fileIndex, 1);
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          files: updatedFiles,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleTextChange = React.useCallback((questionId: string, text: string) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleTextChange = React.useCallback(
+    (questionId: string, text: string) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        textAnswer: text,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          textAnswer: text,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleRadioChange = React.useCallback((questionId: string, optionId: string) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleRadioChange = React.useCallback(
+    (questionId: string, optionId: string) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        radioAnswer: optionId,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          radioAnswer: optionId,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleCheckboxChange = React.useCallback((questionId: string, optionIds: string[]) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleCheckboxChange = React.useCallback(
+    (questionId: string, optionIds: string[]) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        checkboxAnswers: optionIds,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          checkboxAnswers: optionIds,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleAttachmentSelect = React.useCallback((questionId: string, files: FileList | null) => {
-    if (!files || files.length === 0) return;
+  const handleAttachmentSelect = React.useCallback(
+    (questionId: string, files: FileList | null) => {
+      if (!files || files.length === 0) return;
 
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const newFiles = Array.from(files);
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        attachments: [...(currentAnswer.attachments || []), ...newFiles],
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const newFiles = Array.from(files);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          attachments: [...(currentAnswer.attachments || []), ...newFiles],
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleRemoveAttachment = React.useCallback((questionId: string, fileIndex: number) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleRemoveAttachment = React.useCallback(
+    (questionId: string, fileIndex: number) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer || !currentAnswer.attachments) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer || !currentAnswer.attachments) return;
 
-      const updatedAnswers = [...currentAnswers];
-      const updatedAttachments = [...currentAnswer.attachments];
-      updatedAttachments.splice(fileIndex, 1);
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        attachments: updatedAttachments,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        const updatedAttachments = [...currentAnswer.attachments];
+        updatedAttachments.splice(fileIndex, 1);
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          attachments: updatedAttachments,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
   const hasAnyAnswers = () => {
-    return answers?.some((answer) => {
-      switch (answer.questionType) {
-        case "file":
-          return answer.files && answer.files.length > 0;
-        case "text":
-          return answer.textAnswer && answer.textAnswer.trim() !== "";
-        case "radio":
-          return answer.radioAnswer && answer.radioAnswer.trim() !== "";
-        case "checkbox":
-          return answer.checkboxAnswers && answer.checkboxAnswers.length > 0;
-        default:
-          return false;
-      }
-    }) || false;
+    return (
+      answers?.some((answer) => {
+        switch (answer.questionType) {
+          case "file":
+            return answer.files && answer.files.length > 0;
+          case "text":
+            return answer.textAnswer && answer.textAnswer.trim() !== "";
+          case "radio":
+            return answer.radioAnswer && answer.radioAnswer.trim() !== "";
+          case "checkbox":
+            return answer.checkboxAnswers && answer.checkboxAnswers.length > 0;
+          default:
+            return false;
+        }
+      }) || false
+    );
   };
 
   const onSubmit = async (data: SubmissionFormData) => {
@@ -269,14 +290,11 @@ export default function AssignmentSubmission({
       return;
     }
 
-    const confirmed = await confirm(
-      "Bạn có chắc chắn muốn nộp bài? Sau khi nộp bài, bạn không thể chỉnh sửa.",
-      {
-        title: "Xác nhận nộp bài",
-        okText: "Nộp bài",
-        cancelText: "Hủy",
-      }
-    );
+    const confirmed = await confirm("Bạn có chắc chắn muốn nộp bài? Sau khi nộp bài, bạn không thể chỉnh sửa.", {
+      title: "Xác nhận nộp bài",
+      okText: "Nộp bài",
+      cancelText: "Hủy",
+    });
 
     if (!confirmed) return;
 
@@ -303,15 +321,16 @@ export default function AssignmentSubmission({
         throw new Error("Vui lòng trả lời tất cả các câu hỏi");
       }
 
-      const fileAnswers = data.answers.filter(a => a.questionType === "file" && a.files);
-      const answersWithAttachments = data.answers.filter(a => a.attachments && a.attachments.length > 0);
-      const totalFiles = fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0) +
+      const fileAnswers = data.answers.filter((a) => a.questionType === "file" && a.files);
+      const answersWithAttachments = data.answers.filter((a) => a.attachments && a.attachments.length > 0);
+      const totalFiles =
+        fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0) +
         answersWithAttachments.reduce((sum, answer) => sum + (answer.attachments?.length || 0), 0);
       let completedFiles = 0;
 
       const processedAnswers = await Promise.all(
         data.answers.map(async (answer) => {
-          const question = questions?.find(q => q.id === answer.questionId);
+          const question = questions?.find((q) => q.id === answer.questionId);
           if (!question) {
             throw new Error("Không tìm thấy thông tin câu hỏi");
           }
@@ -330,9 +349,7 @@ export default function AssignmentSubmission({
                     onProgress: (percent) => {
                       if (totalFiles > 0) {
                         const currentFileProgress = percent / 100;
-                        const overallProgress = Math.round(
-                          ((completedFiles + currentFileProgress) / totalFiles) * 100
-                        );
+                        const overallProgress = Math.round(((completedFiles + currentFileProgress) / totalFiles) * 100);
                         setUploadProgress(overallProgress);
                       }
                     },
@@ -349,7 +366,7 @@ export default function AssignmentSubmission({
                     fileSize: file.size,
                     mimeType: file.type,
                   };
-                })
+                }),
               );
               answerData = uploadedFiles;
               break;
@@ -387,9 +404,7 @@ export default function AssignmentSubmission({
                   onProgress: (percent) => {
                     if (totalFiles > 0) {
                       const currentFileProgress = percent / 100;
-                      const overallProgress = Math.round(
-                        ((completedFiles + currentFileProgress) / totalFiles) * 100
-                      );
+                      const overallProgress = Math.round(((completedFiles + currentFileProgress) / totalFiles) * 100);
                       setUploadProgress(overallProgress);
                     }
                   },
@@ -406,7 +421,7 @@ export default function AssignmentSubmission({
                   fileSize: file.size,
                   mimeType: file.type,
                 };
-              })
+              }),
             );
           }
 
@@ -415,7 +430,7 @@ export default function AssignmentSubmission({
             answer: answerData,
             attachments: attachmentMetadata,
           };
-        })
+        }),
       );
 
       const response = await fetch(`/api/assignments/${assignmentId}/submit`, {
@@ -440,7 +455,7 @@ export default function AssignmentSubmission({
       });
 
       queryClient.invalidateQueries({
-        queryKey: [GET_ASSIGNMENTS, assignmentId, "students"]
+        queryKey: [GET_ASSIGNMENTS, assignmentId, "students"],
       });
 
       onSubmitted?.({ assignmentId, employeeId });
@@ -457,9 +472,7 @@ export default function AssignmentSubmission({
     } catch (error) {
       console.error("Error submitting assignment:", error);
 
-      const errorMessage = error instanceof Error
-        ? error.message
-        : "Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.";
+      const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.";
 
       notifications.show(errorMessage, {
         severity: "error",
@@ -476,10 +489,7 @@ export default function AssignmentSubmission({
     }
 
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
-      return [
-        { title: "Bài kiểm tra của tôi", path: basePath },
-        { title: "Nộp bài" },
-      ];
+      return [{ title: "Bài kiểm tra của tôi", path: basePath }, { title: "Nộp bài" }];
     }
     return [
       { title: "Bài kiểm tra", path: basePath },
@@ -492,19 +502,11 @@ export default function AssignmentSubmission({
 
   const renderBody = () => {
     if (!assignmentId) {
-      return (
-        <Alert severity="warning">
-          Không tìm thấy thông tin bài kiểm tra.
-        </Alert>
-      );
+      return <Alert severity="warning">Không tìm thấy thông tin bài kiểm tra.</Alert>;
     }
 
     if (!employeeId) {
-      return (
-        <Alert severity="warning">
-          Không xác định được thông tin người học.
-        </Alert>
-      );
+      return <Alert severity="warning">Không xác định được thông tin người học.</Alert>;
     }
 
     if (isLoading) {
@@ -523,11 +525,7 @@ export default function AssignmentSubmission({
     }
 
     if (questionsError) {
-      return (
-        <Alert severity="error">
-          Có lỗi xảy ra khi tải danh sách câu hỏi
-        </Alert>
-      );
+      return <Alert severity="error">Có lỗi xảy ra khi tải danh sách câu hỏi</Alert>;
     }
 
     if (!questions || questions.length === 0) {
@@ -614,11 +612,7 @@ export default function AssignmentSubmission({
       >
         {showBackButton && (
           <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center">
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBack}
-            >
+            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
               Quay lại
             </Button>
           </Stack>
@@ -634,10 +628,7 @@ export default function AssignmentSubmission({
   }
 
   return (
-    <PageContainer
-      title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"}
-      breadcrumbs={breadcrumbs}
-    >
+    <PageContainer title={assignment ? `Nộp bài - ${assignment.name}` : "Nộp bài"} breadcrumbs={breadcrumbs}>
       {content}
     </PageContainer>
   );

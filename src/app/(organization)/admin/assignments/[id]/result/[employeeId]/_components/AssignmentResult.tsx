@@ -1,20 +1,12 @@
 "use client";
 
 import React, { useMemo } from "react";
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Button, Card, CircularProgress, Stack, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { useRouter } from "next/navigation";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import ResultQuestionCard from "./ResultQuestionCard";
 import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
@@ -53,23 +45,14 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 
   const loadingBreadcrumbs = useMemo(() => {
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
-      return [
-        { title: "Bài kiểm tra của tôi", path: basePath },
-        { title: "Kết quả" },
-      ];
+      return [{ title: "Bài kiểm tra của tôi", path: basePath }, { title: "Kết quả" }];
     }
-    return [
-      { title: "Bài tập", path: basePath },
-      { title: "Kết quả" },
-    ];
+    return [{ title: "Bài tập", path: basePath }, { title: "Kết quả" }];
   }, [basePath]);
 
   const successBreadcrumbs = useMemo(() => {
     if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
-      return [
-        { title: "Bài kiểm tra của tôi", path: basePath },
-        { title: "Kết quả" },
-      ];
+      return [{ title: "Bài kiểm tra của tôi", path: basePath }, { title: "Kết quả" }];
     }
     return [
       { title: "Bài tập", path: basePath },
@@ -81,10 +64,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 
   if (isLoading) {
     return (
-      <PageContainer
-        title="Kết quả bài kiểm tra"
-        breadcrumbs={loadingBreadcrumbs}
-      >
+      <PageContainer title="Kết quả bài kiểm tra" breadcrumbs={loadingBreadcrumbs}>
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
           <CircularProgress />
         </Box>
@@ -94,19 +74,10 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 
   if (error || !submission) {
     return (
-      <PageContainer
-        title="Kết quả bài kiểm tra"
-        breadcrumbs={loadingBreadcrumbs}
-      >
+      <PageContainer title="Kết quả bài kiểm tra" breadcrumbs={loadingBreadcrumbs}>
         <Box p={3}>
-          <Alert severity="error">
-            {error instanceof Error ? error.message : "Không thể tải thông tin bài nộp"}
-          </Alert>
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBack}
-            sx={{ mt: 2 }}
-          >
+          <Alert severity="error">{error instanceof Error ? error.message : "Không thể tải thông tin bài nộp"}</Alert>
+          <Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
             Quay lại
           </Button>
         </Box>
@@ -115,10 +86,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   }
 
   return (
-    <PageContainer
-      title={`Kết quả - ${submission.assignmentName}`}
-      breadcrumbs={successBreadcrumbs}
-    >
+    <PageContainer title={`Kết quả - ${submission.assignmentName}`} breadcrumbs={successBreadcrumbs}>
       <Box sx={{ py: 3 }}>
         <AssignmentSubmissionHeader
           avatar={submission.avatar}
@@ -145,20 +113,12 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 
         <Stack spacing={2} sx={{ mb: 3 }}>
           {submission.questions.map((question, index) => (
-            <ResultQuestionCard
-              key={question.id}
-              question={question}
-              questionNumber={index + 1}
-            />
+            <ResultQuestionCard key={question.id} question={question} questionNumber={index + 1} />
           ))}
         </Stack>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBack}
-          >
+          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
             Quay lại
           </Button>
         </Stack>
@@ -168,4 +128,3 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 };
 
 export default AssignmentResult;
-

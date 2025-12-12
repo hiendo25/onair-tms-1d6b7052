@@ -1,3 +1,6 @@
+import React from "react";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+
 import {
   BarChart10Icon,
   BookOpenIcon,
@@ -12,19 +15,18 @@ import {
   UsersIcon2,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import React from "react";
-import { PATHS } from "./path.contstants";
+
+import { PATHS } from "./path.constant";
+import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions.constant";
 import { PermissionsCheck } from "./permission.constant";
-import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions";
 
 type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_PERMISSIONS];
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-    persCheck?: PermissionValue;
-    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-  }
+      persCheck?: PermissionValue;
+      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+    }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;

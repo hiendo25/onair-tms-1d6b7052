@@ -4,7 +4,7 @@ import type { UpdateAssignmentDto } from "@/types/dto/assignments";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
 import { employeesRepository } from "@/repository";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -21,9 +21,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json(
         {
           success: false,
-          message: "Không thể xóa bài kiểm tra đã có học viên được giao. Vui lòng xóa tất cả học viên trước khi xóa bài kiểm tra."
+          message:
+            "Không thể xóa bài kiểm tra đã có học viên được giao. Vui lòng xóa tất cả học viên trước khi xóa bài kiểm tra.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,7 +37,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
         success: true,
         message: "Assignment deleted successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting assignment:", error);
@@ -82,7 +83,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         success: true,
         message: "Assignment updated successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating assignment:", error);
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         success: true,
         data: assignment,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching assignment:", error);
@@ -118,4 +119,3 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
-

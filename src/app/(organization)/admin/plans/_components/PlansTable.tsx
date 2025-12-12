@@ -19,7 +19,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import useDebounce from "@/hooks/useDebounce";
@@ -58,13 +58,21 @@ export default function PlansTable() {
   });
   const plans = data?.data || [];
   const planStats = data?.stats || { total: 0, approved: 0, pending: 0, pending_survey: 0, rejected: 0 };
-  const statusFilters = React.useMemo(() => [
-    { value: "all" as const, label: "Tất cả", count: planStats.total, color: "default" as const },
-    { value: "pending_survey" as const, label: "Chờ khảo sát", count: planStats.pending_survey, color: "warning" as const },
-    { value: "pending" as const, label: "Đang chờ duyệt", count: planStats.pending, color: "warning" as const },
-    { value: "approved" as const, label: "Đã duyệt", count: planStats.approved, color: "success" as const },
-    { value: "rejected" as const, label: "Từ chối", count: planStats.rejected, color: "error" as const },
-  ], [planStats]);
+  const statusFilters = React.useMemo(
+    () => [
+      { value: "all" as const, label: "Tất cả", count: planStats.total, color: "default" as const },
+      {
+        value: "pending_survey" as const,
+        label: "Chờ khảo sát",
+        count: planStats.pending_survey,
+        color: "warning" as const,
+      },
+      { value: "pending" as const, label: "Đang chờ duyệt", count: planStats.pending, color: "warning" as const },
+      { value: "approved" as const, label: "Đã duyệt", count: planStats.approved, color: "success" as const },
+      { value: "rejected" as const, label: "Từ chối", count: planStats.rejected, color: "error" as const },
+    ],
+    [planStats],
+  );
 
   const { mutateAsync: deletePlan } = useDeletePlanMutation();
 
@@ -122,15 +130,12 @@ export default function PlansTable() {
   const handleDelete = async () => {
     if (!selectedPlanId) return;
 
-    const confirmed = await dialogs.confirm(
-      "Bạn có chắc chắn muốn xóa kế hoạch đào tạo này?",
-      {
-        title: "Xác nhận xóa",
-        okText: "Xóa",
-        cancelText: "Hủy",
-        severity: "error",
-      }
-    );
+    const confirmed = await dialogs.confirm("Bạn có chắc chắn muốn xóa kế hoạch đào tạo này?", {
+      title: "Xác nhận xóa",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      severity: "error",
+    });
 
     if (confirmed) {
       try {
@@ -179,7 +184,12 @@ export default function PlansTable() {
       headerName: "Thời gian",
       width: 220,
       renderCell: (_value, row) =>
-        row.startDate && row.endDate ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(row.endDate, FORMAT_DATE_TIME_CLEANER)}` : "Chưa có",
+        row.startDate && row.endDate
+          ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(
+              row.endDate,
+              FORMAT_DATE_TIME_CLEANER,
+            )}`
+          : "Chưa có",
     },
     {
       id: "budget",
@@ -212,12 +222,7 @@ export default function PlansTable() {
   ];
 
   return (
-    <PageContainer
-      title="Kế hoạch đào tạo"
-      breadcrumbs={[
-        { title: "Kế hoạch đào tạo", path: PATHS.PLANS.ROOT },
-      ]}
-    >
+    <PageContainer title="Kế hoạch đào tạo" breadcrumbs={[{ title: "Kế hoạch đào tạo", path: PATHS.PLANS.ROOT }]}>
       <Box
         sx={{
           background: "white",
@@ -257,7 +262,7 @@ export default function PlansTable() {
                     </IconButton>
                   </InputAdornment>
                 ) : undefined,
-              }
+              },
             }}
           />
           <Box sx={{ flex: 1 }} />
@@ -311,7 +316,12 @@ export default function PlansTable() {
           }}
         >
           <StatCard label="Tổng kế hoạch" value={planStats.total} helper="Danh sách hiện có" />
-          <StatCard label="Chờ khảo sát" value={planStats.pending_survey} helper="Đang thu thập khảo sát" tone="warning" />
+          <StatCard
+            label="Chờ khảo sát"
+            value={planStats.pending_survey}
+            helper="Đang thu thập khảo sát"
+            tone="warning"
+          />
           <StatCard label="Đang chờ duyệt" value={planStats.pending} helper="Chờ quyết định" tone="warning" />
           <StatCard label="Đã duyệt" value={planStats.approved} helper="Hoàn tất phê duyệt" tone="success" />
           <StatCard label="Bị từ chối" value={planStats.rejected} helper="Cần chỉnh sửa" tone="error" />
@@ -335,7 +345,9 @@ export default function PlansTable() {
               {hasFilter ? "Không có kế hoạch khớp bộ lọc" : "Chưa có kế hoạch nào"}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-              {hasFilter ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm." : "Tạo kế hoạch đầu tiên để bắt đầu quản lý đào tạo."}
+              {hasFilter
+                ? "Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm."
+                : "Tạo kế hoạch đầu tiên để bắt đầu quản lý đào tạo."}
             </Typography>
             <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap>
               {hasFilter && (

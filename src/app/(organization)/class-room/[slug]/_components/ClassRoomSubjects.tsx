@@ -1,4 +1,4 @@
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { FORMAT_DATE_TIME_SHORTER } from "@/lib";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { AccessTime, MenuBook as MenuBookIcon, OndemandVideo } from "@mui/icons-material";

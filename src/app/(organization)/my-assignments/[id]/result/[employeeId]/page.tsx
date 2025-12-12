@@ -1,5 +1,5 @@
 import AssignmentResult from "@/app/(organization)/admin/assignments/[id]/result/[employeeId]/_components/AssignmentResult";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 interface StudentAssignmentResultPageProps {
   params: Promise<{
@@ -15,4 +15,3 @@ const StudentAssignmentResultPage = async ({ params }: StudentAssignmentResultPa
 };
 
 export default StudentAssignmentResultPage;
-

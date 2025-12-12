@@ -1,4 +1,4 @@
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,10 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
 
   const isSingleSession = useMemo(() => data?.room_type === "single", [data?.room_type]);
 
-  const isAllOnline = useMemo(() => data?.sessions.every((session) => session.session_type !== 'offline') ?? true, [data?.sessions]);
+  const isAllOnline = useMemo(
+    () => data?.sessions.every((session) => session.session_type !== "offline") ?? true,
+    [data?.sessions],
+  );
 
   const firstSessionId = useMemo(() => data?.sessions[0]?.id, [data?.sessions]);
 
@@ -97,7 +100,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
       setDialogOpen(false);
 
       const selectedSession = data?.sessions.find((session) => session.id === sessionId);
-      const isOnline = selectedSession?.session_type !== 'offline';
+      const isOnline = selectedSession?.session_type !== "offline";
 
       joinSession({
         sessionId,

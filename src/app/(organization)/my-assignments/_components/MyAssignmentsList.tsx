@@ -30,9 +30,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import type { MyAssignmentStatusFilter } from "@/types/dto/assignments";
- import useDebounce from "@/hooks/useDebounce";
+import useDebounce from "@/hooks/useDebounce";
 
 type StatusFilterUI = "all" | MyAssignmentStatusFilter;
 
@@ -53,7 +53,11 @@ export default function MyAssignmentsList() {
     setPage(0);
   }, [debouncedSearch, statusFilter]);
 
-  const { data: paginatedResult, isLoading, error } = useGetMyAssignmentsQuery({
+  const {
+    data: paginatedResult,
+    isLoading,
+    error,
+  } = useGetMyAssignmentsQuery({
     page,
     limit: rowsPerPage,
     search: debouncedSearch,
@@ -128,10 +132,7 @@ export default function MyAssignmentsList() {
   }, [assignments, selectedAssignmentId]);
 
   return (
-    <PageContainer
-      title="Bài kiểm tra của tôi"
-      breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}
-    >
+    <PageContainer title="Bài kiểm tra của tôi" breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}>
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
           <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -234,13 +235,9 @@ export default function MyAssignmentsList() {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2">
-                              {formatDate(assignment.submitted_at)}
-                            </Typography>
+                            <Typography variant="body2">{formatDate(assignment.submitted_at)}</Typography>
                           </TableCell>
-                          <TableCell>
-                            {getStatusChip(assignment.status, assignment.has_submitted)}
-                          </TableCell>
+                          <TableCell>{getStatusChip(assignment.status, assignment.has_submitted)}</TableCell>
                           <TableCell>
                             {assignment.status === "graded" && assignment.score !== null ? (
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -253,10 +250,7 @@ export default function MyAssignmentsList() {
                             )}
                           </TableCell>
                           <TableCell align="right">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => handleOpenMenu(e, assignment.assignment_id)}
-                            >
+                            <IconButton size="small" onClick={(e) => handleOpenMenu(e, assignment.assignment_id)}>
                               <MoreVertIcon />
                             </IconButton>
                           </TableCell>
@@ -276,9 +270,7 @@ export default function MyAssignmentsList() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[10, 25, 50, 100]}
                 labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} trong tổng số ${count}`
-                }
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} trong tổng số ${count}`}
               />
             </>
           )}
@@ -297,16 +289,10 @@ export default function MyAssignmentsList() {
             horizontal: "right",
           }}
         >
-          <MenuItem
-            onClick={handleSubmitAssignment}
-            disabled={selectedAssignment?.status === "graded"}
-          >
+          <MenuItem onClick={handleSubmitAssignment} disabled={selectedAssignment?.status === "graded"}>
             Nộp bài
           </MenuItem>
-          <MenuItem
-            onClick={handleViewResult}
-            disabled={selectedAssignment?.status !== "graded"}
-          >
+          <MenuItem onClick={handleViewResult} disabled={selectedAssignment?.status !== "graded"}>
             Xem kết quả
           </MenuItem>
         </Menu>
@@ -314,4 +300,3 @@ export default function MyAssignmentsList() {
     </PageContainer>
   );
 }
-

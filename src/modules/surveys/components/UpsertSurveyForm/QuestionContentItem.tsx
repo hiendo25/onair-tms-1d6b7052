@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Control, Controller, FieldErrors, useWatch } from "react-hook-form";
 
-import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constants";
+import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constant";
 import { FaceSadIcon, FaceSmileIcon, Trash01Icon } from "@/shared/assets/icons";
 import RHFCheckboxField from "@/shared/ui/form/RHFCheckboxField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";

@@ -3,7 +3,7 @@ import { useMemo, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 import { GetCourseByIdResponse } from "@/repository/courses";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import ManageCourseForm, {
   ManageCourseFormProps,
   ManageCourseFormRef,

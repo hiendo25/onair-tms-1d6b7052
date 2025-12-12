@@ -12,7 +12,7 @@ import { mapPlanDetailToFormValues } from "@/modules/plans/plan-form.utils";
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PlanStepId } from "@/modules/plans/plan-step.utils";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { PlanStatus } from "@/model/plan.model";
 
 interface EditPlanFormProps {

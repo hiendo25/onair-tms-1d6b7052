@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import type { GetClassRoomByIdData } from "../page";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];

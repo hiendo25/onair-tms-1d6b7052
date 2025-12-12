@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Box } from "@mui/material";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { PlanDetailDto } from "@/modules/plans/types";
 import PlanInfoCards from "./PlanInfoCards";
 import PlanStatistics from "./PlanStatistics";
@@ -41,10 +41,7 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
         />
 
         {/* Program List Section */}
-        <ProgramAccordion
-          programs={planDetail.programs}
-          programsCount={planDetail.programsCount}
-        />
+        <ProgramAccordion programs={planDetail.programs} programsCount={planDetail.programsCount} />
       </Box>
     </PageContainer>
   );
