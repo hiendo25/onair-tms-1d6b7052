@@ -13,8 +13,8 @@ const useUpsertSurvey = () => {
   const queryClient = useQueryClient();
   const { mutate: createSurvey, isPending: isPendingCreate } = useTMutation({
     mutationFn: async (variables: { type: EnumSurveyType; formData: UpsertSurveyFormData }) => {
-      const data = await upsertSurvey.createSurvey(variables);
-      return data;
+      console.log("createeeee");
+      return await upsertSurvey.createSurvey(variables);
     },
     onSuccess(data, variables, onMutateResult, context) {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_SURVEYS] });
@@ -23,9 +23,9 @@ const useUpsertSurvey = () => {
 
   const { mutate: updateSurvey, isPending: isPendingUpdate } = useTMutation({
     mutationFn: async (variables: { surveyId: string; formData: UpsertSurveyFormData }) => {
+      console.log("calllllll");
       const { surveyId, formData } = variables;
-      const data = await upsertSurvey.updateSurvey(surveyId, formData);
-      return data;
+      return await upsertSurvey.updateSurvey(surveyId, formData);
     },
     onSuccess(data, variables, onMutateResult, context) {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_SURVEYS] });
