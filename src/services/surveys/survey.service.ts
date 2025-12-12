@@ -1,4 +1,4 @@
-import { surveysRepository } from "@/repository/surveys";
+import { surveysRepository } from "@/repository";
 import { PaginatedResult, PaginationParams } from "@/types/dto/pagination.dto";
 
 export interface PlanningSurveyOption {

@@ -24,8 +24,8 @@ import { PlanStatus } from "@/model/plan.model";
 import { Survey } from "@/modules/plans/plan-form.schema";
 import { useSnackbar } from "notistack";
 import { validatePlanStep } from "@/modules/plans/plan-step.utils";
-import { PlanSurveySection } from "./PlanSurveySection";
 import { isSurveyLocked } from "../../../helper";
+import { PlanSurveySection } from "./PlanSurveySection";
 
 interface StepPlanInfoProps {
   onContinue: () => void;
