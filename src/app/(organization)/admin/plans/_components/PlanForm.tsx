@@ -13,12 +13,12 @@ import {
 import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
 import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
 import { PlanStatus } from "@/model/plan.model";
-import StepPlanInfo from "./Steps/StepPlanInfos";
-import StepTrainingProgram from "./Steps/StepTrainingProgram";
-import StepTrainingTopics from "./Steps/StepTrainingTopics";
-import StepAssignCourses from "./Steps/StepAssignCourses";
-import StepApproval from "./Steps/StepApproval";
-import StepNavigation from "./Steps/StepNavigation";
+import StepPlanInfo from "./steps/StepPlanInfos";
+import StepTrainingProgram from "./steps/StepTrainingProgram";
+import StepTrainingTopics from "./steps/StepTrainingTopics";
+import StepAssignCourses from "./steps/StepAssignCourses";
+import StepApproval from "./steps/StepApproval";
+import StepNavigation from "./steps/StepNavigation";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
