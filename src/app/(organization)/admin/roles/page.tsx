@@ -6,7 +6,7 @@ import { Box, Button, IconButton } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { usePermissions } from "@/modules/permission-wrapper";
 import Can from "@/modules/permission-wrapper/components/Can";

@@ -35,7 +35,7 @@ import type { AssignmentDto } from "@/types/dto/assignments";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export default function AssignmentList() {
   const router = useRouter();

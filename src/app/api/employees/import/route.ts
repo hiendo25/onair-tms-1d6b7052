@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { employeeFileService } from "@/services";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,10 +9,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json(
-        { error: "Không tìm thấy file trong request" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Không tìm thấy file trong request" }, { status: 400 });
     }
 
     const result = await employeeFileService.importEmployees(file);
@@ -22,13 +19,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("Error importing employee file:", error);
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi import file nhân viên";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi import file nhân viên";
 
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

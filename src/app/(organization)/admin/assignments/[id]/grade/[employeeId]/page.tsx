@@ -1,7 +1,7 @@
 import React from "react";
 import PageContainer from "@/shared/ui/PageContainer";
 import AssignmentGrading from "./_components/AssignmentGrading";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 interface PageProps {
   params: Promise<{

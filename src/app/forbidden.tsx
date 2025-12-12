@@ -1,7 +1,7 @@
 import { Button } from "@mui/material";
 import Link from "next/link";
 
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 export default function Forbidden() {
   return (
     <div className="flex items-center justify-center w-screen h-screen">

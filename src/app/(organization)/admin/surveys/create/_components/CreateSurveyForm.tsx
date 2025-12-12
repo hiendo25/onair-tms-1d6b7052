@@ -3,7 +3,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import UpsertSurveyForm, { UpsertSurveyFormProps } from "@/modules/surveys/components/UpsertSurveyForm";
 import { useUpsertSurvey } from "@/modules/surveys/hooks/useUpsertSurvey";
 

@@ -1,5 +1,6 @@
 import { Question, QuestionAnswer, QuestionType } from "@/types/survey.types";
-import { MOCK_SURVEYS } from "./survey.constants";
+
+import { MOCK_SURVEYS } from "./survey.constant";
 
 // Helper function to generate multiple responses
 function generateResponses(count: number, generator: (index: number) => QuestionAnswer[]): QuestionAnswer[][] {
@@ -12,11 +13,133 @@ function generateResponses(count: number, generator: (index: number) => Question
  */
 function generateRatingAnswer(responseIndex: number): number {
   const ratingDistribution = [
-    1, 1, 1, // 3 responses with 1 star (2.4%)
-    2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // 12 responses with 2 stars (9.4%)
-    3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, // 28 responses with 3 stars (22.0%)
-    4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, // 56 responses with 4 stars (44.1%)
-    5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, // 28 responses with 5 stars (22.0%)
+    1,
+    1,
+    1, // 3 responses with 1 star (2.4%)
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2, // 12 responses with 2 stars (9.4%)
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3, // 28 responses with 3 stars (22.0%)
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4, // 56 responses with 4 stars (44.1%)
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5, // 28 responses with 5 stars (22.0%)
   ];
   return ratingDistribution[responseIndex % ratingDistribution.length];
 }
@@ -45,9 +168,7 @@ function generateCheckboxAnswer(responseIndex: number, options: string[]): strin
   ];
 
   const pattern = patterns[responseIndex % patterns.length];
-  return pattern
-    .filter(index => index < options.length)
-    .map(index => options[index]);
+  return pattern.filter((index) => index < options.length).map((index) => options[index]);
 }
 
 /**
@@ -146,7 +267,11 @@ function generateTextAnswer(responseIndex: number, isRequired: boolean, surveyId
 /**
  * Generate mock answer for a single question based on its type
  */
-function generateAnswerForQuestion(question: Question, responseIndex: number, surveyId?: string): QuestionAnswer | null {
+function generateAnswerForQuestion(
+  question: Question,
+  responseIndex: number,
+  surveyId?: string,
+): QuestionAnswer | null {
   const baseAnswer = {
     questionId: question.id,
     questionType: question.type,
@@ -197,7 +322,7 @@ function generateAnswerForQuestion(question: Question, responseIndex: number, su
  * Generate mock responses for a specific survey
  */
 function generateResponsesForSurvey(surveyId: string): QuestionAnswer[][] {
-  const survey = MOCK_SURVEYS.find(s => s.id === surveyId);
+  const survey = MOCK_SURVEYS.find((s) => s.id === surveyId);
 
   if (!survey) {
     return [];
@@ -230,6 +355,5 @@ export const MOCK_SURVEY_RESPONSES: Record<string, QuestionAnswer[][]> = new Pro
     get: (target, surveyId: string) => {
       return generateResponsesForSurvey(surveyId);
     },
-  }
+  },
 );
-

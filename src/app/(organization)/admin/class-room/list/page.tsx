@@ -1,7 +1,6 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import ClassRoomContainer from "./_components/ClassRoomContainer";
-import { PATHS } from "@/constants/path.contstants";
-
+import { PATHS } from "@/constants/path.constant";
 
 const ClassRoomList = () => {
   return (
@@ -18,13 +17,13 @@ const ClassRoomList = () => {
         },
         {
           title: "Danh sách lớp học",
-          path: ""
+          path: "",
         },
       ]}
     >
       <ClassRoomContainer />
     </PageContainer>
-  )
+  );
 };
 
 export default ClassRoomList;

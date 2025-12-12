@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 import { Metadata, ResolvingMetadata } from "next";
 import dayjs, { Dayjs } from "dayjs";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 interface EditClassRoomPageProps {
   params: Promise<{
     id: string;

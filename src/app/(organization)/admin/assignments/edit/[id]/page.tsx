@@ -1,6 +1,6 @@
 import PageContainer from "@/shared/ui/PageContainer";
 import UpdateAssignment from "./_components/UpdateAssignment";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 interface EditAssignmentPageProps {
   params: Promise<{
@@ -27,4 +27,3 @@ export default async function EditAssignmentPage({ params }: EditAssignmentPageP
     </PageContainer>
   );
 }
-

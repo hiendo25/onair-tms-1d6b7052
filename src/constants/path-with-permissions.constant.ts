@@ -1,4 +1,4 @@
-import { PATHS } from "./path.contstants";
+import { PATHS } from "./path.constant";
 import { PermissionsCheck } from "./permission.constant";
 
 // Utility type to extract all nested string values from PATHS object

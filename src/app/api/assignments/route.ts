@@ -4,7 +4,7 @@ import type { CreateAssignmentDto } from "@/types/dto/assignments";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
 import { employeesRepository } from "@/repository";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
         message: "Tạo bài kiểm tra thành công",
         assignmentId: result.assignmentId,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating assignment:", error);
@@ -76,4 +76,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
-

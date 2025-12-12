@@ -11,7 +11,7 @@ import AssignmentTabContainer from "./AssignmentTabContainer";
 import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
 import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export const TAB_KEYS_ASSIGNMENT = {
   "assignTab-information": "assignTab-information",
@@ -127,12 +127,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               >
                 <CloseIcon />
               </IconButton>
-              <Button
-                size="large"
-                onClick={handleClickSubmit}
-                disabled={isLoading}
-                loading={isLoading}
-              >
+              <Button size="large" onClick={handleClickSubmit} disabled={isLoading} loading={isLoading}>
                 {action === "edit" ? "Cập nhật" : "Tạo bài kiểm tra"}
               </Button>
             </div>
@@ -146,4 +141,3 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
 AssignmentFormContainer.displayName = "AssignmentFormContainer";
 
 export default AssignmentFormContainer;
-

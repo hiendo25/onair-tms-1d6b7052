@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 import PlanForm from "../../_components/PlanForm";
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { useCreatePlanMutation } from "@/modules/plans/operations/mutation";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
@@ -14,7 +14,11 @@ export default function CreatePlanForm() {
   const { mutateAsync: createPlan, isPending } = useCreatePlanMutation();
   const userInfo = useUserOrganization((state) => state.data);
 
-  const createPlanAndRedirect = async (data: PlanFormSchema, successMessage: string, status?: "pending" | "pending_survey") => {
+  const createPlanAndRedirect = async (
+    data: PlanFormSchema,
+    successMessage: string,
+    status?: "pending" | "pending_survey",
+  ) => {
     try {
       await createPlan({
         form: data,
@@ -30,7 +34,8 @@ export default function CreatePlanForm() {
   };
 
   const handleSubmit = (data: PlanFormSchema) => createPlanAndRedirect(data, "Tạo kế hoạch thành công", "pending");
-  const handleExecutePlan = (data: PlanFormSchema) => createPlanAndRedirect(data, "Đã tạo kế hoạch (khảo sát)", "pending_survey");
+  const handleExecutePlan = (data: PlanFormSchema) =>
+    createPlanAndRedirect(data, "Đã tạo kế hoạch (khảo sát)", "pending_survey");
 
   return (
     <PlanForm

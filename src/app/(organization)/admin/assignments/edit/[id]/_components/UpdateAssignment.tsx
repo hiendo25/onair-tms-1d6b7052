@@ -8,7 +8,7 @@ import { useGetAssignmentQuery } from "@/modules/assignment-management/operation
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 interface UpdateAssignmentProps {
   assignmentId: string;
@@ -79,4 +79,3 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
 };
 
 export default UpdateAssignment;
-

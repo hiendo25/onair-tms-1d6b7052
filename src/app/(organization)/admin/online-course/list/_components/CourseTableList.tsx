@@ -6,7 +6,7 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
 import { useGetCourseListQuery, useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
 import Link from "next/link";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 // import { getColumnsCourse } from "./column-course";
 import useDebounce from "@/hooks/useDebounce";
