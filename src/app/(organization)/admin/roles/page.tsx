@@ -110,14 +110,14 @@ const RolesPage = () => {
               return (
                 <>
                   <Can pers={["role:update"]}>
-                    <IconButton
-                      size="small"
-                      href={PATHS.ROLE.ROLES_ID(row.code)}
-                      LinkComponent={Link}
-                      className="text-blue-600 bg-transparent hover:bg-blue-50"
-                    >
-                      <Edit02Icon className="w-4 h-4" />
-                    </IconButton>
+                    <Link href={PATHS.ROLE.ROLES_ID(row.code)}>
+                      <IconButton
+                        size="small"
+                        className="text-blue-600 bg-transparent hover:bg-blue-50"
+                      >
+                        <Edit02Icon className="w-4 h-4" />
+                      </IconButton>
+                    </Link>
                   </Can>
                   <Can pers={["role:delete"]}>
                     <IconButton
@@ -141,9 +141,11 @@ const RolesPage = () => {
       <div className="bg-white rounded-lg">
         <div className="header px-4 py-3">
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Button variant="contained" startIcon={<AddIcon />} LinkComponent={Link} href={PATHS.ROLE.CREATE}>
-              Tạo vai trò
-            </Button>
+            <Link href={PATHS.ROLE.CREATE}>
+              <Button variant="contained" startIcon={<AddIcon />}>
+                Tạo vai trò
+              </Button>
+            </Link>
           </Box>
         </div>
         <TableData

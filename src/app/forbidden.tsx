@@ -8,9 +8,11 @@ export default function Forbidden() {
       <div>
         <h1>403 - Access Dened</h1>
         <p>You do not have permission to view this resource.</p>
-        <Button LinkComponent={Link} href={PATHS.DASHBOARD}>
-          Quay lai
-        </Button>
+        <Link href={PATHS.DASHBOARD}>
+          <Button>
+            Quay lai
+          </Button>
+        </Link>
       </div>
     </div>
   );
