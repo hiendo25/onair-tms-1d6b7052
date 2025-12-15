@@ -1,5 +1,5 @@
 "use client";
-import { Chip, ChipProps, IconButton } from "@mui/material";
+import { Chip, ChipProps, IconButton, Stack } from "@mui/material";
 import { GetCoursesV2Response } from "@/repository/courses";
 import { TableDataProps } from "@/shared/ui/TableData";
 import dayjs from "dayjs";
@@ -38,14 +38,14 @@ export const columnsCourse: TableDataProps<CourseRowItem>["columns"] = [
         row.status === "published"
           ? "Đã xuất bản"
           : row.status === "unpublished"
-          ? "Đã hủy xuất bản"
-          : row.status === "draft"
-          ? "Bản nháp"
-          : row.status === "deleted"
-          ? "Đã xóa"
-          : row.status === "pending"
-          ? "Chờ duyệt"
-          : "Unknown";
+            ? "Đã hủy xuất bản"
+            : row.status === "draft"
+              ? "Bản nháp"
+              : row.status === "deleted"
+                ? "Đã xóa"
+                : row.status === "pending"
+                  ? "Chờ duyệt"
+                  : "Unknown";
 
       const STATUS_COLOR_MAP: Record<string, ChipProps["color"]> = {
         published: "success",
@@ -56,22 +56,26 @@ export const columnsCourse: TableDataProps<CourseRowItem>["columns"] = [
       } as const;
 
       const getChipColor = (status: string): ChipProps["color"] => {
-        return STATUS_COLOR_MAP[status] || "default";
+        return STATUS_COLOR_MAP[status] ?? "default";
       };
 
+      const needsContentTag = row.status === "draft";
+
       return (
-        <>
+        <Stack direction="row" spacing={1} alignItems="center">
           <Chip
             label={labelChip}
             color={getChipColor(row.status)}
-            sx={(theme) => ({
-              // backgroundColor: alpha(theme.palette.primary["main"], 0.2),
-              // color: theme.palette.primary["dark"],
-              // borderRadius: "0.275rem",
-              // borderColor: "transparent",
-            })}
           />
-        </>
+          {needsContentTag && (
+            <Chip
+              label="Cần hoàn thiện tài liệu"
+              color="warning"
+              variant="outlined"
+              size="small"
+            />
+          )}
+        </Stack>
       );
     },
   },

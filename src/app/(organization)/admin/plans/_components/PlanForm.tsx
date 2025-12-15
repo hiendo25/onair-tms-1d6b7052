@@ -1,266 +1,117 @@
 "use client";
 
 import * as React from "react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { planSchema, PlanFormSchema } from "@/modules/plans/plan-form.schema";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import StepNavigation, { Step } from "./StepNavigation";
-import StepPlanInfo from "./StepPlanInfo";
-import StepTrainingProgram from "./StepTrainingProgram";
-import StepTrainingTopics from "./StepTrainingTopics";
-import StepApproval from "./StepApproval";
-import StepAssignCourses from "./StepAssignCourses";
+import { PlanFormSchema, PlanFormValues, Survey, planSchema } from "@/modules/plans/plan-form.schema";
+import {
+  PLAN_STEPS,
+  PlanStepId,
+} from "@/modules/plans/plan-step.utils";
+import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
+import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
+import { PlanStatus } from "@/model/plan.model";
+import StepPlanInfo from "./steps/StepPlanInfos";
+import StepTrainingProgram from "./steps/StepTrainingProgram";
+import StepTrainingTopics from "./steps/StepTrainingTopics";
+import StepAssignCourses from "./steps/StepAssignCourses";
+import StepApproval from "./steps/StepApproval";
+import StepNavigation from "./steps/StepNavigation";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;
   isLoading?: boolean;
   mode?: "create" | "edit";
   initialData?: PlanFormSchema;
+  planStatus?: PlanStatus;
+  initialStep?: PlanStepId;
+  onExecutePlan?: (data: PlanFormSchema) => void | Promise<void>;
+  isExecuteLoading?: boolean;
 }
-
-const STEPS: Step[] = [
-  {
-    id: 1,
-    label: "Thông tin kế hoạch",
-    description: "Mục tiêu, thời gian và ngân sách",
-  },
-  {
-    id: 2,
-    label: "Chương trình đào tạo",
-    description: "Chương trình đào tạo của bạn",
-  },
-  {
-    id: 3,
-    label: "Chủ đề",
-    description: "Chương trình đào tạo của bạn",
-  },
-  {
-    id: 4,
-    label: "Gửi duyệt đề xuất",
-    description: "Gửi duyệt lên cấp phê duyệt",
-  },
-  {
-    id: 5,
-    label: "Gán môn học",
-    description: "Gán môn học vào kế hoạch được duyệt",
-  },
-];
 
 export default function PlanForm({
   onSubmit,
   isLoading = false,
   mode = "create",
   initialData,
+  planStatus = "pending",
+  initialStep,
+  onExecutePlan,
+  isExecuteLoading = false,
 }: PlanFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
+  const defaultValues = useMemo(
+    () => buildPlanFormDefaultValues(initialData),
+    [initialData],
+  );
 
-  // Helper function to determine which steps should be marked as completed based on initialData
-  const getInitialCompletedSteps = (): number[] => {
-    if (!initialData || mode === "create") return [];
-
-    const completed: number[] = [];
-
-    // Step 1: Check if plan info is filled
-    if (initialData.info?.name && initialData.info?.objective) {
-      completed.push(1);
-    }
-
-    // Step 2: Check if programs exist
-    if (initialData.programs && initialData.programs.length > 0) {
-      completed.push(2);
-    }
-
-    // Step 3: Check if all programs have topics
-    if (initialData.programs && initialData.programs.length > 0) {
-      const allProgramsHaveTopics = initialData.programs.every(
-        program => program.topics && program.topics.length > 0
-      );
-      if (allProgramsHaveTopics) {
-        completed.push(3);
-      }
-    }
-
-    // Step 4: In edit mode, if we have data for steps 1-3, mark step 4 as completed too
-    if (completed.includes(1) && completed.includes(2) && completed.includes(3)) {
-      completed.push(4);
-    }
-
-    // Step 5: In edit mode, if we have data for steps 1-4, mark step 5 as completed too
-    // Step 5 has no validation requirements, so it's automatically completed in edit mode
-    if (completed.includes(1) && completed.includes(2) && completed.includes(3) && completed.includes(4)) {
-      completed.push(5);
-    }
-
-    return completed;
-  };
-
-  const [completedSteps, setCompletedSteps] = useState<number[]>(getInitialCompletedSteps());
-
-  const defaultValues: PlanFormSchema = initialData || {
-    info: {
-      name: "",
-      objective: "",
-      startDate: undefined,
-      endDate: undefined,
-      budget: undefined,
-    },
-    programs: [],
-  };
-
-  const { control, handleSubmit, formState: { errors }, trigger, getValues, setError, clearErrors } = useForm<PlanFormSchema>({
+  const methods = useForm<PlanFormValues, undefined, PlanFormSchema>({
     resolver: zodResolver(planSchema),
     defaultValues,
   });
 
-  const getStepFieldName = (stepId: number): "info" | "programs" | undefined => {
-    switch (stepId) {
-      case 1:
-        return "info";
-      case 2:
-      case 3:
-        return "programs";
-      default:
-        return undefined;
-    }
-  };
+  const survey = methods.watch("info.survey") as Survey | undefined;
 
-  const handleContinue = async () => {
-    // Step 3: Custom validation to ensure all programs have at least 1 topic
-    if (currentStep === 3) {
-      const programs = getValues("programs");
-      let hasError = false;
+  const {
+    currentStep,
+    completedSteps,
+    goBack,
+    goNext,
+    goToStep,
+    isStepAccessible,
+  } = usePlanStepFlow({
+    mode,
+    initialData: defaultValues,
+    trigger: methods.trigger,
+    planStatus,
+    initialStep,
+    survey,
+  });
 
-      // Clear previous errors
-      programs.forEach((_, index) => {
-        clearErrors(`programs.${index}.topics`);
-      });
-
-      // Check each program for topics
-      programs.forEach((program, index) => {
-        if (!program.topics || program.topics.length === 0) {
-          setError(`programs.${index}.topics`, {
-            type: "manual",
-            message: "Mỗi chương trình cần có ít nhất 1 chủ đề.",
-          });
-          hasError = true;
-        }
-      });
-
-      if (hasError) {
-        return; // Don't proceed if validation fails
-      }
-    }
-
-    // Standard validation for other steps
-    const fieldName = getStepFieldName(currentStep);
-    const isValid = fieldName ? await trigger(fieldName) : true;
-    if (isValid) {
-      if (!completedSteps.includes(currentStep)) {
-        setCompletedSteps([...completedSteps, currentStep]);
-      }
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handleBack = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  const handleStepClick = async (stepId: number) => {
-    const accessible = isStepAccessible(stepId);
-    if (!accessible) return;
-
-    if (stepId !== currentStep) {
-      const currentFieldName = getStepFieldName(currentStep);
-      const isValid = currentFieldName ? await trigger(currentFieldName) : true;
-      if (!isValid && completedSteps.includes(currentStep)) {
-        setCompletedSteps(completedSteps.filter(s => s !== currentStep));
-      } else if (isValid && !completedSteps.includes(currentStep)) {
-        setCompletedSteps([...completedSteps, currentStep]);
-      }
-    }
-
-    setCurrentStep(stepId);
-
-    // Mark Step 5 as completed when navigating to it in edit mode
-    // Step 5 has no validation requirements, so it's automatically completed
-    if (mode === "edit" && stepId === 5 && !completedSteps.includes(5)) {
-      setCompletedSteps([...completedSteps, 5]);
-    }
-
-    if (completedSteps.includes(stepId)) {
-      const stepFieldName = getStepFieldName(stepId);
-      const isStepValid = stepFieldName ? await trigger(stepFieldName) : true;
-      if (!isStepValid) {
-        setCompletedSteps(completedSteps.filter(s => s !== stepId));
-      }
-    }
-  };
-
-  const isStepAccessible = (stepId: number) => {
-    if (stepId === 1) return true;
-    // Step 5 (Gán môn học) is now accessible in both create and edit mode
-    return completedSteps.includes(stepId - 1);
-  };
+  const handleFormSubmit = methods.handleSubmit(onSubmit);
+  const handleExecutePlan = onExecutePlan ? methods.handleSubmit(onExecutePlan) : undefined;
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <StepPlanInfo
-            control={control}
-            errors={errors}
-            onContinue={handleContinue}
+            onContinue={goNext}
             isLoading={isLoading}
+            planStatus={planStatus}
+            onExecutePlan={handleExecutePlan}
+            isExecuting={isExecuteLoading}
           />
         );
       case 2:
         return (
           <StepTrainingProgram
-            control={control}
-            errors={errors}
-            onContinue={handleContinue}
+            onContinue={goNext}
           />
         );
       case 3:
         return (
           <StepTrainingTopics
-            control={control}
-            errors={errors}
-            onContinue={handleContinue}
-            onBack={handleBack}
+            onContinue={goNext}
+            onBack={goBack}
           />
         );
       case 4:
         return (
-          <StepApproval
-            control={control}
-            errors={errors}
-            onBack={handleBack}
-            onSubmit={handleSubmit(onSubmit)}
-            onContinue={() => {
-              // Mark Step 4 as completed before navigating to Step 5
-              if (!completedSteps.includes(4)) {
-                setCompletedSteps([...completedSteps, 4]);
-              }
-              setCurrentStep(5);
-            }}
+          <StepAssignCourses
+            onBack={goBack}
+            onContinue={goNext}
             isLoading={isLoading}
-            mode={mode}
           />
         );
       case 5:
         return (
-          <StepAssignCourses
-            control={control}
-            errors={errors}
-            onBack={handleBack}
-            onSave={handleSubmit(onSubmit)}
+          <StepApproval
+            onBack={goBack}
+            onSubmit={handleFormSubmit}
             isLoading={isLoading}
+            status={planStatus}
           />
         );
       default:
@@ -269,23 +120,29 @@ export default function PlanForm({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-      <Box sx={{ display: "flex", gap: 3 }}>
+    <FormProvider {...methods}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "360px 1fr" },
+          gap: 3,
+          alignItems: "flex-start",
+        }}
+      >
         <StepNavigation
-          steps={STEPS}
+          steps={PLAN_STEPS}
           currentStep={currentStep}
           completedSteps={completedSteps}
-          onStepClick={handleStepClick}
+          onStepClick={goToStep}
           isStepAccessible={isStepAccessible}
         />
 
         <Box sx={{ flex: 1 }}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleFormSubmit}>
             {renderStepContent()}
           </form>
         </Box>
       </Box>
-    </LocalizationProvider>
+    </FormProvider>
   );
 }
-

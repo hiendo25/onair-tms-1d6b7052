@@ -1,13 +1,14 @@
 "use client";
-import { PATHS } from "@/constants/path.contstants";
+import { Alert, Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
+import { useParams, useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { IMMUTABLE_ROLES } from "@/constants/roles.constant";
 import { RoleFormContainer } from "@/modules/roles/components/RoleForm";
 import { useUpdateRolePermissions } from "@/modules/roles/operations/mutation";
 import { useGetRolePermissions } from "@/modules/roles/operations/query";
 import { RoleParams, RolePermissionsParams } from "@/repository/roles";
 import PageContainer from "@/shared/ui/PageContainer";
-import { Alert, Backdrop, Box, Button, CircularProgress, Typography } from "@mui/material";
-import { useParams, useRouter } from "next/navigation";
 
 const EditRolePage = () => {
   const router = useRouter();

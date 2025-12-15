@@ -1,6 +1,6 @@
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import { grey } from "../../theme-color";
-/* eslint-disable import/prefer-default-export */
+ 
 export const surfacesCustomizations: Components<Theme> = {
   MuiAccordion: {
     defaultProps: {

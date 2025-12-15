@@ -1,12 +1,12 @@
 import type {
+  AssignmentDto,
   CreateAssignmentDto,
-  UpdateAssignmentDto,
   GetAssignmentsParams,
   GetMyAssignmentsParams,
-  AssignmentDto,
+  UpdateAssignmentDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import { assignmentsRepository, assignmentResultsRepository } from "@/repository";
+import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 
 interface CreateAssignmentResult {
   assignmentId: string;

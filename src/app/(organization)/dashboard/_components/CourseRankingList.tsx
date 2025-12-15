@@ -2,7 +2,7 @@ import * as React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 
 import TimeRangeSwitcher from "./TimeRangeSwitcher";
-import { TimeRange, courseRankingByRange } from "./mock/dashboardData";
+import { courseRankingByRange, TimeRange } from "./mock/dashboardData";
 import { panelSx } from "./mock/panelSx";
 
 type CourseListItemProps = {

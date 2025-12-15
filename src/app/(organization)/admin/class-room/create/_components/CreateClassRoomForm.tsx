@@ -10,7 +10,7 @@ import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useTransition } from "react";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { Button } from "@mui/material";
 interface CreateClassRoomFormProps {
   platform: ClassRoomPlatformType;

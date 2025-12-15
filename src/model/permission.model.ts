@@ -1,4 +1,4 @@
-import { Tables, Database } from "@/types/supabase.types";
+import { Database, Tables } from "@/types/supabase.types";
 
 export type Organization = Tables<"role_permissions">;
 

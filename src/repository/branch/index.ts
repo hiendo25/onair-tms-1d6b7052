@@ -1,5 +1,5 @@
 import { createClient } from "@/services/supabase/client";
-import type { BranchDto, GetBranchesParams, CreateBranchDto, UpdateBranchDto } from "@/types/dto/branches";
+import type { BranchDto, CreateBranchDto, GetBranchesParams, UpdateBranchDto } from "@/types/dto/branches";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const branchRepository = {

@@ -1,5 +1,5 @@
 import { useTMutation } from "@/lib/queryClient";
-import type { CreateDepartmentDto, UpdateDepartmentDto, ImportDepartmentsDto } from "@/types/dto/departments";
+import type { CreateDepartmentDto, ImportDepartmentsDto, UpdateDepartmentDto } from "@/types/dto/departments";
 
 export const useCreateDepartmentMutation = () => {
   return useTMutation({

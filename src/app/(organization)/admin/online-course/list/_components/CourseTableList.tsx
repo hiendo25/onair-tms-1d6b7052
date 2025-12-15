@@ -6,7 +6,7 @@ import { useUserOrganization } from "@/modules/organization/store/UserOrganizati
 import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
 import { useGetCourseListQuery, useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
 import Link from "next/link";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 // import { getColumnsCourse } from "./column-course";
 import useDebounce from "@/hooks/useDebounce";
@@ -14,8 +14,8 @@ import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
 import { columnsCourse, CourseRowItem } from "./column-course";
 import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
-import Can from "@/modules/permission-wraper/components/Can";
-import { usePermissions } from "@/modules/permission-wraper";
+import Can from "@/modules/permission-wrapper/components/Can";
+import { usePermissions } from "@/modules/permission-wrapper";
 
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 

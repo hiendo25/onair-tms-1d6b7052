@@ -47,7 +47,7 @@ const MenuList: React.FC<MenuListProps> = ({
 
   const matchPath = useCallback(
     (pathname: string) => (pathCheck: string) => {
-      console.log({ pathname, pathCheck });
+      // console.log({ pathname, pathCheck });
 
       return pathname.includes(pathCheck);
     },
@@ -107,12 +107,12 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
         flexDirection: "column",
         ...(isSubNavigation
           ? {
-              gap: 0,
-              marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
-              // borderLeft: mini ? undefined : "2px solid #cdcdcd",
-              padding: mini ? 1 : 0.5,
-              width: mini ? 220 : "auto",
-            }
+            gap: 0,
+            marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
+            // borderLeft: mini ? undefined : "2px solid #cdcdcd",
+            padding: mini ? 1 : 0.5,
+            width: mini ? 220 : "auto",
+          }
           : { gap: 0.5, padding: mini ? 1 : 0.5, width: mini ? MINI_DRAWER_WIDTH : "auto" }),
       };
     },

@@ -5,7 +5,7 @@ import PureClient from "@/shared/ui/PureClient";
 import ApexChart from "./ApexChart";
 import { panelSx } from "./mock/panelSx";
 import TimeRangeSwitcher from "./TimeRangeSwitcher";
-import { TimeRange, channelParticipationByRange } from "./mock/dashboardData";
+import { channelParticipationByRange, TimeRange } from "./mock/dashboardData";
 
 const participantOwners = [
   { label: "Y", color: "#f43f5e" },

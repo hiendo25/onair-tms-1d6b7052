@@ -1,5 +1,5 @@
 import { StoreApi } from "zustand";
-import { AuthStoreActions, AuthStore, AuthStoreState } from "./authStore";
+import { AuthStore, AuthStoreActions, AuthStoreState } from "./authStore";
 
 import { authRepository } from "@/repository";
 const attachActions =

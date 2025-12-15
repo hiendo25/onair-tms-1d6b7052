@@ -8,7 +8,7 @@ import { useCreateAssignmentMutation } from "@/modules/assignment-management/ope
 import { useRef } from "react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export default function CreateAssignmentPage() {
   const { enqueueSnackbar } = useSnackbar();
@@ -49,4 +49,3 @@ export default function CreateAssignmentPage() {
     </PageContainer>
   );
 }
-

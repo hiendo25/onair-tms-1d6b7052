@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Box, Card, Stack, Typography, IconButton, Chip } from "@mui/material";
+import { Box, Card, Chip, IconButton, Stack, Typography } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ImageIcon from "@mui/icons-material/Image";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";

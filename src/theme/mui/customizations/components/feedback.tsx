@@ -1,7 +1,7 @@
-import { Theme, alpha, Components } from "@mui/material/styles";
+import { Components, Theme, alpha } from "@mui/material/styles";
 import { grey, warning } from "../../theme-color";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const feedbackCustomizations: Components<Theme> = {
   MuiAlert: {
     styleOverrides: {

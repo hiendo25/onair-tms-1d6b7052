@@ -1,18 +1,18 @@
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type {
-  SubmissionData,
-  QuestionWithAnswer,
-  FileAnswer,
-  TextAnswer,
-  RadioAnswer,
   CheckboxAnswer,
   MatchingAnswer,
   OrderAnswer,
   TrueFalseAnswer,
+  FileAnswer,
   QuestionAnswer,
+  QuestionWithAnswer,
+  RadioAnswer,
+  SubmissionData,
+  TextAnswer,
 } from "@/repository/assignment-results";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption, AssignmentDto, SubmissionDetailDto, QuestionGradeDetail, SaveGradeDto, FileMetadata } from "@/types/dto/assignments";
+import { AssignmentDto, FileMetadata, QuestionGradeDetail, QuestionOption, SaveGradeDto, SubmissionDetailDto } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];

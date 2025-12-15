@@ -1,8 +1,8 @@
 import * as notificationsRepository from "@/repository/notifications";
 import {
+  NotificationType,
   type SendNotificationRequest,
   type SendNotificationResponse,
-  NotificationType,
 } from "@/repository/notifications/type";
 
 export async function sendEmailNotification(request: SendNotificationRequest): Promise<SendNotificationResponse> {

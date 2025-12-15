@@ -168,6 +168,41 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          address: string
+          code: string
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          address?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          address?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -1088,6 +1123,117 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_branches: {
+        Row: {
+          branch_id: string
+          created_at: string | null
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_employee_branches_branch_id"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_branches_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_departments: {
+        Row: {
+          created_at: string | null
+          department_id: string
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department_id: string
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          department_id?: string
+          employee_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_employee_departments_department_id"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_departments_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -2379,6 +2525,7 @@ export type Database = {
         | "drag_and_drop"
         | "true_false"
         | "order"
+        | "fill"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
@@ -2556,6 +2703,7 @@ export const Constants = {
         "drag_and_drop",
         "true_false",
         "order",
+        "fill",
       ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],

@@ -1,4 +1,4 @@
-import { useSignInWithPasswordMutation, useSignInWithGoogleMutation } from "../operations/mutation";
+import { useSignInWithGoogleMutation, useSignInWithPasswordMutation } from "../operations/mutation";
 import { AuthSignInWithPasswordPayload } from "@/repository/auth";
 import { AuthError } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";

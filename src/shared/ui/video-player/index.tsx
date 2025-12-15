@@ -5,11 +5,11 @@ import "@vidstack/react/player/styles/default/layouts/audio.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 
 import React, {
-	useRef,
-	useMemo,
-	useState,
-	useEffect,
 	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
 import clsx from "clsx";
 import {
@@ -17,10 +17,10 @@ import {
 	defaultLayoutIcons,
 } from "@vidstack/react/player/layouts/default";
 import {
-	Poster,
 	MediaPlayer,
-	MediaProvider,
 	MediaPlayerInstance,
+	MediaProvider,
+	Poster,
 } from "@vidstack/react";
 
 import { Box, Typography } from "@mui/material";

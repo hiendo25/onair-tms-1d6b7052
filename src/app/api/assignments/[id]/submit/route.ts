@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSVClient } from "@/services";
 import * as assignmentResultService from "@/services/assignment-results/assignment-result.service";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption, FileMetadata } from "@/types/dto/assignments";
+import { FileMetadata, QuestionOption } from "@/types/dto/assignments";
 import { assignmentsRepository } from "@/repository";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];

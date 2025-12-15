@@ -1,6 +1,6 @@
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
 import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
-import { memo, SetStateAction, useRef, useState } from "react";
+import { SetStateAction, memo, useRef, useState } from "react";
 import { useId } from "react";
 import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
 import BranchSelector, { BranchSelectorProps } from "./BranchSelector";

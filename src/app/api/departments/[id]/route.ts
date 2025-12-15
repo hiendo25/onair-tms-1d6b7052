@@ -2,12 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { UpdateDepartmentDto } from "@/types/dto/departments";
 import { departmentService } from "@/services";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await request.json();
     const payload: UpdateDepartmentDto = {
@@ -25,26 +22,18 @@ export async function PUT(
         message: "Cập nhật phòng ban thành công",
         data: result,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating department:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi cập nhật phòng ban";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật phòng ban";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     await departmentService.deleteDepartment(params.id);
 
@@ -55,18 +44,13 @@ export async function DELETE(
         success: true,
         message: "Xóa phòng ban thành công",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting department:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi xóa phòng ban";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa phòng ban";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

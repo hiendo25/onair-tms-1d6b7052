@@ -1,20 +1,24 @@
+import React from "react";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+
 import {
+  BarChart10Icon,
+  BookOpenIcon,
   ClassIcon,
   ClipboardIcon,
+  FileAttachmentIcon,
+  FolderShieldIcon,
   GitIcon,
+  MonitorIcon,
   SquareFourIcon,
   UsersIcon,
-  MonitorIcon,
-  BookOpenIcon,
   UsersIcon2,
-  BarChart10Icon,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import React from "react";
-import { PATHS } from "./path.contstants";
+
+import { PATHS } from "./path.constant";
+import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions.constant";
 import { PermissionsCheck } from "./permission.constant";
-import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions";
 
 type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_PERMISSIONS];
 
@@ -128,7 +132,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   },
   {
     title: "Kế hoạch đào tạo",
-    icon: React.createElement(StickyNote2OutlinedIcon),
+    icon: React.createElement(FolderShieldIcon),
     key: "plans",
     path: PATHS.PLANS.ROOT,
     children: [
@@ -144,11 +148,29 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         key: "plans/create",
         path: PATHS.PLANS.CREATE,
       },
+      // {
+      //   title: "Khảo sát kế hoạch",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "plans/surveys",
+      //   path: PATHS.SURVEYS.ROOT,
+      // },
+    ],
+  },
+  {
+    title: "Khảo sát",
+    icon: React.createElement(FileAttachmentIcon),
+    key: "surveys",
+    path: PATHS.SURVEYS.ROOT,
+    children: [
       {
-        title: "Khảo sát kế hoạch",
-        icon: React.createElement(ClipboardIcon),
-        key: "plans/surveys",
-        path: PATHS.SURVEYS.ROOT,
+        title: "Danh sách khảo sát",
+        key: "surveys/list",
+        path: PATHS.SURVEYS.LIST,
+      },
+      {
+        title: "Tạo khảo sát",
+        key: "surveys/create",
+        path: PATHS.SURVEYS.CREATE,
       },
     ],
   },

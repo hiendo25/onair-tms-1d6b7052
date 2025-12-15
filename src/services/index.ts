@@ -10,4 +10,6 @@ export * as assignmentService from "./assignments/assignment.service";
 export * as learningScreenService from "./learning-screen/learning-screen.service";
 export * as branchService from "./branches/branch.service";
 export * as departmentService from "./departments/department.service";
+export * as planService from "./plans/plan.service";
 export * as notificationService from "./notifications/notification.service";
+export * as serveyService from "./survey";

@@ -3,9 +3,16 @@
 import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
+  Alert,
   Box,
   Button,
   Card,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Menu,
+  MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -14,20 +21,13 @@ import {
   TablePagination,
   TableRow,
   Typography,
-  CircularProgress,
-  Alert,
-  Chip,
-  Stack,
-  IconButton,
-  Menu,
-  MenuItem,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PageContainer from "@/shared/ui/PageContainer";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export default function AssignmentStudentList() {
   const params = useParams();
@@ -40,11 +40,11 @@ export default function AssignmentStudentList() {
   const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null);
 
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId);
-  const { data: paginatedResult, isLoading: isLoadingStudents, error } = useGetAssignmentStudentsQuery(
-    assignmentId,
-    page,
-    rowsPerPage
-  );
+  const {
+    data: paginatedResult,
+    isLoading: isLoadingStudents,
+    error,
+  } = useGetAssignmentStudentsQuery(assignmentId, page, rowsPerPage);
 
   const isLoading = isLoadingAssignment || isLoadingStudents;
 
@@ -110,19 +110,12 @@ export default function AssignmentStudentList() {
   return (
     <PageContainer
       title={assignment ? `Danh sách học viên - ${assignment.name}` : "Danh sách học viên"}
-      breadcrumbs={[
-        { title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT },
-        { title: "Danh sách học viên" },
-      ]}
+      breadcrumbs={[{ title: "Bài kiểm tra", path: PATHS.ASSIGNMENTS.ROOT }, { title: "Danh sách học viên" }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
           <Stack direction="row" spacing={2} sx={{ mb: 3 }} alignItems="center">
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={handleBack}
-            >
+            <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
               Quay lại
             </Button>
             {assignment && (
@@ -144,9 +137,7 @@ export default function AssignmentStudentList() {
               <CircularProgress />
             </Box>
           ) : error ? (
-            <Alert severity="error">
-              Có lỗi xảy ra khi tải danh sách học viên
-            </Alert>
+            <Alert severity="error">Có lỗi xảy ra khi tải danh sách học viên</Alert>
           ) : !students || students.length === 0 ? (
             <Box
               sx={{
@@ -206,9 +197,7 @@ export default function AssignmentStudentList() {
                             "-"
                           )}
                         </TableCell>
-                        <TableCell>
-                          {formatDate(student.submitted_at)}
-                        </TableCell>
+                        <TableCell>{formatDate(student.submitted_at)}</TableCell>
                         <TableCell align="center">
                           {student.score !== null && student.max_score !== null ? (
                             <Typography variant="body2" fontWeight={500}>
@@ -219,10 +208,7 @@ export default function AssignmentStudentList() {
                           )}
                         </TableCell>
                         <TableCell align="center">
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleOpenMenu(e, student.employee_id)}
-                          >
+                          <IconButton size="small" onClick={(e) => handleOpenMenu(e, student.employee_id)}>
                             <MoreVertIcon />
                           </IconButton>
                         </TableCell>
@@ -286,9 +272,7 @@ export default function AssignmentStudentList() {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 rowsPerPageOptions={[10, 25, 50, 100]}
                 labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) =>
-                  `${from}-${to} của ${count}`
-                }
+                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
               />
             </>
           )}
@@ -297,4 +281,3 @@ export default function AssignmentStudentList() {
     </PageContainer>
   );
 }
-
