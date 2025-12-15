@@ -11,11 +11,12 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const departmentId = params?.departmentId;
   const branchId = params?.branchId;
   const status = params?.status;
+  const employeeType = params?.employeeType;
 
   // Check if we have organization unit filters
   const hasDepartmentFilter = departmentId && departmentId !== "all";
   const hasBranchFilter = branchId && branchId !== "all";
-  const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0);
+  const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0) || employeeType;
 
   // Use RPC function for efficient server-side filtering
   if (hasAnyFilter) {
@@ -26,6 +27,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       p_search: search || undefined,
       p_department_id: hasDepartmentFilter ? departmentId : undefined,
       p_branch_id: hasBranchFilter ? branchId : undefined,
+      p_employee_type: employeeType || undefined,
     });
 
     if (rpcError) {
@@ -149,6 +151,11 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   // Apply status filter if present
   if (status) {
     query = query.eq("status", status);
+  }
+
+  // Apply employee type filter if present
+  if (employeeType) {
+    query = query.eq("employee_type", employeeType);
   }
 
   const from = page * limit;

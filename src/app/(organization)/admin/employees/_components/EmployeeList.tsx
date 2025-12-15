@@ -42,13 +42,26 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
 import { Database } from "@/types/supabase.types";
-import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
-export default function EmployeeList() {
+type EmployeeListProps = {
+  employeeType?: Database["public"]["Enums"]["employee_type"];
+};
+
+export default function EmployeeList({ employeeType = "student" }: EmployeeListProps) {
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
+
+  // Dynamic page title based on employee type
+  const pageTitle = React.useMemo(() => {
+    if (employeeType === "teacher") {
+      return "Danh sách giảng viên";
+    } else if (employeeType === "student") {
+      return "Danh sách học viên";
+    }
+    return "Danh sách nhân viên";
+  }, [employeeType]);
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
@@ -102,6 +115,7 @@ export default function EmployeeList() {
     departmentId: departmentFilter,
     branchId: branchFilter,
     status: statusFilter !== "all" ? (statusFilter as Database["public"]["Enums"]["employee_status"]) : undefined,
+    employeeType,
   });
 
   const { mutateAsync: deleteEmployee, isPending: isDeleting } = useDeleteEmployeeMutation();
@@ -224,7 +238,7 @@ export default function EmployeeList() {
   };
 
   return (
-    <PageContainer title="Danh sách nhân viên" breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}>
+    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}>
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
           <Stack
@@ -326,7 +340,6 @@ export default function EmployeeList() {
                       <TableCell>Họ và tên</TableCell>
                       <TableCell>Email</TableCell>
                       <TableCell>Chức danh</TableCell>
-                      <TableCell>Loại người dùng</TableCell>
                       <TableCell>Chi nhánh</TableCell>
                       <TableCell>Phòng ban</TableCell>
                       <TableCell>Trạng thái</TableCell>
@@ -336,7 +349,7 @@ export default function EmployeeList() {
                   <TableBody>
                     {employees.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
+                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
                           <Typography variant="body2" color="text.secondary">
                             Không tìm thấy nhân viên nào
                           </Typography>
@@ -349,7 +362,6 @@ export default function EmployeeList() {
                           <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
                           <TableCell>{employee.profiles?.email || "-"}</TableCell>
                           <TableCell>{getPositionTitle(employee)}</TableCell>
-                          <TableCell>{getEmployeeTypeLabel(employee.employee_type)}</TableCell>
                           <TableCell>{getBranchName(employee)}</TableCell>
                           <TableCell>{getDepartmentName(employee)}</TableCell>
                           <TableCell>

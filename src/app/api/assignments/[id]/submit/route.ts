@@ -11,7 +11,7 @@ interface SubmitAssignmentRequest {
   employeeId: string;
   answers: Array<{
     questionId: string;
-    answer: string | string[] | FileMetadata[];
+    answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>;
     attachments?: FileMetadata[];
   }>;
 }
@@ -207,6 +207,51 @@ export async function POST(
                 { status: 400 }
               );
             }
+          }
+          break;
+
+        case "matching":
+          if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
+            return NextResponse.json(
+              { error: `Vui lòng hoàn thành ghép đôi cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
+          }
+          // Validate mapping structure
+          for (const mapping of answer.answer as Array<{ columnAId: string; columnBId: string }>) {
+            if (!mapping.columnAId || !mapping.columnBId) {
+              return NextResponse.json(
+                { error: "Dữ liệu ghép đôi không hợp lệ" },
+                { status: 400 }
+              );
+            }
+          }
+          break;
+
+        case "order":
+          if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
+            return NextResponse.json(
+              { error: `Vui lòng sắp xếp các mục cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
+          }
+          // Validate order structure
+          for (const item of answer.answer as Array<{ id: string; position: number }>) {
+            if (!item.id || typeof item.position !== "number") {
+              return NextResponse.json(
+                { error: "Dữ liệu sắp xếp không hợp lệ" },
+                { status: 400 }
+              );
+            }
+          }
+          break;
+
+        case "true_false":
+          if (typeof answer.answer !== "boolean") {
+            return NextResponse.json(
+              { error: `Vui lòng chọn Đúng hoặc Sai cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
           }
           break;
 

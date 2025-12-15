@@ -191,14 +191,14 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
                     </IconButton>
                   </Can>
                   <Can pers={["survey:update"]}>
-                    <IconButton
-                      size="small"
-                      href={PATHS.SURVEYS.EDIT(surveyId)}
-                      LinkComponent={Link}
-                      className="text-blue-600 bg-transparent hover:bg-blue-50"
-                    >
-                      <Edit02Icon className="w-4 h-4" />
-                    </IconButton>
+                    <Link href={PATHS.SURVEYS.EDIT(surveyId)}>
+                      <IconButton
+                        size="small"
+                        className="text-blue-600 bg-transparent hover:bg-blue-50"
+                      >
+                        <Edit02Icon className="w-4 h-4" />
+                      </IconButton>
+                    </Link>
                   </Can>
                   <Can pers={["survey:delete"]}>
                     <IconButton
