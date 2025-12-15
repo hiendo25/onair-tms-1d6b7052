@@ -155,6 +155,13 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
     setSelectedEmployeeId(null);
   };
 
+  const handleDetail = () => {
+    if (selectedEmployeeId) {
+      router.push(`/admin/employees/${selectedEmployeeId}/detail`);
+    }
+    handleMenuClose();
+  };
+
   const handleEdit = () => {
     if (selectedEmployeeId) {
       router.push(`/admin/employees/${selectedEmployeeId}/edit`);
@@ -410,7 +417,9 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
               vertical: "top",
               horizontal: "right",
             }}
-          >
+          > <MenuItem onClick={handleDetail}>
+              <ListItemText>Chi tiết</ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
