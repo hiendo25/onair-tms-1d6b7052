@@ -3,14 +3,14 @@
 import * as React from "react";
 import { Box } from "@mui/material";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.contstants";
-import { PlanDetail } from "../../_components/mock-data";
+import { PATHS } from "@/constants/path.constant";
+import { PlanDetailDto } from "@/modules/plans/types";
 import PlanInfoCards from "./PlanInfoCards";
 import PlanStatistics from "./PlanStatistics";
 import ProgramAccordion from "./ProgramAccordion";
 
 interface PlanDetailViewProps {
-  planDetail: PlanDetail;
+  planDetail: PlanDetailDto;
 }
 
 export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
@@ -27,8 +27,9 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
         <PlanInfoCards
           budget={planDetail.budget}
           approver={planDetail.approver}
-          startDate={planDetail.startDate}
+          createdAt={planDetail.createdAt}
           objective={planDetail.objective}
+          status={planDetail.status}
         />
 
         {/* Statistics Section */}
@@ -40,12 +41,8 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
         />
 
         {/* Program List Section */}
-        <ProgramAccordion
-          programs={planDetail.programs}
-          programsCount={planDetail.programsCount}
-        />
+        <ProgramAccordion programs={planDetail.programs} programsCount={planDetail.programsCount} />
       </Box>
     </PageContainer>
   );
 }
-

@@ -1,6 +1,6 @@
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { Android12Switch, IOSSwitch } from "@/shared/ui/form/CustomSwithcher";
-import { Box, FormControlLabel, IconButton, styled, Typography, TypographyProps } from "@mui/material";
+import { Box, FormControlLabel, IconButton, Typography, TypographyProps, styled } from "@mui/material";
 import React from "react";
 import dayjs from "dayjs";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";

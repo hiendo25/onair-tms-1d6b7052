@@ -1,10 +1,14 @@
 "use client";
 import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
-import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
+import {
+  ClassRoomPriorityDto,
+  ClassRoomSessionDetailDto,
+  EmployeeWithProfileDto,
+} from "@/types/dto/classRooms/classRoom.dto";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import {
@@ -260,7 +264,10 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                       </Stack>
                     </TableCell>
                     <TableCell align="center">
-                      <ClassRoomType sessionType={room?.class_sessions?.[0]?.session_type} roomType={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)} />
+                      <ClassRoomType
+                        sessionType={room?.class_sessions?.[0]?.session_type}
+                        roomType={getClassRoomTypeLabel(room?.room_type as ClassRoomTypeFilter)}
+                      />
                     </TableCell>
                     <TableCell align="center">
                       <Stack direction="row" alignItems="center" spacing={0.5}>

@@ -26,7 +26,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { grey } from "@mui/material/colors";
-import { STUDENT_TABLE_HEAD, ATTENDANCE_OPTIONS } from "../constants/constants";
+import { ATTENDANCE_OPTIONS, STUDENT_TABLE_HEAD } from "../constants/constants";
 import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
 import useDebounce from "@/hooks/useDebounce";
 import { Pagination } from "@/shared/ui/Pagination";

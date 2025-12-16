@@ -1,21 +1,22 @@
-import type { CreateEmployeeDto, UpdateEmployeeDto, GetEmployeesParams, EmployeeDto } from "@/types/dto/employees";
-import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import {
-  employeesRepository,
-  profilesRepository,
-  employeeBranchesRepository,
-  employeeDepartmentsRepository,
-  managersEmployeesRepository,
-  assignmentsRepository,
   assignmentResultsRepository,
-  qrAttendanceRepository,
+  assignmentsRepository,
   classRoomRepository,
   classRoomSessionRepository,
   coursesRepository,
+  employeesRepository,
+  employeeBranchesRepository,
+  employeeDepartmentsRepository,
   libraryRepository,
+  managersEmployeesRepository,
+  organizationsRepository,
+  profilesRepository,
+  qrAttendanceRepository,
 } from "@/repository";
-import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { createSVClient } from "@/services/supabase/server";
+import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import type { CreateEmployeeDto, EmployeeDto, GetEmployeesParams, UpdateEmployeeDto } from "@/types/dto/employees";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 interface CreateEmployeeResult {
   userId: string;
@@ -184,7 +185,7 @@ async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<
 async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
-    start_date: payload.start_date!,
+    start_date: payload.start_date ?? undefined,
     position_id: payload.position_id || null,
     employee_type: payload.employee_type,
   });

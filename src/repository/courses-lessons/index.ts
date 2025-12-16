@@ -1,8 +1,8 @@
 import { supabase } from "@/services";
 import {
   CreateLessonPayload,
-  UpdateLessonPayload,
   CreatePivotLessonsWithResourcesPayload,
+  UpdateLessonPayload,
   UpsertLessonPayload,
 } from "./type";
 

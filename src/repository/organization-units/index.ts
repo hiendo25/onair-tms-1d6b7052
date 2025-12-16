@@ -40,7 +40,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
         name,
         organization_id
       `);
-      
+
       // Add type field and parent_id as null for backwards compatibility
       if (result.data) {
         result.data = result.data.map(item => ({
@@ -49,7 +49,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
           parent_id: null
         }));
       }
-      
+
       return result;
     } else if (type === "department") {
       // Query departments table
@@ -59,7 +59,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
         branch_id,
         organization_id
       `);
-      
+
       // Add type field and map branch_id to parent_id for backwards compatibility
       if (result.data) {
         result.data = result.data.map(item => ({
@@ -68,7 +68,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
           parent_id: item.branch_id
         }));
       }
-      
+
       return result;
     } else {
       // Fetch both if no type specified
@@ -82,7 +82,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
         type: 'branch' as const,
         parent_id: null
       }));
-      
+
       const departments = (departmentsResult.data || []).map(d => ({
         ...d,
         type: 'department' as const,

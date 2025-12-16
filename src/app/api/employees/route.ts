@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import type { CreateEmployeeDto } from "@/types/dto/employees";
 import { employeeService } from "@/services";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,18 +20,13 @@ export async function POST(request: NextRequest) {
         employeeId: result.employeeId,
         employeeCode: result.employeeCode,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating employee:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi tạo nhân viên";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo nhân viên";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

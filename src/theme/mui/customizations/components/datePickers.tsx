@@ -1,4 +1,4 @@
-import { alpha, Theme } from "@mui/material/styles";
+import { Theme, alpha } from "@mui/material/styles";
 import type { PickerComponents } from "@mui/x-date-pickers/themeAugmentation";
 import { menuItemClasses } from "@mui/material/MenuItem";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
@@ -6,7 +6,7 @@ import { grey, primary } from "../../theme-color";
 import { CalendarDateIcon2 } from "@/shared/assets/icons";
 import { theme } from "../../AppTheme";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const datePickersCustomizations: PickerComponents<Theme> = {
   MuiPickerPopper: {
     styleOverrides: {

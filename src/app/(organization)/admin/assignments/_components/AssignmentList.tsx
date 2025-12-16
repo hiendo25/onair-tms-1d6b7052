@@ -3,11 +3,16 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
+  Alert,
   Box,
   Button,
   Card,
+  CircularProgress,
   IconButton,
   InputAdornment,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -17,13 +22,8 @@ import {
   TablePagination,
   TableRow,
   TextField,
-  Typography,
-  CircularProgress,
-  Alert,
-  Menu,
-  MenuItem,
-  ListItemText,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -35,7 +35,7 @@ import type { AssignmentDto } from "@/types/dto/assignments";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useQueryClient } from "@tanstack/react-query";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 export default function AssignmentList() {
   const router = useRouter();

@@ -30,3 +30,5 @@ export * as learningScreenRepository from "./learning-screen";
 export * as learningScreenServerRepository from "./learning-screen/server";
 export * as permissionRepository from "./permissions";
 export * as notificationsRepository from "./notifications";
+export * as surveysRepository from "./surveys";
+export * as plansRepository from "./plans";

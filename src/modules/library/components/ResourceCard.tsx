@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, Box, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 import { Resource } from "../types";
 import { ResourceThumbnail } from "./ResourceThumbnail";
 import { ResourceActionMenu } from "./ResourceActionMenu";

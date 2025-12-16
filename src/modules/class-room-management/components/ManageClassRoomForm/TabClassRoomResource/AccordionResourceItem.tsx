@@ -7,13 +7,13 @@ import {
   AccordionDetails,
   AccordionSummary,
   Button,
-  styled,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
   Typography,
+  styled,
 } from "@mui/material";
 import BoxIcon from "./BoxIcon";
 

@@ -1,26 +1,17 @@
 "use client";
 
 import React, { useEffect, useMemo } from "react";
-import {
-  Box,
-  Card,
-  Typography,
-  Stack,
-  Button,
-  CircularProgress,
-  Alert,
-  TextField,
-} from "@mui/material";
+import { Alert, Box, Button, Card, CircularProgress, Stack, TextField, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { useRouter } from "next/navigation";
-import { useForm, Controller } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import { useSaveGradeMutation } from "@/modules/assignment-management/operations/mutation";
 import GradeQuestionCard from "./GradeQuestionCard";
 import { QuestionGradeInput } from "@/types/dto/assignments";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
 
 interface AssignmentGradingProps {
@@ -34,10 +25,7 @@ interface GradeFormData {
   overallFeedback: string;
 }
 
-const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
-  assignmentId,
-  employeeId,
-}) => {
+const AssignmentGrading: React.FC<AssignmentGradingProps> = ({ assignmentId, employeeId }) => {
   const router = useRouter();
   const notifications = useNotifications();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
@@ -67,7 +55,13 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
     return initialFeedbacks;
   }, [submission]);
 
-  const { control, handleSubmit, watch, reset, formState: { errors, isValid } } = useForm<GradeFormData>({
+  const {
+    control,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<GradeFormData>({
     mode: "onChange",
     defaultValues: {
       grades: defaultGrades,
@@ -100,7 +94,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         total += q.earnedScore ?? 0;
       } else {
         const gradeValue = grades[q.id];
-        total += typeof gradeValue === "number" ? gradeValue : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
+        total += typeof gradeValue === "number" ? gradeValue : gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0;
       }
     });
 
@@ -134,9 +128,8 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
       .filter((q) => !q.isAutoGraded)
       .map((q) => {
         const gradeValue = data.grades[q.id];
-        const score = typeof gradeValue === "number"
-          ? gradeValue
-          : (gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0);
+        const score =
+          typeof gradeValue === "number" ? gradeValue : gradeValue === "" ? 0 : parseFloat(gradeValue!) || 0;
         const feedback = data.feedbacks[q.id] || undefined;
         return {
           questionId: q.id,
@@ -160,13 +153,10 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
       router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
     } catch (error) {
       console.error("Failed to save grade:", error);
-      notifications.show(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi chấm bài",
-        {
-          severity: "error",
-          autoHideDuration: 5000,
-        }
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi chấm bài", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
     }
   };
 
@@ -185,14 +175,8 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
   if (error || !submission) {
     return (
       <Box p={3}>
-        <Alert severity="error">
-          {error instanceof Error ? error.message : "Không thể tải thông tin bài nộp"}
-        </Alert>
-        <Button
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-          sx={{ mt: 2 }}
-        >
+        <Alert severity="error">{error instanceof Error ? error.message : "Không thể tải thông tin bài nộp"}</Alert>
+        <Button startIcon={<ArrowBackIcon />} onClick={handleBack} sx={{ mt: 2 }}>
           Quay lại
         </Button>
       </Box>
@@ -247,11 +231,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
         </Card>
 
         <Stack direction="row" spacing={2} justifyContent="flex-end">
-          <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBack}
-          >
+          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={handleBack}>
             Quay lại
           </Button>
           <Button
@@ -269,4 +249,3 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({
 };
 
 export default AssignmentGrading;
-

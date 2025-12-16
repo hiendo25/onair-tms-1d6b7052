@@ -1,5 +1,5 @@
 import { StoreApi } from "zustand";
-import { LibraryStoreActions, LibraryStore, LibraryStoreState, LibraryConfig } from "./libraryStore";
+import { LibraryConfig, LibraryStore, LibraryStoreActions, LibraryStoreState } from "./libraryStore";
 import { Resource } from "../types";
 import { getCurrentUserLibrary } from "@/services/libraries/library.service";
 

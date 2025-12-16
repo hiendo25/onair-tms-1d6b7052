@@ -9,7 +9,7 @@ import { useTransition } from "react";
 import { ClassRoomType } from "@/model/class-room.model";
 import BoxItem from "./BoxItem";
 import Image from "next/image";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 interface ClassRoomTypeBoxMenuProps {
   items?: { path: string; title: string }[];

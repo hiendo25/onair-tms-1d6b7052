@@ -1,6 +1,6 @@
 "use server";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import { Metadata, ResolvingMetadata } from "next";
 import CourseTableList from "./_components/CourseTableList";
 

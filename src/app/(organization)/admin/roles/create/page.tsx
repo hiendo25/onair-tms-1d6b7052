@@ -7,7 +7,7 @@ import { RoleParams, RolePermissionsParams } from "@/repository/roles";
 import { useCreateRole } from "@/modules/roles/operations/mutation";
 import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 const CreateRolePage = () => {
   const router = useRouter();

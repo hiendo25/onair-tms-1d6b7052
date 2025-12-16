@@ -4,7 +4,7 @@ import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 
 import { panelSx } from "./mock/panelSx";
 import Link from "next/link";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 import dayjs from "dayjs";
 import { useGetClassRoomsPriorityQuery } from "@/modules/class-room-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";

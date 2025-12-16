@@ -1,7 +1,7 @@
 import { DateField as XDateField } from "@mui/x-date-pickers";
 import type { DateFieldProps } from "@mui/x-date-pickers";
 import React, { memo, useCallback, useMemo } from "react";
-import type { Control, PathValue, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 import dayjs, { Dayjs } from "dayjs";
 import { cn } from "@/utils";
@@ -54,9 +54,9 @@ const DatePicker = <T extends FieldValues>({
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDatePickerField
           {...datePickerProps}
-          value={getValueDatePicker(value)}
+          value={getValueDatePicker(value)?? null}
           onChange={onChange}
-          helperText={error?.message}
+          helperText={error?.message} 
           error={!!error}
         />
       )}

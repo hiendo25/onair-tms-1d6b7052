@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import Menu from "@mui/material/Menu";
 import ButtonBase from "@mui/material/ButtonBase";
-import { alpha, MenuItem } from "@mui/material";
+import { MenuItem, alpha } from "@mui/material";
 import type { EditorToolbarProps } from "../../types";
 import { ParagraphIcon } from "@/shared/assets/icons";
 

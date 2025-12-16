@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies */
+ 
 import "dayjs/locale/vi";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";

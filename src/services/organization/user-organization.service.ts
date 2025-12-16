@@ -1,4 +1,4 @@
-import { buildPermission, Permissions, Resources } from "@/constants/permission.constant";
+import { Permissions, Resources, buildPermission } from "@/constants/permission.constant";
 import { employeesRepository, permissionRepository } from "@/repository";
 export class UserOrganizationService {
   private userId;

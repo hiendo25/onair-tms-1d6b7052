@@ -1,6 +1,6 @@
 "use client";
-import { useState, useRef } from "react";
-import { Button, IconButton, Typography, CircularProgress, Box } from "@mui/material";
+import { useRef, useState } from "react";
+import { Box, Button, CircularProgress, IconButton, Typography } from "@mui/material";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 import { useSnackbar } from "notistack";

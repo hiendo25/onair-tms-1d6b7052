@@ -1,25 +1,37 @@
-import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
+import { RESOURCE_OPTIONS } from "@/constants/permission.constant";
 import { PermissionActions } from "@/model/permission.model";
+import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
 import { supabase } from "@/services";
 import { slugify } from "@/utils/slugify";
-import { RESOURCE_OPTIONS } from "@/constants/permission.constant";
 
 export interface AdminGetRoleListParams {
   page?: number;
   pageSize?: number;
+  ids?: string[];
 }
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
 export const getRoleList = async (params?: AdminGetRoleListParams) => {
-  return supabase
+  const ids = params?.ids;
+
+  if (ids && ids.length === 0) {
+    return [];
+  }
+
+  let query = supabase
     .from("roles")
     .select("*")
-    .order("created_at", { ascending: false })
-    .then(({ data, error }) => {
-      if (error) return Promise.reject(error);
-      return data || [];
-    });
+    .order("created_at", { ascending: false });
+
+  if (ids && ids.length > 0) {
+    query = query.in("id", ids);
+  }
+
+  return query.then(({ data, error }) => {
+    if (error) return Promise.reject(error);
+    return data || [];
+  });
 };
 
 export const adminGetRoleList = async (params?: AdminGetRoleListParams) => {
@@ -51,7 +63,7 @@ export const adminGetRoleList = async (params?: AdminGetRoleListParams) => {
       };
     });
 };
-export type adminGetRoleListResponse = Awaited<ReturnType<typeof adminGetRoleList>>;
+export type AdminGetRoleListResponse = Awaited<ReturnType<typeof adminGetRoleList>>;
 export const getGroupPermissionList = async () => {
   return Object.fromEntries(
     RESOURCE_OPTIONS.map((res) => [
@@ -168,7 +180,7 @@ const generateCode = async (title: string) => {
 };
 
 export const createRole = async (data: RoleParams & { permissions: PermissionParams[] }) => {
-  let code = await generateCode(data.title);
+  const code = await generateCode(data.title);
 
   if (!code) return Promise.reject("Failed to generate role code");
   if (!data.organization_id) return Promise.reject("Organization ID is required");

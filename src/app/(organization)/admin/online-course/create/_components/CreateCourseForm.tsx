@@ -8,7 +8,7 @@ import ManageCourseForm, {
   ManageCourseFormRef,
 } from "@/modules/courses/components/ManageCourseForm";
 import { useUpsertCourse } from "@/modules/courses/hooks/useUpsertCourse";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
 
 const CreateCourseForm = () => {
   const { onCreate, isLoading } = useUpsertCourse();

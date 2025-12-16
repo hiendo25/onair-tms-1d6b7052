@@ -128,6 +128,7 @@ const getEmployeeById = async (id: string) => {
       employee_type,
       user_id,
       created_at,
+      status,
       profiles!profiles_employee_id_fkey (
         id,
         full_name,

@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-import { TableDataColumn } from "./TableDataRow";
 import { TableCell } from "@mui/material";
+
 import { TableRowStyled } from "./table-row-styled";
+import { TableDataColumn } from "./TableDataRow";
 export interface TableRowDataProps<T> {
   showRowCount?: boolean;
   hoverRow?: boolean;
@@ -34,15 +35,15 @@ const TableDataHeader = <T,>({ columns, showRowCount }: TableRowDataProps<T>) =>
 
       cellNode.style.left = leftPosition + "px";
       cellNode.classList.add("fixed-left");
-      // cellNode.style.background = "rgb(245 246 248)";
+      cellNode.style.background = "rgb(255 255 255)";
     });
 
-    const nodelistRightReverse = [...nodesRight].reverse();
+    const nodeListRightReverse = [...nodesRight].reverse();
 
-    nodelistRightReverse.forEach((cellNode, _index) => {
+    nodeListRightReverse.forEach((cellNode, _index) => {
       let rightPosition = 0;
       for (let i = 0; i < _index; i++) {
-        const nodeItem = nodelistRightReverse[i];
+        const nodeItem = nodeListRightReverse[i];
         if (nodeItem) {
           const { width } = getClientInfo(nodeItem);
           rightPosition += width;
@@ -51,7 +52,7 @@ const TableDataHeader = <T,>({ columns, showRowCount }: TableRowDataProps<T>) =>
 
       cellNode.style.right = rightPosition + "px";
       cellNode.classList.add("fixed-right");
-      // cellNode.style.background = "rgb(245 246 248)";
+      cellNode.style.background = "rgb(255 255 255)";
     });
   }, []);
 

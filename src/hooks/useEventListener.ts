@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 
-import { useRef, useEffect, useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 const useIsomorphicLayoutEffect =
   typeof window !== "undefined" ? useLayoutEffect : useEffect;
@@ -65,7 +65,7 @@ export function useEventListener<
     targetElement.addEventListener(eventName, eventListener, options);
 
     // Remove event listener on cleanup
-    // eslint-disable-next-line consistent-return
+     
     return () => {
       targetElement.removeEventListener(eventName, eventListener);
     };

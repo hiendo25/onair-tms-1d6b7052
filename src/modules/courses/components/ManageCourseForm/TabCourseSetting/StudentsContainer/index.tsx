@@ -4,7 +4,6 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import {
   Alert,
-  alpha,
   Button,
   Checkbox,
   Chip,
@@ -12,9 +11,10 @@ import {
   IconButton,
   Pagination,
   PaginationProps,
-  styled,
   Toolbar,
   Typography,
+  alpha,
+  styled,
 } from "@mui/material";
 
 import EmployeeFilter from "./EmployeeFilter";

@@ -1,7 +1,7 @@
-import SurveySubmitForm from "./_components/SurveySubmitForm";
+// import SurveySubmitForm from "./_components/SurveySubmitForm";sss
 
 const SurveySubmitPage = async () => {
-  return <SurveySubmitForm />;
+  return <h1>SurveySubmitForm</h1>;
 };
 
 export default SurveySubmitPage;

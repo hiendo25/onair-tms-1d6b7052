@@ -1,19 +1,21 @@
 "use client";
 
+import React, { useMemo, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, IconButton } from "@mui/material";
-import { useRouter } from "next/navigation";
-import React, { useMemo, useRef, useState } from "react";
-import { PATHS } from "@/constants/path.contstants";
-import { useAdminGetRoleList } from "@/modules/roles/operations/query";
-import PageContainer from "@/shared/ui/PageContainer";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
+import { usePermissions } from "@/modules/permission-wrapper";
+import Can from "@/modules/permission-wrapper/components/Can";
 import { useDeleteRole } from "@/modules/roles/operations/mutation";
-import TableData, { TableDataProps } from "@/shared/ui/TableData";
-import Can from "@/modules/permission-wraper/components/Can";
+import { useAdminGetRoleList } from "@/modules/roles/operations/query";
 import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
-import { usePermissions } from "@/modules/permission-wraper";
+import PageContainer from "@/shared/ui/PageContainer";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+
 import DialogDeleteRoleConfirmation, {
   DialogDeleteRoleConfirmationRef,
 } from "./components/DialogDeleteRoleConfirmation";
@@ -94,7 +96,7 @@ const RolesPage = () => {
 
   type ColumnType = Exclude<Exclude<typeof data, undefined>["items"], undefined>[number];
 
-  const mergeColumns: TableDataProps<ColumnType>["columns"] = useMemo(() => {
+  const mergeColumns = useMemo((): TableDataProps<ColumnType>["columns"] => {
     return canCreateOrDeleteRole
       ? [
           ...rolesColumns,
@@ -108,14 +110,14 @@ const RolesPage = () => {
               return (
                 <>
                   <Can pers={["role:update"]}>
-                    <IconButton
-                      size="small"
-                      href={PATHS.ROLE.ROLES_ID(row.code)}
-                      LinkComponent={Link}
-                      className="text-blue-600 bg-transparent hover:bg-blue-50"
-                    >
-                      <Edit02Icon className="w-4 h-4" />
-                    </IconButton>
+                    <Link href={PATHS.ROLE.ROLES_ID(row.code)}>
+                      <IconButton
+                        size="small"
+                        className="text-blue-600 bg-transparent hover:bg-blue-50"
+                      >
+                        <Edit02Icon className="w-4 h-4" />
+                      </IconButton>
+                    </Link>
                   </Can>
                   <Can pers={["role:delete"]}>
                     <IconButton
@@ -139,9 +141,11 @@ const RolesPage = () => {
       <div className="bg-white rounded-lg">
         <div className="header px-4 py-3">
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 3 }}>
-            <Button variant="contained" startIcon={<AddIcon />} LinkComponent={Link} href={PATHS.ROLE.CREATE}>
-              Tạo vai trò
-            </Button>
+            <Link href={PATHS.ROLE.CREATE}>
+              <Button variant="contained" startIcon={<AddIcon />}>
+                Tạo vai trò
+              </Button>
+            </Link>
           </Box>
         </div>
         <TableData

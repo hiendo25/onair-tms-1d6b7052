@@ -14,11 +14,11 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import PersonIcon from "@mui/icons-material/Person";
-import { ProgramDetail } from "../../_components/mock-data";
+import { PlanProgramDetail } from "@/modules/plans/types";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 
 interface ProgramAccordionProps {
-  programs: ProgramDetail[];
+  programs: PlanProgramDetail[];
   programsCount: number;
 }
 
@@ -26,22 +26,11 @@ export default function ProgramAccordion({
   programs,
   programsCount,
 }: ProgramAccordionProps) {
-  // State to track which program descriptions are expanded
   const [expandedDescriptions, setExpandedDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // State to track which descriptions are actually truncated
   const [truncatedDescriptions, setTruncatedDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // Refs to measure description elements
   const descriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
-
-  // State to track which topic descriptions are expanded
   const [expandedTopicDescriptions, setExpandedTopicDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // State to track which topic descriptions are actually truncated
   const [truncatedTopicDescriptions, setTruncatedTopicDescriptions] = React.useState<Record<string, boolean>>({});
-
-  // Refs to measure topic description elements
   const topicDescriptionRefs = React.useRef<Record<string, HTMLElement | null>>({});
 
   const toggleDescription = (programId: string) => {
@@ -116,11 +105,11 @@ export default function ProgramAccordion({
               <Accordion
                 key={program.id}
                 sx={{
-                  bgcolor: "rgba(0, 80, 255, 0.12)",
+                  bgcolor: "white",
                   "&:before": { display: "none" },
-                  boxShadow: "none",
+                  boxShadow: "0 12px 28px rgba(0,0,0,0.06)",
                   border: "1px solid rgba(145, 158, 171, 0.40)",
-                  borderRadius: "8px",
+                  borderRadius: "12px",
                 }}
               >
                 <AccordionSummary
@@ -128,7 +117,7 @@ export default function ProgramAccordion({
                   sx={{
                     minHeight: "auto",
                     "&:hover": {
-                      bgcolor: "rgba(0, 80, 255, 0.12)",
+                      bgcolor: "grey.50",
                     },
                     "& .MuiAccordionSummary-content": {
                       my: 2,
@@ -150,7 +139,7 @@ export default function ProgramAccordion({
                       {program.name}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                      {program.startDate} - {program.endDate}
+                      {program.startDate && program.endDate ? `${fDateTime(program.startDate,FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(program.endDate,FORMAT_DATE_TIME_CLEANER)}` : "Chưa có lịch"}
                     </Typography>
 
                     {/* Program Description with Expand/Collapse */}
@@ -254,11 +243,11 @@ export default function ProgramAccordion({
                             py: 1.5,
                             pl: 2,
                           }}
-                        >
-                          {/* Topic Chip - Dynamically generated name */}
-                          <Chip
-                            label={`Chủ đề ${topicIndex + 1}`}
-                            size="small"
+                          >
+                            {/* Topic Chip - Dynamically generated name */}
+                            <Chip
+                              label={`Chủ đề ${topicIndex + 1}`}
+                              size="small"
                             variant="filled"
                             sx={{
                               bgcolor: "#212B36",
@@ -269,7 +258,7 @@ export default function ProgramAccordion({
                           />
                           {/* Topic Title */}
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {topic.title}
+                            {topic.name}
                           </Typography>
                         </Box>
 
@@ -357,8 +346,6 @@ export default function ProgramAccordion({
                             </Typography>
                           </Box>
                         )}
-
-                        {/* Courses within Topic - Level 2 (Indented 32px, no gray background) */}
                         <Stack spacing={0}>
                           {topic.courses.map((course) => (
                             <Box key={course.id}>
@@ -377,62 +364,21 @@ export default function ProgramAccordion({
                                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                                   {course.title}
                                 </Typography>
-                                <Typography variant="body2" color="text.secondary">
-                                  ({course.classesCount} lớp)
-                                </Typography>
                               </Box>
-
-                              {/* Classes List - Level 3 (Indented 64px total) */}
-                              <Stack spacing={0}>
-                                {course.classes.map((classInstance, classIndex) => (
-                                  <Box
-                                    key={classInstance.id}
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: 1,
-                                      pl: 10,
-                                      pr: 2,
-                                      py: 1.5,
-                                    }}
-                                  >
-                                    {/* Lớp Label */}
-                                    <Typography
-                                      variant="body2"
-                                      sx={{ minWidth: "30px", color: "text.secondary" }}
-                                    >
-                                      Lớp
-                                    </Typography>
-
-                                    {/* Class Code Chip */}
-                                    <Chip
-                                      label={classInstance.classCode}
-                                      size="small"
-                                      variant="outlined"
-                                      color="primary"
-                                    />
-
-                                    {/* Delivery Mode */}
-                                    <Typography variant="body2" sx={{ minWidth: "60px" }}>
-                                      {classInstance.deliveryMode}
-                                    </Typography>
-
-                                    {/* Instructor */}
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flex: 1 }}>
-                                      <PersonIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-                                      <Typography variant="body2">{classInstance.instructor}</Typography>
-                                    </Box>
-
-                                    {/* Date */}
-                                    <Typography variant="body2" sx={{ minWidth: "90px", textAlign: "right" }}>
-                                      {classInstance.date}
-                                    </Typography>
-                                  </Box>
-                                ))}
-                              </Stack>
                             </Box>
                           ))}
                         </Stack>
+                      </Box>
+                    ))}
+                  </Stack>
+                ) : program.courses && program.courses.length > 0 ? (
+                  <Stack spacing={1} sx={{ p: 2 }}>
+                    {program.courses.map((course) => (
+                      <Box key={course.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {course.title}
+                        </Typography>
                       </Box>
                     ))}
                   </Stack>
@@ -452,4 +398,3 @@ export default function ProgramAccordion({
     </Card>
   );
 }
-

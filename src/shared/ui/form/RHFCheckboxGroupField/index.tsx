@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import React, { memo } from "react";
 import { useId } from "react";
-import type { Control, PathValue, FieldValues, Path } from "react-hook-form";
+import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 interface RHFCheckboxGroupFieldProps<T extends FieldValues> {

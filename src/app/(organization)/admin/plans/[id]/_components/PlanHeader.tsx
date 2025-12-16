@@ -4,36 +4,14 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Box, Chip, IconButton, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { PATHS } from "@/constants/path.contstants";
+import { PATHS } from "@/constants/path.constant";
+import { PlanStatus } from "@/model/plan.model";
+import { getStatusColor, getStatusLabel } from "../../helper";
 
 interface PlanHeaderProps {
   planName: string;
-  status: "pending" | "approved" | "rejected";
+  status: PlanStatus;
 }
-
-const getStatusLabel = (status: "pending" | "approved" | "rejected"): string => {
-  switch (status) {
-    case "pending":
-      return "Chờ duyệt";
-    case "approved":
-      return "Đã duyệt";
-    case "rejected":
-      return "Từ chối";
-  }
-};
-
-const getStatusColor = (
-  status: "pending" | "approved" | "rejected"
-): "warning" | "success" | "error" => {
-  switch (status) {
-    case "pending":
-      return "warning";
-    case "approved":
-      return "success";
-    case "rejected":
-      return "error";
-  }
-};
 
 export default function PlanHeader({ planName, status }: PlanHeaderProps) {
   const router = useRouter();
@@ -54,4 +32,3 @@ export default function PlanHeader({ planName, status }: PlanHeaderProps) {
     </Box>
   );
 }
-

@@ -2,15 +2,15 @@
 import React, { Children, memo } from "react";
 import {
   Button,
+  Divider,
+  ListItemIcon,
+  ListItemText,
   Menu,
   MenuItem,
-  Divider,
-  ListItemText,
-  ListItemIcon,
+  dividerClasses,
+  listClasses,
   listItemIconClasses,
   paperClasses,
-  listClasses,
-  dividerClasses,
 } from "@mui/material";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import useAuthSignOut from "@/modules/auth/hooks/useAuthSignOut";

@@ -3,12 +3,17 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
+  Alert,
   Box,
   Button,
   Card,
   Chip,
+  CircularProgress,
   IconButton,
   InputAdornment,
+  ListItemIcon,
+  ListItemText,
+  Menu,
   MenuItem,
   Select,
   Stack,
@@ -21,11 +26,6 @@ import {
   TableRow,
   TextField,
   Typography,
-  CircularProgress,
-  Alert,
-  Menu,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -154,6 +154,13 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedEmployeeId(null);
+  };
+
+  const handleDetail = () => {
+    if (selectedEmployeeId) {
+      router.push(`/admin/employees/${selectedEmployeeId}/detail`);
+    }
+    handleMenuClose();
   };
 
   const handleEdit = () => {
@@ -411,7 +418,9 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
               vertical: "top",
               horizontal: "right",
             }}
-          >
+          > <MenuItem onClick={handleDetail}>
+              <ListItemText>Chi tiết</ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
