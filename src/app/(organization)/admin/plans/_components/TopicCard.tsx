@@ -1,10 +1,11 @@
 "use client";
 
-import { Box, Chip, IconButton, Typography } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Topic } from "@/modules/plans/plan-form.schema";
 import { ReactNode } from "react";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { Box, Chip, IconButton, Typography } from "@mui/material";
+
+import { Topic } from "@/modules/plans/plan-form.schema";
 
 interface TopicCardProps {
   topic: Topic;

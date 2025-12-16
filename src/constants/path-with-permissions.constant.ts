@@ -83,6 +83,15 @@ export const PATHS_WITH_PERMISSIONS = {
   ],
   [PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT]: ["assignment:create"],
   [PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT()]: ["assignment:update"],
+  [PATHS.PLANS.ROOT]: [
+    { $or: "plan:read" },
+    { $or: "plan:create" },
+    { $or: "plan:update" },
+    { $or: "plan:delete" },
+  ],
+  [PATHS.PLANS.CREATE]: [{ $or: "plan:create" }],
+  [PATHS.PLANS.DETAIL()]: [{ $or: "plan:read" }],
+  [PATHS.PLANS.EDIT()]: [{ $or: "plan:update" }],
   [PATHS.ROLE.ROOT]: [
     {
       $or: "role:update",

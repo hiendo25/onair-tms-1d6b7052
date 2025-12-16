@@ -1,9 +1,10 @@
 "use client";
 
-import { Box, Card, CardContent, Chip, LinearProgress, Stack, Typography } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import CheckIcon from "@mui/icons-material/Check";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import RadioButtonCheckedIcon from "@mui/icons-material/RadioButtonChecked";
+import { Box, Card, CardContent, Chip, LinearProgress, Stack, Typography } from "@mui/material";
+
 import { PlanStepId } from "@/modules/plans/plan-step.utils";
 
 export interface Step {

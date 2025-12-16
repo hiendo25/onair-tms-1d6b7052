@@ -12,11 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useFieldArray } from "react-hook-form";
+
 import { Topic, topicSchema } from "@/modules/plans/plan-form.schema";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 import { usePlanInlineForm } from "@/modules/plans/use-plan-inline-form";
 import { formatDateRange } from "../../../helper";
+
 import ProgramTopicsCard, { EditingTopicState } from "./ProgramTopicsCard";
-import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 
 interface StepTrainingTopicsProps {
   onContinue: () => void;

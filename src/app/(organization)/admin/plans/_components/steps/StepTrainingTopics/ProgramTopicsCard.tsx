@@ -1,12 +1,14 @@
 "use client";
 
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { FieldArrayWithId, useFieldArray, UseFormReturn } from "react-hook-form";
+
 import { PlanFormSchema, Topic } from "@/modules/plans/plan-form.schema";
-import { TopicForm } from "./TopicForm";
-import TopicCard from "../../TopicCard";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+import TopicCard from "../../TopicCard";
+
+import { TopicForm } from "./TopicForm";
 
 export type EditingTopicState = { programIndex: number; topicIndex: number } | null;
 interface ProgramTopicsCardProps {

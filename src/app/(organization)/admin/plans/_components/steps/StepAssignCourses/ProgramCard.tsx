@@ -2,11 +2,13 @@
 
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { useFieldArray, useWatch } from "react-hook-form";
+
 import { Course } from "@/modules/plans/plan-form.schema";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
-import TopicCourseSelector from "./TopicCourseSelector";
-import ProgramCourseSelector from "./ProgramCourseSelector";
 import { formatDateRange } from "../../../helper";
+
+import ProgramCourseSelector from "./ProgramCourseSelector";
+import TopicCourseSelector from "./TopicCourseSelector";
 
 interface ProgramCardProps {
   program: any;
