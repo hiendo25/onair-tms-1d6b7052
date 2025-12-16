@@ -13,7 +13,7 @@ type OrganizationUnit = {
 export const useGetOrganizationUnitsQuery = () => {
   return useTQuery({
     queryKey: ["organization-units"],
-    queryFn: organizationUnitsRepository.getOrganizationUnits,
+    queryFn: () => organizationUnitsRepository.getOrganizationDepartmentOrBranch(),
   });
 };
 

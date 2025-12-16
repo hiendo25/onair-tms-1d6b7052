@@ -22,13 +22,25 @@ export class EmployeeDto {
     id: string;
     title: string;
   } | null;
-  employments!: Array<{
+  employee_branches!: Array<{
     id: string;
-    organization_unit_id: string;
-    organization_units: {
+    branch_id: string;
+    created_at: string;
+    branches: {
       id: string;
       name: string;
-      type: Database["public"]["Enums"]["organization_unit_type"];
+      code: string;
+      address: string;
+    } | null;
+  }>;
+  employee_departments!: Array<{
+    id: string;
+    department_id: string;
+    created_at: string;
+    departments: {
+      id: string;
+      name: string;
+      branch_id: string | null;
     } | null;
   }>;
   managers_employees!: Array<{

@@ -1,7 +1,8 @@
 export * as authRepository from "./auth";
 export * as classRoomRepository from "./class-room";
 export * as employeesRepository from "./employees";
-export * as employmentsRepository from "./employments";
+export * as employeeBranchesRepository from "./employee-branches";
+export * as employeeDepartmentsRepository from "./employee-departments";
 export * as libraryRepository from "./library";
 export * as managersEmployeesRepository from "./managers-employees";
 export * as organizationUnitsRepository from "./organization-units";
