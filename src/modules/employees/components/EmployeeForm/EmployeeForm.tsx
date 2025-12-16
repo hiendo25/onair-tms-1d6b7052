@@ -50,7 +50,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 }) => {
   const notifications = useNotifications();
 
-  const { data: organizationUnits, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
+  const { data: organizationUnitsResult, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
+  const organizationUnits = organizationUnitsResult?.data || [];
   const { data: employeesResult, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
   const { data: roles, isLoading: isLoadingRoles } = useGetRoleList();
@@ -60,11 +61,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
   const { mutateAsync: createPosition, isPending: isCreatingPosition } = useCreatePositionMutation();
 
   const branches = React.useMemo(
-    () => organizationUnits?.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
+    () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
     [organizationUnits],
   );
   const departments = React.useMemo(
-    () => organizationUnits?.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[1]),
+    () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[1]),
     [organizationUnits],
   );
 

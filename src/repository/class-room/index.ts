@@ -448,11 +448,11 @@ const getClassRoomStudents = async (
   }
 
   if (branchId && branchId !== "all") {
-    query = query.eq("employee.branchEmployments.organization_unit_id", branchId);
+    query = query.eq("employee.employee_branches.branch_id", branchId);
   }
 
   if (departmentId && departmentId !== "all") {
-    query = query.eq("employee.departmentEmployments.organization_unit_id", departmentId);
+    query = query.eq("employee.employee_departments.department_id", departmentId);
   }
 
   query = query.order("created_at", { ascending: false });

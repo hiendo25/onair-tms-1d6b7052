@@ -168,6 +168,41 @@ export type Database = {
           },
         ]
       }
+      branches: {
+        Row: {
+          address: string
+          code: string
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          address?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          address?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -1088,6 +1123,117 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_branches: {
+        Row: {
+          branch_id: string
+          created_at: string | null
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string | null
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_employee_branches_branch_id"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_branches_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_departments: {
+        Row: {
+          created_at: string | null
+          department_id: string
+          employee_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          department_id: string
+          employee_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          department_id?: string
+          employee_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_employee_departments_department_id"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_departments_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -2054,6 +2200,80 @@ export type Database = {
           },
         ]
       }
+      training_plan_surveys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          organization_id: string
+          plan_id: string
+          result_summary: Json | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["training_plan_survey_status"]
+          survey_id: string
+          target_type: Database["public"]["Enums"]["plan_survey_target"]
+          target_unit_ids: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id: string
+          plan_id: string
+          result_summary?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["training_plan_survey_status"]
+          survey_id: string
+          target_type?: Database["public"]["Enums"]["plan_survey_target"]
+          target_unit_ids?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          organization_id?: string
+          plan_id?: string
+          result_summary?: Json | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["training_plan_survey_status"]
+          survey_id?: string
+          target_type?: Database["public"]["Enums"]["plan_survey_target"]
+          target_unit_ids?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_surveys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_surveys_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_surveys_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "training_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_surveys_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_plan_topic_courses: {
         Row: {
           course_id: string
@@ -2320,6 +2540,7 @@ export type Database = {
         Returns: {
           approved: number
           pending: number
+          pending_survey: number
           rejected: number
           total: number
         }[]
@@ -2369,6 +2590,7 @@ export type Database = {
       hashtag_type: "class_room"
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
+      plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
       question_type:
         | "file"
@@ -2379,6 +2601,7 @@ export type Database = {
         | "drag_and_drop"
         | "true_false"
         | "order"
+        | "fill"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
@@ -2389,7 +2612,13 @@ export type Database = {
         | "radio"
         | "yes_no"
       survey_type: "planning" | "classroom"
-      training_plan_status: "pending" | "approved" | "rejected" | "deleted"
+      training_plan_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "deleted"
+        | "pending_survey"
+      training_plan_survey_status: "pending" | "collecting" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2546,6 +2775,7 @@ export const Constants = {
       hashtag_type: ["class_room"],
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
+      plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
       question_type: [
         "file",
@@ -2556,6 +2786,7 @@ export const Constants = {
         "drag_and_drop",
         "true_false",
         "order",
+        "fill",
       ],
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
@@ -2568,7 +2799,14 @@ export const Constants = {
         "yes_no",
       ],
       survey_type: ["planning", "classroom"],
-      training_plan_status: ["pending", "approved", "rejected", "deleted"],
+      training_plan_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "deleted",
+        "pending_survey",
+      ],
+      training_plan_survey_status: ["pending", "collecting", "closed"],
     },
   },
 } as const

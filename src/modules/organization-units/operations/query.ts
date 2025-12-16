@@ -5,7 +5,7 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 export const useGetOrganizationUnitsQuery = () => {
   return useTQuery({
     queryKey: ["organization-units"],
-    queryFn: organizationUnitsRepository.getOrganizationUnits,
+    queryFn: () => organizationUnitsRepository.getOrganizationDepartmentOrBranch(),
   });
 };
 

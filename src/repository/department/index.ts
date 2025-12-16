@@ -13,9 +13,8 @@ export const departmentRepository = {
     const { page = 0, limit = 10, search, organizationId, branchId } = params || {};
     const supabase = createClient();
     let query = supabase
-      .from("organization_units")
+      .from("departments")
       .select("*", { count: "exact" })
-      .eq("type", "department")
       .order("created_at", { ascending: false });
 
     // Apply organization filter
@@ -23,9 +22,9 @@ export const departmentRepository = {
       query = query.eq("organization_id", organizationId);
     }
 
-    // Apply branch filter (parent_id)
+    // Apply branch filter
     if (branchId) {
-      query = query.eq("parent_id", branchId);
+      query = query.eq("branch_id", branchId);
     }
 
     // Apply search filter (name, case-insensitive)
@@ -57,10 +56,9 @@ export const departmentRepository = {
   async getById(id: string): Promise<DepartmentDto> {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("departments")
       .select("*")
       .eq("id", id)
-      .eq("type", "department")
       .single();
 
     if (error) throw error;
@@ -75,8 +73,8 @@ export const departmentRepository = {
     const supabase = createClient();
 
     const { data, error } = await supabase
-      .from("organization_units")
-      .insert({ ...department, type: "department" })
+      .from("departments")
+      .insert(department)
       .select()
       .single();
 
@@ -92,10 +90,9 @@ export const departmentRepository = {
     const supabase = createClient();
     const { id, ...updateData } = payload;
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("departments")
       .update(updateData)
       .eq("id", id)
-      .eq("type", "department")
       .select()
       .single();
 
@@ -110,25 +107,24 @@ export const departmentRepository = {
     const supabase = createClient();
 
     // Check if department has any employees
-    const { data: employments, error: checkError } = await supabase
-      .from("employments")
+    const { data: employeeDepartments, error: checkError } = await supabase
+      .from("employee_departments")
       .select("id")
-      .eq("organization_unit_id", id)
+      .eq("department_id", id)
       .limit(1);
 
     if (checkError) throw checkError;
 
-    if (employments && employments.length > 0) {
+    if (employeeDepartments && employeeDepartments.length > 0) {
       throw new Error(
         "Không thể xóa phòng ban có nhân viên"
       );
     }
 
     const { error } = await supabase
-      .from("organization_units")
+      .from("departments")
       .delete()
-      .eq("id", id)
-      .eq("type", "department");
+      .eq("id", id);
 
     if (error) throw error;
   },
@@ -143,10 +139,9 @@ export const departmentRepository = {
   ): Promise<boolean> {
     const supabase = createClient();
     let query = supabase
-      .from("organization_units")
+      .from("departments")
       .select("id")
       .eq("organization_id", organizationId)
-      .eq("type", "department")
       .eq("name", name);
 
     if (excludeId) {
@@ -165,10 +160,9 @@ export const departmentRepository = {
   async getBranches(organizationId: string): Promise<BranchDto[]> {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("branches")
       .select("*")
       .eq("organization_id", organizationId)
-      .eq("type", "branch")
       .order("name", { ascending: true });
 
     if (error) throw error;
@@ -182,15 +176,9 @@ export const departmentRepository = {
   async bulkImport(departments: CreateDepartmentDto[]): Promise<DepartmentDto[]> {
     const supabase = createClient();
 
-    // Set type to department for all
-    const departmentsWithType = departments.map((dept) => ({
-      ...dept,
-      type: "department" as const,
-    }));
-
     const { data, error } = await supabase
-      .from("organization_units")
-      .insert(departmentsWithType)
+      .from("departments")
+      .insert(departments)
       .select();
 
     if (error) throw error;

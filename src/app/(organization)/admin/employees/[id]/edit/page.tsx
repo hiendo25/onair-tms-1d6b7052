@@ -23,8 +23,9 @@ const EditEmployeePage = () => {
   const defaultValues = React.useMemo(() => {
     if (!employee) return undefined;
 
-    const departmentEmployment = employee.employments.find((emp) => emp.organization_units?.type === "department");
-    const branchEmployment = employee.employments.find((emp) => emp.organization_units?.type === "branch");
+    // Get department and branch from new junction tables
+    const departmentRelation = employee.employee_departments?.[0];
+    const branchRelation = employee.employee_branches?.[0];
 
     const managerRelationship = employee.managers_employees?.[0];
 
@@ -35,8 +36,8 @@ const EditEmployeePage = () => {
       gender: employee.profiles?.gender || "male",
       birthday: employee.profiles?.birthday || null,
       employee_code: employee.employee_code || "",
-      department: departmentEmployment?.organization_unit_id || "",
-      branch: branchEmployment?.organization_unit_id || "",
+      department: departmentRelation?.department_id || "",
+      branch: branchRelation?.branch_id || "",
       manager_id: managerRelationship?.manager_id || "",
       position_id: employee.position_id || "",
       employee_type: employee.employee_type || undefined,

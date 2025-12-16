@@ -92,15 +92,16 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
     setPage(0);
   }, [statusFilter]);
 
-  const { data: organizationUnits } = useGetOrganizationUnitsQuery();
+  const { data: organizationUnitsResult } = useGetOrganizationUnitsQuery();
+  const organizationUnits = organizationUnitsResult?.data || [];
 
   const departments = React.useMemo(
-    () => organizationUnits?.filter((unit) => unit.type === "department") || [],
+    () => organizationUnits.filter((unit) => unit.type === "department"),
     [organizationUnits],
   );
 
   const branches = React.useMemo(
-    () => organizationUnits?.filter((unit) => unit.type === "branch") || [],
+    () => organizationUnits.filter((unit) => unit.type === "branch"),
     [organizationUnits],
   );
 
@@ -202,13 +203,13 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
   };
 
   const getDepartmentName = (employee: EmployeeDto) => {
-    const dept = employee.employments.find((emp) => emp.organization_units?.type === "department");
-    return dept?.organization_units?.name || "-";
+    const dept = employee.employee_departments?.[0];
+    return dept?.departments?.name || "-";
   };
 
   const getBranchName = (employee: EmployeeDto) => {
-    const branch = employee.employments.find((emp) => emp.organization_units?.type === "branch");
-    return branch?.organization_units?.name || "-";
+    const branch = employee.employee_branches?.[0];
+    return branch?.branches?.name || "-";
   };
 
   const getPositionTitle = (employee: EmployeeDto) => {

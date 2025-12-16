@@ -57,13 +57,13 @@ const resolveOrganizationUnitName = (
   student: ClassRoomStudentDto,
   unitType: "branch" | "department",
 ) => {
-  const employments = student.employee?.employments ?? [];
-
-  return (
-    employments.find(
-      (employment) => employment.organizationUnit?.type === unitType,
-    )?.organizationUnit?.name ?? "-"
-  );
+  if (unitType === "department") {
+    const departments = student.employee?.employee_departments ?? [];
+    return departments[0]?.departments?.name ?? "-";
+  } else {
+    const branches = student.employee?.employee_branches ?? [];
+    return branches[0]?.branches?.name ?? "-";
+  }
 };
 
 
@@ -92,7 +92,8 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const { organization } = useUserOrganization((state) => state.data);
   const organizationId = organization?.id;
 
-  const { data: organizationUnits = [] } = useGetOrganizationUnitsQuery();
+  const { data: organizationUnitsResult } = useGetOrganizationUnitsQuery();
+  const organizationUnits = organizationUnitsResult?.data || [];
 
   const { mutateAsync: deleteUserInClassRoom, isPending: isDeletingStudents } = useDeleteUserInClassRoomMutation();
   const { mutateAsync: markAttendance, isPending: isMarkingAttendance } = useMarkAttendanceMutation();
