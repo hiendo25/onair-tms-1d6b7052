@@ -187,7 +187,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                                 onChange({
                                   id: teacher?.id,
                                   name: teacher?.profiles.full_name,
-                                  departmentName: teacher?.employments[0]?.organization_units.name || "",
+                                  departmentName: teacher?.employee_departments[0]?.departments?.name || "",
                                 });
                               },
                             })

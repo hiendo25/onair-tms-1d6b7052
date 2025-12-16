@@ -24,11 +24,12 @@ export type ClassRoomPriorityDto = Tables<"class_rooms_priority"> & {
   studentCount?: [{ count: number }];
 };
 
-type EmploymentWithOrganizationUnitDto = Tables<"employments"> & {
-  organizationUnit?: Pick<
-    Tables<"organization_units">,
-    "id" | "name" | "type"
-  > | null;
+type EmployeeDepartmentDto = Tables<"employee_departments"> & {
+  departments?: Pick<Tables<"departments">, "id" | "name" | "branch_id"> | null;
+};
+
+type EmployeeBranchDto = Tables<"employee_branches"> & {
+  branches?: Pick<Tables<"branches">, "id" | "name"> | null;
 };
 
 type ClassRoomStudentEmployeeDto = Tables<"employees"> & {
@@ -36,7 +37,8 @@ type ClassRoomStudentEmployeeDto = Tables<"employees"> & {
     Tables<"profiles">,
     "id" | "full_name" | "email" | "phone_number" | "avatar"
   > | null;
-  employments?: EmploymentWithOrganizationUnitDto[];
+  employee_departments?: EmployeeDepartmentDto[];
+  employee_branches?: EmployeeBranchDto[];
   attendances?: ClassRoomStudentSessionAttendanceDto[] | null;
 };
 

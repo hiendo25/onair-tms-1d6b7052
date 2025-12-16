@@ -15,10 +15,13 @@ const ATTENDANCE_LABELS: Record<"attended" | "absent" | "pending", string> = {
 const MAX_PAGE_SIZE = 1000;
 
 const resolveOrganizationUnitName = (student: ClassRoomStudentDto, unitType: "branch" | "department") => {
-  const employments = student.employee?.employments ?? [];
-  return (
-    employments.find((employment) => employment.organizationUnit?.type === unitType)?.organizationUnit?.name ?? "-"
-  );
+  if (unitType === "department") {
+    const departments = student.employee?.employee_departments ?? [];
+    return departments[0]?.departments?.name ?? "-";
+  }
+
+  const branches = student.employee?.employee_branches ?? [];
+  return branches[0]?.branches?.name ?? "-";
 };
 
 // const resolveAttendanceStatus = (

@@ -12,9 +12,8 @@ export const branchRepository = {
     const { page = 0, limit = 10, search, organizationId } = params || {};
     const supabase = createClient();
     let query = supabase
-      .from("organization_units")
+      .from("branches")
       .select("*", { count: "exact" })
-      .eq("type", "branch")
       .order("created_at", { ascending: false });
 
     // Apply organization filter
@@ -51,10 +50,9 @@ export const branchRepository = {
   async getById(id: string): Promise<BranchDto> {
     const supabase = createClient();
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("branches")
       .select("*")
       .eq("id", id)
-      .eq("type", "branch")
       .single();
 
     if (error) throw error;
@@ -69,8 +67,8 @@ export const branchRepository = {
     const supabase = createClient();
 
     const { data, error } = await supabase
-      .from("organization_units")
-      .insert({ ...branch, type: "branch" })
+      .from("branches")
+      .insert(branch)
       .select()
       .single();
 
@@ -86,10 +84,9 @@ export const branchRepository = {
     const supabase = createClient();
     const { id, ...updateData } = payload;
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("branches")
       .update(updateData)
       .eq("id", id)
-      .eq("type", "branch")
       .select()
       .single();
 
@@ -103,27 +100,25 @@ export const branchRepository = {
   async delete(id: string): Promise<void> {
     const supabase = createClient();
 
-    // Check if branch has any child organization units (departments)
-    const { data: units, error: checkError } = await supabase
-      .from("organization_units")
+    // Check if branch has any departments referencing it
+    const { data: departments, error: checkError } = await supabase
+      .from("departments")
       .select("id")
-      .eq("parent_id", id)
-      .eq("type", "department")
+      .eq("branch_id", id)
       .limit(1);
 
     if (checkError) throw checkError;
 
-    if (units && units.length > 0) {
+    if (departments && departments.length > 0) {
       throw new Error(
         "Không thể xóa chi nhánh có phòng ban"
       );
     }
 
     const { error } = await supabase
-      .from("organization_units")
+      .from("branches")
       .delete()
-      .eq("id", id)
-      .eq("type", "branch");
+      .eq("id", id);
 
     if (error) throw error;
   },
@@ -138,10 +133,9 @@ export const branchRepository = {
   ): Promise<boolean> {
     const supabase = createClient();
     let query = supabase
-      .from("organization_units")
+      .from("branches")
       .select("id")
       .eq("organization_id", organizationId)
-      .eq("type", "branch")
       .eq("name", name);
 
     if (excludeId) {
@@ -164,10 +158,9 @@ export const branchRepository = {
   ): Promise<boolean> {
     const supabase = createClient();
     let query = supabase
-      .from("organization_units")
+      .from("branches")
       .select("id")
       .eq("organization_id", organizationId)
-      .eq("type", "branch")
       .eq("code", code);
 
     if (excludeId) {
@@ -188,10 +181,9 @@ export const branchRepository = {
     
     // Get all branch codes for this organization
     const { data, error } = await supabase
-      .from("organization_units")
+      .from("branches")
       .select("code")
       .eq("organization_id", organizationId)
-      .eq("type", "branch")
       .like("code", "CN%");
 
     if (error) throw error;
@@ -201,7 +193,7 @@ export const branchRepository = {
     if (data && data.length > 0) {
       data.forEach((item) => {
         const match = item.code.match(/^CN(\d+)$/);
-        if (match) {
+        if (match && match?.[1]) {
           const num = parseInt(match[1], 10);
           if (num > maxNumber) {
             maxNumber = num;
@@ -221,16 +213,9 @@ export const branchRepository = {
   async bulkImport(branches: CreateBranchDto[]): Promise<BranchDto[]> {
     const supabase = createClient();
 
-    // Set type and parent_id for all branches
-    const branchesWithParent = branches.map((branch) => ({
-      ...branch,
-      type: "branch" as const,
-      parent_id: null,
-    }));
-
     const { data, error } = await supabase
-      .from("organization_units")
-      .insert(branchesWithParent)
+      .from("branches")
+      .insert(branches)
       .select();
 
     if (error) throw error;

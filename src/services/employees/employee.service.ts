@@ -5,7 +5,8 @@ import {
   classRoomSessionRepository,
   coursesRepository,
   employeesRepository,
-  employmentsRepository,
+  employeeBranchesRepository,
+  employeeDepartmentsRepository,
   libraryRepository,
   managersEmployeesRepository,
   organizationsRepository,
@@ -85,25 +86,22 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
     profileId = profileData.id;
     console.log(`Profile record created: ${profileId}`);
 
-    const employmentsToCreate = [];
-
+    // Create employee-department relationship
     if (payload.department) {
-      employmentsToCreate.push({
+      await employeeDepartmentsRepository.create([{
         employee_id: employeeId,
-        organization_unit_id: payload.department,
-      });
+        department_id: payload.department,
+      }]);
+      console.log('Created employee-department relationship');
     }
 
-    if (payload.branch && payload.branch !== payload.department) {
-      employmentsToCreate.push({
+    // Create employee-branch relationship
+    if (payload.branch) {
+      await employeeBranchesRepository.create([{
         employee_id: employeeId,
-        organization_unit_id: payload.branch,
-      });
-    }
-
-    if (employmentsToCreate.length > 0) {
-      await employmentsRepository.createEmployments(employmentsToCreate);
-      console.log(`Created ${employmentsToCreate.length} employment record(s)`);
+        branch_id: payload.branch,
+      }]);
+      console.log('Created employee-branch relationship');
     }
 
     if (payload.manager_id) {
@@ -142,8 +140,11 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
     }
 
     if (employeeId) {
-      console.log(`Rolling back: Deleting employments for employee ${employeeId}`);
-      await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
+      console.log(`Rolling back: Deleting employee-branch relations for employee ${employeeId}`);
+      await employeeBranchesRepository.deleteByEmployeeId(employeeId);
+
+      console.log(`Rolling back: Deleting employee-department relations for employee ${employeeId}`);
+      await employeeDepartmentsRepository.deleteByEmployeeId(employeeId);
 
       console.log(`Rolling back: Deleting manager relationships for employee ${employeeId}`);
       await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(employeeId);
@@ -197,26 +198,24 @@ async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<
     birthday: payload.birthday || null,
   });
 
-  await employmentsRepository.deleteEmploymentsByEmployeeId(payload.id);
+  // Delete existing relationships
+  await employeeBranchesRepository.deleteByEmployeeId(payload.id);
+  await employeeDepartmentsRepository.deleteByEmployeeId(payload.id);
 
-  const employmentsToCreate = [];
-
+  // Create new employee-department relationship
   if (payload.department) {
-    employmentsToCreate.push({
+    await employeeDepartmentsRepository.create([{
       employee_id: payload.id,
-      organization_unit_id: payload.department,
-    });
+      department_id: payload.department,
+    }]);
   }
 
-  if (payload.branch && payload.branch !== payload.department) {
-    employmentsToCreate.push({
+  // Create new employee-branch relationship
+  if (payload.branch) {
+    await employeeBranchesRepository.create([{
       employee_id: payload.id,
-      organization_unit_id: payload.branch,
-    });
-  }
-
-  if (employmentsToCreate.length > 0) {
-    await employmentsRepository.createEmployments(employmentsToCreate);
+      branch_id: payload.branch,
+    }]);
   }
 
   await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(payload.id);
@@ -269,7 +268,8 @@ async function deleteEmployeeWithRelations(employeeId: string): Promise<void> {
 
   // Delete core employee relationships
   await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
-  await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
+  await employeeBranchesRepository.deleteByEmployeeId(employeeId);
+  await employeeDepartmentsRepository.deleteByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);
 
