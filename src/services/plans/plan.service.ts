@@ -1,4 +1,6 @@
+import { PlanStatus } from "@/model/plan.model";
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
+import { mapPlanDetailToFormValues } from "@/modules/plans/plan-form.utils";
 import {
   PlanDetailCounts,
   PlanDetailDto,
@@ -7,11 +9,10 @@ import {
   PlanProgramDetail,
   PlanTopicDetail,
 } from "@/modules/plans/types";
-import { plansRepository } from "@/repository/plans";
-import { PlanStatus } from "@/model/plan.model";
 import { createCourse } from "@/repository/courses";
+import { plansRepository } from "@/repository/plans";
+import { TablesUpdate } from "@/types/supabase.types";
 import { slugify } from "@/utils/slugify";
-import { mapPlanDetailToFormValues } from "@/modules/plans/plan-form.utils";
 interface GetPlansInput {
   organizationId: string;
   search?: string;
@@ -354,6 +355,32 @@ class PlanService {
   static async deletePlan(id: string) {
     return plansRepository.deletePlan(id);
   }
+
+  static async updatePlanStatus(id: string, status: PlanStatus, approverId?: string | null) {
+    const current = await PlanService.getPlanDetail(id);
+
+    if (current.status === "pending_survey") {
+      throw new Error("Kế hoạch đang chờ khảo sát, chưa thể duyệt.");
+    }
+
+    if (current.status !== "pending" && (status === "approved" || status === "rejected")) {
+      throw new Error("Chỉ duyệt kế hoạch ở trạng thái 'Chờ duyệt'.");
+    }
+
+    const requiresApprover = status === "approved" || status === "rejected";
+    if (requiresApprover && !approverId) {
+      throw new Error("Thiếu thông tin người duyệt kế hoạch");
+    }
+
+    const updatePayload: TablesUpdate<"training_plans"> = {
+      status,
+      approved_by: requiresApprover ? approverId ?? null : null,
+      approved_at: requiresApprover ? new Date().toISOString() : null,
+    };
+
+    await plansRepository.updatePlanRow(id, updatePayload);
+    return PlanService.getPlanDetail(id);
+  }
 }
 
 export const planService = {
@@ -376,6 +403,8 @@ export const planService = {
     payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },
   ) =>
     new PlanService(payload.organizationId, payload.createdBy).update(id, payload.form, payload.status),
+  updatePlanStatus: (payload: { id: string; status: PlanStatus; approverId?: string | null }) =>
+    PlanService.updatePlanStatus(payload.id, payload.status, payload.approverId),
 };
 
 export { PlanService };
