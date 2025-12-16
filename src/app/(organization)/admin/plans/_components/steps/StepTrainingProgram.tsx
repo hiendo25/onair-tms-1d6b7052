@@ -63,6 +63,11 @@ export default function StepTrainingProgram({
     name: "info.endDate",
   });
 
+  const infoStartDate = useWatch({
+    control: control,
+    name: "info.startDate",
+  });
+
   const programStartDate = useWatch({
     control: programForm.control,
     name: "startDate",
@@ -153,7 +158,8 @@ export default function StepTrainingProgram({
             <RHFDateTimePicker
               control={programForm.control}
               name="startDate"
-              minDateTime={dayjs(infoEndDate)}
+              minDateTime={dayjs(infoStartDate)}
+              maxDateTime={dayjs(infoEndDate)}
             />
           </Box>
           <Box>
@@ -164,6 +170,7 @@ export default function StepTrainingProgram({
               control={programForm.control}
               name="endDate"
               minDateTime={dayjs(programStartDate)}
+              maxDateTime={dayjs(infoEndDate)}
             />
           </Box>
         </Box>
