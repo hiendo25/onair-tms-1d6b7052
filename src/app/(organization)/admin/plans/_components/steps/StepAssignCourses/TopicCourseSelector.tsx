@@ -2,10 +2,11 @@
 
 import { Autocomplete, Box, Checkbox, TextField, Typography } from "@mui/material";
 import { useFieldArray, useWatch } from "react-hook-form";
+
 import { Course } from "@/modules/plans/plan-form.schema";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
-import TopicCard from "../../TopicCard";
 import { renderCourseTags } from "../../../helper";
+import TopicCard from "../../TopicCard";
 
 interface TopicCourseSelectorProps {
   topic: any;

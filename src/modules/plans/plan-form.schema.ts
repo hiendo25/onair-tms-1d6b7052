@@ -1,4 +1,6 @@
+import dayjs from "dayjs";
 import * as zod from "zod";
+
 import { Enums } from "@/types/supabase.types";
 
 export type PlanSurveyTarget = Enums<"plan_survey_target">;
@@ -65,11 +67,24 @@ export const trainingProgramSchema = zod.object({
   description: zod.string().optional(),
   topics: zod.array(topicSchema).optional(),
   courses: zod.array(courseSchema).optional(), // Cho phép gán môn học trực tiếp khi không có chủ đề
+}).superRefine((values, ctx) => {
+  if (!values.startDate || !values.endDate) return;
+
+  const startDate = dayjs(values.startDate);
+  const endDate = dayjs(values.endDate);
+
+  if (startDate.isValid() && endDate.isValid() && !endDate.isAfter(startDate)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "Ngày kết thúc phải lớn hơn ngày bắt đầu.",
+    });
+  }
 });
 
 export const planSchema = zod.object({
   info: zod.object({
-    name: zod.string().min(1, { message: "Tên kế hoạch không được bỏ trống." }),
+    name: zod.string().min(1, { message: "Tên kế hoạch không được bỏ trống." }).max(200, { message: "Tên kế hoạch tối đa 200 ký tự" }),
     objective: zod.string().optional(),
     startDate: zod.string().optional().nullable(),
     endDate: zod.string().optional().nullable(),

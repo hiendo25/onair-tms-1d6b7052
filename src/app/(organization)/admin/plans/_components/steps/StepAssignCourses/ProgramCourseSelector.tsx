@@ -1,6 +1,7 @@
 "use client";
 
 import { Autocomplete, Box, Checkbox, TextField, Typography } from "@mui/material";
+
 import { Course } from "@/modules/plans/plan-form.schema";
 import { renderCourseTags } from "../../../helper";
 

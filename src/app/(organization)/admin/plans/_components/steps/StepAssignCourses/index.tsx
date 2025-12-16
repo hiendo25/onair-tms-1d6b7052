@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
   Button,
@@ -10,14 +12,14 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import { useState } from "react";
-import { useFieldArray } from "react-hook-form";
-import { useGetPlanCourseOptionsQuery } from "@/modules/plans/operations/query";
-import { useCreatePlanDraftCourseMutation } from "@/modules/plans/operations/mutation";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 import { useSnackbar } from "notistack";
+import { useFieldArray } from "react-hook-form";
+
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useCreatePlanDraftCourseMutation } from "@/modules/plans/operations/mutation";
+import { useGetPlanCourseOptionsQuery } from "@/modules/plans/operations/query";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+
 import CreateCourseDialog from "./CreateCourseDialog";
 import ProgramCard from "./ProgramCard";
 
@@ -67,8 +69,17 @@ export default function StepAssignCourses({
   return (
     <Card sx={{ boxShadow: "0 14px 44px rgba(9, 30, 66, 0.08)", border: "1px solid", borderColor: "divider" }}>
       <CardContent sx={{ p: { xs: 2.5, md: 3.5 } }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
-          <Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            mb: 1.5,
+            gap: { xs: 1.5, sm: 1 },
+          }}
+        >
+          <Box sx={{ flex: 1, minWidth: 0 }}>
             <Typography variant="overline" sx={{ color: "text.secondary", letterSpacing: 0.6 }}>
               Bước 4
             </Typography>
@@ -80,7 +91,16 @@ export default function StepAssignCourses({
               Bạn có thể bỏ qua nếu chưa cần gán môn.
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              width: { xs: "100%", sm: "auto" },
+              justifyContent: { xs: "flex-start", sm: "flex-end" },
+            }}
+          >
             <Button
               variant="outlined"
               size="small"

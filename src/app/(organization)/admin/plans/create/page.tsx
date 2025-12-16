@@ -1,6 +1,7 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import CreatePlanForm from "./_components/CreatePlanForm";
 import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import CreatePlanForm from "./_components/CreatePlanForm";
 
 export default async function CreatePlanPage() {
   return (

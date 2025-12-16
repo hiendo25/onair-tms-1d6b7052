@@ -1,39 +1,41 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
   Chip,
   IconButton,
   InputAdornment,
+  ListItemText,
   Menu,
   MenuItem,
+  Stack,
   TextField,
   Typography,
-  ListItemText,
-  Stack,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import ClearIcon from "@mui/icons-material/Clear";
+import { useRouter } from "next/navigation";
+
 import { PATHS } from "@/constants/path.constant";
+import useDebounce from "@/hooks/useDebounce";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import useDebounce from "@/hooks/useDebounce";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { PlanStatus } from "@/model/plan.model";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useDeletePlanMutation } from "@/modules/plans/operations/mutation";
+import { useGetPlansQuery } from "@/modules/plans/operations/query";
+import { EmptyBoxIcon } from "@/shared/assets/icons";
 import PageContainer from "@/shared/ui/PageContainer";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
-import { useGetPlansQuery } from "@/modules/plans/operations/query";
-import { useDeletePlanMutation } from "@/modules/plans/operations/mutation";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { PlanStatus } from "@/model/plan.model";
 import { formatCurrencyV2 } from "@/utils/format-number";
-import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { getStatusColor, getStatusLabel } from "../helper";
+
 import StatCard from "./StatCard";
-import { EmptyBoxIcon } from "@/shared/assets/icons";
 
 export default function PlansTable() {
   const router = useRouter();
@@ -186,9 +188,9 @@ export default function PlansTable() {
       renderCell: (_value, row) =>
         row.startDate && row.endDate
           ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(
-              row.endDate,
-              FORMAT_DATE_TIME_CLEANER,
-            )}`
+            row.endDate,
+            FORMAT_DATE_TIME_CLEANER,
+          )}`
           : "Chưa có",
     },
     {
