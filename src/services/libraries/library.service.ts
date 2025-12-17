@@ -1,14 +1,17 @@
 import { libraryRepository } from "@/repository";
-import { Database } from "@/types/supabase.types";
 import { createClient } from "@/services";
-
+import { Database } from "@/types/supabase.types";
+import { UserOrganizationService } from "../organization/user-organization.service";
 type Library = Database["public"]["Tables"]["libraries"]["Row"];
 type Resource = Database["public"]["Tables"]["resources"]["Row"];
 
 async function getCurrentEmployee() {
   const supabase = createClient();
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user) {
     throw new Error("User not authenticated");
@@ -18,6 +21,7 @@ async function getCurrentEmployee() {
     .from("employees")
     .select("id, organization_id")
     .eq("user_id", user.id)
+    .eq("is_main", true)
     .single();
 
   if (error) {
@@ -27,8 +31,11 @@ async function getCurrentEmployee() {
   if (!employee) {
     throw new Error("Employee not found");
   }
-
-  return employee;
+  return {
+    id: employee.id,
+    organization_id: employee.organization_id,
+  };
+  // return employee;
 }
 
 export async function getCurrentUserLibrary(): Promise<Library | null> {
@@ -40,10 +47,7 @@ export async function getLibraryResources(libraryId: string): Promise<Resource[]
   return libraryRepository.getResourcesByLibrary(libraryId);
 }
 
-export async function getLibraryResourcesByFolder(
-  libraryId: string,
-  folderId: string | null
-): Promise<Resource[]> {
+export async function getLibraryResourcesByFolder(libraryId: string, folderId: string | null): Promise<Resource[]> {
   return libraryRepository.getResourcesByLibraryAndFolder(libraryId, folderId);
 }
 
@@ -51,11 +55,7 @@ export async function deleteResource(resourceId: string): Promise<void> {
   return libraryRepository.deleteResource(resourceId);
 }
 
-export async function createFolder(
-  name: string,
-  libraryId: string,
-  parentId: string | null
-): Promise<Resource> {
+export async function createFolder(name: string, libraryId: string, parentId: string | null): Promise<Resource> {
   const employee = await getCurrentEmployee();
 
   if (!employee.organization_id) {
@@ -83,7 +83,7 @@ export async function createFileResource(
   size: number,
   mimeType: string,
   extension: string,
-  thumbnailUrl: string | null
+  thumbnailUrl: string | null,
 ): Promise<Resource> {
   const employee = await getCurrentEmployee();
 
@@ -130,9 +130,7 @@ export async function getResourcesByIds(resourceIds: string[]): Promise<Resource
 
   const resources = await libraryRepository.getResourcesByIds(resourceIds);
 
-  const unauthorizedResources = resources.filter(
-    (resource) => resource.organization_id !== employee.organization_id
-  );
+  const unauthorizedResources = resources.filter((resource) => resource.organization_id !== employee.organization_id);
 
   if (unauthorizedResources.length > 0) {
     throw new Error("Access denied: Some resources do not belong to your organization");

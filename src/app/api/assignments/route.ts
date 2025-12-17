@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { CreateAssignmentDto } from "@/types/dto/assignments";
+import { NextRequest, NextResponse } from "next/server";
+
+import { PATHS } from "@/constants/path.constant";
+import { employeesRepository } from "@/repository";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
-import { employeesRepository } from "@/repository";
-import { PATHS } from "@/constants/path.constant";
+import type { CreateAssignmentDto } from "@/types/dto/assignments";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
 
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "0");
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
 
     const result = await assignmentService.createAssignmentWithRelations(payload, employee.id);
 

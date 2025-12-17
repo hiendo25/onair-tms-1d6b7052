@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       assignment_categories: {
@@ -1245,6 +1270,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
+          is_main: boolean | null
           organization_id: string | null
           position_id: string | null
           start_date: string | null
@@ -1257,6 +1283,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1269,6 +1296,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1288,6 +1316,42 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees_roles: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_roles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
@@ -1570,28 +1634,34 @@ export type Database = {
         Row: {
           created_at: string
           employee_limit: number | null
+          favicon: string | null
           id: string
           is_active: boolean
           logo: string
           name: string
+          shortname: string | null
           subdomain: string
         }
         Insert: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo: string
           name: string
+          shortname?: string | null
           subdomain: string
         }
         Update: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo?: string
           name?: string
+          shortname?: string | null
           subdomain?: string
         }
         Relationships: []
@@ -2056,7 +2126,7 @@ export type Database = {
           is_other: boolean | null
           option_text: string | null
           priority: number | null
-          survey_question_id: string | null
+          survey_question_id: string
         }
         Insert: {
           created_at?: string
@@ -2064,7 +2134,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Update: {
           created_at?: string
@@ -2072,7 +2142,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Relationships: [
           {
@@ -2744,6 +2814,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],

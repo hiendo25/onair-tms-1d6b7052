@@ -1,4 +1,4 @@
-import { supabase } from "@/services";
+import { createClient, supabase } from "@/services";
 import { createSVClient } from "@/services";
 import type { EmployeeDto, GetEmployeesParams } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
@@ -244,14 +244,14 @@ export async function updateEmployeeById(
     throw new Error(`Failed to update employee: ${error.message}`);
   }
 }
-
-export async function getEmployeeByUserId(userId: string) {
+export async function getMainEmployeeByUserId(userId: string) {
   const supabase = await createSVClient();
 
   const { data: employee, error } = await supabase
     .from("employees")
     .select("id, organization_id")
     .eq("user_id", userId)
+    .eq("is_main", true)
     .single();
 
   if (error) {
@@ -262,8 +262,28 @@ export async function getEmployeeByUserId(userId: string) {
     throw new Error("Employee not found");
   }
 
+  console.log({ employee });
   return employee;
 }
+// export async function getEmployeeByUserId(userId: string) {
+//   const supabase = await createSVClient();
+
+//   const { data: employee, error } = await supabase
+//     .from("employees")
+//     .select("id, organization_id")
+//     .eq("user_id", userId)
+//     .single();
+
+//   if (error) {
+//     throw new Error(`Failed to fetch employee: ${error.message}`);
+//   }
+
+//   if (!employee) {
+//     throw new Error("Employee not found");
+//   }
+
+//   return employee;
+// }
 
 export async function getEmployeeUserId(employeeId: string) {
   const supabase = await createSVClient();
@@ -323,9 +343,9 @@ export async function getEmployeeOrganizationIdByUserId(userId: string): Promise
   return employee.organization_id;
 }
 
-export const getEmployeeDetailByUserId = async (userId: string) => {
+export const getEmployeesByUserId = async (userId: string) => {
   try {
-    const supabase = await createSVClient();
+    const supabase = createClient();
     const { data, error } = await supabase
       .from("employees")
       .select(
@@ -335,13 +355,17 @@ export const getEmployeeDetailByUserId = async (userId: string) => {
 				employee_code, 
 				employee_type,
 				user_id,
-				organization_id,
-				organizations(
+				is_main,
+				organization:organizations!inner(
 					id, 
 					name, 
 					subdomain, 
 					employee_limit, 
-					subdomain
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
 				),
 				positions(
 					id,
@@ -357,8 +381,7 @@ export const getEmployeeDetailByUserId = async (userId: string) => {
 				)
 			`,
       )
-      .eq("user_id", userId)
-      .maybeSingle();
+      .eq("user_id", userId);
 
     if (error) {
       console.log(error);
@@ -366,10 +389,71 @@ export const getEmployeeDetailByUserId = async (userId: string) => {
     }
     return data;
   } catch (err) {
-    console.log(err);
-    throw new Error("Can't get user Info");
+    console.error(err);
+    throw new Error("Can't get employees Info");
   }
 };
-export type GetEmployeeDetailByUserIdResponse = Awaited<ReturnType<typeof getEmployeeDetailByUserId>>;
+export type GetEmployeesByUserIdResponse = Awaited<ReturnType<typeof getEmployeesByUserId>>;
 
-export { getEmployees, getEmployeeById };
+const updateMainEmployee = async (payload: { employeeId: string; isMain: boolean }) => {
+  const { employeeId, isMain } = payload;
+  try {
+    const supabase = createClient();
+    return await supabase
+      .from("employees")
+      .update({
+        is_main: isMain,
+      })
+      .eq("id", employeeId)
+      .select("*");
+  } catch (err) {
+    console.log(err);
+    throw new Error("Can't update main employee");
+  }
+};
+
+const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: string; organizationId: string }) => {
+  const { userId, organizationId } = variables;
+  try {
+    const supabase = createClient();
+    return await supabase
+      .from("employees")
+      .select(
+        `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				is_main,
+				organization_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+      )
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+  } catch (err) {
+    console.log(err);
+    throw new Error("Can't getOneEmployeeByUserIdWithOrganizationId");
+  }
+};
+
+export { getEmployees, getEmployeeById, updateMainEmployee, getOneEmployeeByUserIdWithOrganizationId };

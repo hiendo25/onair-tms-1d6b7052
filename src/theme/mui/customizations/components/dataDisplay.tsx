@@ -1,12 +1,12 @@
-import { Components, Theme, alpha } from "@mui/material/styles";
-import { svgIconClasses } from "@mui/material/SvgIcon";
-import { typographyClasses } from "@mui/material/Typography";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { chipClasses } from "@mui/material/Chip";
 import { iconButtonClasses } from "@mui/material/IconButton";
+import { alpha, Components, Theme } from "@mui/material/styles";
+import { svgIconClasses } from "@mui/material/SvgIcon";
+import { typographyClasses } from "@mui/material/Typography";
+
 import { black, error, grey, success, white } from "../../theme-color";
 
- 
 export const dataDisplayCustomizations: Components<Theme> = {
   MuiList: {
     styleOverrides: {
@@ -271,6 +271,8 @@ export const dataDisplayCustomizations: Components<Theme> = {
     styleOverrides: {
       root: {
         background: "white",
+        boxShadow:
+          "0px 2px 1px -1px rgba(107, 114, 128, 0.03), 0px 1px 1px 0px rgba(107, 114, 128, 0.04), 0px 1px 3px 0px rgba(107, 114, 128, 0.08)",
       },
     },
   },

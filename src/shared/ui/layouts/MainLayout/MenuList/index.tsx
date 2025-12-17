@@ -1,14 +1,16 @@
 "use client";
 import React, { memo, useCallback, useState } from "react";
 import { Box, List, SxProps, Theme } from "@mui/material";
-import MenuContextProvider, { MenuContextApi } from "./MenuContext";
 import { usePathname } from "next/navigation";
+
+import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
+import { getDrawerSxTransitionMixin } from "../DashboardSidebar/mixins";
+
 import MenuContentItem from "./MenuContentItem";
+import MenuContentSubItem from "./MenuContentSubItem";
+import MenuContextProvider, { MenuContextApi } from "./MenuContext";
 import { useMenuContext } from "./MenuContext";
 import MenuHeaderItem from "./MenuHeaderItem";
-import { getDrawerSxTransitionMixin } from "../DashboardSidebar/mixins";
-import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
-import MenuContentSubItem from "./MenuContentSubItem";
 import { MenuItemType } from "./type";
 
 export interface MenuListProps {
@@ -60,6 +62,7 @@ const MenuList: React.FC<MenuListProps> = ({
     <Box
       component="nav"
       aria-label={`${viewport.charAt(0).toUpperCase()}${viewport.slice(1)}`}
+      className="nav-menu-items"
       sx={{
         height: "100%",
         display: "flex",
@@ -107,22 +110,22 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
         flexDirection: "column",
         ...(isSubNavigation
           ? {
-            gap: 0,
-            marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
-            // borderLeft: mini ? undefined : "2px solid #cdcdcd",
-            padding: mini ? 1 : 0.5,
-            width: mini ? 220 : "auto",
-          }
+              gap: 0,
+              marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
+              // borderLeft: mini ? undefined : "2px solid #cdcdcd",
+              padding: mini ? 1 : 0.5,
+              width: mini ? 220 : "auto",
+            }
           : { gap: 0.5, padding: mini ? 1 : 0.5, width: mini ? MINI_DRAWER_WIDTH : "auto" }),
       };
     },
     [mini],
   );
 
-  //render UI for nested Menu Item
+  // //render UI for nested Menu Item
   if (depth > 0) {
     return (
-      <List dense sx={getMenuListSx(true)}>
+      <List dense sx={getMenuListSx(true)} className="sub-items">
         {menuItems.map((item, _index) => (
           <React.Fragment key={_index}>
             {!item.type || item.type === "item" ? (
@@ -171,7 +174,7 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
 
   // Render UI for Parent Menu Item
   return (
-    <List dense sx={getMenuListSx(false)}>
+    <List dense sx={getMenuListSx(depth > 0)} className="items">
       {menuItems.map((item, _index) => (
         <React.Fragment key={_index}>
           {!item.type || item.type === "item" ? (
@@ -184,6 +187,7 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
               selected={matchPath(item.path)}
               defaultExpanded={matchPath(item.path)}
               expanded={hasExpanded(item.key)}
+              isSubItem={depth > 0}
               nestedNavigation={
                 item.children?.length ? <MenuContentList items={item.children} depth={depth + 1} /> : undefined
               }
@@ -205,6 +209,7 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
                       selected={matchPath(groupItem.path)}
                       defaultExpanded={matchPath(groupItem.path)}
                       expanded={hasExpanded(groupItem.key)}
+                      isSubItem={depth > 0}
                       nestedNavigation={
                         groupItem.children?.length ? (
                           <MenuContentList items={groupItem.children} depth={depth + 1} />

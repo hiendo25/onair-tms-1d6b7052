@@ -11,13 +11,22 @@ export const UserOrganizationContext = createContext<UserOrganizationStoreContex
 export interface UserOrganizationProviderProps {
   children: ReactNode;
   data: UserOrganizationState["data"];
+  mainOrganization: UserOrganizationState["mainOrganization"];
+  employeesOrganizations: UserOrganizationState["employeesOrganizations"];
 }
 
-export const UserOrganizationProvider = ({ children, data }: UserOrganizationProviderProps) => {
+export const UserOrganizationProvider = ({
+  children,
+  data,
+  employeesOrganizations = [],
+  mainOrganization,
+}: UserOrganizationProviderProps) => {
   const storeRef = useRef<UserOrganizationStoreContextApi | null>(null);
   if (storeRef.current === null) {
     storeRef.current = createOrganizationStore({
-      data: data,
+      data,
+      mainOrganization,
+      employeesOrganizations,
     });
   }
 
