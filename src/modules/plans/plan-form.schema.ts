@@ -19,6 +19,7 @@ export const surveySchema = zod.object({
   targetUnitIds: zod.array(zod.string()).optional(),
   status: zod.enum(planSurveyStatuses).optional(),
   createdAt: zod.string().optional().nullable(),
+  resultSummary: zod.unknown().optional().nullable(),
 }).superRefine((values, ctx) => {
   if (!values.startDate) {
     ctx.addIssue({
@@ -109,7 +110,20 @@ export const planSchema = zod.object({
       message: "Cần có ít nhất 1 chương trình đào tạo.",
     });
   }
-});
+}).superRefine((values, ctx) => {
+  if (!values.info.startDate || !values.info.endDate) return;
+
+  const startDate = dayjs(values.info.startDate);
+  const endDate = dayjs(values.info.endDate);
+
+  if (startDate.isValid() && endDate.isValid() && !endDate.isAfter(startDate)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["info.endDate"],
+      message: "Ngày kết thúc phải lớn hơn ngày bắt đầu.",
+    });
+  }
+})
 
 export type Survey = zod.infer<typeof surveySchema>;
 export type SurveyFormValues = zod.input<typeof surveySchema>;

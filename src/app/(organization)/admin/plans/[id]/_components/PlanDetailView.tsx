@@ -10,6 +10,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import PlanApprovalActions from "./PlanApprovalActions";
 import PlanInfoCards from "./PlanInfoCards";
 import PlanStatistics from "./PlanStatistics";
+import { PlanSurveyResultSection } from "./PlanSurveyResultSection";
 import ProgramAccordion from "./ProgramAccordion";
 
 interface PlanDetailViewProps {
@@ -51,6 +52,9 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
 
         {/* Program List Section */}
         <ProgramAccordion programs={planDetail.programs} programsCount={planDetail.programsCount} />
+
+        {/* Survey Section */}
+        <PlanSurveyResultSection survey={planDetail.survey} planStatus={planDetail.status} />
       </Box>
     </PageContainer>
   );

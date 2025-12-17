@@ -43,6 +43,7 @@ const buildSurveyDefaults = (
   targetType: survey?.targetType ?? "all",
   targetUnitIds: survey?.targetUnitIds ?? [],
   status: survey?.status ?? "pending",
+  resultSummary: survey?.resultSummary ?? null,
 });
 
 export function PlanSurveySection() {
@@ -129,7 +130,12 @@ export function PlanSurveySection() {
   };
 
   const handleSaveSurveyConfig = configForm.handleSubmit(async (values) => {
-    setValue("info.survey", values, { shouldDirty: true, shouldTouch: true });
+    const nextValue: Survey = {
+      ...values,
+      resultSummary: values.resultSummary ?? surveyValue?.resultSummary ?? null,
+    };
+
+    setValue("info.survey", nextValue, { shouldDirty: true, shouldTouch: true });
     clearErrors("info.survey");
     setSelectedSurvey(null);
     setConfigOpen(false);
