@@ -1,20 +1,20 @@
 "use client";
 
+import { LearningPathStepId } from "@/modules/learning-paths/learning-path-step.utils";
 import SharedStepNavigation, { StepConfig } from "@/shared/ui/StepNavigation";
-import { PlanStepId } from "@/modules/plans/plan-step.utils";
 
 export interface Step {
-  id: PlanStepId;
+  id: LearningPathStepId;
   label: string;
   description: string;
 }
 
 interface StepNavigationProps {
   steps: Step[];
-  currentStep: PlanStepId;
-  completedSteps: PlanStepId[];
-  onStepClick: (stepId: PlanStepId) => void;
-  isStepAccessible: (stepId: PlanStepId) => boolean;
+  currentStep: LearningPathStepId;
+  completedSteps: LearningPathStepId[];
+  onStepClick: (stepId: LearningPathStepId) => void;
+  isStepAccessible: (stepId: LearningPathStepId) => boolean;
 }
 
 export default function StepNavigation({
@@ -25,13 +25,14 @@ export default function StepNavigation({
   isStepAccessible,
 }: StepNavigationProps) {
   return (
-    <SharedStepNavigation<PlanStepId>
-      steps={steps as StepConfig<PlanStepId>[]}
+    <SharedStepNavigation<LearningPathStepId>
+      steps={steps as StepConfig<LearningPathStepId>[]}
       currentStep={currentStep}
       completedSteps={completedSteps}
       onStepClick={onStepClick}
       isStepAccessible={isStepAccessible}
-      title="Hành trình kế hoạch"
+      title="Hành trình lộ trình"
     />
   );
 }
+
