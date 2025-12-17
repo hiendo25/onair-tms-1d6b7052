@@ -1,29 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { employeesRepository } from "@/repository";
 import { createSVClient } from "@/services";
 import { getMyAssignments } from "@/services/assignments/assignment.service";
-import { employeesRepository } from "@/repository";
 import type { GetMyAssignmentsParams, MyAssignmentStatusFilter } from "@/types/dto/assignments";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "User not authenticated" }, { status: 401 });
     }
 
     // Get employee ID from user ID
-    const employee = await employeesRepository.getEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
 
     if (!employee) {
-      return NextResponse.json(
-        { error: "Employee not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
     }
 
     // Get pagination, search, and status parameters from query string
@@ -46,8 +44,7 @@ export async function GET(request: NextRequest) {
       {
         error: error instanceof Error ? error.message : "Failed to fetch my assignments",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

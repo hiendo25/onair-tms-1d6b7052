@@ -1,16 +1,32 @@
-import { Permissions, Resources, buildPermission } from "@/constants/permission.constant";
+import { buildPermission, Permissions, Resources } from "@/constants/permission.constant";
 import { employeesRepository, permissionRepository } from "@/repository";
+import { GetEmployeesByUserIdResponse } from "@/repository/employees";
 export class UserOrganizationService {
   private userId;
 
+  private employees: GetEmployeesByUserIdResponse | null = null;
+
   constructor(userId: string) {
     this.userId = userId;
+    this.ensureUserHasEmployeeMain();
   }
 
-  async getEmployeeDetail() {
-    const employee = await employeesRepository.getEmployeeDetailByUserId(this.userId);
+  async getEmployees() {
+    const employees = await employeesRepository.getEmployeesByUserId(this.userId);
+    this.employees = employees;
+    return employees;
+  }
 
-    return employee;
+  async getMainEmployee() {
+    await this.ensureEmployeesInitialized();
+
+    const mainEmployee = this.employees?.find((epl) => epl.is_main);
+
+    if (!mainEmployee) {
+      throw new Error("Main employee undefined");
+    }
+
+    return mainEmployee;
   }
 
   async getPermissions() {
@@ -43,5 +59,49 @@ export class UserOrganizationService {
       permissions: pers || [],
       roles: userRoles?.map((urRole) => urRole.role.code) || [],
     };
+  }
+
+  async updateMainEmployeeOrganization(variables: { employeeId: string; nextOrganizationId: string }) {
+    const { nextOrganizationId, employeeId } = variables;
+    const { data: nextEmployeeData, error: nextEmployeeError } =
+      await employeesRepository.getOneEmployeeByUserIdWithOrganizationId({
+        userId: this.userId,
+        organizationId: nextOrganizationId,
+      });
+
+    if (!nextEmployeeData || nextEmployeeError) {
+      throw new Error(nextEmployeeError?.message);
+    }
+    await employeesRepository.updateMainEmployee({
+      employeeId: employeeId,
+      isMain: false,
+    });
+    return await employeesRepository.updateMainEmployee({
+      employeeId: nextEmployeeData.id,
+      isMain: true,
+    });
+  }
+
+  private async ensureEmployeesInitialized() {
+    if (this.employees !== null) return;
+
+    const employees = await employeesRepository.getEmployeesByUserId(this.userId);
+
+    this.employees = employees;
+  }
+  private async ensureUserHasEmployeeMain() {
+    await this.ensureEmployeesInitialized();
+
+    const employeesOfUser = this.employees;
+    const mainEmployee = employeesOfUser?.find((epl) => epl.is_main);
+
+    const firstEmployee = employeesOfUser?.at(0);
+
+    if (mainEmployee || !firstEmployee) return;
+
+    await employeesRepository.updateMainEmployee({
+      employeeId: firstEmployee.id,
+      isMain: true,
+    });
   }
 }
