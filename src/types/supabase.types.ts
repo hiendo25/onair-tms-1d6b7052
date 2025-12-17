@@ -1238,6 +1238,42 @@ export type Database = {
           },
         ]
       }
+      employee_learning_paths: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          learning_path_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          id?: string
+          learning_path_id: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          learning_path_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_learning_paths_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_learning_paths_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           created_at: string
@@ -1351,6 +1387,144 @@ export type Database = {
           type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Relationships: []
+      }
+      learning_path_phases: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          learning_path_id: string
+          order_index: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          learning_path_id: string
+          order_index?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          learning_path_id?: string
+          order_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_phases_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_paths: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_paths_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_paths_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          current_position_seconds: number | null
+          employee_id: string
+          id: string
+          learning_path_id: string | null
+          lesson_id: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["lesson_progress_status"]
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          current_position_seconds?: number | null
+          employee_id: string
+          id?: string
+          learning_path_id?: string | null
+          lesson_id: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["lesson_progress_status"]
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          current_position_seconds?: number | null
+          employee_id?: string
+          id?: string
+          learning_path_id?: string | null
+          lesson_id?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["lesson_progress_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lessons: {
         Row: {
@@ -1595,6 +1769,52 @@ export type Database = {
           subdomain?: string
         }
         Relationships: []
+      }
+      phase_class_rooms: {
+        Row: {
+          class_room_id: string
+          created_at: string
+          id: string
+          order_index: number
+          phase_id: string
+        }
+        Insert: {
+          class_room_id: string
+          created_at?: string
+          id?: string
+          order_index: number
+          phase_id: string
+        }
+        Update: {
+          class_room_id?: string
+          created_at?: string
+          id?: string
+          order_index?: number
+          phase_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "phase_class_rooms_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase_class_rooms_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "phase_class_rooms_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "learning_path_phases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       positions: {
         Row: {
@@ -2588,6 +2808,7 @@ export type Database = {
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
+      lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
@@ -2773,6 +2994,7 @@ export const Constants = {
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
+      lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
