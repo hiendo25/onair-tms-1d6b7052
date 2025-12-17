@@ -4,7 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Accordion, AccordionDetails, AccordionSummary, Box, Chip,IconButton, Stack, Typography } from "@mui/material";
+import { Accordion, AccordionDetails, AccordionSummary, Box, Chip, Stack, Typography } from "@mui/material";
 
 interface SortablePhaseItemProps {
   id: string;
@@ -101,17 +101,47 @@ const SortablePhaseItem: React.FC<SortablePhaseItemProps> = ({
             )}
 
             {/* Delete Button */}
-            <IconButton
-              size="small"
-              color="error"
+            <Box
               onClick={(e) => {
                 e.stopPropagation(); // Prevent accordion toggle
                 onDelete();
               }}
-              title="Xóa giai đoạn"
+              onKeyDown={(e) => {
+                // Handle keyboard accessibility (Enter and Space)
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete();
+                }
+              }}
+              role="button"
+              tabIndex={0}
+              aria-label="Xóa giai đoạn"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                cursor: "pointer",
+                color: "error.main",
+                transition: "background-color 0.2s",
+                "&:hover": {
+                  bgcolor: "error.lighter",
+                },
+                "&:active": {
+                  bgcolor: "error.light",
+                },
+                "&:focus-visible": {
+                  outline: "2px solid",
+                  outlineColor: "error.main",
+                  outlineOffset: 2,
+                },
+              }}
             >
               <DeleteIcon fontSize="small" />
-            </IconButton>
+            </Box>
           </Stack>
         </AccordionSummary>
 

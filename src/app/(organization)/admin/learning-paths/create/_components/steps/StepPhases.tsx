@@ -8,25 +8,24 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Autocomplete,
   Box,
   Button,
   Card,
   CardContent,
   Chip,
   FormControl,
+  FormHelperText,
   FormLabel,
   IconButton,
   OutlinedInput,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 
 import type { ClassRoom, Phase } from "@/modules/learning-paths/learning-path-form.schema";
-import { useClassRoomsForSelection } from "@/modules/learning-paths/operations/use-class-rooms-for-selection";
 import { useLearningPathFormContext } from "@/modules/learning-paths/use-learning-path-form-context";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { ClassRoomItem,ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker";
 
 import SortablePhaseItem from "./SortablePhaseItem";
 
@@ -44,16 +43,14 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
     formState: { errors },
   } = useLearningPathFormContext();
 
-  const { data: orgData } = useUserOrganization((state) => state);
-  const organizationId = orgData?.organizationId || "";
+  const { organization, ...rest } = useUserOrganization((state) => state.data);
+  const isAdmin = rest.employeeType === "admin";
+  const organizationId = isAdmin ? organization?.id : undefined;
+  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [expandedPhases, setExpandedPhases] = useState<Record<number, boolean>>({});
-
-  const { classRooms, isLoading: isLoadingClassRooms } = useClassRoomsForSelection({
-    organizationId,
-    search: searchTerm,
-  });
+  const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState<number | null>(null);
 
   const phases = watch("phases") || [];
 
@@ -75,19 +72,23 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
   };
 
   const handleAddPhase = () => {
+    // Generate a unique ID for the new phase using timestamp + random string
+    const uniqueId = `phase-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     const newPhase: Phase = {
+      id: uniqueId,
       order: phases.length + 1,
       description: "",
       class_rooms: [],
     };
     const newPhases = [...phases, newPhase];
     setValue("phases", newPhases, { shouldValidate: false });
-    // Auto-expand the newly added phase
-    setExpandedPhases((prev) => ({ ...prev, [newPhases.length - 1]: true }));
+    // Auto-expand the newly added phase using the unique ID
+    setExpandedPhases((prev) => ({ ...prev, [uniqueId]: true }));
   };
 
-  const handleTogglePhase = (index: number, expanded: boolean) => {
-    setExpandedPhases((prev) => ({ ...prev, [index]: expanded }));
+  const handleTogglePhase = (phaseId: string, expanded: boolean) => {
+    setExpandedPhases((prev) => ({ ...prev, [phaseId]: expanded }));
   };
 
   const handleRemovePhase = (index: number) => {
@@ -107,8 +108,8 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
       return;
     }
 
-    const oldIndex = phases.findIndex((_, i) => `phase-${i}` === active.id);
-    const newIndex = phases.findIndex((_, i) => `phase-${i}` === over.id);
+    const oldIndex = phases.findIndex((phase) => phase.id === active.id);
+    const newIndex = phases.findIndex((phase) => phase.id === over.id);
 
     if (oldIndex !== -1 && newIndex !== -1) {
       const reorderedPhases = arrayMove(phases, oldIndex, newIndex);
@@ -130,15 +131,36 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
     setValue("phases", updatedPhases, { shouldValidate: false });
   };
 
-  const handleClassRoomsChange = (index: number, newValue: ClassRoom[]) => {
+  const handleOpenDialog = (index: number) => {
+    setCurrentPhaseIndex(index);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setCurrentPhaseIndex(null);
+  };
+
+  const handleConfirmSelection = (selectedClassRooms: ClassRoomItem[]) => {
+    if (currentPhaseIndex === null) return;
+
     const updatedPhases = [...phases];
-    updatedPhases[index] = {
-      ...updatedPhases[index],
-      class_rooms: newValue,
+    updatedPhases[currentPhaseIndex] = {
+      ...updatedPhases[currentPhaseIndex],
+      class_rooms: selectedClassRooms as ClassRoom[],
     };
-    // Only validate if class-rooms are being added (not removed or cleared)
-    const shouldValidate = newValue.length > 0;
+    // Only validate if class-rooms are being added
+    const shouldValidate = selectedClassRooms.length > 0;
     setValue("phases", updatedPhases, { shouldValidate });
+  };
+
+  const handleRemoveClassRoom = (phaseIndex: number, classRoomId: string) => {
+    const updatedPhases = [...phases];
+    updatedPhases[phaseIndex] = {
+      ...updatedPhases[phaseIndex],
+      class_rooms: updatedPhases[phaseIndex].class_rooms.filter((room) => room.id !== classRoomId),
+    };
+    setValue("phases", updatedPhases, { shouldValidate: false });
   };
 
   const getPhaseError = (index: number) => {
@@ -190,7 +212,7 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
             </Box>
           ) : (
             <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-              <SortableContext items={phases.map((_, i) => `phase-${i}`)} strategy={verticalListSortingStrategy}>
+              <SortableContext items={phases.map((phase) => phase.id!)} strategy={verticalListSortingStrategy}>
                 <Stack spacing={2}>
                   {phases.map((phase, index) => {
                     const phaseError = getPhaseError(index);
@@ -198,13 +220,13 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
 
                     return (
                       <SortablePhaseItem
-                        key={`phase-${index}`}
-                        id={`phase-${index}`}
+                        key={phase.id}
+                        id={phase.id!}
                         phaseNumber={index + 1}
                         classRoomCount={phase.class_rooms.length}
-                        expanded={expandedPhases[index] || false}
+                        expanded={expandedPhases[phase.id!] || false}
                         hasError={!!classRoomsError}
-                        onExpandChange={(expanded) => handleTogglePhase(index, expanded)}
+                        onExpandChange={(expanded) => handleTogglePhase(phase.id!, expanded)}
                         onDelete={() => handleRemovePhase(index)}
                       >
                         <Stack spacing={3}>
@@ -229,49 +251,46 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
                           </FormControl>
 
                           {/* Class-room Selection */}
-                          <Autocomplete
-                            multiple
-                            options={classRooms}
-                            value={phase.class_rooms}
-                            onChange={(_, newValue) => handleClassRoomsChange(index, newValue)}
-                            getOptionLabel={(option) => option.name}
-                            isOptionEqualToValue={(option, value) => option.id === value.id}
-                            loading={isLoadingClassRooms}
-                            onInputChange={(_, value) => setSearchTerm(value)}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Chọn lớp học"
-                                placeholder="Tìm kiếm lớp học..."
-                                error={!!classRoomsError}
-                                helperText={
-                                  classRoomsError?.message || `Đã chọn ${phase.class_rooms.length} lớp học`
-                                }
-                              />
-                            )}
-                            renderTags={(value, getTagProps) =>
-                              value.map((option, tagIndex) => (
+                          <FormControl fullWidth error={!!classRoomsError}>
+                            <FormLabel>Lớp học</FormLabel>
+                            <Box
+                              sx={{
+                                minHeight: 56,
+                                p: 1.5,
+                                border: "1px solid",
+                                borderColor: classRoomsError ? "error.main" : "divider",
+                                borderRadius: 1,
+                                bgcolor: "white",
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 1,
+                                alignItems: "center",
+                              }}
+                            >
+                              {phase.class_rooms.map((classRoom) => (
                                 <Chip
-                                  {...getTagProps({ index: tagIndex })}
-                                  key={option.id}
-                                  label={option.name}
+                                  key={classRoom.id}
+                                  label={classRoom.name}
                                   size="small"
+                                  onDelete={() => handleRemoveClassRoom(index, classRoom.id)}
                                 />
-                              ))
-                            }
-                            renderOption={(props, option) => (
-                              <li {...props} key={option.id}>
-                                <Box>
-                                  <Typography variant="body2">{option.name}</Typography>
-                                  {option.code && (
-                                    <Typography variant="caption" color="text.secondary">
-                                      {option.code}
-                                    </Typography>
-                                  )}
-                                </Box>
-                              </li>
+                              ))}
+                              <Button
+                                size="small"
+                                variant="outlined"
+                                startIcon={<AddIcon />}
+                                onClick={() => handleOpenDialog(index)}
+                              >
+                                Thêm lớp
+                              </Button>
+                            </Box>
+                            {classRoomsError?.message && (
+                              <FormHelperText>{classRoomsError.message}</FormHelperText>
                             )}
-                          />
+                            {!classRoomsError && (
+                              <FormHelperText>Đã chọn {phase.class_rooms.length} lớp học</FormHelperText>
+                            )}
+                          </FormControl>
                         </Stack>
                       </SortablePhaseItem>
                     );
@@ -298,6 +317,20 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
           </Button>
         </Stack>
       </CardContent>
+
+      {/* Class-Room Picker Dialog */}
+      {currentPhaseIndex !== null && (
+        <ClassRoomPickerDialog
+          open={dialogOpen}
+          onClose={handleCloseDialog}
+          onConfirm={handleConfirmSelection}
+          initialSelected={phases[currentPhaseIndex]?.class_rooms || []}
+          organizationId={organizationId}
+          employeeId={employeeId}
+          title="Chọn lớp học cho giai đoạn"
+          multiple={true}
+        />
+      )}
     </Card>
   );
 }
