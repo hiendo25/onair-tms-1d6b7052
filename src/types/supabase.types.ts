@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       assignment_categories: {
@@ -198,14 +223,14 @@ export type Database = {
       class_attendances: {
         Row: {
           attendance_method:
-          | Database["public"]["Enums"]["attendance_method_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
           attendance_mode:
-          | Database["public"]["Enums"]["attendance_mode_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status:
-          | Database["public"]["Enums"]["attendance_status"]
-          | null
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
           attended_at: string | null
           class_room_id: string | null
           class_session_id: string | null
@@ -221,14 +246,14 @@ export type Database = {
         }
         Insert: {
           attendance_method?:
-          | Database["public"]["Enums"]["attendance_method_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
           attendance_mode?:
-          | Database["public"]["Enums"]["attendance_mode_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
-          | Database["public"]["Enums"]["attendance_status"]
-          | null
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -244,14 +269,14 @@ export type Database = {
         }
         Update: {
           attendance_method?:
-          | Database["public"]["Enums"]["attendance_method_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_method_enum"]
+            | null
           attendance_mode?:
-          | Database["public"]["Enums"]["attendance_mode_enum"]
-          | null
+            | Database["public"]["Enums"]["attendance_mode_enum"]
+            | null
           attendance_status?:
-          | Database["public"]["Enums"]["attendance_status"]
-          | null
+            | Database["public"]["Enums"]["attendance_status"]
+            | null
           attended_at?: string | null
           class_room_id?: string | null
           class_session_id?: string | null
@@ -815,8 +840,8 @@ export type Database = {
         Row: {
           channel_info: Json | null
           channel_provider:
-          | Database["public"]["Enums"]["channel_provider"]
-          | null
+            | Database["public"]["Enums"]["channel_provider"]
+            | null
           class_room_id: string
           created_at: string
           description: string | null
@@ -832,8 +857,8 @@ export type Database = {
         Insert: {
           channel_info?: Json | null
           channel_provider?:
-          | Database["public"]["Enums"]["channel_provider"]
-          | null
+            | Database["public"]["Enums"]["channel_provider"]
+            | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -849,8 +874,8 @@ export type Database = {
         Update: {
           channel_info?: Json | null
           channel_provider?:
-          | Database["public"]["Enums"]["channel_provider"]
-          | null
+            | Database["public"]["Enums"]["channel_provider"]
+            | null
           class_room_id?: string
           created_at?: string
           description?: string | null
@@ -1099,6 +1124,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
+          is_main: boolean | null
           organization_id: string | null
           position_id: string | null
           start_date: string | null
@@ -1111,6 +1137,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1123,6 +1150,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1142,6 +1170,42 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees_roles: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_roles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
@@ -1424,28 +1488,34 @@ export type Database = {
         Row: {
           created_at: string
           employee_limit: number | null
+          favicon: string | null
           id: string
           is_active: boolean
           logo: string
           name: string
+          shortname: string | null
           subdomain: string
         }
         Insert: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo: string
           name: string
+          shortname?: string | null
           subdomain: string
         }
         Update: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo?: string
           name?: string
+          shortname?: string | null
           subdomain?: string
         }
         Relationships: []
@@ -1762,27 +1832,6 @@ export type Database = {
           },
         ]
       }
-      serveys: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          title: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Relationships: []
-      }
       surveys: {
         Row: {
           created_at: string
@@ -1931,7 +1980,7 @@ export type Database = {
           is_other: boolean | null
           option_text: string | null
           priority: number | null
-          survey_question_id: string | null
+          survey_question_id: string
         }
         Insert: {
           created_at?: string
@@ -1939,7 +1988,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Update: {
           created_at?: string
@@ -1947,7 +1996,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Relationships: [
           {
@@ -2071,80 +2120,6 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_surveys: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          end_date: string | null
-          id: string
-          organization_id: string
-          plan_id: string
-          result_summary: Json | null
-          start_date: string | null
-          status: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids: string[] | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id: string
-          plan_id: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id?: string
-          plan_id?: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id?: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
             referencedColumns: ["id"]
           },
         ]
@@ -2381,21 +2356,21 @@ export type Database = {
       }
       get_filtered_employees: {
         Args:
-        | {
-          p_branch_id?: string
-          p_department_id?: string
-          p_employee_type?: Database["public"]["Enums"]["employee_type"]
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
-        | {
-          p_branch_id?: string
-          p_department_id?: string
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_employee_type?: Database["public"]["Enums"]["employee_type"]
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
         Returns: {
           employee_id: string
           total_count: number
@@ -2415,7 +2390,6 @@ export type Database = {
         Returns: {
           approved: number
           pending: number
-          pending_survey: number
           rejected: number
           total: number
         }[]
@@ -2445,54 +2419,47 @@ export type Database = {
       attendance_status: "present" | "late" | "absent" | "rejected"
       channel_provider: "google_meet" | "zoom" | "microsoft_teams"
       class_room_status:
-      | "publish"
-      | "active"
-      | "deactive"
-      | "pending"
-      | "deleted"
-      | "draft"
+        | "publish"
+        | "active"
+        | "deactive"
+        | "pending"
+        | "deleted"
+        | "draft"
       class_room_type: "single" | "multiple"
       class_session_type: "online" | "offline" | "live"
       course_status:
-      | "published"
-      | "pending"
-      | "draft"
-      | "deleted"
-      | "unpublished"
+        | "published"
+        | "pending"
+        | "draft"
+        | "deleted"
+        | "unpublished"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
-      plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
       question_type:
-      | "file"
-      | "text"
-      | "checkbox"
-      | "radio"
-      | "matching"
-      | "drag_and_drop"
-      | "boolean"
-      | "order"
+        | "file"
+        | "text"
+        | "checkbox"
+        | "radio"
+        | "matching"
+        | "drag_and_drop"
+        | "boolean"
+        | "order"
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
-      | "text"
-      | "rating"
-      | "rating_sort"
-      | "checkbox"
-      | "radio"
-      | "yes_no"
+        | "text"
+        | "rating"
+        | "rating_sort"
+        | "checkbox"
+        | "radio"
+        | "yes_no"
       survey_type: "planning" | "classroom"
-      training_plan_status:
-        | "pending"
-        | "approved"
-        | "rejected"
-        | "deleted"
-        | "pending_survey"
-      training_plan_survey_status: "pending" | "collecting" | "closed"
+      training_plan_status: "pending" | "approved" | "rejected" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2506,118 +2473,121 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
@@ -2649,7 +2619,6 @@ export const Constants = {
       hashtag_type: ["class_room"],
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
-      plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
       question_type: [
         "file",
@@ -2672,14 +2641,7 @@ export const Constants = {
         "yes_no",
       ],
       survey_type: ["planning", "classroom"],
-      training_plan_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "deleted",
-        "pending_survey",
-      ],
-      training_plan_survey_status: ["pending", "collecting", "closed"],
+      training_plan_status: ["pending", "approved", "rejected", "deleted"],
     },
   },
 } as const

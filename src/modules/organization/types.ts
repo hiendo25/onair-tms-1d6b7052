@@ -18,4 +18,17 @@ interface UserOrganization {
     gender: Gender;
   } | null;
 }
-export type { UserOrganization };
+
+type EmployeeOrganization = {
+  employeeId: string;
+  isMain: boolean;
+  orgId: string;
+  orgName: string;
+  orgLogo: string;
+  orgDomain: string;
+  orgFavicon: string;
+  orgShortName: string;
+  userId: string;
+};
+
+export type { UserOrganization, EmployeeOrganization };

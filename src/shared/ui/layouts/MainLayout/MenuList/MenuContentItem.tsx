@@ -1,5 +1,6 @@
 import * as React from "react";
-import { SxProps, type Theme, alpha, styled } from "@mui/material/styles";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { svgIconClasses } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
@@ -9,13 +10,14 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Paper from "@mui/material/Paper";
-import Typography from "@mui/material/Typography";
+import { alpha, styled, SxProps, type Theme } from "@mui/material/styles";
 import type {} from "@mui/material/themeCssVarsAugmentation";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Typography from "@mui/material/Typography";
 import Link from "next/link";
+
 import { MINI_DRAWER_WIDTH } from "../DashboardSidebar/constants";
+
 import MenuContextProvider, { MenuContextApi, useMenuContext } from "./MenuContext";
-import { svgIconClasses } from "@mui/material";
 
 export interface MenuContentItemProps {
   id: string;
@@ -28,6 +30,7 @@ export interface MenuContentItemProps {
   expanded?: boolean;
   selected?: boolean;
   disabled?: boolean;
+  isSubItem?: boolean;
   nestedNavigation?: React.ReactNode;
   type?: "item" | "group";
 }
@@ -42,6 +45,7 @@ export default function MenuContentItem({
   defaultExpanded = false,
   expanded = defaultExpanded,
   selected = false,
+  isSubItem = false,
   disabled = false,
   nestedNavigation,
 }: MenuContentItemProps) {
@@ -54,28 +58,6 @@ export default function MenuContentItem({
       onMenuItemClick(id, !!nestedNavigation);
     }
   }, [onMenuItemClick, id, nestedNavigation]);
-
-  let nestedNavigationCollapseSx: SxProps<Theme> = { display: "none" };
-  if (mini) {
-    nestedNavigationCollapseSx = {
-      fontSize: 18,
-      position: "absolute",
-      top: "41.5%",
-      right: "2px",
-      transform: "translateY(-50%) rotate(-90deg)",
-    };
-  } else if (!mini) {
-    nestedNavigationCollapseSx = {
-      ml: 0.5,
-      fontSize: 20,
-      transform: `rotate(${expanded ? 0 : -90}deg)`,
-      transition: (theme: Theme) =>
-        theme.transitions.create("transform", {
-          easing: theme.transitions.easing.sharp,
-          duration: 100,
-        }),
-    };
-  }
 
   const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
 
@@ -127,8 +109,8 @@ export default function MenuContentItem({
           },
           ["& .MuiListItemIcon-root"]: {
             [`& svg`]: {
-              width: mini ? 24 : 22,
-              height: mini ? 24 : 22,
+              width: mini ? 24 : 18,
+              height: mini ? 24 : 18,
             },
           },
         })}
@@ -183,8 +165,8 @@ export default function MenuContentItem({
                   <Avatar
                     sx={{
                       fontSize: 10,
-                      height: 22,
-                      width: 22,
+                      height: 18,
+                      width: 18,
                     }}
                   >
                     {title
@@ -202,13 +184,13 @@ export default function MenuContentItem({
                     bottom: -18,
                     left: "50%",
                     transform: "translateX(-50%)",
-                    fontSize: 10,
+                    fontSize: 8,
                     fontWeight: 500,
                     textAlign: "center",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    maxWidth: MINI_DRAWER_WIDTH - 28,
+                    maxWidth: MINI_DRAWER_WIDTH - 24,
                   }}
                 >
                   {title}
@@ -231,27 +213,29 @@ export default function MenuContentItem({
                   margin: 0,
                 }}
               />
-              <ListItemText
-                className="menu-sub-title"
-                secondary={subTitle}
-                sx={(theme) => ({
-                  WebkitLineClamp: 1,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitBoxOrient: "vertical",
-                  zIndex: 1,
-                  margin: 0,
-                  ".MuiTypography-root": {
-                    color: theme.palette.grey[800],
-                    fontWeight: 400,
-                  },
-                })}
-              />
+              {subTitle ? (
+                <ListItemText
+                  className="menu-sub-title"
+                  secondary={subTitle}
+                  sx={(theme) => ({
+                    WebkitLineClamp: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    zIndex: 1,
+                    margin: 0,
+                    ".MuiTypography-root": {
+                      color: theme.palette.grey[800],
+                      fontWeight: 400,
+                    },
+                  })}
+                />
+              ) : null}
             </div>
           ) : null}
           {action && !mini ? action : null}
-          {nestedNavigation && !mini ? <ExpandMoreIcon sx={nestedNavigationCollapseSx} /> : null}
+          {nestedNavigation && !mini ? <ExpandIcon isExpanded={expanded} isMini={mini} /> : null}
         </ListItemButton>
         {nestedNavigation && mini ? (
           <Grow in={isHovered}>
@@ -285,3 +269,32 @@ export default function MenuContentItem({
     </React.Fragment>
   );
 }
+
+interface ExpandIconProps {
+  isExpanded?: boolean;
+  isMini?: boolean;
+}
+const ExpandIcon: React.FC<ExpandIconProps> = ({ isExpanded, isMini }) => {
+  let nestedNavigationCollapseSx: SxProps<Theme> = { display: "none" };
+  if (isMini) {
+    nestedNavigationCollapseSx = {
+      fontSize: 16,
+      position: "absolute",
+      top: "41.5%",
+      right: "2px",
+      transform: "translateY(-50%) rotate(-90deg)",
+    };
+  } else {
+    nestedNavigationCollapseSx = {
+      ml: 0.5,
+      fontSize: 20,
+      transform: `rotate(${isExpanded ? 0 : -90}deg)`,
+      transition: (theme: Theme) =>
+        theme.transitions.create("transform", {
+          easing: theme.transitions.easing.sharp,
+          duration: 100,
+        }),
+    };
+  }
+  return <ExpandMoreIcon sx={nestedNavigationCollapseSx} />;
+};

@@ -1,10 +1,10 @@
 import React from "react";
 
 import Authorized from "@/modules/auth-wrapper/Authorized";
-import LayoutWraper from "@/modules/layout-wraper/LayoutWraper";
+import LayoutWrapper from "@/modules/layout-wrapper/container/LayoutWrapper";
 import { LibraryDialog } from "@/modules/library/components/LibraryDialog";
 import { LibraryProvider } from "@/modules/library/store/libraryProvider";
-import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWraper";
+import UserOrganizationWrapper from "@/modules/organization/container/UserOrganizationWrapper";
 
 export default async function RootLayout({
   children,
@@ -13,14 +13,14 @@ export default async function RootLayout({
 }>) {
   return (
     <Authorized>
-      <UserOrganizationWraper>
-        <LayoutWraper>
+      <UserOrganizationWrapper>
+        <LayoutWrapper>
           <LibraryProvider>
             {children}
             <LibraryDialog />
           </LibraryProvider>
-        </LayoutWraper>
-      </UserOrganizationWraper>
+        </LayoutWrapper>
+      </UserOrganizationWrapper>
     </Authorized>
   );
 }

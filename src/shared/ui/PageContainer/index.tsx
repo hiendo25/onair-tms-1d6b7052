@@ -1,13 +1,15 @@
 import * as React from "react";
+import { Toolbar } from "@mui/material";
 import Box from "@mui/material/Box";
 import Container, { ContainerProps } from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
-import PageHeader, { PageHeaderProps } from "./PageHeader";
-import NotifycationButton from "../NotificationButton";
-import ThemeSwitcher from "../layouts/MainLayout/ThemeSwitcher";
-import SettingButton from "../SettingButton";
+
 import AccountSetting from "../layouts/MainLayout/AccountSetting";
-import { Toolbar } from "@mui/material";
+import ThemeSwitcher from "../layouts/MainLayout/ThemeSwitcher";
+import NotificationButton from "../NotificationButton";
+import SettingButton from "../SettingButton";
+
+import PageHeader, { PageHeaderProps } from "./PageHeader";
 
 export interface PageContainerProps extends ContainerProps {
   children?: React.ReactNode;
@@ -24,14 +26,14 @@ export default function PageContainer(props: PageContainerProps) {
         breadcrumbs={breadcrumbs}
         actions={actions}
         pageTitle={title}
-        rightColumn={
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <AccountSetting />
-            <NotifycationButton />
-            {/* <ThemeSwitcher /> */}
-            <SettingButton />
-          </Stack>
-        }
+        // rightColumn={
+        //   <Stack direction="row" alignItems="center" spacing={1.5}>
+        //     <NotificationButton />
+        //     <AccountSetting />
+        //     {/* <ThemeSwitcher /> */}
+        //     {/* <SettingButton /> */}
+        //   </Stack>
+        // }
       />
       <div className="h-6"></div>
       <Container

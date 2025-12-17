@@ -1,11 +1,13 @@
 "use client";
-import { useMemo } from "react";
-import Avatar from "@/shared/ui/Avatar";
+import React, { useMemo } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import AccountMenuOptions, { AccountMenuOptionsProps } from "./AccountMenuOptions";
+
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import Avatar from "@/shared/ui/Avatar";
+
+import AccountMenuOptions, { AccountMenuOptionsProps } from "./AccountMenuOptions";
 interface AccountSettingProps {
   className?: string;
 }
