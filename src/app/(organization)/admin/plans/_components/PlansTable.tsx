@@ -204,9 +204,14 @@ export default function PlansTable() {
       id: "status",
       field: "status",
       headerName: "Trạng thái",
-      width: 140,
-      renderCell: (value) => (
-        <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
+      width: 220,
+      renderCell: (value, row) => (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
+          {row.surveyCompleted && (
+            <Chip label="Khảo sát xong" color="success" variant="outlined" size="small" />
+          )}
+        </Stack>
       ),
     },
     {

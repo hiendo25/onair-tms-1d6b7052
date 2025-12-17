@@ -1,6 +1,6 @@
+import { PlanStatus } from "@/model/plan.model";
 import { supabase } from "@/services";
 import { TablesInsert, TablesUpdate } from "@/types/supabase.types";
-import { PlanStatus } from "@/model/plan.model";
 
 interface GetPlansParams {
   search?: string;
@@ -24,7 +24,12 @@ const getPlans = async ({ search, organizationId, page = 1, limit = 10, status }
       start_date,
       end_date,
       budget,
-      status
+      status,
+      training_plan_surveys (
+        end_date,
+        status,
+        result_summary
+      )
     `,
       { count: "exact" },
     )
@@ -105,6 +110,7 @@ const getPlanDetail = async (id: string) => {
         start_date,
         end_date,
         status,
+        result_summary,
         target_type,
         target_unit_ids,
         survey:surveys (

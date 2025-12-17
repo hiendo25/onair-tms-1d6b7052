@@ -1,5 +1,6 @@
 import { PlanStatus } from "@/model/plan.model";
 import { PlanSurveyTarget, Survey } from "@/modules/plans/plan-form.schema";
+import { getPlanSurveyAccess } from "@/modules/plans/survey-access";
 
 export const getSurveyStatusLabel = (status?: Survey["status"]) => {
   switch (status) {
@@ -39,8 +40,5 @@ export const getSurveyTargetLabel = (targetType?: PlanSurveyTarget) => {
 };
 
 export const isSurveyLocked = (planStatus?: PlanStatus, survey?: Survey) => {
-  if (!survey) return false;
-  const isPendingSurvey = planStatus === "pending_survey";
-  const surveyNotClosed = survey.status !== "closed";
-  return isPendingSurvey || surveyNotClosed;
+  return getPlanSurveyAccess(planStatus, survey).shouldLock;
 };
