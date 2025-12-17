@@ -1,6 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Container, { ContainerProps } from "@mui/material/Container";
+
 import PageHeader, { PageHeaderProps } from "./PageHeader";
 
 export interface PublicPageContainerProps extends ContainerProps {
@@ -24,16 +25,10 @@ export default function PublicPageContainer(props: PublicPageContainerProps) {
         className="px-0!"
       >
         <div className="h-6"></div>
-        <PageHeader
-          breadcrumbs={breadcrumbs}
-          actions={actions}
-          pageTitle={title}
-          rightColumn={null}
-        />
+        <PageHeader breadcrumbs={breadcrumbs} actions={actions} pageTitle={title} rightColumn={null} />
         <div className="h-6"></div>
         {children}
       </Container>
     </div>
   );
 }
-

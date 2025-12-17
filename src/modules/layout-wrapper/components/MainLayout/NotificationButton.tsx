@@ -3,7 +3,7 @@ import React from "react";
 import { Badge, IconButton } from "@mui/material";
 import { useColorScheme, useMediaQuery, useTheme } from "@mui/material";
 
-import { Bell01Icon } from "../assets/icons";
+import { Bell01Icon } from "@/shared/assets/icons";
 
 interface NotificationButtonProps {
   className?: string;

@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       assignment_categories: {
@@ -1245,6 +1270,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
+          is_main: boolean | null
           organization_id: string | null
           position_id: string | null
           start_date: string | null
@@ -1257,6 +1283,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1269,6 +1296,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1288,6 +1316,42 @@ export type Database = {
             columns: ["position_id"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employees_roles: {
+        Row: {
+          created_at: string
+          employee_id: string
+          id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_roles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
             referencedColumns: ["id"]
           },
         ]
@@ -1570,28 +1634,34 @@ export type Database = {
         Row: {
           created_at: string
           employee_limit: number | null
+          favicon: string | null
           id: string
           is_active: boolean
           logo: string
           name: string
+          shortname: string | null
           subdomain: string
         }
         Insert: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo: string
           name: string
+          shortname?: string | null
           subdomain: string
         }
         Update: {
           created_at?: string
           employee_limit?: number | null
+          favicon?: string | null
           id?: string
           is_active?: boolean
           logo?: string
           name?: string
+          shortname?: string | null
           subdomain?: string
         }
         Relationships: []
@@ -2056,7 +2126,7 @@ export type Database = {
           is_other: boolean | null
           option_text: string | null
           priority: number | null
-          survey_question_id: string | null
+          survey_question_id: string
         }
         Insert: {
           created_at?: string
@@ -2064,7 +2134,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Update: {
           created_at?: string
@@ -2072,7 +2142,7 @@ export type Database = {
           is_other?: boolean | null
           option_text?: string | null
           priority?: number | null
-          survey_question_id?: string | null
+          survey_question_id?: string
         }
         Relationships: [
           {
@@ -2196,80 +2266,6 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      training_plan_surveys: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          end_date: string | null
-          id: string
-          organization_id: string
-          plan_id: string
-          result_summary: Json | null
-          start_date: string | null
-          status: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids: string[] | null
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id: string
-          plan_id: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          end_date?: string | null
-          id?: string
-          organization_id?: string
-          plan_id?: string
-          result_summary?: Json | null
-          start_date?: string | null
-          status?: Database["public"]["Enums"]["training_plan_survey_status"]
-          survey_id?: string
-          target_type?: Database["public"]["Enums"]["plan_survey_target"]
-          target_unit_ids?: string[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "training_plan_surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_plan_id_fkey"
-            columns: ["plan_id"]
-            isOneToOne: false
-            referencedRelation: "training_plans"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plan_surveys_survey_id_fkey"
-            columns: ["survey_id"]
-            isOneToOne: false
-            referencedRelation: "surveys"
             referencedColumns: ["id"]
           },
         ]
@@ -2540,7 +2536,6 @@ export type Database = {
         Returns: {
           approved: number
           pending: number
-          pending_survey: number
           rejected: number
           total: number
         }[]
@@ -2590,7 +2585,6 @@ export type Database = {
       hashtag_type: "class_room"
       lesson_type: "video" | "file" | "assessment"
       organization_unit_type: "branch" | "department"
-      plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
       question_type:
         | "file"
@@ -2599,9 +2593,14 @@ export type Database = {
         | "radio"
         | "matching"
         | "drag_and_drop"
+<<<<<<< HEAD
+        | "boolean"
+        | "order"
+=======
         | "true_false"
         | "order"
         | "fill"
+>>>>>>> staging
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
@@ -2612,13 +2611,7 @@ export type Database = {
         | "radio"
         | "yes_no"
       survey_type: "planning" | "classroom"
-      training_plan_status:
-        | "pending"
-        | "approved"
-        | "rejected"
-        | "deleted"
-        | "pending_survey"
-      training_plan_survey_status: "pending" | "collecting" | "closed"
+      training_plan_status: "pending" | "approved" | "rejected" | "deleted"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2744,6 +2737,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
@@ -2775,7 +2771,6 @@ export const Constants = {
       hashtag_type: ["class_room"],
       lesson_type: ["video", "file", "assessment"],
       organization_unit_type: ["branch", "department"],
-      plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
       question_type: [
         "file",
@@ -2799,14 +2794,7 @@ export const Constants = {
         "yes_no",
       ],
       survey_type: ["planning", "classroom"],
-      training_plan_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "deleted",
-        "pending_survey",
-      ],
-      training_plan_survey_status: ["pending", "collecting", "closed"],
+      training_plan_status: ["pending", "approved", "rejected", "deleted"],
     },
   },
 } as const

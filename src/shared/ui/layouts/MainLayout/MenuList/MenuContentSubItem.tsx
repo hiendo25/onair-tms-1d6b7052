@@ -1,9 +1,9 @@
 import * as React from "react";
-import Link from "next/link";
-import { Box, Collapse, Grow, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
-import { SxProps, type Theme, alpha } from "@mui/material/styles";
-import type {} from "@mui/material/themeCssVarsAugmentation";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box, Collapse, Grow, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
+import { alpha, SxProps, type Theme } from "@mui/material/styles";
+import type {} from "@mui/material/themeCssVarsAugmentation";
+import Link from "next/link";
 
 import MenuContextProvider, { MenuContextApi, useMenuContext } from "./MenuContext";
 
@@ -60,7 +60,7 @@ export default function MenuContentSubItem({
               duration: 100,
             }),
         };
-  }, [mini]);
+  }, [mini, expanded]);
 
   const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
 
@@ -79,7 +79,7 @@ export default function MenuContentSubItem({
 
   const getListItemSx = React.useCallback(
     (mini: boolean, selected: boolean): SxProps<Theme> => {
-      const listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2 };
+      const listItemSx: SxProps<Theme> = { display: "block", py: 0, pl: 0, pr: 2, cursor: "pointer" };
 
       return (theme) => ({
         ...(mini
@@ -89,37 +89,28 @@ export default function MenuContentSubItem({
               padding: "4px 8px",
               "& .MuiButtonBase-root": {
                 minHeight: "auto",
-                padding: "6px 20px 6px 12px",
+                padding: "8px 20px 8px 12px",
                 textAlign: "left",
                 borderRadius: 1,
-                opacity: 0.6,
+                fontWeight: 400,
+                opacity: 0.9,
+                "&:hover": {
+                  bgcolor: `${theme.palette.grey[200]} !important`,
+                },
               },
             }
           : {
               ...listItemSx,
               overflowX: "hidden",
-              // marginLeft: "-2px",
               "& .MuiButtonBase-root": {
                 minHeight: 42,
                 padding: "6px 6px 6px 18px",
                 borderRadius: 1,
                 opacity: 0.7,
-                // borderLeft: "2px solid transparent",
                 ["&:hover"]: {
                   backgroundColor: "transparent",
                   opacity: 1,
                 },
-                // "&.Mui-selected": {
-                //   backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                //   opacity: 1,
-                //   ".MuiTypography-root": {
-                //     color: theme.palette.primary.main,
-                //     fontWeight: 500,
-                //   },
-                //   svg: {
-                //     color: theme.palette.primary.main,
-                //   },
-                // },
                 [`&.Mui-selected`]: {
                   backgroundColor: "transparent",
                   borderLeftColor: "black",
@@ -144,7 +135,7 @@ export default function MenuContentSubItem({
             }),
       });
     },
-    [mini],
+    [mini, selected],
   );
   return (
     <React.Fragment>
@@ -189,23 +180,6 @@ export default function MenuContentSubItem({
             : {})}
         >
           {mini ? (
-            <Box>
-              {mini ? (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 500,
-                    textAlign: "left",
-                    overflow: "hidden",
-                  }}
-                >
-                  {title}
-                </Typography>
-              ) : null}
-            </Box>
-          ) : null}
-          {!mini ? (
             <ListItemText
               primary={title}
               sx={(theme) => ({
@@ -219,7 +193,21 @@ export default function MenuContentSubItem({
                 margin: 0,
               })}
             />
-          ) : null}
+          ) : (
+            <ListItemText
+              primary={title}
+              sx={(theme) => ({
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                textAlign: "left",
+                zIndex: 1,
+                margin: 0,
+              })}
+            />
+          )}
           {nestedNavigation ? <ExpandMoreIcon sx={nestedNavigationCollapseSx} /> : null}
         </ListItemButton>
         {nestedNavigation && mini ? (

@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { UpdateAssignmentDto } from "@/types/dto/assignments";
+import { NextRequest, NextResponse } from "next/server";
+
+import { PATHS } from "@/constants/path.constant";
+import { employeesRepository } from "@/repository";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
-import { employeesRepository } from "@/repository";
-import { PATHS } from "@/constants/path.constant";
+import { UserOrganizationService } from "@/services/organization/user-organization.service";
+import type { UpdateAssignmentDto } from "@/types/dto/assignments";
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -72,7 +74,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
 
     await assignmentService.updateAssignmentWithRelations(payload, employee.id);
 

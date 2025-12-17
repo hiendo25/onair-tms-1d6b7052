@@ -27,7 +27,7 @@ export default function ThemeSwitcher() {
         <IconButton
           aria-label={`Switch to ${paletteMode === "dark" ? "light" : "dark"} mode`}
           sx={{
-            bgcolor: paletteMode === "dark" ? "white" : "white",
+            backgroundColor: paletteMode === "dark" ? "white" : "white",
           }}
           onClick={toggleMode}
         >

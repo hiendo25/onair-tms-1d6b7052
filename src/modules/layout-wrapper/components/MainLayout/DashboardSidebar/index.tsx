@@ -1,12 +1,10 @@
 "use client";
 import * as React from "react";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import { Button } from "@mui/material";
 import Drawer from "@mui/material/Drawer";
-import { useTheme } from "@mui/material/styles";
+import { SxProps, Theme, useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-import MenuList, { MenuListProps } from "../MenuList";
+import MenuList, { MenuListProps } from "@/shared/ui/layouts/MainLayout/MenuList";
 
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
@@ -53,23 +51,23 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     return () => {};
   }, [expanded, theme.transitions.duration.enteringScreen]);
 
-  React.useEffect(() => {
-    if (!expanded) {
-      const drawerWidthTransitionTimeout = setTimeout(() => {
-        setIsFullyCollapsed(true);
-      }, theme.transitions.duration.leavingScreen);
+  // React.useEffect(() => {
+  //   if (!expanded) {
+  //     const drawerWidthTransitionTimeout = setTimeout(() => {
+  //       setIsFullyCollapsed(true);
+  //     }, theme.transitions.duration.leavingScreen);
 
-      return () => clearTimeout(drawerWidthTransitionTimeout);
-    }
+  //     return () => clearTimeout(drawerWidthTransitionTimeout);
+  //   }
 
-    setIsFullyCollapsed(false);
+  //   setIsFullyCollapsed(false);
 
-    return () => {};
-  }, [expanded, theme.transitions.duration.leavingScreen]);
+  //   return () => {};
+  // }, [expanded, theme.transitions.duration.leavingScreen]);
 
   const mini = !disableCollapsibleSidebar && !expanded;
 
-  const canToggleSidebar = !!setExpanded && !disableCollapsibleSidebar;
+  // const canToggleSidebar = !!setExpanded && !disableCollapsibleSidebar;
 
   const handleSetSidebarExpanded = React.useCallback(
     (newExpanded: boolean) => () => {
@@ -86,7 +84,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
   const hasDrawerTransitions = isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
   const getDrawerSharedSx = React.useCallback(
-    (isTemporary: boolean) => {
+    (isTemporary: boolean): SxProps<Theme> => {
       const drawerWidth = mini ? MINI_DRAWER_WIDTH : DRAWER_WIDTH;
       return {
         displayPrint: "none",
@@ -99,11 +97,18 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           width: drawerWidth,
           boxSizing: "border-box",
           backgroundImage: "none",
+          backgroundColor: "#ffffff",
+          ...theme.applyStyles("dark", {
+            background: "#141a21",
+          }),
           ...getDrawerWidthTransitionMixin(expanded),
         },
-      };
+        ...theme.applyStyles("dark", {
+          background: "#141a21",
+        }),
+      } as SxProps<Theme>;
     },
-    [expanded, mini],
+    [expanded, mini, theme],
   );
 
   const renderMenuContent = React.useCallback(
@@ -117,7 +122,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             isFullyExpanded={isFullyExpanded}
             hasDrawerTransitions={hasDrawerTransitions}
           />
-          {/* {!mini ? <CardAlert /> : null} */}
+
           {bottomSlot}
         </>
       );
@@ -151,13 +156,6 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         sx={{
           display: { xs: "none", sm: "block" },
           ...getDrawerSharedSx(false),
-        }}
-        slotProps={{
-          paper: {
-            sx: {
-              border: "none",
-            },
-          },
         }}
         className={className}
       >
