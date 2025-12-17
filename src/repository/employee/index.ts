@@ -5,7 +5,8 @@ export type EmployeeQueryParams = {
   pageSize?: number;
   excludes?: string[];
   search?: string;
-  organizationUnitIds?: string[];
+  departmentIds?: string[];
+  branchIds?: string[];
 };
 
 export type GetStudentsQueryParams = {
@@ -13,35 +14,45 @@ export type GetStudentsQueryParams = {
   pageSize?: number;
   excludes?: string[];
   search?: string;
-  organizationUnitIds?: string[];
+  departmentIds?: string[];
+  branchIds?: string[];
 };
 
 const getStudents = async (queryParams?: GetStudentsQueryParams) => {
-  const { page = 1, pageSize = 20, excludes, search, organizationUnitIds } = queryParams || {};
+  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   let studentQuery = supabase
     .from("employees")
     .select(
-      `id, 
-      employee_code, 
-      status, 
-      created_at, 
+      `id,
+      employee_code,
+      status,
+      created_at,
       employee_type,
       profiles!inner(
-        id, 
-        full_name, 
-        gender, 
-        avatar, 
+        id,
+        full_name,
+        gender,
+        avatar,
         email
       ),
-      employments!inner(
-      organization_unit_id,
-        organization_units!inner(
+      employee_departments(
+        id,
+        department_id,
+        departments(
           id,
-          name, 
-          type
+          name,
+          branch_id
+        )
+      ),
+      employee_branches(
+        id,
+        branch_id,
+        branches(
+          id,
+          name
         )
       )
     `,
@@ -51,8 +62,12 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
     )
     .eq("employee_type", "student");
 
-  if (organizationUnitIds?.length) {
-    studentQuery.in("employments.organization_units.id", organizationUnitIds);
+  if (departmentIds?.length) {
+    studentQuery = studentQuery.in("employee_departments.department_id", departmentIds);
+  }
+
+  if (branchIds?.length) {
+    studentQuery = studentQuery.in("employee_branches.branch_id", branchIds);
   }
 
   if (excludes?.length) {

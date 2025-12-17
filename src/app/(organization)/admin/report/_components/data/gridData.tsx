@@ -108,7 +108,7 @@ export const columns: GridColDef<StudentItem>[] = [
     align: "right",
     flex: 1,
     minWidth: 80,
-    renderCell: ({ row }) => row.employments[0]?.organization_units.name,
+    renderCell: ({ row }) => row.employee_departments[0]?.departments?.name ?? "-",
   },
   {
     field: "status",

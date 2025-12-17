@@ -11,102 +11,18 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const departmentId = params?.departmentId;
   const branchId = params?.branchId;
   const status = params?.status;
+  const employeeType = params?.employeeType;
 
-  // Check if we have organization unit filters
+  // Determine if we need INNER joins for filtering
   const hasDepartmentFilter = departmentId && departmentId !== "all";
   const hasBranchFilter = branchId && branchId !== "all";
-  const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0);
 
-  // Use RPC function for efficient server-side filtering
-  if (hasAnyFilter) {
-    // Call the PostgreSQL RPC function to get filtered employee IDs
-    const { data: rpcResult, error: rpcError } = await supabase.rpc("get_filtered_employees", {
-      p_page: page,
-      p_limit: limit,
-      p_search: search || undefined,
-      p_department_id: hasDepartmentFilter ? departmentId : undefined,
-      p_branch_id: hasBranchFilter ? branchId : undefined,
-    });
+  // Use INNER join for junction tables when filtering to exclude employees without those relationships
+  const departmentJoinType = hasDepartmentFilter ? "!inner" : "";
+  const branchJoinType = hasBranchFilter ? "!inner" : "";
 
-    if (rpcError) {
-      throw new Error(`Failed to filter employees: ${rpcError.message}`);
-    }
-
-    // Extract employee IDs and total count from RPC result
-    const employeeIds = rpcResult?.map((row: any) => row.employee_id) || [];
-    const totalCount = rpcResult?.[0]?.total_count || 0;
-
-    if (employeeIds.length === 0) {
-      return {
-        data: [],
-        total: totalCount,
-        page,
-        limit,
-      };
-    }
-
-    // Fetch full employee data for the filtered IDs
-    // Use LEFT JOIN for employments to get ALL employment records
-    let employeeQuery = supabase
-      .from("employees")
-      .select(
-        `
-        id,
-        employee_code,
-        start_date,
-        position_id,
-        employee_type,
-        user_id,
-        created_at,
-        status,
-        profiles!profiles_employee_id_fkey (
-          id,
-          full_name,
-          email,
-          phone_number,
-          gender,
-          birthday,
-          avatar
-        ),
-        positions (
-          id,
-          title
-        ),
-        employments (
-          id,
-          organization_unit_id,
-          organization_units!employments_organization_unit_id_fkey (
-            id,
-            name,
-            type
-          )
-        ),
-        managers_employees!managers_employees_employee_id_fkey (
-          manager_id
-        )
-      `,
-      )
-      .in("id", employeeIds);
-
-    if (status) {
-      employeeQuery = employeeQuery.eq("status", status);
-    }
-
-    const { data: fullEmployeeData, error: dataError } = await employeeQuery.order("created_at", { ascending: false });
-
-    if (dataError) {
-      throw new Error(`Failed to fetch employee data: ${dataError.message}`);
-    }
-
-    return {
-      data: (fullEmployeeData as unknown as EmployeeDto[]) || [],
-      total: totalCount,
-      page,
-      limit,
-    };
-  }
-
-  // No filters - use simple query with LEFT JOIN
+  // Build query using Supabase ORM with new junction tables
+  // Use !inner for profiles to ensure we only get employees with valid profile data
   let query = supabase.from("employees").select(
     `
       id,
@@ -117,7 +33,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       user_id,
       created_at,
       status,
-      profiles!profiles_employee_id_fkey (
+      profiles!inner (
         id,
         full_name,
         email,
@@ -130,13 +46,25 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         id,
         title
       ),
-      employments (
+      employee_branches${branchJoinType} (
         id,
-        organization_unit_id,
-        organization_units!employments_organization_unit_id_fkey (
+        branch_id,
+        created_at,
+        branches (
           id,
           name,
-          type
+          code,
+          address
+        )
+      ),
+      employee_departments${departmentJoinType} (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
         )
       ),
       managers_employees!managers_employees_employee_id_fkey (
@@ -146,11 +74,31 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     { count: "exact" },
   );
 
-  // Apply status filter if present
+  // Apply filters
   if (status) {
     query = query.eq("status", status);
   }
 
+  if (employeeType) {
+    query = query.eq("employee_type", employeeType);
+  }
+
+  // Filter by department using junction table
+  if (hasDepartmentFilter) {
+    query = query.eq("employee_departments.department_id", departmentId);
+  }
+
+  // Filter by branch using junction table
+  if (hasBranchFilter) {
+    query = query.eq("employee_branches.branch_id", branchId);
+  }
+
+  // Search by full name in profiles
+  if (search && search.length > 0) {
+    query = query.ilike("profiles.full_name", `%${search}%`);
+  }
+
+  // Apply pagination
   const from = page * limit;
   const to = from + limit - 1;
 
@@ -180,6 +128,7 @@ const getEmployeeById = async (id: string) => {
       employee_type,
       user_id,
       created_at,
+      status,
       profiles!profiles_employee_id_fkey (
         id,
         full_name,
@@ -193,13 +142,25 @@ const getEmployeeById = async (id: string) => {
         id,
         title
       ),
-      employments (
+      employee_branches (
         id,
-        organization_unit_id,
-        organization_units!employments_organization_unit_id_fkey (
+        branch_id,
+        created_at,
+        branches (
           id,
           name,
-          type
+          code,
+          address
+        )
+      ),
+      employee_departments (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
         )
       ),
       managers_employees!managers_employees_employee_id_fkey (

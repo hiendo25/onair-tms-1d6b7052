@@ -24,9 +24,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-      persCheck?: PermissionValue;
-      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-    }
+    persCheck?: PermissionValue;
+    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+  }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -59,9 +59,15 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         type: "item",
       },
       {
-        title: "Quản lý người dùng",
-        key: "manage-org/employee",
-        path: PATHS.EMPLOYEES.ROOT,
+        title: "Quản lý học viên",
+        key: "manage-org/student",
+        path: `${PATHS.EMPLOYEES.ROOT}?employee_type=student`,
+        type: "item",
+      },
+      {
+        title: "Quản lý giảng viên",
+        key: "manage-org/teacher",
+        path: `${PATHS.EMPLOYEES.ROOT}?employee_type=teacher`,
         type: "item",
       },
       {
@@ -129,18 +135,21 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     icon: React.createElement(FolderShieldIcon),
     key: "plans",
     path: PATHS.PLANS.ROOT,
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/plans"],
     children: [
       {
         title: "Danh sách kế hoạch",
         icon: React.createElement(ClipboardIcon),
         key: "plans/list",
         path: PATHS.PLANS.ROOT,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/plans"],
       },
       {
         title: "Tạo kế hoạch",
         icon: React.createElement(ClipboardIcon),
         key: "plans/create",
         path: PATHS.PLANS.CREATE,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/plans/create"],
       },
       // {
       //   title: "Khảo sát kế hoạch",

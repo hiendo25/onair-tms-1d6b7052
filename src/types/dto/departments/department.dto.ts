@@ -2,8 +2,7 @@ export interface DepartmentDto {
   id: string;
   name: string;
   organization_id: string;
-  parent_id: string | null;
-  type: "department";
+  branch_id: string | null;
   created_at: string;
   branch?: {
     id: string;

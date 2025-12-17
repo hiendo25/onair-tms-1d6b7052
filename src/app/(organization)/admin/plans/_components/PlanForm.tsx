@@ -2,23 +2,25 @@
 
 import * as React from "react";
 import { useMemo } from "react";
-import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box } from "@mui/material";
-import { PlanFormSchema, PlanFormValues, Survey, planSchema } from "@/modules/plans/plan-form.schema";
+import { FormProvider, useForm } from "react-hook-form";
+
+import { PlanStatus } from "@/model/plan.model";
+import { PlanFormSchema, PlanFormValues, planSchema, Survey } from "@/modules/plans/plan-form.schema";
+import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
 import {
   PLAN_STEPS,
   PlanStepId,
 } from "@/modules/plans/plan-step.utils";
 import { usePlanStepFlow } from "@/modules/plans/use-plan-step-flow";
-import { buildPlanFormDefaultValues } from "@/modules/plans/plan-form.utils";
-import { PlanStatus } from "@/model/plan.model";
+
+import StepApproval from "./steps/StepApproval";
+import StepAssignCourses from "./steps/StepAssignCourses";
+import StepNavigation from "./steps/StepNavigation";
 import StepPlanInfo from "./steps/StepPlanInfos";
 import StepTrainingProgram from "./steps/StepTrainingProgram";
 import StepTrainingTopics from "./steps/StepTrainingTopics";
-import StepAssignCourses from "./steps/StepAssignCourses";
-import StepApproval from "./steps/StepApproval";
-import StepNavigation from "./steps/StepNavigation";
 
 interface PlanFormProps {
   onSubmit: (data: PlanFormSchema) => void;

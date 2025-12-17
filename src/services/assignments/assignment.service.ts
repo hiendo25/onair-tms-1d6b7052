@@ -31,15 +31,57 @@ async function createAssignmentWithRelations(
 
     // Create questions
     if (payload.questions && payload.questions.length > 0) {
-      const questionsToCreate = payload.questions.map((question) => ({
-        assignment_id: assignmentId as string,
-        type: question.type,
-        label: question.label,
-        score: question.score,
-        options: question.options || null,
-        attachments: question.attachments || null,
-        created_by: createdBy,
-      }));
+      const questionsToCreate = payload.questions.map((question) => {
+        let options = question.options || null;
+
+        // Transform matchingData to options for matching type
+        if (question.type === "matching" && question.matchingData) {
+          const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+
+          // Store the matching data structure in options
+          options = {
+            columnAItems,
+            columnBItems,
+            correctMappings,
+          } as any;
+        }
+
+        // Transform orderItems to options for order type
+        // Ensure correctOrder and displayOrder are assigned
+        if (question.type === "order" && question.orderItems) {
+          const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
+            ...item,
+            correctOrder: index + 1, // 1-based index represents the correct order
+          }));
+
+          // Generate shuffled displayOrder using Fisher-Yates algorithm
+          const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
+          for (let i = shuffledIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+          }
+
+          const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
+            ...item,
+            displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
+          }));
+
+          // Store the order data structure in options (similar to matching)
+          options = {
+            orderItems: orderItemsWithDisplayOrder,
+          } as any;
+        }
+
+        return {
+          assignment_id: assignmentId as string,
+          type: question.type,
+          label: question.label,
+          score: question.score,
+          options,
+          attachments: question.attachments || null,
+          created_by: createdBy,
+        };
+      });
 
       await assignmentsRepository.createQuestions(questionsToCreate);
       console.log(`Created ${questionsToCreate.length} question(s)`);
@@ -105,15 +147,57 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
   await assignmentsRepository.deleteQuestionsByAssignmentId(payload.id);
 
   if (payload.questions && payload.questions.length > 0) {
-    const questionsToCreate = payload.questions.map((question) => ({
-      assignment_id: payload.id,
-      type: question.type,
-      label: question.label,
-      score: question.score,
-      options: question.options || null,
-      attachments: question.attachments || null,
-      created_by: updatedBy,
-    }));
+    const questionsToCreate = payload.questions.map((question) => {
+      let options = question.options || null;
+
+      // Transform matchingData to options for matching type
+      if (question.type === "matching" && question.matchingData) {
+        const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+
+        // Store the matching data structure in options
+        options = {
+          columnAItems,
+          columnBItems,
+          correctMappings,
+        } as any;
+      }
+
+      // Transform orderItems to options for order type
+      // Ensure correctOrder and displayOrder are assigned
+      if (question.type === "order" && question.orderItems) {
+        const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
+          ...item,
+          correctOrder: index + 1, // 1-based index represents the correct order
+        }));
+
+        // Generate shuffled displayOrder using Fisher-Yates algorithm
+        const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
+        for (let i = shuffledIndices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+        }
+
+        const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
+          ...item,
+          displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
+        }));
+
+        // Store the order data structure in options (similar to matching)
+        options = {
+          orderItems: orderItemsWithDisplayOrder,
+        } as any;
+      }
+
+      return {
+        assignment_id: payload.id,
+        type: question.type,
+        label: question.label,
+        score: question.score,
+        options,
+        attachments: question.attachments || null,
+        created_by: updatedBy,
+      };
+    });
 
     await assignmentsRepository.createQuestions(questionsToCreate);
   }

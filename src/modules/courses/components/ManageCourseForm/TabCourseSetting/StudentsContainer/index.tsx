@@ -233,7 +233,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
                       email: emp.profiles.email,
                       employeeCode: emp.employee_code,
                       fullName: emp.profiles.full_name,
-                      departmentName: emp.employments[0]?.organization_units?.name,
+                      departmentName: emp.employee_departments[0]?.departments?.name,
                     }}
                     onClick={() => handleAddEmployee(emp)}
                     isSelected={hasSelected(emp.id, selectedStudents)}

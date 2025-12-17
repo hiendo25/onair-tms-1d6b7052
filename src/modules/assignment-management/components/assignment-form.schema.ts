@@ -9,6 +9,31 @@ const optionSchema = zod.object({
   correct: zod.boolean(),
 });
 
+// Schema for matching question type - independent columns with mappings
+const matchingColumnItemSchema = zod.object({
+  id: zod.string(),
+  content: zod.string().min(1, { message: "Nội dung không được bỏ trống." }),
+});
+
+const matchingMappingSchema = zod.object({
+  columnAId: zod.string(),
+  columnBId: zod.string(),
+});
+
+const matchingQuestionDataSchema = zod.object({
+  columnAItems: zod.array(matchingColumnItemSchema),
+  columnBItems: zod.array(matchingColumnItemSchema),
+  correctMappings: zod.array(matchingMappingSchema),
+});
+
+// Schema for order question type - items with correct sequence
+const orderItemSchema = zod.object({
+  id: zod.string(),
+  content: zod.string().min(1, { message: "Nội dung không được bỏ trống." }),
+  correctOrder: zod.number(), // 1-based position in correct sequence
+  displayOrder: zod.number(), // 1-based shuffled display position (consistent for all students)
+});
+
 const questionSchema = zod
   .object({
     type: zod.enum(questionTypeValues),
@@ -18,6 +43,8 @@ const questionSchema = zod
       .positive({ message: "Điểm phải là số dương." })
       .min(0.1, { message: "Điểm phải lớn hơn 0." }),
     options: zod.array(optionSchema).optional(),
+    matchingData: matchingQuestionDataSchema.optional(),
+    orderItems: zod.array(orderItemSchema).optional(),
     attachments: zod.array(zod.string()).optional(),
   })
   .superRefine((data, ctx) => {
@@ -56,6 +83,88 @@ const questionSchema = zod
         }
       }
     }
+
+    // Validation for true_false type
+    if (data.type === "true_false") {
+      if (!data.options || data.options.length !== 2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi Đúng/Sai phải có đúng 2 tùy chọn.",
+          path: ["options"],
+        });
+      } else {
+        const correctAnswers = data.options.filter((opt) => opt.correct);
+        if (correctAnswers.length !== 1) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng chọn đúng 1 đáp án đúng.",
+            path: ["options"],
+          });
+        }
+      }
+    }
+
+    // Validation for matching type
+    if (data.type === "matching") {
+      if (!data.matchingData) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi ghép đôi phải có dữ liệu.",
+          path: ["matchingData"],
+        });
+      } else {
+        const { columnAItems, columnBItems, correctMappings } = data.matchingData;
+
+        // Check minimum items
+        if (columnAItems.length === 0 || columnBItems.length === 0) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Câu hỏi ghép đôi phải có ít nhất 1 mục ở mỗi cột.",
+            path: ["matchingData"],
+          });
+        }
+
+        // Check equal length
+        if (columnAItems.length !== columnBItems.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Hai cột phải có cùng số lượng mục.",
+            path: ["matchingData"],
+          });
+        }
+
+        // Check all items have mappings
+        if (correctMappings.length !== columnAItems.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Tất cả các mục phải được ghép đôi.",
+            path: ["matchingData", "correctMappings"],
+          });
+        }
+      }
+    }
+
+    // Validation for order type
+    if (data.type === "order") {
+      if (!data.orderItems || data.orderItems.length < 2) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Câu hỏi sắp xếp thứ tự phải có ít nhất 2 mục.",
+          path: ["orderItems"],
+        });
+      } else {
+        // Check for duplicate correctOrder values
+        const orders = data.orderItems.map(item => item.correctOrder);
+        const uniqueOrders = new Set(orders);
+        if (orders.length !== uniqueOrders.size) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Thứ tự các mục không được trùng lặp.",
+            path: ["orderItems"],
+          });
+        }
+      }
+    }
   });
 
 const employeeItemSchema = zod.object({
@@ -81,7 +190,21 @@ const assignmentSchema = zod.object({
 type Assignment = zod.infer<typeof assignmentSchema>;
 type Question = zod.infer<typeof questionSchema>;
 type QuestionOption = zod.infer<typeof optionSchema>;
+type MatchingQuestionData = zod.infer<typeof matchingQuestionDataSchema>;
+type MatchingColumnItem = zod.infer<typeof matchingColumnItemSchema>;
+type MatchingMapping = zod.infer<typeof matchingMappingSchema>;
+type OrderItem = zod.infer<typeof orderItemSchema>;
 type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
-export { assignmentSchema, type Assignment, type Question, type QuestionOption, type EmployeeItem };
+export {
+  assignmentSchema,
+  type Assignment,
+  type Question,
+  type QuestionOption,
+  type MatchingQuestionData,
+  type MatchingColumnItem,
+  type MatchingMapping,
+  type OrderItem,
+  type EmployeeItem
+};
 

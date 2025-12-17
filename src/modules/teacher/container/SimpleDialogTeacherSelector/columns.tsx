@@ -43,7 +43,7 @@ export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
     headerName: "Phòng ban",
     width: 220,
     renderCell: ({ row }) => {
-      return row.employments[0]?.organization_units?.name;
+      return row.employee_departments[0]?.departments?.name ?? "-";
     },
   },
   {
@@ -52,7 +52,9 @@ export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
     width: 220,
     renderCell: ({  row }) => {
 			console.log(row)
-      return row.employments[0]?.organization_units?.branch?.name ?? "-";
+      // Get branch from employee_branches or from department's branch
+      const directBranch = row.employee_branches[0]?.branches?.name;
+      return directBranch || "-";
     },
   },
 ];

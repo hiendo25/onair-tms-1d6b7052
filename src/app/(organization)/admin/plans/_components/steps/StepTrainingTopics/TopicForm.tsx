@@ -2,9 +2,10 @@
 
 import { Box, Button, Stack } from "@mui/material";
 import { UseFormReturn } from "react-hook-form";
+
 import { Topic } from "@/modules/plans/plan-form.schema";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
 
 interface TopicFormProps {
   form: UseFormReturn<Topic>;

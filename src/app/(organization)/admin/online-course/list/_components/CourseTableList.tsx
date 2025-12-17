@@ -110,14 +110,14 @@ export default function CourseTableList({ className }: CourseTableListProps) {
               return (
                 <>
                   <Can pers={["course:update"]}>
-                    <IconButton
-                      size="small"
-                      href={PATHS.COURSES.EDIT(courseId)}
-                      LinkComponent={Link}
-                      className="text-blue-600 bg-transparent hover:bg-blue-50"
-                    >
-                      <Edit02Icon className="w-4 h-4" />
-                    </IconButton>
+                    <Link href={PATHS.COURSES.EDIT(courseId)}>
+                      <IconButton
+                        size="small"
+                        className="text-blue-600 bg-transparent hover:bg-blue-50"
+                      >
+                        <Edit02Icon className="w-4 h-4" />
+                      </IconButton>
+                    </Link>
                   </Can>
                   <Can pers={["course:delete"]}>
                     <IconButton
@@ -164,9 +164,11 @@ export default function CourseTableList({ className }: CourseTableListProps) {
           />
         </Box>
         <Can pers={["course:create"]}>
-          <Button variant="contained" color="primary" LinkComponent={Link} href={PATHS.COURSES.CREATE} size="large">
-            Tạo môn học
-          </Button>
+          <Link href={PATHS.COURSES.CREATE}>
+            <Button variant="contained" color="primary" size="large">
+              Tạo môn học
+            </Button>
+          </Link>
         </Can>
       </div>
 

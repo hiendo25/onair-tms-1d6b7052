@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import {
   Box,
   Button,
@@ -12,18 +17,15 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useFieldArray, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EventNoteIcon from "@mui/icons-material/EventNote";
+import dayjs from "dayjs";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
+
 import { TrainingProgram, trainingProgramSchema } from "@/modules/plans/plan-form.schema";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { formatDateRange } from "../../helper";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { formatDateRange } from "../../helper";
 
 interface StepTrainingProgramProps {
   onContinue: () => void;
@@ -54,6 +56,21 @@ export default function StepTrainingProgram({
       topics: [],
       courses: [],
     },
+  });
+
+  const infoEndDate = useWatch({
+    control: control,
+    name: "info.endDate",
+  });
+
+  const infoStartDate = useWatch({
+    control: control,
+    name: "info.startDate",
+  });
+
+  const programStartDate = useWatch({
+    control: programForm.control,
+    name: "startDate",
   });
 
   const handleShowForm = () => {
@@ -141,6 +158,8 @@ export default function StepTrainingProgram({
             <RHFDateTimePicker
               control={programForm.control}
               name="startDate"
+              minDateTime={dayjs(infoStartDate)}
+              maxDateTime={dayjs(infoEndDate)}
             />
           </Box>
           <Box>
@@ -150,6 +169,8 @@ export default function StepTrainingProgram({
             <RHFDateTimePicker
               control={programForm.control}
               name="endDate"
+              minDateTime={dayjs(programStartDate)}
+              maxDateTime={dayjs(infoEndDate)}
             />
           </Box>
         </Box>

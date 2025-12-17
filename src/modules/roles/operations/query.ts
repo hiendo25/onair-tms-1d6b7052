@@ -18,7 +18,7 @@ export const useAdminGetRoleList = (params?: AdminGetRoleListParams) => {
 
 export const useGetRoleList = (params?: AdminGetRoleListParams) => {
   return useTQuery({
-    queryKey: [GET_ROLES, params?.page, params?.pageSize],
+    queryKey: [GET_ROLES, params?.page, params?.pageSize, params?.ids?.join(",")],
     queryFn: async () => await getRoleList(params),
   });
 };

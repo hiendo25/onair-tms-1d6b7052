@@ -14,12 +14,22 @@ export type EmployeeStudentWithProfileItem = {
     avatar: string | null;
     email: string;
   };
-  employments: {
-    organization_units: {
+  employee_departments: {
+    id: string;
+    department_id: string;
+    departments: {
       id: string;
       name: string;
-      type: string;
-    };
+      branch_id: string | null;
+    } | null;
+  }[];
+  employee_branches: {
+    id: string;
+    branch_id: string;
+    branches: {
+      id: string;
+      name: string;
+    } | null;
   }[];
 };
 
@@ -35,18 +45,26 @@ export type EmployeeTeacherTypeItem = {
     avatar: string | null;
     email: string;
   };
-  employments: {
-    organization_units: {
+  employee_departments: {
+    id: string;
+    department_id: string;
+    departments: {
       id: string;
       name: string;
-      type: string;
-      parent_id: string;
-      branch: {
+      branch_id: string | null;
+      branches: {
         id: string;
         name: string;
-        type: string;
-      };
-    };
+      } | null;
+    } | null;
+  }[];
+  employee_branches: {
+    id: string;
+    branch_id: string;
+    branches: {
+      id: string;
+      name: string;
+    } | null;
   }[];
 };
 
@@ -62,12 +80,22 @@ export type EmployeeWithOrganizationItem = {
     avatar: string | null;
     email: string;
   };
-  employments: {
-    organization_units: {
+  employee_departments: {
+    id: string;
+    department_id: string;
+    departments: {
       id: string;
       name: string;
-      type: string;
-    };
+      branch_id: string | null;
+    } | null;
+  }[];
+  employee_branches: {
+    id: string;
+    branch_id: string;
+    branches: {
+      id: string;
+      name: string;
+    } | null;
   }[];
 };
 export type EmployeeWithProfileListResponse = PostgrestSingleResponse<EmployeeStudentWithProfileItem[]>;

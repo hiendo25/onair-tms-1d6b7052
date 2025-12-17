@@ -119,17 +119,23 @@ export const CLASS_ROOM_STUDENTS_SELECT = `
           phone_number,
           avatar
         ),
-        employments (
+        employee_departments (
           id,
-          organization_unit_id,
-          organizationUnit:organization_units!employments_organization_unit_id_fkey (
+          department_id,
+          departments (
             id,
             name,
-            type
+            branch_id
           )
         ),
-        branchEmployments:employments!inner (organization_unit_id),
-        departmentEmployments:employments!inner (organization_unit_id),
+        employee_branches (
+          id,
+          branch_id,
+          branches (
+            id,
+            name
+          )
+        ),
         attendances:class_attendances!class_attendances_employee_id_fkey (
           id,
           employee_id,

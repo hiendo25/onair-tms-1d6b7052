@@ -1,7 +1,8 @@
 "use client";
 
-import dayjs from "dayjs";
 import React, { useCallback } from "react";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {
   Alert,
   Box,
@@ -12,19 +13,20 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import dayjs from "dayjs";
+import { useSnackbar } from "notistack";
 import { useWatch } from "react-hook-form";
-import { RHFInputDecimalField } from "@/shared/ui/form/RHFInputDecimal";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+
 import { PlanStatus } from "@/model/plan.model";
 import { Survey } from "@/modules/plans/plan-form.schema";
-import { useSnackbar } from "notistack";
 import { validatePlanStep } from "@/modules/plans/plan-step.utils";
+import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import { RHFInputDecimalField } from "@/shared/ui/form/RHFInputDecimal";
+import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { isSurveyLocked } from "../../../helper";
+
 import { PlanSurveySection } from "./PlanSurveySection";
 
 interface StepPlanInfoProps {
@@ -123,12 +125,12 @@ export default function StepPlanInfo({
               <RHFDateTimePicker
                 control={control}
                 name="info.startDate"
-                minDate={dayjs()}
+                minDateTime={dayjs()}
               />
               <RHFDateTimePicker
                 control={control}
                 name="info.endDate"
-                minDate={dayjs(planStartDate)}
+                minDateTime={dayjs(planStartDate)}
               />
             </Box>
           </Box>

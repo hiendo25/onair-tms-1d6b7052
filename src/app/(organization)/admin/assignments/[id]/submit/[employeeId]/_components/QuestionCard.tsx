@@ -20,6 +20,9 @@ import type { AssignmentQuestionDto } from "@/types/dto/assignments";
 import FileUploadButton from "./FileUploadButton";
 import FileListItem from "./FileListItem";
 import AttachmentSection from "./AttachmentSection";
+import MatchingQuestionInput from "./MatchingQuestionInput";
+import OrderQuestionInput from "./OrderQuestionInput";
+import TrueFalseQuestionInput from "./TrueFalseQuestionInput";
 
 interface QuestionCardProps {
   question: AssignmentQuestionDto;
@@ -37,6 +40,15 @@ interface QuestionCardProps {
   // For checkbox type questions
   checkboxAnswers?: string[];
   onCheckboxChange?: (optionIds: string[]) => void;
+  // For matching type questions
+  matchingMappings?: Array<{ columnAId: string; columnBId: string }>;
+  onMatchingChange?: (mappings: Array<{ columnAId: string; columnBId: string }>) => void;
+  // For order type questions
+  orderedItems?: Array<{ id: string; position: number }>;
+  onOrderChange?: (orderedItems: Array<{ id: string; position: number }>) => void;
+  // For true_false type questions
+  trueFalseAnswer?: boolean;
+  onTrueFalseChange?: (answer: boolean) => void;
   // For optional attachments (text, radio, checkbox)
   attachments?: File[];
   onAttachmentSelect?: (files: FileList | null) => void;
@@ -68,6 +80,12 @@ function QuestionCard({
   onRadioChange,
   checkboxAnswers = [],
   onCheckboxChange,
+  matchingMappings = [],
+  onMatchingChange,
+  orderedItems = [],
+  onOrderChange,
+  trueFalseAnswer,
+  onTrueFalseChange,
   attachments = [],
   onAttachmentSelect,
   onRemoveAttachment,
@@ -242,6 +260,30 @@ function QuestionCard({
             onRemoveAttachment={onRemoveAttachment}
           />
         </>
+      )}
+
+      {question.type === "matching" && question.options && (
+        <MatchingQuestionInput
+          columnAItems={(question.options as any).columnAItems || []}
+          columnBItems={(question.options as any).columnBItems || []}
+          mappings={matchingMappings}
+          onMappingsChange={onMatchingChange || (() => {})}
+        />
+      )}
+
+      {question.type === "order" && question.options && (
+        <OrderQuestionInput
+          items={(question.options as any).orderItems || []}
+          orderedItems={orderedItems}
+          onOrderChange={onOrderChange || (() => {})}
+        />
+      )}
+
+      {question.type === "true_false" && (
+        <TrueFalseQuestionInput
+          answer={trueFalseAnswer}
+          onAnswerChange={onTrueFalseChange || (() => {})}
+        />
       )}
     </Card>
   );

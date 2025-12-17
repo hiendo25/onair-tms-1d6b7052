@@ -11,8 +11,15 @@ export type FileAnswer = { files: FileMetadata[] };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
 export type CheckboxAnswer = { selectedOptionIds: string[] };
+export type MatchingAnswer = {
+  mappings: Array<{ columnAId: string; columnBId: string }>
+};
+export type OrderAnswer = {
+  orderedItems: Array<{ id: string; position: number }>
+};
+export type TrueFalseAnswer = { answer: boolean };
 
-export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer;
+export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer | MatchingAnswer | OrderAnswer | TrueFalseAnswer;
 
 export interface QuestionWithAnswer {
   id: string;

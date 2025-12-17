@@ -7,19 +7,31 @@ import { slugify } from "@/utils/slugify";
 export interface AdminGetRoleListParams {
   page?: number;
   pageSize?: number;
+  ids?: string[];
 }
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
 export const getRoleList = async (params?: AdminGetRoleListParams) => {
-  return supabase
+  const ids = params?.ids;
+
+  if (ids && ids.length === 0) {
+    return [];
+  }
+
+  let query = supabase
     .from("roles")
     .select("*")
-    .order("created_at", { ascending: false })
-    .then(({ data, error }) => {
-      if (error) return Promise.reject(error);
-      return data || [];
-    });
+    .order("created_at", { ascending: false });
+
+  if (ids && ids.length > 0) {
+    query = query.in("id", ids);
+  }
+
+  return query.then(({ data, error }) => {
+    if (error) return Promise.reject(error);
+    return data || [];
+  });
 };
 
 export const adminGetRoleList = async (params?: AdminGetRoleListParams) => {
