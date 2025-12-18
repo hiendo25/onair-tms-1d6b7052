@@ -70,9 +70,13 @@ export const phaseSchema = zod.object({
     .min(1, { message: "Mỗi giai đoạn phải có ít nhất một lớp học." }),
 });
 
-// Settings schema for Step 3 (placeholder for now)
+// Settings schema for Step 3
 export const settingsSchema = zod.object({
-  // Add settings fields later
+  sequentialLearning: zod.boolean().default(false),
+  completionCriteria: zod.number().min(0).max(100).default(80),
+  deadlineType: zod.enum(["none", "hours"]).default("none"),
+  deadlineHours: zod.number().min(1).optional(),
+  allowRetake: zod.boolean().default(false),
 });
 
 // Complete learning path form schema

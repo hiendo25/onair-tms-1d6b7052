@@ -179,7 +179,7 @@ export default function LearningPathForm({
             status: getStatusTab(TAB_KEYS["tab-phases"]),
           },
           {
-            tabName: "Cài đặt",
+            tabName: "Thiết lập",
             tabKey: TAB_KEYS["tab-settings"],
             icon: <SettingsIcon />,
             content: <StepSettings onSubmit={handleFormSubmit} isLoading={isLoading} />,
