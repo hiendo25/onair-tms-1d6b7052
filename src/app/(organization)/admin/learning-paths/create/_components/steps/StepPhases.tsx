@@ -9,11 +9,9 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   FormControl,
   FormHelperText,
   FormLabel,
-  IconButton,
   OutlinedInput,
   Stack,
   Typography,
@@ -24,6 +22,7 @@ import { useLearningPathFormContext } from "@/modules/learning-paths/use-learnin
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { ClassRoomItem,ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker";
 
+import ClassRoomAccordionItem from "./ClassRoomAccordionItem";
 import SortablePhaseItem from "./SortablePhaseItem";
 
 export default function StepPhases() {
@@ -40,6 +39,7 @@ export default function StepPhases() {
   const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
+  const [expandedClassRooms, setExpandedClassRooms] = useState<Record<string, boolean>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState<number | null>(null);
 
@@ -74,6 +74,11 @@ export default function StepPhases() {
 
   const handleTogglePhase = (phaseId: string, expanded: boolean) => {
     setExpandedPhases((prev) => ({ ...prev, [phaseId]: expanded }));
+  };
+
+  const handleToggleClassRoom = (phaseIndex: number, classRoomId: string, expanded: boolean) => {
+    const key = `${phaseIndex}-${classRoomId}`;
+    setExpandedClassRooms((prev) => ({ ...prev, [key]: expanded }));
   };
 
   const handleRemovePhase = (index: number) => {
@@ -234,43 +239,60 @@ export default function StepPhases() {
 
                           {/* Class-room Selection */}
                           <FormControl fullWidth error={!!classRoomsError}>
-                            <FormLabel required>Lớp học trong giai đoạn</FormLabel>
-                            <Box
-                              sx={{
-                                minHeight: 56,
-                                p: 1.5,
-                                border: "1px solid",
-                                borderColor: classRoomsError ? "error.main" : "divider",
-                                borderRadius: 1,
-                                bgcolor: "white",
-                                display: "flex",
-                                flexWrap: "wrap",
-                                gap: 1,
-                                alignItems: "center",
-                              }}
-                            >
-                              {phase.class_rooms.map((classRoom) => (
-                                <Chip
-                                  key={classRoom.id}
-                                  label={classRoom.name}
-                                  size="small"
-                                  onDelete={() => handleRemoveClassRoom(index, classRoom.id)}
-                                />
-                              ))}
+                            <Stack direction="row" justifyContent="space-between" alignItems="center">
+                              <FormLabel required>Lớp học trong giai đoạn</FormLabel>
                               <Button
                                 size="small"
-                                variant="outlined"
+                                variant="fill"
                                 startIcon={<AddIcon />}
                                 onClick={() => handleOpenDialog(index)}
                               >
                                 Thêm lớp
                               </Button>
-                            </Box>
+                            </Stack>
+
+                            {/* Display selected classrooms */}
+                            {phase.class_rooms.length > 0 ? (
+                              <Stack spacing={2} sx={{ mt: 2 }}>
+                                {phase.class_rooms.map((classRoom) => {
+                                  const classRoomKey = `${index}-${classRoom.id}`;
+                                  const isExpanded = expandedClassRooms[classRoomKey] || false;
+
+                                  return (
+                                    <ClassRoomAccordionItem
+                                      key={classRoom.id}
+                                      classRoom={classRoom}
+                                      expanded={isExpanded}
+                                      hasError={!!classRoomsError}
+                                      onExpandChange={(expanded) => handleToggleClassRoom(index, classRoom.id, expanded)}
+                                      onDelete={() => handleRemoveClassRoom(index, classRoom.id)}
+                                    />
+                                  );
+                                })}
+                              </Stack>
+                            ) : (
+                              <Box
+                                sx={{
+                                  minHeight: 80,
+                                  mt: 2,
+                                  p: 2,
+                                  border: "1px solid",
+                                  borderColor: classRoomsError ? "error.main" : "divider",
+                                  borderRadius: 1,
+                                  bgcolor: "grey.50",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <Typography variant="body2" color="text.secondary">
+                                  Chưa có lớp học nào được chọn
+                                </Typography>
+                              </Box>
+                            )}
+
                             {classRoomsError?.message && (
                               <FormHelperText>{classRoomsError.message}</FormHelperText>
-                            )}
-                            {!classRoomsError && (
-                              <FormHelperText>Đã chọn {phase.class_rooms.length} lớp học</FormHelperText>
                             )}
                           </FormControl>
                         </Stack>

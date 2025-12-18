@@ -18,16 +18,16 @@ import {
   ListItemButton,
   ListItemText,
   Radio,
+  Stack,
   TextField,
   Typography,
-  Stack,
 } from "@mui/material";
 
 import { useClassRoomsForSelection } from "@/modules/class-room-management/operations/use-class-rooms-for-selection";
 import { ClassSessionModeFilter } from "@/repository/class-room";
+import { Database } from "@/types/supabase.types";
 
 import { ClassRoomItem, ClassRoomPickerDialogProps } from "./types";
-import { Database } from "@/types/supabase.types";
 
 // Helper functions for chip labels and colors
 const getSessionTypeLabel = (sessionType?: Database["public"]["Enums"]["class_session_type"]) => {

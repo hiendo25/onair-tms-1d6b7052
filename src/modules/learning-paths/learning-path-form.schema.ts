@@ -29,12 +29,35 @@ export const generalInfoSchema = zod.object({
   assignedEmployees: zod.array(employeeItemSchema).default([]),
 });
 
+// Class-room session schema
+export const classRoomSessionSchema = zod.object({
+  id: zod.string(),
+  title: zod.string(),
+  start_at: zod.string().optional(),
+  end_at: zod.string().optional(),
+  session_type: zod.string().optional(),
+  channel_provider: zod.string().optional(),
+  course: zod.object({
+    id: zod.string(),
+    title: zod.string(),
+  }).optional(),
+  teacher: zod.object({
+    id: zod.string(),
+    full_name: zod.string(),
+  }).optional(),
+});
+
 // Class-room schema for phase selection
 export const classRoomSchema = zod.object({
   id: zod.string(),
   name: zod.string(),
   code: zod.string().optional(),
   description: zod.string().optional(),
+  room_type: zod.string().optional(),
+  session_type: zod.string().optional(),
+  sessions_count: zod.number().optional(),
+  courses_count: zod.number().optional(),
+  sessions: zod.array(classRoomSessionSchema).optional(),
 });
 
 // Phase schema for Step 2
