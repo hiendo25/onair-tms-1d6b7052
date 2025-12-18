@@ -1,6 +1,6 @@
+import { PlanStatus } from "@/model/plan.model";
 import { supabase } from "@/services";
 import { TablesInsert, TablesUpdate } from "@/types/supabase.types";
-import { PlanStatus } from "@/model/plan.model";
 
 interface GetPlansParams {
   search?: string;
@@ -8,9 +8,19 @@ interface GetPlansParams {
   page?: number;
   limit?: number;
   status?: PlanStatus | "all";
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
-const getPlans = async ({ search, organizationId, page = 1, limit = 10, status }: GetPlansParams) => {
+const getPlans = async ({
+  search,
+  organizationId,
+  page = 1,
+  limit = 10,
+  status,
+  startDate,
+  endDate,
+}: GetPlansParams) => {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -24,7 +34,12 @@ const getPlans = async ({ search, organizationId, page = 1, limit = 10, status }
       start_date,
       end_date,
       budget,
-      status
+      status,
+      training_plan_surveys (
+        end_date,
+        status,
+        result_summary
+      )
     `,
       { count: "exact" },
     )
@@ -35,6 +50,14 @@ const getPlans = async ({ search, organizationId, page = 1, limit = 10, status }
 
   if (status && status !== "all") {
     query = query.eq("status", status);
+  }
+
+  if (startDate) {
+    query = query.gte("start_date", startDate);
+  }
+
+  if (endDate) {
+    query = query.lte("end_date", endDate);
   }
 
   if (search) {
@@ -105,6 +128,7 @@ const getPlanDetail = async (id: string) => {
         start_date,
         end_date,
         status,
+        result_summary,
         target_type,
         target_unit_ids,
         survey:surveys (
@@ -130,21 +154,53 @@ const getPlanDetail = async (id: string) => {
   return data;
 };
 
-const getPlanStatusCounts = async ({ organizationId, search }: Pick<GetPlansParams, "organizationId" | "search">) => {
-  const { data, error } = await supabase.rpc("get_training_plan_status_counts" as any, {
-    org_id: organizationId,
-    search_text: search || null,
-  });
+const getPlanStatusCounts = async ({
+  organizationId,
+  search,
+  startDate,
+  endDate,
+}: Pick<GetPlansParams, "organizationId" | "search" | "startDate" | "endDate">) => {
+  const buildQuery = () => {
+    let query = supabase
+      .from("training_plans")
+      .select("id", { count: "exact", head: true })
+      .eq("organization_id", organizationId)
+      .not("status", "in", "(deleted)");
 
-  if (error) throw new Error(error.message);
-  const stats = (data?.[0] as any) || {};
+    if (startDate) {
+      query = query.gte("end_date", startDate);
+    }
+
+    if (endDate) {
+      query = query.lte("start_date", endDate);
+    }
+
+    if (search) {
+      query = query.ilike("name", `%${search}%`);
+    }
+
+    return query;
+  };
+
+  const [totalResult, approvedResult, pendingResult, pendingSurveyResult, rejectedResult] = await Promise.all([
+    buildQuery(),
+    buildQuery().eq("status", "approved"),
+    buildQuery().eq("status", "pending"),
+    buildQuery().eq("status", "pending_survey"),
+    buildQuery().eq("status", "rejected"),
+  ]);
+
+  const getCount = (result: { count: number | null; error: { message: string } | null }) => {
+    if (result.error) throw new Error(result.error.message);
+    return Number(result.count ?? 0);
+  };
 
   return {
-    total: Number(stats.total) || 0,
-    approved: Number(stats.approved) || 0,
-    pending: Number(stats.pending) || 0,
-    pending_survey: Number(stats.pending_survey) || 0,
-    rejected: Number(stats.rejected) || 0,
+    total: getCount(totalResult),
+    approved: getCount(approvedResult),
+    pending: getCount(pendingResult),
+    pending_survey: getCount(pendingSurveyResult),
+    rejected: getCount(rejectedResult),
   };
 };
 

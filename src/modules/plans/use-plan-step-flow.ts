@@ -2,17 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { UseFormTrigger } from "react-hook-form";
+
+import { PlanStatus } from "@/model/plan.model";
+
+import { PlanFormSchema, PlanFormValues, Survey } from "./plan-form.schema";
 import {
   canAccessPlanStep,
   getNextPlanStepId,
   getPlanInitialCompletedSteps,
   getPrevPlanStepId,
+  PLAN_STEPS,
   PlanStepId,
   validatePlanStep,
-  PLAN_STEPS,
 } from "./plan-step.utils";
-import { PlanFormSchema, PlanFormValues, Survey } from "./plan-form.schema";
-import { PlanStatus } from "@/model/plan.model";
+import { getPlanSurveyAccess } from "./survey-access";
 
 interface UsePlanStepFlowProps {
   mode: "create" | "edit";
@@ -31,7 +34,11 @@ export const usePlanStepFlow = ({
   initialStep,
   survey,
 }: UsePlanStepFlowProps) => {
-  const surveyLocked = !!survey && (planStatus === "pending_survey" || survey.status !== "closed");
+  const surveyAccess = useMemo(
+    () => getPlanSurveyAccess(planStatus, survey),
+    [planStatus, survey],
+  );
+  const surveyLocked = surveyAccess.shouldLock;
   const initialCompletedSteps = useMemo(
     () => getPlanInitialCompletedSteps(mode, initialData, planStatus),
     [initialData, mode, planStatus],
@@ -118,7 +125,7 @@ export const usePlanStepFlow = ({
 
       return true;
     },
-    [completedSteps, currentStep, planStatus, surveyLocked, updateCompletion],
+    [completedSteps, currentStep, surveyLocked, updateCompletion],
   );
 
   const isStepAccessible = useCallback(
