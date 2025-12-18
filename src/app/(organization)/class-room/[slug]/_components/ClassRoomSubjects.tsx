@@ -1,10 +1,11 @@
-import { PATHS } from "@/constants/path.constant";
-import { FORMAT_DATE_TIME_SHORTER } from "@/lib";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { useMemo } from "react";
 import { AccessTime, MenuBook as MenuBookIcon, OndemandVideo } from "@mui/icons-material";
 import { Avatar, Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { useMemo } from "react";
+
+import { PATHS } from "@/constants/path.constant";
+import { FORMAT_DATE_TIME_SHORTER } from "@/lib";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 type CoursePeriod = NonNullable<
   NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"][number]["courses_period"]

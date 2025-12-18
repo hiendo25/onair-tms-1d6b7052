@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const CalendarDateIcon2: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const CalendarDateIcon2: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

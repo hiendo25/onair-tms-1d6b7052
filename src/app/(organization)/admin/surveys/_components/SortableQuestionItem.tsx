@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { IconButton } from "@mui/material";
+
 import { Dot2RowVerticalIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 

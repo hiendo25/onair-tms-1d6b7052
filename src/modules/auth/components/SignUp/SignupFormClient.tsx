@@ -1,13 +1,14 @@
 "use client";
 import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
+import FormLabel from "@mui/material/FormLabel";
 import TextField from "@mui/material/TextField";
-import { SignUpSchema, TSignUpForm } from "./schema";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+
+import { SignUpSchema, TSignUpForm } from "./schema";
 export interface SignUpFormClientProps {
   onSubmit?: (data: TSignUpForm) => void;
   isSubmitting?: boolean;

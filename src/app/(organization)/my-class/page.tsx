@@ -1,4 +1,5 @@
 import PageContainer from "@/shared/ui/PageContainer";
+
 import MyClassSection from "./_components";
 
 const MyClassPage = () => {

@@ -1,3 +1,4 @@
+import React from "react";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { Editor, EditorOptions, Extension } from "@tiptap/react";
 

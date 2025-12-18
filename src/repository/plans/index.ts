@@ -1,6 +1,6 @@
+import { PlanStatus } from "@/model/plan.model";
 import { supabase } from "@/services";
 import { TablesInsert, TablesUpdate } from "@/types/supabase.types";
-import { PlanStatus } from "@/model/plan.model";
 
 interface GetPlansParams {
   search?: string;

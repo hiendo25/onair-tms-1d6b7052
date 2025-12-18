@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Box } from "@mui/material";
-import PageContainer from "@/shared/ui/PageContainer";
+
 import { PATHS } from "@/constants/path.constant";
 import { PlanDetailDto } from "@/modules/plans/types";
+import PageContainer from "@/shared/ui/PageContainer";
+
 import PlanInfoCards from "./PlanInfoCards";
 import PlanStatistics from "./PlanStatistics";
 import ProgramAccordion from "./ProgramAccordion";

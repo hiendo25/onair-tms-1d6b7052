@@ -1,9 +1,9 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useParams } from "next/navigation";
+
 import {
   useLearningCourseOutlineQuery,
   useLearningLessonDetailQuery,
@@ -13,12 +13,14 @@ import type {
   LearningLessonSummary,
   LearningSectionOutline,
 } from "@/modules/learning-screen/types";
-import LessonNavigator from "./lesson-content/LessonNavigator";
-import LessonContentPanel from "./lesson-content/LessonContentPanel";
 import type {
   LessonProgressMap,
   StoredLessonProgress,
 } from "@/modules/learning-screen/utils/progressStorage";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+
+import LessonContentPanel from "./lesson-content/LessonContentPanel";
+import LessonNavigator from "./lesson-content/LessonNavigator";
 
 const createLessonLookup = (sections: LearningSectionOutline[]) => {
   const lookup = new Map<string, LearningLessonSummary>();

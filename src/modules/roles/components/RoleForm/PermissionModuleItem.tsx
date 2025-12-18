@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
   AccordionDetails,
@@ -10,11 +12,10 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import React from "react";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { ActionOption } from "../../types";
-import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
+
 import { PermissionActions } from "@/model/permission.model";
+import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
+import { ActionOption } from "../../types";
 
 interface PermissionModuleItemProps extends Pick<UseRolePermissionsReturn, "setSelectedPermissions" | "toggleAction"> {
   moduleId: string;

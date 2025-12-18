@@ -1,8 +1,9 @@
 import { Control, useController } from "react-hook-form";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
+
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
-import { slugify } from "@/utils/slugify";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
+import { slugify } from "@/utils/slugify";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 interface CategorySelectorProps {
   control: Control<UpsertCourseFormData>;
 }

@@ -1,4 +1,5 @@
 import { supabase } from "@/services";
+
 import { CreateClassRoomHashTagPayload } from "./type";
 
 const getHashTags = async () => {

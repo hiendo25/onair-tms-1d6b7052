@@ -1,5 +1,4 @@
 import { createClient, createSVClient } from "@/services";
-import type { Database } from "@/types/supabase.types";
 import type {
   AssignmentDto,
   GetAssignmentsParams,
@@ -7,6 +6,7 @@ import type {
   QuestionOption,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import type { Database } from "@/types/supabase.types";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
   const supabase = createClient();

@@ -1,6 +1,7 @@
 import { Divider, Stack } from "@mui/material";
-import AccountSetting from "../MainLayout/AccountSetting";
+
 import { LogoOnairIcon } from "@/shared/assets/icons";
+import AccountSetting from "../MainLayout/AccountSetting";
 
 const SPAHeader = () => {
     return (

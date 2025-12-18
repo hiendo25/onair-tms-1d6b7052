@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import { useEventListener } from "./useEventListener";
 
@@ -32,9 +25,7 @@ export type UseClientRectReturn = DOMRectValue &
     elementRef: React.RefObject<HTMLDivElement | null>;
   };
 
-export function useClientRect(
-  inputRef?: React.RefObject<HTMLDivElement>,
-): UseClientRectReturn {
+export function useClientRect(inputRef?: React.RefObject<HTMLDivElement>): UseClientRectReturn {
   const initialRef = useRef<HTMLDivElement>(null);
 
   const elementRef = inputRef || initialRef;
@@ -43,8 +34,7 @@ export function useClientRect(
 
   const [scroll, setScroll] = useState<ScrollElValue | undefined>(undefined);
 
-  const useIsomorphicLayoutEffect =
-    typeof window !== "undefined" ? useLayoutEffect : useEffect;
+  const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
   const handleResize = useCallback(() => {
     if (elementRef?.current) {

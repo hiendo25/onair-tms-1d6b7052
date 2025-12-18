@@ -1,10 +1,12 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import { Box, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, IconButton } from "@mui/material";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import LearningScreenSection from "./_components";
+
 import { createSVClient } from "@/services";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import LearningScreenSection from "./_components";
 
 interface ILearningScreenPage {
     params: Promise<{

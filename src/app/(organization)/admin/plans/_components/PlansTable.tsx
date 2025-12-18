@@ -188,9 +188,9 @@ export default function PlansTable() {
       renderCell: (_value, row) =>
         row.startDate && row.endDate
           ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(
-            row.endDate,
-            FORMAT_DATE_TIME_CLEANER,
-          )}`
+              row.endDate,
+              FORMAT_DATE_TIME_CLEANER,
+            )}`
           : "Chưa có",
     },
     {

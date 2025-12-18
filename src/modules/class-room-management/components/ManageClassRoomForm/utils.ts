@@ -1,4 +1,5 @@
 import { FieldErrors } from "react-hook-form";
+
 import { ClassRoom, ClassRoomSession } from "./classroom-form.schema";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 
@@ -31,33 +32,6 @@ export const getStatusTabClassRoom = (
   tabKey: keyof typeof TAB_KEYS_CLASS_ROOM,
 ): "invalid" | "valid" => {
   const keyListByTab = getKeyFieldByTab(tabKey);
-
-  // const isValid = keyListByTab.every((key) => {
-  //   if (key === "classRoomSessions") {
-  //     const sessionsErrors = errors["classRoomSessions"] as FieldErrors<ClassRoomSession>[] | undefined;
-
-  //     if (!sessionsErrors || !sessionsErrors.length) return true;
-
-  //     return sessionsErrors.every((session) => {
-  //       if (!session) return true;
-  //       /**
-  //        * remove Qrcode
-  //        */
-  //       const { qrCode, ...restKeys } = session;
-
-  //       if (tabKey === "clsTab-setting" && qrCode) {
-  //         return false;
-  //       }
-  //       if (tabKey === "clsTab-session" && Object.keys(restKeys).length) {
-  //         return false;
-  //       }
-
-  //       return true;
-  //     });
-  //   } else {
-  //     return !errors[key];
-  //   }
-  // });
 
   const isValid = keyListByTab.every((key) => !errors[key]);
 

@@ -1,8 +1,8 @@
-import { useDropzone } from "react-dropzone";
-import { IconButton, SxProps, Theme, alpha } from "@mui/material";
+import React, { memo } from "react";
+import { alpha, IconButton, SxProps, Theme } from "@mui/material";
 import Box from "@mui/material/Box";
 import type { DropzoneOptions } from "react-dropzone";
-import { memo } from "react";
+import { useDropzone } from "react-dropzone";
 
 export type FileUploadType = File | string | null;
 
@@ -22,19 +22,11 @@ export interface UploadProps extends DropzoneOptions {
   unsetBox?: boolean;
 }
 
-const UploadBox: React.FC<UploadProps> = ({
-  placeholder,
-  error,
-  disabled,
-  unsetBox,
-  sx,
-  ...other
-}) => {
-  const { getRootProps, getInputProps, isDragActive, isDragReject } =
-    useDropzone({
-      disabled,
-      ...other,
-    });
+const UploadBox: React.FC<UploadProps> = ({ placeholder, error, disabled, unsetBox, sx, ...other }) => {
+  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
+    disabled,
+    ...other,
+  });
 
   const hasError = isDragReject || error;
 
@@ -51,12 +43,8 @@ const UploadBox: React.FC<UploadProps> = ({
         alignItems: "center",
         color: unsetBox ? "unset" : "text.disabled",
         justifyContent: "center",
-        bgcolor: unsetBox
-          ? "unset"
-          : (theme) => alpha(theme.palette.grey[500], 0.08),
-        border: unsetBox
-          ? "unset"
-          : (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.16)}`,
+        bgcolor: unsetBox ? "unset" : (theme) => alpha(theme.palette.grey[500], 0.08),
+        border: unsetBox ? "unset" : (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.16)}`,
         ...(isDragActive && { opacity: 0.72 }),
         ...(disabled && { opacity: 0.48, pointerEvents: "none" }),
         ...(hasError && {

@@ -1,5 +1,3 @@
-import { createSVClient } from "@/services";
-import type { Tables } from "@/types/supabase.types";
 import type {
   LearningCourseOutline,
   LearningLesson,
@@ -8,6 +6,8 @@ import type {
   LearningSectionOutline,
   ResourceRow,
 } from "@/modules/learning-screen/types";
+import { createSVClient } from "@/services";
+import type { Tables } from "@/types/supabase.types";
 
 type LessonResourceBridgeRow = Tables<"lessons_resources"> & {
   resource?: ResourceRow | null;

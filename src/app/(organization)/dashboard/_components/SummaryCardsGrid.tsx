@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
-import SchoolRounded from "@mui/icons-material/SchoolRounded";
-import PlayCircleFilledRounded from "@mui/icons-material/PlayCircleFilledRounded";
 import AccessTimeRounded from "@mui/icons-material/AccessTimeRounded";
 import EmojiEventsRounded from "@mui/icons-material/EmojiEventsRounded";
+import PlayCircleFilledRounded from "@mui/icons-material/PlayCircleFilledRounded";
+import SchoolRounded from "@mui/icons-material/SchoolRounded";
+import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
 
 import { summaryCards } from "./mock/dashboardData";
 import { panelSx } from "./mock/panelSx";

@@ -1,6 +1,6 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetDepartmentsParams } from "@/types/dto/departments";
 import * as departmentService from "@/services/departments/department.service";
+import type { GetDepartmentsParams } from "@/types/dto/departments";
 
 export const useGetDepartmentsQuery = (
   params?: GetDepartmentsParams,

@@ -1,10 +1,12 @@
 "use client";
 import { Box, Typography } from "@mui/material";
-import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
-import { useUpsertCourseStore } from "@/modules/courses/store/upsert-course-context";
+
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
-import QrSetting from "./QrSetting";
+import { useUpsertCourseStore } from "@/modules/courses/store/upsert-course-context";
 import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
+
+import QrSetting from "./QrSetting";
+import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 
 const TabClassRoomSetting = () => {
   const setStudents = useUpsertCourseStore((state) => state.actions.setSelectedStudents);

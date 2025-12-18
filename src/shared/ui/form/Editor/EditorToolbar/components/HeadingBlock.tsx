@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import Menu from "@mui/material/Menu";
+import { alpha,MenuItem } from "@mui/material";
 import ButtonBase from "@mui/material/ButtonBase";
-import { MenuItem, alpha } from "@mui/material";
-import type { EditorToolbarProps } from "../../types";
+import Menu from "@mui/material/Menu";
+
 import { ParagraphIcon } from "@/shared/assets/icons";
+import type { EditorToolbarProps } from "../../types";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 

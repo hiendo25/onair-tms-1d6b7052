@@ -244,14 +244,14 @@ export async function updateEmployeeById(
     throw new Error(`Failed to update employee: ${error.message}`);
   }
 }
-export async function getMainEmployeeByUserId(userId: string) {
+export async function getCurrentEmployee(userId: string, organizationId: string) {
   const supabase = await createSVClient();
 
   const { data: employee, error } = await supabase
     .from("employees")
     .select("id, organization_id")
     .eq("user_id", userId)
-    .eq("is_main", true)
+    .eq("organization_id", organizationId)
     .single();
 
   if (error) {
@@ -355,7 +355,6 @@ export const getEmployeesByUserId = async (userId: string) => {
 				employee_code, 
 				employee_type,
 				user_id,
-				is_main,
 				organization:organizations!inner(
 					id, 
 					name, 
@@ -395,23 +394,6 @@ export const getEmployeesByUserId = async (userId: string) => {
 };
 export type GetEmployeesByUserIdResponse = Awaited<ReturnType<typeof getEmployeesByUserId>>;
 
-const updateMainEmployee = async (payload: { employeeId: string; isMain: boolean }) => {
-  const { employeeId, isMain } = payload;
-  try {
-    const supabase = createClient();
-    return await supabase
-      .from("employees")
-      .update({
-        is_main: isMain,
-      })
-      .eq("id", employeeId)
-      .select("*");
-  } catch (err) {
-    console.log(err);
-    throw new Error("Can't update main employee");
-  }
-};
-
 const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: string; organizationId: string }) => {
   const { userId, organizationId } = variables;
   try {
@@ -425,7 +407,6 @@ const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: str
 				employee_code, 
 				employee_type,
 				user_id,
-				is_main,
 				organization_id,
 				organization:organizations!inner(
 					id, 
@@ -455,5 +436,7 @@ const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: str
     throw new Error("Can't getOneEmployeeByUserIdWithOrganizationId");
   }
 };
-
-export { getEmployees, getEmployeeById, updateMainEmployee, getOneEmployeeByUserIdWithOrganizationId };
+export type GetOneEmployeeByUserIdWithOrganizationId = Awaited<
+  ReturnType<typeof getOneEmployeeByUserIdWithOrganizationId>
+>;
+export { getEmployees, getEmployeeById, getOneEmployeeByUserIdWithOrganizationId };

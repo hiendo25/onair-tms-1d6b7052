@@ -1,5 +1,5 @@
-import { PlanDetailDto } from "./types";
 import { PlanFormSchema } from "./plan-form.schema";
+import { PlanDetailDto } from "./types";
 
 const createEmptyPlanForm = (): PlanFormSchema => ({
   info: {

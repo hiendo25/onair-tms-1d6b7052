@@ -1,18 +1,20 @@
 "use client";
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
-import { useGetTeachersQuery } from "../../hooks/useGetTeacher";
-import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
-import { SearchIcon } from "@/shared/assets/icons";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
+
 import useDebounce from "@/hooks/useDebounce";
-import { columns } from "./columns";
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { SearchIcon } from "@/shared/assets/icons";
+import { useGetTeachersQuery } from "../../hooks/useGetTeacher";
+
+import { columns } from "./columns";
 
 export interface DialogTeacherContainerProps {
   open?: boolean;

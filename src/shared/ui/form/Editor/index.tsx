@@ -1,28 +1,27 @@
 "use client";
 import { forwardRef, useCallback, useEffect, useState } from "react";
-import { EditorContent, useEditor } from "@tiptap/react";
-import Youtube from "@tiptap/extension-youtube";
-import Dropcursor from "@tiptap/extension-dropcursor";
-// import { common, createLowlight } from "lowlight";
-import LinkExtension from "@tiptap/extension-link";
-import ImageExtension from "@tiptap/extension-image";
-import StarterKitExtension from "@tiptap/starter-kit";
-import TextAlignExtension from "@tiptap/extension-text-align";
-import PlaceholderExtension from "@tiptap/extension-placeholder";
-import CodeBlockLowlightExtension from "@tiptap/extension-code-block-lowlight";
-import CustomVideoExtension from "./extensions/custom-video-extension";
-
-import Stack from "@mui/material/Stack";
-import Portal from "@mui/material/Portal";
 import Backdrop from "@mui/material/Backdrop";
 import FormHelperText from "@mui/material/FormHelperText";
-
-import { EditorContainer } from "./EditorContainer";
-import { editorClasses } from "./classes";
-import { CodeHighlightBlock } from "./EditorToolbar/components/code-highlight-block";
+import Portal from "@mui/material/Portal";
+import Stack from "@mui/material/Stack";
+import CodeBlockLowlightExtension from "@tiptap/extension-code-block-lowlight";
+import Dropcursor from "@tiptap/extension-dropcursor";
+import ImageExtension from "@tiptap/extension-image";
+// import { common, createLowlight } from "lowlight";
+import LinkExtension from "@tiptap/extension-link";
+import PlaceholderExtension from "@tiptap/extension-placeholder";
+import TextAlignExtension from "@tiptap/extension-text-align";
+import Youtube from "@tiptap/extension-youtube";
+import { EditorContent, useEditor } from "@tiptap/react";
+import StarterKitExtension from "@tiptap/starter-kit";
 import { all, createLowlight } from "lowlight";
-import type { EditorProps } from "./types";
+
+import { editorClasses } from "./classes";
+import { EditorContainer } from "./EditorContainer";
 import EditorToolbar from "./EditorToolbar";
+import { CodeHighlightBlock } from "./EditorToolbar/components/code-highlight-block";
+import CustomVideoExtension from "./extensions/custom-video-extension";
+import type { EditorProps } from "./types";
 
 const Editor = forwardRef<HTMLDivElement, EditorProps>(
   (

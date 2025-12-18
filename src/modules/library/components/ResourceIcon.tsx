@@ -1,11 +1,12 @@
+import DescriptionIcon from "@mui/icons-material/Description";
 import FolderIcon from "@mui/icons-material/Folder";
+import ImageIcon from "@mui/icons-material/Image";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import ImageIcon from "@mui/icons-material/Image";
-import VideoFileIcon from "@mui/icons-material/VideoFile";
-import DescriptionIcon from "@mui/icons-material/Description";
-import TableChartIcon from "@mui/icons-material/TableChart";
 import SlideshowIcon from "@mui/icons-material/Slideshow";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import VideoFileIcon from "@mui/icons-material/VideoFile";
+
 import { Resource } from "../types";
 
 interface ResourceIconProps {

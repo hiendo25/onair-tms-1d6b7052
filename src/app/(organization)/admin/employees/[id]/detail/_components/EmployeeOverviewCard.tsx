@@ -2,9 +2,10 @@
 
 import * as React from "react";
 import { Avatar, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+
+import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
 import type { EmployeeDto } from "@/types/dto/employees";
 import { getEmployeeTypeLabel } from "@/utils/employee-type";
-import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
 
 interface EmployeeOverviewCardProps {
   employee: EmployeeDto;

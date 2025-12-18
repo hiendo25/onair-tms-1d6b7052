@@ -1,3 +1,4 @@
+import Stack from "@mui/material/Stack";
 import {
 	FullscreenButton,
 	MuteButton,
@@ -19,7 +20,6 @@ import {
 	VolumeLowIcon,
 } from "@vidstack/react/icons";
 
-import Stack from "@mui/material/Stack";
 import { cn } from "@/utils";
 
 

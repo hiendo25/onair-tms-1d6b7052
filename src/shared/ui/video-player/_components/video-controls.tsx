@@ -1,14 +1,13 @@
-import { Controls } from "@vidstack/react";
-
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import { Controls } from "@vidstack/react";
 
+import { cn } from "@/utils";
 
 import * as Buttons from "./buttons";
 import * as Menus from "./menus";
 import * as Sliders from "./sliders";
 import { TimeGroup } from "./time-group";
-import { cn } from "@/utils";
 
 interface VideoControlsProps {
     visible: boolean;

@@ -1,4 +1,5 @@
 import React from "react";
+
 import { SPALayout } from "@/shared/ui/layouts/spa";
 
 interface PropTypes {

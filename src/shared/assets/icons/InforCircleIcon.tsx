@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const InforCircleIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
+const InforCircleIcon: FC<SVGProps<SVGSVGElement>> = ({
   className,
   ...rest
 }) => {

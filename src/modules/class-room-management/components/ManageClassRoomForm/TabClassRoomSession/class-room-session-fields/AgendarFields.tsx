@@ -1,15 +1,15 @@
+import React, { memo } from "react";
 import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
-import { memo } from "react";
-
-import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-import { Control, useController, useFieldArray } from "react-hook-form";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { TrashIcon1 } from "@/shared/assets/icons";
-import { ClassRoom } from "../../classroom-form.schema";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import { cn } from "@/utils";
 import dayjs from "dayjs";
+import { Control, useController, useFieldArray } from "react-hook-form";
+
+import { TrashIcon1 } from "@/shared/assets/icons";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { cn } from "@/utils";
+import { ClassRoom } from "../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["agendas"][number] => {
   return {

@@ -1,7 +1,9 @@
-import attachActions from "./class-room-actions";
 import { createStore } from "zustand/vanilla";
-import { ClassRoomActions } from "./class-room-actions";
+
 import { EmployeeType } from "@/model/employee.model";
+
+import attachActions from "./class-room-actions";
+import { ClassRoomActions } from "./class-room-actions";
 
 export type TeacherSelectedItem = {
   id: string;

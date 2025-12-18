@@ -1,10 +1,12 @@
 "use client";
-import { useResponsive } from "@/hooks/useResponsive";
-import { Image } from "@/shared/ui/Image";
 import { Box, Container, Stack, Typography } from "@mui/material";
+
+import { useResponsive } from "@/hooks/useResponsive";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { Image } from "@/shared/ui/Image";
+
 import { ClassRoomDetailBox } from "./ClassRoomDetailBox";
 import ClassRoomJoin from "./ClassRoomJoin";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 interface ClassRoomHeaderProps {
   data: GetClassRoomBySlugResponse["data"];

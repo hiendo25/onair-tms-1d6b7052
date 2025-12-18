@@ -1,6 +1,7 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import UpdateAssignment from "./_components/UpdateAssignment";
 import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import UpdateAssignment from "./_components/UpdateAssignment";
 
 interface EditAssignmentPageProps {
   params: Promise<{

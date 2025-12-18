@@ -1,12 +1,14 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
-import PageContainer from "@/shared/ui/PageContainer";
-import EmployeeForm from "@/modules/employees/components/EmployeeForm";
-import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
-import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { Box } from "@mui/material";
+import { useRouter } from "next/navigation";
+
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
+import EmployeeForm from "@/modules/employees/components/EmployeeForm";
+import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
+import { useUserOrganization } from "@/modules/organization";
+import PageContainer from "@/shared/ui/PageContainer";
 import type { CreateEmployeeDto } from "@/types/dto/employees";
 
 const CreateEmployeePage = () => {
@@ -14,6 +16,8 @@ const CreateEmployeePage = () => {
   const router = useRouter();
   const notifications = useNotifications();
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
+
+  const { organization } = useUserOrganization((state) => state.data);
 
   const handleSubmit = async (data: EmployeeFormData) => {
     const payload: CreateEmployeeDto = {
@@ -30,6 +34,7 @@ const CreateEmployeePage = () => {
       employee_type: data.employee_type,
       start_date: data.start_date,
       role_id: data.role_id,
+      organizationId: organization.id,
     };
 
     createEmployee(payload, {
@@ -41,13 +46,6 @@ const CreateEmployeePage = () => {
 
         // Navigate to employees list page
         router.push("/admin/employees");
-      },
-      onError: (error) => {
-        console.error("Error creating employee:", error);
-        notifications.show(`Tạo nhân viên thất bại: ${error instanceof Error ? error.message : "Lỗi không xác định"}`, {
-          severity: "error",
-          autoHideDuration: 5000,
-        });
       },
     });
   };

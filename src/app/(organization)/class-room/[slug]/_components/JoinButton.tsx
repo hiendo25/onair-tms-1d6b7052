@@ -1,6 +1,7 @@
-import { Database } from "@/types/supabase.types";
 import { QrCode } from "@mui/icons-material";
 import { Button } from "@mui/material";
+
+import { Database } from "@/types/supabase.types";
 
 interface JoinButtonProps {
   onClick: () => void;

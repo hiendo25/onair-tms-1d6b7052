@@ -1,13 +1,15 @@
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { Avatar, AvatarGroup, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
+
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+
 import CountDown from "./CountDown";
 import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
 import JoinButton from "./JoinButton";
-import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 const MAX_AVATAR = 3;
 

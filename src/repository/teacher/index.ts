@@ -1,5 +1,4 @@
 import { supabase } from "@/services";
-import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 export interface GetTeacherQueryParams {
   page?: number;
   pageSize?: number;
@@ -56,7 +55,6 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
       { count: "exact" },
     )
     .eq("employee_type", "teacher");
-
   if (exclude?.length) {
     teacherQuery = teacherQuery.not("id", "in", `(${excludeStr})`);
   }
@@ -66,12 +64,17 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
 
   const { data, error, count, status, statusText } = await teacherQuery
     .order("created_at", { ascending: false })
-    .range(from, to);
+    .range(from, to)
+    .overrideTypes<
+      Array<{
+        employee_type: "teacher";
+      }>
+    >();
 
   if (error) throw error;
 
   return {
-    data: data as EmployeeTeacherTypeItem[],
+    data,
     count,
     status,
     statusText,

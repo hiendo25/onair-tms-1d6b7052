@@ -1,7 +1,7 @@
 "use client";
+import { createContext, type ReactNode, useContext, useRef } from "react";
 import { useStore } from "zustand";
 
-import { type ReactNode, createContext, useContext, useRef } from "react";
 import { ClassRoomStore, createClassRoomStore } from "./class-room-store";
 
 export type ClassRoomStoreContextAPI = ReturnType<typeof createClassRoomStore>;

@@ -1,3 +1,4 @@
+"use server";
 import React from "react";
 import { redirect, RedirectType } from "next/navigation";
 
@@ -10,74 +11,114 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
   const currentUser = await authRepository.ensureGetCurrentUser();
   const userOrganization = new UserOrganizationService(currentUser.id);
 
-  const mainEmployee = await userOrganization.getMainEmployee();
-  const orgsEmployees = await userOrganization.getEmployees();
-
-  console.log({ orgsEmployees, mainEmployee });
+  const currentEmployee = await userOrganization.getCurrentEmployee();
+  const employees = await userOrganization.getEmployees();
+  const organizations = await userOrganization.getOrganizations();
 
   const { roles, permissions } = await userOrganization.getRolesPermissions();
 
-  if (!mainEmployee || !mainEmployee.organization) {
+  if (!currentEmployee || !currentEmployee.organization) {
     await authRepository.authServerSignOut();
     redirect("/auth/signin", RedirectType.replace);
   }
 
-  const organizationsEmployees = orgsEmployees?.reduce(
-    (acc, orgEpl): UserOrganizationProviderProps["employeesOrganizations"] => {
-      return [
-        ...acc,
-        {
-          employeeId: orgEpl.id,
-          isMain: orgEpl.is_main || false,
-          orgId: orgEpl.organization.id,
-          orgName: orgEpl.organization?.name || "",
-          orgLogo: orgEpl.organization?.logo || "",
-          orgDomain: orgEpl.organization?.subdomain || "",
-          userId: orgEpl.user_id,
-          orgFavicon: orgEpl.organization.favicon || "",
-          orgShortName: orgEpl.organization.shortname || "",
-        },
-      ];
-    },
-    [],
-  );
+  const organizationsStore = organizations.reduce((acc, orgEpl): UserOrganizationProviderProps["organizations"] => {
+    return [
+      ...acc,
+      {
+        employeeId: orgEpl.employee_id,
+        orgId: orgEpl.organization.id,
+        orgName: orgEpl.organization?.name || "",
+        orgLogo: orgEpl.organization?.logo || "",
+        orgDomain: orgEpl.organization?.subdomain || "",
+        userId: orgEpl.user_id,
+        orgFavicon: orgEpl.organization.favicon || "",
+        orgShortName: orgEpl.organization.shortname || "",
+      },
+    ];
+  }, []);
 
   const currentEmployeeProfile: UserOrganizationProviderProps["data"] = {
-    id: mainEmployee.id,
-    status: mainEmployee.status,
-    employeeCode: mainEmployee.employee_code,
-    employeeType: mainEmployee.employee_type || "student",
+    id: currentEmployee.id,
+    status: currentEmployee.status,
+    employeeCode: currentEmployee.employee_code,
+    employeeType: currentEmployee.employee_type || "student",
     userId: currentUser.id,
+    employeeId: currentEmployee.id,
     organization: {
-      id: mainEmployee.organization.id,
-      name: mainEmployee.organization.name,
-      subdomain: mainEmployee.organization.subdomain,
+      id: currentEmployee.organization.id,
+      name: currentEmployee.organization.name,
+      subdomain: currentEmployee.organization.subdomain,
     },
-    profile: mainEmployee.profiles
+    profile: currentEmployee.profiles
       ? {
-          fullName: mainEmployee.profiles.full_name,
-          avatarUrl: mainEmployee.profiles.avatar || "",
-          email: mainEmployee.profiles.email,
-          gender: mainEmployee.profiles.gender,
+          fullName: currentEmployee.profiles.full_name,
+          avatarUrl: currentEmployee.profiles.avatar || "",
+          email: currentEmployee.profiles.email,
+          gender: currentEmployee.profiles.gender,
         }
       : null,
   };
 
+  const employeesStore = employees.reduce((acc, employee): UserOrganizationProviderProps["employees"] => {
+    return [
+      ...acc,
+      {
+        id: employee.id,
+        status: employee.status,
+        code: employee.employee_code,
+        type: employee.employee_type || "student",
+        userId: currentUser.id,
+        organization: {
+          id: employee.organization.id,
+          name: employee.organization.name,
+        },
+        profile: employee.profiles
+          ? {
+              fullName: employee.profiles.full_name,
+              avatarUrl: employee.profiles.avatar || "",
+              email: employee.profiles.email,
+              gender: employee.profiles.gender,
+            }
+          : null,
+      },
+    ];
+  }, []);
+
   return (
     <UserOrganizationProvider
       data={currentEmployeeProfile}
-      mainOrganization={{
-        isMain: mainEmployee.is_main || false,
-        employeeId: mainEmployee.id,
-        orgDomain: mainEmployee.organization.subdomain,
-        orgFavicon: mainEmployee.organization.favicon || "",
-        orgShortName: mainEmployee.organization.shortname || "",
-        userId: mainEmployee.user_id,
-        orgId: mainEmployee.organization.id,
-        orgLogo: mainEmployee.organization.logo,
-        orgName: mainEmployee.organization.name,
+      currentOrganization={{
+        employeeId: currentEmployee.id,
+        orgDomain: currentEmployee.organization.subdomain,
+        orgFavicon: currentEmployee.organization.favicon || "",
+        orgShortName: currentEmployee.organization.shortname || "",
+        userId: currentEmployee.user_id,
+        orgId: currentEmployee.organization.id,
+        orgLogo: currentEmployee.organization.logo,
+        orgName: currentEmployee.organization.name,
       }}
-      employeesOrganizations={organizationsEmployees || []}
+      currentEmployee={{
+        id: currentEmployee.id,
+        status: currentEmployee.status,
+        code: currentEmployee.employee_code,
+        type: currentEmployee.employee_type || "student",
+        userId: currentUser.id,
+        organization: {
+          id: currentEmployee.organization.id,
+          name: currentEmployee.organization.name,
+        },
+        profile: currentEmployee.profiles
+          ? {
+              fullName: currentEmployee.profiles.full_name,
+              avatarUrl: currentEmployee.profiles.avatar || "",
+              email: currentEmployee.profiles.email,
+              gender: currentEmployee.profiles.gender,
+            }
+          : null,
+      }}
+      organizations={organizationsStore}
+      employees={employeesStore}
     >
       <PermissionProvider permissions={permissions} roles={roles}>
         {children}

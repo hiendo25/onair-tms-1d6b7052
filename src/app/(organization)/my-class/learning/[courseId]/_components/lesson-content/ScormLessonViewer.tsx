@@ -5,8 +5,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import type { ResourceRow } from "@/modules/learning-screen/types";
+
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
+import type { ResourceRow } from "@/modules/learning-screen/types";
 
 interface ScormLessonViewerProps {
   resource: ResourceRow | null;

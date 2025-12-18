@@ -1,7 +1,5 @@
 "use client";
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
-import { useFieldArray } from "react-hook-form";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import {
   DndContext,
   DragEndEvent,
@@ -12,15 +10,18 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { isUndefined } from "lodash";
+import { useFieldArray } from "react-hook-form";
 
 import type { LessonType } from "@/model/lesson.model";
-import BoxEmptySection from "./BoxEmptySection";
-import CourseSectionItem from "./CourseSectionItem";
 import { UpsertCourseFormData } from "../../upsert-course.schema";
-import SortableSection from "./CourseSectionItem/SortableSection";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 import CourseLessons, { CourseLessonsProps, CourseLessonsRef } from "../CourseLessons";
-import { isUndefined } from "lodash";
+
+import BoxEmptySection from "./BoxEmptySection";
+import CourseSectionItem from "./CourseSectionItem";
+import SortableSection from "./CourseSectionItem/SortableSection";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {

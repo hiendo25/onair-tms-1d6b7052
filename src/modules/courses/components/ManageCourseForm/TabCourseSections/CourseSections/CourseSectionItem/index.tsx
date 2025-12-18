@@ -2,23 +2,23 @@ import React, {
   ChangeEventHandler,
   Dispatch,
   KeyboardEventHandler,
+  memo,
   PropsWithChildren,
   SetStateAction,
-  memo,
   useCallback,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
+import { Button, FormHelperText, OutlinedInput, Typography } from "@mui/material";
 import { get } from "lodash";
+import { Control, Controller, useController } from "react-hook-form";
+
+import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
+import PlusIcon from "@/shared/assets/icons/PlusIcon";
+import { useUpsertCourseFormContext } from "../../../UpsertCourseFormContainer";
 
 import CourseSectionContent from "./CourseSectionContent";
-import { Button, FormHelperText, OutlinedInput, Typography } from "@mui/material";
-import PlusIcon from "@/shared/assets/icons/PlusIcon";
-
-import { Control, Controller, useController } from "react-hook-form";
-import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
-import { useUpsertCourseFormContext } from "../../../UpsertCourseFormContainer";
 export interface CourseSectionItemProps extends PropsWithChildren {
   index: number;
   onDelete?: (index: number) => void;

@@ -1,5 +1,5 @@
-import { useSignUpMutation } from "../operations/mutation";
 import { AuthSignUpPayload } from "@/repository/auth";
+import { useSignUpMutation } from "../operations/mutation";
 
 const useAuthSignUp = () => {
   const { mutate: signUp, isPending } = useSignUpMutation();

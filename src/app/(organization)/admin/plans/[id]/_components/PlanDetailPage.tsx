@@ -1,9 +1,11 @@
 "use client";
 
 import { Box, CircularProgress, Typography } from "@mui/material";
-import PageContainer from "@/shared/ui/PageContainer";
+
 import { PATHS } from "@/constants/path.constant";
 import { useGetPlanDetailQuery } from "@/modules/plans/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
+
 import PlanDetailView from "./PlanDetailView";
 
 interface Props {

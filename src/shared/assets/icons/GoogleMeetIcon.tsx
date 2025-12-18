@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const GoogleMeetIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const GoogleMeetIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

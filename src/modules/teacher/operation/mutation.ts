@@ -1,5 +1,5 @@
-import { useTQuery } from "@/lib";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useTQuery } from "@/lib";
 import { teacherRepository } from "@/repository";
 import { GetTeacherQueryParams } from "@/repository/teacher";
 

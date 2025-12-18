@@ -1,6 +1,6 @@
 import { createSVClient } from "@/services";
-import { Database } from "@/types/supabase.types";
 import { FileMetadata, QuestionOption } from "@/types/dto/assignments";
+import { Database } from "@/types/supabase.types";
 
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];

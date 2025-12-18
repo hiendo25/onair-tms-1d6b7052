@@ -11,10 +11,11 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { useLibraryStore } from "@/modules/library/store/libraryProvider";
-import { Resource } from "@/modules/library/types";
+
 import { SelectedResourceCard } from "@/modules/library/components/SelectedResourceCard";
 import { SelectedResourcesList } from "@/modules/library/components/SelectedResourcesList";
+import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { Resource } from "@/modules/library/types";
 
 export default function LibraryExample() {
   const openLibrary = useLibraryStore((state) => state.openLibrary);

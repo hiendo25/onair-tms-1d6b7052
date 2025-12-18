@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import AddIcon from "@mui/icons-material/Add";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
@@ -25,17 +27,17 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import PageContainer from "@/shared/ui/PageContainer";
-import { useGetAssignmentsQuery } from "@/modules/assignment-management/operations/query";
-import { useDeleteAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
-import type { AssignmentDto } from "@/types/dto/assignments";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { useQueryClient } from "@tanstack/react-query";
-import { PATHS } from "@/constants/path.constant";
+import { useDeleteAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
+import { useGetAssignmentsQuery } from "@/modules/assignment-management/operations/query";
+import { useUserOrganization } from "@/modules/organization";
+import PageContainer from "@/shared/ui/PageContainer";
+import type { AssignmentDto } from "@/types/dto/assignments";
 
 export default function AssignmentList() {
   const router = useRouter();
@@ -48,14 +50,7 @@ export default function AssignmentList() {
   const [searchInput, setSearchInput] = React.useState("");
   const [debouncedSearch, setDebouncedSearch] = React.useState("");
 
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput);
-      setPage(0);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
 
   const {
     data: assignmentsResult,
@@ -65,6 +60,7 @@ export default function AssignmentList() {
     page,
     limit: rowsPerPage,
     search: debouncedSearch,
+    organizationId: currentEmployee.organization.id,
   });
 
   const { mutateAsync: deleteAssignment, isPending: isDeleting } = useDeleteAssignmentMutation();
@@ -170,6 +166,14 @@ export default function AssignmentList() {
     });
   };
 
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+      setPage(0);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
   return (
     <PageContainer
       title="Danh sách bài kiểm tra"

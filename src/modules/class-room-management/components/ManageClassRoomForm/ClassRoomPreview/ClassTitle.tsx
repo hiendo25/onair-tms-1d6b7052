@@ -1,7 +1,8 @@
-import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../classroom-form.schema";
+import { alpha,Box, Typography } from "@mui/material";
 import Image from "next/image";
-import { Box, Typography, alpha } from "@mui/material";
+import { Control, useController } from "react-hook-form";
+
+import { ClassRoom } from "../classroom-form.schema";
 
 export interface ClassTitleProps {
   control: Control<ClassRoom>;

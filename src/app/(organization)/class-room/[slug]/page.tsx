@@ -1,6 +1,8 @@
-import { getClassRoomBySlug } from "@/repository/class-room";
-import ClassRoomDetailSection from "./_components/ClassRoomDetailSection";
 import { notFound } from "next/navigation";
+
+import { getClassRoomBySlug } from "@/repository/class-room";
+
+import ClassRoomDetailSection from "./_components/ClassRoomDetailSection";
 
 interface ClassRoomDetailPageProps {
   params: Promise<{ slug: string }>;

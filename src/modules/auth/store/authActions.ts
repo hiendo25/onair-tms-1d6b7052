@@ -1,7 +1,8 @@
 import { StoreApi } from "zustand";
-import { AuthStore, AuthStoreActions, AuthStoreState } from "./authStore";
 
 import { authRepository } from "@/repository";
+
+import { AuthStore, AuthStoreActions, AuthStoreState } from "./authStore";
 const attachActions =
   (initState: AuthStoreState) =>
   (set: StoreApi<AuthStore>["setState"], get: StoreApi<AuthStore>["getState"]): AuthStoreActions => ({

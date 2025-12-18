@@ -1,23 +1,25 @@
 "use client";
 
 import * as React from "react";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Alert, Box, Button, Card, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { Alert, Box, Button, Card, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import PageContainer from "@/shared/ui/PageContainer";
+
+import { PATHS } from "@/constants/path.constant";
+import { useDialogs } from "@/hooks/useDialogs/useDialogs";
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 import {
   useGetAssignmentQuery,
   useGetAssignmentQuestionsQuery,
 } from "@/modules/assignment-management/operations/query";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
-import { useDialogs } from "@/hooks/useDialogs/useDialogs";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { uploadFileToS3 } from "@/utils/s3-upload";
-import { useQueryClient } from "@tanstack/react-query";
-import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
+import PageContainer from "@/shared/ui/PageContainer";
 import { FileMetadata } from "@/types/dto/assignments";
-import { PATHS } from "@/constants/path.constant";
+import { uploadFileToS3 } from "@/utils/s3-upload";
+
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
 
@@ -240,22 +242,25 @@ export default function AssignmentSubmission({
     [answers, setValue],
   );
 
-  const handleMatchingChange = React.useCallback((questionId: string, mappings: Array<{ columnAId: string; columnBId: string }>) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleMatchingChange = React.useCallback(
+    (questionId: string, mappings: Array<{ columnAId: string; columnBId: string }>) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        matchingMappings: mappings,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          matchingMappings: mappings,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
   const handleAttachmentSelect = React.useCallback(
     (questionId: string, files: FileList | null) => {
@@ -302,39 +307,45 @@ export default function AssignmentSubmission({
     [answers, setValue],
   );
 
-  const handleOrderChange = React.useCallback((questionId: string, orderedItems: Array<{ id: string; position: number }>) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleOrderChange = React.useCallback(
+    (questionId: string, orderedItems: Array<{ id: string; position: number }>) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        orderedItems,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          orderedItems,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
-  const handleTrueFalseChange = React.useCallback((questionId: string, answer: boolean) => {
-    const currentAnswers = answers || [];
-    const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
+  const handleTrueFalseChange = React.useCallback(
+    (questionId: string, answer: boolean) => {
+      const currentAnswers = answers || [];
+      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
 
-    if (answerIndex >= 0) {
-      const currentAnswer = currentAnswers[answerIndex];
-      if (!currentAnswer) return;
+      if (answerIndex >= 0) {
+        const currentAnswer = currentAnswers[answerIndex];
+        if (!currentAnswer) return;
 
-      const updatedAnswers = [...currentAnswers];
-      updatedAnswers[answerIndex] = {
-        ...currentAnswer,
-        trueFalseAnswer: answer,
-      };
-      setValue("answers", updatedAnswers);
-    }
-  }, [answers, setValue]);
+        const updatedAnswers = [...currentAnswers];
+        updatedAnswers[answerIndex] = {
+          ...currentAnswer,
+          trueFalseAnswer: answer,
+        };
+        setValue("answers", updatedAnswers);
+      }
+    },
+    [answers, setValue],
+  );
 
   const hasAnyAnswers = () => {
     return (
@@ -393,12 +404,12 @@ export default function AssignmentSubmission({
             return !answer.checkboxAnswers || answer.checkboxAnswers.length === 0;
           case "matching":
             // For matching questions, check if all Column A items have been mapped
-            const matchingQuestion = questions?.find(q => q.id === answer.questionId);
+            const matchingQuestion = questions?.find((q) => q.id === answer.questionId);
             const columnAItems = (matchingQuestion?.options as any)?.columnAItems || [];
             return !answer.matchingMappings || answer.matchingMappings.length !== columnAItems.length;
           case "order":
             // For order questions, check if all items have been ordered
-            const orderQuestion = questions?.find(q => q.id === answer.questionId);
+            const orderQuestion = questions?.find((q) => q.id === answer.questionId);
             const orderItems = (orderQuestion?.options as any)?.orderItems || [];
             return !answer.orderedItems || answer.orderedItems.length !== orderItems.length;
           case "true_false":

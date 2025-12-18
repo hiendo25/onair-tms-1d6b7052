@@ -1,15 +1,17 @@
 "use client";
 import { memo } from "react";
+import { Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
+
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { Typography } from "@mui/material";
 import { type ClassRoom } from "../classroom-form.schema";
-import { useFormContext } from "react-hook-form";
-import ThumbnailUploader from "./fields/ThumbailUploader";
-import ClassRoomSlugField from "./fields/ClassRoomSlugField";
+
 import ClassFieldSelector from "./fields/ClassFieldSelector";
+import ClassRoomSlugField from "./fields/ClassRoomSlugField";
 import DocumentFields from "./fields/DocumentFields";
 import ForWhomFields from "./fields/ForWhomFields";
+import ThumbnailUploader from "./fields/ThumbailUploader";
 
 interface TabClassRoomInformationProps {
   className?: string;

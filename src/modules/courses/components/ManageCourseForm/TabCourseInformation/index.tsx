@@ -1,12 +1,13 @@
 "use client";
-import { memo } from "react";
+import React, { memo } from "react";
+import { Typography } from "@mui/material";
+
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { Typography } from "@mui/material";
-import SlugField from "./fields/SlugField";
-import CategorySelector from "./fields/CategorySelector";
-
 import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
+
+import CategorySelector from "./fields/CategorySelector";
+import SlugField from "./fields/SlugField";
 
 interface TabCourseInformationProps {
   className?: string;

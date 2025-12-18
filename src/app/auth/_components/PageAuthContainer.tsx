@@ -1,7 +1,7 @@
 "use client";
-import { styled } from "@mui/material/styles";
+import React, { PropsWithChildren } from "react";
 import { Container, Stack } from "@mui/material";
-import { PropsWithChildren } from "react";
+import { styled } from "@mui/material/styles";
 import Image from "next/image";
 
 const PageContainer = styled(Stack)(({ theme }) => ({
@@ -14,12 +14,10 @@ const PageContainer = styled(Stack)(({ theme }) => ({
     position: "absolute",
     zIndex: -1,
     inset: 0,
-    backgroundImage:
-      "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
+    backgroundImage: "radial-gradient(ellipse at 50% 50%, hsl(210, 100%, 97%), hsl(0, 0%, 100%))",
     backgroundRepeat: "no-repeat",
     ...theme.applyStyles("dark", {
-      backgroundImage:
-        "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
+      backgroundImage: "radial-gradient(at 50% 50%, hsla(210, 100%, 16%, 0.5), hsl(220, 30%, 5%))",
     }),
   },
 }));
@@ -27,10 +25,7 @@ const PageContainer = styled(Stack)(({ theme }) => ({
 interface PageAuthContainerProps extends PropsWithChildren {
   className?: string;
 }
-const PageAuthContainer: React.FC<PageAuthContainerProps> = ({
-  children,
-  className,
-}) => {
+const PageAuthContainer: React.FC<PageAuthContainerProps> = ({ children, className }) => {
   return (
     <PageContainer className={className}>
       <div className="grid grid-cols-1 lg:grid-cols-2 h-full">

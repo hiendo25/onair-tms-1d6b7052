@@ -1,14 +1,15 @@
 "use client";
+import { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
+import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
+
+import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import DialogTeacherContainer, {
   DialogTeacherContainerProps,
 } from "@/modules/teacher/container/DialogTeacherContainer";
-import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
-import { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
 import { CloseIcon } from "@/shared/assets/icons";
-import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
-import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
-import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import { cn } from "@/utils";
 
 export interface TeacherSelectorRef {
   removeTeachersBySessionIndex: (index: number) => void;

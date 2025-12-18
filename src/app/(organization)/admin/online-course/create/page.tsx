@@ -1,8 +1,10 @@
-import PageContainer from "@/shared/ui/PageContainer";
 import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
-import CreateCourseForm from "./_components/CreateCourseForm";
+
 import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import CreateCourseForm from "./_components/CreateCourseForm";
 
 type CreateCoursePageProps = {
   searchParams: Promise<Record<string, any>>;

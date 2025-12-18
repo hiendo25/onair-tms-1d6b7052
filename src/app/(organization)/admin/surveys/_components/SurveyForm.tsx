@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
@@ -21,17 +21,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { useRouter } from "next/navigation";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import { v4 as uuidv4 } from "uuid";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import { SurveyFormSchema, surveySchema } from "@/modules/surveys/survey-form.schema";
+
 import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constant";
+import { SurveyFormSchema, surveySchema } from "@/modules/surveys/survey-form.schema";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import SortableQuestionItem from "./SortableQuestionItem";
+import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { QuestionType, Survey } from "@/types/survey.types";
+
+import SortableQuestionItem from "./SortableQuestionItem";
 
 interface QuestionOptionsSectionProps {
   control: any;

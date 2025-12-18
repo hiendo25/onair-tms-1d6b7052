@@ -2,9 +2,11 @@
 
 import * as React from "react";
 import { Alert, Box, CircularProgress, Typography } from "@mui/material";
-import PageContainer from "@/shared/ui/PageContainer";
+
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useGetRoleList } from "@/modules/roles/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
+
 import EmployeeDetailView from "./EmployeeDetailView";
 
 interface EmployeeDetailPageProps {

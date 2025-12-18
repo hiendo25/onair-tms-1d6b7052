@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
-import VideoPlayer from "@/shared/ui/video-player";
+
+import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 import type {
   LearningLesson,
   ResourceRow,
 } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
-import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
+import VideoPlayer from "@/shared/ui/video-player";
 
 interface VideoLessonPlayerProps {
   resource: ResourceRow | null;

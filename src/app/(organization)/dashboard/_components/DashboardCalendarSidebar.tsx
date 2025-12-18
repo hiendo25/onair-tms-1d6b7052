@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import dayjs from "dayjs";
 import {
   Avatar,
   Box,
@@ -10,8 +9,10 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import dayjs from "dayjs";
 
 import { CalendarSidebar, CalenderStatus } from "@/shared/ui/calendar";
+
 import { mockEvents } from "./mock/dashboardData";
 
 const DashboardCalendarSidebar = () => {

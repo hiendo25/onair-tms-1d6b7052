@@ -1,16 +1,18 @@
-import { useTMutation } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
+
+import { useTMutation } from "@/lib/queryClient";
 import {
-  type AttendanceCheckInPayload,
-  type CreateQRCodePayload,
-  type UpdateQRCodePayload,
   activateQRCode,
+  type AttendanceCheckInPayload,
   checkInWithQR,
   createClassQRCode,
+  type CreateQRCodePayload,
   deactivateQRCode,
   deleteQRCode,
   updateQRCode,
+  type UpdateQRCodePayload,
 } from "@/repository/qr-attendance";
+
 import { QR_ATTENDANCE_KEYS } from "./key";
 
 export const useCreateQRCodeMutation = () => {

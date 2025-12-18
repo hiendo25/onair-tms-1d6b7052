@@ -1,6 +1,10 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import {
   Alert,
   Box,
@@ -9,16 +13,13 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+
+import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 import type {
   LearningLesson,
   ResourceRow,
 } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
-import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 
 
 const splitTextIntoPages = (content: string | null): string[] => {

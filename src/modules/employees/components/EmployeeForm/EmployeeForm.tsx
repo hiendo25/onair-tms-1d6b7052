@@ -1,5 +1,8 @@
 "use client";
+import "dayjs/locale/vi";
+
 import * as React from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Autocomplete,
   Box,
@@ -18,22 +21,22 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { EmployeeFormData, EmployeeFormSchema } from "./schema";
-import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
-import { useGetPositionsQuery } from "@/modules/positions/operations/query";
-import { useCreatePositionMutation } from "@/modules/positions/operations/mutation";
-import { Constants } from "@/types/supabase.types";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
-import "dayjs/locale/vi";
+import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
+import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
+import { useCreatePositionMutation } from "@/modules/positions/operations/mutation";
+import { useGetPositionsQuery } from "@/modules/positions/operations/query";
 import { useGetRoleList } from "@/modules/roles/operations/query";
+import { Constants } from "@/types/supabase.types";
+import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
+
+import { EmployeeFormData, EmployeeFormSchema } from "./schema";
 
 export interface EmployeeFormProps {
   onSubmit?: (data: EmployeeFormData) => void | Promise<void>;

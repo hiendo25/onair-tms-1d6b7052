@@ -1,5 +1,5 @@
-import { supabase } from "@/services";
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
+import { supabase } from "@/services";
 export type EmployeeQueryParams = {
   page?: number;
   pageSize?: number;
@@ -7,6 +7,7 @@ export type EmployeeQueryParams = {
   search?: string;
   departmentIds?: string[];
   branchIds?: string[];
+  organizationId: string;
 };
 
 export type GetStudentsQueryParams = {
@@ -16,10 +17,11 @@ export type GetStudentsQueryParams = {
   search?: string;
   departmentIds?: string[];
   branchIds?: string[];
+  organizationId: string;
 };
 
-const getStudents = async (queryParams?: GetStudentsQueryParams) => {
-  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds } = queryParams || {};
+const getStudents = async (queryParams: GetStudentsQueryParams) => {
+  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds, organizationId } = queryParams;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -60,7 +62,8 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
         count: "exact",
       },
     )
-    .eq("employee_type", "student");
+    .eq("employee_type", "student")
+    .eq("organization_id", organizationId);
 
   if (departmentIds?.length) {
     studentQuery = studentQuery.in("employee_departments.department_id", departmentIds);
@@ -79,10 +82,11 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
 
   const { data, error, count, status, statusText } = await studentQuery
     .order("created_at", { ascending: false })
-    .range(from, to);
+    .range(from, to)
+    .overrideTypes<Array<{ employee_type: "student" }>>();
 
   return {
-    data: data as EmployeeStudentWithProfileItem[],
+    data,
     count,
     error,
     status,

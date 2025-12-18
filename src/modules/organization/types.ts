@@ -5,6 +5,7 @@ interface UserOrganization {
   status: "active" | "inactive";
   employeeCode: string;
   employeeType: EmployeeType;
+  employeeId: string;
   userId: string;
   organization: {
     id: string;
@@ -21,7 +22,6 @@ interface UserOrganization {
 
 type EmployeeOrganization = {
   employeeId: string;
-  isMain: boolean;
   orgId: string;
   orgName: string;
   orgLogo: string;
@@ -31,4 +31,22 @@ type EmployeeOrganization = {
   userId: string;
 };
 
-export type { UserOrganization, EmployeeOrganization };
+type Employee = {
+  id: string;
+  status: "active" | "inactive";
+  code: string;
+  type: EmployeeType;
+  userId: string;
+  organization: {
+    id: string;
+    name: string;
+  };
+  profile: {
+    fullName?: string;
+    avatarUrl?: string;
+    email?: string;
+    gender: Gender;
+  } | null;
+};
+
+export type { UserOrganization, EmployeeOrganization, Employee };

@@ -1,8 +1,9 @@
 "use client";
 import { Chip, ChipProps, IconButton, Stack } from "@mui/material";
+import dayjs from "dayjs";
+
 import { GetCoursesV2Response } from "@/repository/courses";
 import { TableDataProps } from "@/shared/ui/TableData";
-import dayjs from "dayjs";
 
 export type CourseRowItem = NonNullable<GetCoursesV2Response["data"]>[number];
 

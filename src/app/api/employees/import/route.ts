@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { employeeFileService } from "@/services";
+import { NextRequest, NextResponse } from "next/server";
+
 import { PATHS } from "@/constants/path.constant";
+import { employeeFileService } from "@/services";
 
 export async function POST(request: NextRequest) {
   try {

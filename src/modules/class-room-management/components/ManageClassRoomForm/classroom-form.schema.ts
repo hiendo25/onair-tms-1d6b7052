@@ -1,7 +1,8 @@
-import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
-import { EmployeeType } from "@/model/employee.model";
 import dayjs from "dayjs";
 import * as zod from "zod";
+
+import { CLASS_ROOM_PLATFORM } from "@/constants/class-room.constant";
+import { EmployeeType } from "@/model/employee.model";
 
 const googleMeetRegex = /^https?:\/\/meet\.google\.com\//i;
 

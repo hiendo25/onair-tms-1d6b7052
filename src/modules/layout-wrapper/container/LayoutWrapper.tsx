@@ -2,8 +2,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 
+import { LOCAL_STORAGE_KEYS } from "@/constants/localStorage.constant";
 import { ADMIN_MENU_LIST, MenuItemTypeWithPer, STUDENTS_MENU_LIST } from "@/constants/menu-config.constant";
-import { useUpdateMainEmployeeOrganization } from "@/modules/organization/hooks/useUpdateMainEmployeeOrganization";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { usePermissions } from "@/modules/permission-wrapper";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
@@ -13,15 +13,14 @@ interface LayoutWrapperProps {
 }
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const router = useRouter();
+  const { hasPermissions } = usePermissions();
 
   const {
     data: userOrganization,
-    employeesOrganizations,
-    mainOrganization,
-    setMainOrganization,
+    currentOrganization: { orgId, orgLogo },
+    organizations,
+    setCurrentOrganization,
   } = useUserOrganization((state) => state);
-  const { mutate: updateMainEmployee, isPending } = useUpdateMainEmployeeOrganization();
-  const { hasPermissions } = usePermissions();
 
   const mappingPathWithRolePermissions = (items: MenuItemTypeWithPer[]): MenuItemType[] => {
     return items.reduce<MenuItemType[]>((allMenuItems, { persCheck, children, ...menuItem }) => {
@@ -55,8 +54,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
     }, []);
   };
 
-  console.log({ mainOrganization });
-  const organizationItems = employeesOrganizations.reduce<MainLayoutProps["organizationItems"]>(
+  const organizationItems = organizations.reduce<MainLayoutProps["organizationItems"]>(
     (acc, org): MainLayoutProps["organizationItems"] => {
       return [
         ...acc,
@@ -75,26 +73,18 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const menuList = userOrganization.employeeType === "student" ? STUDENTS_MENU_LIST : ADMIN_MENU_LIST;
 
   const handleChangeOrganization: MainLayoutProps["onChangeOrganization"] = (value, option) => {
-    updateMainEmployee(
-      { employeeId: userOrganization.id, nextOrganizationId: value },
-      {
-        onSuccess(data, variables, onMutateResult, context) {
-          router.refresh();
-          window.location.reload();
-          // setMainOrganization({
-          // 	""
-          // })
-        },
-      },
-    );
+    // setCurrentOrganization(value);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.ORGANIZATION_ID, value);
+    router.refresh();
+    window.location.reload();
   };
   return (
     <MainLayout
       menuItems={mappingPathWithRolePermissions(menuList)}
-      currentOrganization={mainOrganization.orgId}
+      currentOrganizationId={orgId}
+      logoUrl={orgLogo}
       organizationItems={organizationItems}
       onChangeOrganization={handleChangeOrganization}
-      logoUrl={mainOrganization.orgLogo}
     >
       {children}
     </MainLayout>

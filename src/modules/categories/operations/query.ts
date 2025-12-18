@@ -1,6 +1,6 @@
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTQuery } from "@/lib";
 import { categoriesRepository } from "@/repository";
-import { QUERY_KEYS } from "@/constants/query-key.constant";
 
 const useGetCategoriesQuery = () => {
   return useTQuery({

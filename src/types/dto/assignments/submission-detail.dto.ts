@@ -1,6 +1,7 @@
 import { Database } from "@/types/supabase.types";
-import { QuestionOption } from "./question-option.dto";
+
 import { FileMetadata } from "./file-metadata.dto";
+import { QuestionOption } from "./question-option.dto";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
@@ -44,4 +45,3 @@ export interface SubmissionDetailDto {
   questions: QuestionGradeDetail[];
   feedback: string | null;
 }
-

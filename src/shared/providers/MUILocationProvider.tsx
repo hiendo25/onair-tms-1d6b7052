@@ -1,7 +1,8 @@
 "use client";
+import React from "react";
 import { LocalizationProvider as XDateLocationProvider } from "@mui/x-date-pickers";
-import { viVN } from "@mui/x-date-pickers/locales";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { viVN } from "@mui/x-date-pickers/locales";
 
 const MUILocalizationProvider = ({ children }: Readonly<{ children: React.ReactNode }>) => {
   return (

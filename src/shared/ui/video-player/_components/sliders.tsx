@@ -1,5 +1,5 @@
-import { TimeSlider, VolumeSlider } from "@vidstack/react";
 import { useState } from "react";
+import { TimeSlider, VolumeSlider } from "@vidstack/react";
 
 export const Volume = () => {
 	return (

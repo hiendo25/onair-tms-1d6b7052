@@ -1,8 +1,9 @@
-import { ClassSessionType } from "@/model/class-session.model";
 import FmdGoodOutlinedIcon from "@mui/icons-material/FmdGoodOutlined";
 import LiveTvOutlinedIcon from "@mui/icons-material/LiveTvOutlined";
 import VideocamOutlinedIcon from "@mui/icons-material/VideocamOutlined";
 import { Stack, Typography } from "@mui/material";
+
+import { ClassSessionType } from "@/model/class-session.model";
 
 interface IClassRoomType {
     sessionType?: ClassSessionType | null;

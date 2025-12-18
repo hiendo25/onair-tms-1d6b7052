@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   Alert,
   Box,
@@ -22,12 +23,12 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import PageContainer from "@/shared/ui/PageContainer";
+import { useParams, useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
-import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
 
 export default function AssignmentStudentList() {
   const params = useParams();

@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const ClipboardIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
+const ClipboardIcon: FC<SVGProps<SVGSVGElement>> = ({
   className,
   ...rest
 }) => {

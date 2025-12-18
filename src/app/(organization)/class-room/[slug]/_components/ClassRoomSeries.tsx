@@ -1,6 +1,5 @@
 "use client";
-import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { useMemo, useState } from "react";
 import { LocationOnOutlined, VideocamOutlined } from "@mui/icons-material";
 import {
   Box,
@@ -17,13 +16,16 @@ import {
 import { ClockIcon } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { ROOM_PROVIDERS } from "../_constants";
-import JoinButton from "./JoinButton";
-import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+
+import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { ROOM_PROVIDERS } from "../_constants";
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+
+import JoinButton from "./JoinButton";
 
 const ClassRoomSerieCard = ({
   session,

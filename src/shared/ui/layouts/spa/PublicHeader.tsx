@@ -1,4 +1,5 @@
 import { Divider, Stack } from "@mui/material";
+
 import { LogoOnairIcon } from "@/shared/assets/icons";
 
 const PublicHeader = () => {

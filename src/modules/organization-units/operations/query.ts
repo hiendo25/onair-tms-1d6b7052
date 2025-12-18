@@ -1,6 +1,6 @@
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTQuery } from "@/lib/queryClient";
 import { organizationUnitsRepository } from "@/repository";
-import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
 
 type OrganizationUnitType = "department" | "branch";

@@ -1,6 +1,7 @@
+import chunk from "lodash/chunk";
+
 import { useTMutation } from "@/lib";
 import { classRoomRepository } from "@/repository";
-import chunk from "lodash/chunk";
 
 const DELETE_BATCH_SIZE = 500;
 const DELETE_BATCH_CONCURRENCY = 3;
