@@ -1,11 +1,13 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import UpdateClassRoomForm from "./_components/UpdateClassRoomForm";
-import { getClassRoomById } from "@/repository/class-room";
+import dayjs, { Dayjs } from "dayjs";
+import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
-import { Metadata, ResolvingMetadata } from "next";
-import dayjs, { Dayjs } from "dayjs";
+
 import { PATHS } from "@/constants/path.constant";
+import { getClassRoomById } from "@/repository/class-room";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import UpdateClassRoomForm from "./_components/UpdateClassRoomForm";
 interface EditClassRoomPageProps {
   params: Promise<{
     id: string;

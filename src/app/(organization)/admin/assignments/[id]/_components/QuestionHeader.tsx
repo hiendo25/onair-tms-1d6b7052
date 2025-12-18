@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Chip, Stack, Typography } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Chip, Stack, Typography } from "@mui/material";
 
 interface QuestionHeaderProps {
   questionNumber: number;

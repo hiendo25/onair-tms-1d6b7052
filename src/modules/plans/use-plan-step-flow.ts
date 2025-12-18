@@ -15,7 +15,6 @@ import {
   PlanStepId,
   validatePlanStep,
 } from "./plan-step.utils";
-import { getPlanSurveyAccess } from "./survey-access";
 
 interface UsePlanStepFlowProps {
   mode: "create" | "edit";
@@ -34,10 +33,7 @@ export const usePlanStepFlow = ({
   initialStep,
   survey,
 }: UsePlanStepFlowProps) => {
-  const surveyAccess = useMemo(
-    () => getPlanSurveyAccess(planStatus, survey),
-    [planStatus, survey],
-  );
+  const surveyAccess = useMemo(() => getPlanSurveyAccess(planStatus, survey), [planStatus, survey]);
   const surveyLocked = surveyAccess.shouldLock;
   const initialCompletedSteps = useMemo(
     () => getPlanInitialCompletedSteps(mode, initialData, planStatus),
@@ -49,9 +45,7 @@ export const usePlanStepFlow = ({
     if (surveyLocked) return defaultStep;
     if (!initialStep) return defaultStep;
 
-    return canAccessPlanStep(initialStep, initialCompletedSteps)
-      ? initialStep
-      : defaultStep;
+    return canAccessPlanStep(initialStep, initialCompletedSteps) ? initialStep : defaultStep;
   }, [initialCompletedSteps, initialStep, surveyLocked]);
 
   const [currentStep, setCurrentStep] = useState<PlanStepId>(initialStepId);

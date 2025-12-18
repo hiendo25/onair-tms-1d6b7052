@@ -1,7 +1,8 @@
 import React from "react";
+import { redirect,RedirectType } from "next/navigation";
+
 import { AuthProvider } from "@/modules/auth/store/AuthProvider";
 import { authRepository } from "@/repository";
-import { RedirectType, redirect } from "next/navigation";
 import { AuthData } from "../auth/types";
 interface Props {
   children: React.ReactNode;

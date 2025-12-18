@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import StarIcon from "@mui/icons-material/Star";
 import {
   Box,
   Card,
@@ -14,7 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
-import StarIcon from "@mui/icons-material/Star";
+
 import { QuestionAnswer, Survey } from "@/types/survey.types";
 
 interface SurveyStatisticsProps {

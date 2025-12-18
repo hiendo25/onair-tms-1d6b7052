@@ -1,9 +1,7 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
-const BrazilFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const BrazilFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
@@ -16,12 +14,7 @@ const BrazilFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
         {...rest}
       >
         <g clipPath="url(#clip0_983_1741)">
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 0.5V24.5H28V0.5H-4Z"
-            fill="#009933"
-          />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 0.5V24.5H28V0.5H-4Z" fill="#009933" />
           <path
             fillRule="evenodd"
             clipRule="evenodd"

@@ -1,15 +1,16 @@
 "use client";
+import React, { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
+
+import { PATHS } from "@/constants/path.constant";
 import ManageAssignmentForm, {
   ManageAssignmentFormProps,
   ManageAssignmentFormRef,
 } from "@/modules/assignment-management/components/ManageAssignmentForm";
 import { useUpdateAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
-import { useRef } from "react";
-import { useSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
-import { PATHS } from "@/constants/path.constant";
-
+import { useUserOrganization } from "@/modules/organization";
 interface UpdateAssignmentProps {
   assignmentId: string;
 }
@@ -21,6 +22,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
   const { mutate: updateAssignment, isPending: isUpdating } = useUpdateAssignmentMutation();
   const { data: assignmentData, isPending: isLoading } = useGetAssignmentQuery(assignmentId);
 
+  const currentOrg = useUserOrganization((state) => state.currentOrganization);
   const handleUpdateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
     const payload = {
       ...formData,

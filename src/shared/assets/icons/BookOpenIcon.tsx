@@ -1,3 +1,4 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
 const BookOpenIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {

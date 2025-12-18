@@ -1,3 +1,4 @@
+import { departmentRepository } from "@/repository/department";
 import type {
   CreateDepartmentDto,
   DepartmentDto,
@@ -7,7 +8,6 @@ import type {
   UpdateDepartmentDto,
 } from "@/types/dto/departments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import { departmentRepository } from "@/repository/department";
 
 async function getDepartments(params?: GetDepartmentsParams): Promise<PaginatedResult<DepartmentDto>> {
   return departmentRepository.getList(params);

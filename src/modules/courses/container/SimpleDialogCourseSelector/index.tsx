@@ -1,18 +1,20 @@
 "use client";
 import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
+import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import CloseIcon from "@mui/icons-material/Close";
-import { useGetCourseListMinimalQuery } from "../../operations/query";
-import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
-import { SearchIcon } from "@/shared/assets/icons";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
+
 import useDebounce from "@/hooks/useDebounce";
-import { columns } from "./columns";
 import { GetCoursesListMinimalResponse } from "@/repository/courses";
+import { SearchIcon } from "@/shared/assets/icons";
+import { useGetCourseListMinimalQuery } from "../../operations/query";
+
+import { columns } from "./columns";
 
 export type SimpleDialogCourseSelectorRef = {
   openDialog: () => void;

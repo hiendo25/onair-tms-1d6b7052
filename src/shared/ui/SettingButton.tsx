@@ -1,7 +1,8 @@
 "use client";
 import { IconButton } from "@mui/material";
-import { Setting02Icon } from "../assets/icons";
 import { useColorScheme, useMediaQuery, useTheme } from "@mui/material";
+
+import { Setting02Icon } from "../assets/icons";
 const SettingButton = () => {
   const theme = useTheme();
 

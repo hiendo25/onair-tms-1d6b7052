@@ -1,4 +1,11 @@
 import { JSX, useEffect, useMemo, useState } from "react";
+import ArticleIcon from "@mui/icons-material/Article";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import QuizIcon from "@mui/icons-material/Quiz";
 import {
   Alert,
   Box,
@@ -9,14 +16,8 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import DescriptionIcon from "@mui/icons-material/Description";
-import QuizIcon from "@mui/icons-material/Quiz";
-import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
-import ArticleIcon from "@mui/icons-material/Article";
 import clsx from "clsx";
+
 import type { LearningSectionOutline } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import {

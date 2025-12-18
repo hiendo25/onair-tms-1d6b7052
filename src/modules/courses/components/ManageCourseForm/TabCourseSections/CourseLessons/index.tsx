@@ -1,14 +1,13 @@
 import React, {
-  PropsWithChildren,
   forwardRef,
   memo,
+  PropsWithChildren,
   useCallback,
   useEffect,
   useImperativeHandle,
   useMemo,
   useState,
 } from "react";
-import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
 import {
   DndContext,
   DragEndEvent,
@@ -20,12 +19,15 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import { useFieldArray } from "react-hook-form";
-import SortableLessionItem from "./SortableLessionItem";
-import { LessonType } from "@/model/lesson.model";
-import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
-import LessonContentItem from "./LessonContentItem";
 import { isUndefined } from "lodash";
+import { useFieldArray } from "react-hook-form";
+
+import { LessonType } from "@/model/lesson.model";
+import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
+import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
+
+import LessonContentItem from "./LessonContentItem";
+import SortableLessionItem from "./SortableLessionItem";
 
 type LessonItem = UpsertCourseFormData["sections"][number]["lessons"][number];
 export const initLessonFormData = (type: LessonType): LessonItem => {

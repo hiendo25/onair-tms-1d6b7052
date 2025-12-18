@@ -1,12 +1,12 @@
+import React from "react";
+import { FormLabel, Typography } from "@mui/material";
+import dayjs from "dayjs";
 import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
+
+import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
-import { FormLabel, Typography } from "@mui/material";
-import React from "react";
-import dayjs from "dayjs";
 interface QRCodeSettingFieldsProps {
   className?: string;
   sessionIndex: number;

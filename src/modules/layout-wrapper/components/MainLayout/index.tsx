@@ -41,7 +41,7 @@ export interface MainLayoutProps extends PropsWithChildren {
   menuItems: DashboardSidebarProps["menuItems"];
   organizationItems: OrganizationSelectorProps["options"];
   onChangeOrganization?: OrganizationSelectorProps["onChange"];
-  currentOrganization?: OrganizationSelectorProps["value"];
+  currentOrganizationId?: OrganizationSelectorProps["value"];
   logoUrl?: string;
 }
 
@@ -49,7 +49,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   menuItems,
   onChangeOrganization,
-  currentOrganization,
+  currentOrganizationId,
   organizationItems,
   logoUrl,
 }) => {
@@ -106,7 +106,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           onToggleMenu={toggleExpand}
           actions={
             <OrganizationSelector
-              value={currentOrganization}
+              value={currentOrganizationId}
               options={organizationItems}
               onChange={onChangeOrganization}
             />

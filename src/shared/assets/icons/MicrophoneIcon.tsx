@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const MicrophoneIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const MicrophoneIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

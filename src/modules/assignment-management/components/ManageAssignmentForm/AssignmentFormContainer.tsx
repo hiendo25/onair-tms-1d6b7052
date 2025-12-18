@@ -1,17 +1,19 @@
 "use client";
 import * as React from "react";
-import TabAssignmentInformation from "./TabAssignmentInformation";
-import TabAssignmentContent from "./TabAssignmentContent";
-import TabAssignmentSettings from "./TabAssignmentSettings";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { Assignment, assignmentSchema } from "../assignment-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
-import AssignmentTabContainer from "./AssignmentTabContainer";
-import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
-import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
 import { useRouter } from "next/navigation";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+
 import { PATHS } from "@/constants/path.constant";
+import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
+import { Assignment, assignmentSchema } from "../assignment-form.schema";
+
+import AssignmentTabContainer from "./AssignmentTabContainer";
+import TabAssignmentContent from "./TabAssignmentContent";
+import TabAssignmentInformation from "./TabAssignmentInformation";
+import TabAssignmentSettings from "./TabAssignmentSettings";
+import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
 
 export const TAB_KEYS_ASSIGNMENT = {
   "assignTab-information": "assignTab-information",

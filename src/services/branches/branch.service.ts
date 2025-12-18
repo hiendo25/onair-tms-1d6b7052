@@ -1,3 +1,4 @@
+import { branchRepository } from "@/repository/branch";
 import type {
   BranchDto,
   BranchImportResult,
@@ -7,7 +8,6 @@ import type {
   UpdateBranchDto,
 } from "@/types/dto/branches";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import { branchRepository } from "@/repository/branch";
 
 async function getBranches(params?: GetBranchesParams): Promise<PaginatedResult<BranchDto>> {
   return branchRepository.getList(params);

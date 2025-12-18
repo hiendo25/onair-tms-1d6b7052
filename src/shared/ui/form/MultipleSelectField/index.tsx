@@ -1,15 +1,18 @@
 "use client";
 import React, {
+  forwardRef,
   InputHTMLAttributes,
   KeyboardEventHandler,
-  forwardRef,
   memo,
   useEffect,
   useId,
   useRef,
   useState,
 } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import type { BoxProps, ChipProps } from "@mui/material";
 import {
+  alpha,
   Box,
   Chip,
   FormControl,
@@ -17,15 +20,14 @@ import {
   FormLabel,
   MenuItem,
   MenuList,
-  Typography,
-  alpha,
   styled,
+  Typography,
 } from "@mui/material";
-import type { BoxProps, ChipProps } from "@mui/material";
 import { isArray } from "lodash";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import useClickOutSide from "./useClickOutside";
+
 import { CloseIcon } from "@/shared/assets/icons";
+
+import useClickOutSide from "./useClickOutside";
 
 type Option<T> = { value: T; label: string } & Record<string, any>;
 

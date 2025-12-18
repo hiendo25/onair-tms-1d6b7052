@@ -1,8 +1,9 @@
-import { useSignInWithGoogleMutation, useSignInWithPasswordMutation } from "../operations/mutation";
-import { AuthSignInWithPasswordPayload } from "@/repository/auth";
+import { useState } from "react";
 import { AuthError } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+
+import { AuthSignInWithPasswordPayload } from "@/repository/auth";
+import { useSignInWithGoogleMutation, useSignInWithPasswordMutation } from "../operations/mutation";
 /**
  *
  * SIGN IN WITH PASSWORD

@@ -16,3 +16,29 @@ export async function getFirstOrganization(): Promise<OrganizationDto> {
 
   return data as OrganizationDto;
 }
+
+const getOrganizationsByUserId = async (userId: string) => {
+  const supabase = await createSVClient();
+
+  try {
+    const { data, error } = await supabase
+      .from("employees")
+      .select(
+        `
+				employee_id:id,
+				user_id,
+				organization_id,
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain)
+			`,
+      )
+      .eq("user_id", userId);
+
+    if (!data || error) {
+      throw new Error(error?.message || "Organizations is empty");
+    }
+    return data;
+  } catch (err) {
+    throw new Error("Fail to get organizations");
+  }
+};
+export { getOrganizationsByUserId };

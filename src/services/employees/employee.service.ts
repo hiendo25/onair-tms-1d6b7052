@@ -4,19 +4,21 @@ import {
   classRoomRepository,
   classRoomSessionRepository,
   coursesRepository,
-  employeesRepository,
   employeeBranchesRepository,
   employeeDepartmentsRepository,
+  employeesRepository,
   libraryRepository,
   managersEmployeesRepository,
   organizationsRepository,
   profilesRepository,
   qrAttendanceRepository,
+  userPreferenceRepository,
 } from "@/repository";
 import { createSVClient } from "@/services/supabase/server";
 import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import type { CreateEmployeeDto, EmployeeDto, GetEmployeesParams, UpdateEmployeeDto } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import { createClient } from "../supabase/client";
 
 interface CreateEmployeeResult {
   userId: string;
@@ -32,21 +34,25 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
 
   try {
     const adminSupabase = await createServiceRoleClient();
-
+    const supabaseClient = createClient();
     const temporaryPassword = "123456";
 
-    const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
-      email: payload.email,
-      password: temporaryPassword,
-      email_confirm: true,
-    });
+    const { data, error } = await supabaseClient.rpc("get_user_id_by_email", { user_email: payload.email });
 
-    if (authError || !authData.user) {
-      throw new Error(`Failed to create auth user: ${authError?.message || "Unknown error"}`);
+    if (!data) {
+      const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+        email: payload.email,
+        password: temporaryPassword,
+        email_confirm: true,
+      });
+      if (authError || !authData.user) {
+        throw new Error(`Failed to create auth user: ${authError?.message || "Unknown error"}`);
+      }
+      userId = authData.user.id;
+      console.log(`Auth user created: ${userId}`);
+    } else {
+      userId = data;
     }
-
-    userId = authData.user.id;
-    console.log(`Auth user created: ${userId}`);
 
     let employeeCode = payload.employee_code;
     let employeeOrder: number;
@@ -88,20 +94,24 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
 
     // Create employee-department relationship
     if (payload.department) {
-      await employeeDepartmentsRepository.create([{
-        employee_id: employeeId,
-        department_id: payload.department,
-      }]);
-      console.log('Created employee-department relationship');
+      await employeeDepartmentsRepository.create([
+        {
+          employee_id: employeeId,
+          department_id: payload.department,
+        },
+      ]);
+      console.log("Created employee-department relationship");
     }
 
     // Create employee-branch relationship
     if (payload.branch) {
-      await employeeBranchesRepository.create([{
-        employee_id: employeeId,
-        branch_id: payload.branch,
-      }]);
-      console.log('Created employee-branch relationship');
+      await employeeBranchesRepository.create([
+        {
+          employee_id: employeeId,
+          branch_id: payload.branch,
+        },
+      ]);
+      console.log("Created employee-branch relationship");
     }
 
     if (payload.manager_id) {
@@ -122,6 +132,15 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
       ]);
 
       if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
+    }
+
+    const { data: referenceData, error: referenceError } = await userPreferenceRepository.createUserPreference({
+      user_id: userId,
+      default_organization_id: organizationId,
+    });
+
+    if (referenceError || !referenceData) {
+      throw new Error(referenceError.message);
     }
 
     return {
@@ -166,20 +185,20 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
 }
 
 async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<CreateEmployeeResult> {
-  const supabase = await createSVClient();
-  const {
-    data: { user: currentUser },
-    error: userError,
-  } = await supabase.auth.getUser();
+  // const supabase = await createSVClient();
+  // const {
+  //   data: { user: currentUser },
+  //   error: userError,
+  // } = await supabase.auth.getUser();
 
-  if (userError || !currentUser) {
-    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
-  }
+  // if (userError || !currentUser) {
+  //   throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  // }
 
-  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
-  console.log(`Creating employee in organization: ${organizationId}`);
+  // const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+  // console.log(`Creating employee in organization: ${organizationId}`);
 
-  return createEmployeeCore(payload, organizationId);
+  return createEmployeeCore(payload, payload.organizationId);
 }
 
 async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<void> {
@@ -204,18 +223,22 @@ async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<
 
   // Create new employee-department relationship
   if (payload.department) {
-    await employeeDepartmentsRepository.create([{
-      employee_id: payload.id,
-      department_id: payload.department,
-    }]);
+    await employeeDepartmentsRepository.create([
+      {
+        employee_id: payload.id,
+        department_id: payload.department,
+      },
+    ]);
   }
 
   // Create new employee-branch relationship
   if (payload.branch) {
-    await employeeBranchesRepository.create([{
-      employee_id: payload.id,
-      branch_id: payload.branch,
-    }]);
+    await employeeBranchesRepository.create([
+      {
+        employee_id: payload.id,
+        branch_id: payload.branch,
+      },
+    ]);
   }
 
   await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(payload.id);

@@ -1,5 +1,7 @@
-import { Star01Icon } from "@/shared/assets/icons";
+import React from "react";
 import { Box, Typography } from "@mui/material";
+
+import { Star01Icon } from "@/shared/assets/icons";
 
 interface QuestionRatingTypeProps {
   index?: number;

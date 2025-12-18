@@ -1,5 +1,6 @@
 "use client";
-import { Shadows, alpha, createTheme } from "@mui/material/styles";
+import { alpha, createTheme,Shadows } from "@mui/material/styles";
+
 import { error, grey, info, primary, success, warning } from "./theme-color";
 export * from "./primitive/typography";
 

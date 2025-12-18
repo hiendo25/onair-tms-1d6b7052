@@ -2,7 +2,7 @@
 import { useMemo, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
-import { GetCourseByIdResponse } from "@/repository/courses";
+
 import { PATHS } from "@/constants/path.constant";
 import ManageCourseForm, {
   ManageCourseFormProps,
@@ -10,6 +10,7 @@ import ManageCourseForm, {
 } from "@/modules/courses/components/ManageCourseForm";
 import { useUpsertCourse } from "@/modules/courses/hooks/useUpsertCourse";
 import { getCourseMetaValue } from "@/modules/courses/utils";
+import { GetCourseByIdResponse } from "@/repository/courses";
 interface UpdateCourseFormProps {
   data: Exclude<GetCourseByIdResponse["data"], null>;
 }

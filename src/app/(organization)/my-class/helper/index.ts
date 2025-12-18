@@ -1,6 +1,6 @@
+import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room/type";
 import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
 import { CLASSROOM_RUNTIME_STATUS_LABEL, RUNTIME_STATUS_COLOR_MAP } from "../../admin/class-room/list/utils/status";
-import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room/type";
 
 const SESSION_MODE_BADGE_LABEL = {
   online: "Online",

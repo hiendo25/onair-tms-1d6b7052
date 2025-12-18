@@ -2,10 +2,11 @@ import * as React from "react";
 import { Paper, Stack, Typography } from "@mui/material";
 
 import PureClient from "@/shared/ui/PureClient";
+
 import ApexChart from "./ApexChart";
+import { participationRateByRange, TimeRange } from "./mock/dashboardData";
 import { panelSx } from "./mock/panelSx";
 import TimeRangeSwitcher from "./TimeRangeSwitcher";
-import { participationRateByRange, TimeRange } from "./mock/dashboardData";
 
 const ParticipationRateCard = () => {
   const [range, setRange] = React.useState<TimeRange>("week");

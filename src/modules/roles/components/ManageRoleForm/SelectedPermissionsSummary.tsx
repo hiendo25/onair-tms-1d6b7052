@@ -1,7 +1,8 @@
 "use client";
 
-import { Box, Chip, Stack, Typography } from "@mui/material";
 import React from "react";
+import { Box, Chip, Stack, Typography } from "@mui/material";
+
 import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
 
 interface SelectedPermissionsSummaryProps

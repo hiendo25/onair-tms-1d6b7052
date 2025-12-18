@@ -1,10 +1,12 @@
-import PageContainer from "@/shared/ui/PageContainer";
 import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
-import UpdateCourseForm from "./_components/UpdateCourseForm";
+import { notFound } from "next/navigation";
+
 import { PATHS } from "@/constants/path.constant";
 import { coursesRepository } from "@/repository";
-import { notFound } from "next/navigation";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import UpdateCourseForm from "./_components/UpdateCourseForm";
 
 type EditCoursePageProps = {
   params: Promise<{ id: string }>;

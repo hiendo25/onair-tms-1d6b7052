@@ -1,8 +1,9 @@
 import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Chip from "@mui/material/Chip";
-import { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { SparkLineChart } from "@mui/x-charts/SparkLineChart";
+import { GridCellParams, GridColDef, GridRowsProp } from "@mui/x-data-grid";
+
 import { GetStudentsResponse } from "@/repository/employee";
 
 type StudentItem = GetStudentsResponse["data"][number];

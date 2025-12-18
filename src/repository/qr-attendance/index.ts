@@ -1,13 +1,14 @@
+import type { AttendanceWithRelations, QRCodeStatus, QRCodeWithRelations } from "@/model/qr-attendance.model";
 import { supabase } from "@/services";
+
 import {
   AttendanceCheckInPayload,
   AttendanceCheckInResult,
   CreateQRCodePayload,
   QRCodeValidationResult,
-  UpSertQrCodePayload,
   UpdateQRCodePayload,
+  UpSertQrCodePayload,
 } from "./type";
-import type { AttendanceWithRelations, QRCodeStatus, QRCodeWithRelations } from "@/model/qr-attendance.model";
 
 export * from "./type";
 

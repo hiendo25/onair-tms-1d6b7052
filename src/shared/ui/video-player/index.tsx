@@ -3,6 +3,7 @@
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/audio.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
+import "./video-layout.css";
 
 import React, {
 	useCallback,
@@ -11,24 +12,23 @@ import React, {
 	useRef,
 	useState,
 } from "react";
-import clsx from "clsx";
-import {
-	DefaultVideoLayout,
-	defaultLayoutIcons,
-} from "@vidstack/react/player/layouts/default";
+import { Box, Typography } from "@mui/material";
 import {
 	MediaPlayer,
 	MediaPlayerInstance,
 	MediaProvider,
 	Poster,
 } from "@vidstack/react";
+import {
+	defaultLayoutIcons,
+	DefaultVideoLayout,
+} from "@vidstack/react/player/layouts/default";
+import clsx from "clsx";
 
-import { Box, Typography } from "@mui/material";
-
-import NextLessonOverlay from "./next-lesson-overlay";
-import "./video-layout.css";
 import { useResponsive } from "@/hooks/useResponsive";
 import { isYoutubeVideo } from "@/utils/check-url";
+
+import NextLessonOverlay from "./next-lesson-overlay";
 
 interface VideoPlayerProps {
 	videoUrl: string;

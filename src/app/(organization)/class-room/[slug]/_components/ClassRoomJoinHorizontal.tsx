@@ -1,16 +1,18 @@
-import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { QrCode } from "@mui/icons-material";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
+
+import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { Image } from "@/shared/ui/Image";
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+
 // import Image from "next/image";
 import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
-import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
 import JoinButton from "./JoinButton";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { Image } from "@/shared/ui/Image";
 
 interface ClassRoomJoinProps {
   data: GetClassRoomBySlugResponse["data"];

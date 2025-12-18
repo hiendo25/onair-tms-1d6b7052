@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { Avatar, AvatarGroup, Box, Container, Tooltip, Typography } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 import { useGetClassRoomSessionDetailQuery } from "@/modules/class-room-management/operations/query";
-import { Avatar, AvatarGroup, Box, Container, Tooltip, Typography } from "@mui/material";
-import TimeCountDown from "./time-count-down";
-import JoinButton from "./join-button";
-import { extractTeachers, resolveJoinUrl } from "../helper";
 import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { extractTeachers, resolveJoinUrl } from "../helper";
+
+import JoinButton from "./join-button";
+import TimeCountDown from "./time-count-down";
 
 interface ClassRoomCountDownSection {
     sessionId: string;

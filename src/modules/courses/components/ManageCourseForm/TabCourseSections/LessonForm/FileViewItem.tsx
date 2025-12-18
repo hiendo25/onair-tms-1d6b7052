@@ -1,6 +1,7 @@
-import { CloseIcon, FilePdfIcon } from "@/shared/assets/icons";
+import React, { memo } from "react";
 import { IconButton } from "@mui/material";
-import { memo } from "react";
+
+import { CloseIcon, FilePdfIcon } from "@/shared/assets/icons";
 
 interface FileViewItemProps {
   fileUrl: string;

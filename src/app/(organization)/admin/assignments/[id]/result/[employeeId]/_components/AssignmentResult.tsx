@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Alert, Box, Button, Card, CircularProgress, Stack, Typography } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Alert, Box, Button, Card, CircularProgress, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.constant";
-import ResultQuestionCard from "./ResultQuestionCard";
 import AssignmentSubmissionHeader from "../../../_components/AssignmentSubmissionHeader";
+
+import ResultQuestionCard from "./ResultQuestionCard";
 
 interface AssignmentResultProps {
   assignmentId: string;

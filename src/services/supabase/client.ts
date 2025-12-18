@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { SupabaseAuthClientOptions, SupabaseClientOptions } from "@supabase/supabase-js/dist/module/lib/types";
 
 import { Database as DatabaseGenerate } from "@/types/supabase.types";
 

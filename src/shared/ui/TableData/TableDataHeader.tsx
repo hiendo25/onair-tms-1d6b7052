@@ -10,64 +10,58 @@ export interface TableRowDataProps<T> {
 }
 
 const TableDataHeader = <T,>({ columns, showRowCount }: TableRowDataProps<T>) => {
-  const nodeListLeft = useRef<HTMLTableCellElement[]>([]);
-  const nodeListRight = useRef<HTMLTableCellElement[]>([]);
-
-  const splitCellsRefs = (fixed?: "left" | "right") => (el: HTMLTableCellElement) => {
-    if (!fixed) return;
-    fixed === "left" && nodeListLeft.current.push(el);
-    fixed === "right" && nodeListRight.current.push(el);
+  const nodeListMap = useRef<
+    Map<string, { index: number; node: HTMLTableCellElement; fixed: "left" | "right" | undefined }>
+  >(new Map());
+  const splitCellsRefs = (fixed: "left" | "right" | undefined, index: number) => (el: HTMLTableCellElement) => {
+    nodeListMap.current.set(index.toString(), { index: index, node: el, fixed });
   };
 
   useEffect(() => {
-    const nodesLeft = [...nodeListLeft.current];
-    const nodesRight = [...nodeListRight.current];
-
-    nodesLeft.forEach((cellNode, _index) => {
-      let leftPosition = 0;
-      for (let i = 0; i < _index; i++) {
-        const nodeItem = nodesLeft[i];
-        if (nodeItem) {
-          const { width } = getClientInfo(nodeItem);
-          leftPosition += width;
-        }
+    const nodeListArr = [...nodeListMap.current];
+    let leftPosition = 0;
+    nodeListArr.forEach(([nodeIndex, nodeItem], _index) => {
+      if (nodeItem.fixed === "left") {
+        nodeItem.node.style.left = leftPosition + "px";
+        nodeItem.node.style.right = "auto";
+        nodeItem.node.classList.add("fixed-left");
+        nodeItem.node.style.background = "rgb(255 255 255)";
+        nodeItem.node.style.zIndex = `${(_index + 1) * 10}`;
+        const { width } = getClientInfo(nodeItem.node);
+        leftPosition += width;
       }
-
-      cellNode.style.left = leftPosition + "px";
-      cellNode.classList.add("fixed-left");
-      cellNode.style.background = "rgb(255 255 255)";
     });
 
-    const nodeListRightReverse = [...nodesRight].reverse();
+    let rightPosition = 0;
 
-    nodeListRightReverse.forEach((cellNode, _index) => {
-      let rightPosition = 0;
-      for (let i = 0; i < _index; i++) {
-        const nodeItem = nodeListRightReverse[i];
-        if (nodeItem) {
-          const { width } = getClientInfo(nodeItem);
-          rightPosition += width;
-        }
+    const nodeListRevert = [...nodeListArr].reverse();
+
+    nodeListRevert.forEach(([nodeIndex, nodeItem], _index) => {
+      if (nodeItem.fixed === "right") {
+        nodeItem.node.style.right = rightPosition + "px";
+        nodeItem.node.style.left = "auto";
+        nodeItem.node.classList.add("fixed-right");
+        nodeItem.node.style.background = "rgb(255 255 255)";
+        nodeItem.node.style.zIndex = `${_index}`;
+
+        const { width } = getClientInfo(nodeItem.node);
+        rightPosition += width;
       }
-
-      cellNode.style.right = rightPosition + "px";
-      cellNode.classList.add("fixed-right");
-      cellNode.style.background = "rgb(255 255 255)";
     });
-  }, []);
+  }, [columns, nodeListMap]);
 
   return (
     <TableRowStyled className="table-data-row table-data-row-header h-15">
       {showRowCount && (
-        <TableCell className="w-20 table-cell-head" sx={{ padding: "8px 12px" }}>
+        <TableCell className="w-20 table-cell-head font-semibold bg-gray-100" sx={{ padding: "8px 12px" }}>
           STT
         </TableCell>
       )}
-      {columns.map(({ headerName, field, renderCell, ...restProps }, _index) => (
+      {columns.map(({ headerName, field, renderCell, fixed = undefined, ...restProps }, _index) => (
         <TableCell
-          ref={splitCellsRefs(restProps.fixed)}
+          ref={splitCellsRefs(fixed, _index)}
           key={field.toString()}
-          className="table-cell-head"
+          className="table-cell-head font-semibold bg-gray-100"
           sx={{ padding: "8px 12px" }}
           {...restProps}
         >

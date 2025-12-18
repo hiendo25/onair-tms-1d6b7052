@@ -1,6 +1,7 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetEmployeesParams } from "@/types/dto/employees";
 import * as employeeService from "@/services/employees/employee.service";
+import type { GetEmployeesParams } from "@/types/dto/employees";
+
 import { GET_EMPLOYEES } from "./key";
 
 export const useGetEmployeesQuery = (params?: GetEmployeesParams) => {

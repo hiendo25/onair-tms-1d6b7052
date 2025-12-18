@@ -1,9 +1,10 @@
 import { Chip, ChipProps, IconButton, Menu, MenuItem, Stack } from "@mui/material";
 import { GridColDef, GridMoreVertIcon } from "@mui/x-data-grid";
-import { PATHS } from "@/constants/path.constant";
 import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
-import { CourseDto } from "@/types/dto/courses/course.dto";
 import Link from "next/link";
+
+import { PATHS } from "@/constants/path.constant";
+import { CourseDto } from "@/types/dto/courses/course.dto";
 
 type ColumnFactoryOptions = {
   isAdmin: boolean;

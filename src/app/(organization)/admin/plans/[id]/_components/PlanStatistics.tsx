@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
-import SchoolIcon from "@mui/icons-material/School";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import PeopleIcon from "@mui/icons-material/People";
+import SchoolIcon from "@mui/icons-material/School";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 
 interface PlanStatisticsProps {
   programsCount?: number;

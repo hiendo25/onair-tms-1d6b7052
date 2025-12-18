@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDownIcon, TrashIcon1 } from "@/shared/assets/icons";
 import { PropsWithChildren, useState } from "react";
 import {
   Accordion,
@@ -12,9 +11,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Typography,
   styled,
+  Typography,
 } from "@mui/material";
+
+import { ChevronDownIcon, TrashIcon1 } from "@/shared/assets/icons";
+
 import BoxIcon from "./BoxIcon";
 
 const CustomAccordion = styled(Accordion)(({ theme }) => ({

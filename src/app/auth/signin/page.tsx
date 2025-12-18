@@ -1,5 +1,7 @@
-import SignIn from "@/modules/auth/components/SignIn";
+import React from "react";
 import type { Metadata, ResolvingMetadata } from "next";
+
+import SignIn from "@/modules/auth/components/SignIn";
 import PageAuthContainer from "../_components/PageAuthContainer";
 
 interface SignInPageProps {

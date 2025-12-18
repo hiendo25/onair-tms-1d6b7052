@@ -1,15 +1,15 @@
 "use client";
-import { useCallback, useState } from "react";
-import Stack from "@mui/material/Stack";
+import React, { useCallback, useState } from "react";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { editorClasses } from "../../classes";
-import { ToolbarItem } from "./toolbar-item";
-
 import type { EditorToolbarProps } from "../../types";
+
+import { ToolbarItem } from "./toolbar-item";
 
 export function LinkBlock({ editor }: Pick<EditorToolbarProps, "editor">) {
   const [url, setUrl] = useState("");
@@ -38,12 +38,7 @@ export function LinkBlock({ editor }: Pick<EditorToolbarProps, "editor">) {
     if (!url) {
       editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     } else {
-      editor
-        ?.chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: url })
-        .run();
+      editor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
     }
   }, [editor, url]);
 

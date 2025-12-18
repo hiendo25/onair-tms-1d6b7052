@@ -1,7 +1,9 @@
 "use client";
+import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
 import { useFieldArray } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
+
+import { useLibraryStore } from "@/modules/library/store/libraryProvider";
 import {
   CloseIcon,
   CloudUploadIcon,
@@ -10,9 +12,8 @@ import {
   FilePdfIcon,
   FileVideoIcon,
 } from "@/shared/assets/icons";
-import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
-import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { ClassRoom } from "../../classroom-form.schema";
 interface DocumentFieldsProps {
   className?: string;
 }

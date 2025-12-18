@@ -1,7 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
@@ -27,20 +32,16 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import PageContainer from "@/shared/ui/PageContainer";
-import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
-import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
-import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import type { EmployeeDto } from "@/types/dto/employees";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { useQueryClient } from "@tanstack/react-query";
+import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
+import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
+import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
+import type { EmployeeDto } from "@/types/dto/employees";
 import { Database } from "@/types/supabase.types";
 
 type EmployeeListProps = {

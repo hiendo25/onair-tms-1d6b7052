@@ -1,6 +1,7 @@
-import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
-import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 import { useMemo } from "react";
+import { Alert, Checkbox, FormControlLabel } from "@mui/material";
+
+import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
 
 export interface DepartmentSelectorProps {
   className?: string;

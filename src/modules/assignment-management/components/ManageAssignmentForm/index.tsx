@@ -1,9 +1,10 @@
 "use client";
+import { forwardRef, memo } from "react";
+
 import AssignmentFormContainer, {
   AssignmentFormContainerProps,
   AssignmentFormContainerRef,
 } from "./AssignmentFormContainer";
-import { forwardRef, memo } from "react";
 
 export interface ManageAssignmentFormRef extends AssignmentFormContainerRef {}
 export interface ManageAssignmentFormProps {
@@ -24,4 +25,3 @@ const ManageAssignmentForm = forwardRef<ManageAssignmentFormRef, ManageAssignmen
 ManageAssignmentForm.displayName = "ManageAssignmentForm";
 
 export default memo(ManageAssignmentForm);
-

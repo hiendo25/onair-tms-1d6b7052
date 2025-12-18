@@ -1,10 +1,12 @@
 "use client";
 
-import { Box, Checkbox, CircularProgress, FormControlLabel, Typography } from "@mui/material";
 import React from "react";
-import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
-import PermissionModuleItem from "./PermissionModuleItem";
+import { Box, Checkbox, CircularProgress, FormControlLabel, Typography } from "@mui/material";
+
 import { PermissionActions } from "@/model/permission.model";
+import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
+
+import PermissionModuleItem from "./PermissionModuleItem";
 
 interface PermissionSelectorProps
   extends Pick<

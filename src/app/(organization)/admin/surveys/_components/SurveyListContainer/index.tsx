@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { useUserOrganization } from "@/modules/organization";
 import { usePermissions } from "@/modules/permission-wrapper";
 import Can from "@/modules/permission-wrapper/components/Can";
 import { useGetSurveysQuery } from "@/modules/surveys/operation/queries";
@@ -24,7 +25,12 @@ interface SurveyListContainerProps {
   className?: string;
 }
 const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) => {
-  const { data: surveysData, isPending } = useGetSurveysQuery();
+  const organization = useUserOrganization((state) => state.currentOrganization);
+  const { data: surveysData, isPending } = useGetSurveysQuery({
+    queryParams: {
+      organizationId: organization.orgId,
+    },
+  });
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
@@ -192,10 +198,7 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
                   </Can>
                   <Can pers={["survey:update"]}>
                     <Link href={PATHS.SURVEYS.EDIT(surveyId)}>
-                      <IconButton
-                        size="small"
-                        className="text-blue-600 bg-transparent hover:bg-blue-50"
-                      >
+                      <IconButton size="small" className="text-blue-600 bg-transparent hover:bg-blue-50">
                         <Edit02Icon className="w-4 h-4" />
                       </IconButton>
                     </Link>
@@ -218,54 +221,49 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
   }, []);
 
   return (
-    <PageContainer title="Danh sách khảo sát" breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}>
-      <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3 }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{ mb: 3 }}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            justifyContent="space-between"
-          >
-            <TextField
-              placeholder="Tìm kiếm khảo sát..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              size="small"
-              sx={{ width: { xs: "100%", sm: 300 } }}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreateSurvey}
-              loading={isTransition}
-              disabled={isTransition}
-            >
-              Tạo khảo sát
-            </Button>
-          </Stack>
-          <TableData
-            rows={surveyList}
-            showRowCount
-            columns={mergedColumns}
-            rowKey="id"
-            loading={isPending}
-            bordered={false}
-            minWidth={1200}
-          />
-        </Card>
-      </Box>
-    </PageContainer>
+    <Box>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 3 }}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
+      >
+        <TextField
+          placeholder="Tìm kiếm khảo sát..."
+          value={searchQuery}
+          onChange={handleSearchChange}
+          size="small"
+          sx={{ width: { xs: "100%", sm: 300 } }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleCreateSurvey}
+          loading={isTransition}
+          disabled={isTransition}
+        >
+          Tạo khảo sát
+        </Button>
+      </Stack>
+      <TableData
+        rows={surveyList}
+        showRowCount
+        columns={mergedColumns}
+        rowKey="id"
+        loading={isPending}
+        minWidth={1200}
+      />
+    </Box>
   );
 };
 

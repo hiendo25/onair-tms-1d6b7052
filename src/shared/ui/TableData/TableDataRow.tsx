@@ -1,4 +1,4 @@
-import React, { EventHandler, MouseEvent, MouseEventHandler, useCallback, useEffect, useRef } from "react";
+import React, { MouseEvent, useCallback, useEffect, useRef } from "react";
 import { TableCell, TableCellProps, TableRow } from "@mui/material";
 
 import { TableRowStyled } from "./table-row-styled";
@@ -37,15 +37,13 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
   onRowClick,
   onCellClick,
 }: TableRowDataProps<T>) => {
-  const nodeListLeft = useRef<HTMLTableCellElement[]>([]);
-  const nodeListRight = useRef<HTMLTableCellElement[]>([]);
-  const isMounted = useRef(false);
-
-  const splitCellsRefs = (fixed?: "left" | "right") => (el: HTMLTableCellElement) => {
-    if (!fixed) return;
-    fixed === "left" && nodeListLeft.current.push(el);
-    fixed === "right" && nodeListRight.current.push(el);
+  const nodeListMap = useRef<
+    Map<string, { index: number; node: HTMLTableCellElement; fixed: "left" | "right" | undefined }>
+  >(new Map());
+  const splitCellsRefs = (fixed: "left" | "right" | undefined, index: number) => (el: HTMLTableCellElement) => {
+    nodeListMap.current.set(index.toString(), { index: index, node: el, fixed });
   };
+
   const handleClickRow = useCallback(
     (row: T) => () => {
       onRowClick?.(row);
@@ -58,40 +56,39 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
     },
     [onCellClick],
   );
+
   useEffect(() => {
-    const nodesLeft = [...nodeListLeft.current];
-    nodesLeft.forEach((cellNode, _index) => {
-      let leftPosition = 0;
-      for (let i = 0; i < _index; i++) {
-        const node = nodesLeft[i];
-        if (node) {
-          const { width } = getClientInfo(node);
-          leftPosition += width;
-        }
+    const nodeListArr = [...nodeListMap.current];
+    let leftPosition = 0;
+    nodeListArr.forEach(([nodeIndex, nodeItem], _index) => {
+      if (nodeItem.fixed === "left") {
+        nodeItem.node.style.left = leftPosition + "px";
+        nodeItem.node.style.right = "auto";
+        nodeItem.node.classList.add("fixed-left");
+        nodeItem.node.style.background = "rgb(255 255 255)";
+        nodeItem.node.style.zIndex = `${(_index + 1) * 10}`;
+        const { width } = getClientInfo(nodeItem.node);
+        leftPosition += width;
       }
-
-      cellNode.style.left = leftPosition + "px";
-      cellNode.classList.add("fixed-left");
-      cellNode.style.background = "#fff";
     });
 
-    const nodeListRightReverse = [...nodeListRight.current].reverse();
+    let rightPosition = 0;
 
-    nodeListRightReverse.forEach((cellNode, _index) => {
-      let rightPosition = 0;
-      for (let i = 0; i < _index; i++) {
-        const el = nodeListRightReverse[i];
-        if (el) {
-          const { width } = getClientInfo(el);
-          rightPosition += width;
-        }
+    const nodeListRevert = [...nodeListArr].reverse();
+
+    nodeListRevert.forEach(([nodeIndex, nodeItem], _index) => {
+      if (nodeItem.fixed === "right") {
+        nodeItem.node.style.right = rightPosition + "px";
+        nodeItem.node.style.left = "auto";
+        nodeItem.node.classList.add("fixed-right");
+        nodeItem.node.style.background = "rgb(255 255 255)";
+        nodeItem.node.style.zIndex = `${_index}`;
+
+        const { width } = getClientInfo(nodeItem.node);
+        rightPosition += width;
       }
-
-      cellNode.style.right = rightPosition + "px";
-      cellNode.classList.add("fixed-right");
-      cellNode.style.background = "#fff";
     });
-  }, []);
+  }, [columns, nodeListMap]);
 
   return (
     <TableRowStyled className="table-data-row h-14" hover={hoverRow} onClick={handleClickRow(row)}>
@@ -102,13 +99,13 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
       )}
       {columns.map(({ headerName, field, renderCell, id, ...restProps }, _index) => (
         <TableCell
-          ref={splitCellsRefs(restProps.fixed)}
+          ref={splitCellsRefs(restProps.fixed, _index)}
           key={field.toString()}
           onClick={(evt) => handleClickCell(field, row, evt)}
           {...restProps}
-          sx={{
+          sx={() => ({
             padding: "8px 12px",
-          }}
+          })}
         >
           {renderCell
             ? renderCell(row[field], row)

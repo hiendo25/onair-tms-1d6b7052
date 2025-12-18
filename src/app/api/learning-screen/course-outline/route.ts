@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { learningScreenService } from "@/services";
 
 export async function GET(request: NextRequest) {

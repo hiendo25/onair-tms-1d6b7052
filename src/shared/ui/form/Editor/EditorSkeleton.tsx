@@ -1,6 +1,7 @@
-import { cn } from "@/utils";
-import { Typography } from "@mui/material";
 import { memo } from "react";
+import { Typography } from "@mui/material";
+
+import { cn } from "@/utils";
 
 interface EditorSkeletonProps {
   aspect?: "video" | "square" | "auto" | string;

@@ -1,6 +1,6 @@
-import { employeeRepository } from "@/repository";
-import { useTQuery } from "@/lib";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useTQuery } from "@/lib";
+import { employeeRepository } from "@/repository";
 import { GetStudentsQueryParams } from "@/repository/employee";
 
 const useGetStudentsQuery = (queryParams: GetStudentsQueryParams) => {

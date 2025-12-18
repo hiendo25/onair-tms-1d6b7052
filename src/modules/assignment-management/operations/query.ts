@@ -1,8 +1,16 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { AssignmentDto, AssignmentQuestionDto, AssignmentStudentDto, GetAssignmentsParams, GetMyAssignmentsParams, MyAssignmentDto, SubmissionDetailDto } from "@/types/dto/assignments";
-import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import * as assignmentService from "@/services/assignments/assignment.service";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
+import * as assignmentService from "@/services/assignments/assignment.service";
+import type {
+  AssignmentDto,
+  AssignmentQuestionDto,
+  AssignmentStudentDto,
+  GetAssignmentsParams,
+  GetMyAssignmentsParams,
+  MyAssignmentDto,
+  SubmissionDetailDto,
+} from "@/types/dto/assignments";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
   return useTQuery<PaginatedResult<AssignmentDto>>({
@@ -19,7 +27,9 @@ export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
       if (params?.search) {
         searchParams.set("search", params.search);
       }
-
+      if (params) {
+        searchParams.set("organizationId", params?.organizationId);
+      }
       const response = await fetch(`/api/assignments?${searchParams.toString()}`);
       if (!response.ok) {
         const error = await response.json();
@@ -42,7 +52,7 @@ export const useGetAssignmentStudentsQuery = (
   assignmentId: string,
   page: number = 0,
   limit: number = 25,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) => {
   return useTQuery<PaginatedResult<AssignmentStudentDto>>({
     queryKey: [GET_ASSIGNMENTS, assignmentId, "students", page, limit],

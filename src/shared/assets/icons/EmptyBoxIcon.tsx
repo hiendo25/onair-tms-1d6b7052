@@ -1,5 +1,6 @@
 import SvgIcon from "@mui/material/SvgIcon";
-const EmptyBoxIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+import type { FC, SVGProps } from "react";
+const EmptyBoxIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

@@ -1,7 +1,9 @@
 "use client";
 
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { redirect } from "next/navigation";
+
+import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+
 import ClassRoomTableList from "./ClassRoomTableList";
 
 export default function ClassRoomContainer() {

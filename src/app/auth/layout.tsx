@@ -1,5 +1,6 @@
+import React, { Suspense } from "react";
+
 import UnAuthorized from "@/modules/auth-wrapper/UnAuthorized";
-import { Suspense } from "react";
 const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <UnAuthorized>

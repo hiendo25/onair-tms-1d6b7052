@@ -1,10 +1,11 @@
-import Image from "next/image";
-import { cn } from "@/utils";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
-import { ClassRoom } from "../../classroom-form.schema";
+import Image from "next/image";
 import { Control, useController } from "react-hook-form";
-import { CloseIcon } from "@/shared/assets/icons";
+
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { CloseIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
+import { ClassRoom } from "../../classroom-form.schema";
 
 export interface ThumbnailUploaderProps {
   onChange?: (url: string) => void;

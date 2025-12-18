@@ -1,9 +1,12 @@
+import React from "react";
 import { redirect } from "next/navigation";
-import PageContainer from "@/shared/ui/PageContainer";
-import CreateClassRoomForm from "./_components/CreateClassRoomForm";
+
 import { CLASS_ROOM_PLATFORM, ClassRoomPlatformType } from "@/constants/class-room.constant";
-import { ClassRoomType } from "@/model/class-room.model";
 import { PATHS } from "@/constants/path.constant";
+import { ClassRoomType } from "@/model/class-room.model";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import CreateClassRoomForm from "./_components/CreateClassRoomForm";
 interface CreateClassRoomPageProps {
   searchParams: Promise<
     {

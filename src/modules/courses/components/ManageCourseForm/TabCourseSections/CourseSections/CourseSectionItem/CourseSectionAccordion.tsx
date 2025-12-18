@@ -1,9 +1,9 @@
 import React from "react";
-
 import { styled } from "@mui/material";
-import MuiAccordion, { AccordionProps, accordionClasses } from "@mui/material/Accordion";
-import MuiAccordionSummary, { AccordionSummaryProps, accordionSummaryClasses } from "@mui/material/AccordionSummary";
+import MuiAccordion, { accordionClasses, AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
+import MuiAccordionSummary, { accordionSummaryClasses, AccordionSummaryProps } from "@mui/material/AccordionSummary";
+
 import { ChevronDownIcon } from "@/shared/assets/icons";
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(

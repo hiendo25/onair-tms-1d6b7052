@@ -1,7 +1,8 @@
 import React from "react";
-import { SPALayout } from "@/shared/ui/layouts/spa";
+
 import Authorized from "@/modules/auth-wrapper/Authorized";
 import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWrapper";
+import { SPALayout } from "@/shared/ui/layouts/spa";
 
 interface PropTypes {
   children: React.ReactNode;

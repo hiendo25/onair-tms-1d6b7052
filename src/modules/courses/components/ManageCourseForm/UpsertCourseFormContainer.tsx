@@ -1,18 +1,20 @@
 "use client";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef } from "react";
-import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
-import { UpsertCourseFormData, upsertCourseSchema } from "./upsert-course.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
+
 import { BookOpenIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import { useUpsertCourseStore } from "../../store/upsert-course-context";
-import UpsertCourseTabContainer, { UpsertCourseTabContainerRef } from "./UpsertCourseTabContainer";
+import { UpsertCourseStore } from "../../store/upsert-course-store";
+
 import TabCourseInformation from "./TabCourseInformation";
 import TabCourseSections, { initSectionFormData } from "./TabCourseSections";
 import TabCourseSetting from "./TabCourseSetting";
-import { useSnackbar } from "notistack";
+import { UpsertCourseFormData, upsertCourseSchema } from "./upsert-course.schema";
+import UpsertCourseTabContainer, { UpsertCourseTabContainerRef } from "./UpsertCourseTabContainer";
 import { getKeyFieldByTab } from "./utils";
-import { UpsertCourseStore } from "../../store/upsert-course-store";
 
 export const TAB_KEYS_MANAGE_COURSE = {
   "clsTab-information": "clsTab-information",

@@ -1,4 +1,5 @@
 import { Database } from "@/types/supabase.types";
+
 import { QuestionOption } from "./question-option.dto";
 
 export class AssignmentDto {
@@ -39,4 +40,3 @@ export class AssignmentDto {
     } | null;
   }>;
 }
-

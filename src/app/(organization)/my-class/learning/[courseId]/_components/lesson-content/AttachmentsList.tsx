@@ -1,15 +1,16 @@
 import { useState } from "react";
+import ArchiveIcon from "@mui/icons-material/Archive";
+import ImageIcon from "@mui/icons-material/Image";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
 import {
   Box,
   Button,
   Stack,
   Typography,
 } from "@mui/material";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import ImageIcon from "@mui/icons-material/Image";
-import ArchiveIcon from "@mui/icons-material/Archive";
+
 import type { LearningLessonAttachment } from "@/modules/learning-screen/types";
 import { getSignedResourceUrl } from "@/modules/learning-screen/utils/resource";
 

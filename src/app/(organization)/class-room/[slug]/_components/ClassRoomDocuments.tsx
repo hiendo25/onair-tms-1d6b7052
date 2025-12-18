@@ -1,6 +1,7 @@
+import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { FilePdfIcon } from "@/shared/assets/icons";
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
 
 interface ClassRoomDocumentsProps {
   data: NonNullable<GetClassRoomBySlugResponse["data"]>;

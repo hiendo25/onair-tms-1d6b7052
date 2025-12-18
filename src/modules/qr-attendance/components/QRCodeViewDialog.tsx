@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Alert,
   AlertTitle,
@@ -16,10 +18,9 @@ import {
   Tabs,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
+
 import { useGetQRCodesByClassRoomQuery } from "@/modules/class-room-management/operation/qr-attendance";
+import { ClassRoomPriorityDto } from "@/types/dto/classRooms/classRoom.dto";
 
 interface QRCodeViewDialogProps {
   open: boolean;

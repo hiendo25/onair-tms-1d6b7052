@@ -1,7 +1,7 @@
 "use client";
+import React, { useMemo } from "react";
 import { Alert, SxProps, Theme } from "@mui/material";
 import { SnackbarProvider as NotiSnackbarProvider } from "notistack";
-import { useMemo } from "react";
 export default function SnackbarProvider({ children }: { readonly children: React.ReactNode }) {
   const baseSx = useMemo((): SxProps<Theme> => {
     return (theme) => ({

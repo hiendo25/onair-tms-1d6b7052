@@ -1,14 +1,16 @@
 import { memo, useCallback } from "react";
+import { FormHelperText, FormLabel, Typography } from "@mui/material";
 import Image from "next/image";
-import { Control, useController } from "react-hook-form";
 import { useSnackbar } from "notistack";
-import { cn } from "@/utils";
+import { Control, useController } from "react-hook-form";
+
 import { LessonType } from "@/model/lesson.model";
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
-import { FormHelperText, FormLabel, Typography } from "@mui/material";
+import { cn } from "@/utils";
 import { UpsertCourseFormData } from "../../upsert-course.schema";
-import VideoViewItem from "./VideoItemView";
+
 import FileViewItem from "./FileViewItem";
+import VideoViewItem from "./VideoItemView";
 export interface MainResourceFieldProps {
   onChange?: (url: string) => void;
   control: Control<UpsertCourseFormData>;

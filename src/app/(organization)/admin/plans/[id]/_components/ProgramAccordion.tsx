@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import {
   Accordion,
   AccordionDetails,
@@ -12,10 +14,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { PlanProgramDetail } from "@/modules/plans/types";
+
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+import { PlanProgramDetail } from "@/modules/plans/types";
 
 interface ProgramAccordionProps {
   programs: PlanProgramDetail[];

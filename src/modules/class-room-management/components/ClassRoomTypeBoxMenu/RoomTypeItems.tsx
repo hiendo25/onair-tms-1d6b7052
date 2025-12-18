@@ -1,9 +1,10 @@
 "use client";
-import { Dispatch, SetStateAction, memo } from "react";
-import Image from "next/image";
-import { cn } from "@/utils";
+import { Dispatch, memo,SetStateAction } from "react";
 import { Box, Typography } from "@mui/material";
+import Image from "next/image";
+
 import { ClassRoomType } from "@/model/class-room.model";
+import { cn } from "@/utils";
 export interface RoomTypeItemsProps {
   className?: string;
   value: NonNullable<ClassRoomType> | undefined;

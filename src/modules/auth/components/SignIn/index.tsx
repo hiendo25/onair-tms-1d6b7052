@@ -1,12 +1,13 @@
 "use client";
 import * as React from "react";
+import { Alert } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import SignInFormClient, { SignInFormClientProps } from "./SignInFormClient";
+
+import { useAuthSignInWithPassword } from "../../hooks/useAuthSignIn";
 import AuthCard from "../AuthCard";
 import GoogleSignInButton from "../GoogleSignInButton";
 
-import { useAuthSignInWithPassword } from "../../hooks/useAuthSignIn";
-import { Alert } from "@mui/material";
+import SignInFormClient, { SignInFormClientProps } from "./SignInFormClient";
 
 interface SignInProps {
   className?: string;

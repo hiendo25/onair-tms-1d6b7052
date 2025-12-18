@@ -1,9 +1,10 @@
-import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
 import { Control, useController } from "react-hook-form";
-import { Assignment } from "../../assignment-form.schema";
+
 import { useCreateClassFieldMutation } from "@/modules/class-room-management/operation/mutation";
-import { slugify } from "@/utils/slugify";
+import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
+import { slugify } from "@/utils/slugify";
+import { Assignment } from "../../assignment-form.schema";
 
 interface AssignmentCategorySelectorProps {
   control: Control<Assignment>;

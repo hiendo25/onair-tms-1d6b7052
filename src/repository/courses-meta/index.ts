@@ -1,6 +1,7 @@
-import { supabase } from "@/services";
-import { CreateCourseMetaPayload, GetCourseMetaQueryParams, UpSertCourseMetaPayload } from "./type";
 import { CourseMetaKey, CourseMetaValue } from "@/constants/course-meta.constant";
+import { supabase } from "@/services";
+
+import { CreateCourseMetaPayload, GetCourseMetaQueryParams, UpSertCourseMetaPayload } from "./type";
 export * from "./type";
 
 const createCourseMeta = async <K extends CourseMetaKey>(payload: CreateCourseMetaPayload<K>) => {

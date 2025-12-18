@@ -1,6 +1,8 @@
 import { createStore } from "zustand/vanilla";
-import attachActions from "./authActions";
+
 import { AuthData } from "../types";
+
+import attachActions from "./authActions";
 type AuthStoreState = {
   data: AuthData;
 };

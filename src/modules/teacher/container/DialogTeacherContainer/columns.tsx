@@ -1,6 +1,7 @@
 "use client";
-import { Chip, Typography, alpha } from "@mui/material";
+import { alpha,Chip, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
+
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
   {

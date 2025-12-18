@@ -1,12 +1,13 @@
+import React from "react";
+import { IconButton, styled,Typography, TypographyProps } from "@mui/material";
+import dayjs from "dayjs";
 import { Control, Controller, useFieldArray } from "react-hook-form";
+
+import { ChevronDownIcon } from "@/shared/assets/icons";
+import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
-import { IconButton, Typography, TypographyProps, styled } from "@mui/material";
-import React from "react";
-import { ChevronDownIcon } from "@/shared/assets/icons";
-import dayjs from "dayjs";
 interface QrSettingProps {
   className?: string;
 }

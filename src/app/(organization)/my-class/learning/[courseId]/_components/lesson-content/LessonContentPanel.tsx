@@ -4,9 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { Alert, Box, Button, CircularProgress, Divider, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
+
 import type {
   CourseRow,
   LearningLesson,
@@ -14,11 +15,12 @@ import type {
 } from "@/modules/learning-screen/types";
 import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import { inferLessonContentKind } from "@/modules/learning-screen/utils/resource";
-import VideoLessonPlayer from "./VideoLessonPlayer";
-import ScormLessonViewer from "./ScormLessonViewer";
+
 import AssessmentLessonFrame from "./AssessmentLessonFrame";
 import AttachmentsList from "./AttachmentsList";
 import DocumentLessonViewer from "./DocumentLessonViewer";
+import ScormLessonViewer from "./ScormLessonViewer";
+import VideoLessonPlayer from "./VideoLessonPlayer";
 
 const DESCRIPTION_COLLAPSED_HEIGHT = 320;
 

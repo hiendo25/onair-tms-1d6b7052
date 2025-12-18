@@ -1,7 +1,3 @@
-import { FORMAT_DATE_LABEL_WITHOUT_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
-import { CloseIcon } from "@/shared/assets/icons";
-import { Image } from "@/shared/ui/Image";
 import {
   Box,
   Button,
@@ -15,6 +11,12 @@ import {
   Typography,
 } from "@mui/material";
 import dayjs from "dayjs";
+
+import { FORMAT_DATE_LABEL_WITHOUT_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { CloseIcon } from "@/shared/assets/icons";
+import { Image } from "@/shared/ui/Image";
+
 import JoinButton from "./JoinButton";
 
 const EnterClassRoomsDialog = ({

@@ -1,9 +1,7 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
 import {
   Alert,
+  alpha,
   Button,
   Checkbox,
   Chip,
@@ -11,21 +9,25 @@ import {
   IconButton,
   Pagination,
   PaginationProps,
+  styled,
   Toolbar,
   Typography,
-  alpha,
-  styled,
 } from "@mui/material";
+import Box from "@mui/material/Box";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 
-import EmployeeFilter from "./EmployeeFilter";
+import useDebounce from "@/hooks/useDebounce";
+import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
+import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
+import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import { useUserOrganization } from "@/modules/organization";
+import { CloseIcon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
 import { cn } from "@/utils";
-import { CloseIcon } from "@/shared/assets/icons";
-import useDebounce from "@/hooks/useDebounce";
-import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
+
 import CheckAllStudents from "./CheckAllStudent";
-import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
-import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
+import EmployeeFilter from "./EmployeeFilter";
 
 const BoxWraper = styled("div")(({ theme }) => ({
   border: "1px solid",
@@ -65,12 +67,15 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
   const [selectedDepartmentIds, setSelectedDepartmentIds] = React.useState<string[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = React.useState<string[]>([]);
   const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
+  const { orgId } = useUserOrganization((state) => state.currentOrganization);
   const { data: employeeData, isPending } = useGetEmployeeQuery({
     enabled: true,
     queryParams: {
       ...queryParams,
       search: searchEmployeeNameDebounce,
-      organizationUnitIds: [...selectedDepartmentIds, ...selectedBranchIds],
+      departmentIds: [...selectedDepartmentIds],
+      branchIds: [...selectedBranchIds],
+      organizationId: orgId,
       // excludes: values,
     },
   });
@@ -205,7 +210,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               <CheckAllStudents
                 onCheckAll={handleCheckAllStudents}
                 selectedStudents={selectedStudents}
-                students={employeeData?.data}
+                students={employeeData?.data?.map((item) => ({ id: item.id, code: item.employee_code }))}
               />
               <EmployeeFilter
                 onSearch={(searchText) => {

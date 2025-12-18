@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Components, Theme, alpha } from "@mui/material/styles";
+import { alpha,Components, Theme } from "@mui/material/styles";
 
  
 export const typographyCustomizations: Components<Theme> = {

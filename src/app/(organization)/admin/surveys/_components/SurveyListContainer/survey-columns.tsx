@@ -15,7 +15,7 @@ export const surveyColumns: TableDataProps<SurveyRow>["columns"] = [
       return (
         <div>
           <Typography className="text-sm font-semibold mb-1">{title}</Typography>
-          <Typography className="text-sm" variant="body2">
+          <Typography className="text-sm line-clamp-2" variant="body2">
             {description}
           </Typography>
         </div>

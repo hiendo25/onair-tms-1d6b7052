@@ -1,7 +1,9 @@
-import attachActions from "./upsert-course-actions";
 import { createStore } from "zustand/vanilla";
-import { ClassRoomActions } from "./upsert-course-actions";
+
 import { EmployeeType } from "@/model/employee.model";
+
+import attachActions from "./upsert-course-actions";
+import { ClassRoomActions } from "./upsert-course-actions";
 
 export type TeacherSelectedItem = {
   id: string;

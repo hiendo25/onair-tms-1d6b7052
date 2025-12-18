@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Button, Typography } from "@mui/material";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Button, Typography } from "@mui/material";
 
 interface FileUploadButtonProps {
   onFileSelect: (files: FileList | null) => void;

@@ -11,8 +11,9 @@ import {
   Typography,
 } from "@mui/material";
 
-import { Accordion, AccordionDetails, AccordionSummary } from "./CourseSectionAccordion";
 import { ChevronDownIcon, Edit05Icon, Trash01Icon } from "@/shared/assets/icons";
+
+import { Accordion, AccordionDetails, AccordionSummary } from "./CourseSectionAccordion";
 
 interface CourseSectionContentProps extends PropsWithChildren {
   header?: React.ReactNode;

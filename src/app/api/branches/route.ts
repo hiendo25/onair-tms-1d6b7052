@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { CreateBranchDto } from "@/types/dto/branches";
-import { branchService } from "@/services";
+import { NextRequest, NextResponse } from "next/server";
+
 import { PATHS } from "@/constants/path.constant";
+import { branchService } from "@/services";
+import type { CreateBranchDto } from "@/types/dto/branches";
 
 export async function POST(request: NextRequest) {
   try {
