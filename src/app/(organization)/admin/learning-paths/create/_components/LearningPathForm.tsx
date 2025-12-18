@@ -196,7 +196,7 @@ export default function LearningPathForm({
               <CloseIcon />
             </IconButton>
             <Button size="large" onClick={handleClickSubmit} disabled={isLoading}>
-              {mode === "edit" ? "Cập nhật" : "Tạo lộ trình học tập"}
+              {mode === "edit" ? "Cập nhật" : "Đăng tải"}
             </Button>
           </div>
         }

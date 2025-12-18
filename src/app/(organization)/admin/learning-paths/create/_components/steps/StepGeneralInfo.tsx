@@ -7,6 +7,8 @@ import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
 
+import EmployeeAssignmentField from "./EmployeeAssignmentField";
+
 export default function StepGeneralInfo() {
   const {
     control,
@@ -17,28 +19,28 @@ export default function StepGeneralInfo() {
     <Card sx={{ border: "1px solid", borderColor: "divider" }}>
       <CardContent sx={{ p: 4 }}>
         <Typography variant="h5" sx={{ mb: 1, fontWeight: 600 }}>
-          Thông tin chung
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Nhập tên, mô tả và thông tin cơ bản cho lộ trình học tập
+          Thông tin cơ bản
         </Typography>
 
-        <Stack spacing={3}>
+        <Stack mt={2} spacing={3}>
           {/* Name Field */}
           <RHFTextField
             name="info.name"
             control={control}
-            label="Tên lộ trình học tập"
+            label="Tên lộ trình"
             placeholder="Nhập tên lộ trình học tập"
             required
           />
+
+          {/* Employee Assignment Section */}
+          <EmployeeAssignmentField control={control} />
 
           {/* Description Field */}
           <RHFTextAreaField
             name="info.description"
             control={control}
             label="Mô tả"
-            placeholder="Nhập mô tả cho lộ trình học tập"
+            placeholder="Mô tả chi tiết lộ trình học tập"
             minRows={4}
           />
 

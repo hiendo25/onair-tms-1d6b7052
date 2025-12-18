@@ -7,6 +7,16 @@ const thumbnailSchema = zod.union([
   zod.null(),
 ]).optional();
 
+// Employee schema for assignment
+export const employeeItemSchema = zod.object({
+  id: zod.string(),
+  fullName: zod.string(),
+  email: zod.string(),
+  employeeCode: zod.string(),
+  avatar: zod.string().optional(),
+  empoyeeType: zod.string().optional(),
+});
+
 // General information schema for Step 1
 export const generalInfoSchema = zod.object({
   name: zod
@@ -15,6 +25,8 @@ export const generalInfoSchema = zod.object({
     .max(200, { message: "Tên lộ trình học tập tối đa 200 ký tự." }),
   description: zod.string().optional(),
   thumbnail: thumbnailSchema,
+  assignmentMode: zod.enum(["auto", "manual"]).default("auto"),
+  assignedEmployees: zod.array(employeeItemSchema).default([]),
 });
 
 // Class-room schema for phase selection
@@ -51,6 +63,7 @@ export const learningPathSchema = zod.object({
 });
 
 // Type exports
+export type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 export type ClassRoom = zod.infer<typeof classRoomSchema>;
 export type GeneralInfo = zod.infer<typeof generalInfoSchema>;
 export type Phase = zod.infer<typeof phaseSchema>;

@@ -1465,6 +1465,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          metadata: Json | null
           name: string
           organization_id: string
           thumbnail_url: string | null
@@ -1475,6 +1476,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name: string
           organization_id: string
           thumbnail_url?: string | null
@@ -1485,6 +1487,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name?: string
           organization_id?: string
           thumbnail_url?: string | null
@@ -2172,6 +2175,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      serveys: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Relationships: []
       }
       surveys: {
         Row: {
