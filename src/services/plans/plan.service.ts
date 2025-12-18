@@ -21,6 +21,8 @@ interface GetPlansInput {
   page?: number;
   limit?: number;
   status?: PlanStatus | "all";
+  startDate?: string;
+  endDate?: string;
 }
 
 class PlanService {

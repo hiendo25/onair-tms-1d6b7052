@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Chip, Stack, Tooltip, Typography } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import PersonIcon from "@mui/icons-material/Person";
@@ -38,6 +38,7 @@ const toneStyle = {
 
 function InfoTile({ icon: Icon, label, value, helper, tone }: InfoTileProps) {
   const toneColor = toneStyle[tone];
+  const isLongValue = value.length > 48;
 
   return (
     <Box
@@ -50,6 +51,7 @@ function InfoTile({ icon: Icon, label, value, helper, tone }: InfoTileProps) {
         display: "flex",
         gap: 1.75,
         alignItems: "flex-start",
+        minWidth: 0,
       }}
     >
       <Box
@@ -65,15 +67,28 @@ function InfoTile({ icon: Icon, label, value, helper, tone }: InfoTileProps) {
       >
         <Icon sx={{ color: toneColor.icon, fontSize: 26 }} />
       </Box>
-      <Box sx={{ flex: 1 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 600 }}>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontWeight: 500 }}>
           {label}
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 600, lineHeight: 1.3 }} className="line-clamp-2">
-          {value}
-        </Typography>
+        <Tooltip
+          title={value}
+          arrow
+          placement="left"
+          disableHoverListener={!isLongValue}
+          disableFocusListener={!isLongValue}
+          disableTouchListener={!isLongValue}
+        >
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 500, lineHeight: 1.3, overflowWrap: "anywhere" }}
+            className="line-clamp-2"
+          >
+            {value}
+          </Typography>
+        </Tooltip>
         {helper && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25, overflowWrap: "anywhere" }}>
             {helper}
           </Typography>
         )}
@@ -148,7 +163,16 @@ export default function PlanInfoCards({
       }}
     >
       <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: { xs: "flex-start", sm: "center" },
+            justifyContent: "space-between",
+            flexWrap: { xs: "wrap", sm: "nowrap" },
+            gap: { xs: 1.5, sm: 2 },
+            mb: 2,
+          }}
+        >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Thông tin chung
@@ -157,14 +181,24 @@ export default function PlanInfoCards({
               Các thông tin chính về ngân sách, người phê duyệt và mục tiêu.
             </Typography>
           </Box>
-          <Chip label="Cập nhật mới nhất" size="small" color="primary" variant="outlined" />
+          <Chip
+            label="Cập nhật mới nhất"
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ alignSelf: { xs: "flex-start", sm: "center" } }}
+          />
         </Box>
 
         <Stack
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "repeat(auto-fit, minmax(240px, 1fr))" },
-            gap: 2
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(auto-fit, minmax(220px, 1fr))",
+              md: "repeat(auto-fit, minmax(240px, 1fr))",
+            },
+            gap: 2,
           }}
         >
           {infoTiles.map((tile) => (
