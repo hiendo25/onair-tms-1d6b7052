@@ -36,8 +36,7 @@ export default function StepPhases() {
   } = useLearningPathFormContext();
 
   const { organization, ...rest } = useUserOrganization((state) => state.data);
-  const isAdmin = rest.employeeType === "admin";
-  const organizationId = isAdmin ? organization?.id : undefined;
+  const organizationId = organization?.id;
   const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
 
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
@@ -162,17 +161,14 @@ export default function StepPhases() {
       <CardContent sx={{ p: 4 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
-            Giai đoạn
+            Giai đoạn học tập
           </Typography>
           <Button variant="fill" startIcon={<AddIcon />} onClick={handleAddPhase}>
             Thêm giai đoạn
           </Button>
         </Stack>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
-          Thêm và quản lý các giai đoạn trong lộ trình học tập
-        </Typography>
 
-        <Stack spacing={3}>
+        <Stack mt={3} spacing={3}>
           {/* Phase List */}
           {phases.length === 0 ? (
             <Box
@@ -220,9 +216,9 @@ export default function StepPhases() {
                           <FormControl fullWidth>
                             <FormLabel>Mô tả giai đoạn</FormLabel>
                             <OutlinedInput
-                              placeholder="Nhập mô tả cho giai đoạn này (tùy chọn)"
+                              placeholder="Mô tả về giai đoạn học tập này"
                               multiline
-                              minRows={2}
+                              minRows={4}
                               maxRows={8}
                               value={phase.description || ""}
                               onChange={(e) => handleDescriptionChange(index, e.target.value)}

@@ -94,9 +94,9 @@ const SortablePhaseItem: React.FC<SortablePhaseItemProps> = ({
               <Chip
                 label={`${classRoomCount} lớp học`}
                 size="small"
-                color="primary"
+                color="default"
                 variant="outlined"
-                sx={{ fontWeight: 500 }}
+                sx={{ fontWeight: 500, borderColor: "darkgray" }}
               />
             )}
 
@@ -121,23 +121,15 @@ const SortablePhaseItem: React.FC<SortablePhaseItemProps> = ({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                width: 32,
-                height: 32,
-                borderRadius: "50%",
+                width: 24,
+                height: 24,
+                borderRadius: 1,
+                p: 1.5,
                 cursor: "pointer",
-                color: "error.main",
+                color: "grey.600",
                 transition: "background-color 0.2s",
-                "&:hover": {
-                  bgcolor: "error.lighter",
-                },
-                "&:active": {
-                  bgcolor: "error.light",
-                },
-                "&:focus-visible": {
-                  outline: "2px solid",
-                  outlineColor: "error.main",
-                  outlineOffset: 2,
-                },
+                border: "1px solid",
+                borderColor: "grey.500",
               }}
             >
               <DeleteIcon fontSize="small" />
