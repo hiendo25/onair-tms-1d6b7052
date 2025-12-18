@@ -43,12 +43,12 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
         />
 
         {/* Statistics Section */}
-        <PlanStatistics
+        {/* <PlanStatistics
           programsCount={planDetail.programsCount}
           topicsCount={planDetail.topicsCount}
           coursesCount={planDetail.coursesCount}
           instructorsCount={planDetail.instructorsCount}
-        />
+        /> */}
 
         {/* Program List Section */}
         <ProgramAccordion programs={planDetail.programs} programsCount={planDetail.programsCount} />

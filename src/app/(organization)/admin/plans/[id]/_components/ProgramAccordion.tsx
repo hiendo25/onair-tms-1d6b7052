@@ -87,6 +87,8 @@ export default function ProgramAccordion({
     setTruncatedTopicDescriptions(newTruncatedState);
   }, [programs]);
 
+  if (programs.length === 0) return null;
+
   return (
     <Card sx={{ mb: 3, bgcolor: "white" }}>
       <CardContent>
@@ -139,7 +141,7 @@ export default function ProgramAccordion({
                       {program.name}
                     </Typography>
                     <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.875rem" }}>
-                      {program.startDate && program.endDate ? `${fDateTime(program.startDate,FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(program.endDate,FORMAT_DATE_TIME_CLEANER)}` : "Chưa có lịch"}
+                      {program.startDate && program.endDate ? `${fDateTime(program.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(program.endDate, FORMAT_DATE_TIME_CLEANER)}` : "Chưa có lịch"}
                     </Typography>
 
                     {/* Program Description with Expand/Collapse */}
@@ -228,169 +230,169 @@ export default function ProgramAccordion({
                     )}
                   </Box>
                 </AccordionSummary>
-              <AccordionDetails sx={{ bgcolor: "white", borderTop: "1px solid #e0e0e0", p: 0, borderRadius: 1, mt: 0.5 }}>
-                {program.topics && program.topics.length > 0 ? (
-                  <Stack spacing={0}>
-                    {program.topics.map((topic, topicIndex) => (
-                      <Box key={topic.id}>
-                        {/* Topic Header - Level 1 (No left padding, Chip + Title) */}
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1.5,
-                            px: 0,
-                            py: 1.5,
-                            pl: 2,
-                          }}
+                <AccordionDetails sx={{ bgcolor: "white", borderTop: "1px solid #e0e0e0", p: 0, borderRadius: 1, mt: 0.5 }}>
+                  {program.topics && program.topics.length > 0 ? (
+                    <Stack spacing={0}>
+                      {program.topics.map((topic, topicIndex) => (
+                        <Box key={topic.id}>
+                          {/* Topic Header - Level 1 (No left padding, Chip + Title) */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                              px: 0,
+                              py: 1.5,
+                              pl: 2,
+                            }}
                           >
                             {/* Topic Chip - Dynamically generated name */}
                             <Chip
                               label={`Chủ đề ${topicIndex + 1}`}
                               size="small"
-                            variant="filled"
-                            sx={{
-                              bgcolor: "#212B36",
-                              '& span': {
-                                color: "white !important"
-                              }
-                            }}
-                          />
-                          {/* Topic Title */}
-                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                            {topic.name}
-                          </Typography>
-                        </Box>
-
-                        {/* Topic Description with Expand/Collapse */}
-                        {topic.description && (
-                          <Box sx={{ bgcolor: "grey.200", p: 1, mx: 2, mb: 1.5, borderRadius: 1 }}>
-                            <Typography
-                              variant="body2"
+                              variant="filled"
                               sx={{
-                                color: "text.primary",
-                                fontSize: "0.875rem",
-                                display: "inline",
+                                bgcolor: "#212B36",
+                                '& span': {
+                                  color: "white !important"
+                                }
                               }}
-                            >
-                              {expandedTopicDescriptions[topic.id] ? (
-                                <>
-                                  {topic.description}{" "}
-                                  {truncatedTopicDescriptions[topic.id] && (
-                                    <Typography
-                                      component="span"
-                                      variant="body2"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleTopicDescription(topic.id);
-                                      }}
-                                      sx={{
-                                        color: "primary.main",
-                                        cursor: "pointer",
-                                        fontSize: "0.875rem",
-                                        fontWeight: 500,
-                                        whiteSpace: "nowrap",
-                                        "&:hover": {
-                                          textDecoration: "underline",
-                                        },
-                                      }}
-                                    >
-                                      Thu gọn
-                                    </Typography>
-                                  )}
-                                </>
-                              ) : (
-                                <>
-                                  <Typography
-                                    component="span"
-                                    variant="body2"
-                                    ref={(el) => {
-                                      topicDescriptionRefs.current[topic.id] = el;
-                                    }}
-                                    sx={{
-                                      color: "text.primary",
-                                      fontSize: "0.875rem",
-                                      display: "-webkit-box",
-                                      WebkitLineClamp: 1,
-                                      WebkitBoxOrient: "vertical",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                    }}
-                                  >
-                                    {topic.description}
-                                  </Typography>{" "}
-                                  {truncatedTopicDescriptions[topic.id] && (
-                                    <Typography
-                                      component="span"
-                                      variant="body2"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleTopicDescription(topic.id);
-                                      }}
-                                      sx={{
-                                        color: "primary.main",
-                                        cursor: "pointer",
-                                        fontSize: "0.875rem",
-                                        fontWeight: 500,
-                                        whiteSpace: "nowrap",
-                                        "&:hover": {
-                                          textDecoration: "underline",
-                                        },
-                                      }}
-                                    >
-                                      Xem thêm
-                                    </Typography>
-                                  )}
-                                </>
-                              )}
+                            />
+                            {/* Topic Title */}
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                              {topic.name}
                             </Typography>
                           </Box>
-                        )}
-                        <Stack spacing={0}>
-                          {topic.courses.map((course) => (
-                            <Box key={course.id}>
-                              {/* Course Header */}
-                              <Box
+
+                          {/* Topic Description with Expand/Collapse */}
+                          {topic.description && (
+                            <Box sx={{ bgcolor: "grey.200", p: 1, mx: 2, mb: 1.5, borderRadius: 1 }}>
+                              <Typography
+                                variant="body2"
                                 sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                  pl: 6,
-                                  pr: 2,
-                                  py: 1.5,
+                                  color: "text.primary",
+                                  fontSize: "0.875rem",
+                                  display: "inline",
                                 }}
                               >
-                                <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-                                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                                  {course.title}
-                                </Typography>
-                              </Box>
+                                {expandedTopicDescriptions[topic.id] ? (
+                                  <>
+                                    {topic.description}{" "}
+                                    {truncatedTopicDescriptions[topic.id] && (
+                                      <Typography
+                                        component="span"
+                                        variant="body2"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleTopicDescription(topic.id);
+                                        }}
+                                        sx={{
+                                          color: "primary.main",
+                                          cursor: "pointer",
+                                          fontSize: "0.875rem",
+                                          fontWeight: 500,
+                                          whiteSpace: "nowrap",
+                                          "&:hover": {
+                                            textDecoration: "underline",
+                                          },
+                                        }}
+                                      >
+                                        Thu gọn
+                                      </Typography>
+                                    )}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Typography
+                                      component="span"
+                                      variant="body2"
+                                      ref={(el) => {
+                                        topicDescriptionRefs.current[topic.id] = el;
+                                      }}
+                                      sx={{
+                                        color: "text.primary",
+                                        fontSize: "0.875rem",
+                                        display: "-webkit-box",
+                                        WebkitLineClamp: 1,
+                                        WebkitBoxOrient: "vertical",
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                      }}
+                                    >
+                                      {topic.description}
+                                    </Typography>{" "}
+                                    {truncatedTopicDescriptions[topic.id] && (
+                                      <Typography
+                                        component="span"
+                                        variant="body2"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleTopicDescription(topic.id);
+                                        }}
+                                        sx={{
+                                          color: "primary.main",
+                                          cursor: "pointer",
+                                          fontSize: "0.875rem",
+                                          fontWeight: 500,
+                                          whiteSpace: "nowrap",
+                                          "&:hover": {
+                                            textDecoration: "underline",
+                                          },
+                                        }}
+                                      >
+                                        Xem thêm
+                                      </Typography>
+                                    )}
+                                  </>
+                                )}
+                              </Typography>
                             </Box>
-                          ))}
-                        </Stack>
-                      </Box>
-                    ))}
-                  </Stack>
-                ) : program.courses && program.courses.length > 0 ? (
-                  <Stack spacing={1} sx={{ p: 2 }}>
-                    {program.courses.map((course) => (
-                      <Box key={course.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {course.title}
-                        </Typography>
-                      </Box>
-                    ))}
-                  </Stack>
-                ) : (
-                  <Box sx={{ p: 2 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Chưa có nội dung chương trình
-                    </Typography>
-                  </Box>
-                )}
-              </AccordionDetails>
-            </Accordion>
+                          )}
+                          <Stack spacing={0}>
+                            {topic.courses.map((course) => (
+                              <Box key={course.id}>
+                                {/* Course Header */}
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                    pl: 6,
+                                    pr: 2,
+                                    py: 1.5,
+                                  }}
+                                >
+                                  <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+                                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                                    {course.title}
+                                  </Typography>
+                                </Box>
+                              </Box>
+                            ))}
+                          </Stack>
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : program.courses && program.courses.length > 0 ? (
+                    <Stack spacing={1} sx={{ p: 2 }}>
+                      {program.courses.map((course) => (
+                        <Box key={course.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <MenuBookIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {course.title}
+                          </Typography>
+                        </Box>
+                      ))}
+                    </Stack>
+                  ) : (
+                    <Box sx={{ p: 2 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Chưa có nội dung chương trình
+                      </Typography>
+                    </Box>
+                  )}
+                </AccordionDetails>
+              </Accordion>
             );
           })}
         </Stack>
