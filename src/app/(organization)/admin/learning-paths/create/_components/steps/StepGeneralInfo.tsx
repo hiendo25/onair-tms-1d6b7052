@@ -3,9 +3,9 @@
 import { Card, CardContent, Stack, Typography } from "@mui/material";
 
 import { useLearningPathFormContext } from "@/modules/learning-paths/use-learning-path-form-context";
-import RHFImageUpload from "@/shared/ui/form/RHFImageUpload";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
 
 export default function StepGeneralInfo() {
   const {
@@ -43,15 +43,25 @@ export default function StepGeneralInfo() {
           />
 
           {/* Thumbnail Upload */}
-          <RHFImageUpload
-            name="info.thumbnail"
+          <RHFThumbnailUpload
             control={control}
-            label="Ảnh đại diện"
-            placeholder="Nhấn để chọn ảnh"
-            helpText="Định dạng: JPG, PNG, GIF (tối đa 5MB)"
-            maxFileSize={5 * 1024 * 1024}
-            maxWidth={400}
-            maxHeight={200}
+            name="info.thumbnail"
+            label="Ảnh bìa đại diện"
+            subTitle="Hình ảnh đại diện cho lộ trình học tập của bạn"
+            required
+            aspectRatio="21/9"
+            width="480px"
+            description={
+              <div className="flex flex-wrap gap-2 items-center mb-2">
+                <Typography className="text-xs">
+                  Kích thước chuẩn: <strong>1152 x 480 px (21:9)</strong>
+                </Typography>
+                <span className="w-1 h-1 rounded-full bg-slate-500"></span>
+                <Typography className="text-xs">
+                  Định dạng: <strong>JPG, PNG, GIF</strong>
+                </Typography>
+              </div>
+            }
           />
         </Stack>
       </CardContent>

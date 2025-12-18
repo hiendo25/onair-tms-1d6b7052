@@ -1,0 +1,161 @@
+"use client";
+
+import Image from "next/image";
+import { cn } from "@/utils";
+import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
+import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
+import { CloseIcon } from "@/shared/assets/icons";
+import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+
+export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = FieldValues> {
+  control: Control<TFieldValues>;
+  name: FieldPath<TFieldValues>;
+  label?: string;
+  subTitle?: string;
+  description?: React.ReactNode;
+  required?: boolean;
+  aspectRatio?: string; // e.g., "21/9", "16/9", "4/3"
+  width?: string; // e.g., "480px", "100%"
+  onChange?: (url: string) => void;
+}
+
+/**
+ * RHFThumbnailUpload - Reusable thumbnail upload component for React Hook Form
+ * 
+ * Features:
+ * - Integrates with Library module for image selection
+ * - Supports image preview and removal
+ * - Customizable aspect ratio and width
+ * - Form validation support
+ * - Works with any React Hook Form setup
+ * 
+ * @example
+ * ```tsx
+ * <RHFThumbnailUpload
+ *   control={control}
+ *   name="thumbnail"
+ *   label="Ảnh bìa đại diện"
+ *   subTitle="Hình ảnh đại diện cho nội dung của bạn"
+ *   required
+ *   aspectRatio="21/9"
+ *   width="480px"
+ * />
+ * ```
+ */
+const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
+  control,
+  name,
+  label = "Ảnh bìa đại diện",
+  subTitle,
+  description,
+  required = false,
+  aspectRatio = "21/9",
+  width = "480px",
+  onChange,
+}: RHFThumbnailUploadProps<TFieldValues>) => {
+  const openResource = useLibraryStore((state) => state.openLibrary);
+  const {
+    field,
+    fieldState: { error },
+  } = useController({ control, name });
+
+  const handleRemoveThumbnail = () => {
+    field.onChange("");
+    onChange?.("");
+  };
+
+  const handleOpenResource = async () => {
+    const resource = await openResource({ mode: "single" });
+    const resourceItem = resource[0];
+    const path = resourceItem?.path;
+    
+    if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path) {
+      return;
+    }
+
+    field.onChange(path);
+    onChange?.(path);
+  };
+
+  return (
+    <div>
+      <FormLabel component="div" className="mb-2 inline-block">
+        {label}
+        {required && <span className="text-red-600 ml-1">*</span>}
+      </FormLabel>
+      
+      {subTitle && <Typography className="text-xs mb-4">{subTitle}</Typography>}
+      {description && <div className="description">{description}</div>}
+      
+      <div
+        className={cn(
+          "thumbnail-wrapper",
+          "bg-gray-100 rounded-xl border border-dashed border-gray-300",
+          "flex items-center justify-center",
+          error && "border-red-500"
+        )}
+        style={{
+          aspectRatio: aspectRatio,
+          width: width,
+        }}
+      >
+        {field.value && (
+          <div className="preview-url relative w-full h-full overflow-hidden rounded-xl">
+            <Image 
+              src={field.value} 
+              alt="thumbnail" 
+              fill 
+              className="w-full h-full object-cover" 
+            />
+            <IconButton
+              sx={{ 
+                width: "2rem", 
+                height: "2rem", 
+                position: "absolute", 
+                right: "0.5rem", 
+                top: "0.5rem",
+                bgcolor: "rgba(255, 255, 255, 0.9)",
+                "&:hover": {
+                  bgcolor: "rgba(255, 255, 255, 1)",
+                }
+              }}
+              onClick={handleRemoveThumbnail}
+            >
+              <CloseIcon className="w-4 h-4" />
+            </IconButton>
+          </div>
+        )}
+        
+        <div
+          className={cn("cursor-pointer", { "opacity-0 hidden pointer-events-none": field.value })}
+          onClick={handleOpenResource}
+        >
+          <Image
+            src="/assets/icons/upload-cloud.svg"
+            width={80}
+            height={40}
+            alt="upload icon"
+            className="mb-3 mx-auto"
+          />
+          <Typography
+            sx={(theme) => ({
+              color: theme.palette.primary["dark"],
+              backgroundColor: theme.palette.primary["lighter"],
+              fontWeight: "bold",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "0.75rem",
+            })}
+          >
+            Tải ảnh lên
+          </Typography>
+        </div>
+      </div>
+      
+      {error?.message && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
+    </div>
+  );
+};
+
+export default RHFThumbnailUpload;
+
