@@ -29,6 +29,7 @@ export const buildPlanFormDefaultValues = (initialData?: PlanFormSchema): PlanFo
           targetType: initialData.info.survey.targetType ?? "all",
           targetUnitIds: initialData.info.survey.targetUnitIds ?? [],
           createdAt: initialData.info.survey.createdAt ?? null,
+          resultSummary: initialData.info.survey.resultSummary ?? null,
         }
         : undefined,
     },
@@ -65,6 +66,7 @@ export const mapPlanDetailToFormValues = (planDetail: PlanDetailDto): PlanFormSc
         status: planDetail.survey.status,
         targetType: planDetail.survey.targetType ?? "all",
         targetUnitIds: planDetail.survey.targetUnitIds ?? [],
+        resultSummary: planDetail.survey.resultSummary ?? null,
       }
       : undefined,
   },

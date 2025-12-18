@@ -14,6 +14,7 @@ import {
   GET_PLAN_DETAIL,
   GET_PLANS,
   UPDATE_PLAN,
+  UPDATE_PLAN_STATUS,
 } from "./key";
 
 export const useCreatePlanMutation = () => {
@@ -97,17 +98,31 @@ export const useCreatePlanDraftCourseMutation = () => {
       queryClient.setQueryData<PlanTopicCourse[] | undefined>(
         [GET_COURSES_OPTIONS, variables.organizationId],
         (prev = []) => {
-        const next = prev ?? [];
-        if (!data) return next;
+          const next = prev ?? [];
+          if (!data) return next;
 
-        const exists = next.some((course) => course.id === data.id);
-        if (exists) return next;
+          const exists = next.some((course) => course.id === data.id);
+          if (exists) return next;
 
           return [...next, { id: data.id, title: data.title ?? variables.title }];
         },
       );
 
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] });
+    },
+  });
+};
+
+export const useUpdatePlanStatusMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation({
+    mutationKey: [UPDATE_PLAN_STATUS],
+    mutationFn: ({ id, status, approverId }: { id: string; status: PlanStatus; approverId?: string | null }) =>
+      planService.updatePlanStatus({ id, status, approverId }),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: [GET_PLANS] });
+      queryClient.invalidateQueries({ queryKey: [GET_PLAN_DETAIL, variables.id] });
     },
   });
 };

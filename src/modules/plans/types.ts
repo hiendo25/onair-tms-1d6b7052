@@ -11,6 +11,7 @@ export interface PlanListItem {
   endDate: string | null;
   budget: number | null;
   status: PlanStatus;
+  surveyCompleted: boolean;
 }
 
 export interface PlanTopicCourse {
@@ -47,6 +48,7 @@ export interface PlanSurveyDetail {
   status: PlanSurveyStatus;
   targetType: PlanSurveyTarget;
   targetUnitIds: string[] | null;
+  resultSummary?: Record<string, any> | null;
 }
 
 export interface PlanDetailDto {
@@ -54,10 +56,11 @@ export interface PlanDetailDto {
   name: string;
   objective: string | null;
   startDate: string | null;
-  createdAt:string | null;
+  createdAt: string | null;
   endDate: string | null;
   budget: number | null;
   status: PlanStatus;
+  surveyCompleted: boolean;
   approver: string | null;
   programsCount: number;
   topicsCount: number;

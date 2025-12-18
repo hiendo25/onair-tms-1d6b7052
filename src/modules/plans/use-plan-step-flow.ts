@@ -33,7 +33,8 @@ export const usePlanStepFlow = ({
   initialStep,
   survey,
 }: UsePlanStepFlowProps) => {
-  const surveyLocked = !!survey && (planStatus === "pending_survey" || survey.status !== "closed");
+  const surveyAccess = useMemo(() => getPlanSurveyAccess(planStatus, survey), [planStatus, survey]);
+  const surveyLocked = surveyAccess.shouldLock;
   const initialCompletedSteps = useMemo(
     () => getPlanInitialCompletedSteps(mode, initialData, planStatus),
     [initialData, mode, planStatus],
@@ -44,9 +45,7 @@ export const usePlanStepFlow = ({
     if (surveyLocked) return defaultStep;
     if (!initialStep) return defaultStep;
 
-    return canAccessPlanStep(initialStep, initialCompletedSteps)
-      ? initialStep
-      : defaultStep;
+    return canAccessPlanStep(initialStep, initialCompletedSteps) ? initialStep : defaultStep;
   }, [initialCompletedSteps, initialStep, surveyLocked]);
 
   const [currentStep, setCurrentStep] = useState<PlanStepId>(initialStepId);
@@ -120,7 +119,7 @@ export const usePlanStepFlow = ({
 
       return true;
     },
-    [completedSteps, currentStep, planStatus, surveyLocked, updateCompletion],
+    [completedSteps, currentStep, surveyLocked, updateCompletion],
   );
 
   const isStepAccessible = useCallback(

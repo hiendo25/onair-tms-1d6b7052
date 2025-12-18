@@ -7,8 +7,10 @@ import { PATHS } from "@/constants/path.constant";
 import { PlanDetailDto } from "@/modules/plans/types";
 import PageContainer from "@/shared/ui/PageContainer";
 
+import PlanApprovalActions from "./PlanApprovalActions";
 import PlanInfoCards from "./PlanInfoCards";
 import PlanStatistics from "./PlanStatistics";
+import { PlanSurveyResultSection } from "./PlanSurveyResultSection";
 import ProgramAccordion from "./ProgramAccordion";
 
 interface PlanDetailViewProps {
@@ -25,6 +27,12 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
       ]}
     >
       <Box>
+        <PlanApprovalActions
+          planId={planDetail.id}
+          planName={planDetail.name}
+          status={planDetail.status}
+          approver={planDetail.approver}
+        />
         {/* Plan Information Cards */}
         <PlanInfoCards
           budget={planDetail.budget}
@@ -35,15 +43,18 @@ export default function PlanDetailView({ planDetail }: PlanDetailViewProps) {
         />
 
         {/* Statistics Section */}
-        <PlanStatistics
+        {/* <PlanStatistics
           programsCount={planDetail.programsCount}
           topicsCount={planDetail.topicsCount}
           coursesCount={planDetail.coursesCount}
           instructorsCount={planDetail.instructorsCount}
-        />
+        /> */}
 
         {/* Program List Section */}
         <ProgramAccordion programs={planDetail.programs} programsCount={planDetail.programsCount} />
+
+        {/* Survey Section */}
+        <PlanSurveyResultSection survey={planDetail.survey} planStatus={planDetail.status} />
       </Box>
     </PageContainer>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import dayjs, { Dayjs } from "dayjs";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -18,6 +19,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
@@ -37,6 +39,12 @@ import { getStatusColor, getStatusLabel } from "../helper";
 
 import StatCard from "./StatCard";
 
+const parseDate = (value?: string | null): Dayjs | null => {
+  if (!value) return null;
+  const parsed = dayjs(value);
+  return parsed.isValid() ? parsed : null;
+};
+
 export default function PlansTable() {
   const router = useRouter();
   const dialogs = useDialogs();
@@ -47,9 +55,20 @@ export default function PlansTable() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [searchInput, setSearchInput] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<PlanStatus | "all">("all");
+  const [startDateFilter, setStartDateFilter] = React.useState<string | null>(null);
+  const [endDateFilter, setEndDateFilter] = React.useState<string | null>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedPlanId, setSelectedPlanId] = React.useState<string | null>(null);
   const debouncedSearch = useDebounce(searchInput, 400);
+
+  const startDateRange = React.useMemo(
+    () => (startDateFilter ? dayjs(startDateFilter).startOf("day").toISOString() : undefined),
+    [startDateFilter],
+  );
+  const endDateRange = React.useMemo(
+    () => (endDateFilter ? dayjs(endDateFilter).endOf("day").toISOString() : undefined),
+    [endDateFilter],
+  );
 
   const { data, isLoading } = useGetPlansQuery({
     organizationId,
@@ -57,6 +76,8 @@ export default function PlansTable() {
     page,
     limit: rowsPerPage,
     status: statusFilter,
+    startDate: startDateRange,
+    endDate: endDateRange,
   });
   const plans = data?.data || [];
   const planStats = data?.stats || { total: 0, approved: 0, pending: 0, pending_survey: 0, rejected: 0 };
@@ -82,7 +103,8 @@ export default function PlansTable() {
   const totalCount = data?.total || 0;
   const isEmpty = !isLoading && plans.length === 0;
   const activeStatusLabel = statusFilter === "all" ? "Tất cả kế hoạch" : getStatusLabel(statusFilter as PlanStatus);
-  const hasFilter = statusFilter !== "all" || !!debouncedSearch;
+  const hasFilter = statusFilter !== "all" || !!debouncedSearch || !!startDateFilter || !!endDateFilter;
+  const hasActiveFilter = statusFilter !== "all" || !!searchInput || !!startDateFilter || !!endDateFilter;
 
   const handleCreatePlan = () => {
     router.push(PATHS.PLANS.CREATE);
@@ -98,9 +120,20 @@ export default function PlansTable() {
     setPage(1);
   };
 
+  const handleDateFilterChange = (field: "startDate" | "endDate", value: string | null) => {
+    setPage(1);
+    if (field === "startDate") {
+      setStartDateFilter(value);
+      return;
+    }
+    setEndDateFilter(value);
+  };
+
   const handleResetFilters = () => {
     setStatusFilter("all");
     setSearchInput("");
+    setStartDateFilter(null);
+    setEndDateFilter(null);
     setPage(1);
   };
 
@@ -204,9 +237,14 @@ export default function PlansTable() {
       id: "status",
       field: "status",
       headerName: "Trạng thái",
-      width: 140,
-      renderCell: (value) => (
-        <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
+      width: 220,
+      renderCell: (value, row) => (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
+          {row.surveyCompleted && (
+            <Chip label="Khảo sát xong" color="success" variant="outlined" size="small" />
+          )}
+        </Stack>
       ),
     },
     {
@@ -241,32 +279,71 @@ export default function PlansTable() {
           alignItems={{ xs: "stretch", md: "center" }}
           sx={{ mb: 2.5 }}
         >
-          <TextField
-            placeholder="Tìm kiếm"
-            value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-              setPage(1);
-            }}
-            size="small"
-            sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-                endAdornment: searchInput ? (
-                  <InputAdornment position="end">
-                    <IconButton size="small" onClick={handleClearSearch}>
-                      <ClearIcon fontSize="small" />
-                    </IconButton>
-                  </InputAdornment>
-                ) : undefined,
-              },
-            }}
-          />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Tìm kiếm
+            </Typography>
+            <TextField
+              placeholder="Tìm kiếm..."
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                setPage(1);
+              }}
+              size="small"
+              sx={{ minWidth: { xs: "100%", sm: 280 }, maxWidth: 360 }}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchInput ? (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={handleClearSearch}>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  ) : undefined,
+                },
+              }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Từ ngày
+            </Typography>
+            <DatePicker
+              value={parseDate(startDateFilter)}
+              onChange={(newValue) => handleDateFilterChange("startDate", newValue ? newValue.toISOString() : null)}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  sx: { minWidth: { xs: "100%", sm: 200 }, maxWidth: 240 },
+                },
+              }}
+            />
+          </Box>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, minWidth: 0 }}>
+            <Typography variant="caption" color="text.secondary" fontWeight={600}>
+              Đến ngày
+            </Typography>
+            <DatePicker
+              value={parseDate(endDateFilter)}
+              onChange={(newValue) => handleDateFilterChange("endDate", newValue ? newValue.toISOString() : null)}
+              format="DD/MM/YYYY"
+              slotProps={{
+                textField: {
+                  size: "small",
+                  fullWidth: true,
+                  sx: { minWidth: { xs: "100%", sm: 200 }, maxWidth: 240 },
+                },
+              }}
+            />
+          </Box>
           <Box sx={{ flex: 1 }} />
           <Button
             variant="contained"
@@ -277,6 +354,20 @@ export default function PlansTable() {
             Tạo kế hoạch
           </Button>
         </Stack>
+
+        {/* {hasActiveFilter && (
+          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+            <Button
+              variant="text"
+              color="inherit"
+              startIcon={<ClearIcon />}
+              onClick={handleResetFilters}
+              sx={{ textTransform: "none" }}
+            >
+              Xóa bộ lọc
+            </Button>
+          </Stack>
+        )} */}
 
         <Stack
           direction={{ xs: "column", lg: "row" }}

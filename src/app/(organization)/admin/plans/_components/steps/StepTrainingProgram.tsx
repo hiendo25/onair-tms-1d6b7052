@@ -26,6 +26,7 @@ import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { formatDateRange } from "../../helper";
+import { fIsBetween } from "@/lib";
 
 interface StepTrainingProgramProps {
   onContinue: () => void;
@@ -37,6 +38,8 @@ export default function StepTrainingProgram({
   const {
     control,
     formState: { errors },
+    setError,
+    clearErrors,
   } = usePlanFormContext();
   const [showForm, setShowForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -84,6 +87,7 @@ export default function StepTrainingProgram({
     });
     setEditingIndex(null);
     setShowForm(true);
+    clearErrors("programs");
   };
 
   const handleEditProgram = (index: number) => {
@@ -100,6 +104,26 @@ export default function StepTrainingProgram({
   };
 
   const handleSaveProgram = programForm.handleSubmit((data) => {
+    const hasPlanDateRange = Boolean(infoStartDate && infoEndDate);
+    const isStartDateInPlanRange =
+      !data.startDate ||
+      !hasPlanDateRange ||
+      fIsBetween(data.startDate, infoStartDate, infoEndDate);
+    const isEndDateInPlanRange =
+      !data.endDate ||
+      !hasPlanDateRange ||
+      fIsBetween(data.endDate, infoStartDate, infoEndDate);
+
+    if (!isStartDateInPlanRange || !isEndDateInPlanRange) {
+      setError("programs", {
+        type: "manual",
+        message: "Ngày bắt đầu/kết thúc của chương trình phải nằm trong thời gian kế hoạch.",
+      });
+      return;
+    }
+
+    clearErrors("programs");
+
     if (editingIndex !== null) {
       const current = fields[editingIndex];
       update(editingIndex, {
@@ -160,6 +184,7 @@ export default function StepTrainingProgram({
               name="startDate"
               minDateTime={dayjs(infoStartDate)}
               maxDateTime={dayjs(infoEndDate)}
+              disablePast
             />
           </Box>
           <Box>
@@ -171,6 +196,7 @@ export default function StepTrainingProgram({
               name="endDate"
               minDateTime={dayjs(programStartDate)}
               maxDateTime={dayjs(infoEndDate)}
+              disablePast
             />
           </Box>
         </Box>

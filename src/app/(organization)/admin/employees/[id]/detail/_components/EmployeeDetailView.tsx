@@ -96,6 +96,11 @@ const EmployeeDetailView: React.FC<EmployeeDetailViewProps> = ({
 export default EmployeeDetailView;
 
 function getEmploymentName(employee: EmployeeDto, type: "branch" | "department") {
-  const unit = employee.employments.find((employment) => employment.organization_units?.type === type);
-  return unit?.organization_units?.name || "Chưa cập nhật";
+  if (type === "branch") {
+    const branch = employee.employee_branches?.[0];
+    return branch?.branches?.name || "Chưa cập nhật";
+  }
+
+  const department = employee.employee_departments?.[0];
+  return department?.departments?.name || "Chưa cập nhật";
 }

@@ -12,12 +12,23 @@ interface UsePlanListParams {
   page?: number;
   limit?: number;
   status?: PlanStatus | "all";
+  startDate?: string;
+  endDate?: string;
 }
 
-export const useGetPlansQuery = ({ organizationId, search, page, limit, status }: UsePlanListParams) => {
+export const useGetPlansQuery = ({
+  organizationId,
+  search,
+  page,
+  limit,
+  status,
+  startDate,
+  endDate,
+}: UsePlanListParams) => {
   return useTQuery<PlanListResponse>({
-    queryKey: [GET_PLANS, organizationId, search, page, limit, status],
-    queryFn: () => planService.getPlans({ organizationId: organizationId!, search, page, limit, status }),
+    queryKey: [GET_PLANS, organizationId, search, page, limit, status, startDate, endDate],
+    queryFn: () =>
+      planService.getPlans({ organizationId: organizationId!, search, page, limit, status, startDate, endDate }),
     enabled: !!organizationId,
   });
 };
