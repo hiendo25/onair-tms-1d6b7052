@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 
+import { ClassSessionModeFilter } from "@/repository/class-room";
+
 import { useGetClassRoomsPriorityQuery } from "./query";
 
 export interface ClassRoomForSelection {
@@ -15,31 +17,22 @@ export interface UseClassRoomsForSelectionParams {
   organizationId?: string;
   employeeId?: string;
   search?: string;
+  sessionMode?: ClassSessionModeFilter;
 }
 
-/**
- * Hook to fetch class-rooms for selection in various features
- * (learning paths, courses, assignments, etc.)
- *
- * Returns a simplified list with just id, name, code, description
- * suitable for selection components like pickers, dropdowns, etc.
- *
- * This hook works for both admins and teachers:
- * - Admins: Pass organizationId to get all class-rooms in the organization
- * - Teachers: Pass employeeId to get only class-rooms assigned to that teacher
- *
- * @param organizationId - Filter class-rooms by organization (for admins)
- * @param employeeId - Filter class-rooms by employee/teacher (for teachers)
- * @param search - Optional search term to filter class-rooms
- * @returns Object containing classRooms array, loading state, error, and total count
- */
-export function useClassRoomsForSelection({ organizationId, employeeId, search }: UseClassRoomsForSelectionParams) {
+export function useClassRoomsForSelection({
+                                            organizationId,
+                                            employeeId,
+                                            search,
+                                            sessionMode,
+                                          }: UseClassRoomsForSelectionParams) {
   const { data, isLoading, error } = useGetClassRoomsPriorityQuery({
     organizationId,
     employeeId,
     q: search,
     limit: 100, // Get more results for selection
     page: 1,
+    sessionMode,
   });
 
   const classRooms: ClassRoomForSelection[] = useMemo(() => {

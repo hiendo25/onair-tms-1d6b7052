@@ -300,7 +300,7 @@ export default function StepPhases() {
           initialSelected={phases[currentPhaseIndex]?.class_rooms || []}
           organizationId={organizationId}
           employeeId={employeeId}
-          title="Chọn lớp học cho giai đoạn"
+          title="Chọn lớp học"
           multiple={true}
         />
       )}

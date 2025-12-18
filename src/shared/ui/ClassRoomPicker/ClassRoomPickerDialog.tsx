@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo,useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
@@ -23,18 +23,19 @@ import {
 
 import { useClassRoomsForSelection } from "@/modules/class-room-management/operations/use-class-rooms-for-selection";
 
-import { ClassRoomItem,ClassRoomPickerDialogProps } from "./types";
+import { ClassRoomItem, ClassRoomPickerDialogProps } from "./types";
+import { ClassSessionModeFilter } from "@/repository/class-room";
 
 export default function ClassRoomPickerDialog({
-  open,
-  onClose,
-  onConfirm,
-  initialSelected = [],
-  organizationId,
-  employeeId,
-  title = "Chọn lớp học",
-  multiple = true,
-}: ClassRoomPickerDialogProps) {
+                                                open,
+                                                onClose,
+                                                onConfirm,
+                                                initialSelected = [],
+                                                organizationId,
+                                                employeeId,
+                                                title = "Chọn lớp học",
+                                                multiple = true,
+                                              }: ClassRoomPickerDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClassRooms, setSelectedClassRooms] = useState<ClassRoomItem[]>(initialSelected);
 
@@ -42,6 +43,7 @@ export default function ClassRoomPickerDialog({
     organizationId,
     employeeId,
     search: searchTerm,
+    sessionMode: ClassSessionModeFilter.Online,
   });
 
   // Update selected class-rooms when initialSelected changes
@@ -58,7 +60,7 @@ export default function ClassRoomPickerDialog({
     return classRooms.filter(
       (room) =>
         room.name.toLowerCase().includes(lowerSearch) ||
-        room.code?.toLowerCase().includes(lowerSearch)
+        room.code?.toLowerCase().includes(lowerSearch),
     );
   }, [classRooms, searchTerm]);
 
@@ -97,7 +99,7 @@ export default function ClassRoomPickerDialog({
         {/* Search Input */}
         <TextField
           fullWidth
-          placeholder="Tìm kiếm lớp học..."
+          placeholder="Tìm kiếm lớp học"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           size="small"
@@ -123,21 +125,21 @@ export default function ClassRoomPickerDialog({
             </Typography>
           </Box>
         ) : (
-          <List sx={{ maxHeight: 400, overflow: "auto" }}>
+          <List sx={{ p: 0, maxHeight: 400, overflow: "auto" }}>
             {filteredClassRooms.map((classRoom) => {
               const selected = isSelected(classRoom.id);
               return (
                 <ListItem key={classRoom.id} disablePadding>
                   <ListItemButton onClick={() => handleToggle(classRoom)} dense>
                     {multiple ? (
-                      <Checkbox edge="start" checked={selected} tabIndex={-1} disableRipple />
+                      <Checkbox sx={{
+                        borderRadius: 0.5,
+                      }} edge="start" checked={selected} tabIndex={-1} disableRipple />
                     ) : (
                       <Radio edge="start" checked={selected} tabIndex={-1} />
                     )}
                     <ListItemText
                       primary={classRoom.name}
-                      secondary={classRoom.code}
-                      primaryTypographyProps={{ fontWeight: selected ? 600 : 400 }}
                     />
                   </ListItemButton>
                 </ListItem>
@@ -145,18 +147,11 @@ export default function ClassRoomPickerDialog({
             })}
           </List>
         )}
-
-        {/* Selected Count */}
-        {multiple && selectedClassRooms.length > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: "block" }}>
-            Đã chọn {selectedClassRooms.length} lớp học
-          </Typography>
-        )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel}>Hủy</Button>
+        <Button color="inherit" variant="outlined" onClick={handleCancel}>Hủy</Button>
         <Button onClick={handleConfirm} variant="contained">
-          Xác nhận
+          Xác nhận ({selectedClassRooms.length})
         </Button>
       </DialogActions>
     </Dialog>
