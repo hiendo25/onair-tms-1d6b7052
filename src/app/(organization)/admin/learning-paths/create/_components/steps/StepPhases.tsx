@@ -4,9 +4,6 @@ import { useState } from "react";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove,SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -29,12 +26,7 @@ import { ClassRoomItem,ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker
 
 import SortablePhaseItem from "./SortablePhaseItem";
 
-interface StepPhasesProps {
-  onContinue: () => void;
-  onBack: () => void;
-}
-
-export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
+export default function StepPhases() {
   const {
     control,
     trigger,
@@ -63,13 +55,7 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
     })
   );
 
-  const handleContinue = async () => {
-    // Validate the phases before continuing
-    const isValid = await trigger("phases");
-    if (isValid) {
-      onContinue();
-    }
-  };
+
 
   const handleAddPhase = () => {
     // Generate a unique ID for the new phase using timestamp + random string
@@ -306,15 +292,6 @@ export default function StepPhases({ onContinue, onBack }: StepPhasesProps) {
               {errors.phases.message}
             </Typography>
           )}
-        </Stack>
-
-        <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: "space-between" }}>
-          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onBack}>
-            Quay lại
-          </Button>
-          <Button variant="contained" endIcon={<ArrowForwardIcon />} onClick={handleContinue}>
-            Tiếp tục
-          </Button>
         </Stack>
       </CardContent>
 

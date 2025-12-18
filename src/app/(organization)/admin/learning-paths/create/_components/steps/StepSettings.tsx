@@ -1,16 +1,13 @@
 "use client";
 
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CheckIcon from "@mui/icons-material/Check";
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Typography } from "@mui/material";
 
 interface StepSettingsProps {
   onSubmit: () => void;
-  onBack: () => void;
   isLoading?: boolean;
 }
 
-export default function StepSettings({ onSubmit, onBack, isLoading = false }: StepSettingsProps) {
+export default function StepSettings({ onSubmit, isLoading = false }: StepSettingsProps) {
   return (
     <Card sx={{ border: "1px solid", borderColor: "divider" }}>
       <CardContent sx={{ p: 4 }}>
@@ -37,15 +34,6 @@ export default function StepSettings({ onSubmit, onBack, isLoading = false }: St
             Thiết lập - Coming Soon
           </Typography>
         </Box>
-
-        <Stack direction="row" spacing={2} sx={{ mt: 4, justifyContent: "space-between" }}>
-          <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={onBack} disabled={isLoading}>
-            Quay lại
-          </Button>
-          <Button variant="contained" startIcon={<CheckIcon />} onClick={onSubmit} disabled={isLoading}>
-            {isLoading ? "Đang xử lý..." : "Hoàn tất"}
-          </Button>
-        </Stack>
       </CardContent>
     </Card>
   );
