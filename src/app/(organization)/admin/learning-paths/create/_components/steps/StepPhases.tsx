@@ -234,7 +234,7 @@ export default function StepPhases() {
 
                           {/* Class-room Selection */}
                           <FormControl fullWidth error={!!classRoomsError}>
-                            <FormLabel>Lớp học</FormLabel>
+                            <FormLabel required>Lớp học trong giai đoạn</FormLabel>
                             <Box
                               sx={{
                                 minHeight: 56,

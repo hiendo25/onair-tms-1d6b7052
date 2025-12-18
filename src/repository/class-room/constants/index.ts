@@ -6,6 +6,13 @@ export const CLASS_ROOMS_SELECT = `
   *,
   class_sessions!inner (
     *,
+    courses_period:class_sessions_courses_period (
+      id,
+      course:courses (
+        id,
+        title
+      )
+    ),
     teacherAssignments:class_session_teacher (
       id,
       teacher_id,
