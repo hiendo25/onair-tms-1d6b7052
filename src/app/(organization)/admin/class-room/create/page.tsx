@@ -1,3 +1,4 @@
+"use server";
 import React from "react";
 import { redirect } from "next/navigation";
 
@@ -29,15 +30,14 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
   if (!ROOMS.includes(roomtype) || !PLATFORMS.includes(platform)) {
     redirect(PATHS.CLASSROOMS.ROOT);
   }
-  const pageTitle = `Tạo lớp học ${
-    platform === "online"
-      ? "E-learning"
-      : platform === "offline"
-      ? "trực tiếp (Offline)"
-      : platform === "live"
-      ? "trực tuyến (Live)"
-      : ""
-  }`;
+
+  const platformTypeName: Record<ClassRoomPlatformType, string> = {
+    offline: "trực tiếp (Offline)",
+    live: "trực tuyến (Live)",
+    online: "E-learning",
+    hybrid: "Hybrid",
+  };
+  const pageTitle = `Tạo lớp học ${platformTypeName[platform] ?? ""}`;
 
   return (
     <PageContainer

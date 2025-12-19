@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 
@@ -24,7 +24,7 @@ interface ClassRoomDetailSectionProps {
 }
 
 export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionProps) {
-  const user = useUserOrganization((state) => state.data);
+  const { id: employeeId, type: employeeType } = useUserOrganization((state) => state.currentEmployee);
   const [showJoinHorizontal, setShowJoinHorizontal] = useState<boolean>(false);
 
   const [tabValue, setTabValue] = useState(0);
@@ -89,8 +89,7 @@ export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionP
 
   const classRoomData = data;
 
-  const isAdminView =
-    classRoomData.owner?.id === user.id || user.employeeType === "admin" || user.employeeType === "teacher";
+  const isAdminView = classRoomData.owner?.id === employeeId || employeeType === "admin" || employeeType === "teacher";
 
   return (
     <PageContainer

@@ -35,7 +35,7 @@ const ClassRoomTypeBoxMenu: React.FC<ClassRoomTypeBoxMenuProps> = ({ items }) =>
 
   return (
     <div
-      className="bg-white rounded-2xl p-6 max-w-[1040px] mx-auto border border-gray-200 "
+      className="bg-white rounded-2xl p-6 max-w-[1040px] mx-auto border border-gray-200"
       style={{ boxShadow: "var(--paper-shadow)" }}
     >
       <Typography className="font-semibold text-center text-2xl">Chọn loại lớp học</Typography>

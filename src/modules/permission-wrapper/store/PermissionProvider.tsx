@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 
 import { buildPermission, Resources, ResourcesActions } from "@/constants/permission.constant";
 import { Permissions, PermissionsCheck } from "@/constants/permission.constant";
@@ -13,7 +13,7 @@ export const PermissionProvider: React.FC<{
   permissions: Permissions[];
   roles: string[];
 }> = ({ children, permissions, roles }) => {
-  const isSuperAdmin = roles.some((it) => it === "super_admin");
+  const isSuperAdmin = roles.some((role) => role === "super_admin");
   const persMap = useMemo(() => new Map(permissions.map((per) => [per, per])), [permissions]);
 
   const hasOnePer = useCallback(

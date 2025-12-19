@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
@@ -59,7 +59,7 @@ const ClassRoomCard = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | undefined>();
-  const employeeId = useUserOrganization((state) => state.data.id);
+  const employeeId = useUserOrganization((state) => state.currentEmployee.id);
 
   const navigateToSession = useCallback(
     (sessions: ClassRoomSessionDetailDto, sessionType?: ClassSessionType) => {

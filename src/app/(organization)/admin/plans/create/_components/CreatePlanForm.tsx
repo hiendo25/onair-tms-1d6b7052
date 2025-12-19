@@ -13,7 +13,10 @@ export default function CreatePlanForm() {
   const router = useRouter();
   const { enqueueSnackbar } = useSnackbar();
   const { mutateAsync: createPlan, isPending } = useCreatePlanMutation();
-  const userInfo = useUserOrganization((state) => state.data);
+  const {
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
 
   const createPlanAndRedirect = async (
     data: PlanFormSchema,
@@ -23,8 +26,8 @@ export default function CreatePlanForm() {
     try {
       await createPlan({
         form: data,
-        organizationId: userInfo.organization.id,
-        createdBy: userInfo.id,
+        organizationId: organizationId,
+        createdBy: employeeId,
         status,
       });
       enqueueSnackbar(successMessage, { variant: "success" });

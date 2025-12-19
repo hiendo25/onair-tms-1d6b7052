@@ -44,7 +44,9 @@ const buildSurveyDefaults = (survey?: Survey, picked?: PlanningSurveyOption | nu
 
 export function PlanSurveySection() {
   const { control, setValue, clearErrors, getValues } = usePlanFormContext();
-  const userInfo = useUserOrganization((state) => state.data);
+  const {
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
   const watchedSurvey = useWatch({ control, name: "info.survey" }) as Survey | undefined;
   const surveyValue = watchedSurvey ?? (getValues("info.survey") as Survey | undefined);
 
@@ -72,7 +74,7 @@ export function PlanSurveySection() {
   }, [targetType]);
 
   const { data: surveyList, isLoading: isLoadingSurveys } = useGetPlanningSurveysQuery({
-    organizationId: userInfo?.organization?.id,
+    organizationId: organizationId,
     search: debouncedSearch,
     page,
     limit: pageSize,
@@ -83,7 +85,7 @@ export function PlanSurveySection() {
     isLoading: isLoadingUnits,
     isFetching: isFetchingUnits,
   } = useGetOrganizationUnitsByOrgQuery({
-    organizationId: userInfo?.organization?.id,
+    organizationId: organizationId,
     type: targetType === "branch" || targetType === "department" ? targetType : undefined,
     search: debouncedUnitSearch,
     page: 1,

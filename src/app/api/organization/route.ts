@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
 
   cookieStore.set({
     httpOnly: true,
-    name: "organization",
-    value: JSON.stringify({ organizationId, userId: currentUser.id }),
+    name: "organization_id",
+    value: organizationId,
+    path: "/",
   });
 
   revalidatePath("/");

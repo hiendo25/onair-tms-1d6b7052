@@ -317,6 +317,7 @@ export default function PlansTable() {
               onChange={(newValue) => handleDateFilterChange("startDate", newValue ? newValue.toISOString() : null)}
               format="DD/MM/YYYY"
               slotProps={{
+                field: { clearable: true },
                 textField: {
                   size: "small",
                   fullWidth: true,
@@ -334,6 +335,7 @@ export default function PlansTable() {
               onChange={(newValue) => handleDateFilterChange("endDate", newValue ? newValue.toISOString() : null)}
               format="DD/MM/YYYY"
               slotProps={{
+                field: { clearable: true },
                 textField: {
                   size: "small",
                   fullWidth: true,
@@ -352,20 +354,6 @@ export default function PlansTable() {
             Tạo kế hoạch
           </Button>
         </Stack>
-
-        {/* {hasActiveFilter && (
-          <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
-            <Button
-              variant="text"
-              color="inherit"
-              startIcon={<ClearIcon />}
-              onClick={handleResetFilters}
-              sx={{ textTransform: "none" }}
-            >
-              Xóa bộ lọc
-            </Button>
-          </Stack>
-        )} */}
 
         <Stack
           direction={{ xs: "column", lg: "row" }}

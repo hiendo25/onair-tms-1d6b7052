@@ -22,8 +22,7 @@ import ClassRoomStatusTabs from "./ClassRoomStatusTabs";
 const PAGE_SIZE = 12;
 
 const ClassRoomContainer = () => {
-  const userOrganization = useUserOrganization((state) => state.data);
-  const employeeId = userOrganization?.id ? userOrganization?.id : undefined;
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
 
   const [search, setSearch] = useState("");
   const [runtimeStatus, setRuntimeStatus] = useState<ClassRoomRuntimeStatusFilter>(ClassRoomRuntimeStatusFilter.All);

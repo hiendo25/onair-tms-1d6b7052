@@ -5,12 +5,12 @@ import Button from "@mui/material/Button";
 import { useForkRef } from "@mui/material/utils";
 import { useParsedFormat, usePickerContext, useSplitFieldProps } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker, DatePickerFieldProps } from "@mui/x-date-pickers/DatePicker";
+import { DatePicker, DatePickerFieldProps, DatePickerProps } from "@mui/x-date-pickers/DatePicker";
 import { viVN } from "@mui/x-date-pickers/locales";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, { Dayjs } from "dayjs";
 
-interface ButtonFieldProps extends DatePickerFieldProps {
+interface ButtonFieldProps extends DatePickerProps {
   className?: string;
 }
 

@@ -109,7 +109,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     return (
       <div className={cn("class-room-tabs", className)}>
         <TabContext value={currentTab}>
-          <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
+          <div className="flex items-center justify-between mb-6">
             <ClassRoomTabList onChange={handleChangeTab}>
               {items.map(({ tabKey, tabName, icon }) => (
                 <Tab

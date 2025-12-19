@@ -1,17 +1,18 @@
 "use client";
 import React, { PropsWithChildren, useRef } from "react";
-import { styled } from "@mui/material";
+import { Stack, styled } from "@mui/material";
 import Box from "@mui/material/Box";
 import Image from "next/image";
 import Link from "next/link";
 
-import { ChevronRightDoubleIcon, LogoOnairIcon, LogoOnairShortIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 
+import AccountSetting from "./AccountSetting";
 import DashboardSidebar from "./DashboardSidebar";
 import { DashboardSidebarProps } from "./DashboardSidebar";
 import Footer from "./Footer";
 import Header from "./Header";
+import NotificationButton from "./NotificationButton";
 import OrganizationSelector, { OrganizationSelectorProps } from "./OrganizationSelector";
 import useToggleSidebar from "./useToggleSidebar";
 const LayoutWrapper = styled(Box)(() => ({
@@ -43,6 +44,7 @@ export interface MainLayoutProps extends PropsWithChildren {
   onChangeOrganization?: OrganizationSelectorProps["onChange"];
   currentOrganizationId?: OrganizationSelectorProps["value"];
   logoUrl?: string;
+  faviconUrl?: string;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -52,6 +54,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   currentOrganizationId,
   organizationItems,
   logoUrl,
+  faviconUrl,
 }) => {
   const layoutRef = useRef<HTMLDivElement>(null);
 
@@ -68,33 +71,22 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         slots={{
           top: (
             <div
-              className={cn("gap-3", {
+              className={cn("gap-3 h-16 md:h-20", {
                 "py-4 px-2 flex items-center justify-center": !isExpanded,
                 "py-4 px-6": isExpanded,
               })}
             >
               <Link href="/dashboard">
-                {logoUrl ? <Image src={logoUrl} alt="logo" width={120} height={80} /> : null}
+                {logoUrl && isExpanded ? (
+                  <Image src={logoUrl} alt="logo" width={120} height={80} className="h-full w-auto" />
+                ) : null}
+                {faviconUrl && !isExpanded ? <Image src={faviconUrl} alt="logo" width={36} height={36} /> : null}
               </Link>
             </div>
           ),
           // bottom: (
           //   <div className="px-4 py-2">
-          //     <Button
-          //       endIcon={<ChevronRightDoubleIcon />}
-          //       color="inherit"
-          //       variant="fill"
-          //       fullWidth
-          //       title={isExpanded ? "Thu gọn menu" : "Mở rộng menu"}
-          //       className="min-w-auto"
-          //       onClick={() => toggleExpand(!isExpanded)}
-          //       sx={{
-          //         ".MuiButton-endIcon": {
-          //           marginLeft: 0,
-          //           marginRight: 0,
-          //         },
-          //       }}
-          //     />
+          //     <AccountSetting />
           //   </div>
           // ),
         }}
@@ -104,15 +96,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <Header
           menuOpen={isExpanded}
           onToggleMenu={toggleExpand}
-          actions={
-            <OrganizationSelector
-              value={currentOrganizationId}
-              options={organizationItems}
-              onChange={onChangeOrganization}
-            />
-          }
+          slots={{
+            left: (
+              <OrganizationSelector
+                value={currentOrganizationId}
+                options={organizationItems}
+                onChange={onChangeOrganization}
+              />
+            ),
+            right: (
+              <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 2 }}>
+                <NotificationButton />
+                <AccountSetting />
+              </Stack>
+            ),
+          }}
         />
-        <Box component="main" sx={{ display: "flex", flexDirection: "column", flex: 1, px: { xs: 4, md: 6, xl: 8 } }}>
+        <Box component="main" sx={{ display: "flex", flexDirection: "column", flex: 1, px: { xs: 2, md: 4, xl: 8 } }}>
           {children}
         </Box>
         <Footer />

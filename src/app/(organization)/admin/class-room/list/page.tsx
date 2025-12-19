@@ -1,7 +1,7 @@
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
 
-import ClassRoomContainer from "./_components/ClassRoomContainer";
+import ClassRoomTableList from "./_components/ClassRoomTableList";
 
 const ClassRoomList = () => {
   return (
@@ -22,7 +22,7 @@ const ClassRoomList = () => {
         },
       ]}
     >
-      <ClassRoomContainer />
+      <ClassRoomTableList />
     </PageContainer>
   );
 };

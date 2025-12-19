@@ -2,7 +2,7 @@
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState, useTransition } from "react";
 import { Button, Divider, Typography } from "@mui/material";
 // import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
-import { useFieldArray,UseFormReturn } from "react-hook-form";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
 
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
@@ -125,7 +125,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
   }));
   return (
     <div className="class-multiple-session">
-      <div className="inner">
+      <div className="inner rounded-xl">
         <div className="mb-6">
           <Typography component="h3" className="text-base font-semibold">
             Chi tiết chuỗi lớp học
