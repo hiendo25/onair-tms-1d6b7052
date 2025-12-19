@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const Edit05Icon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const Edit05Icon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

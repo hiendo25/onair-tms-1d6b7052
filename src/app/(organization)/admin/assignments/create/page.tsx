@@ -1,25 +1,28 @@
 "use client";
-import PageContainer from "@/shared/ui/PageContainer";
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
+
+import { PATHS } from "@/constants/path.constant";
 import ManageAssignmentForm, {
   ManageAssignmentFormProps,
   ManageAssignmentFormRef,
 } from "@/modules/assignment-management/components/ManageAssignmentForm";
 import { useCreateAssignmentMutation } from "@/modules/assignment-management/operations/mutation";
-import { useRef } from "react";
-import { useSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
-import { PATHS } from "@/constants/path.constant";
+import { useUserOrganization } from "@/modules/organization";
+import PageContainer from "@/shared/ui/PageContainer";
 
 export default function CreateAssignmentPage() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const formAssignmentRef = useRef<ManageAssignmentFormRef>(null);
   const { mutate: createAssignment, isPending: isLoading } = useCreateAssignmentMutation();
-
+  const currentOrg = useUserOrganization((state) => state.currentOrganization);
   const handleCreateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
     const payload = {
       ...formData,
       assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
+      organizationId: currentOrg.orgId,
     };
 
     createAssignment(payload, {

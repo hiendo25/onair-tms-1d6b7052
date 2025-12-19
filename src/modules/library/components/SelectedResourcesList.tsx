@@ -1,7 +1,9 @@
 "use client";
 
 import { Alert, Box, CircularProgress, Grid, Typography } from "@mui/material";
+
 import { useGetResourcesByIds } from "../operations/query";
+
 import { ResourceCard } from "./ResourceCard";
 
 interface SelectedResourcesListProps {

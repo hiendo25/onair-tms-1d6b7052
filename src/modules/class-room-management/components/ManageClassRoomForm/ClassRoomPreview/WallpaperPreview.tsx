@@ -1,6 +1,7 @@
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../classroom-form.schema";
+
 import { Image } from "@/shared/ui/Image";
+import { ClassRoom } from "../classroom-form.schema";
 
 export interface WallpaperPreviewProps {
   control: Control<ClassRoom>;

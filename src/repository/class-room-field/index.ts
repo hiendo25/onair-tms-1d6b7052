@@ -1,4 +1,5 @@
 import { supabase } from "@/services";
+
 import { CreateClassFieldPayload } from "./type";
 
 const getClassFields = async () => {

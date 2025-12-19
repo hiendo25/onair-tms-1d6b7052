@@ -1,15 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { Box, Card, CardContent, Chip, Stack, Tooltip, Typography } from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import PersonIcon from "@mui/icons-material/Person";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import { formatCurrencyV2 } from "@/utils/format-number";
+import PersonIcon from "@mui/icons-material/Person";
+import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
+
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { PlanStatus } from "@/model/plan.model";
+import { formatCurrencyV2 } from "@/utils/format-number";
 import { getStatusColor, getStatusLabel } from "../../helper";
 
 interface PlanInfoCardsProps {
@@ -97,22 +98,16 @@ function InfoTile({ icon: Icon, label, value, helper, tone }: InfoTileProps) {
   );
 }
 
-export default function PlanInfoCards({
-  budget,
-  approver,
-  createdAt,
-  objective,
-  status,
-}: PlanInfoCardsProps) {
+export default function PlanInfoCards({ budget, approver, createdAt, objective, status }: PlanInfoCardsProps) {
   const statusTone = getStatusColor(status);
   const statusHelper =
     status === "approved"
       ? "Đã duyệt, có thể triển khai"
       : status === "pending_survey"
-        ? "Cần hoàn thành khảo sát trước khi xây dựng các bước tiếp theo"
-        : status === "rejected"
-          ? "Cần chỉnh sửa và gửi duyệt lại"
-          : "Đang chờ duyệt kế hoạch";
+      ? "Cần hoàn thành khảo sát trước khi xây dựng các bước tiếp theo"
+      : status === "rejected"
+      ? "Cần chỉnh sửa và gửi duyệt lại"
+      : "Đang chờ duyệt kế hoạch";
 
   const infoTiles: InfoTileProps[] = [
     {

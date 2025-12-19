@@ -1,14 +1,16 @@
 import { createStore } from "zustand/vanilla";
 
-import { EmployeeOrganization, UserOrganization } from "../types";
+import { Employee, EmployeeOrganization } from "../types";
 type UserOrganizationState = {
-  data: UserOrganization;
-  mainOrganization: EmployeeOrganization;
-  employeesOrganizations: EmployeeOrganization[];
+  currentOrganization: EmployeeOrganization;
+  organizations: EmployeeOrganization[];
+  employees: Employee[];
+  currentEmployee: Employee;
 };
 
 type UserOrganizationActions = {
-  setMainOrganization: (mainOrganization: EmployeeOrganization) => void;
+  setCurrentOrganization: (organizationId: string) => void;
+  reset: () => void;
 };
 
 type OrganizationStoreApi = UserOrganizationState & UserOrganizationActions;
@@ -16,8 +18,15 @@ type OrganizationStoreApi = UserOrganizationState & UserOrganizationActions;
 const createOrganizationStore = (initState: UserOrganizationState) => {
   return createStore<OrganizationStoreApi>()((set, get) => ({
     ...initState,
-    setMainOrganization: (mainOrganization) => {
-      set({ mainOrganization: mainOrganization });
+    setCurrentOrganization: (organizationId) => {
+      const { organizations, employees } = get();
+      const updateOrganization = organizations.find((org) => org.orgId === organizationId);
+      const updateEmployee = employees.find((employee) => employee.organization.id === organizationId);
+      if (!updateOrganization || !updateEmployee) return;
+      set({ currentOrganization: updateOrganization, currentEmployee: updateEmployee });
+    },
+    reset: () => {
+      set(initState);
     },
   }));
 };

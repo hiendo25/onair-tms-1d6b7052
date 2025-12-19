@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
+
 import { columns, rows } from "./data/gridData";
 
 export default function CustomizedDataGrid() {

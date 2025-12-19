@@ -1,16 +1,17 @@
 "use client";
-import { type ClassRoom } from "../classroom-form.schema";
-import { UseFormReturn, useFieldArray } from "react-hook-form";
-import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
-import TeacherSelector from "./class-room-session-fields/TeacherSelector";
-import RoomChannel from "./class-room-session-fields/RoomChannel";
-import AgendarFields from "./class-room-session-fields/AgendarFields";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { MarkerPin01Icon } from "@/shared/assets/icons";
 import { forwardRef, useImperativeHandle } from "react";
-import QRCodeSettingFields from "./class-room-session-fields/QRCodeSettingFields";
-import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
+import { useFieldArray, UseFormReturn } from "react-hook-form";
+
+import { MarkerPin01Icon } from "@/shared/assets/icons";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { type ClassRoom } from "../classroom-form.schema";
+
+import AgendarFields from "./class-room-session-fields/AgendarFields";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
+import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
+import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
+import QRCodeSettingFields from "./class-room-session-fields/QRCodeSettingFields";
+import RoomChannel from "./class-room-session-fields/RoomChannel";
 
 export type SingleSessionRef = {
   checkAllSessionField: () => Promise<boolean>;

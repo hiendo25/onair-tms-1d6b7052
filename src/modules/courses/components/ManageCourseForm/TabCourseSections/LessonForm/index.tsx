@@ -1,13 +1,14 @@
 import { useCallback } from "react";
+import { Controller } from "react-hook-form";
 
+import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
-import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
-import DocumentsFields from "./DocumentsFields";
-import MainResourceField from "./MainResourceField";
-import LessonFormWraper from "./LessonFormWraper";
+
 import AssessmentSelector, { AssessmentSelectorProps } from "./AssessmentSelector";
-import { Controller } from "react-hook-form";
+import DocumentsFields from "./DocumentsFields";
+import LessonFormWraper from "./LessonFormWraper";
+import MainResourceField from "./MainResourceField";
 interface LessonFormProps {
   lessonIndex: number;
   sectionIndex: number;

@@ -1,8 +1,9 @@
 "use client";
-import { Dispatch, SetStateAction, memo } from "react";
-import { cn } from "@/utils";
+import React, { Dispatch, memo, SetStateAction } from "react";
 import { Box, FormControlLabel, Radio, Typography } from "@mui/material";
+
 import { ClassRoomType } from "@/model/class-room.model";
+import { cn } from "@/utils";
 export interface RoomTypeItemsProps {
   className?: string;
   value: NonNullable<ClassRoomType> | undefined;

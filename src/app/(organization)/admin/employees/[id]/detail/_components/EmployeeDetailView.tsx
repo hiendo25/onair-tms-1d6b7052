@@ -2,10 +2,12 @@
 
 import * as React from "react";
 import { Box, Chip, Stack } from "@mui/material";
+
+import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
 import PageContainer from "@/shared/ui/PageContainer";
 import { EmployeeDto } from "@/types/dto/employees";
-import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
 import { getEmployeeTypeLabel } from "@/utils/employee-type";
+
 import EmployeeOverviewCard from "./EmployeeOverviewCard";
 import InfoGroupCard from "./InfoGroupCard";
 

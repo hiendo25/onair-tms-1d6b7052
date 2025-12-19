@@ -1,8 +1,8 @@
-import { useTQuery } from "@/lib";
-import { getClassFields } from "@/repository/class-room-field";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useTQuery } from "@/lib";
 import { employeeRepository } from "@/repository";
-import { EmployeeQueryParams } from "@/repository/employee";
+import { getClassFields } from "@/repository/class-room-field";
+import { GetStudentsQueryParams } from "@/repository/employee";
 
 const useGetClassFieldQuery = () => {
   return useTQuery({
@@ -11,8 +11,8 @@ const useGetClassFieldQuery = () => {
   });
 };
 
-const useGetEmployeeQuery = (options?: { enabled?: boolean; queryParams?: EmployeeQueryParams }) => {
-  const { enabled, queryParams } = options || {};
+const useGetEmployeeQuery = (options: { enabled?: boolean; queryParams: GetStudentsQueryParams }) => {
+  const { enabled, queryParams } = options;
   return useTQuery({
     queryKey: [QUERY_KEYS.GET_STUDENTS, queryParams],
     queryFn: () => employeeRepository.getStudents(queryParams),

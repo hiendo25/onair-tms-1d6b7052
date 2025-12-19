@@ -1,4 +1,5 @@
 import { supabase } from "@/services";
+
 import { CreateCategoryPayload } from "./type";
 
 const getCategories = async () => {

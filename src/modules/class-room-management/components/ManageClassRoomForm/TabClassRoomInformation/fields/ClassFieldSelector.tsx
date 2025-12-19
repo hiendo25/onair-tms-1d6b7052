@@ -1,8 +1,9 @@
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
+
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
-import { slugify } from "@/utils/slugify";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
+import { slugify } from "@/utils/slugify";
+import { ClassRoom } from "../../classroom-form.schema";
 interface ClassFieldSelectorProps {
   control: Control<ClassRoom>;
 }

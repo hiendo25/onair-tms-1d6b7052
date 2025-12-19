@@ -9,6 +9,7 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
+
 import { Resource } from "../types";
 
 interface RenameResourceDialogProps {

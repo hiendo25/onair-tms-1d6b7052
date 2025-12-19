@@ -1,9 +1,7 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
-const UsaFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const UsaFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
@@ -16,54 +14,14 @@ const UsaFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
         {...rest}
       >
         <g clipPath="url(#clip0_983_1725)">
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 0H28V24H-4V0Z"
-            fill="#F7FCFF"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 14.6667V16.6667H28V14.6667H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 18.3333V20.3333H28V18.3333H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 7.33325V9.33325H28V7.33325H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 22V24H28V22H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 11V13H28V11H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 0V2H28V0H-4Z"
-            fill="#E31D1C"
-          />
-          <path
-            fillRule="evenodd"
-            clipRule="evenodd"
-            d="M-4 3.66675V5.66675H28V3.66675H-4Z"
-            fill="#E31D1C"
-          />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 0H28V24H-4V0Z" fill="#F7FCFF" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 14.6667V16.6667H28V14.6667H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 18.3333V20.3333H28V18.3333H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 7.33325V9.33325H28V7.33325H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 22V24H28V22H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 11V13H28V11H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 0V2H28V0H-4Z" fill="#E31D1C" />
+          <path fillRule="evenodd" clipRule="evenodd" d="M-4 3.66675V5.66675H28V3.66675H-4Z" fill="#E31D1C" />
           <path d="M-4 0H16V13H-4V0Z" fill="#2E42A5" />
           <path
             fillRule="evenodd"

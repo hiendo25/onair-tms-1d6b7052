@@ -13,7 +13,6 @@ import {
 } from "@/modules/plans/types";
 import { createCourse } from "@/repository/courses";
 import { plansRepository } from "@/repository/plans";
-import { Json, TablesUpdate } from "@/types/supabase.types";
 import { slugify } from "@/utils/slugify";
 interface GetPlansInput {
   organizationId: string;
@@ -44,12 +43,13 @@ class PlanService {
       throw new Error("Kế hoạch cần ít nhất 1 chương trình đào tạo");
     }
 
-    const nextStatus: PlanStatus =
-      statusOverride
-        ? statusOverride
-        : hasSurvey
-          ? (surveyClosed ? "pending" as const : "pending_survey" as const)
-          : "pending";
+    const nextStatus: PlanStatus = statusOverride
+      ? statusOverride
+      : hasSurvey
+      ? surveyClosed
+        ? ("pending" as const)
+        : ("pending_survey" as const)
+      : "pending";
 
     const planPayload = this.buildPlanRowPayload(form, nextStatus);
 
@@ -103,14 +103,13 @@ class PlanService {
 
     const hasSurvey = !!form.info.survey;
     const surveyClosed = form.info.survey?.status === "closed";
-    const nextStatus: PlanStatus =
-      status
-        ? status
-        : hasSurvey
-          ? surveyClosed
-            ? "pending"
-            : "pending_survey"
-          : "pending";
+    const nextStatus: PlanStatus = status
+      ? status
+      : hasSurvey
+      ? surveyClosed
+        ? "pending"
+        : "pending_survey"
+      : "pending";
 
     const planPayload = this.buildPlanRowPayload(form, nextStatus);
 
@@ -158,11 +157,11 @@ class PlanService {
         const programCoursesPromise =
           courses.length > 0
             ? plansRepository.insertProgramCourses(
-              courses.map((courseId) => ({
-                program_id: programRow.id,
-                course_id: courseId,
-              })),
-            )
+                courses.map((courseId) => ({
+                  program_id: programRow.id,
+                  course_id: courseId,
+                })),
+              )
             : Promise.resolve();
 
         const topicsPromise = Promise.all(
@@ -194,16 +193,16 @@ class PlanService {
     return form.programs.map((program, programIndex) => ({
       name: program.name,
       description: program.description || null,
-      start_date: (program.startDate) || null,
-      end_date: (program.endDate) || null,
+      start_date: program.startDate || null,
+      end_date: program.endDate || null,
       order_index: programIndex,
-      courses: program.courses?.map(course => course.id).filter(Boolean) || [],
+      courses: program.courses?.map((course) => course.id).filter(Boolean) || [],
       topics:
         program.topics?.map((topic, topicIndex) => ({
           name: topic.name,
           description: topic.description || null,
           order_index: topicIndex,
-          courses: topic.courses?.map(course => course.id).filter(Boolean) || [],
+          courses: topic.courses?.map((course) => course.id).filter(Boolean) || [],
         })) || [],
     }));
   }
@@ -251,9 +250,11 @@ class PlanService {
     return !dayjs().isBefore(parsed);
   }
 
-  private static isSurveyCompleted(
-    survey?: { result_summary?: Json | null; status?: string; end_date?: string | null },
-  ) {
+  private static isSurveyCompleted(survey?: {
+    result_summary?: Json | null;
+    status?: string;
+    end_date?: string | null;
+  }) {
     if (!survey) return false;
     return PlanService.hasSurveyResultFlag(survey) || PlanService.isSurveyWindowEnded(survey.end_date);
   }
@@ -297,29 +298,29 @@ class PlanService {
     statusOverride?: PlanStatus,
   ): PlanDetailDto {
     const programs: PlanProgramDetail[] =
-      row.training_plan_programs?.map(program => {
+      row.training_plan_programs?.map((program) => {
         const topics: PlanTopicDetail[] =
-          program.training_plan_topics?.map(topic => ({
+          program.training_plan_topics?.map((topic) => ({
             id: topic.id,
             name: topic.name,
             description: topic.description,
             orderIndex: topic.order_index,
             courses:
-              (topic.training_plan_topic_courses
-                ?.map(tc => ({
+              topic.training_plan_topic_courses
+                ?.map((tc) => ({
                   id: tc.course?.id || tc.course_id || "",
                   title: tc.course?.title || "Môn học",
                 }))
-                .filter(course => !!course.id)) || [],
+                .filter((course) => !!course.id) || [],
           })) || [];
 
         const programCourses =
           program.training_plan_program_courses
-            ?.map(pc => ({
+            ?.map((pc) => ({
               id: pc.course?.id || pc.course_id || "",
               title: pc.course?.title || "Môn học",
             }))
-            .filter(course => !!course.id) || [];
+            .filter((course) => !!course.id) || [];
 
         return {
           id: program.id,
@@ -337,17 +338,17 @@ class PlanService {
     const planSurvey = (row as any)?.training_plan_surveys?.[0];
     const surveyDetail = planSurvey
       ? {
-        id: planSurvey.id,
-        surveyId: planSurvey.survey_id,
-        surveyTitle: planSurvey?.survey?.title || "",
-        surveyCreatedAt: planSurvey?.survey?.created_at ?? null,
-        startDate: planSurvey.start_date,
-        endDate: planSurvey.end_date,
-        status: planSurvey.status,
-        targetType: planSurvey.target_type,
-        targetUnitIds: planSurvey.target_unit_ids,
-        resultSummary: planSurvey.result_summary,
-      }
+          id: planSurvey.id,
+          surveyId: planSurvey.survey_id,
+          surveyTitle: planSurvey?.survey?.title || "",
+          surveyCreatedAt: planSurvey?.survey?.created_at ?? null,
+          startDate: planSurvey.start_date,
+          endDate: planSurvey.end_date,
+          status: planSurvey.status,
+          targetType: planSurvey.target_type,
+          targetUnitIds: planSurvey.target_unit_ids,
+          resultSummary: planSurvey.result_summary,
+        }
       : null;
 
     const resolvedStatus = statusOverride ?? row.status;
@@ -380,7 +381,7 @@ class PlanService {
 
     let unlockedCount = 0;
     const mappedData = await Promise.all(
-      data.map(async row => {
+      data.map(async (row) => {
         const survey = (row as any)?.training_plan_surveys?.[0];
         const surveyCompleted = PlanService.isSurveyCompleted(survey);
         const normalizedStatus = await PlanService.unlockPendingSurveyStatus(
@@ -393,11 +394,7 @@ class PlanService {
           unlockedCount += 1;
         }
 
-        return PlanService.mapPlanListRow(
-          { ...row, status: normalizedStatus },
-          surveyCompleted,
-          normalizedStatus,
-        );
+        return PlanService.mapPlanListRow({ ...row, status: normalizedStatus }, surveyCompleted, normalizedStatus);
       }),
     );
 
@@ -433,7 +430,7 @@ class PlanService {
 
   static async getCourseOptions(organizationId: string) {
     const data = await plansRepository.getCourseOptions(organizationId);
-    return data.map(course => ({
+    return data.map((course) => ({
       id: course.id,
       title: course.title || "Chưa đặt tên",
     }));
@@ -477,19 +474,23 @@ export const planService = {
   deletePlan: PlanService.deletePlan,
   createPlan: (payload: { form: PlanFormSchema; organizationId: string; createdBy: string }) =>
     new PlanService(payload.organizationId, payload.createdBy).create(payload.form),
-  createPlanWithStatus: (
-    payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },
-  ) =>
-    new PlanService(payload.organizationId, payload.createdBy).create(payload.form, payload.status),
-  createDraftCourse: (
-    payload: { title: string; description?: string | null; organizationId: string; createdBy: string },
-  ) =>
+  createPlanWithStatus: (payload: {
+    form: PlanFormSchema;
+    organizationId: string;
+    createdBy: string;
+    status?: PlanStatus;
+  }) => new PlanService(payload.organizationId, payload.createdBy).create(payload.form, payload.status),
+  createDraftCourse: (payload: {
+    title: string;
+    description?: string | null;
+    organizationId: string;
+    createdBy: string;
+  }) =>
     new PlanService(payload.organizationId, payload.createdBy).createDraftCourse(payload.title, payload.description),
   updatePlan: (
     id: string,
     payload: { form: PlanFormSchema; organizationId: string; createdBy: string; status?: PlanStatus },
-  ) =>
-    new PlanService(payload.organizationId, payload.createdBy).update(id, payload.form, payload.status),
+  ) => new PlanService(payload.organizationId, payload.createdBy).update(id, payload.form, payload.status),
   updatePlanStatus: (payload: { id: string; status: PlanStatus; approverId?: string | null }) =>
     PlanService.updatePlanStatus(payload.id, payload.status, payload.approverId),
 };

@@ -1,4 +1,5 @@
 import { StoreApi } from "zustand";
+
 import { StudentSelectedItem, TeacherSelectedItem, UpsertCourseStore } from "./upsert-course-store";
 
 export type ClassRoomActions = {

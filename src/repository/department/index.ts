@@ -1,6 +1,6 @@
 import { createClient } from "@/services/supabase/client";
-import type { CreateDepartmentDto, DepartmentDto, GetDepartmentsParams, UpdateDepartmentDto } from "@/types/dto/departments";
 import type { BranchDto } from "@/types/dto/branches";
+import type { CreateDepartmentDto, DepartmentDto, GetDepartmentsParams, UpdateDepartmentDto } from "@/types/dto/departments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const departmentRepository = {

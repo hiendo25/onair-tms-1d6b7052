@@ -1,6 +1,8 @@
+import React from "react";
 import { Box } from "@mui/material";
-import { EmptyBoxIcon } from "../assets/icons";
+
 import { cn } from "@/utils";
+import { EmptyBoxIcon } from "../assets/icons";
 
 interface EmptyDataProps {
   title?: React.ReactNode;

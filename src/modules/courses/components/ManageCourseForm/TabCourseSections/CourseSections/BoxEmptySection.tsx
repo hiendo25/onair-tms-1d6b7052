@@ -1,6 +1,6 @@
+import { memo } from "react";
 import { Typography } from "@mui/material";
 import Image from "next/image";
-import { memo } from "react";
 
 const BoxEmptySection = () => {
   return (

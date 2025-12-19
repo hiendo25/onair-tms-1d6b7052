@@ -1,10 +1,11 @@
-import { Checkbox } from "@mui/material";
 import React from "react";
+import { Checkbox } from "@mui/material";
+
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 interface CheckAllStudentsProps {
   selectedStudents?: StudentSelectedItem[];
-  students?: EmployeeStudentWithProfileItem[];
+  students?: { id: string; code: string }[];
   onCheckAll: (checked: boolean) => void;
 }
 const CheckAllStudents: React.FC<CheckAllStudentsProps> = ({ students = [], selectedStudents = [], onCheckAll }) => {

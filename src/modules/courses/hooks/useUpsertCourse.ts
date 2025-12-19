@@ -1,18 +1,17 @@
 "use client";
+import { QueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 
-import { UpsertCourseFormData } from "../components/ManageCourseForm/upsert-course.schema";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { useTMutation } from "@/lib";
-import { QueryClient } from "@tanstack/react-query";
-
-import { UpsertCourseService } from "@/services/course/upsert-course.service";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
-import { useQueryClient } from "@tanstack/react-query";
+import { useTMutation } from "@/lib";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { UpsertCourseService } from "@/services/course/upsert-course.service";
+import { UpsertCourseFormData } from "../components/ManageCourseForm/upsert-course.schema";
 
 const useUpsertCourse = () => {
-  const userInfo = useUserOrganization((state) => state.data);
-  const courseService = new UpsertCourseService(userInfo.id, userInfo.organization.id);
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const courseService = new UpsertCourseService(currentEmployee.id, currentEmployee.organization.id);
 
   const queryClient = useQueryClient();
   const { mutate: doCreateCourse, isPending } = useTMutation({

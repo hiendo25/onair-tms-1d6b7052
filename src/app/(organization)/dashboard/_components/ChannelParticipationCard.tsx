@@ -2,10 +2,11 @@ import * as React from "react";
 import { Avatar, Box, Paper, Stack, Typography } from "@mui/material";
 
 import PureClient from "@/shared/ui/PureClient";
+
 import ApexChart from "./ApexChart";
+import { channelParticipationByRange, TimeRange } from "./mock/dashboardData";
 import { panelSx } from "./mock/panelSx";
 import TimeRangeSwitcher from "./TimeRangeSwitcher";
-import { channelParticipationByRange, TimeRange } from "./mock/dashboardData";
 
 const participantOwners = [
   { label: "Y", color: "#f43f5e" },

@@ -1,14 +1,14 @@
-import { useCallback, useState } from "react";
-
-import Stack from "@mui/material/Stack";
+import React, { useCallback, useState } from "react";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { editorClasses } from "../../classes";
-import { ToolbarItem } from "./toolbar-item";
 
+import { editorClasses } from "../../classes";
 import type { EditorToolbarProps } from "../../types";
+
+import { ToolbarItem } from "./toolbar-item";
 
 export function ImageBlock({ editor }: Pick<EditorToolbarProps, "editor">) {
   const [url, setUrl] = useState("");

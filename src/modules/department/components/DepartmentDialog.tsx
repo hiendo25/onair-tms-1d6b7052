@@ -16,13 +16,14 @@ import {
   Select,
   TextField,
 } from "@mui/material";
+
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { departmentRepository } from "@/repository";
+import type { DepartmentDto } from "@/types/dto/departments";
 import {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
 } from "../operations/mutation";
-import type { DepartmentDto } from "@/types/dto/departments";
-import { departmentRepository } from "@/repository";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
 
 interface DepartmentFormData {
   name: string;

@@ -1,13 +1,14 @@
 "use client";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ImageIcon from "@mui/icons-material/Image";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { Box, Button, CircularProgress, IconButton, Typography } from "@mui/material";
+import { useSnackbar } from "notistack";
+
 import { TrashIcon1 } from "@/shared/assets/icons";
 import { uploadFileToS3 } from "@/utils/s3-upload";
-import { useSnackbar } from "notistack";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ImageIcon from "@mui/icons-material/Image";
-import DescriptionIcon from "@mui/icons-material/Description";
 
 interface FileUploadProps {
   value?: string[]; // Array of URLs, but typically only first element is used
@@ -36,7 +37,7 @@ const DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 const getFileIcon = (fileName: string) => {
   const extension = fileName.split(".").pop()?.toLowerCase();
-  
+
   if (["jpg", "jpeg", "png", "gif"].includes(extension || "")) {
     return <ImageIcon className="w-5 h-5 text-blue-500" />;
   }
@@ -49,7 +50,7 @@ const getFileIcon = (fileName: string) => {
   if (["xls", "xlsx"].includes(extension || "")) {
     return <DescriptionIcon className="w-5 h-5 text-green-600" />;
   }
-  
+
   return <InsertDriveFileIcon className="w-5 h-5 text-gray-500" />;
 };
 
@@ -76,19 +77,19 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const defaultHelperText = (() => {
     const types = Object.values(acceptedFileTypes).flat();
     const sizeInMB = maxFileSize / 1024 / 1024;
-    
+
     // Group file types for better readability
-    const hasImages = types.some(ext => [".jpg", ".jpeg", ".png", ".gif"].includes(ext));
+    const hasImages = types.some((ext) => [".jpg", ".jpeg", ".png", ".gif"].includes(ext));
     const hasPDF = types.includes(".pdf");
-    const hasWord = types.some(ext => [".doc", ".docx"].includes(ext));
-    const hasExcel = types.some(ext => [".xls", ".xlsx"].includes(ext));
-    
+    const hasWord = types.some((ext) => [".doc", ".docx"].includes(ext));
+    const hasExcel = types.some((ext) => [".xls", ".xlsx"].includes(ext));
+
     const typeGroups = [];
     if (hasImages) typeGroups.push("Ảnh (JPG, PNG, GIF)");
     if (hasPDF) typeGroups.push("PDF");
     if (hasWord) typeGroups.push("Word (DOC, DOCX)");
     if (hasExcel) typeGroups.push("Excel (XLS, XLSX)");
-    
+
     return `Hỗ trợ: ${typeGroups.join(", ")}. Tối đa ${sizeInMB}MB.`;
   })();
 
@@ -129,14 +130,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
       // Store as single-element array
       onChange([result.url]);
-      
+
       enqueueSnackbar("Tải tệp lên thành công!", { variant: "success" });
     } catch (error) {
       console.error("Error uploading file:", error);
-      enqueueSnackbar(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi tải tệp lên.",
-        { variant: "error" }
-      );
+      enqueueSnackbar(error instanceof Error ? error.message : "Có lỗi xảy ra khi tải tệp lên.", { variant: "error" });
     } finally {
       setUploading(false);
       setUploadProgress(0);
@@ -190,32 +188,23 @@ const FileUpload: React.FC<FileUploadProps> = ({
       {uploading && (
         <Box className="flex items-center gap-2 p-3 border border-gray-200 rounded bg-gray-50">
           <CircularProgress size={20} variant="determinate" value={uploadProgress} />
-          <Typography className="text-sm text-gray-600">
-            Đang tải lên... {uploadProgress}%
-          </Typography>
+          <Typography className="text-sm text-gray-600">Đang tải lên... {uploadProgress}%</Typography>
         </Box>
       )}
 
       {currentFileUrl && !uploading && (
         <Box className="flex items-center gap-2 p-3 border border-gray-200 rounded bg-gray-50">
           {getFileIcon(currentFileName || "")}
-          <Typography className="text-sm text-gray-700 flex-1 truncate">
-            {currentFileName}
-          </Typography>
+          <Typography className="text-sm text-gray-700 flex-1 truncate">{currentFileName}</Typography>
           <IconButton size="small" onClick={handleRemoveFile} disabled={disabled} className="p-1">
             <TrashIcon1 className="w-4 h-4" />
           </IconButton>
         </Box>
       )}
 
-      {displayHelperText && (
-        <Typography className="text-xs text-gray-500">
-          {displayHelperText}
-        </Typography>
-      )}
+      {displayHelperText && <Typography className="text-xs text-gray-500">{displayHelperText}</Typography>}
     </div>
   );
 };
 
 export default FileUpload;
-

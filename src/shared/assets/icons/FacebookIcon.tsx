@@ -1,9 +1,7 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
-const FacebookIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const FacebookIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
@@ -24,14 +22,7 @@ const FacebookIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
           fill="white"
         />
         <defs>
-          <linearGradient
-            id="paint0_linear_795_116"
-            x1="8"
-            y1="0"
-            x2="8"
-            y2="15.9991"
-            gradientUnits="userSpaceOnUse"
-          >
+          <linearGradient id="paint0_linear_795_116" x1="8" y1="0" x2="8" y2="15.9991" gradientUnits="userSpaceOnUse">
             <stop stopColor="#1AAFFF" />
             <stop offset="1" stopColor="#0163E0" />
           </linearGradient>

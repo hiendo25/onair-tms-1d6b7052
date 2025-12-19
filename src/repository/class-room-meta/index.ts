@@ -1,6 +1,7 @@
-import { supabase } from "@/services";
-import { CreateClassRoomMetaPayload, GetClassRoomMetaQueryParams, UpSertClassRoomMetaPayload } from "./type";
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
+import { supabase } from "@/services";
+
+import { CreateClassRoomMetaPayload, GetClassRoomMetaQueryParams, UpSertClassRoomMetaPayload } from "./type";
 export * from "./type";
 
 const createClassRoomMeta = async <K extends ClassRoomMetaKey>(payload: CreateClassRoomMetaPayload<K>) => {

@@ -1,9 +1,7 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
-const GitIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const GitIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

@@ -1,13 +1,14 @@
-import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
-import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
+import { alpha, FormControl, FormLabel, MenuItem, MenuList, Select, styled } from "@mui/material";
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
-import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
+
+import { LinkIcon } from "@/shared/assets/icons";
 import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
+import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
+import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
 import RHFSelectField from "@/shared/ui/form/RHFSelectField";
-import { FormControl, FormLabel, MenuItem, MenuList, Select, alpha, styled } from "@mui/material";
-import { LinkIcon } from "@/shared/assets/icons";
+import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
+import { ClassRoom } from "../../classroom-form.schema";
 
 interface RoomChannelProps {
   control: Control<ClassRoom>;

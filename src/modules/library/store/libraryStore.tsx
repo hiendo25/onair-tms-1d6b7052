@@ -1,6 +1,8 @@
 import { createStore } from "zustand/vanilla";
-import attachActions from "./libraryActions";
+
 import { Resource } from "../types";
+
+import attachActions from "./libraryActions";
 
 export type SelectionMode = "single" | "multiple";
 
@@ -16,6 +18,7 @@ type LibraryStoreState = {
   config: LibraryConfig | null;
   resolve: ((resources: Resource[]) => void) | null;
   reject: ((reason?: any) => void) | null;
+  employeeId: string;
 };
 
 type LibraryStoreActions = {
@@ -33,6 +36,7 @@ const libraryStateInit: LibraryStoreState = {
   config: null,
   resolve: null,
   reject: null,
+  employeeId: "",
 };
 
 const createLibraryStore = (initState: LibraryStoreState) => {

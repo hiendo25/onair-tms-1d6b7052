@@ -8,7 +8,7 @@ import PlanForm from "@/app/(organization)/admin/plans/_components/PlanForm";
 import { PATHS } from "@/constants/path.constant";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { PlanStatus } from "@/model/plan.model";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useUpdatePlanMutation } from "@/modules/plans/operations/mutation";
 import { useGetPlanDetailQuery } from "@/modules/plans/operations/query";
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";

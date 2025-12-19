@@ -1,5 +1,6 @@
-import { Checkbox } from "@mui/material";
 import React from "react";
+import { Checkbox } from "@mui/material";
+
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 interface CheckAllStudentsProps {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { generateSampleEmployeeData } from "@/services/employees/employee-sample.service";
 
 export async function GET(request: NextRequest) {

@@ -1,7 +1,9 @@
 "use server";
-import PageContainer from "@/shared/ui/PageContainer";
-import { PATHS } from "@/constants/path.constant";
 import { Metadata, ResolvingMetadata } from "next";
+
+import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
+
 import CourseTableList from "./_components/CourseTableList";
 
 type CreateCoursePageProps = {

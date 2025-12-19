@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Box, Card, Chip, IconButton, Stack, Typography } from "@mui/material";
+import AudiotrackIcon from "@mui/icons-material/Audiotrack";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ImageIcon from "@mui/icons-material/Image";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
-import AudiotrackIcon from "@mui/icons-material/Audiotrack";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import { Box, Card, Chip, IconButton, Stack, Typography } from "@mui/material";
 import Image from "next/image";
+
 import { formatFileSize } from "@/utils";
 
 interface FileListItemProps {

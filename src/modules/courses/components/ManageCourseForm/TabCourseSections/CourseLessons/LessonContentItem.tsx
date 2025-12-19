@@ -1,6 +1,7 @@
-import { Control, useWatch } from "react-hook-form";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
 import { Typography } from "@mui/material";
+import { Control, useWatch } from "react-hook-form";
+
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 interface LessonContentItemProps {
   sectionIndex: number;
   lessonIndex: number;

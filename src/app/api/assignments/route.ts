@@ -8,6 +8,14 @@ import { createSVClient } from "@/services";
 import type { CreateAssignmentDto } from "@/types/dto/assignments";
 
 export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+
+  const organizationId = searchParams.get("organizationId");
+
+  if (!organizationId) {
+    return NextResponse.json({ success: false, message: "Organization invalid" }, { status: 403 });
+  }
+
   try {
     const supabase = await createSVClient();
     const {
@@ -18,9 +26,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getCurrentEmployee(user.id, organizationId);
 
-    const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "0");
     const limit = parseInt(searchParams.get("limit") || "12");
     const search = searchParams.get("search") || undefined;
@@ -30,6 +37,7 @@ export async function GET(request: NextRequest) {
       limit,
       search,
       createdBy: employee.id,
+      organizationId,
     });
 
     return NextResponse.json(result, { status: 200 });
@@ -45,7 +53,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const payload: CreateAssignmentDto = await request.json();
-
+    const organizationId = payload.organizationId;
     const supabase = await createSVClient();
     const {
       data: { user },
@@ -55,7 +63,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
+    if (!organizationId) {
+      return NextResponse.json({ success: false, message: "Organization Id valid" }, { status: 401 });
+    }
+    const employee = await employeesRepository.getCurrentEmployee(user.id, organizationId);
 
     const result = await assignmentService.createAssignmentWithRelations(payload, employee.id);
 

@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+
 import { CloseNotification, ShowNotification } from "./useNotifications";
 
 const NotificationsContext = React.createContext<{

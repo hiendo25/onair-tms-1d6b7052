@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Box, Paper, Typography } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Box, Paper, Typography } from "@mui/material";
 
 interface TrueFalseAnswerDisplayProps {
   studentAnswer: boolean;

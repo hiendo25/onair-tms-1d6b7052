@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useTMutation } from "@/lib/queryClient";
 import type {
   CreateAssignmentDto,
@@ -5,7 +7,7 @@ import type {
   SaveGradeResponse,
   UpdateAssignmentDto,
 } from "@/types/dto/assignments";
-import { useQueryClient } from "@tanstack/react-query";
+
 import { GET_ASSIGNMENTS } from "./key";
 
 export const useCreateAssignmentMutation = () => {
@@ -104,7 +106,9 @@ export const useSaveGradeMutation = () => {
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "students"] });
-      queryClient.invalidateQueries({ queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "grade", variables.employeeId] });
+      queryClient.invalidateQueries({
+        queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "grade", variables.employeeId],
+      });
     },
   });
 };

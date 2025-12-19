@@ -1,4 +1,5 @@
 import { supabase } from "@/services";
+
 import { CreateSectionPayload, UpdateSectionPayload, UpsertSectionPayload } from "./type";
 
 const createSection = async (payload: CreateSectionPayload) => {

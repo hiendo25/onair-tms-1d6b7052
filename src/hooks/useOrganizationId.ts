@@ -1,8 +1,8 @@
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 
 export function useOrganizationId() {
-  const organizationId = useUserOrganization((state) => state.data.organization.id);
-  
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
+
   return {
     organizationId,
     isLoading: false,

@@ -1,6 +1,7 @@
 "use client";
-import { GoogleIcon } from "@/shared/assets/icons";
 import Button, { ButtonProps } from "@mui/material/Button";
+
+import { GoogleIcon } from "@/shared/assets/icons";
 import { useAuthSignInWithGoogle } from "../hooks/useAuthSignIn";
 interface GoogleSignInButtonProps extends ButtonProps {
   buttonText?: string;

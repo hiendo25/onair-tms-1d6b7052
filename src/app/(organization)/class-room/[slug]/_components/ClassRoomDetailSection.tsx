@@ -1,18 +1,20 @@
 "use client";
-import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import PageContainer from "@/shared/ui/PageContainer";
+import { useEffect, useState } from "react";
 import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+
+import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import PageContainer from "@/shared/ui/PageContainer";
+import { queryClassName } from "../_constants";
+
 import ClassRoomAgenda from "./ClassRoomAgenda";
 import ClassRoomDocuments from "./ClassRoomDocuments";
 import ClassRoomHeader from "./ClassRoomHeader";
 import ClassRoomJoinHorizontal from "./ClassRoomJoinHorizontal";
 import ClassRoomSeries from "./ClassRoomSeries";
-import { queryClassName } from "../_constants";
 import ClassRoomSubjects from "./ClassRoomSubjects";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 const offsetValue = -0.1;
 const outOfMainJoinZoneClassName = "join-horizontal-zone";

@@ -32,4 +32,5 @@ export * as permissionRepository from "./permissions";
 export * as notificationsRepository from "./notifications";
 export * as surveysRepository from "./surveys";
 export * as plansRepository from "./plans";
+export * as userPreferenceRepository from "./user-preferences";
 export * as learningPathsRepository from "./learning-paths";

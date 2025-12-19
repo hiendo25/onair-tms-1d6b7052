@@ -1,7 +1,9 @@
 "use client";
 
 import { Alert, Card, CardContent, CircularProgress } from "@mui/material";
+
 import { useGetResourceById } from "../operations/query";
+
 import { ResourceCard } from "./ResourceCard";
 
 interface SelectedResourceCardProps {

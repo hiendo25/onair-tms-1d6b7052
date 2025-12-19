@@ -1,11 +1,13 @@
+import React from "react";
 import { Button, FormLabel, IconButton, Typography } from "@mui/material";
-import { UpsertCourseFormData } from "../../upsert-course.schema";
-import { Control, useFieldArray } from "react-hook-form";
 import Image from "next/image";
-import { cn } from "@/utils";
-import { CloseIcon, FileExcelIcon, FileImageIcon, FileVideoIcon } from "@/shared/assets/icons";
+import { Control, useFieldArray } from "react-hook-form";
+
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { CloseIcon, FileExcelIcon, FileImageIcon, FileVideoIcon } from "@/shared/assets/icons";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
+import { cn } from "@/utils";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
 
 export interface DocumentsFieldsProps {
   control: Control<UpsertCourseFormData>;

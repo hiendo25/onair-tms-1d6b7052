@@ -1,8 +1,9 @@
 "use client";
 import React, { memo, useMemo } from "react";
-import Image from "next/image";
-import { cn } from "@/utils";
 import { Box } from "@mui/material";
+import Image from "next/image";
+
+import { cn } from "@/utils";
 
 export interface AvatarProps {
   src?: string | null;

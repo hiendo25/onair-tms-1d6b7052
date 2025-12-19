@@ -1,6 +1,6 @@
 import React from "react";
-
 import { TextField, TextFieldProps } from "@mui/material";
+
 import { formatNumber } from "@/utils/format-number";
 
 interface InputDecimalFieldProps extends Omit<TextFieldProps, "onChange"> {

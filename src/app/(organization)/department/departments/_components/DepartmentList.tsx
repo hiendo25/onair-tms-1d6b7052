@@ -1,6 +1,10 @@
 "use client";
 
 import * as React from "react";
+import AddIcon from "@mui/icons-material/Add";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Alert,
   Box,
@@ -23,20 +27,17 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import PageContainer from "@/shared/ui/PageContainer";
-import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
-import { useDeleteDepartmentMutation } from "@/modules/department/operations/mutation";
-import type { DepartmentDto } from "@/types/dto/departments";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { useQueryClient } from "@tanstack/react-query";
+import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { DepartmentDialog } from "@/modules/department/components/DepartmentDialog";
 import { ImportDepartmentDialog } from "@/modules/department/components/ImportDepartmentDialog";
-import { useOrganizationId } from "@/hooks/useOrganizationId";
+import { useDeleteDepartmentMutation } from "@/modules/department/operations/mutation";
+import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
+import type { DepartmentDto } from "@/types/dto/departments";
 
 export default function DepartmentList() {
   const dialogs = useDialogs();

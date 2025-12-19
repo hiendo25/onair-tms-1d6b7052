@@ -1,14 +1,15 @@
 "use client";
 import { forwardRef, memo, useCallback, useRef, useState } from "react";
-import { useFieldArray } from "react-hook-form";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Box, Typography } from "@mui/material";
-import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
+import { useFieldArray } from "react-hook-form";
+
 import { UpsertCourseFormData } from "../../upsert-course.schema";
-import CourseSectionItem, { CourseSectionItemRef } from "./CourseSectionItem";
+import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 
 import BoxEmptySection from "./BoxEmptySection";
+import CourseSectionItem, { CourseSectionItemRef } from "./CourseSectionItem";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {

@@ -1,13 +1,14 @@
 "use client";
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
 import { Alert, Box, CircularProgress } from "@mui/material";
-import PageContainer from "@/shared/ui/PageContainer";
-import EmployeeForm from "@/modules/employees/components/EmployeeForm";
-import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
-import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
-import { useUpdateEmployeeMutation } from "@/modules/employees/operations/mutation";
+import { useParams, useRouter } from "next/navigation";
+
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
+import EmployeeForm from "@/modules/employees/components/EmployeeForm";
+import { useUpdateEmployeeMutation } from "@/modules/employees/operations/mutation";
+import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
 
 const EditEmployeePage = () => {
   const router = useRouter();

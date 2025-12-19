@@ -1,9 +1,9 @@
-import { useTQuery } from "@/lib";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useTQuery } from "@/lib";
 import { coursesRepository } from "@/repository";
-import { PaginatedResult } from "@/types/dto/pagination.dto";
-import { CourseDto } from "@/types/dto/courses/course.dto";
 import { GetCoursesListMinimalQueryParams, GetCoursesQueryParams } from "@/repository/courses";
+import { CourseDto } from "@/types/dto/courses/course.dto";
+import { PaginatedResult } from "@/types/dto/pagination.dto";
 export interface GetCoursesQueryInput {
   q?: string;
   page?: number;

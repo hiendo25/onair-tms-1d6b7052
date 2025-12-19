@@ -1,14 +1,16 @@
 "use client";
 import { forwardRef, memo, useCallback, useRef, useState } from "react";
 import { Typography } from "@mui/material";
-import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
-import { UpsertCourseFormData } from "../upsert-course.schema";
-import ButtonAddSection, { ButtonAddSectionProps } from "./ButtonAddSection";
-import LessonTypeSelector, { LessonTypeSelectorProps } from "./LessonTypeSelector";
-import LessonForm from "./LessonForm";
 import { isUndefined } from "lodash";
+
+import { UpsertCourseFormData } from "../upsert-course.schema";
+import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
+
 import BoxEmptyLesson from "./BoxEmptyLesson";
+import ButtonAddSection, { ButtonAddSectionProps } from "./ButtonAddSection";
 import CourseSections, { CourseSectionsProps, CourseSectionsRef } from "./CourseSections";
+import LessonForm from "./LessonForm";
+import LessonTypeSelector, { LessonTypeSelectorProps } from "./LessonTypeSelector";
 
 export const initSectionFormData = (): UpsertCourseFormData["sections"][number] => {
   return {

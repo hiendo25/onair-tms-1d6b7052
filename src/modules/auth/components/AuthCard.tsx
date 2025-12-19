@@ -1,7 +1,8 @@
 import * as React from "react";
-import Typography from "@mui/material/Typography";
-import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
 import { LogoOnairIcon } from "@/shared/assets/icons";
 export interface AuhCardProps extends React.PropsWithChildren {
   title?: React.ReactNode;

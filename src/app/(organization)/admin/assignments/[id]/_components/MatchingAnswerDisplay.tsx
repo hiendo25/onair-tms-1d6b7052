@@ -1,14 +1,14 @@
 "use client";
 
 import React from "react";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import {
   Box,
-  Typography,
-  Stack,
   Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 
 interface MatchingAnswerDisplayProps {
   studentMappings: Array<{ columnAId: string; columnBId: string }> | undefined;

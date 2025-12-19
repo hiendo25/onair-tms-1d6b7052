@@ -1,17 +1,15 @@
-import { coursesLessonsRepository, coursesRepository, coursesSectionsRepository } from "@/repository";
-import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
+import dayjs from "dayjs";
+import { isUndefined } from "lodash";
 
-import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
+import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
+import { coursesLessonsRepository, coursesRepository, coursesSectionsRepository } from "@/repository";
+import { GetCourseByIdResponse } from "@/repository/courses";
 import {
   CreateLessonPayload,
   CreatePivotLessonsWithResourcesPayload,
   UpsertLessonPayload,
 } from "@/repository/courses-lessons/type";
-
-import { isUndefined } from "lodash";
-
-import dayjs from "dayjs";
-import { GetCourseByIdResponse } from "@/repository/courses";
+import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
 
 export class UpsertCourseService {
   private userId: string;

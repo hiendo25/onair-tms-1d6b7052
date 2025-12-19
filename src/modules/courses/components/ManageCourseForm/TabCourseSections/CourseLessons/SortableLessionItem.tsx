@@ -1,9 +1,10 @@
-import React, { PropsWithChildren, memo } from "react";
-import { Box, IconButton } from "@mui/material";
+import React, { memo, PropsWithChildren } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "@/utils";
+import { Box, IconButton } from "@mui/material";
+
 import { Dot2RowVerticalIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
 
 interface SortableLessionItemProps extends PropsWithChildren {
   id: string;

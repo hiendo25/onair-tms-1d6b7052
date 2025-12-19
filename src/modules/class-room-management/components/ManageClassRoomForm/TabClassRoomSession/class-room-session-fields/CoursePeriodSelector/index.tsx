@@ -1,20 +1,20 @@
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
+import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
+import { DateTimePickerProps } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { Controller, UseFormReturn, useFieldArray } from "react-hook-form";
-import { Box, Button, FormHelperText, FormLabel, IconButton, Typography, styled } from "@mui/material";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { CloseIcon, Edit05Icon } from "@/shared/assets/icons";
-import EmptyData from "@/shared/ui/EmptyData";
+import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
 
 import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
   SimpleDialogCourseSelectorRef,
 } from "@/modules/courses/container/SimpleDialogCourseSelector";
-import { DateTimePickerProps } from "@mui/x-date-pickers";
 import SimpleDialogTeacherSelector, {
   SimpleDialogTeacherSelectorRef,
 } from "@/modules/teacher/container/SimpleDialogTeacherSelector";
+import { CloseIcon, Edit05Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
+import EmptyData from "@/shared/ui/EmptyData";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
 
 const CoursePeriodsWraper = styled(Box)(({ theme }) => ({

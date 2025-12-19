@@ -9,7 +9,7 @@ import { Box, Button, Card, CardContent, Chip, Divider, Stack, Typography } from
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { PlanStatus } from "@/model/plan.model";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { usePermissions } from "@/modules/permission-wrapper";
 import { useUpdatePlanStatusMutation } from "@/modules/plans/operations/mutation";
 import { getStatusColor, getStatusLabel } from "../../helper";
@@ -77,12 +77,7 @@ export default function PlanApprovalActions({ planId, planName, status, approver
       return;
     }
 
-    const nextAction =
-      nextStatus === "approved"
-        ? "duyệt"
-        : nextStatus === "rejected"
-          ? "từ chối"
-          : "đưa về chờ duyệt";
+    const nextAction = nextStatus === "approved" ? "duyệt" : nextStatus === "rejected" ? "từ chối" : "đưa về chờ duyệt";
 
     const confirmed = await dialogs.confirm(`Bạn muốn ${nextAction} kế hoạch "${planName}"?`, {
       title: "Xác nhận duyệt kế hoạch",
@@ -103,8 +98,8 @@ export default function PlanApprovalActions({ planId, planName, status, approver
         nextStatus === "approved"
           ? "Đã duyệt kế hoạch thành công."
           : nextStatus === "rejected"
-            ? "Đã từ chối kế hoạch."
-            : "Đã cập nhật trạng thái chờ duyệt.";
+          ? "Đã từ chối kế hoạch."
+          : "Đã cập nhật trạng thái chờ duyệt.";
       notifications.show(successMessage, { severity: "success" });
     } catch (error: any) {
       notifications.show(error?.message || "Không thể cập nhật trạng thái kế hoạch.", { severity: "error" });
@@ -136,8 +131,8 @@ export default function PlanApprovalActions({ planId, planName, status, approver
               {isPendingSurvey
                 ? "Hoàn thành khảo sát trước khi thực hiện phê duyệt."
                 : approver && status === "approved"
-                  ? `Người duyệt: ${approver}.`
-                  : ""}
+                ? `Người duyệt: ${approver}.`
+                : ""}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.5 }}>
               Chỉ admin có quyền duyệt hoặc từ chối kế hoạch này.
@@ -151,9 +146,7 @@ export default function PlanApprovalActions({ planId, planName, status, approver
         <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={1} alignItems="center" sx={{ color: "text.secondary" }}>
             <CheckCircleOutlineIcon fontSize="small" />
-            <Typography variant="body2">
-              Quyết định sẽ cập nhật trạng thái kế hoạch và người duyệt.
-            </Typography>
+            <Typography variant="body2">Quyết định sẽ cập nhật trạng thái kế hoạch và người duyệt.</Typography>
           </Stack>
 
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>

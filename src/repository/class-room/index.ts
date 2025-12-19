@@ -688,7 +688,7 @@ const markAttendance = async (payload: MarkAttendancePayload) => {
 
     return data;
   } catch (error) {
-    throw error;
+    throw new Error("Unable to markAttendance");
   }
 };
 

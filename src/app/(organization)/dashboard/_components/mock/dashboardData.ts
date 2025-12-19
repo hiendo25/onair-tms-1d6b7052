@@ -1,5 +1,6 @@
-import { CalenderStatus } from "@/shared/ui/calendar";
 import dayjs from "dayjs";
+
+import { CalenderStatus } from "@/shared/ui/calendar";
 
 export type CourseRow = {
   id: string;

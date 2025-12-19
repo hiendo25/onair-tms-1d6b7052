@@ -2,20 +2,22 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, Box, Button, Divider, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
-import { useGetCourseListQuery, useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
 import Link from "next/link";
+
 import { PATHS } from "@/constants/path.constant";
-import TableData, { TableDataProps } from "@/shared/ui/TableData";
 // import { getColumnsCourse } from "./column-course";
 import useDebounce from "@/hooks/useDebounce";
-import { GetCoursesQueryParams } from "@/repository/courses";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
+import { useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { usePermissions } from "@/modules/permission-wrapper";
+import Can from "@/modules/permission-wrapper/components/Can";
+import { GetCoursesQueryParams } from "@/repository/courses";
+import { Edit02Icon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+
 import { columnsCourse, CourseRowItem } from "./column-course";
 import DialogDeleteCourseConfirmation, { DialogDeleteCourseConfirmationRef } from "./DialogDeleteCourseConfirmation";
-import Can from "@/modules/permission-wrapper/components/Can";
-import { usePermissions } from "@/modules/permission-wrapper";
 
 const PAGE_SIZE_OPTIONS = [20, 40, 60, 100];
 
@@ -29,9 +31,9 @@ export default function CourseTableList({ className }: CourseTableListProps) {
   console.log({ canCreateOrDeleteCourse });
   const {
     organization: { id: organizationId },
-    employeeType,
+    type: employeeType,
     id: employeeId,
-  } = useUserOrganization((state) => state.data);
+  } = useUserOrganization((state) => state.currentEmployee);
 
   const [queryParams, setQueryParams] = useState<GetCoursesQueryParams>({
     search: "",
@@ -111,10 +113,7 @@ export default function CourseTableList({ className }: CourseTableListProps) {
                 <>
                   <Can pers={["course:update"]}>
                     <Link href={PATHS.COURSES.EDIT(courseId)}>
-                      <IconButton
-                        size="small"
-                        className="text-blue-600 bg-transparent hover:bg-blue-50"
-                      >
+                      <IconButton size="small" className="text-blue-600 bg-transparent hover:bg-blue-50">
                         <Edit02Icon className="w-4 h-4" />
                       </IconButton>
                     </Link>
@@ -137,14 +136,8 @@ export default function CourseTableList({ className }: CourseTableListProps) {
   }, [canCreateOrDeleteCourse]);
 
   return (
-    <Box
-      sx={{
-        background: "white",
-        borderRadius: "8px",
-        overflow: "hidden",
-      }}
-    >
-      <div className="flex items-center justify-between gap-2 mb-3 p-4">
+    <Box>
+      <div className="flex items-center justify-between mb-6">
         <Box component="div" className="w-full max-w-[360px] block">
           <TextField
             value={queryParams.search}
@@ -185,14 +178,12 @@ export default function CourseTableList({ className }: CourseTableListProps) {
             Không thể tải danh sách khóa học. Vui lòng kiểm tra lại kết nối.
           </Alert>
         ) : null}
-        <Divider />
         <TableData
           rows={coursesList}
           columns={mergeColumns}
           hoverRow
           loading={isLoading || isPending}
           showRowCount
-          bordered={false}
           pagination={{
             page: queryParams.page,
             pageSize: queryParams.pageSize,

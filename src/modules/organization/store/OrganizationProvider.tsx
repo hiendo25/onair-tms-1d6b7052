@@ -1,5 +1,5 @@
 "use client";
-import { createContext, type ReactNode, useContext, useRef } from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef } from "react";
 import { useStore } from "zustand";
 
 import { createOrganizationStore, OrganizationStoreApi, UserOrganizationState } from "./user-organization-store";
@@ -8,25 +8,28 @@ type UserOrganizationStoreContextApi = ReturnType<typeof createOrganizationStore
 
 export const UserOrganizationContext = createContext<UserOrganizationStoreContextApi | undefined>(undefined);
 
-export interface UserOrganizationProviderProps {
+export interface OrganizationProviderProps {
   children: ReactNode;
-  data: UserOrganizationState["data"];
-  mainOrganization: UserOrganizationState["mainOrganization"];
-  employeesOrganizations: UserOrganizationState["employeesOrganizations"];
+  currentOrganization: UserOrganizationState["currentOrganization"];
+  organizations: UserOrganizationState["organizations"];
+  employees: UserOrganizationState["employees"];
+  currentEmployee: UserOrganizationState["currentEmployee"];
 }
 
-export const UserOrganizationProvider = ({
+export const OrganizationProvider = ({
   children,
-  data,
-  employeesOrganizations = [],
-  mainOrganization,
-}: UserOrganizationProviderProps) => {
+  organizations = [],
+  currentOrganization,
+  employees = [],
+  currentEmployee,
+}: OrganizationProviderProps) => {
   const storeRef = useRef<UserOrganizationStoreContextApi | null>(null);
   if (storeRef.current === null) {
     storeRef.current = createOrganizationStore({
-      data,
-      mainOrganization,
-      employeesOrganizations,
+      currentOrganization: currentOrganization,
+      organizations,
+      employees,
+      currentEmployee,
     });
   }
 
@@ -36,7 +39,7 @@ export const UserOrganizationProvider = ({
 export const useUserOrganization = <T,>(selector: (store: OrganizationStoreApi) => T): T => {
   const context = useContext(UserOrganizationContext);
   if (!context) {
-    throw new Error(`useUserOrganization must be used within UserOrganizationProvider`);
+    throw new Error(`useUserOrganization must be used within OrganizationProvider`);
   }
   return useStore(context, selector);
 };

@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Box } from "@mui/material";
+
 import { Resource } from "../types";
+
 import { ResourceIcon } from "./ResourceIcon";
 
 interface ResourceThumbnailProps {

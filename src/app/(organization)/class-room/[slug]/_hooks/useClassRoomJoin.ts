@@ -1,8 +1,9 @@
-import { PATHS } from "@/constants/path.constant";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { useCallback, useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+
+import { PATHS } from "@/constants/path.constant";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 
 interface UseClassRoomJoinOptions {
   data: GetClassRoomBySlugResponse["data"];

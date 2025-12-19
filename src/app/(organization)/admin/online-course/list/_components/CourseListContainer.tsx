@@ -1,6 +1,8 @@
 "use client";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import { redirect } from "next/navigation";
+
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+
 import CourseTableList from "./CourseTableList";
 
 export default function CourseListContainer() {

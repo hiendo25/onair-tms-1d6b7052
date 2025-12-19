@@ -1,6 +1,7 @@
-import { CloseIcon } from "@/shared/assets/icons";
-import { IconButton } from "@mui/material";
 import { memo } from "react";
+import { IconButton } from "@mui/material";
+
+import { CloseIcon } from "@/shared/assets/icons";
 
 interface VideoItemViewProps {
   videoUrl: string;

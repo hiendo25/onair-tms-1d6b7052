@@ -1,10 +1,12 @@
 "use client";
 
 import { Box, Card, CardContent, Typography } from "@mui/material";
-import { Resource } from "../types";
-import { ResourceThumbnail } from "./ResourceThumbnail";
-import { ResourceActionMenu } from "./ResourceActionMenu";
+
 import { formatFileSize } from "@/utils";
+import { Resource } from "../types";
+
+import { ResourceActionMenu } from "./ResourceActionMenu";
+import { ResourceThumbnail } from "./ResourceThumbnail";
 
 interface ResourceCardProps {
   resource: Resource;

@@ -1,15 +1,17 @@
 "use client";
-import { ChevronRightDoubleIcon } from "@/shared/assets/icons";
-import { Button, Typography } from "@mui/material";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
-import { useState } from "react";
-import { cn } from "@/utils";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { useTransition } from "react";
-import { ClassRoomType } from "@/model/class-room.model";
-import BoxItem from "./BoxItem";
+import { Button, Typography } from "@mui/material";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { PATHS } from "@/constants/path.constant";
+import { ClassRoomType } from "@/model/class-room.model";
+import { ChevronRightDoubleIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
+
+import BoxItem from "./BoxItem";
 
 interface ClassRoomTypeBoxMenuProps {
   items?: { path: string; title: string }[];
@@ -32,7 +34,10 @@ const ClassRoomTypeBoxMenu: React.FC<ClassRoomTypeBoxMenuProps> = ({ items }) =>
   };
 
   return (
-    <div className="bg-white rounded-2xl p-8 max-w-[1040px] mx-auto">
+    <div
+      className="bg-white rounded-2xl p-6 max-w-[1040px] mx-auto border border-gray-200 "
+      style={{ boxShadow: "var(--paper-shadow)" }}
+    >
       <Typography className="font-semibold text-center text-2xl">Chọn loại lớp học</Typography>
       <div className="h-8"></div>
       <div className="grid grid-cols-3 gap-6 bg-gray-100 px-5 py-3 rounded-lg">

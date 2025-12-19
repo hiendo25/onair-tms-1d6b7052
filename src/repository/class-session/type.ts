@@ -1,5 +1,5 @@
-import { ClassSessionsCoursesPeriod } from "@/model/class-session-course-period";
 import { ClassSession } from "@/model/class-session.model";
+import { ClassSessionsCoursesPeriod } from "@/model/class-session-course-period";
 
 export type BulkCreateClassRoomSessionsPayload = {
   classRoomId: string;

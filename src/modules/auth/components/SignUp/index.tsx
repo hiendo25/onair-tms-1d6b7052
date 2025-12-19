@@ -3,11 +3,13 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import SignUpFormClient, { SignUpFormClientProps } from "./SignupFormClient";
-import GoogleSignInButton from "../GoogleSignInButton";
-import AuhCard from "../AuthCard";
 import Link from "next/link";
+
 import useAuthSignUp from "../../hooks/useAuthSignUp";
+import AuhCard from "../AuthCard";
+import GoogleSignInButton from "../GoogleSignInButton";
+
+import SignUpFormClient, { SignUpFormClientProps } from "./SignupFormClient";
 export interface SignUpProps {
   className?: string;
 }

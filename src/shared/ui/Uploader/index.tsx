@@ -1,11 +1,12 @@
-import { EyeIcon, FileAdioIcon, FileExcelIcon, FileVideoIcon, ImageIcon, TrashIcon1 } from "@/shared/assets/icons";
-import { cn } from "@/utils";
+import React, { ChangeEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useId } from "react";
 import { IconButton, Typography } from "@mui/material";
 import { isArray } from "lodash";
-import { ChangeEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useId } from "react";
+
 import { FILE_TYPES, FileTypes, getTypeOfFile } from "@/constants/file.constant";
+import { EyeIcon, FileAdioIcon, FileExcelIcon, FileVideoIcon, ImageIcon, TrashIcon1 } from "@/shared/assets/icons";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
+import { cn } from "@/utils";
 
 type FileTypesAcceptKey = keyof FileTypes;
 

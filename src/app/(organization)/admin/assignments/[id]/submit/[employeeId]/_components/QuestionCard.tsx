@@ -1,4 +1,7 @@
 import * as React from "react";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ImageIcon from "@mui/icons-material/Image";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import {
   Box,
   Button,
@@ -13,13 +16,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import ImageIcon from "@mui/icons-material/Image";
-import DescriptionIcon from "@mui/icons-material/Description";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+
 import type { AssignmentQuestionDto } from "@/types/dto/assignments";
-import FileUploadButton from "./FileUploadButton";
-import FileListItem from "./FileListItem";
+
 import AttachmentSection from "./AttachmentSection";
+import FileListItem from "./FileListItem";
+import FileUploadButton from "./FileUploadButton";
 import MatchingQuestionInput from "./MatchingQuestionInput";
 import OrderQuestionInput from "./OrderQuestionInput";
 import TrueFalseQuestionInput from "./TrueFalseQuestionInput";

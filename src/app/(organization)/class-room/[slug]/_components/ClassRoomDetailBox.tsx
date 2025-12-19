@@ -1,12 +1,11 @@
 import React, { useMemo } from "react";
-
 import { Avatar, Box, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
 
 import { FORMAT_DATE_LABEL_WITHOUT_YEAR, FORMAT_TIME } from "@/lib";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { VideoCameraRecordFillIcon } from "@/shared/assets/icons";
 import MicrophoneIcon from "@/shared/assets/icons/MicrophoneIcon";
-import dayjs from "dayjs";
 import { ROOM_PROVIDERS } from "../_constants";
 
 export enum ClassroomMiniBoxType {

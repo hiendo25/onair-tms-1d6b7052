@@ -1,10 +1,12 @@
-import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
-import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
-import { SetStateAction, memo, useRef, useState } from "react";
+import { memo, SetStateAction, useRef, useState } from "react";
 import { useId } from "react";
-import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
-import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
+import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
+
+import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
+
+import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
+import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
 
 export interface EmployeeFilterProps {
   className?: string;

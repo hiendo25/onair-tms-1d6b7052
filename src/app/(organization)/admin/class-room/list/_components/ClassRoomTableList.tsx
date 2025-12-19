@@ -1,7 +1,14 @@
 "use client";
 import { useMemo, useState } from "react";
-import dayjs from "dayjs";
 import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import { redirect } from "next/navigation";
+
+import {
+  GetClassRoomsQueryInput,
+  useGetClassRoomsPriorityQuery,
+} from "@/modules/class-room-management/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import {
   ClassRoomFilters,
   ClassRoomRuntimeStatusFilter,
@@ -9,15 +16,10 @@ import {
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
 } from "@/repository/class-room/type";
-import {
-  GetClassRoomsQueryInput,
-  useGetClassRoomsPriorityQuery,
-} from "@/modules/class-room-management/operations/query";
 import { Pagination } from "@/shared/ui/Pagination";
+
 import ClassRoomListFilters from "./ClassRoomCourseFilters";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 import ClassRoomListTable from "./ClassRoomListTable";
-import { redirect } from "next/navigation";
 
 const initialFilters: ClassRoomFilters = {
   type: ClassRoomTypeFilter.All,
@@ -33,11 +35,12 @@ const PAGE_SIZE = 12;
 export default function ClassRoomTableList() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
-  const { organization, ...rest } = useUserOrganization((state) => state.data);
-  const isAdmin = rest.employeeType === "admin";
-  const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher";
-  const organizationId = isAdmin ? organization?.id : undefined;
-  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
+  const {
+    type: employeeType,
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
+  const isAdmin = employeeType === "admin";
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -125,10 +128,6 @@ export default function ClassRoomTableList() {
   const handlePaginationChange = (nextPage: number) => {
     setPage(nextPage);
   };
-
-  if (!isHasAccess) {
-    redirect("/403");
-  }
 
   return (
     <Box bgcolor={"#fff"} borderRadius={2} p={2}>

@@ -1,8 +1,9 @@
-import { ClassRoom } from "../../classroom-form.schema";
-import { Control, useController, useWatch } from "react-hook-form";
-import { Typography } from "@mui/material";
-import { slugify } from "@/utils/slugify";
 import { useEffect } from "react";
+import { Typography } from "@mui/material";
+import { Control, useController, useWatch } from "react-hook-form";
+
+import { slugify } from "@/utils/slugify";
+import { ClassRoom } from "../../classroom-form.schema";
 
 interface ClassRoomSlugFieldProps {
   control: Control<ClassRoom>;

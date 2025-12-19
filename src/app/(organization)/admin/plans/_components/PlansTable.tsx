@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import dayjs, { Dayjs } from "dayjs";
 import AddIcon from "@mui/icons-material/Add";
 import ClearIcon from "@mui/icons-material/Clear";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -20,6 +19,7 @@ import {
   Typography,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
@@ -28,7 +28,7 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { PlanStatus } from "@/model/plan.model";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useDeletePlanMutation } from "@/modules/plans/operations/mutation";
 import { useGetPlansQuery } from "@/modules/plans/operations/query";
 import { EmptyBoxIcon } from "@/shared/assets/icons";
@@ -49,7 +49,7 @@ export default function PlansTable() {
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
-  const organizationId = useUserOrganization((state) => state.data.organization.id);
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
 
   const [page, setPage] = React.useState(1);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
@@ -221,9 +221,9 @@ export default function PlansTable() {
       renderCell: (_value, row) =>
         row.startDate && row.endDate
           ? `${fDateTime(row.startDate, FORMAT_DATE_TIME_CLEANER)} - ${fDateTime(
-            row.endDate,
-            FORMAT_DATE_TIME_CLEANER,
-          )}`
+              row.endDate,
+              FORMAT_DATE_TIME_CLEANER,
+            )}`
           : "Chưa có",
     },
     {
@@ -241,9 +241,7 @@ export default function PlansTable() {
       renderCell: (value, row) => (
         <Stack direction="row" spacing={1} alignItems="center">
           <Chip label={getStatusLabel(value as PlanStatus)} color={getStatusColor(value as PlanStatus)} size="small" />
-          {row.surveyCompleted && (
-            <Chip label="Khảo sát xong" color="success" variant="outlined" size="small" />
-          )}
+          {row.surveyCompleted && <Chip label="Khảo sát xong" color="success" variant="outlined" size="small" />}
         </Stack>
       ),
     },

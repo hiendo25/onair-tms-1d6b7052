@@ -1,13 +1,14 @@
 import { useTQuery } from "@/lib/queryClient";
 import {
-  getAttendanceStatsByQRCode,
   getAttendancesByClassRoom,
   getAttendancesByEmployee,
   getAttendancesBySession,
+  getAttendanceStatsByQRCode,
   getQRCodeById,
   getQRCodesByClassRoom,
   getQRCodesBySession,
 } from "@/repository/qr-attendance";
+
 import { QR_ATTENDANCE_KEYS } from "./key";
 
 export const useGetQRCodeQuery = (qrCodeId: string | undefined) => {

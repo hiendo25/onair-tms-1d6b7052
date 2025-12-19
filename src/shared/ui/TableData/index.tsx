@@ -1,19 +1,9 @@
 import { createContext, memo, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Paper,
-  SxProps,
-  Table,
-  TableBody,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TablePaginationOwnProps,
-  Typography,
-} from "@mui/material";
+import { Box, Table, TableBody, TableContainer, TableHead, TablePaginationOwnProps, Typography } from "@mui/material";
 
 import { EmptyBoxIcon } from "@/shared/assets/icons";
 
+import { CustomTablePagination } from "./CustomTablePagination";
 import TableDataHeader from "./TableDataHeader";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowDataProvider from "./TableRowDataProvider";
@@ -136,7 +126,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
         component="div"
         sx={(theme) => ({
           marginTop: "0px !important",
-          ...(bordered ? { border: "1px solid", borderColor: theme.palette.grey[200] } : {}),
+          ...(bordered ? { border: "1px solid", borderColor: theme.palette.grey[300], borderRadius: "12px" } : {}),
         })}
         className="table-container shadow-none bg-transparent"
       >
@@ -196,45 +186,13 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
             </TableBody>
           </Table>
         </Box>
-        <TablePagination
-          id="table-data-pagination"
-          className="table-pagination"
-          component="div"
+        <CustomTablePagination
           count={total}
           rowsPerPageOptions={perPageOptions}
           rowsPerPage={pageSize}
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangePageSize}
           page={page - 1}
-          slotProps={{
-            select: {
-              popoverTargetAction: "toggle",
-              popoverTarget: "table-pagination",
-              popover: "manual",
-              MenuProps: {
-                sx: (theme) => ({
-                  ".MuiPaper-root": {
-                    minWidth: "52px !important",
-                  },
-                  ".MuiList-root": {
-                    padding: "6px",
-                  },
-                  ".MuiButtonBase-root": {
-                    display: "inline-block",
-                    textAlign: "center",
-
-                    "&.Mui-selected": {
-                      background: theme.palette.grey[200],
-                      "&.Mui-focusVisible": {
-                        background: theme.palette.grey[200],
-                        outline: "none",
-                      },
-                    },
-                  },
-                }),
-              },
-            },
-          }}
         />
       </TableContainer>
     </TableRowDataProvider>

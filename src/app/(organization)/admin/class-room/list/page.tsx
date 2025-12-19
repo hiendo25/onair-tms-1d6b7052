@@ -1,6 +1,7 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import ClassRoomContainer from "./_components/ClassRoomContainer";
 import { PATHS } from "@/constants/path.constant";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import ClassRoomContainer from "./_components/ClassRoomContainer";
 
 const ClassRoomList = () => {
   return (

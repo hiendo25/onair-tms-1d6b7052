@@ -1,16 +1,17 @@
 "use client";
-import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { useTMutation } from "@/lib";
-import { ClassRoomStore } from "../store/class-room-store";
 import { QueryClient } from "@tanstack/react-query";
-import { UpsertClassRoomService } from "@/services/class-room/upsert-class-room.service";
+
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useTMutation } from "@/lib";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { UpsertClassRoomService } from "@/services/class-room/upsert-class-room.service";
+import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
+import { ClassRoomStore } from "../store/class-room-store";
 
 const useCRUDClassRoom = () => {
-  const userInfo = useUserOrganization((state) => state.data);
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
   const queryClient = new QueryClient();
-  const classRoomService = new UpsertClassRoomService(userInfo.id, userInfo.organization.id);
+  const classRoomService = new UpsertClassRoomService(currentEmployee.id, currentEmployee.organization.id);
 
   const { mutate: doCreateClassRoom, isPending } = useTMutation({
     mutationKey: ["CREATE_CLASS_ROOM"],

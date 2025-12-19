@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import CameraswitchIcon from "@mui/icons-material/Cameraswitch";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Alert,
   AlertTitle,
@@ -13,11 +15,10 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import CameraswitchIcon from "@mui/icons-material/Cameraswitch";
 import { Html5Qrcode } from "html5-qrcode";
-import { useCheckInWithQRMutation } from "@/modules/class-room-management/operation/qr-attendance";
+
 import { fDateTime } from "@/lib";
+import { useCheckInWithQRMutation } from "@/modules/class-room-management/operation/qr-attendance";
 
 interface QRScannerDialogProps {
   open: boolean;

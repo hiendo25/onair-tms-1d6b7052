@@ -83,3 +83,8 @@ export const PATHS = {
     EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
   },
 } as const;
+
+export const AUTH_PATHS = {
+  SIGNIN: "/auth/signin",
+  SIGNUP: "/auth/signup",
+} as const;

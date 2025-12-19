@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { CloseIcon, FilePdf02Icon, FileWord02Icon, VideoIcon } from "@/shared/assets/icons";
 import { IconButton, Typography } from "@mui/material";
+
 import { LessonType } from "@/model/lesson.model";
+import { CloseIcon, FilePdf02Icon, FileWord02Icon, VideoIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 export interface LessonTypeSelectorProps {
   onSelect: (type: LessonType) => void;

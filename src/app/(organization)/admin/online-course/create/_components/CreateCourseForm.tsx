@@ -1,14 +1,15 @@
 "use client";
-import { useSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
+
+import { PATHS } from "@/constants/path.constant";
 import ManageCourseForm, {
   ManageCourseFormProps,
   ManageCourseFormRef,
 } from "@/modules/courses/components/ManageCourseForm";
 import { useUpsertCourse } from "@/modules/courses/hooks/useUpsertCourse";
-import { PATHS } from "@/constants/path.constant";
 
 const CreateCourseForm = () => {
   const { onCreate, isLoading } = useUpsertCourse();

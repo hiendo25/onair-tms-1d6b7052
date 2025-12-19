@@ -6,9 +6,9 @@ import {
   FormLabel,
   Typography,
 } from "@mui/material";
-
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
+
 import { Android12Switch } from "../CustomSwithcher";
 interface RHFSwitcherFieldProps<T extends FieldValues> {
   control: Control<T>;

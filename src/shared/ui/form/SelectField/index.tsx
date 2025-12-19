@@ -1,6 +1,8 @@
 "use client";
 import React, { memo, useCallback, useId } from "react";
+import type { SelectProps } from "@mui/material";
 import {
+  alpha,
   Box,
   Chip,
   FormControl,
@@ -8,11 +10,9 @@ import {
   FormLabel,
   MenuItem,
   Select,
-  Typography,
-  alpha,
   styled,
+  Typography,
 } from "@mui/material";
-import type { SelectProps } from "@mui/material";
 import { isArray, isNull, isUndefined } from "lodash";
 
 type OptionType = { id: string | number; label?: string; [key: string]: any };

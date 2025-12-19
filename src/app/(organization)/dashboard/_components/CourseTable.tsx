@@ -1,15 +1,16 @@
 import * as React from "react";
-import { Box, Button, Chip, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
+import { Box, Button, Chip, CircularProgress, Divider, Paper, Stack, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import Link from "next/link";
+
+import { PATHS } from "@/constants/path.constant";
+import { fDateTime, FORMAT_DATE_TIME_SHORTER } from "@/lib";
+import { useGetClassRoomsPriorityQuery } from "@/modules/class-room-management/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 
 import { panelSx } from "./mock/panelSx";
-import Link from "next/link";
-import { PATHS } from "@/constants/path.constant";
-import dayjs from "dayjs";
-import { useGetClassRoomsPriorityQuery } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import { fDateTime, FORMAT_DATE_TIME_SHORTER } from "@/lib";
-import { EmployeeWithProfileDto } from "@/types/dto/classRooms/classRoom.dto";
 
 type DashboardCourseRow = {
   id: string;
@@ -24,7 +25,10 @@ type DashboardCourseRow = {
 };
 
 const CourseTable = () => {
-  const user = useUserOrganization((state) => state.data);
+  const {
+    type: employeeType,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
   const formatDateLabel = (date?: string | null) => fDateTime(date, FORMAT_DATE_TIME_SHORTER) ?? "Chưa có lịch";
 
   const queryInput = React.useMemo(() => {
@@ -36,11 +40,11 @@ const CourseTable = () => {
       orderBy: "asc" as const,
     };
 
-    if (user.employeeType === "admin") {
-      return user.organization?.id ? { ...baseFilters, organizationId: user.organization.id } : undefined;
+    if (employeeType === "admin") {
+      return organizationId ? { ...baseFilters, organizationId: organizationId } : undefined;
     }
-    return { ...baseFilters, employeeId: undefined, organizationId: user.organization?.id };
-  }, [user]);
+    return { ...baseFilters, employeeId: undefined, organizationId: organizationId };
+  }, [employeeType, organizationId]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } = useGetClassRoomsPriorityQuery(queryInput ?? {});
 

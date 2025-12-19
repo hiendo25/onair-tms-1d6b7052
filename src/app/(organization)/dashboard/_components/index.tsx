@@ -1,16 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { Metadata } from "next";
 import { Box, Grid, Stack } from "@mui/material";
+import { Metadata } from "next";
 
-import DashboardCalendarSidebar from "./DashboardCalendarSidebar";
-import SummaryCardsGrid from "./SummaryCardsGrid";
-import CourseTable from "./CourseTable";
-import CompletionRateCard from "./CompletionRateCard";
-import ParticipationRateCard from "./ParticipationRateCard";
 import ChannelParticipationCard from "./ChannelParticipationCard";
+import CompletionRateCard from "./CompletionRateCard";
 import CourseRankingList from "./CourseRankingList";
+import CourseTable from "./CourseTable";
+import DashboardCalendarSidebar from "./DashboardCalendarSidebar";
+import ParticipationRateCard from "./ParticipationRateCard";
+import SummaryCardsGrid from "./SummaryCardsGrid";
 
 export const metadata: Metadata = {
   title: "Dashboard",

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { Box, Paper, Stack, Typography } from "@mui/material";
 
-import TimeRangeSwitcher from "./TimeRangeSwitcher";
 import { courseRankingByRange, TimeRange } from "./mock/dashboardData";
 import { panelSx } from "./mock/panelSx";
+import TimeRangeSwitcher from "./TimeRangeSwitcher";
 
 type CourseListItemProps = {
   text: string;

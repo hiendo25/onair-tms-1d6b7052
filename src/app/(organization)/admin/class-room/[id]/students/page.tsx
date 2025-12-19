@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
-import PageContainer from "@/shared/ui/PageContainer";
-import StudentsSection from "./_components";
+
 import { getClassRoomById } from "@/repository/class-room";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import StudentsSection from "./_components";
 
 const StudentsPage = async ({ params }: { params: Promise<{ id: string }> }) => {
     const { id } = await params;

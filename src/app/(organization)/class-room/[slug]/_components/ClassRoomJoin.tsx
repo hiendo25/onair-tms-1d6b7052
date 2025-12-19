@@ -1,13 +1,15 @@
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { Avatar, AvatarGroup, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
+
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
+
 import CountDown from "./CountDown";
 import EnterClassRoomsDialog from "./EnterClassRoomsDialog";
 import JoinButton from "./JoinButton";
-import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
 
 const MAX_AVATAR = 3;
 
@@ -112,17 +114,19 @@ export default function ClassRoomJoin({ data, isAdminView }: ClassRoomJoinProps)
           <QRCodeViewDialog
             open={qrViewOpen}
             onClose={closeQRView}
-            classRoom={{
-              id: data.id,
-              title: data.title,
-              class_sessions: data.sessions?.map((s) => ({
-                id: s.id,
-                title: s.title,
-                start_at: s.start_at,
-                end_at: s.end_at,
-                is_online: s.session_type !== "offline",
-              })),
-            } as any}
+            classRoom={
+              {
+                id: data.id,
+                title: data.title,
+                class_sessions: data.sessions?.map((s) => ({
+                  id: s.id,
+                  title: s.title,
+                  start_at: s.start_at,
+                  end_at: s.end_at,
+                  is_online: s.session_type !== "offline",
+                })),
+              } as any
+            }
           />
         )
       ) : (

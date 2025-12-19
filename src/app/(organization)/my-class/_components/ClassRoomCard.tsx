@@ -1,20 +1,22 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Image } from "@/shared/ui/Image";
-import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import { fDateTime } from "@/lib";
-import EnterClassRoomsDialog from "./EnterClassRooms";
-import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
-import { PATHS } from "@/constants/path.constant";
+import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
 import Link from "next/link";
-import { ClassRoomTypeFilter } from "@/repository/class-room/type";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
+import { fDateTime } from "@/lib";
 import { ClassSessionType } from "@/model/class-session.model";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import { ClassRoomTypeFilter } from "@/repository/class-room/type";
+import { Image } from "@/shared/ui/Image";
+import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
+
+import EnterClassRoomsDialog from "./EnterClassRooms";
 
 interface IClassRoomCard {
   start_at: string;

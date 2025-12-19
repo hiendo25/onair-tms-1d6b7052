@@ -1,16 +1,17 @@
 import * as React from "react";
-import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
+import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import ChartUserByCountry from "../_components/ChartUserByCountry";
-import CustomizedTreeView from "../_components/CustomizedTreeView";
-import CustomizedDataGrid from "../_components/CustomizedDataGrid";
+
 import HighlightedCard from "@/shared/ui/HighlightedCard";
+import PureClient from "@/shared/ui/PureClient";
+import ChartUserByCountry from "../_components/ChartUserByCountry";
+import CustomizedDataGrid from "../_components/CustomizedDataGrid";
+import CustomizedTreeView from "../_components/CustomizedTreeView";
 import PageViewsBarChart from "../_components/PageViewsBarChart";
 import SessionsChart from "../_components/SessionsChart";
 import StatCard, { StatCardProps } from "../_components/StatCard";
-import PureClient from "@/shared/ui/PureClient";
 
 const data: StatCardProps[] = [
   {

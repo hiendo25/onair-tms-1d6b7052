@@ -1,5 +1,6 @@
-import { Components, Theme } from "@mui/material/styles";
 import { tabClasses, tabsClasses } from "@mui/material";
+import { Components, Theme } from "@mui/material/styles";
+
 import { grey } from "../../theme-color";
  
 export const cardsCustomizations: Components<Theme> = {

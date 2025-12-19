@@ -1,11 +1,4 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import SwipeableDrawer, { SwipeableDrawerProps } from "@mui/material/SwipeableDrawer";
-import Button from "@mui/material/Button";
-import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 import {
   Checkbox,
   Chip,
@@ -18,9 +11,17 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import SwipeableDrawer, { SwipeableDrawerProps } from "@mui/material/SwipeableDrawer";
+
+import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
+import { useUserOrganization } from "@/modules/organization";
 import { CloseIcon, SearchIcon } from "@/shared/assets/icons";
 import Avatar from "@/shared/ui/Avatar";
-
 type Anchor = "top" | "left" | "bottom" | "right";
 
 interface DrawerEmployeeProps {
@@ -30,7 +31,11 @@ interface DrawerEmployeeProps {
   onOk?: () => void;
 }
 const DrawerEmployee: React.FC<DrawerEmployeeProps> = ({ open, onClose, onOk, onOpenChange }) => {
-  const { data: employeeData, error } = useGetEmployeeQuery({ enabled: true, queryParams: { page: 1, pageSize: 20 } });
+  const currentOrg = useUserOrganization((state) => state.currentOrganization);
+  const { data: employeeData, error } = useGetEmployeeQuery({
+    enabled: true,
+    queryParams: { page: 1, pageSize: 20, organizationId: currentOrg.orgId },
+  });
 
   const employeeList = React.useMemo(() => employeeData?.data || [], [employeeData]);
   const handleClose: SwipeableDrawerProps["onClose"] = () => {

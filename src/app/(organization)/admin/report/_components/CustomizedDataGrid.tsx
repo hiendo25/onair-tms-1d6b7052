@@ -1,9 +1,11 @@
 "use client";
 import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { columns, rows } from "./data/gridData";
+
 import { useGetStudentsQuery } from "@/modules/student/operation/query";
 import { GetStudentsResponse } from "@/repository/employee";
+
+import { columns, rows } from "./data/gridData";
 
 export default function CustomizedDataGrid() {
   const { data, isPending } = useGetStudentsQuery({});

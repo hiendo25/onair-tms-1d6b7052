@@ -1,8 +1,9 @@
-import IconButton from "@mui/material/IconButton";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import useAuthSignOut from "../hooks/useAuthSignOut";
 import { Button, Typography } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+
 import { cn } from "@/utils";
+import useAuthSignOut from "../hooks/useAuthSignOut";
 
 interface SignOutButtonProps {
   type?: "icon";
