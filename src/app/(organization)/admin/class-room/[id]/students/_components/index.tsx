@@ -1,5 +1,5 @@
 "use client";
-import { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useState } from "react";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DownloadIcon from "@mui/icons-material/Download";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
@@ -86,8 +86,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const [classRoomRuntimeStatus, setClassRoomRuntimeStatus] = useState<string | null>(null);
   const [expandedStudentRows, setExpandedStudentRows] = useState<Record<string, boolean>>({});
 
-  const { organization } = useUserOrganization((state) => state.data);
-  const organizationId = organization?.id;
+  const {
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
 
   const { data: organizationUnitsResult } = useGetOrganizationUnitsQuery();
   const organizationUnits = organizationUnitsResult?.data || [];
