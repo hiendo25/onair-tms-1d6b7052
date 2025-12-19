@@ -118,6 +118,9 @@ export const useGetMyAssignmentsQuery = (params?: GetMyAssignmentsParams) => {
       if (params?.status) {
         searchParams.set("status", params.status);
       }
+      if (params?.organizationId) {
+        searchParams.set("organizationId", params.organizationId);
+      }
 
       const response = await fetch(`/api/my-assignments?${searchParams.toString()}`);
       if (!response.ok) {

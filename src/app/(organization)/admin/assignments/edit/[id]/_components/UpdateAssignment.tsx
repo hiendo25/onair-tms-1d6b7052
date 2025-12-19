@@ -28,6 +28,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
       ...formData,
       id: assignmentId,
       assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
+      organizationId: currentOrg.orgId,
     };
 
     updateAssignment(payload, {

@@ -7,6 +7,13 @@ import type { GetMyAssignmentsParams, MyAssignmentStatusFilter } from "@/types/d
 
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const organizationId = searchParams.get("organizationId");
+
+    if (!organizationId) {
+      return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
+    }
+
     const supabase = await createSVClient();
     const {
       data: { user },
@@ -18,14 +25,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Get employee ID from user ID
-    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
+    const employee = await employeesRepository.getCurrentEmployee(user.id, organizationId);
 
     if (!employee) {
       return NextResponse.json({ error: "Employee not found" }, { status: 404 });
     }
 
     // Get pagination, search, and status parameters from query string
-    const searchParams = request.nextUrl.searchParams;
     const statusParam = searchParams.get("status") as MyAssignmentStatusFilter | null;
 
     const params: GetMyAssignmentsParams = {
@@ -33,6 +39,7 @@ export async function GET(request: NextRequest) {
       limit: parseInt(searchParams.get("limit") || "25", 10),
       search: searchParams.get("search") || undefined,
       status: statusParam || undefined,
+      organizationId
     };
 
     const myAssignments = await getMyAssignments(employee.id, params);

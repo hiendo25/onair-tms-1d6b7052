@@ -39,7 +39,8 @@ type StatusFilterUI = "all" | MyAssignmentStatusFilter;
 
 export default function MyAssignmentsList() {
   const router = useRouter();
-  const { id: employeeId } = useUserOrganization((state) => state.data);
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
+  const currentOrg = useUserOrganization((state) => state.currentOrganization);
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
@@ -63,6 +64,7 @@ export default function MyAssignmentsList() {
     limit: rowsPerPage,
     search: debouncedSearch,
     status: statusFilter !== "all" ? statusFilter : undefined,
+    organizationId: currentOrg.orgId,
   });
 
   const handleChangePage = React.useCallback((_event: unknown, newPage: number) => {
