@@ -62,7 +62,6 @@ async function applyOrganizationMiddleware(
       path: "/",
       httpOnly: true,
     });
-    console.log("set name");
   } else {
     const organization = request.cookies.get("organization_id");
     if (!organization) {

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
-import { getClassRoomById } from "@/repository/class-room";
+import { getClassRoomById, GetClassRoomByIdResponse } from "@/repository/class-room";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import UpdateClassRoomForm from "./_components/UpdateClassRoomForm";
@@ -26,15 +26,13 @@ export async function generateMetadata(
   };
 }
 
-export type GetClassRoomByIdData = Awaited<ReturnType<typeof getClassRoomById>>["data"];
+export type GetClassRoomByIdData = NonNullable<GetClassRoomByIdResponse["data"]>;
 const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
   const { id: classRoomId } = await params;
   const { data, error } = await getClassRoomById(classRoomId);
 
-  console.log(data, error);
-
   if (!data || error) {
-    return notFound();
+    notFound();
   }
 
   /**

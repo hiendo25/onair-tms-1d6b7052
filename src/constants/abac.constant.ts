@@ -12,6 +12,7 @@ type Todo = {
   completed: boolean;
   invitedUsers: string[];
 };
+
 type Permissions = {
   comments: {
     dataType: Comment;
@@ -114,3 +115,5 @@ hasPermission(user, "todos", "view", todo);
 
 // Can view all todos
 hasPermission(user, "todos", "create", todo);
+
+hasPermission(user, "todos", "update", todo);

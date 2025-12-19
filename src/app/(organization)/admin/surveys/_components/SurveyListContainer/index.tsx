@@ -15,10 +15,9 @@ import { useUserOrganization } from "@/modules/organization";
 import { usePermissions } from "@/modules/permission-wrapper";
 import Can from "@/modules/permission-wrapper/components/Can";
 import { useGetSurveysQuery } from "@/modules/surveys/operation/queries";
+import { GetSurveysQueryParams } from "@/repository/surveys";
 import { Edit02Icon, EyeIcon, Trash01Icon } from "@/shared/assets/icons";
-import PageContainer from "@/shared/ui/PageContainer";
 import TableData from "@/shared/ui/TableData";
-import { Survey } from "@/types/survey.types";
 
 import { surveyColumns } from "./survey-columns";
 interface SurveyListContainerProps {
@@ -26,12 +25,18 @@ interface SurveyListContainerProps {
 }
 const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) => {
   const organization = useUserOrganization((state) => state.currentOrganization);
+  const [querParams, setQueryParams] = React.useState<GetSurveysQueryParams>({
+    page: 1,
+    pageSize: 10,
+  });
+
   const {
     data: surveysData,
     isPending,
     isLoading,
   } = useGetSurveysQuery({
     queryParams: {
+      ...querParams,
       organizationId: organization.orgId,
     },
   });
@@ -40,12 +45,15 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
   const notifications = useNotifications();
 
   const [isTransition, startTransition] = useTransition();
+
   const surveyList = React.useMemo(() => {
     return surveysData?.data || [];
   }, [surveysData]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(12);
-  const [surveys, setSurveys] = React.useState<Survey[]>([]);
+
+  const totalCount = React.useMemo(() => {
+    return surveysData?.count || 0;
+  }, [surveysData]);
+
   const [searchQuery, setSearchQuery] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedSurveyId, setSelectedSurveyId] = React.useState<string | null>(null);
@@ -54,34 +62,14 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
 
   const canCreateOrUpdate = hasPermissions([{ $or: "survey:create" }, { $or: "survey:update" }]);
 
-  const filteredSurveys = React.useMemo(() => {
-    if (!searchQuery.trim()) {
-      return surveys;
-    }
-    const query = searchQuery.toLowerCase();
-    return surveys.filter(
-      (survey) => survey.name.toLowerCase().includes(query) || survey.description.toLowerCase().includes(query),
-    );
-  }, [surveys, searchQuery]);
-
-  const paginatedSurveys = React.useMemo(() => {
-    const start = page * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredSurveys.slice(start, end);
-  }, [filteredSurveys, page, rowsPerPage]);
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
-    setPage(0);
+    setQueryParams((prev) => ({ ...prev, page: 1 }));
   };
 
   const handleCreateSurvey = () => {
@@ -90,11 +78,11 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     });
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, surveyId: string) => {
-    event.stopPropagation();
-    setAnchorEl(event.currentTarget);
-    setSelectedSurveyId(surveyId);
-  };
+  // const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, surveyId: string) => {
+  //   event.stopPropagation();
+  //   setAnchorEl(event.currentTarget);
+  //   setSelectedSurveyId(surveyId);
+  // };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -120,25 +108,23 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     handleMenuClose();
   };
 
-  const handleViewStatistics = () => {
-    if (selectedSurveyId) {
-      router.push(PATHS.SURVEYS.STATISTICS(selectedSurveyId));
-    }
-    handleMenuClose();
-  };
+  // const handleViewStatistics = () => {
+  //   if (selectedSurveyId) {
+  //     router.push(PATHS.SURVEYS.STATISTICS(selectedSurveyId));
+  //   }
+  //   handleMenuClose();
+  // };
 
-  const handleEdit = () => {
-    if (selectedSurveyId) {
-      router.push(PATHS.SURVEYS.EDIT(selectedSurveyId));
-    }
-    handleMenuClose();
-  };
+  // const handleEdit = () => {
+  //   if (selectedSurveyId) {
+  //     router.push(PATHS.SURVEYS.EDIT(selectedSurveyId));
+  //   }
+  //   handleMenuClose();
+  // };
 
-  const handleDelete = async () => {
-    if (!selectedSurveyId) return;
-
+  const handleDeleteSurvey = (surveyId: string, surveyName: string) => async () => {
     const confirmed = await dialogs.confirm(
-      "Bạn có chắc chắn muốn xóa khảo sát này không? Hành động này không thể hoàn tác.",
+      `"Bạn có chắc chắn muốn xóa ${surveyName} ? Hành động này không thể hoàn tác."`,
       {
         title: "Xác nhận xóa",
         okText: "Xóa",
@@ -152,7 +138,6 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
       return;
     }
 
-    setSurveys((prev) => prev.filter((survey) => survey.id !== selectedSurveyId));
     notifications.show("Xóa khảo sát thành công!", {
       severity: "success",
       autoHideDuration: 3000,
@@ -160,23 +145,14 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     handleMenuClose();
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const dateStr = date.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const timeStr = date.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
-    return `${dateStr}, ${timeStr}`;
+  const handleViewDetail = (surveyId: string) => () => {
+    router.push(PATHS.SURVEYS.STATISTICS(surveyId));
   };
 
-  const handleDeleteSurvey = (surveyId: string, surveyName: string) => () => {};
+  const handleChangePage = React.useCallback((newPage: number) => {
+    setQueryParams((prev) => ({ ...prev, page: newPage }));
+  }, []);
+
   const mergedColumns = React.useMemo((): typeof surveyColumns => {
     return canCreateOrUpdate
       ? [
@@ -195,7 +171,7 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
                       size="small"
                       className="text-blue-600 bg-transparent hover:bg-blue-50"
                       title="View"
-                      onClick={handleDeleteSurvey(surveyId, title)}
+                      onClick={handleViewDetail(surveyId)}
                     >
                       <EyeIcon className="w-4 h-4" />
                     </IconButton>
@@ -260,12 +236,18 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
         </Button>
       </Stack>
       <TableData
+        rowKey="id"
         rows={surveyList}
         showRowCount
         columns={mergedColumns}
-        rowKey="id"
-        loading={isPending}
+        loading={isLoading || isPending}
         minWidth={1200}
+        pagination={{
+          total: totalCount,
+          page: querParams.page,
+          pageSize: querParams.pageSize,
+          onChangePage: handleChangePage,
+        }}
       />
     </Box>
   );

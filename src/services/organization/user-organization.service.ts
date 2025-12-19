@@ -66,6 +66,7 @@ export class UserOrganizationService {
 
   async getRolesPermissions() {
     const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
+    console.log({ userRoles });
     const pers = userRoles?.reduce<Permissions[]>((sumPers, ur) => {
       const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
         const resource = rolePer.resource_code as Resources;
