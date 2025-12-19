@@ -3,7 +3,7 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 
 import { FORMAT_DATE_LABEL_WITHOUT_HUMAN_DAY_AND_YEAR, FORMAT_DATE_TIME_SHORTER, FORMAT_TIME } from "@/lib";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
@@ -40,7 +40,7 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
       <Stack flexDirection="row" alignItems="center" justifyContent="space-between" bgcolor={"white"} px={2}>
         <Stack direction="row" spacing={1} alignItems="center">
           {data?.thumbnail_url && (
-            <Image 
+            <Image
               src={data?.thumbnail_url || ""}
               alt={"thumbnail"}
               width={135}

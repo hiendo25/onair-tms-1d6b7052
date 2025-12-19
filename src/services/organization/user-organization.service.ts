@@ -36,14 +36,12 @@ export class UserOrganizationService {
     return employees;
   }
 
-  async getCurrentEmployee() {
-    const userPreference = await userPreferenceRepository.getUserPreferencesByUserId(this.userId);
+  async getCurrentEmployee(organizationId: string) {
     const { data: employee, error } = await employeesRepository.getOneEmployeeByUserIdWithOrganizationId({
       userId: this.userId,
-      organizationId: userPreference.default_organization_id,
+      organizationId: organizationId,
     });
 
-    console.log({ userPreference, employee });
     if (!employee) {
       throw new Error("Main employee undefined");
     }

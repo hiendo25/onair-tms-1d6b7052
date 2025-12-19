@@ -78,3 +78,8 @@ export const PATHS = {
     EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
 } as const;
+
+export const AUTH_PATHS = {
+  SIGNIN: "/auth/signin",
+  SIGNUP: "/auth/signup",
+} as const;

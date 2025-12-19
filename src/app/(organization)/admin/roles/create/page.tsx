@@ -3,7 +3,7 @@ import { Backdrop, Box, CircularProgress, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { RoleFormContainer } from "@/modules/roles/components/RoleForm";
 import { useCreateRole } from "@/modules/roles/operations/mutation";
 import { useGetGroupPermissionList } from "@/modules/roles/operations/query";

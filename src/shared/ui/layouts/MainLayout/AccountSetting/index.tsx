@@ -4,7 +4,7 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import Avatar from "@/shared/ui/Avatar";
 
 import AccountMenuOptions, { AccountMenuOptionsProps } from "./AccountMenuOptions";

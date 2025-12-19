@@ -1,7 +1,7 @@
 "use client";
 import { redirect } from "next/navigation";
 
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 
 import CourseTableList from "./CourseTableList";
 

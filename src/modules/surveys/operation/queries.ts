@@ -6,7 +6,7 @@ import { GetSurveysQueryParams } from "@/repository/surveys";
 export const useGetSurveysQuery = (options?: { enabled?: boolean; queryParams: GetSurveysQueryParams }) => {
   const { queryParams, enabled } = options || {};
   return useTQuery({
-    queryKey: [QUERY_KEYS.GET_SURVEYS],
+    queryKey: [QUERY_KEYS.GET_SURVEYS, queryParams?.organizationId],
     queryFn: () => surveysRepository.getSurveys(queryParams),
     enabled,
   });

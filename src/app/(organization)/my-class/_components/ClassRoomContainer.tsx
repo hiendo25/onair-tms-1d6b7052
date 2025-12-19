@@ -8,7 +8,7 @@ import {
   useCountStatusClassRoomsQuery,
   useGetClassRoomsByEmployeeId,
 } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { ClassRoomRuntimeStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "@/repository/class-room";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { Pagination } from "@/shared/ui/Pagination";

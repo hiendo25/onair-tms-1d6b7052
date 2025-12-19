@@ -2,20 +2,11 @@
 
 import { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, Divider, Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
 import { useFieldArray } from "react-hook-form";
 
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useCreatePlanDraftCourseMutation } from "@/modules/plans/operations/mutation";
 import { useGetPlanCourseOptionsQuery } from "@/modules/plans/operations/query";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
@@ -29,11 +20,7 @@ interface StepAssignCoursesProps {
   isLoading?: boolean;
 }
 
-export default function StepAssignCourses({
-  onBack,
-  onContinue,
-  isLoading = false,
-}: StepAssignCoursesProps) {
+export default function StepAssignCourses({ onBack, onContinue, isLoading = false }: StepAssignCoursesProps) {
   const { enqueueSnackbar } = useSnackbar();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { control } = usePlanFormContext();
@@ -87,8 +74,8 @@ export default function StepAssignCourses({
               Gán môn học
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              Gán môn học cho từng chủ đề hoặc trực tiếp vào chương trình khi sẵn sàng.
-              Bạn có thể bỏ qua nếu chưa cần gán môn.
+              Gán môn học cho từng chủ đề hoặc trực tiếp vào chương trình khi sẵn sàng. Bạn có thể bỏ qua nếu chưa cần
+              gán môn.
             </Typography>
           </Box>
           <Box
@@ -128,18 +115,10 @@ export default function StepAssignCourses({
         </Stack>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button
-            variant="outlined"
-            onClick={onBack}
-            disabled={isLoading}
-          >
+          <Button variant="outlined" onClick={onBack} disabled={isLoading}>
             Quay lại
           </Button>
-          <Button
-            variant="contained"
-            onClick={onContinue}
-            disabled={isLoading}
-          >
+          <Button variant="contained" onClick={onContinue} disabled={isLoading}>
             Tiếp tục
           </Button>
         </Box>

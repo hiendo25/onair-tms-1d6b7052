@@ -1,28 +1,35 @@
 "use server";
 import React from "react";
+import { cookies, headers } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 
 import { PermissionProvider } from "@/modules/permission-wrapper/store/PermissionProvider";
 import { authRepository } from "@/repository";
 import { UserOrganizationService } from "@/services/organization/user-organization.service";
-import { UserOrganizationProvider, UserOrganizationProviderProps } from "../store/UserOrganizationProvider";
+import { OrganizationProvider, OrganizationProviderProps } from "../store/OrganizationProvider";
 
-const UserOrganizationWrapper = async ({ children }: { readonly children: React.ReactNode }) => {
-  const currentUser = await authRepository.ensureGetCurrentUser();
-  const userOrganization = new UserOrganizationService(currentUser.id);
+const OrganizationWrapper = async ({ children }: { readonly children: React.ReactNode }) => {
+  const cookieStore = await cookies();
+  const organizationId = cookieStore.get("organization_id")?.value;
 
-  const currentEmployee = await userOrganization.getCurrentEmployee();
-  const employees = await userOrganization.getEmployees();
-  const organizations = await userOrganization.getOrganizations();
+  const currentUser = await authRepository.getCurrentUser();
 
-  const { roles, permissions } = await userOrganization.getRolesPermissions();
-
-  if (!currentEmployee || !currentEmployee.organization) {
+  console.log({ organizationId });
+  if (!organizationId || !currentUser) {
     await authRepository.authServerSignOut();
     redirect("/auth/signin", RedirectType.replace);
   }
 
-  const organizationsStore = organizations.reduce((acc, orgEpl): UserOrganizationProviderProps["organizations"] => {
+  const userOrganization = new UserOrganizationService(currentUser.id);
+
+  const [employees, organizations, { roles, permissions }, currentEmployee] = await Promise.all([
+    userOrganization.getEmployees(),
+    userOrganization.getOrganizations(),
+    userOrganization.getRolesPermissions(),
+    userOrganization.getCurrentEmployee(organizationId),
+  ]);
+
+  const organizationsStore = organizations.reduce((acc, orgEpl): OrganizationProviderProps["organizations"] => {
     return [
       ...acc,
       {
@@ -38,29 +45,7 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
     ];
   }, []);
 
-  const currentEmployeeProfile: UserOrganizationProviderProps["data"] = {
-    id: currentEmployee.id,
-    status: currentEmployee.status,
-    employeeCode: currentEmployee.employee_code,
-    employeeType: currentEmployee.employee_type || "student",
-    userId: currentUser.id,
-    employeeId: currentEmployee.id,
-    organization: {
-      id: currentEmployee.organization.id,
-      name: currentEmployee.organization.name,
-      subdomain: currentEmployee.organization.subdomain,
-    },
-    profile: currentEmployee.profiles
-      ? {
-          fullName: currentEmployee.profiles.full_name,
-          avatarUrl: currentEmployee.profiles.avatar || "",
-          email: currentEmployee.profiles.email,
-          gender: currentEmployee.profiles.gender,
-        }
-      : null,
-  };
-
-  const employeesStore = employees.reduce((acc, employee): UserOrganizationProviderProps["employees"] => {
+  const employeesStore = employees.reduce((acc, employee): OrganizationProviderProps["employees"] => {
     return [
       ...acc,
       {
@@ -68,7 +53,7 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
         status: employee.status,
         code: employee.employee_code,
         type: employee.employee_type || "student",
-        userId: currentUser.id,
+        userId: currentEmployee.user_id,
         organization: {
           id: employee.organization.id,
           name: employee.organization.name,
@@ -86,8 +71,7 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
   }, []);
 
   return (
-    <UserOrganizationProvider
-      data={currentEmployeeProfile}
+    <OrganizationProvider
       currentOrganization={{
         employeeId: currentEmployee.id,
         orgDomain: currentEmployee.organization.subdomain,
@@ -103,7 +87,7 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
         status: currentEmployee.status,
         code: currentEmployee.employee_code,
         type: currentEmployee.employee_type || "student",
-        userId: currentUser.id,
+        userId: currentEmployee.user_id,
         organization: {
           id: currentEmployee.organization.id,
           name: currentEmployee.organization.name,
@@ -123,7 +107,7 @@ const UserOrganizationWrapper = async ({ children }: { readonly children: React.
       <PermissionProvider permissions={permissions} roles={roles}>
         {children}
       </PermissionProvider>
-    </UserOrganizationProvider>
+    </OrganizationProvider>
   );
 };
-export default UserOrganizationWrapper;
+export default OrganizationWrapper;
