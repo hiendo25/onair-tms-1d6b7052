@@ -6,4 +6,5 @@ export type MyAssignmentStatusFilter = "not_submitted" | Database["public"]["Enu
 export class GetMyAssignmentsParams extends PaginationParams {
   search?: string;
   status?: MyAssignmentStatusFilter;
+  organizationId!: string;
 }

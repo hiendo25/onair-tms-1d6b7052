@@ -74,7 +74,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getMainEmployeeByUserId(user.id);
+    if (!payload.organizationId) {
+      return NextResponse.json({ success: false, message: "Organization Id required" }, { status: 400 });
+    }
+
+    const employee = await employeesRepository.getCurrentEmployee(user.id, payload.organizationId);
 
     await assignmentService.updateAssignmentWithRelations(payload, employee.id);
 
