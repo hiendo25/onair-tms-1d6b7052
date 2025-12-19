@@ -11,9 +11,9 @@ import Typography from "@mui/material/Typography";
 import Link from "next/link";
 
 import { Menu05Icon } from "@/shared/assets/icons";
-import AccountSetting from "@/shared/ui/layouts/MainLayout/AccountSetting";
 import NotificationButton from "@/shared/ui/NotificationButton";
 
+import AccountSetting from "./AccountSetting";
 import ThemeSwitcher from "./ThemeSwitcher";
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
@@ -79,8 +79,8 @@ export default function Header({ logo, title, menuOpen, onToggleMenu, actions }:
   );
 
   return (
-    <AppBar color="inherit" position="sticky">
-      <Toolbar sx={{ backgroundColor: "inherit" }}>
+    <AppBar color="inherit" position="sticky" className="header-bar">
+      <Toolbar sx={{ px: { xs: 2, md: 4, xl: 8 } }}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -114,7 +114,7 @@ export default function Header({ logo, title, menuOpen, onToggleMenu, actions }:
             {actions ? <Box component="div">{actions}</Box> : null}
           </Stack>
           <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
-            <Stack direction="row" alignItems="center" gap={2}>
+            <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 3 }}>
               <NotificationButton />
               <AccountSetting />
               {/* <ThemeSwitcher /> */}

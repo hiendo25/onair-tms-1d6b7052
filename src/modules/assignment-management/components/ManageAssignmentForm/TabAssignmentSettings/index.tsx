@@ -1,5 +1,5 @@
 "use client";
-import { memo } from "react";
+import React, { memo } from "react";
 import { Typography } from "@mui/material";
 import { useController, useFormContext } from "react-hook-form";
 
@@ -42,7 +42,7 @@ const TabAssignmentSettings: React.FC<TabAssignmentSettingsProps> = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg">
+    <div className="px-3 md:p-6 border border-gray-200 rounded-xl">
       <div className="flex items-center justify-between mb-6">
         <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
           Thêm học viên <span className="text-red-600">*</span>
@@ -54,4 +54,3 @@ const TabAssignmentSettings: React.FC<TabAssignmentSettingsProps> = () => {
 };
 
 export default memo(TabAssignmentSettings);
-
