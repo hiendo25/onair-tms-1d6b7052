@@ -31,7 +31,7 @@ interface OrganizationItem {
 }
 const ListItemAvatar = styled(MuiListItemAvatar)({
   minWidth: 0,
-  marginRight: 12,
+  marginRight: 8,
 });
 
 const SelectWrapper = styled(Select)(() => ({
@@ -94,7 +94,9 @@ const OrganizationSelector: React.FC<OrganizationSelectorProps> = ({ options, va
       }}
       sx={(theme) => ({
         maxHeight: 40,
-        background: theme.palette.grey[200],
+        "&:hover": {
+          background: theme.palette.grey[200],
+        },
         [`& .${selectClasses.select}`]: {
           display: "flex",
           alignItems: "center",
