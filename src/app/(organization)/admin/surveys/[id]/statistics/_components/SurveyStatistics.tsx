@@ -129,7 +129,7 @@ export default function SurveyStatistics({ survey, responses }: SurveyStatistics
   return (
     <Stack spacing={3}>
       {/* Total responses summary */}
-      <Card sx={{ p: 3 }}>
+      <Card>
         <Typography variant="h6" gutterBottom>
           Tổng số phản hồi: {responses.length}
         </Typography>
@@ -140,21 +140,39 @@ export default function SurveyStatistics({ survey, responses }: SurveyStatistics
         const stat = questionStats[index];
 
         return (
-          <Card key={question.id} sx={{ p: 3 }}>
+          <Card key={question.id}>
             {/* Question title */}
             <Typography variant="h6" gutterBottom>
               {question.label}
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Loại: {question.type === "checkbox" ? "Lựa chọn nhiều đáp án" : question.type === "rating" ? "Thang điểm" : question.type === "text" ? "Câu hỏi tự luận" : "Lựa chọn"} - Tổng số trả lời: {stat.totalResponses}
+              Loại:{" "}
+              {question.type === "checkbox"
+                ? "Lựa chọn nhiều đáp án"
+                : question.type === "rating"
+                ? "Thang điểm"
+                : question.type === "text"
+                ? "Câu hỏi tự luận"
+                : "Lựa chọn"}{" "}
+              - Tổng số trả lời: {stat?.totalResponses}
             </Typography>
 
             <Box sx={{ mt: 3 }}>
               {/* Render based on question type */}
-              {stat.type === "choice" && <ChoiceStatistics stats={stat.stats} />}
-              {stat.type === "checkbox" && <CheckboxStatistics stats={stat.stats} totalResponses={stat.totalResponses} />}
-              {stat.type === "rating" && <RatingStatistics stats={stat.stats} averageRating={stat.averageRating} totalResponses={stat.totalResponses} />}
-              {stat.type === "text" && <TextStatistics responses={stat.responses} totalResponses={stat.totalResponses} />}
+              {stat?.type === "choice" && <ChoiceStatistics stats={stat?.stats} />}
+              {stat?.type === "checkbox" && (
+                <CheckboxStatistics stats={stat?.stats} totalResponses={stat?.totalResponses} />
+              )}
+              {stat?.type === "rating" && (
+                <RatingStatistics
+                  stats={stat?.stats}
+                  averageRating={stat?.averageRating}
+                  totalResponses={stat?.totalResponses}
+                />
+              )}
+              {stat?.type === "text" && (
+                <TextStatistics responses={stat?.responses} totalResponses={stat.totalResponses} />
+              )}
             </Box>
           </Card>
         );
@@ -393,4 +411,3 @@ function TextStatistics({ responses, totalResponses }: { responses: TextResponse
     </Box>
   );
 }
-

@@ -1,9 +1,10 @@
-import * as React from "react";
-import { Box } from "@mui/material";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
+import { MOCK_SURVEYS } from "@/constants/survey.constant";
 import { MOCK_SURVEY_RESPONSES } from "@/constants/survey-statistics.constant";
+import { surveysRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import SurveyStatistics from "./_components/SurveyStatistics";
@@ -17,29 +18,27 @@ interface PageProps {
 export default async function SurveyStatisticsPage({ params }: PageProps) {
   const { id } = await params;
 
-  // // Find survey from mock data
-  // const survey = MOCK_SURVEYS.find((s) => s.id === id);
+  const { data: surveyDetail, error } = await surveysRepository.getSurveyById(id);
+  // Find survey from mock data
+  const survey = MOCK_SURVEYS.find((s) => s.id === "1");
 
-  // if (!survey) {
-  //   notFound();
-  // }
+  if (!survey || !surveyDetail) {
+    notFound();
+  }
 
-  // // Get responses for this survey
-  // const responses = MOCK_SURVEY_RESPONSES[id] || [];
+  // Get responses for this survey
+  const responses = MOCK_SURVEY_RESPONSES["1"] || [];
 
   return (
     <PageContainer
-      title="Thống kê khảo sát"
+      title={`Thống kê: ${surveyDetail.title}`}
       breadcrumbs={[
-        { title: "Khảo sát", path: PATHS.SURVEYS.ROOT },
-        // { title: survey.name, path: "#" },
-        { title: "Thống kê", path: PATHS.SURVEYS.STATISTICS(id) },
+        { title: "Khảo sát", path: PATHS.SURVEYS.LIST },
+        { title: surveyDetail.title },
+        { title: "Thống kê" },
       ]}
     >
-      <Box sx={{ py: 3 }}>
-        {/* <SurveyStatistics survey={survey} responses={responses} /> */}
-        SurveyStatistics
-      </Box>
+      <SurveyStatistics survey={survey} responses={responses} />
     </PageContainer>
   );
 }

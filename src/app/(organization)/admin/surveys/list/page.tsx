@@ -21,8 +21,10 @@ export async function generateMetadata(
 
 const PageSurveyList: React.FC<PageSurveyListProps> = () => {
   return (
-    <PageContainer title="Danh sách khảo sát" breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.ROOT }]}>
-      <SurveyListContainer />
+    <PageContainer title="Danh sách khảo sát" breadcrumbs={[{ title: "Khảo sát", path: PATHS.SURVEYS.LIST }]}>
+      <React.Suspense fallback="Loading...">
+        <SurveyListContainer />
+      </React.Suspense>
     </PageContainer>
   );
 };
