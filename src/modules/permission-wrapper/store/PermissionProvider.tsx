@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo } from "react";
+import React, { Suspense, useCallback, useMemo } from "react";
 
 import { buildPermission, Resources, ResourcesActions } from "@/constants/permission.constant";
 import { Permissions, PermissionsCheck } from "@/constants/permission.constant";
