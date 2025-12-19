@@ -84,7 +84,7 @@ export default function ClassRoomPickerDialog({
     organizationId,
     employeeId,
     search: searchTerm,
-    // sessionMode: ClassSessionModeFilter.Online,
+    sessionMode: ClassSessionModeFilter.Online,
   });
 
   // Update selected class-rooms when initialSelected changes
@@ -173,13 +173,19 @@ export default function ClassRoomPickerDialog({
                 <ListItem key={classRoom.id} disablePadding>
                   <ListItemButton onClick={() => handleToggle(classRoom)} dense>
                     {multiple ? (
-                      <Checkbox
-                        sx={{ borderRadius: 0 }}
-                        edge="start"
-                        checked={selected}
-                        tabIndex={-1}
-                        disableRipple
-                      />
+                      <Box>
+                        <Checkbox
+                          sx={{
+                            borderRadius: 0,
+                            border: "darkgrey !important",
+                            p: 0,
+                          }}
+                          checked={selected}
+                          tabIndex={-1}
+                          disableRipple
+                          edge="start"
+                        />
+                      </Box>
                     ) : (
                       <Radio edge="start" checked={selected} tabIndex={-1} />
                     )}

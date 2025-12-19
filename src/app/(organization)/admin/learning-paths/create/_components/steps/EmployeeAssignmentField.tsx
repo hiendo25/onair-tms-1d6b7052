@@ -45,11 +45,6 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
     field: { value: assignedEmployees, onChange: onEmployeesChange },
   } = useController({ control, name: "info.assignedEmployees" });
 
-  const handleRemoveEmployee = (employeeId: string) => {
-    const updated = (assignedEmployees || []).filter((emp: EmployeeItem) => emp.id !== employeeId);
-    onEmployeesChange(updated);
-  };
-
   const handleEmployeeChange = (students: StudentSelectedItem[]) => {
     // Convert StudentSelectedItem to EmployeeItem
     const employees: EmployeeItem[] = students.map((student) => ({
@@ -125,6 +120,19 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
             </Box>
           </Box>
         </Stack>
+
+        {/* If auto mode, show text 'Tất cả học viên' */}
+        {mode === "auto" && (
+          <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, p: 2, mt: 1 }}>
+            <Typography variant="subtitle2">
+              Gán người mới tự động
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+              Tự động gán học viên mới vào lộ trình này
+            </Typography>
+          </Box>
+        )}
       </FormControl>
 
       {/* Employee Selection Dialog */}

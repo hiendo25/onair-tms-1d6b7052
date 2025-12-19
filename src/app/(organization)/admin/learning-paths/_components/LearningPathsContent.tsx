@@ -201,7 +201,7 @@ export default function LearningPathsContent() {
       width: 120,
       fixed: "right",
       renderCell: (_value, row) => (
-        <IconButton size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
+        <IconButton disabled size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
           <MoreVertIcon fontSize="small" />
         </IconButton>
       ),
