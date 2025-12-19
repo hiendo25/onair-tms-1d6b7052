@@ -46,7 +46,7 @@ const statusCopy: Record<PlanStatus, { headline: string; description: string }> 
 
 export default function PlanApprovalActions({ planId, planName, status, approver }: PlanApprovalActionsProps) {
   const { hasPermissions } = usePermissions();
-  const { id: userId, employeeType } = useUserOrganization((state) => state.data);
+  const { id: userId, type: employeeType } = useUserOrganization((state) => state.currentEmployee);
   const notifications = useNotifications();
   const dialogs = useDialogs();
   const { mutateAsync: updatePlanStatus, isPending: isUpdating } = useUpdatePlanStatusMutation();
