@@ -50,7 +50,6 @@ export default function StepGeneralInfo() {
             name="info.thumbnail"
             label="Ảnh bìa đại diện"
             subTitle="Hình ảnh đại diện cho lộ trình học tập của bạn"
-            required
             aspectRatio="21/9"
             width="480px"
             description={
