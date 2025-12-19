@@ -40,4 +40,5 @@ export class UpdateAssignmentDto {
     attachments?: string[];
   }>;
   assignedEmployees!: string[]; // employee IDs
+  organizationId!: string;
 }
