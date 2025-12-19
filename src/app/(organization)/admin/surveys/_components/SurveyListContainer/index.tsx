@@ -26,7 +26,11 @@ interface SurveyListContainerProps {
 }
 const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) => {
   const organization = useUserOrganization((state) => state.currentOrganization);
-  const { data: surveysData, isPending } = useGetSurveysQuery({
+  const {
+    data: surveysData,
+    isPending,
+    isLoading,
+  } = useGetSurveysQuery({
     queryParams: {
       organizationId: organization.orgId,
     },
