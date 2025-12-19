@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assignment_categories: {
@@ -1306,6 +1281,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
+          is_main: boolean | null
           organization_id: string | null
           position_id: string | null
           start_date: string | null
@@ -1318,6 +1294,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1330,6 +1307,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          is_main?: boolean | null
           organization_id?: string | null
           position_id?: string | null
           start_date?: string | null
@@ -1487,6 +1465,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          metadata: Json | null
           name: string
           organization_id: string
           thumbnail_url: string | null
@@ -1497,6 +1476,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name: string
           organization_id: string
           thumbnail_url?: string | null
@@ -1507,6 +1487,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name?: string
           organization_id?: string
           thumbnail_url?: string | null
@@ -2195,6 +2176,27 @@ export type Database = {
           },
         ]
       }
+      serveys: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       surveys: {
         Row: {
           created_at: string
@@ -2708,32 +2710,6 @@ export type Database = {
           },
         ]
       }
-      user_references: {
-        Row: {
-          default_organization_id: string
-          id: number
-          user_id: string
-        }
-        Insert: {
-          default_organization_id?: string
-          id?: number
-          user_id?: string
-        }
-        Update: {
-          default_organization_id?: string
-          id?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_references_default_organization_id_fkey"
-            columns: ["default_organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_roles: {
         Row: {
           assigned_at: string | null
@@ -2857,10 +2833,6 @@ export type Database = {
           rejected: number
           total: number
         }[]
-      }
-      get_user_id_by_email: {
-        Args: { user_email: string }
-        Returns: string
       }
       has_permission: {
         Args: { action_code: string; resource_code: string }
@@ -3062,9 +3034,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
