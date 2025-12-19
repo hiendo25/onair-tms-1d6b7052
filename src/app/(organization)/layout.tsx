@@ -4,7 +4,7 @@ import Authorized from "@/modules/auth-wrapper/Authorized";
 import LayoutWrapper from "@/modules/layout-wrapper/container/LayoutWrapper";
 import { LibraryDialog } from "@/modules/library/components/LibraryDialog";
 import { LibraryProvider } from "@/modules/library/store/libraryProvider";
-import UserOrganizationWrapper from "@/modules/organization/container/UserOrganizationWrapper";
+import OrganizationWrapper from "@/modules/organization/container/OrganizationWrapper";
 
 export default async function RootLayout({
   children,
@@ -13,14 +13,14 @@ export default async function RootLayout({
 }>) {
   return (
     <Authorized>
-      <UserOrganizationWrapper>
+      <OrganizationWrapper>
         <LayoutWrapper>
           <LibraryProvider>
             {children}
             <LibraryDialog />
           </LibraryProvider>
         </LayoutWrapper>
-      </UserOrganizationWrapper>
+      </OrganizationWrapper>
     </Authorized>
   );
 }

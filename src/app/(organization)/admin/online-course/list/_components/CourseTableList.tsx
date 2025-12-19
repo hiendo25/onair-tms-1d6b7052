@@ -9,7 +9,7 @@ import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
 import { useDeleteCourseByIdMutation } from "@/modules/courses/operations/mutation";
 import { useGetCourseListQueryV2 } from "@/modules/courses/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { usePermissions } from "@/modules/permission-wrapper";
 import Can from "@/modules/permission-wrapper/components/Can";
 import { GetCoursesQueryParams } from "@/repository/courses";

@@ -1,9 +1,7 @@
 import { createStore } from "zustand/vanilla";
 
-import { LOCAL_STORAGE_KEYS } from "@/constants/localStorage.constant";
-import { Employee, EmployeeOrganization, UserOrganization } from "../types";
+import { Employee, EmployeeOrganization } from "../types";
 type UserOrganizationState = {
-  data: UserOrganization;
   currentOrganization: EmployeeOrganization;
   organizations: EmployeeOrganization[];
   employees: Employee[];
@@ -12,7 +10,7 @@ type UserOrganizationState = {
 
 type UserOrganizationActions = {
   setCurrentOrganization: (organizationId: string) => void;
-  setEmployeeProfile: (data: UserOrganization) => void;
+  reset: () => void;
 };
 
 type OrganizationStoreApi = UserOrganizationState & UserOrganizationActions;
@@ -22,14 +20,13 @@ const createOrganizationStore = (initState: UserOrganizationState) => {
     ...initState,
     setCurrentOrganization: (organizationId) => {
       const { organizations, employees } = get();
-      const orgItem = organizations.find((org) => org.orgId === organizationId);
-      const employeeItem = employees.find((employee) => employee.organization.id === organizationId);
-      if (!orgItem || !employeeItem) return;
-      localStorage.setItem(LOCAL_STORAGE_KEYS.ORGANIZATION_ID, organizationId);
-      set({ currentOrganization: orgItem, currentEmployee: employeeItem });
+      const updateOrganization = organizations.find((org) => org.orgId === organizationId);
+      const updateEmployee = employees.find((employee) => employee.organization.id === organizationId);
+      if (!updateOrganization || !updateEmployee) return;
+      set({ currentOrganization: updateOrganization, currentEmployee: updateEmployee });
     },
-    setEmployeeProfile: (data) => {
-      set({ data });
+    reset: () => {
+      set(initState);
     },
   }));
 };

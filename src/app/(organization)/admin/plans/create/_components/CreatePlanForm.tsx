@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
 import { PATHS } from "@/constants/path.constant";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useCreatePlanMutation } from "@/modules/plans/operations/mutation";
 import { PlanFormSchema } from "@/modules/plans/plan-form.schema";
 import PlanForm from "../../_components/PlanForm";

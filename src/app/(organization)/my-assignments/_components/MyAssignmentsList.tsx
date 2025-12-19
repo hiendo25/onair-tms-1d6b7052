@@ -31,7 +31,7 @@ import { useRouter } from "next/navigation";
 import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import PageContainer from "@/shared/ui/PageContainer";
 import type { MyAssignmentStatusFilter } from "@/types/dto/assignments";
 

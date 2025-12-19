@@ -5,7 +5,7 @@ import { enqueueSnackbar } from "notistack";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { UpsertCourseService } from "@/services/course/upsert-course.service";
 import { UpsertCourseFormData } from "../components/ManageCourseForm/upsert-course.schema";
 

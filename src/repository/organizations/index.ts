@@ -41,4 +41,24 @@ const getOrganizationsByUserId = async (userId: string) => {
     throw new Error("Fail to get organizations");
   }
 };
-export { getOrganizationsByUserId };
+export type GetOrganizationsByUserIdResponse = Awaited<ReturnType<typeof getOrganizationsByUserId>>;
+const getOrganizationByUserIdAndOrganizationId = async (userId: string, organizationId: string) => {
+  const supabase = await createSVClient();
+  try {
+    return await supabase
+      .from("employees")
+      .select(
+        `
+				employee_id:id,
+				user_id,
+				organization_id,
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain)
+			`,
+      )
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId);
+  } catch (err) {
+    throw new Error("Fail to get organizations");
+  }
+};
+export { getOrganizationsByUserId, getOrganizationByUserIdAndOrganizationId };

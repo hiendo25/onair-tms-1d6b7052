@@ -8,7 +8,7 @@ import {
   GetClassRoomsQueryInput,
   useGetClassRoomsPriorityQuery,
 } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import {
   ClassRoomFilters,
   ClassRoomRuntimeStatusFilter,
@@ -35,11 +35,12 @@ const PAGE_SIZE = 12;
 export default function ClassRoomTableList() {
   const [filters, setFilters] = useState<ClassRoomFilters>(initialFilters);
   const [page, setPage] = useState(1);
-  const { organization, ...rest } = useUserOrganization((state) => state.data);
-  const isAdmin = rest.employeeType === "admin";
-  const isHasAccess = rest.employeeType === "admin" || rest.employeeType === "teacher";
-  const organizationId = isAdmin ? organization?.id : undefined;
-  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
+  const {
+    type: employeeType,
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
+  const isAdmin = employeeType === "admin";
 
   const queryInput = useMemo<GetClassRoomsQueryInput>(() => {
     const trimmedSearch = filters.search.trim();
@@ -127,10 +128,6 @@ export default function ClassRoomTableList() {
   const handlePaginationChange = (nextPage: number) => {
     setPage(nextPage);
   };
-
-  if (!isHasAccess) {
-    redirect("/403");
-  }
 
   return (
     <Box bgcolor={"#fff"} borderRadius={2} p={2}>

@@ -2,7 +2,7 @@ import { use } from "react";
 import { useStore } from "zustand";
 
 import { OrganizationStoreApi } from "../store/user-organization-store";
-import { UserOrganizationContext } from "../store/UserOrganizationProvider";
+import { UserOrganizationContext } from "../store/OrganizationProvider";
 
 export const useUserOrganization = <T>(selector: (store: OrganizationStoreApi) => T): T => {
   const context = use(UserOrganizationContext);

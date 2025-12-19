@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
 import useDebounce from "@/hooks/useDebounce";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useGetOrganizationUnitsByOrgQuery } from "@/modules/organization-units/operations/query";
 import { useGetPlanningSurveysQuery } from "@/modules/plans/operations/query";
 import { Survey, SurveyFormValues, surveySchema } from "@/modules/plans/plan-form.schema";
@@ -29,11 +29,7 @@ const SURVEY_TARGET_OPTIONS: { value: PlanSurveyTarget; label: string }[] = [
   { value: "branch", label: "Theo chi nhánh" },
 ];
 
-
-const buildSurveyDefaults = (
-  survey?: Survey,
-  picked?: PlanningSurveyOption | null,
-): Survey => ({
+const buildSurveyDefaults = (survey?: Survey, picked?: PlanningSurveyOption | null): Survey => ({
   id: picked?.id || survey?.id || "",
   title: picked?.title || survey?.title || "",
   createdAt: picked?.createdAt ?? survey?.createdAt ?? null,
@@ -82,7 +78,11 @@ export function PlanSurveySection() {
     limit: pageSize,
   });
 
-  const { data: unitList, isLoading: isLoadingUnits, isFetching: isFetchingUnits } = useGetOrganizationUnitsByOrgQuery({
+  const {
+    data: unitList,
+    isLoading: isLoadingUnits,
+    isFetching: isFetchingUnits,
+  } = useGetOrganizationUnitsByOrgQuery({
     organizationId: userInfo?.organization?.id,
     type: targetType === "branch" || targetType === "department" ? targetType : undefined,
     search: debouncedUnitSearch,
@@ -101,9 +101,7 @@ export function PlanSurveySection() {
 
   const activeSurvey =
     selectedSurvey ??
-    (surveyValue
-      ? { id: surveyValue.id, title: surveyValue.title, createdAt: surveyValue.createdAt ?? null }
-      : null);
+    (surveyValue ? { id: surveyValue.id, title: surveyValue.title, createdAt: surveyValue.createdAt ?? null } : null);
 
   const handleOpenPicker = () => {
     setPage(1);

@@ -1,7 +1,7 @@
 import React from "react";
 
 import Authorized from "@/modules/auth-wrapper/Authorized";
-import UserOrganizationWraper from "@/modules/organization/container/UserOrganizationWrapper";
+import OrganizationWrapper from "@/modules/organization/container/OrganizationWrapper";
 import { SPALayout } from "@/shared/ui/layouts/spa";
 
 interface PropTypes {
@@ -12,9 +12,9 @@ const Layout = async (props: PropTypes) => {
   const { children } = props;
   return (
     <Authorized>
-      <UserOrganizationWraper>
+      <OrganizationWrapper>
         <SPALayout loading={false}>{children}</SPALayout>
-      </UserOrganizationWraper>
+      </OrganizationWrapper>
     </Authorized>
   );
 };

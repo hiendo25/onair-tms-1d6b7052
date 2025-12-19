@@ -3,7 +3,7 @@ import { QueryClient } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { UpsertClassRoomService } from "@/services/class-room/upsert-class-room.service";
 import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "../store/class-room-store";

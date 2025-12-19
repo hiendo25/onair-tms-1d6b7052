@@ -33,9 +33,13 @@ import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
 import useDebounce from "@/hooks/useDebounce";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { fDateTime } from "@/lib";
-import { useDeleteUserInClassRoomMutation, useExportStudentsMutation, useMarkAttendanceMutation } from "@/modules/class-room-management/operations/mutation";
+import {
+  useDeleteUserInClassRoomMutation,
+  useExportStudentsMutation,
+  useMarkAttendanceMutation,
+} from "@/modules/class-room-management/operations/mutation";
 import { useGetClassRoomStudentsQuery } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import { SearchIcon } from "@/shared/assets/icons";
 import { ConfirmDialog } from "@/shared/ui/custom-dialog";
@@ -55,10 +59,7 @@ const SEARCH_DEBOUNCE = 600;
 
 type AttendanceFilterValue = "all" | "attended" | "absent" | "pending";
 
-const resolveOrganizationUnitName = (
-  student: ClassRoomStudentDto,
-  unitType: "branch" | "department",
-) => {
+const resolveOrganizationUnitName = (student: ClassRoomStudentDto, unitType: "branch" | "department") => {
   if (unitType === "department") {
     const departments = student.employee?.employee_departments ?? [];
     return departments[0]?.departments?.name ?? "-";
@@ -68,17 +69,14 @@ const resolveOrganizationUnitName = (
   }
 };
 
-
 const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
-
   const queryClient = useQueryClient();
   const notifications = useNotifications();
 
   const [search, setSearch] = useState("");
   const [branchId, setBranchId] = useState<string>("all");
   const [departmentId, setDepartmentId] = useState<string>("all");
-  const [attendance, setAttendance] =
-    useState<AttendanceFilterValue>("all");
+  const [attendance, setAttendance] = useState<AttendanceFilterValue>("all");
   const [page, setPage] = useState(1);
 
   const debouncedSearch = useDebounce(search, SEARCH_DEBOUNCE);
@@ -86,10 +84,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const [deleteTargetIds, setDeleteTargetIds] = useState<string[]>([]);
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<string>>(new Set<string>());
   const [classRoomRuntimeStatus, setClassRoomRuntimeStatus] = useState<string | null>(null);
-  const [expandedStudentRows, setExpandedStudentRows] = useState<
-    Record<string, boolean>
-  >({});
-
+  const [expandedStudentRows, setExpandedStudentRows] = useState<Record<string, boolean>>({});
 
   const { organization } = useUserOrganization((state) => state.data);
   const organizationId = organization?.id;
@@ -101,28 +96,20 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const { mutateAsync: markAttendance, isPending: isMarkingAttendance } = useMarkAttendanceMutation();
   const { mutateAsync: exportStudents, isPending: isExporting } = useExportStudentsMutation();
 
-
-  const normalizedSearch = debouncedSearch?.trim()
-    ? debouncedSearch.trim()
-    : undefined;
+  const normalizedSearch = debouncedSearch?.trim() ? debouncedSearch.trim() : undefined;
   const normalizedBranchId = branchId !== "all" ? branchId : undefined;
-  const normalizedDepartmentId =
-    departmentId !== "all" ? departmentId : undefined;
-  const normalizedAttendance =
-    attendance !== "all" ? attendance : undefined;
+  const normalizedDepartmentId = departmentId !== "all" ? departmentId : undefined;
+  const normalizedAttendance = attendance !== "all" ? attendance : undefined;
 
   const branchOptions = useMemo(() => {
     return (organizationUnits ?? []).filter(
-      (unit) =>
-        unit.organization_id === organizationId && unit.type === "branch",
+      (unit) => unit.organization_id === organizationId && unit.type === "branch",
     );
   }, [organizationUnits, organizationId]);
 
   const departmentOptions = useMemo(() => {
     return (organizationUnits ?? []).filter(
-      (unit) =>
-        unit.organization_id === organizationId &&
-        unit.type === "department",
+      (unit) => unit.organization_id === organizationId && unit.type === "department",
     );
   }, [organizationUnits, organizationId]);
 
@@ -136,23 +123,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       departmentId: normalizedDepartmentId,
       attendanceStatus: normalizedAttendance,
     }),
-    [
-      classRoomId,
-      page,
-      normalizedSearch,
-      normalizedBranchId,
-      normalizedDepartmentId,
-      normalizedAttendance,
-    ],
+    [classRoomId, page, normalizedSearch, normalizedBranchId, normalizedDepartmentId, normalizedAttendance],
   );
 
-  const {
-    data: studentsResult,
-    isLoading,
-    isError,
-    refetch,
-    isFetching,
-  } = useGetClassRoomStudentsQuery(queryInput);
+  const { data: studentsResult, isLoading, isError, refetch, isFetching } = useGetClassRoomStudentsQuery(queryInput);
 
   const students = studentsResult?.data ?? [];
   const totalStudents = studentsResult?.total ?? 0;
@@ -170,21 +144,16 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
 
   const pageEmployeeIds = useMemo(
     () =>
-      students
-        .map((student) => student.employee?.id)
-        .filter((employeeId): employeeId is string => Boolean(employeeId)),
+      students.map((student) => student.employee?.id).filter((employeeId): employeeId is string => Boolean(employeeId)),
     [students],
   );
 
   const selectedCount = selectedEmployeeIds.size;
   const isAllCurrentPageSelected =
-    pageEmployeeIds.length > 0 &&
-    pageEmployeeIds.every((employeeId) => selectedEmployeeIds.has(employeeId));
+    pageEmployeeIds.length > 0 && pageEmployeeIds.every((employeeId) => selectedEmployeeIds.has(employeeId));
   const isSomeCurrentPageSelected =
-    pageEmployeeIds.length > 0 &&
-    pageEmployeeIds.some((employeeId) => selectedEmployeeIds.has(employeeId));
-  const isDeleteLocked =
-    classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing";
+    pageEmployeeIds.length > 0 && pageEmployeeIds.some((employeeId) => selectedEmployeeIds.has(employeeId));
+  const isDeleteLocked = classRoomRuntimeStatus === "past" || classRoomRuntimeStatus === "ongoing";
 
   const exportFilters = useMemo(
     () => ({
@@ -193,17 +162,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       departmentId: normalizedDepartmentId,
       attendanceStatus: normalizedAttendance,
     }),
-    [
-      normalizedSearch,
-      normalizedBranchId,
-      normalizedDepartmentId,
-      normalizedAttendance,
-    ],
+    [normalizedSearch, normalizedBranchId, normalizedDepartmentId, normalizedAttendance],
   );
 
-  const handleSearchChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(event.target.value);
     setPage(1);
   };
@@ -322,16 +284,12 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       });
       setDeleteTargetIds([]);
       setDeleteConfirmOpen(false);
-      notifications.show(
-        `Đã gỡ ${payload.employeeIds.length} học viên khỏi lớp học.`,
-        {
-          severity: "success",
-        },
-      );
+      notifications.show(`Đã gỡ ${payload.employeeIds.length} học viên khỏi lớp học.`, {
+        severity: "success",
+      });
     } catch (error) {
       const fallbackMessage = "Không thể gỡ học viên. Vui lòng thử lại.";
-      const message =
-        error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
+      const message = error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
       notifications.show(message, { severity: "error" });
     }
   };
@@ -339,12 +297,14 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const deleteConfirmationTitle = isDeleteLocked
     ? "Không thể gỡ học viên khỏi lớp học"
     : deleteTargetIds.length > 1
-      ? `Gỡ ${deleteTargetIds.length} học viên khỏi lớp học`
-      : "Xác nhận gỡ học viên khỏi lớp học";
+    ? `Gỡ ${deleteTargetIds.length} học viên khỏi lớp học`
+    : "Xác nhận gỡ học viên khỏi lớp học";
 
   const deleteConfirmationContent = isDeleteLocked
     ? "Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khóa chức năng gỡ học viên để đảm bảo ổn định buổi học."
-    : `Bạn có chắc muốn gỡ ${deleteTargetIds.length > 1 ? `${deleteTargetIds.length} học viên` : "học viên này"} khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học.`;
+    : `Bạn có chắc muốn gỡ ${
+        deleteTargetIds.length > 1 ? `${deleteTargetIds.length} học viên` : "học viên này"
+      } khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học.`;
 
   const handleMarkAttendance = async (classSessionId: string, employeeId?: string) => {
     if (!employeeId) {
@@ -368,13 +328,12 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       queryClient.invalidateQueries({ queryKey: ["class-room-students"] });
     } catch (error) {
       const fallbackMessage = "Điểm danh thủ công thất bại. Vui lòng thử lại.";
-      const message =
-        error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
+      const message = error instanceof Error ? error.message || fallbackMessage : fallbackMessage;
       notifications.show(message, {
         severity: "error",
       });
     }
-  }
+  };
 
   const handleExport = async () => {
     if (isExporting) {
@@ -382,12 +341,9 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
     }
 
     if (!studentsResult) {
-      notifications.show(
-        "Dữ liệu đang được tải. Vui lòng thử lại trong giây lát.",
-        {
-          severity: "info",
-        },
-      );
+      notifications.show("Dữ liệu đang được tải. Vui lòng thử lại trong giây lát.", {
+        severity: "info",
+      });
       return;
     }
 
@@ -418,16 +374,13 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
       });
     } catch (error) {
       console.error("Export class room students failed:", error);
-      const fallbackMessage =
-        "Xuất danh sách học viên thất bại. Vui lòng thử lại.";
+      const fallbackMessage = "Xuất danh sách học viên thất bại. Vui lòng thử lại.";
       let message = fallbackMessage;
       let severity: "info" | "error" = "error";
 
       if (error instanceof Error) {
         message = error.message || fallbackMessage;
-        severity =
-          (error as Error & { severity?: "info" | "error" }).severity ??
-          "error";
+        severity = (error as Error & { severity?: "info" | "error" }).severity ?? "error";
       }
 
       notifications.show(message, {
@@ -463,11 +416,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
             }}
           />
         </Box>
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={1}
-          flex={1}
-        >
+        <Stack direction={{ xs: "column", md: "row" }} spacing={1} flex={1}>
           <SelectOption
             inputLabel="Chi nhánh"
             onChange={(value) => handleBranchChange(value)}
@@ -549,17 +498,10 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
         spacing={1}
       >
         <Typography variant="body2" color="text.secondary">
-          {selectedCount > 0
-            ? `Đã chọn ${selectedCount} học viên`
-            : "Chưa chọn học viên nào"}
+          {selectedCount > 0 ? `Đã chọn ${selectedCount} học viên` : "Chưa chọn học viên nào"}
         </Typography>
         <Stack direction="row" spacing={1} alignItems="center">
-          <Button
-            variant="outlined"
-            size="small"
-            onClick={handleClearSelection}
-            disabled={selectedCount === 0}
-          >
+          <Button variant="outlined" size="small" onClick={handleClearSelection} disabled={selectedCount === 0}>
             Bỏ chọn
           </Button>
           <Button
@@ -626,9 +568,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                       <Checkbox
                         checked={isAllCurrentPageSelected && pageEmployeeIds.length > 0}
                         indeterminate={isSomeCurrentPageSelected && !isAllCurrentPageSelected}
-                        onChange={(event) =>
-                          handleToggleSelectAllCurrentPage(event.target.checked)
-                        }
+                        onChange={(event) => handleToggleSelectAllCurrentPage(event.target.checked)}
                         disabled={students.length === 0}
                         inputProps={{ "aria-label": "Chọn tất cả học viên trong trang" }}
                       />
@@ -649,17 +589,8 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
             >
               {isLoading ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={STUDENT_TABLE_HEAD.length}
-                    align="center"
-                  >
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="center"
-                      spacing={2}
-                      sx={{ py: 4 }}
-                    >
+                  <TableCell colSpan={STUDENT_TABLE_HEAD.length} align="center">
+                    <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ py: 4 }}>
                       <CircularProgress size={24} />
                       <Typography variant="body2" color="text.secondary">
                         Đang tải dữ liệu học viên...
@@ -669,11 +600,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                 </TableRow>
               ) : students.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={STUDENT_TABLE_HEAD.length}
-                    align="center"
-                    sx={{ py: 6 }}
-                  >
+                  <TableCell colSpan={STUDENT_TABLE_HEAD.length} align="center" sx={{ py: 6 }}>
                     <Typography variant="body2" color="text.secondary">
                       Không có học viên phù hợp với tiêu chí lọc hiện tại.
                     </Typography>
@@ -710,31 +637,21 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                             checked={isSelected}
                             disabled={!employeeId}
                             onChange={() => handleToggleStudentSelection(employeeId)}
-                            slotProps={
-                              {
-                                input:{
-                                  "aria-label": `Chọn ${student.employee?.profile?.full_name ?? "học viên"}`,
-                                }
-                              }
-                            }
+                            slotProps={{
+                              input: {
+                                "aria-label": `Chọn ${student.employee?.profile?.full_name ?? "học viên"}`,
+                              },
+                            }}
                           />
                         </TableCell>
                         <TableCell>
-                          <Stack
-                            direction="row"
-                            spacing={1.5}
-                            alignItems="flex-start"
-                          >
+                          <Stack direction="row" spacing={1.5} alignItems="flex-start">
                             <IconButton
                               size="small"
                               onClick={toggleSessions}
                               disabled={!hasSessions}
                               sx={{ mt: 0.5 }}
-                              aria-label={
-                                isExpanded
-                                  ? "Ẩn danh sách buổi học"
-                                  : "Hiển thị danh sách buổi học"
-                              }
+                              aria-label={isExpanded ? "Ẩn danh sách buổi học" : "Hiển thị danh sách buổi học"}
                             >
                               {isExpanded ? (
                                 <KeyboardArrowUpIcon fontSize="small" />
@@ -743,11 +660,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                               )}
                             </IconButton>
                             <Box>
-                              <Typography
-                                variant="subtitle2"
-                                fontWeight={600}
-                                noWrap
-                              >
+                              <Typography variant="subtitle2" fontWeight={600} noWrap>
                                 {student.employee?.profile?.full_name ?? "-"}
                               </Typography>
                               <Chip
@@ -760,26 +673,13 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                             </Box>
                           </Stack>
                         </TableCell>
-                        <TableCell>
-                          {student.employee?.profile?.email ?? "-"}
-                        </TableCell>
-                        <TableCell>
-                          {student.employee?.profile?.phone_number ?? "-"}
-                        </TableCell>
-                        <TableCell>
-                          {resolveOrganizationUnitName(student, "branch")}
-                        </TableCell>
-                        <TableCell>
-                          {resolveOrganizationUnitName(student, "department")}
-                        </TableCell>
+                        <TableCell>{student.employee?.profile?.email ?? "-"}</TableCell>
+                        <TableCell>{student.employee?.profile?.phone_number ?? "-"}</TableCell>
+                        <TableCell>{resolveOrganizationUnitName(student, "branch")}</TableCell>
+                        <TableCell>{resolveOrganizationUnitName(student, "department")}</TableCell>
+                        <TableCell align="center">{fDateTime(student.created_at)}</TableCell>
                         <TableCell align="center">
-                          {fDateTime(student.created_at)}
-                        </TableCell>
-                        <TableCell align="center">
-                          <PopupState
-                            variant="popover"
-                            popupId="demo-popup-menu"
-                          >
+                          <PopupState variant="popover" popupId="demo-popup-menu">
                             {(popupState) => (
                               <>
                                 <IconButton {...bindTrigger(popupState)}>
@@ -790,8 +690,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
                                     onClick={() =>
                                       handleOpenDialogDeleteUser(
                                         student.employee?.id,
-                                        student?.class_rooms_priority
-                                          ?.runtime_status,
+                                        student?.class_rooms_priority?.runtime_status,
                                       )
                                     }
                                   >
@@ -828,12 +727,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
               backgroundColor: grey[50],
             }}
           >
-            <Stack
-              direction="row"
-              spacing={1}
-              alignItems="center"
-              justifyContent="center"
-            >
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
               <CircularProgress size={16} />
               <Typography variant="caption" color="text.secondary">
                 Đang cập nhật danh sách...
@@ -842,13 +736,7 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
           </Box>
         ) : null}
       </Box>
-      <Pagination
-        onChange={handlePageChange}
-        total={totalStudents}
-        take={PAGE_SIZE}
-        value={page}
-        name="Học viên"
-      />
+      <Pagination onChange={handlePageChange} total={totalStudents} take={PAGE_SIZE} value={page} name="Học viên" />
 
       <ConfirmDialog
         open={deleteConfirmOpen}
@@ -865,14 +753,8 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
             variant="contained"
             color="error"
             onClick={handleDeleteUser}
-            disabled={
-              isDeleteLocked || isDeletingStudents || deleteTargetIds.length === 0
-            }
-            startIcon={
-              isDeletingStudents ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : undefined
-            }
+            disabled={isDeleteLocked || isDeletingStudents || deleteTargetIds.length === 0}
+            startIcon={isDeletingStudents ? <CircularProgress size={16} color="inherit" /> : undefined}
           >
             {isDeletingStudents ? "Đang gỡ..." : "Gỡ học viên"}
           </Button>

@@ -4,7 +4,7 @@ import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 
 import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import PageContainer from "@/shared/ui/PageContainer";
 import { queryClassName } from "../_constants";

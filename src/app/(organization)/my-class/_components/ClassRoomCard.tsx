@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { PATHS } from "@/constants/path.constant";
 import { fDateTime } from "@/lib";
 import { ClassSessionType } from "@/model/class-session.model";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { Image } from "@/shared/ui/Image";

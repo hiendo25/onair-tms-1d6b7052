@@ -8,16 +8,9 @@ import {
   useLearningCourseOutlineQuery,
   useLearningLessonDetailQuery,
 } from "@/modules/learning-screen/operations/query";
-import type {
-  LearningLesson,
-  LearningLessonSummary,
-  LearningSectionOutline,
-} from "@/modules/learning-screen/types";
-import type {
-  LessonProgressMap,
-  StoredLessonProgress,
-} from "@/modules/learning-screen/utils/progressStorage";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import type { LearningLesson, LearningLessonSummary, LearningSectionOutline } from "@/modules/learning-screen/types";
+import type { LessonProgressMap, StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 
 import LessonContentPanel from "./lesson-content/LessonContentPanel";
 import LessonNavigator from "./lesson-content/LessonNavigator";
@@ -37,12 +30,7 @@ const LearningScreenSection = () => {
   const courseId = params?.courseId ?? null;
   const studentId = useUserOrganization((state) => state.data.id);
 
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch,
-  } = useLearningCourseOutlineQuery(courseId, { enabled: Boolean(courseId) });
+  const { data, isLoading, isError, refetch } = useLearningCourseOutlineQuery(courseId, { enabled: Boolean(courseId) });
 
   const course = data?.course ?? null;
   const sections = useMemo(() => data?.sections ?? [], [data?.sections]);
@@ -144,10 +132,7 @@ const LearningScreenSection = () => {
   );
 
   const persistDocumentProgress = useCallback(
-    (
-      lessonId: string,
-      payload: { page: number; totalPages?: number; zoom?: number },
-    ) => {
+    (lessonId: string, payload: { page: number; totalPages?: number; zoom?: number }) => {
       if (!lessonId) return;
       const timestamp = new Date().toISOString();
       updateLessonProgress(lessonId, (prev) => ({
@@ -223,19 +208,11 @@ const LearningScreenSection = () => {
   }
 
   if (!course) {
-    return (
-      <Alert severity="warning">
-        Không tìm thấy khoá học. Vui lòng quay lại danh sách lớp học.
-      </Alert>
-    );
+    return <Alert severity="warning">Không tìm thấy khoá học. Vui lòng quay lại danh sách lớp học.</Alert>;
   }
 
   if (!sections.length) {
-    return (
-      <Alert severity="info">
-        Khoá học hiện chưa có nội dung bài giảng. Vui lòng quay lại sau.
-      </Alert>
-    );
+    return <Alert severity="info">Khoá học hiện chưa có nội dung bài giảng. Vui lòng quay lại sau.</Alert>;
   }
 
   return (
