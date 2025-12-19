@@ -152,136 +152,139 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
     return stopPromise;
   }, [forceStopCameraStreams]);
 
-  const onScanSuccess = useCallback(async (decodedText: string) => {
-    // Prevent multiple scans while processing
-    if (isProcessing) {
-      return;
-    }
-
-    // Set processing flag immediately
-    setIsProcessing(true);
-
-    try {
-      // Validate QR code format BEFORE calling API
-      // Expected format: QR-{timestamp}-{random} (e.g., "QR-123456789-abc123")
-      if (!decodedText.startsWith("QR-")) {
-        // Stop scanner for invalid QR
-        await stopScanner();
-        setCheckinResult({
-          status: "warning",
-          message: "Mã QR không đúng định dạng lớp học. Vui lòng quét mã QR của lớp học.",
-        });
-        setScannerStatus("warning");
-        setIsProcessing(false);
+  const onScanSuccess = useCallback(
+    async (decodedText: string) => {
+      // Prevent multiple scans while processing
+      if (isProcessing) {
         return;
       }
 
-      // Stop scanning after valid QR detected
-      await stopScanner();
+      // Set processing flag immediately
+      setIsProcessing(true);
 
-      // Get current location
-      const deviceInfo: any = {
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
-      };
+      try {
+        // Validate QR code format BEFORE calling API
+        // Expected format: QR-{timestamp}-{random} (e.g., "QR-123456789-abc123")
+        if (!decodedText.startsWith("QR-")) {
+          // Stop scanner for invalid QR
+          await stopScanner();
+          setCheckinResult({
+            status: "warning",
+            message: "Mã QR không đúng định dạng lớp học. Vui lòng quét mã QR của lớp học.",
+          });
+          setScannerStatus("warning");
+          setIsProcessing(false);
+          return;
+        }
 
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 0,
+        // Stop scanning after valid QR detected
+        await stopScanner();
+
+        // Get current location
+        const deviceInfo: any = {
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+        };
+
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+              });
             });
-          });
 
-          deviceInfo.location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-          };
-        } catch (geoError) {
-          console.warn("Could not get location:", geoError);
-        }
-      }
-
-      // Call check-in API
-      const result = await checkInWithQR({
-        qr_code: decodedText,
-        employee_id: employeeId,
-        device_info: deviceInfo,
-      });
-
-      if (result.success && result.attendance) {
-        // Validate that scanned QR matches expected classroom/session
-        const qrClassRoomId = result.attendance.class_room_id;
-        const qrSessionId = result.attendance.class_session_id;
-        
-        // If we expect a specific classroom or session, validate it matches
-        if (classRoomId && qrClassRoomId !== classRoomId) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR này không thuộc lớp học bạn đang chọn",
-          });
-          setScannerStatus("warning");
-          setIsProcessing(false);
-          return;
-        }
-        
-        if (sessionId && qrSessionId !== sessionId) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR này không thuộc buổi học bạn đang chọn",
-          });
-          setScannerStatus("warning");
-          setIsProcessing(false);
-          return;
+            deviceInfo.location = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+            };
+          } catch (geoError) {
+            console.warn("Could not get location:", geoError);
+          }
         }
 
-        setCheckinResult({
-          status: "success",
-          message: result.message,
-          data: {
-            fullName: result.attendance.employee_id || "N/A",
-            classCode: classTitle || "N/A",
-            checkinTime: result.attendance.attended_at || new Date().toISOString(),
-          },
+        // Call check-in API
+        const result = await checkInWithQR({
+          qr_code: decodedText,
+          employee_id: employeeId,
+          device_info: deviceInfo,
         });
-        setScannerStatus("success");
-        setIsProcessing(false);
-      } else {
-        // Handle different error types
-        const errorMessage = result.message || result.rejection_reason || "Điểm danh thất bại";
-        
-        if (errorMessage.includes("hết hạn") || errorMessage.includes("hết giờ")) {
+
+        if (result.success && result.attendance) {
+          // Validate that scanned QR matches expected classroom/session
+          const qrClassRoomId = result.attendance.class_room_id;
+          const qrSessionId = result.attendance.class_session_id;
+
+          // If we expect a specific classroom or session, validate it matches
+          if (classRoomId && qrClassRoomId !== classRoomId) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR này không thuộc lớp học bạn đang chọn",
+            });
+            setScannerStatus("warning");
+            setIsProcessing(false);
+            return;
+          }
+
+          if (sessionId && qrSessionId !== sessionId) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR này không thuộc buổi học bạn đang chọn",
+            });
+            setScannerStatus("warning");
+            setIsProcessing(false);
+            return;
+          }
+
           setCheckinResult({
-            status: "error",
-            message: "Mã QR đã hết hiệu lực",
+            status: "success",
+            message: result.message,
+            data: {
+              fullName: result.attendance.employee_id || "N/A",
+              classCode: classTitle || "N/A",
+              checkinTime: result.attendance.attended_at || new Date().toISOString(),
+            },
           });
-        } else if (errorMessage.includes("không hợp lệ") || errorMessage.includes("không tồn tại")) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR không hợp lệ",
-          });
+          setScannerStatus("success");
+          setIsProcessing(false);
         } else {
-          setCheckinResult({
-            status: "error",
-            message: errorMessage,
-          });
+          // Handle different error types
+          const errorMessage = result.message || result.rejection_reason || "Điểm danh thất bại";
+
+          if (errorMessage.includes("hết hạn") || errorMessage.includes("hết giờ")) {
+            setCheckinResult({
+              status: "error",
+              message: "Mã QR đã hết hiệu lực",
+            });
+          } else if (errorMessage.includes("không hợp lệ") || errorMessage.includes("không tồn tại")) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR không hợp lệ",
+            });
+          } else {
+            setCheckinResult({
+              status: "error",
+              message: errorMessage,
+            });
+          }
+          setScannerStatus("error");
+          setIsProcessing(false);
         }
+      } catch (error: any) {
+        console.error("Check-in error:", error);
+        setCheckinResult({
+          status: "error",
+          message: "Checkin thất bại. Vui lòng thử lại.",
+        });
         setScannerStatus("error");
         setIsProcessing(false);
       }
-    } catch (error: any) {
-      console.error("Check-in error:", error);
-      setCheckinResult({
-        status: "error",
-        message: "Checkin thất bại. Vui lòng thử lại.",
-      });
-      setScannerStatus("error");
-      setIsProcessing(false);
-    }
-  }, [checkInWithQR, employeeId, isProcessing, stopScanner, classRoomId, sessionId, classTitle]);
+    },
+    [checkInWithQR, employeeId, isProcessing, stopScanner, classRoomId, sessionId, classTitle],
+  );
 
   const onScanFailure = useCallback((error: string) => {
     if (
@@ -332,7 +335,7 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
             qrbox: { width: 250, height: 250 },
           },
           onScanSuccess,
-          onScanFailure
+          onScanFailure,
         );
         setIsScanning(true);
       } catch (error) {
@@ -441,7 +444,7 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
     if (!stopped) {
       forceStopCameraStreams();
     }
-    
+
     setCheckinResult({ status: "idle" });
     setScannerStatus("idle");
     setIsScanning(false);
@@ -452,11 +455,11 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
   const handleRescan = async () => {
     setCheckinResult({ status: "idle" });
     setIsProcessing(false);
-    
+
     await stopScanner();
-    
+
     setScannerStatus("scanning");
-    
+
     setTimeout(() => {
       startScanning().catch(() => undefined);
     }, 100);
