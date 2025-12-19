@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import TabContext from "@mui/lab/TabContext";
 import TabList, { TabListProps } from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import { Button, styled,SxProps, Theme } from "@mui/material";
+import { Button, styled, SxProps, Theme } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
 import Tab, { TabProps } from "@mui/material/Tab";
@@ -69,7 +69,7 @@ const AssignmentTabContainer: React.FC<AssignmentTabContainerProps> = ({
   return (
     <div className={cn("assignment-tabs", className)}>
       <TabContext value={currentTab ?? ""}>
-        <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
+        <div className="flex items-center justify-between mb-6">
           <AssignmentTabList onChange={handleChange}>
             {items.map(({ tabKey, tabName, status = "idle", icon }) => (
               <Tab
@@ -149,4 +149,3 @@ const AssignmentTabList = styled((props: TabListProps) => <TabList {...props} />
     },
   };
 });
-

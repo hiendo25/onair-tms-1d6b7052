@@ -68,13 +68,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         slots={{
           top: (
             <div
-              className={cn("gap-3", {
+              className={cn("gap-3 h-20", {
                 "py-4 px-2 flex items-center justify-center": !isExpanded,
                 "py-4 px-6": isExpanded,
               })}
             >
               <Link href="/dashboard">
-                {logoUrl ? <Image src={logoUrl} alt="logo" width={120} height={80} /> : null}
+                {logoUrl ? <Image src={logoUrl} alt="logo" width={120} height={80} className="h-full w-auto" /> : null}
               </Link>
             </div>
           ),
@@ -112,7 +112,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             />
           }
         />
-        <Box component="main" sx={{ display: "flex", flexDirection: "column", flex: 1, px: { xs: 4, md: 6, xl: 8 } }}>
+        <Box component="main" sx={{ display: "flex", flexDirection: "column", flex: 1, px: { xs: 2, md: 4, xl: 8 } }}>
           {children}
         </Box>
         <Footer />

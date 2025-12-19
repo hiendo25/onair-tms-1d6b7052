@@ -1,7 +1,7 @@
 import React, { useTransition } from "react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
-import { alpha, styled,Typography, TypographyProps } from "@mui/material";
+import { alpha, styled, Typography, TypographyProps } from "@mui/material";
 import Accordion from "@mui/material/Accordion";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
@@ -71,13 +71,13 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
           expandIcon={<ExpandMoreIcon onClick={toggleExpand} />}
           className="felx items-center justify-between"
           sx={(theme) => ({
-            backgroundColor: theme.palette.grey[300],
+            backgroundColor: theme.palette.grey[200],
             borderRadius: 0,
             "& .MuiAccordionSummary-content": {
               marginBlock: "6px",
             },
             "&:hover": {
-              backgroundColor: theme.palette.grey[300],
+              backgroundColor: theme.palette.grey[200],
             },
           })}
         >

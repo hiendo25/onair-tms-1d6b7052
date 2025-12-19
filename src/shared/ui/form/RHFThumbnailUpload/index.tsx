@@ -1,11 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { cn } from "@/utils";
+import React from "react";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
+import Image from "next/image";
 import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
-import { CloseIcon } from "@/shared/assets/icons";
+
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
+import { CloseIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
 
 export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = FieldValues> {
   control: Control<TFieldValues>;
@@ -21,14 +23,14 @@ export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = Fiel
 
 /**
  * RHFThumbnailUpload - Reusable thumbnail upload component for React Hook Form
- * 
+ *
  * Features:
  * - Integrates with Library module for image selection
  * - Supports image preview and removal
  * - Customizable aspect ratio and width
  * - Form validation support
  * - Works with any React Hook Form setup
- * 
+ *
  * @example
  * ```tsx
  * <RHFThumbnailUpload
@@ -50,7 +52,6 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
   description,
   required = false,
   aspectRatio = "21/9",
-  width = "480px",
   onChange,
 }: RHFThumbnailUploadProps<TFieldValues>) => {
   const openResource = useLibraryStore((state) => state.openLibrary);
@@ -68,7 +69,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
     const resource = await openResource({ mode: "single" });
     const resourceItem = resource[0];
     const path = resourceItem?.path;
-    
+
     if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path) {
       return;
     }
@@ -83,41 +84,35 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
         {label}
         {required && <span className="text-red-600 ml-1">*</span>}
       </FormLabel>
-      
+
       {subTitle && <Typography className="text-xs mb-4">{subTitle}</Typography>}
       {description && <div className="description">{description}</div>}
-      
+
       <div
         className={cn(
           "thumbnail-wrapper",
           "bg-gray-100 rounded-xl border border-dashed border-gray-300",
-          "flex items-center justify-center",
-          error && "border-red-500"
+          "flex items-center justify-center w-full max-w-[480px]",
+          error && "border-red-500",
         )}
         style={{
           aspectRatio: aspectRatio,
-          width: width,
         }}
       >
         {field.value && (
           <div className="preview-url relative w-full h-full overflow-hidden rounded-xl">
-            <Image 
-              src={field.value} 
-              alt="thumbnail" 
-              fill 
-              className="w-full h-full object-cover" 
-            />
+            <Image src={field.value} alt="thumbnail" fill className="w-full h-full object-cover" />
             <IconButton
-              sx={{ 
-                width: "2rem", 
-                height: "2rem", 
-                position: "absolute", 
-                right: "0.5rem", 
+              sx={{
+                width: "2rem",
+                height: "2rem",
+                position: "absolute",
+                right: "0.5rem",
                 top: "0.5rem",
                 bgcolor: "rgba(255, 255, 255, 0.9)",
                 "&:hover": {
                   bgcolor: "rgba(255, 255, 255, 1)",
-                }
+                },
               }}
               onClick={handleRemoveThumbnail}
             >
@@ -125,7 +120,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
             </IconButton>
           </div>
         )}
-        
+
         <div
           className={cn("cursor-pointer", { "opacity-0 hidden pointer-events-none": field.value })}
           onClick={handleOpenResource}
@@ -151,11 +146,10 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
           </Typography>
         </div>
       </div>
-      
+
       {error?.message && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
     </div>
   );
 };
 
 export default RHFThumbnailUpload;
-
