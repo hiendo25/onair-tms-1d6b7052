@@ -12,6 +12,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const branchId = params?.branchId;
   const status = params?.status;
   const employeeType = params?.employeeType;
+  const organizationId = params?.organizationId;
 
   // Determine if we need INNER joins for filtering
   const hasDepartmentFilter = departmentId && departmentId !== "all";
@@ -91,6 +92,10 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   // Filter by branch using junction table
   if (hasBranchFilter) {
     query = query.eq("employee_branches.branch_id", branchId);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
   }
 
   // Search by full name in profiles
