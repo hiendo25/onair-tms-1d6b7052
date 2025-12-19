@@ -178,7 +178,7 @@ export default function StepSettings({ onSubmit, isLoading = false }: StepSettin
                             />
                           )}
                         />
-                        <Typography component="span">giờ</Typography>
+                        <Typography component="span">ngày</Typography>
                       </Box>
                     }
                   />
