@@ -32,6 +32,6 @@ const PermissionGuard: React.FC<PermissionGuardProps> = memo(({ children }) => {
     resolvePathnameWithPermissionsPath(pathname);
   }, [pathname]);
 
-  return isValidPerm ? children : "null";
+  return isValidPerm ? children : null;
 });
 export default PermissionGuard;
