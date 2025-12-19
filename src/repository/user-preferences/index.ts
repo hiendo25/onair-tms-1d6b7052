@@ -26,7 +26,7 @@ const upsertUserPreference = async (payload: UpsertUserPreferencePayload) => {
   const supabaseClient = createClient();
 
   try {
-    return await supabaseClient.from("user_references").insert(payload).select("*");
+    return await supabaseClient.from("user_references").upsert(payload).select("*");
   } catch (err) {
     throw new Error("Fail to get user preferences");
   }
