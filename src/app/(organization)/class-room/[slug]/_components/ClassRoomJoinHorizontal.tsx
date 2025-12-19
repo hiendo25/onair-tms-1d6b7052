@@ -20,7 +20,7 @@ interface ClassRoomJoinProps {
 }
 
 export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: ClassRoomJoinProps) {
-  const employee = useUserOrganization((state) => state.data);
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
 
   const {
     dialogOpen,
@@ -139,7 +139,7 @@ export default function ClassRoomJoinHorizontal({ data, isAdminView = false }: C
           onClose={() => {
             closeQRDialog();
           }}
-          employeeId={employee?.id || ""}
+          employeeId={employeeId}
           classRoomId={data?.id || ""}
           sessionId={selectedSessionForQR || ""}
           classTitle={data?.title || ""}
