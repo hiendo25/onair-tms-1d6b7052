@@ -77,6 +77,11 @@ export const PATHS = {
     DETAIL: (id: string = ":id") => `/admin/plans/${id}`,
     EDIT: (id: string = ":id") => `/admin/plans/${id}/edit`,
   },
+  LEARNING_PATHS: {
+    ROOT: "/admin/learning-paths",
+    CREATE: "/admin/learning-paths/create",
+    EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
+  },
 } as const;
 
 export const AUTH_PATHS = {

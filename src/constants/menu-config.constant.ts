@@ -160,6 +160,27 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     ],
   },
   {
+    title: "Lộ trình học tập",
+    icon: React.createElement(BookOpenIcon),
+    key: "learning-paths",
+    path: PATHS.LEARNING_PATHS.ROOT,
+    persCheck: [],
+    children: [
+      {
+        title: "Danh sách lộ trình",
+        key: "learning-paths/list",
+        path: PATHS.LEARNING_PATHS.ROOT,
+        type: "item",
+      },
+      {
+        title: "Tạo lộ trình",
+        key: "learning-paths/create",
+        path: PATHS.LEARNING_PATHS.CREATE,
+        type: "item",
+      },
+    ],
+  },
+  {
     title: "Khảo sát",
     icon: React.createElement(FileAttachmentIcon),
     key: "surveys",
