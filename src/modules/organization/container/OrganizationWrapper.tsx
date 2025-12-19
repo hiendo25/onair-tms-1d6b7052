@@ -1,7 +1,7 @@
 "use server";
 import React from "react";
-import { cookies, headers } from "next/headers";
-import { redirect, RedirectType } from "next/navigation";
+import { cookies } from "next/headers";
+import { forbidden, redirect, RedirectType } from "next/navigation";
 
 import { PermissionProvider } from "@/modules/permission-wrapper/store/PermissionProvider";
 import { authRepository } from "@/repository";
@@ -9,25 +9,27 @@ import { UserOrganizationService } from "@/services/organization/user-organizati
 import { OrganizationProvider, OrganizationProviderProps } from "../store/OrganizationProvider";
 
 const OrganizationWrapper = async ({ children }: { readonly children: React.ReactNode }) => {
-  const cookieStore = await cookies();
-  const organizationId = cookieStore.get("organization_id")?.value;
-
   const currentUser = await authRepository.getCurrentUser();
 
-  console.log({ organizationId });
-  if (!organizationId || !currentUser) {
+  if (!currentUser) {
     await authRepository.authServerSignOut();
     redirect("/auth/signin", RedirectType.replace);
   }
 
   const userOrganization = new UserOrganizationService(currentUser.id);
-
-  const [employees, organizations, { roles, permissions }, currentEmployee] = await Promise.all([
+  const cookieStore = await cookies();
+  const organizationId = cookieStore.get("organization_id")?.value;
+  const [employees, organizations, { roles, permissions }] = await Promise.all([
     userOrganization.getEmployees(),
     userOrganization.getOrganizations(),
     userOrganization.getRolesPermissions(),
-    userOrganization.getCurrentEmployee(organizationId),
   ]);
+
+  const currentEmployee = employees.find((epl) => epl.organization.id === organizationId);
+
+  if (!currentEmployee) {
+    forbidden();
+  }
 
   const organizationsStore = organizations.reduce((acc, orgEpl): OrganizationProviderProps["organizations"] => {
     return [

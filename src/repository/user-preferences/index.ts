@@ -1,4 +1,3 @@
-import { UserPreferences } from "@/model/user-preferences";
 import { createClient } from "@/services";
 import { createSVClient } from "@/services";
 
