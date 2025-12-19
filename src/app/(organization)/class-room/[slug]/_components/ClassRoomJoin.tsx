@@ -21,7 +21,7 @@ interface ClassRoomJoinProps {
 export default function ClassRoomJoin({ data, isAdminView }: ClassRoomJoinProps) {
   const employees = data?.employees || [];
 
-  const employee = useUserOrganization((state) => state.data);
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
 
   const {
     dialogOpen,
@@ -135,7 +135,7 @@ export default function ClassRoomJoin({ data, isAdminView }: ClassRoomJoinProps)
           onClose={() => {
             closeQRDialog();
           }}
-          employeeId={employee?.id || ""}
+          employeeId={employeeId}
           classRoomId={data?.id || ""}
           sessionId={selectedSessionForQR || ""}
           classTitle={data?.title || ""}

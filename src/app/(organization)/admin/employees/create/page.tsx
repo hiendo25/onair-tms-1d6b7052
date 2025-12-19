@@ -17,7 +17,7 @@ const CreateEmployeePage = () => {
   const notifications = useNotifications();
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
 
-  const { organization } = useUserOrganization((state) => state.data);
+  const { orgId } = useUserOrganization((state) => state.currentOrganization);
 
   const handleSubmit = async (data: EmployeeFormData) => {
     const payload: CreateEmployeeDto = {
@@ -34,7 +34,7 @@ const CreateEmployeePage = () => {
       employee_type: data.employee_type,
       start_date: data.start_date,
       role_id: data.role_id,
-      organizationId: organization.id,
+      organizationId: orgId,
     };
 
     createEmployee(payload, {

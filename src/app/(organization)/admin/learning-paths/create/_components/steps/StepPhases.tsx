@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove,SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import AddIcon from "@mui/icons-material/Add";
 import {
   Box,
@@ -20,7 +20,7 @@ import {
 import type { ClassRoom, Phase } from "@/modules/learning-paths/learning-path-form.schema";
 import { useLearningPathFormContext } from "@/modules/learning-paths/use-learning-path-form-context";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import { ClassRoomItem,ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker";
+import { ClassRoomItem, ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker";
 
 import ClassRoomAccordionItem from "./ClassRoomAccordionItem";
 import SortablePhaseItem from "./SortablePhaseItem";
@@ -36,7 +36,7 @@ export default function StepPhases() {
 
   const currentEmployee = useUserOrganization((state) => state.currentEmployee);
   const organizationId = currentEmployee.organization.id;
-  const employeeId = currentEmployee.employeeType === "teacher" ? currentEmployee.id : undefined;
+  const employeeId = currentEmployee.type === "teacher" ? currentEmployee.id : undefined;
 
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
   const [expandedClassRooms, setExpandedClassRooms] = useState<Record<string, boolean>>({});
@@ -51,10 +51,8 @@ export default function StepPhases() {
       activationConstraint: {
         distance: 5, // 5px movement required before drag starts
       },
-    })
+    }),
   );
-
-
 
   const handleAddPhase = () => {
     // Generate a unique ID for the new phase using timestamp + random string
@@ -160,7 +158,6 @@ export default function StepPhases() {
     return undefined;
   };
 
-
   return (
     <Card sx={{ border: "1px solid", borderColor: "divider" }}>
       <CardContent sx={{ p: 4 }}>
@@ -264,7 +261,9 @@ export default function StepPhases() {
                                       classRoom={classRoom}
                                       expanded={isExpanded}
                                       hasError={!!classRoomsError}
-                                      onExpandChange={(expanded) => handleToggleClassRoom(index, classRoom.id, expanded)}
+                                      onExpandChange={(expanded) =>
+                                        handleToggleClassRoom(index, classRoom.id, expanded)
+                                      }
                                       onDelete={() => handleRemoveClassRoom(index, classRoom.id)}
                                     />
                                   );
@@ -291,9 +290,7 @@ export default function StepPhases() {
                               </Box>
                             )}
 
-                            {classRoomsError?.message && (
-                              <FormHelperText>{classRoomsError.message}</FormHelperText>
-                            )}
+                            {classRoomsError?.message && <FormHelperText>{classRoomsError.message}</FormHelperText>}
                           </FormControl>
                         </Stack>
                       </SortablePhaseItem>
@@ -329,4 +326,3 @@ export default function StepPhases() {
     </Card>
   );
 }
-

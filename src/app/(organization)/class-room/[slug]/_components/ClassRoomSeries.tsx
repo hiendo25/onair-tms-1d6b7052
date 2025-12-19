@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { LocationOnOutlined, VideocamOutlined } from "@mui/icons-material";
 import {
   Box,
@@ -289,7 +289,7 @@ interface ClassRoomSeriesProps {
 }
 
 const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
-  const employee = useUserOrganization((state) => state.data);
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
 
   const [selectedSession, setSelectedSession] = useState<
     (NonNullable<GetClassRoomBySlugResponse["data"]>["sessions"][number] & { index: number }) | null
@@ -388,7 +388,7 @@ const ClassRoomSeries = ({ data, isAdminView }: ClassRoomSeriesProps) => {
           onClose={() => {
             closeQRDialog();
           }}
-          employeeId={employee?.id || ""}
+          employeeId={employeeId}
           classRoomId={data?.id || ""}
           sessionId={selectedSessionForQR || ""}
           classTitle={data?.title || ""}

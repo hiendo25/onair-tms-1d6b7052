@@ -28,7 +28,7 @@ const createLessonLookup = (sections: LearningSectionOutline[]) => {
 const LearningScreenSection = () => {
   const params = useParams<{ courseId: string }>();
   const courseId = params?.courseId ?? null;
-  const studentId = useUserOrganization((state) => state.data.id);
+  const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
 
   const { data, isLoading, isError, refetch } = useLearningCourseOutlineQuery(courseId, { enabled: Boolean(courseId) });
 

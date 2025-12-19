@@ -39,7 +39,7 @@ type StatusFilterUI = "all" | MyAssignmentStatusFilter;
 
 export default function MyAssignmentsList() {
   const router = useRouter();
-  const { id: employeeId } = useUserOrganization((state) => state.data);
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(25);
