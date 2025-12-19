@@ -19,7 +19,7 @@ import {
 
 import type { ClassRoom, Phase } from "@/modules/learning-paths/learning-path-form.schema";
 import { useLearningPathFormContext } from "@/modules/learning-paths/use-learning-path-form-context";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { ClassRoomItem,ClassRoomPickerDialog } from "@/shared/ui/ClassRoomPicker";
 
 import ClassRoomAccordionItem from "./ClassRoomAccordionItem";
@@ -34,9 +34,9 @@ export default function StepPhases() {
     formState: { errors },
   } = useLearningPathFormContext();
 
-  const { organization, ...rest } = useUserOrganization((state) => state.data);
-  const organizationId = organization?.id;
-  const employeeId = rest.employeeType === "teacher" ? rest.id : undefined;
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+  const employeeId = currentEmployee.employeeType === "teacher" ? currentEmployee.id : undefined;
 
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({});
   const [expandedClassRooms, setExpandedClassRooms] = useState<Record<string, boolean>>({});

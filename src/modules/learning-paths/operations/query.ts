@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import type { LearningPathWithCounts } from "@/repository/learning-paths";
 
 import { LEARNING_PATHS_KEYS } from "./keys";
@@ -48,8 +48,8 @@ async function fetchLearningPaths(
 }
 
 export function useGetLearningPathsQuery(params: UseGetLearningPathsParams) {
-  const { organization } = useUserOrganization((state) => state.data);
-  const organizationId = organization?.id;
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
 
   return useTQuery<LearningPathsListResponse>({
     queryKey: LEARNING_PATHS_KEYS.list(params),

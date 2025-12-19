@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useTMutation } from "@/lib/queryClient";
-import { useUserOrganization } from "@/modules/organization/store/UserOrganizationProvider";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import type { LearningPathFormSchema } from "../learning-path-form.schema";
 
 import { LEARNING_PATHS_KEYS } from "./keys";
@@ -35,8 +35,8 @@ async function createLearningPath(
 
 export function useCreateLearningPathMutation() {
   const queryClient = useQueryClient();
-  const { organization } = useUserOrganization((state) => state.data);
-  const organizationId = organization?.id;
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
 
   return useTMutation({
     mutationFn: (data: LearningPathFormSchema) => {
