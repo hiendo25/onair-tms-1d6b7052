@@ -38,7 +38,6 @@ import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutati
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useUserOrganization } from "@/modules/organization";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import PageContainer from "@/shared/ui/PageContainer";
 import type { EmployeeDto } from "@/types/dto/employees";
 import { Database } from "@/types/supabase.types";
 
@@ -238,189 +237,186 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
 
   return (
     <Box sx={{ py: 3 }}>
-      <Card sx={{ p: 3 }}>
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={2}
-          sx={{ mb: 3 }}
-          alignItems={{ xs: "stretch", sm: "center" }}
-          justifyContent="space-between"
-        >
-          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ flex: 1 }}>
-            <TextField
-              placeholder="Tìm kiếm..."
-              size="small"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              InputProps={{
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 3 }}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
+      >
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ flex: 1 }}>
+          <TextField
+            placeholder="Tìm kiếm..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            slotProps={{
+              input: {
                 endAdornment: (
-                  <InputAdornment position="start">
+                  <InputAdornment position="end">
                     <SearchIcon fontSize="small" />
                   </InputAdornment>
                 ),
-              }}
-              sx={{ maxWidth: 200 }}
-            />
+              },
+            }}
+            sx={{ maxWidth: 200 }}
+          />
 
-            <Select
-              size="small"
-              value={departmentFilter}
-              onChange={(e) => setDepartmentFilter(e.target.value)}
-              displayEmpty
-              sx={{ minWidth: 150 }}
-            >
-              <MenuItem value="all">Phòng ban</MenuItem>
-              {departments.map((dept) => (
-                <MenuItem key={dept.id} value={dept.id}>
-                  {dept.name}
-                </MenuItem>
-              ))}
-            </Select>
+          <Select
+            value={departmentFilter}
+            onChange={(e) => setDepartmentFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Phòng ban</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </MenuItem>
+            ))}
+          </Select>
 
-            <Select
-              size="small"
-              value={branchFilter}
-              onChange={(e) => setBranchFilter(e.target.value)}
-              displayEmpty
-              sx={{ minWidth: 150 }}
-            >
-              <MenuItem value="all">Chi nhánh</MenuItem>
-              {branches.map((branch) => (
-                <MenuItem key={branch.id} value={branch.id}>
-                  {branch.name}
-                </MenuItem>
-              ))}
-            </Select>
+          <Select
+            size="small"
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Chi nhánh</MenuItem>
+            {branches.map((branch) => (
+              <MenuItem key={branch.id} value={branch.id}>
+                {branch.name}
+              </MenuItem>
+            ))}
+          </Select>
 
-            <Select
-              size="small"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              displayEmpty
-              sx={{ minWidth: 150 }}
-            >
-              <MenuItem value="all">Trạng thái</MenuItem>
-              <MenuItem value="active">Hoạt động</MenuItem>
-              <MenuItem value="inactive">Không hoạt động</MenuItem>
-            </Select>
-          </Stack>
-
-          <Stack direction="row" spacing={2}>
-            <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportEmployees}>
-              Import người dùng
-            </Button>
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateEmployee}>
-              Tạo người dùng
-            </Button>
-          </Stack>
+          <Select
+            size="small"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Trạng thái</MenuItem>
+            <MenuItem value="active">Hoạt động</MenuItem>
+            <MenuItem value="inactive">Không hoạt động</MenuItem>
+          </Select>
         </Stack>
 
-        {isLoading ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              minHeight: 400,
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        ) : error ? (
-          <Alert severity="error">Có lỗi xảy ra khi tải danh sách nhân viên</Alert>
-        ) : (
-          <>
-            <TableContainer>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Mã nhân viên</TableCell>
-                    <TableCell>Họ và tên</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Chức danh</TableCell>
-                    <TableCell>Chi nhánh</TableCell>
-                    <TableCell>Phòng ban</TableCell>
-                    <TableCell>Trạng thái</TableCell>
-                    <TableCell align="center"></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {employees.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          Không tìm thấy nhân viên nào
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    employees.map((employee) => (
-                      <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
-                        <TableCell>{employee.employee_code}</TableCell>
-                        <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
-                        <TableCell>{employee.profiles?.email || "-"}</TableCell>
-                        <TableCell>{getPositionTitle(employee)}</TableCell>
-                        <TableCell>{getBranchName(employee)}</TableCell>
-                        <TableCell>{getDepartmentName(employee)}</TableCell>
-                        <TableCell>
-                          <Chip
-                            label={getStatusLabel(employee.status)}
-                            color={getStatusColor(employee.status)}
-                            size="small"
-                            sx={{ minWidth: 100 }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <IconButton size="small" onClick={(e) => handleMenuOpen(e, employee.id)}>
-                            <MoreVertIcon fontSize="small" />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportEmployees}>
+            Import người dùng
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateEmployee}>
+            Tạo người dùng
+          </Button>
+        </Stack>
+      </Stack>
 
-            <TablePagination
-              component="div"
-              count={totalCount}
-              page={page}
-              onPageChange={handleChangePage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              rowsPerPageOptions={[12, 25, 50, 100]}
-              labelRowsPerPage="Số hàng mỗi trang:"
-              labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
-            />
-          </>
-        )}
-
-        <Menu
-          anchorEl={anchorEl}
-          open={menuOpen}
-          onClose={handleMenuClose}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "right",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "right",
+      {isLoading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 400,
           }}
         >
-          {" "}
-          <MenuItem onClick={handleDetail}>
-            <ListItemText>Chi tiết</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={handleEdit}>
-            <ListItemText>Chỉnh sửa</ListItemText>
-          </MenuItem>
-          <MenuItem onClick={handleDelete} disabled={isDeleting}>
-            <ListItemText>Xóa tài khoản</ListItemText>
-          </MenuItem>
-        </Menu>
-      </Card>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">Có lỗi xảy ra khi tải danh sách nhân viên</Alert>
+      ) : (
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Mã nhân viên</TableCell>
+                  <TableCell>Họ và tên</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Chức danh</TableCell>
+                  <TableCell>Chi nhánh</TableCell>
+                  <TableCell>Phòng ban</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell align="center"></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {employees.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Không tìm thấy nhân viên nào
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  employees.map((employee) => (
+                    <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
+                      <TableCell>{employee.employee_code}</TableCell>
+                      <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
+                      <TableCell>{employee.profiles?.email || "-"}</TableCell>
+                      <TableCell>{getPositionTitle(employee)}</TableCell>
+                      <TableCell>{getBranchName(employee)}</TableCell>
+                      <TableCell>{getDepartmentName(employee)}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getStatusLabel(employee.status)}
+                          color={getStatusColor(employee.status)}
+                          size="small"
+                          sx={{ minWidth: 100 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, employee.id)}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <TablePagination
+            component="div"
+            count={totalCount}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[12, 25, 50, 100]}
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+          />
+        </>
+      )}
+
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem onClick={handleDetail}>
+          <ListItemText>Chi tiết</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleEdit}>
+          <ListItemText>Chỉnh sửa</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete} disabled={isDeleting}>
+          <ListItemText>Xóa tài khoản</ListItemText>
+        </MenuItem>
+      </Menu>
     </Box>
   );
 }

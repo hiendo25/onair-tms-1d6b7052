@@ -20,7 +20,7 @@ const EmployeePage = async ({ searchParams }: EmployeePageProps) => {
 
   return (
     <PageContainer title={pageTitleName[employeeType]} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}>
-      <EmployeeList employeeType={employeeType} />;
+      <EmployeeList employeeType={employeeType} />
     </PageContainer>
   );
 };

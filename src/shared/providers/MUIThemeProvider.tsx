@@ -13,8 +13,9 @@ const MUIThemeProvider = ({ children }: { children: React.ReactNode }) => {
       options={{
         enableCssLayer: true,
         key: "onair",
-        // nonce: "668868",
+        nonce: "668868",
         prepend: true,
+        speedy: true,
       }}
     >
       <InitColorSchemeScript attribute="class" />

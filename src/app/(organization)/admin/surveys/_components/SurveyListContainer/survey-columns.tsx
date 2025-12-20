@@ -14,8 +14,8 @@ export const surveyColumns: TableDataProps<SurveyRow>["columns"] = [
     renderCell(value, { title, description }) {
       return (
         <div>
-          <Typography className="text-sm font-semibold mb-1">{title}</Typography>
-          <Typography className="text-sm line-clamp-2" variant="body2">
+          <Typography className="text-sm font-semibold">{title}</Typography>
+          <Typography className="text-xs line-clamp-2 text-gray-600" variant="body2">
             {description}
           </Typography>
         </div>
@@ -31,11 +31,11 @@ export const surveyColumns: TableDataProps<SurveyRow>["columns"] = [
       const question = questions[0];
       return (
         <Chip
-          color="primary"
+          color="default"
           size="small"
-          variant="outlined"
+          variant="filled"
           label={question ? question.count : "--"}
-          className="w-7 h-7 min-h-7"
+          className="w-6 h-6 min-h-6 text-gray-900"
         />
       );
     },
