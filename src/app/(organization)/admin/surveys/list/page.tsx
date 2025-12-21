@@ -21,6 +21,7 @@ export async function generateMetadata(
 }
 
 const PageSurveyList: React.FC<PageSurveyListProps> = async () => {
+  // await sleep();
   return (
     <PageContainer
       title="Danh sách khảo sát"
@@ -36,3 +37,11 @@ const PageSurveyList: React.FC<PageSurveyListProps> = async () => {
   );
 };
 export default PageSurveyList;
+
+const sleep = async (timeout = 10000) => {
+  return await new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve("ok");
+    }, timeout);
+  });
+};
