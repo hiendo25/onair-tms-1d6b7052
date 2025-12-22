@@ -4,12 +4,12 @@ import * as React from "react";
 import { Box, Chip, Stack } from "@mui/material";
 
 import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
+import InfoGroupCard from "@/shared/ui/InfoGroupCard";
 import PageContainer from "@/shared/ui/PageContainer";
 import { EmployeeDto } from "@/types/dto/employees";
 import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
 import EmployeeOverviewCard from "./EmployeeOverviewCard";
-import InfoGroupCard from "./InfoGroupCard";
 
 interface EmployeeDetailViewProps {
   employee: EmployeeDto;

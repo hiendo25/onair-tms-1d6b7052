@@ -7,11 +7,13 @@ export const PATHS = {
     ROOT: "/department/departments",
     CREATE_DEPARTMENT: "/department/departments/create",
     IMPORT_DEPARTMENTS: "/department/departments/import",
+    DETAIL: (id: string = ":id") => `/department/departments/${id}`,
   },
   BRANCHES: {
     ROOT: "/department/branches",
     CREATE_BRANCH: "/department/branches/create",
     IMPORT_BRANCHES: "/department/branches/import",
+    DETAIL: (id: string = ":id") => `/department/branches/${id}`,
   },
   EMPLOYEES: {
     ROOT: "/admin/employees",

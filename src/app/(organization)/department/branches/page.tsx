@@ -1,5 +1,6 @@
 import { Metadata, ResolvingMetadata } from "next";
 
+import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import BranchList from "./_components/BranchList";
@@ -21,7 +22,10 @@ export async function generateMetadata(
 
 export default function BranchesPage(props: ManageBranchProps) {
   return (
-    <PageContainer title="Quản lý Chi nhánh" breadcrumbs={[{ title: "Chi nhánh", path: "/department/branches" }]}>
+    <PageContainer
+      title="Quản lý Chi nhánh"
+      breadcrumbs={[{ title: "Chi nhánh", path: PATHS.BRANCHES.ROOT }]}
+    >
       <BranchList />
     </PageContainer>
   );
