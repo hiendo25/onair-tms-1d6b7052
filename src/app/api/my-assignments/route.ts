@@ -8,11 +8,11 @@ import type { GetMyAssignmentsParams, MyAssignmentStatusFilter } from "@/types/d
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const organizationId = searchParams.get("organizationId");
+    // const organizationId = searchParams.get("organizationId");
 
-    if (!organizationId) {
-      return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
-    }
+    // if (!organizationId) {
+    //   return NextResponse.json({ error: "Organization ID is required" }, { status: 400 });
+    // }
 
     const supabase = await createSVClient();
     const {
