@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Box, List, SxProps, Theme } from "@mui/material";
 import { usePathname } from "next/navigation";
 
@@ -47,6 +47,7 @@ const MenuList: React.FC<MenuListProps> = ({
     [mini],
   );
 
+  console.log({ expandedItemIds });
   const matchPath = useCallback(
     (pathname: string) => (pathCheck: string) => {
       // console.log({ pathname, pathCheck });
@@ -56,6 +57,7 @@ const MenuList: React.FC<MenuListProps> = ({
     [pathname],
   );
 
+  useEffect(() => {}, []);
   if (!items.length) return null;
 
   return (

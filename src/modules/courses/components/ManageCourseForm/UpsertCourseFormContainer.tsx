@@ -189,7 +189,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
                 Lưu nháp
               </Button> */}
               <Button
-                size="large"
                 onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "published")}
                 disabled={isLoading}
                 loading={isLoading}
