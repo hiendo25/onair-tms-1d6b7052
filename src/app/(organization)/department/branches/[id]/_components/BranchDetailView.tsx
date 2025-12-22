@@ -6,14 +6,7 @@ import {
   Box,
   Card,
   CardContent,
-  CircularProgress,
   Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -22,6 +15,7 @@ import { PATHS } from "@/constants/path.constant";
 import { fDate, FORMAT_DATE_STANDARD } from "@/lib";
 import InfoGroupCard from "@/shared/ui/InfoGroupCard";
 import PageContainer from "@/shared/ui/PageContainer";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import type { BranchDto } from "@/types/dto/branches";
 import type { DepartmentDto } from "@/types/dto/departments";
 
@@ -31,10 +25,27 @@ interface BranchDetailViewProps {
   departmentsTotal: number;
   isDepartmentsLoading: boolean;
   departmentsError: unknown;
+  departmentsPage: number;
+  departmentsPageSize: number;
+  onDepartmentsPageChange: (page: number) => void;
+  onDepartmentsPageSizeChange: (pageSize: number) => void;
   breadcrumbs?: { title: string; path?: string }[];
 }
 
 const EMPTY_VALUE = "Chưa cập nhật";
+const DEPARTMENT_COLUMNS: TableDataProps<DepartmentDto>["columns"] = [
+  {
+    id: "name",
+    field: "name",
+    headerName: "Tên phòng ban",
+  },
+  {
+    id: "created_at",
+    field: "created_at",
+    headerName: "Ngày tạo",
+    renderCell: (value) => fDate(value as string, FORMAT_DATE_STANDARD) || EMPTY_VALUE,
+  },
+];
 
 const BranchDetailView: React.FC<BranchDetailViewProps> = ({
   branch,
@@ -42,6 +53,10 @@ const BranchDetailView: React.FC<BranchDetailViewProps> = ({
   departmentsTotal,
   isDepartmentsLoading,
   departmentsError,
+  departmentsPage,
+  departmentsPageSize,
+  onDepartmentsPageChange,
+  onDepartmentsPageSizeChange,
   breadcrumbs,
 }) => {
   const router = useRouter();
@@ -53,9 +68,12 @@ const BranchDetailView: React.FC<BranchDetailViewProps> = ({
   const totalDepartmentsLabel =
     departmentsTotal > 0 ? `Tổng số ${departmentsTotal} phòng ban` : "Chưa có phòng ban";
 
-  const handleDepartmentClick = (departmentId: string) => {
-    router.push(PATHS.DEPARTMENTS.DETAIL(departmentId));
-  };
+  const handleDepartmentClick = React.useCallback(
+    (department: DepartmentDto) => {
+      router.push(PATHS.DEPARTMENTS.DETAIL(department.id));
+    },
+    [router],
+  );
 
   return (
     <PageContainer title={branch.name} breadcrumbs={breadcrumbs}>
@@ -90,49 +108,23 @@ const BranchDetailView: React.FC<BranchDetailViewProps> = ({
               </Box>
             </Stack>
 
-            {isDepartmentsLoading ? (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, py: 2 }}>
-                <CircularProgress size={20} />
-                <Typography variant="body2">Đang tải danh sách phòng ban...</Typography>
-              </Box>
-            ) : departmentsError ? (
+            {departmentsError ? (
               <Alert severity="error">Có lỗi xảy ra khi tải danh sách phòng ban</Alert>
             ) : (
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Tên phòng ban</TableCell>
-                      <TableCell>Ngày tạo</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {departments.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={2} align="center" sx={{ py: 4 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Chưa có phòng ban nào
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      departments.map((department) => (
-                        <TableRow
-                          key={department.id}
-                          hover
-                          sx={{ cursor: "pointer" }}
-                          onClick={() => handleDepartmentClick(department.id)}
-                        >
-                          <TableCell>{department.name}</TableCell>
-                          <TableCell>
-                            {fDate(department.created_at, FORMAT_DATE_STANDARD) || EMPTY_VALUE}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <TableData
+                rows={departments}
+                columns={DEPARTMENT_COLUMNS}
+                hoverRow
+                loading={isDepartmentsLoading}
+                onRowClick={handleDepartmentClick}
+                pagination={{
+                  page: departmentsPage,
+                  pageSize: departmentsPageSize,
+                  total: departmentsTotal,
+                  onChangePage: onDepartmentsPageChange,
+                  onChangePageSize: onDepartmentsPageSizeChange,
+                }}
+              />
             )}
           </CardContent>
         </Card>

@@ -14,10 +14,13 @@ interface BranchDetailPageProps {
   id: string;
 }
 
-const DEPARTMENT_PREVIEW_LIMIT = 6;
+const DEFAULT_DEPARTMENT_PAGE = 1;
+const DEFAULT_DEPARTMENT_PAGE_SIZE = 10;
 
 const BranchDetailPage: React.FC<BranchDetailPageProps> = ({ id }) => {
   const { data: branch, isLoading, error } = useGetBranchQuery(id);
+  const [departmentsPage, setDepartmentsPage] = React.useState(DEFAULT_DEPARTMENT_PAGE);
+  const [departmentsPageSize, setDepartmentsPageSize] = React.useState(DEFAULT_DEPARTMENT_PAGE_SIZE);
 
   const breadcrumbs = React.useMemo(
     () => [
@@ -27,18 +30,32 @@ const BranchDetailPage: React.FC<BranchDetailPageProps> = ({ id }) => {
     [branch?.name],
   );
 
+  React.useEffect(() => {
+    if (!branch?.id) return;
+    setDepartmentsPage(DEFAULT_DEPARTMENT_PAGE);
+  }, [branch?.id]);
+
   const departmentsParams = React.useMemo(() => {
     if (!branch?.organization_id || !branch?.id) {
       return null;
     }
 
     return {
-      page: 0,
-      limit: DEPARTMENT_PREVIEW_LIMIT,
+      page: departmentsPage - 1,
+      limit: departmentsPageSize,
       organizationId: branch.organization_id,
       branchId: branch.id,
     };
-  }, [branch?.organization_id, branch?.id]);
+  }, [branch?.organization_id, branch?.id, departmentsPage, departmentsPageSize]);
+
+  const handleDepartmentsPageChange = React.useCallback((page: number) => {
+    setDepartmentsPage(page);
+  }, []);
+
+  const handleDepartmentsPageSizeChange = React.useCallback((pageSize: number) => {
+    setDepartmentsPageSize(pageSize);
+    setDepartmentsPage(DEFAULT_DEPARTMENT_PAGE);
+  }, []);
 
   const {
     data: departmentsResult,
@@ -78,6 +95,10 @@ const BranchDetailPage: React.FC<BranchDetailPageProps> = ({ id }) => {
       departmentsTotal={departmentsResult?.total ?? 0}
       isDepartmentsLoading={Boolean(departmentsParams) && isDepartmentsLoading}
       departmentsError={departmentsError}
+      departmentsPage={departmentsPage}
+      departmentsPageSize={departmentsPageSize}
+      onDepartmentsPageChange={handleDepartmentsPageChange}
+      onDepartmentsPageSizeChange={handleDepartmentsPageSizeChange}
       breadcrumbs={breadcrumbs}
     />
   );
