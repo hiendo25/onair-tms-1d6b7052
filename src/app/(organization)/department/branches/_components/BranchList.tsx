@@ -27,7 +27,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useOrganizationId } from "@/hooks/useOrganizationId";
@@ -38,6 +40,7 @@ import { useGetBranchesQuery } from "@/modules/branch/operations/query";
 import type { BranchDto } from "@/types/dto/branches";
 
 export default function BranchList() {
+  const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
@@ -121,6 +124,16 @@ export default function BranchList() {
       setEditDialogOpen(true);
     }
     handleMenuClose();
+  };
+
+  const handleDetail = () => {
+    if (!selectedBranchId) return;
+    router.push(PATHS.BRANCHES.DETAIL(selectedBranchId));
+    handleMenuClose();
+  };
+
+  const handleRowClick = (branchId: string) => {
+    router.push(PATHS.BRANCHES.DETAIL(branchId));
   };
 
   const handleDelete = async () => {
@@ -256,7 +269,12 @@ export default function BranchList() {
                     </TableRow>
                   ) : (
                     branches.map((branch) => (
-                      <TableRow key={branch.id} hover sx={{ cursor: "pointer" }}>
+                      <TableRow
+                        key={branch.id}
+                        hover
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => handleRowClick(branch.id)}
+                      >
                         <TableCell>{branch.name}</TableCell>
                         <TableCell>{branch.code}</TableCell>
                         <TableCell>{branch.address}</TableCell>
@@ -300,6 +318,9 @@ export default function BranchList() {
             horizontal: "right",
           }}
         >
+          <MenuItem onClick={handleDetail}>
+            <ListItemText>Chi tiết</ListItemText>
+          </MenuItem>
           <MenuItem onClick={handleEdit}>
             <ListItemText>Chỉnh sửa</ListItemText>
           </MenuItem>

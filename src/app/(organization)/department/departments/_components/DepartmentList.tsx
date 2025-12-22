@@ -28,7 +28,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useOrganizationId } from "@/hooks/useOrganizationId";
@@ -40,6 +42,7 @@ import PageContainer from "@/shared/ui/PageContainer";
 import type { DepartmentDto } from "@/types/dto/departments";
 
 export default function DepartmentList() {
+  const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
@@ -122,6 +125,16 @@ export default function DepartmentList() {
     handleMenuClose();
   };
 
+  const handleDetail = () => {
+    if (!selectedDepartmentId) return;
+    router.push(PATHS.DEPARTMENTS.DETAIL(selectedDepartmentId));
+    handleMenuClose();
+  };
+
+  const handleRowClick = (departmentId: string) => {
+    router.push(PATHS.DEPARTMENTS.DETAIL(departmentId));
+  };
+
   const handleDelete = async () => {
     if (!selectedDepartmentId) return;
 
@@ -179,7 +192,7 @@ export default function DepartmentList() {
   return (
     <PageContainer
       title="Quản lý Phòng ban"
-      breadcrumbs={[{ title: "Phòng ban", path: "/department/departments" }]}
+      breadcrumbs={[{ title: "Phòng ban", path: PATHS.DEPARTMENTS.ROOT }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
@@ -262,7 +275,12 @@ export default function DepartmentList() {
                       </TableRow>
                     ) : (
                       departments.map((department) => (
-                        <TableRow key={department.id} hover sx={{ cursor: "pointer" }}>
+                        <TableRow
+                          key={department.id}
+                          hover
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => handleRowClick(department.id)}
+                        >
                           <TableCell>{department.name}</TableCell>
                           <TableCell>
                             {new Date(department.created_at).toLocaleString("vi-VN")}
@@ -309,6 +327,9 @@ export default function DepartmentList() {
               horizontal: "right",
             }}
           >
+            <MenuItem onClick={handleDetail}>
+              <ListItemText>Chi tiết</ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>
