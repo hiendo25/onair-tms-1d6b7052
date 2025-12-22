@@ -20,6 +20,16 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
       name,
       description,
       created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
       created_at,
       updated_at,
       questions (
@@ -38,19 +48,8 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
           name
         )
       ),
-      assignment_employees (
-        employee_id,
-        employees (
-          id,
-          employee_code,
-          profiles (
-            id,
-            full_name,
-            email,
-            avatar
-          )
-        )
-      )
+      assignmentEmployees:assignment_employees(count),
+      submissions:assignment_results(count)
     `,
       { count: "exact" },
     );
@@ -91,6 +90,16 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
       name,
       description,
       created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
       created_at,
       updated_at,
       questions (
@@ -648,4 +657,3 @@ const getMyAssignments = async (
 };
 
 export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments, getQuestionsByIds };
-
