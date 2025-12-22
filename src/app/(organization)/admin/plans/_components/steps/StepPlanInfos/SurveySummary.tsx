@@ -21,7 +21,7 @@ export function SurveySummary({
 }: SurveySummaryProps) {
   if (!survey) {
     return (
-      <Button variant="outlined" onClick={onOpenPicker} startIcon={<SearchIcon />} size="large">
+      <Button variant="outlined" onClick={onOpenPicker} startIcon={<SearchIcon />} size="small">
         Chọn khảo sát
       </Button>
     );
