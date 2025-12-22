@@ -3,21 +3,21 @@ import { redirect } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 
-type ManageClassRoomPageProps = {
+type ManageCourseProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata(
-  { params, searchParams }: ManageClassRoomPageProps,
+  { params, searchParams }: ManageCourseProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   return {
-    title: "Quản lý lớp học",
-    description: "Quản lý lớp học",
+    title: "Quản lý môn học",
+    description: "Quản lý môn học",
   };
 }
 
-export default function ManageClassRoomPage(props: ManageClassRoomPageProps) {
-  redirect(PATHS.CLASSROOMS.LIST_CLASSROOM);
+export default function ManageClassRoomPage(props: ManageCourseProps) {
+  redirect(PATHS.COURSES.LIST);
 }

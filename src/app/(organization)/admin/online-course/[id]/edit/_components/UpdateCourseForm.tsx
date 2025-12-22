@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef, useTransition } from "react";
+import React, { useMemo, useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
@@ -84,7 +84,7 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
 
   const handleCancelUpdate = () => {
     startTransition(() => {
-      router.push(PATHS.CLASSROOMS.ROOT);
+      router.push(PATHS.COURSES.LIST);
     });
   };
 

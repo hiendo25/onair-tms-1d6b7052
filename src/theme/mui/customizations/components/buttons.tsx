@@ -34,6 +34,7 @@ export const buttonsCustomizations: Components<Theme> = {
         borderRadius: (theme.vars || theme).shape.borderRadius,
         textTransform: "none",
         fontWeight: 500,
+        lineHeight: 1,
         ["&:hover"]: {
           boxShadow: "none",
         },
@@ -54,7 +55,7 @@ export const buttonsCustomizations: Components<Theme> = {
             },
             style: {
               height: "40px",
-              padding: "6px 12px",
+              padding: "6px 18px",
               borderRadius: "8px",
             },
           },

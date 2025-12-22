@@ -1,26 +1,20 @@
 import "./code-highlight-block.css";
 
-import { Extension, NodeViewContent, NodeViewWrapper } from "@tiptap/react";
+import React, { ComponentType } from "react";
+import { Extension, NodeViewContent, NodeViewWrapper, ReactNodeViewProps } from "@tiptap/react";
 
 import { editorClasses } from "../../classes";
 
-export type EditorCodeHighlightBlockProps = {
-  extension: Extension;
-  updateAttributes: (attributes: Record<string, any>) => void;
-  node: {
-    attrs: {
-      language: string;
-    };
-  };
-};
+export type EditorCodeHighlightBlockProps = ComponentType<ReactNodeViewProps<HTMLElement>>;
 
-export function CodeHighlightBlock({
-  node: {
-    attrs: { language: defaultLanguage },
-  },
-  extension,
-  updateAttributes,
-}: EditorCodeHighlightBlockProps) {
+const CodeHighlightBlock: ComponentType<ReactNodeViewProps<HTMLElement>> = (props) => {
+  const {
+    node: {
+      attrs: { language: defaultLanguage },
+    },
+    extension,
+    updateAttributes,
+  } = props;
   return (
     <NodeViewWrapper className={editorClasses.content.codeBlock}>
       <select
@@ -44,4 +38,5 @@ export function CodeHighlightBlock({
       </pre>
     </NodeViewWrapper>
   );
-}
+};
+export default CodeHighlightBlock;

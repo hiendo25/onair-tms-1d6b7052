@@ -158,7 +158,7 @@ export default function CourseTableList({ className }: CourseTableListProps) {
         </Box>
         <Can pers={["course:create"]}>
           <Link href={PATHS.COURSES.CREATE}>
-            <Button variant="contained" color="primary" size="large">
+            <Button variant="contained" color="primary">
               Tạo môn học
             </Button>
           </Link>
