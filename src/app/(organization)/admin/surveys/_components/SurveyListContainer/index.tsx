@@ -213,7 +213,6 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
           placeholder="Tìm kiếm khảo sát..."
           value={searchQuery}
           onChange={handleSearchChange}
-          size="small"
           sx={{ width: { xs: "100%", sm: 300 } }}
           slotProps={{
             input: {
