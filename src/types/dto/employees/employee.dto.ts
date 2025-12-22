@@ -1,5 +1,7 @@
 import { Database } from "@/types/supabase.types";
 
+export type EmployeeStatus = Database["public"]["Enums"]["employee_status"];
+
 export class EmployeeDto {
   id!: string;
   employee_code!: string;
@@ -8,7 +10,7 @@ export class EmployeeDto {
   employee_type!: Database["public"]["Enums"]["employee_type"] | null;
   user_id!: string;
   created_at!: string;
-  status!: Database["public"]["Enums"]["employee_status"];
+  status!: EmployeeStatus;
   profiles!: {
     id: string;
     full_name: string;

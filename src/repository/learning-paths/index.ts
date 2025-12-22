@@ -28,7 +28,7 @@ export const getLearningPaths = async (
 ): Promise<GetLearningPathsResult> => {
   const supabase = createClient();
   const { organizationId, page = 1, limit = 10, search } = params;
-  
+
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
@@ -68,7 +68,7 @@ export const getLearningPaths = async (
   // Transform the data to include counts
   const learningPathsWithCounts: LearningPathWithCounts[] = (data || []).map((item: any) => {
     const { learning_path_phases, employee_learning_paths, ...rest } = item;
-    
+
     return {
       ...rest,
       phase_count: learning_path_phases?.[0]?.count || 0,
