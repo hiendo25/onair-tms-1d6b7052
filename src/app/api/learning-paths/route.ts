@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { employeesRepository, learningPathsRepository } from "@/repository";
+import { transformFormToMetadata, transformFormPhasesToInput } from "@/repository/learning-paths/transformers";
 import { createSVClient } from "@/services/supabase/server";
 import { PATHS } from "@/constants/path.constant";
 
@@ -96,19 +97,8 @@ export async function POST(request: NextRequest) {
       thumbnail_url: payload.info.thumbnail || undefined,
       organization_id: organizationId,
       created_by: employee.id,
-      metadata: {
-        assignmentMode: payload.info.assignmentMode,
-        sequentialLearning: payload.settings?.sequentialLearning ?? false,
-        completionCriteria: payload.settings?.completionCriteria ?? 80,
-        deadlineType: payload.settings?.deadlineType ?? "none",
-        deadlineHours: payload.settings?.deadlineHours,
-        allowRetake: payload.settings?.allowRetake ?? false,
-      },
-      phases: (payload.phases || []).map((phase: any) => ({
-        order_index: phase.order,
-        description: phase.description || undefined,
-        class_room_ids: phase.class_rooms.map((cr: any) => cr.id),
-      })),
+      metadata: transformFormToMetadata(payload),
+      phases: transformFormPhasesToInput(payload.phases || []),
       assigned_employee_ids:
         payload.info.assignmentMode === "manual"
           ? payload.info.assignedEmployees?.map((emp: any) => emp.id) || []

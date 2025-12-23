@@ -63,9 +63,11 @@ export interface StudentsContainerProps {
 }
 const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = [], onChange }) => {
   const [queryParams, setQueryParams] = React.useState({ page: 1, pageSize: 20, search: "" });
-  const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(seletedItems);
   const [selectedDepartmentIds, setSelectedDepartmentIds] = React.useState<string[]>([]);
   const [selectedBranchIds, setSelectedBranchIds] = React.useState<string[]>([]);
+
+  // Use seletedItems directly as the source of truth (controlled component)
+  const selectedStudents = seletedItems;
   const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
   const { orgId } = useUserOrganization((state) => state.currentOrganization);
   const { data: employeeData, isPending } = useGetEmployeeQuery({
@@ -111,74 +113,64 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
   };
 
   const handleAddEmployee = (emp: EmployeeStudentWithProfileItem) => {
-    setSelectedStudents((prevSelectedStudents) => {
-      const existItem = prevSelectedStudents.find((it) => it.id === emp.id);
-      const newSelectedStudents = existItem
-        ? prevSelectedStudents
-        : [
-            ...prevSelectedStudents,
-            {
-              id: emp.id,
-              email: emp.profiles.email,
-              fullName: emp.profiles.full_name,
-              employeeCode: emp.employee_code,
-              avatar: emp.profiles.avatar,
-              empoyeeType: emp.employee_type,
-            },
-          ];
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    const existItem = selectedStudents.find((it) => it.id === emp.id);
+    if (existItem) return; // Already selected
+
+    const newSelectedStudents = [
+      ...selectedStudents,
+      {
+        id: emp.id,
+        email: emp.profiles.email,
+        fullName: emp.profiles.full_name,
+        employeeCode: emp.employee_code,
+        avatar: emp.profiles.avatar,
+        empoyeeType: emp.employee_type,
+      },
+    ];
+    onChange(newSelectedStudents);
   };
 
   const handleRemoveItem = (itemId: string) => {
-    setSelectedStudents((prevSelectedStudents) => {
-      const newSelectedStudents = prevSelectedStudents.filter((item) => item.id !== itemId);
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    const newSelectedStudents = selectedStudents.filter((item) => item.id !== itemId);
+    onChange(newSelectedStudents);
   };
 
   const handleCheckAllStudents = (checked?: boolean) => {
     const students = employeeData?.data;
     if (!students?.length) return;
 
-    setSelectedStudents((prevSelectedStudents) => {
-      const newSelectedStudents: StudentSelectedItem[] = [];
+    const newSelectedStudents: StudentSelectedItem[] = [];
 
-      const studentsFormated = students.map<StudentSelectedItem>((item) => ({
-        id: item.id,
-        fullName: item.profiles.full_name,
-        email: item.profiles.email || "",
-        employeeCode: item.employee_code,
-        empoyeeType: item.employee_type,
-        avatar: item.profiles.avatar || "",
-      }));
+    const studentsFormated = students.map<StudentSelectedItem>((item) => ({
+      id: item.id,
+      fullName: item.profiles.full_name,
+      email: item.profiles.email || "",
+      employeeCode: item.employee_code,
+      empoyeeType: item.employee_type,
+      avatar: item.profiles.avatar || "",
+    }));
 
-      if (checked) {
-        const studentsMap = new Map<string, StudentSelectedItem>();
+    if (checked) {
+      const studentsMap = new Map<string, StudentSelectedItem>();
 
-        [...studentsFormated, ...prevSelectedStudents].forEach((item) => {
-          studentsMap.set(item.id, item);
-        });
+      [...studentsFormated, ...selectedStudents].forEach((item) => {
+        studentsMap.set(item.id, item);
+      });
 
-        for (const [key, value] of studentsMap.entries()) {
-          newSelectedStudents.push(value);
-        }
-      } else {
-        prevSelectedStudents.forEach((sltItem) => {
-          if (studentsFormated.every((it) => it.id !== sltItem.id)) {
-            newSelectedStudents.push(sltItem);
-          }
-        });
+      for (const [key, value] of studentsMap.entries()) {
+        newSelectedStudents.push(value);
       }
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    } else {
+      selectedStudents.forEach((sltItem) => {
+        if (studentsFormated.every((it) => it.id !== sltItem.id)) {
+          newSelectedStudents.push(sltItem);
+        }
+      });
+    }
+    onChange(newSelectedStudents);
   };
 
   const handleRemoveALl = () => {
-    setSelectedStudents([]);
     onChange([]);
   };
 
@@ -191,11 +183,6 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
     if (isPending) return;
     prevEmployeeList.current = employeeData?.data || [];
   }, [isPending, employeeData]);
-
-  React.useEffect(() => {
-    if (!seletedItems.length) return;
-    setSelectedStudents(seletedItems);
-  }, [seletedItems]);
 
   return (
     <div className="employee-data-transfer relative">
