@@ -2,7 +2,7 @@ import { memo } from "react";
 import { IconButton } from "@mui/material";
 import { Control, useController } from "react-hook-form";
 
-import { UpsertSurveyFormData } from "@/modules/surveys/survey-form.schema";
+import { UpsertSurveyFormData } from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
 import { Trash01Icon } from "@/shared/assets/icons";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 

@@ -14,7 +14,7 @@ import { Button } from "@mui/material";
 import { Control, FieldErrors, useFieldArray } from "react-hook-form";
 
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { UpsertSurveyFormData } from "../../survey-form.schema";
+import { UpsertSurveyFormData } from "./survey-form.schema";
 import { useUpsertServeyFormContext } from ".";
 
 import QuestionContentItem from "./QuestionContentItem";

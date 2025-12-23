@@ -16,7 +16,7 @@ import { Control, useFieldArray, useWatch } from "react-hook-form";
 import { Trash01Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { UpsertSurveyFormData } from "../../../survey-form.schema";
+import { UpsertSurveyFormData } from "../survey-form.schema";
 import SortableItem from "../SortableItem";
 
 import OptionContentItem from "./OptionContentItem";

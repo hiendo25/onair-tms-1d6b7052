@@ -6,7 +6,10 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 
-import { UpsertSurveyFormData, upsertSurveyFormSchema } from "@/modules/surveys/survey-form.schema";
+import {
+  UpsertSurveyFormData,
+  upsertSurveyFormSchema,
+} from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 

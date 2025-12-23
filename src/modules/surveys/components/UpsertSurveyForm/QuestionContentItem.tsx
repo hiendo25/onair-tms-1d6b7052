@@ -16,7 +16,7 @@ import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constant";
 import { FaceSadIcon, FaceSmileIcon, Trash01Icon } from "@/shared/assets/icons";
 import RHFCheckboxField from "@/shared/ui/form/RHFCheckboxField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { UpsertSurveyFormData } from "../../survey-form.schema";
+import { UpsertSurveyFormData } from "./survey-form.schema";
 
 import QuestionRatingType from "./question-fields-type/QuestionRatingType";
 import QuestionOptionContainer from "./QuestionOptionContainer";

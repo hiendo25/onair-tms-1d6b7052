@@ -1,5 +1,5 @@
 import { EnumSurveyType } from "@/model/survey";
-import { UpsertSurveyFormData } from "@/modules/surveys/survey-form.schema";
+import { UpsertSurveyFormData } from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
 import { surveysRepository } from "@/repository";
 import { CreateSurveyQuestionPayload, UpsertSurveyQuestionPayload } from "@/repository/surveys/surveys-questions/type";
 import {

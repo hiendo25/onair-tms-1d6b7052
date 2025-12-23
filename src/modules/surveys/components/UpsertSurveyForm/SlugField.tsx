@@ -3,7 +3,8 @@ import { Typography } from "@mui/material";
 import { Control, useController, useWatch } from "react-hook-form";
 
 import { slugify } from "@/utils/slugify";
-import { UpsertSurveyFormData } from "../../survey-form.schema";
+
+import { UpsertSurveyFormData } from "./survey-form.schema";
 interface SlugFieldProps {
   control: Control<UpsertSurveyFormData>;
 }
