@@ -134,13 +134,22 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
       if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
     }
 
-    const { data: referenceData, error: referenceError } = await userPreferenceRepository.createUserPreference({
-      user_id: userId,
-      default_organization_id: organizationId,
-    });
+    const { data: currentReferenceData, error: currentReferenceError } =
+      await userPreferenceRepository.getUserPreferencesByUserId(userId);
 
-    if (referenceError || !referenceData) {
-      throw new Error(referenceError.message);
+    if (currentReferenceError) {
+      throw new Error(currentReferenceError.message);
+    }
+
+    if (!currentReferenceData) {
+      const { data: referenceData, error: referenceError } = await userPreferenceRepository.createUserPreference({
+        user_id: userId,
+        default_organization_id: organizationId,
+      });
+
+      if (referenceError || !referenceData) {
+        throw new Error(referenceError.message);
+      }
     }
 
     return {

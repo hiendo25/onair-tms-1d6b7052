@@ -1,30 +1,26 @@
-import type { StackProps } from "@mui/material/Stack";
-import Stack from "@mui/material/Stack";
+import { Box, BoxProps } from "@mui/material";
 import { alpha, styled } from "@mui/material/styles";
 
 import { editorClasses } from "./classes";
 
 const MARGIN = "0.75em";
 
-type EditorContainerProps = StackProps & {
+type EditorContainerProps = BoxProps & {
   error?: boolean;
   disabled?: boolean;
   fullScreen?: boolean;
 };
-export const EditorContainer = styled(Stack, {
-  shouldForwardProp: (prop) =>
-    prop !== "error" && prop !== "disabled" && prop !== "fullScreen",
+export const EditorContainer = styled(Box, {
+  shouldForwardProp: (prop) => prop !== "error" && prop !== "disabled" && prop !== "fullScreen",
 })<EditorContainerProps>(({ error, disabled, fullScreen, theme }) => ({
   minHeight: 360,
   maxHeight: 650,
   borderRadius: theme.shape.borderRadius,
   border: `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
   scrollbarWidth: "thin",
-  scrollbarColor: `${alpha(theme.palette.grey[500], 0.4)} ${alpha(
-    theme.palette.grey[500],
-    0.08,
-  )}`,
-
+  scrollbarColor: `${alpha(theme.palette.grey[500], 0.4)} ${alpha(theme.palette.grey[500], 0.08)}`,
+  display: "flex",
+  flexDirection: "column",
   /**
    * State: error
    */
@@ -54,8 +50,13 @@ export const EditorContainer = styled(Stack, {
   /**
    * Placeholder
    */
-  [`.${editorClasses.content.root}`]: {
+  [`& .${editorClasses.content.root}`]: {
     scrollbarWidth: "thin",
+    ".tiptap": {
+      p: {
+        fontSize: "0.875rem !important",
+      },
+    },
   },
   [`& .${editorClasses.content.placeholder}`]: {
     "&:first-of-type::before": {
@@ -70,7 +71,7 @@ export const EditorContainer = styled(Stack, {
   /**
    * Content
    */
-  [`& .${editorClasses.content.root}`]: {
+  [`.${editorClasses.content.root}`]: {
     display: "flex",
     flex: "1 1 auto",
     overflowY: "auto",
@@ -81,7 +82,7 @@ export const EditorContainer = styled(Stack, {
     ...(error && {
       backgroundColor: alpha(theme.palette.error.main, 0.08),
     }),
-    "& .tiptap": {
+    ".tiptap": {
       "> * + *": {
         marginTop: 0,
         marginBottom: MARGIN,
@@ -94,8 +95,8 @@ export const EditorContainer = styled(Stack, {
       /**
        * Heading & Paragraph
        */
-      h1: { ...theme.typography.h1, marginTop: 40, marginBottom: 8 },
-      h2: { ...theme.typography.h2, marginTop: 40, marginBottom: 8 },
+      h1: { ...theme.typography.h1, marginTop: 36, marginBottom: 8 },
+      h2: { ...theme.typography.h2, marginTop: 32, marginBottom: 8 },
       h3: { ...theme.typography.h3, marginTop: 24, marginBottom: 8 },
       h4: { ...theme.typography.h4, marginTop: 24, marginBottom: 8 },
       h5: { ...theme.typography.h5, marginTop: 24, marginBottom: 8 },
@@ -107,6 +108,9 @@ export const EditorContainer = styled(Stack, {
        */
       [`& .${editorClasses.content.link}`]: {
         color: theme.palette.primary.main,
+        cursor: "pointer",
+        textDecoration: "underline",
+        textUnderlineOffset: 3,
       },
       /**
        * Hr Divider
@@ -114,7 +118,7 @@ export const EditorContainer = styled(Stack, {
       [`& .${editorClasses.content.hr}`]: {
         flexShrink: 0,
         borderWidth: 0,
-        margin: "2em 0",
+        margin: "1em 0",
         msFlexNegative: 0,
         WebkitFlexShrink: 0,
         borderStyle: "solid",

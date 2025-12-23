@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { useTransition } from "react";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
@@ -28,11 +28,6 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
-  const handleCancelUpdate = () => {
-    startTransition(() => {
-      router.push(PATHS.CLASSROOMS.ROOT);
-    });
-  };
 
   const platform = sessions.every((s) => s.session_type === "live")
     ? "live"
@@ -158,10 +153,15 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
           // router.refresh();
-          router.push(PATHS.CLASSROOMS.ROOT);
+          router.push(PATHS.CLASSROOMS.LIST_CLASSROOM);
         },
       },
     );
+  };
+  const handleCancelUpdate = () => {
+    startTransition(() => {
+      router.push(PATHS.CLASSROOMS.ROOT);
+    });
   };
 
   return (

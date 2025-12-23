@@ -9,7 +9,6 @@ import {
   Alert,
   Box,
   Button,
-  Card,
   CircularProgress,
   IconButton,
   InputAdornment,
@@ -28,7 +27,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useOrganizationId } from "@/hooks/useOrganizationId";
@@ -36,10 +37,10 @@ import { BranchDialog } from "@/modules/branch/components/BranchDialog";
 import { ImportBranchDialog } from "@/modules/branch/components/ImportBranchDialog";
 import { useDeleteBranchMutation } from "@/modules/branch/operations/mutation";
 import { useGetBranchesQuery } from "@/modules/branch/operations/query";
-import PageContainer from "@/shared/ui/PageContainer";
 import type { BranchDto } from "@/types/dto/branches";
 
 export default function BranchList() {
+  const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
@@ -67,14 +68,17 @@ export default function BranchList() {
     data: branchesResult,
     isLoading,
     error,
-  } = useGetBranchesQuery({
-    page,
-    limit: rowsPerPage,
-    search: debouncedSearch,
-    organizationId: organizationId!,
-  }, {
-    enabled: !!organizationId,
-  });
+  } = useGetBranchesQuery(
+    {
+      page,
+      limit: rowsPerPage,
+      search: debouncedSearch,
+      organizationId: organizationId!,
+    },
+    {
+      enabled: !!organizationId,
+    },
+  );
 
   const { mutateAsync: deleteBranch, isPending: isDeleting } = useDeleteBranchMutation();
 
@@ -122,6 +126,16 @@ export default function BranchList() {
     handleMenuClose();
   };
 
+  const handleDetail = () => {
+    if (!selectedBranchId) return;
+    router.push(PATHS.BRANCHES.DETAIL(selectedBranchId));
+    handleMenuClose();
+  };
+
+  const handleRowClick = (branchId: string) => {
+    router.push(PATHS.BRANCHES.DETAIL(branchId));
+  };
+
   const handleDelete = async () => {
     if (!selectedBranchId) return;
 
@@ -132,7 +146,7 @@ export default function BranchList() {
         okText: "Xóa",
         cancelText: "Hủy",
         severity: "error",
-      }
+      },
     );
 
     if (!confirmed) {
@@ -153,13 +167,10 @@ export default function BranchList() {
       handleMenuClose();
     } catch (error) {
       console.error("Error deleting branch:", error);
-      notifications.show(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa chi nhánh",
-        {
-          severity: "error",
-          autoHideDuration: 5000,
-        }
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa chi nhánh", {
+        severity: "error",
+        autoHideDuration: 5000,
+      });
       handleMenuClose();
     }
   };
@@ -177,148 +188,146 @@ export default function BranchList() {
   };
 
   return (
-    <PageContainer
-      title="Quản lý Chi nhánh"
-      breadcrumbs={[{ title: "Chi nhánh", path: "/department/branches" }]}
-    >
+    <>
       <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3 }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{ mb: 3 }}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            justifyContent="space-between"
-          >
-            <TextField
-              placeholder="Tìm kiếm..."
-              size="small"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ maxWidth: 300 }}
-            />
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          sx={{ mb: 3 }}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          justifyContent="space-between"
+        >
+          <TextField
+            placeholder="Tìm kiếm..."
+            size="small"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            }}
+            sx={{ maxWidth: 300 }}
+          />
 
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="outlined"
-                startIcon={<FileUploadIcon />}
-                onClick={handleImportBranches}
-                disabled={!organizationId || isLoadingOrgId}
-              >
-                Import
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleCreateBranch}
-                disabled={!organizationId || isLoadingOrgId}
-              >
-                Tạo chi nhánh
-              </Button>
-            </Stack>
-          </Stack>
-
-          {(isLoading || isLoadingOrgId) ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 400,
-              }}
+          <Stack direction="row" spacing={2}>
+            <Button
+              variant="outlined"
+              startIcon={<FileUploadIcon />}
+              onClick={handleImportBranches}
+              disabled={!organizationId || isLoadingOrgId}
             >
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error">Có lỗi xảy ra khi tải danh sách chi nhánh</Alert>
-          ) : (
-            <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
+              Import
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={handleCreateBranch}
+              disabled={!organizationId || isLoadingOrgId}
+            >
+              Tạo chi nhánh
+            </Button>
+          </Stack>
+        </Stack>
+
+        {isLoading || isLoadingOrgId ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 400,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error">Có lỗi xảy ra khi tải danh sách chi nhánh</Alert>
+        ) : (
+          <>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Tên chi nhánh</TableCell>
+                    <TableCell>Mã chi nhánh</TableCell>
+                    <TableCell>Địa điểm</TableCell>
+                    <TableCell>Ngày tạo</TableCell>
+                    <TableCell align="center"></TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {branches.length === 0 ? (
                     <TableRow>
-                      <TableCell>Tên chi nhánh</TableCell>
-                      <TableCell>Mã chi nhánh</TableCell>
-                      <TableCell>Địa điểm</TableCell>
-                      <TableCell>Ngày tạo</TableCell>
-                      <TableCell align="center"></TableCell>
+                      <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          Không tìm thấy chi nhánh nào
+                        </Typography>
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {branches.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Không tìm thấy chi nhánh nào
-                          </Typography>
+                  ) : (
+                    branches.map((branch) => (
+                      <TableRow
+                        key={branch.id}
+                        hover
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => handleRowClick(branch.id)}
+                      >
+                        <TableCell>{branch.name}</TableCell>
+                        <TableCell>{branch.code}</TableCell>
+                        <TableCell>{branch.address}</TableCell>
+                        <TableCell>{new Date(branch.created_at).toLocaleString("vi-VN")}</TableCell>
+                        <TableCell align="center">
+                          <IconButton size="small" onClick={(e) => handleMenuOpen(e, branch)}>
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      branches.map((branch) => (
-                        <TableRow key={branch.id} hover sx={{ cursor: "pointer" }}>
-                          <TableCell>{branch.name}</TableCell>
-                          <TableCell>{branch.code}</TableCell>
-                          <TableCell>{branch.address}</TableCell>
-                          <TableCell>
-                            {new Date(branch.created_at).toLocaleString("vi-VN")}
-                          </TableCell>
-                          <TableCell align="center">
-                            <IconButton
-                              size="small"
-                              onClick={(e) => handleMenuOpen(e, branch)}
-                            >
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-              <TablePagination
-                component="div"
-                count={totalCount}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[12, 25, 50, 100]}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
-              />
-            </>
-          )}
+            <TablePagination
+              component="div"
+              count={totalCount}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              rowsPerPageOptions={[12, 25, 50, 100]}
+              labelRowsPerPage="Số hàng mỗi trang:"
+              labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+            />
+          </>
+        )}
 
-          <Menu
-            anchorEl={anchorEl}
-            open={menuOpen}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          >
-            <MenuItem onClick={handleEdit}>
-              <ListItemText>Chỉnh sửa</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleDelete} disabled={isDeleting}>
-              <ListItemText>Xóa</ListItemText>
-            </MenuItem>
-          </Menu>
-        </Card>
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem onClick={handleDetail}>
+            <ListItemText>Chi tiết</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleEdit}>
+            <ListItemText>Chỉnh sửa</ListItemText>
+          </MenuItem>
+          <MenuItem onClick={handleDelete} disabled={isDeleting}>
+            <ListItemText>Xóa</ListItemText>
+          </MenuItem>
+        </Menu>
       </Box>
 
       <BranchDialog
@@ -342,6 +351,6 @@ export default function BranchList() {
         organizationId={organizationId || ""}
         onSuccess={handleSuccess}
       />
-    </PageContainer>
+    </>
   );
 }

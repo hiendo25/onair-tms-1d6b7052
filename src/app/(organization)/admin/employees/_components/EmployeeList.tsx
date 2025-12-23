@@ -2,8 +2,6 @@
 
 import * as React from "react";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
@@ -16,7 +14,6 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
@@ -39,8 +36,8 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
+import { useUserOrganization } from "@/modules/organization";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
-import PageContainer from "@/shared/ui/PageContainer";
 import type { EmployeeDto } from "@/types/dto/employees";
 import { Database } from "@/types/supabase.types";
 
@@ -53,16 +50,10 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
-
+  const {
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
   // Dynamic page title based on employee type
-  const pageTitle = React.useMemo(() => {
-    if (employeeType === "teacher") {
-      return "Danh sách giảng viên";
-    } else if (employeeType === "student") {
-      return "Danh sách học viên";
-    }
-    return "Danh sách nhân viên";
-  }, [employeeType]);
 
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(12);
@@ -101,10 +92,7 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
     [organizationUnits],
   );
 
-  const branches = React.useMemo(
-    () => organizationUnits.filter((unit) => unit.type === "branch"),
-    [organizationUnits],
-  );
+  const branches = React.useMemo(() => organizationUnits.filter((unit) => unit.type === "branch"), [organizationUnits]);
 
   const {
     data: employeesResult,
@@ -117,6 +105,7 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
     departmentId: departmentFilter,
     branchId: branchFilter,
     status: statusFilter !== "all" ? (statusFilter as Database["public"]["Enums"]["employee_status"]) : undefined,
+    organizationId: organizationId,
     employeeType,
   });
 
@@ -247,190 +236,187 @@ export default function EmployeeList({ employeeType = "student" }: EmployeeListP
   };
 
   return (
-    <PageContainer title={pageTitle} breadcrumbs={[{ title: "Nhân viên", path: "/admin/employees" }]}>
-      <Box sx={{ py: 3 }}>
-        <Card sx={{ p: 3 }}>
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={2}
-            sx={{ mb: 3 }}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            justifyContent="space-between"
+    <Box sx={{ py: 3 }}>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        sx={{ mb: 3 }}
+        alignItems={{ xs: "stretch", sm: "center" }}
+        justifyContent="space-between"
+      >
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ flex: 1 }}>
+          <TextField
+            placeholder="Tìm kiếm..."
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={{ maxWidth: 200 }}
+          />
+
+          <Select
+            value={departmentFilter}
+            onChange={(e) => setDepartmentFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
           >
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ flex: 1 }}>
-              <TextField
-                placeholder="Tìm kiếm..."
-                size="small"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ maxWidth: 200 }}
-              />
+            <MenuItem value="all">Phòng ban</MenuItem>
+            {departments.map((dept) => (
+              <MenuItem key={dept.id} value={dept.id}>
+                {dept.name}
+              </MenuItem>
+            ))}
+          </Select>
 
-              <Select
-                size="small"
-                value={departmentFilter}
-                onChange={(e) => setDepartmentFilter(e.target.value)}
-                displayEmpty
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">Phòng ban</MenuItem>
-                {departments.map((dept) => (
-                  <MenuItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </MenuItem>
-                ))}
-              </Select>
+          <Select
+            size="small"
+            value={branchFilter}
+            onChange={(e) => setBranchFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Chi nhánh</MenuItem>
+            {branches.map((branch) => (
+              <MenuItem key={branch.id} value={branch.id}>
+                {branch.name}
+              </MenuItem>
+            ))}
+          </Select>
 
-              <Select
-                size="small"
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-                displayEmpty
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">Chi nhánh</MenuItem>
-                {branches.map((branch) => (
-                  <MenuItem key={branch.id} value={branch.id}>
-                    {branch.name}
-                  </MenuItem>
-                ))}
-              </Select>
+          <Select
+            size="small"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            displayEmpty
+            sx={{ minWidth: 150 }}
+          >
+            <MenuItem value="all">Trạng thái</MenuItem>
+            <MenuItem value="active">Hoạt động</MenuItem>
+            <MenuItem value="inactive">Không hoạt động</MenuItem>
+          </Select>
+        </Stack>
 
-              <Select
-                size="small"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                displayEmpty
-                sx={{ minWidth: 150 }}
-              >
-                <MenuItem value="all">Trạng thái</MenuItem>
-                <MenuItem value="active">Hoạt động</MenuItem>
-                <MenuItem value="inactive">Không hoạt động</MenuItem>
-              </Select>
-            </Stack>
+        <Stack direction="row" spacing={2}>
+          <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportEmployees}>
+            Import người dùng
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateEmployee}>
+            Tạo người dùng
+          </Button>
+        </Stack>
+      </Stack>
 
-            <Stack direction="row" spacing={2}>
-              <Button variant="outlined" startIcon={<FileUploadIcon />} onClick={handleImportEmployees}>
-                Import người dùng
-              </Button>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={handleCreateEmployee}>
-                Tạo người dùng
-              </Button>
-            </Stack>
-          </Stack>
-
-          {isLoading ? (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                minHeight: 400,
-              }}
-            >
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error">Có lỗi xảy ra khi tải danh sách nhân viên</Alert>
-          ) : (
-            <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Mã nhân viên</TableCell>
-                      <TableCell>Họ và tên</TableCell>
-                      <TableCell>Email</TableCell>
-                      <TableCell>Chức danh</TableCell>
-                      <TableCell>Chi nhánh</TableCell>
-                      <TableCell>Phòng ban</TableCell>
-                      <TableCell>Trạng thái</TableCell>
-                      <TableCell align="center"></TableCell>
+      {isLoading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: 400,
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">Có lỗi xảy ra khi tải danh sách nhân viên</Alert>
+      ) : (
+        <>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Mã nhân viên</TableCell>
+                  <TableCell>Họ và tên</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Chức danh</TableCell>
+                  <TableCell>Chi nhánh</TableCell>
+                  <TableCell>Phòng ban</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell align="center"></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {employees.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Không tìm thấy nhân viên nào
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  employees.map((employee) => (
+                    <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
+                      <TableCell>{employee.employee_code}</TableCell>
+                      <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
+                      <TableCell>{employee.profiles?.email || "-"}</TableCell>
+                      <TableCell>{getPositionTitle(employee)}</TableCell>
+                      <TableCell>{getBranchName(employee)}</TableCell>
+                      <TableCell>{getDepartmentName(employee)}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getStatusLabel(employee.status)}
+                          color={getStatusColor(employee.status)}
+                          size="small"
+                          sx={{ minWidth: 100 }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, employee.id)}>
+                          <MoreVertIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
                     </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {employees.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={8} align="center" sx={{ py: 8 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Không tìm thấy nhân viên nào
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      employees.map((employee) => (
-                        <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
-                          <TableCell>{employee.employee_code}</TableCell>
-                          <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
-                          <TableCell>{employee.profiles?.email || "-"}</TableCell>
-                          <TableCell>{getPositionTitle(employee)}</TableCell>
-                          <TableCell>{getBranchName(employee)}</TableCell>
-                          <TableCell>{getDepartmentName(employee)}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={getStatusLabel(employee.status)}
-                              color={getStatusColor(employee.status)}
-                              size="small"
-                              sx={{ minWidth: 100 }}
-                            />
-                          </TableCell>
-                          <TableCell align="center">
-                            <IconButton size="small" onClick={(e) => handleMenuOpen(e, employee.id)}>
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
 
-              <TablePagination
-                component="div"
-                count={totalCount}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[12, 25, 50, 100]}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
-              />
-            </>
-          )}
+          <TablePagination
+            component="div"
+            count={totalCount}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[12, 25, 50, 100]}
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} của ${count}`}
+          />
+        </>
+      )}
 
-          <Menu
-            anchorEl={anchorEl}
-            open={menuOpen}
-            onClose={handleMenuClose}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "right",
-            }}
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "right",
-            }}
-          > <MenuItem onClick={handleDetail}>
-              <ListItemText>Chi tiết</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleEdit}>
-              <ListItemText>Chỉnh sửa</ListItemText>
-            </MenuItem>
-            <MenuItem onClick={handleDelete} disabled={isDeleting}>
-              <ListItemText>Xóa tài khoản</ListItemText>
-            </MenuItem>
-          </Menu>
-        </Card>
-      </Box>
-    </PageContainer>
+      <Menu
+        anchorEl={anchorEl}
+        open={menuOpen}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "right",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem onClick={handleDetail}>
+          <ListItemText>Chi tiết</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleEdit}>
+          <ListItemText>Chỉnh sửa</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={handleDelete} disabled={isDeleting}>
+          <ListItemText>Xóa tài khoản</ListItemText>
+        </MenuItem>
+      </Menu>
+    </Box>
   );
 }

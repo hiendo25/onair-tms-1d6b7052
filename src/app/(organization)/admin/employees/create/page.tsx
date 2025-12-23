@@ -43,7 +43,6 @@ const CreateEmployeePage = () => {
           severity: "success",
           autoHideDuration: 3000,
         });
-
         // Navigate to employees list page
         router.push("/admin/employees");
       },

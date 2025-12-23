@@ -130,7 +130,7 @@ export default function ClassRoomTableList() {
   };
 
   return (
-    <Box bgcolor={"#fff"} borderRadius={2} p={2}>
+    <Box>
       <Stack spacing={3}>
         <ClassRoomListFilters
           type={filters.type}

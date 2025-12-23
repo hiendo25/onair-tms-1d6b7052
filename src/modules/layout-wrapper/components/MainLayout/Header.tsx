@@ -10,12 +10,6 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import Link from "next/link";
 
-import { Menu05Icon } from "@/shared/assets/icons";
-import AccountSetting from "@/shared/ui/layouts/MainLayout/AccountSetting";
-import NotificationButton from "@/shared/ui/NotificationButton";
-
-import ThemeSwitcher from "./ThemeSwitcher";
-
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
   borderWidth: 0,
   borderBottomWidth: 1,
@@ -47,9 +41,13 @@ export interface HeaderProps {
   menuOpen: boolean;
   onToggleMenu: (open: boolean) => void;
   actions?: React.ReactNode;
+  slots?: {
+    right?: React.ReactNode;
+    left?: React.ReactNode;
+  };
 }
 
-export default function Header({ logo, title, menuOpen, onToggleMenu, actions }: HeaderProps) {
+export default function Header({ logo, title, menuOpen, onToggleMenu, actions, slots }: HeaderProps) {
   const theme = useTheme();
 
   const handleMenuOpen = React.useCallback(() => {
@@ -79,8 +77,8 @@ export default function Header({ logo, title, menuOpen, onToggleMenu, actions }:
   );
 
   return (
-    <AppBar color="inherit" position="sticky">
-      <Toolbar sx={{ backgroundColor: "inherit" }}>
+    <AppBar color="inherit" position="sticky" className="header-bar">
+      <Toolbar sx={{ px: 2 }}>
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -111,15 +109,17 @@ export default function Header({ logo, title, menuOpen, onToggleMenu, actions }:
                 ) : null}
               </Stack>
             </Link>
-            {actions ? <Box component="div">{actions}</Box> : null}
+            {slots?.left ? (
+              <Box component="div" className="header-slot-left">
+                {slots.left}
+              </Box>
+            ) : null}
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
-            <Stack direction="row" alignItems="center" gap={2}>
-              <NotificationButton />
-              <AccountSetting />
-              {/* <ThemeSwitcher /> */}
+          {slots?.right ? (
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
+              {slots?.right}
             </Stack>
-          </Stack>
+          ) : null}
         </Stack>
       </Toolbar>
     </AppBar>

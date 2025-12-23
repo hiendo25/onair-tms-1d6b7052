@@ -1,12 +1,22 @@
-import { createContext, memo, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
-import { Box, Table, TableBody, TableContainer, TableHead, TablePaginationOwnProps, Typography } from "@mui/material";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Box,
+  Table,
+  TableBody,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TablePaginationOwnProps,
+  Typography,
+} from "@mui/material";
 
 import { EmptyBoxIcon } from "@/shared/assets/icons";
 
-import { CustomTablePagination } from "./CustomTablePagination";
 import TableDataHeader from "./TableDataHeader";
+import TableDataPagination from "./TableDataPagination";
+import { CustomTablePagination } from "./TableDataPagination/CustomTablePagination";
+import TableRowDataProvider from "./TableDataProvider";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
-import TableRowDataProvider from "./TableRowDataProvider";
 import TableRowFixedWidth from "./TableRowFixedWith";
 
 export type TableDataProps<T> = {
@@ -49,7 +59,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   loading,
   hoverRow,
   bordered = true,
-  pagination = initPagination,
+  pagination,
   stickyHeader,
   showRowCount,
   onRowClick,
@@ -57,14 +67,14 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
 }: TableDataProps<T>) => {
   const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
-      ...initPagination,
-      page: pagination?.page ? pagination?.page : initPagination.page,
-      pageSize: pagination?.pageSize || initPagination.pageSize,
-      total: pagination?.total || rows?.length || initPagination.total,
-      totalPages: pagination?.totalPages || initPagination.totalPages,
-      perPageOptions: pagination?.perPageOptions || initPagination.perPageOptions,
+      page: pagination?.page ?? initPagination.page,
+      pageSize: pagination?.pageSize ?? initPagination.pageSize,
+      total: pagination?.total ?? rows?.length ?? initPagination.total,
+      totalPages: pagination?.totalPages ?? initPagination.totalPages,
+      perPageOptions: pagination?.perPageOptions ?? initPagination.perPageOptions,
     };
   });
+
   const { page, pageSize, total, perPageOptions } = tablePagination;
 
   const rowsList = useMemo(() => {
@@ -72,8 +82,11 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   }, [pageSize, rows]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
-    setTablePagination((prev) => {
+    if (pagination?.onChangePage) {
       pagination?.onChangePage?.(newPage + 1);
+      return;
+    }
+    setTablePagination((prev) => {
       return {
         ...prev,
         page: newPage + 1,
@@ -82,8 +95,12 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   };
   const onChangePageSize: TablePaginationOwnProps["onRowsPerPageChange"] = (evt) => {
     const newPageSize = parseInt(evt.target.value);
+
+    if (pagination?.onChangePageSize) {
+      pagination.onChangePageSize(newPageSize);
+      return;
+    }
     setTablePagination((prev) => {
-      pagination?.onChangePageSize?.(newPageSize);
       return {
         ...prev,
         pageSize: newPageSize,
@@ -92,7 +109,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   };
   const genRowKey = useCallback(
     (row: T) => {
-      const currentRowKey = row[rowKey || "id"];
+      const currentRowKey = row[rowKey ?? "id"];
       if (!currentRowKey) {
         console.error("Row key is not defined for row:", row);
       }
@@ -107,21 +124,26 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     return showRowCount ? columns.length + 1 : columns.length;
   }, [showRowCount, columns]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!pagination) return;
 
-    setTablePagination((prev) => {
-      let updatePagination = { ...prev };
-      const { page, ...restPaginationUpdate } = pagination;
-      if (page) {
-        updatePagination = { ...updatePagination, page: page };
-      }
-      return { ...updatePagination, ...restPaginationUpdate };
-    });
+    setTablePagination((prev) => ({ ...prev, ...pagination, page: pagination.page ?? prev.page }));
   }, [pagination]);
 
+  console.log({ pagination });
   return (
-    <TableRowDataProvider>
+    <TableRowDataProvider<T>
+      initState={{
+        data: rows ?? [],
+        pagination: {
+          page: pagination?.page ?? initPagination.page,
+          pageSize: pagination?.pageSize ?? initPagination.pageSize,
+          total: pagination?.total ?? rows?.length ?? initPagination.total,
+          totalPages: pagination?.totalPages ?? initPagination.totalPages,
+          perPageOptions: pagination?.perPageOptions ?? initPagination.perPageOptions,
+        },
+      }}
+    >
       <TableContainer
         component="div"
         sx={(theme) => ({
@@ -186,6 +208,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
             </TableBody>
           </Table>
         </Box>
+        {/* <TableDataPagination /> */}
         <CustomTablePagination
           count={total}
           rowsPerPageOptions={perPageOptions}

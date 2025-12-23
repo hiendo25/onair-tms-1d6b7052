@@ -1,5 +1,5 @@
 import { menuItemClasses } from "@mui/material/MenuItem";
-import { alpha,Theme } from "@mui/material/styles";
+import { alpha, Theme } from "@mui/material/styles";
 import { pickersDayClasses, yearCalendarClasses } from "@mui/x-date-pickers";
 import type { PickerComponents } from "@mui/x-date-pickers/themeAugmentation";
 
@@ -7,7 +7,6 @@ import { CalendarDateIcon2 } from "@/shared/assets/icons";
 import { theme } from "../../AppTheme";
 import { grey, primary } from "../../theme-color";
 
- 
 export const datePickersCustomizations: PickerComponents<Theme> = {
   MuiPickerPopper: {
     styleOverrides: {
@@ -29,7 +28,19 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       }),
     },
   },
-
+  MuiDatePicker: {
+    defaultProps: {
+      format: "DD/MM/YYYY",
+      slotProps: {
+        textField: {
+          size: "medium",
+        },
+      },
+      slots: {
+        openPickerIcon: CalendarDateIcon2,
+      },
+    },
+  },
   MuiDateCalendar: {
     styleOverrides: {
       root: {
@@ -62,7 +73,6 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       weekNumberLabel: {},
     },
   },
-
   MuiDateTimePicker: {
     defaultProps: {
       ampm: false,
@@ -72,6 +82,10 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
       },
     },
   },
+  MuiPickersTextField: {
+    styleOverrides: {},
+  },
+
   MuiPickersOutlinedInput: {
     styleOverrides: {
       root: ({ theme }) => ({
@@ -218,11 +232,54 @@ export const datePickersCustomizations: PickerComponents<Theme> = {
   MuiPickersInputBase: {
     styleOverrides: {
       root: {
+        padding: "0px 12px !important",
+        fontSize: "0.875rem",
         ".MuiInputAdornment-positionEnd": {
           ".MuiButtonBase-root": {
-            marginRight: "-10px",
+            marginRight: "-8px",
           },
         },
+        ".MuiInputAdornment-root": {
+          ".MuiButtonBase-root": {
+            padding: 4,
+            height: "2rem",
+            width: "2rem",
+          },
+        },
+        variants: [
+          {
+            props: {
+              inputSize: "small",
+            },
+            style: (theme) => ({
+              height: 36,
+            }),
+          },
+          {
+            props: {
+              inputSize: "medium",
+            },
+            style: (theme) => ({
+              height: 40,
+            }),
+          },
+        ],
+      },
+
+      sectionsContainer: {
+        padding: "8px 0 !important",
+        lineHeight: 1,
+      },
+    },
+  },
+  MuiPickersSectionList: {
+    styleOverrides: {
+      root: () => ({}),
+      section: {
+        lineHeight: 1,
+      },
+      sectionContent: {
+        lineHeight: 1,
       },
     },
   },

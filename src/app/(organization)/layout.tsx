@@ -1,3 +1,4 @@
+"use server";
 import React from "react";
 
 import Authorized from "@/modules/auth-wrapper/Authorized";

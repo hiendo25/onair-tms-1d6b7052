@@ -51,9 +51,8 @@ const mappingPathWithRolePermissions = (
 const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
   const router = useRouter();
   const { hasPermissions } = usePermissions();
-
   const {
-    currentOrganization: { orgId, orgLogo },
+    currentOrganization: { orgId, orgLogo, orgFavicon },
     currentEmployee: { type: employeeType },
     organizations,
     setCurrentOrganization,
@@ -93,6 +92,7 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
       menuItems={mappingPathWithRolePermissions(menuList, hasPermissions)}
       currentOrganizationId={orgId}
       logoUrl={orgLogo}
+      faviconUrl={orgFavicon}
       organizationItems={organizationItems}
       onChangeOrganization={handleChangeOrganization}
     >

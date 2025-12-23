@@ -56,12 +56,10 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
 
   return (
     <FormProvider {...methods}>
-      <Stack spacing={3} className="bg-white rounded-lg overflow-hidden p-5">
-        <div>
-          <Typography variant="h5" component="h4">
-            Thông tin khảo sát
-          </Typography>
-        </div>
+      <Stack spacing={3} className="bg-white rounded-xl overflow-hidden p-3 md:p-6 border border-gray-200">
+        <Typography variant="h5" component="h4">
+          Thông tin khảo sát
+        </Typography>
 
         <div className="flex flex-col gap-3">
           <RHFTextField control={control} name="name" label="Tên khảo sát" placeholder="Nhập tên khảo sát" required />
@@ -84,11 +82,11 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
             {errors.questions.message}
           </Typography>
         )}
-        <div>
-          <Typography variant="h5" component="h4">
-            Câu hỏi khảo sát
-          </Typography>
-        </div>
+
+        <Typography variant="h5" component="h4">
+          Câu hỏi khảo sát
+        </Typography>
+
         <SurveyQuestionContainer control={control} errors={errors} />
       </Stack>
       <div className="h-6"></div>

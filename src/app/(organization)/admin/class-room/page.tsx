@@ -1,8 +1,7 @@
-import * as React from "react";
 import { Metadata, ResolvingMetadata } from "next";
+import { redirect } from "next/navigation";
 
-import ClassRoomTypeBoxMenu from "@/modules/class-room-management/components/ClassRoomTypeBoxMenu";
-import PageContainer from "@/shared/ui/PageContainer";
+import { PATHS } from "@/constants/path.constant";
 
 type ManageClassRoomPageProps = {
   params: Promise<{ slug: string }>;
@@ -20,9 +19,5 @@ export async function generateMetadata(
 }
 
 export default function ManageClassRoomPage(props: ManageClassRoomPageProps) {
-  return (
-    <PageContainer title="Tạo lớp học" breadcrumbs={[{ title: "Dashboard" }, { title: "Tạo lớp học" }]}>
-      <ClassRoomTypeBoxMenu />
-    </PageContainer>
-  );
+  redirect(PATHS.CLASSROOMS.LIST_CLASSROOM);
 }

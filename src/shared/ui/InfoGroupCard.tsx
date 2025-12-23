@@ -3,18 +3,25 @@
 import * as React from "react";
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
-interface InfoGroupCardProps {
+export interface InfoGroupItem {
+  label: string;
+  value: React.ReactNode;
+}
+
+export interface InfoGroupCardProps {
   title: string;
   description?: string;
-  items: Array<{ label: string; value: React.ReactNode }>;
+  items: InfoGroupItem[];
 }
+
+const EMPTY_VALUE_LABEL = "Chưa cập nhật";
 
 const InfoGroupCard: React.FC<InfoGroupCardProps> = ({ title, description, items }) => {
   const renderValue = (value: React.ReactNode) => {
     if (value === undefined || value === null || value === "") {
       return (
         <Typography variant="subtitle1" sx={{ fontWeight: 600, lineHeight: 1.4 }}>
-          Chưa cập nhật
+          {EMPTY_VALUE_LABEL}
         </Typography>
       );
     }
@@ -45,7 +52,11 @@ const InfoGroupCard: React.FC<InfoGroupCardProps> = ({ title, description, items
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, minmax(0, 1fr))",
+              md: "repeat(3, minmax(0, 1fr))",
+            },
             gap: 2,
           }}
         >

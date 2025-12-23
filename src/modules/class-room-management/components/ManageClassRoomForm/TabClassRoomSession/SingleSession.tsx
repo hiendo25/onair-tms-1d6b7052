@@ -38,7 +38,7 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
     <div className="class-single-session">
       {classSessionsFields.map(({ _sessionId, sessionType }, _index) => (
         <div key={_sessionId}>
-          <div className="flex flex-col gap-6 bg-white rounded-xl p-6 mb-6">
+          <div className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
             <ClassRoomSessionFromToDate index={_index} control={control} />
             {/* 
              * Update BA no need teacher for class session 20/11/2025

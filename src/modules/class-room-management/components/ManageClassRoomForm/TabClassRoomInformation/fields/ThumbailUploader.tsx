@@ -23,13 +23,7 @@ export interface ThumbnailUploaderProps {
  * This component now uses the reusable RHFThumbnailUpload component.
  * Please migrate to using RHFThumbnailUpload directly in new code.
  */
-const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
-  control,
-  onChange,
-  label,
-  subTitle,
-  description
-}) => {
+const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({ control, onChange, label, subTitle, description }) => {
   return (
     <RHFThumbnailUpload
       control={control}
@@ -39,7 +33,7 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({
       description={description}
       required
       aspectRatio="21/9"
-      width="480px"
+      // width="480px"
       onChange={onChange}
     />
   );

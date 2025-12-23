@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import FormHelperText from "@mui/material/FormHelperText";
 import Portal from "@mui/material/Portal";
@@ -7,19 +7,18 @@ import Stack from "@mui/material/Stack";
 import CodeBlockLowlightExtension from "@tiptap/extension-code-block-lowlight";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import ImageExtension from "@tiptap/extension-image";
-// import { common, createLowlight } from "lowlight";
 import LinkExtension from "@tiptap/extension-link";
 import PlaceholderExtension from "@tiptap/extension-placeholder";
 import TextAlignExtension from "@tiptap/extension-text-align";
 import Youtube from "@tiptap/extension-youtube";
-import { EditorContent, useEditor } from "@tiptap/react";
+import { EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import StarterKitExtension from "@tiptap/starter-kit";
 import { all, createLowlight } from "lowlight";
 
 import { editorClasses } from "./classes";
 import { EditorContainer } from "./EditorContainer";
 import EditorToolbar from "./EditorToolbar";
-import { CodeHighlightBlock } from "./EditorToolbar/components/code-highlight-block";
+import CodeHighlightBlock from "./EditorToolbar/components/CodeHighlightBlock";
 import CustomVideoExtension from "./extensions/custom-video-extension";
 import type { EditorProps } from "./types";
 
@@ -37,24 +36,24 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>(
       resourceItem = false,
       value: content = "",
       placeholder = "Nội dung",
-      ...other
+      ...restEditorProps
     },
     ref,
   ) => {
     const [fullScreen, setFullScreen] = useState(false);
-
     const handleToggleFullScreen = useCallback(() => {
       setFullScreen((prev) => !prev);
     }, []);
     const lowlight = createLowlight(all);
 
     const editor = useEditor({
-      content,
       editable,
       immediatelyRender: false,
       extensions: [
         StarterKitExtension.configure({
           codeBlock: false,
+          link: false,
+          dropcursor: false,
           code: {
             HTMLAttributes: { class: editorClasses.content.codeInline },
           },
@@ -95,14 +94,14 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>(
             return /^(https?:\/\/|www\.)\S+/.test(url);
           },
         }),
-        // CodeBlockLowlightExtension.extend({
-        //   addNodeView() {
-        //     return ReactNodeViewRenderer(CodeHighlightBlock);
-        //   },
-        // }).configure({
-        //   lowlight,
-        //   HTMLAttributes: { class: editorClasses.content.codeBlock },
-        // }),
+        CodeBlockLowlightExtension.extend({
+          addNodeView() {
+            return ReactNodeViewRenderer(CodeHighlightBlock);
+          },
+        }).configure({
+          lowlight,
+          HTMLAttributes: { class: editorClasses.content.codeBlock },
+        }),
         Youtube.configure({
           controls: true,
           nocookie: true,
@@ -114,33 +113,21 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>(
         }),
         CustomVideoExtension,
       ],
+      onUpdate({ editor }) {
+        let html = editor.getHTML();
 
-      onUpdate({ editor: _editor }) {
-        let html = _editor.getHTML();
-
-        if (html === "<p></p>") {
-          html = "";
-        }
+        if (html === "<p></p>") html = "";
 
         onChange?.(html);
       },
-      ...other,
+      ...restEditorProps,
     });
-
-    useEffect(() => {
-      if (!editor || content === "<p></p>") return;
-      const { from, to } = editor.state.selection;
-      // editor.commands.setContent(content, false, {
-      //   preserveWhitespace: "full",
-      // });
-      editor.commands.setTextSelection({ from, to });
-    }, [editor, content]);
 
     useEffect(() => {
       if (resetValue && !content) {
         editor?.commands.clearContent();
       }
-    }, [content]);
+    }, [content, resetValue]);
 
     useEffect(() => {
       if (fullScreen) {
@@ -150,6 +137,16 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>(
       }
     }, [fullScreen]);
 
+    useEffect(() => {
+      if (!editor) return;
+
+      const currentHTML = editor.getHTML();
+      if (currentHTML !== content) {
+        editor.commands.setContent(content || "");
+      }
+    }, [content, editor]);
+
+    if (!editor) return null;
     return (
       <Portal disablePortal={!fullScreen}>
         {fullScreen && <Backdrop open sx={{ zIndex: (theme) => theme.zIndex.modal - 1 }} />}

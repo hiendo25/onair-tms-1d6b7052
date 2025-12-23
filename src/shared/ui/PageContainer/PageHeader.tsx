@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Box, Stack, Toolbar, Typography } from "@mui/material";
+import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import Link from "next/link";
 
 import PageContentHeader from "./PageContentHeader";
@@ -23,10 +23,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ pageTitle, actions, breadcrumbs
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{
-          flexWrap: "wrap",
-          width: "100%",
-        }}
+        sx={{ flexWrap: "wrap", width: "100%" }}
       >
         <Stack direction="row" alignItems="center">
           <Stack>
@@ -36,25 +33,21 @@ const PageHeader: React.FC<PageHeaderProps> = ({ pageTitle, actions, breadcrumbs
                   {pageTitle}
                 </Typography>
               ) : null}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 1,
-                  // marginLeft: "auto",
-                }}
-              >
-                {actions}
-              </Box>
+              <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>{actions}</Box>
             </PageContentHeader>
             {breadcrumbs ? (
               <PageHeaderBreadcrumbs
                 aria-label="breadcrumb"
-                separator={<span className="text-sm mx-1 mt-[1px] inline-block text-gray-600">/</span>}
+                separator={<span className="text-sm mx-1 mt-px inline-block text-gray-600">/</span>}
                 className="mt-1"
               >
                 {breadcrumbs?.map((breadcrumb, index) => (
-                  <BreadcrumbItem key={index} title={breadcrumb.title} path={breadcrumb.path} className="text-xs" />
+                  <BreadcrumbItem
+                    key={index}
+                    title={breadcrumb.title}
+                    path={breadcrumb.path}
+                    className="text-xs inline-block"
+                  />
                 ))}
               </PageHeaderBreadcrumbs>
             ) : null}

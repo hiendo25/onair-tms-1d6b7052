@@ -1,8 +1,8 @@
-import React, { MouseEvent, useCallback, useEffect, useRef } from "react";
-import { TableCell, TableCellProps, TableRow } from "@mui/material";
+import React, { MouseEvent, useCallback } from "react";
+import { TableCell, TableCellProps } from "@mui/material";
 
 import { TableRowStyled } from "./table-row-styled";
-import { getClientInfo } from "./utils";
+import { useStickyCell } from "./use-sticky-node";
 
 type FieldKey<T> = keyof T | (string & {});
 
@@ -26,7 +26,7 @@ export interface TableRowDataProps<T> {
   onCellClick?: (column: FieldKey<T>, row: T, evt: MouseEvent<HTMLTableCellElement>) => void;
 }
 
-const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
+const TableDataRow = <T extends { id: number | string } & Record<string, any>>({
   row,
   hoverRow,
   page = 1,
@@ -37,12 +37,7 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
   onRowClick,
   onCellClick,
 }: TableRowDataProps<T>) => {
-  const nodeListMap = useRef<
-    Map<string, { index: number; node: HTMLTableCellElement; fixed: "left" | "right" | undefined }>
-  >(new Map());
-  const splitCellsRefs = (fixed: "left" | "right" | undefined, index: number) => (el: HTMLTableCellElement) => {
-    nodeListMap.current.set(index.toString(), { index: index, node: el, fixed });
-  };
+  const getNodeIndex = useStickyCell([columns]);
 
   const handleClickRow = useCallback(
     (row: T) => () => {
@@ -57,39 +52,6 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
     [onCellClick],
   );
 
-  useEffect(() => {
-    const nodeListArr = [...nodeListMap.current];
-    let leftPosition = 0;
-    nodeListArr.forEach(([nodeIndex, nodeItem], _index) => {
-      if (nodeItem.fixed === "left") {
-        nodeItem.node.style.left = leftPosition + "px";
-        nodeItem.node.style.right = "auto";
-        nodeItem.node.classList.add("fixed-left");
-        nodeItem.node.style.background = "rgb(255 255 255)";
-        nodeItem.node.style.zIndex = `${(_index + 1) * 10}`;
-        const { width } = getClientInfo(nodeItem.node);
-        leftPosition += width;
-      }
-    });
-
-    let rightPosition = 0;
-
-    const nodeListRevert = [...nodeListArr].reverse();
-
-    nodeListRevert.forEach(([nodeIndex, nodeItem], _index) => {
-      if (nodeItem.fixed === "right") {
-        nodeItem.node.style.right = rightPosition + "px";
-        nodeItem.node.style.left = "auto";
-        nodeItem.node.classList.add("fixed-right");
-        nodeItem.node.style.background = "rgb(255 255 255)";
-        nodeItem.node.style.zIndex = `${_index}`;
-
-        const { width } = getClientInfo(nodeItem.node);
-        rightPosition += width;
-      }
-    });
-  }, [columns, nodeListMap]);
-
   return (
     <TableRowStyled className="table-data-row h-14" hover={hoverRow} onClick={handleClickRow(row)}>
       {showRowCount && (
@@ -99,13 +61,11 @@ const TableDataRow = <T extends { id: number | string; [key: string]: any }>({
       )}
       {columns.map(({ headerName, field, renderCell, id, ...restProps }, _index) => (
         <TableCell
-          ref={splitCellsRefs(restProps.fixed, _index)}
+          ref={getNodeIndex(restProps.fixed, _index)}
           key={field.toString()}
           onClick={(evt) => handleClickCell(field, row, evt)}
           {...restProps}
-          sx={() => ({
-            padding: "8px 12px",
-          })}
+          sx={{ padding: "8px 12px" }}
         >
           {renderCell
             ? renderCell(row[field], row)

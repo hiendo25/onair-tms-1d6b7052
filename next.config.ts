@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone", // Enable standalone output for Docker
-  reactStrictMode: false,
+  reactStrictMode: true,
   // Add empty turbopack config to silence the warning
   turbopack: {},
   // typedRoutes: true,

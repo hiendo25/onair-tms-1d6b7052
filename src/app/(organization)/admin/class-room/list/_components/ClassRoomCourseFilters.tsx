@@ -7,7 +7,12 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs, { Dayjs } from "dayjs";
 import Link from "next/link";
 
-import { ClassRoomRuntimeStatusFilter, ClassRoomStatusFilter, ClassRoomTypeFilter, ClassSessionModeFilter } from "@/repository/class-room/type";
+import {
+  ClassRoomRuntimeStatusFilter,
+  ClassRoomStatusFilter,
+  ClassRoomTypeFilter,
+  ClassSessionModeFilter,
+} from "@/repository/class-room/type";
 import { SearchIcon } from "@/shared/assets/icons";
 import { SelectOption } from "@/shared/ui/form/SelectOption";
 import { RUNTIME_STATUS_OPTIONS, SESSION_MODE_OPTIONS, TYPE_OPTIONS } from "../constants";
@@ -146,6 +151,7 @@ export default function ClassRoomFilters({
             }}
           />
         </Box>
+
         <Box sx={filterItemSx}>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
             Ngày kết thúc
@@ -187,12 +193,7 @@ export default function ClassRoomFilters({
           <Typography variant="caption" color="text.secondary" fontWeight={600}>
             Loại lớp học
           </Typography>
-          <SelectOption
-            onChange={(type) => onTypeChange(type)}
-            value={type}
-            options={TYPE_OPTIONS}
-            size="small"
-          />
+          <SelectOption onChange={(type) => onTypeChange(type)} value={type} options={TYPE_OPTIONS} size="small" />
         </Box>
         <Box sx={{ ...filterItemSx, ...selectSx }}>
           <Typography variant="caption" color="text.secondary" fontWeight={600}>

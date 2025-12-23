@@ -224,7 +224,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
                 Lưu nháp
               </Button> */}
               <Button
-                size="large"
                 onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "publish")}
                 disabled={isLoading}
                 loading={isLoading}

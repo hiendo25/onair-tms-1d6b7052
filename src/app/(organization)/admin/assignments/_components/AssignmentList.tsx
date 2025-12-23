@@ -29,6 +29,10 @@ import {
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
@@ -77,7 +81,7 @@ export default function AssignmentList() {
   }, [assignments, selectedAssignmentId]);
 
   const hasAssignedStudents = React.useMemo(() => {
-    return (selectedAssignment?.assignment_employees?.length || 0) > 0;
+    return (selectedAssignment?.assignmentEmployees?.[0]?.count ?? 0) > 0;
   }, [selectedAssignment]);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -228,8 +232,12 @@ export default function AssignmentList() {
                   <TableHead>
                     <TableRow>
                       <TableCell>Tên bài kiểm tra</TableCell>
+                      <TableCell>Mô tả</TableCell>
                       <TableCell>Số câu hỏi</TableCell>
+                      <TableCell>Tổng điểm</TableCell>
+                      <TableCell>Tiến độ</TableCell>
                       <TableCell>Số học viên</TableCell>
+                      <TableCell>Người tạo</TableCell>
                       <TableCell>Ngày tạo</TableCell>
                       <TableCell align="center"></TableCell>
                     </TableRow>
@@ -237,30 +245,53 @@ export default function AssignmentList() {
                   <TableBody>
                     {assignments.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
+                        <TableCell colSpan={9} align="center" sx={{ py: 8 }}>
                           <Typography variant="body2" color="text.secondary">
                             Không tìm thấy bài kiểm tra nào
                           </Typography>
                         </TableCell>
                       </TableRow>
                     ) : (
-                      assignments.map((assignment) => (
-                        <TableRow key={assignment.id} hover sx={{ cursor: "pointer" }}>
-                          <TableCell>
-                            <Typography variant="body2" fontWeight={500}>
-                              {assignment.name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>{assignment.questions?.length || 0}</TableCell>
-                          <TableCell>{assignment.assignment_employees?.length || 0}</TableCell>
-                          <TableCell>{formatDate(assignment.created_at)}</TableCell>
-                          <TableCell align="center">
-                            <IconButton size="small" onClick={(e) => handleMenuOpen(e, assignment.id)}>
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
+                      assignments.map((assignment) => {
+                        const totalScore =
+                          assignment.questions?.reduce((sum, question) => sum + (question.score ?? 0), 0) || 0;
+                        const assignedCount = assignment.assignmentEmployees?.[0]?.count ?? 0;
+                        const submittedCount = assignment.submissions?.[0]?.count ?? 0;
+
+                        return (
+                          <TableRow key={assignment.id} hover sx={{ cursor: "pointer" }}>
+                            <TableCell>
+                              <Typography variant="body2" fontWeight={500}>
+                                {assignment.name}
+                              </Typography>
+                            </TableCell>
+                            <Tooltip title={assignment.description}>
+                              <TableCell className="max-w-3xs">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                                  className="line-clamp-2"
+                                >
+                                  {assignment.description}
+                                </ReactMarkdown>
+                              </TableCell>
+                            </Tooltip>
+                            <TableCell>{assignment.questions?.length || 0}</TableCell>
+                            <TableCell>{totalScore}</TableCell>
+                            <TableCell>{submittedCount}/{assignedCount}</TableCell>
+                            <TableCell>{assignedCount}</TableCell>
+                            <TableCell>
+                              {assignment.createdBy?.profiles?.full_name || assignment.created_by}
+                            </TableCell>
+                            <TableCell>{formatDate(assignment.created_at)}</TableCell>
+                            <TableCell align="center">
+                              <IconButton size="small" onClick={(e) => handleMenuOpen(e, assignment.id)}>
+                                <MoreVertIcon fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
                     )}
                   </TableBody>
                 </Table>
