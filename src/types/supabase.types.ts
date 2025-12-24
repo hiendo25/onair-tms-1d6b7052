@@ -1438,6 +1438,7 @@ export type Database = {
           id: string
           learning_path_id: string | null
           lesson_id: string
+          progress_percentage: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1449,6 +1450,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id: string
+          progress_percentage?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1460,6 +1462,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id?: string
+          progress_percentage?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
