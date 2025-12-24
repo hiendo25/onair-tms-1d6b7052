@@ -5,6 +5,8 @@ import { learningScreenService } from "@/services";
 export async function GET(request: NextRequest) {
   try {
     const courseId = request.nextUrl.searchParams.get("courseId") ?? "";
+    const includeProgress = request.nextUrl.searchParams.get("includeProgress") === "true";
+    const learningPathId = request.nextUrl.searchParams.get("learningPathId");
 
     if (!courseId.trim()) {
       return NextResponse.json(
@@ -13,7 +15,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await learningScreenService.getCourseLearningOutline(courseId);
+    const result = await learningScreenService.getCourseLearningOutline(courseId, {
+      includeProgress,
+      learningPathId: learningPathId?.trim() ? learningPathId : null,
+    });
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

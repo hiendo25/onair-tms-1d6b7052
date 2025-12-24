@@ -1,5 +1,6 @@
-import { JSX, useEffect, useMemo, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import ArticleIcon from "@mui/icons-material/Article";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import IntegrationInstructionsIcon from "@mui/icons-material/IntegrationInstructions";
@@ -18,8 +19,12 @@ import {
 } from "@mui/material";
 import clsx from "clsx";
 
+import {
+  LESSON_PROGRESS_STATUS,
+  SECTION_PROGRESS_MAX_PERCENT,
+  SECTION_PROGRESS_MIN_PERCENT,
+} from "@/modules/learning-screen/constants";
 import type { LearningSectionOutline } from "@/modules/learning-screen/types";
-import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import {
   inferLessonContentKind,
   LessonContentKind,
@@ -30,8 +35,9 @@ import { formatFileSize } from "@/utils";
 interface LessonNavigatorProps {
   sections: LearningSectionOutline[];
   selectedLessonId: string | null;
-  progressMap: Record<string, StoredLessonProgress>;
   onSelectLesson: (lessonId: string) => void;
+  showSectionProgress?: boolean;
+  sectionProgressById?: Record<string, number>;
 }
 
 const LESSON_TYPE_META: Record<
@@ -78,8 +84,9 @@ const LESSON_TYPE_META: Record<
 const LessonNavigator = ({
   sections,
   selectedLessonId,
-  progressMap,
   onSelectLesson,
+  showSectionProgress = false,
+  sectionProgressById = {},
 }: LessonNavigatorProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
     const initial = new Set<string>();
@@ -124,23 +131,6 @@ const LessonNavigator = ({
     });
   }, [selectedLessonId, sections]);
 
-  const sectionSummaries = useMemo(() => {
-    return sections.map((section) => {
-      const total = section.lessons.length;
-      const completed = section.lessons.filter(
-        (lesson) => progressMap[lesson.id]?.completed,
-      ).length;
-      return {
-        sectionId: section.id,
-        total,
-        completed,
-      };
-    });
-  }, [sections, progressMap]);
-
-  const getSectionSummary = (sectionId: string) =>
-    sectionSummaries.find((item) => item.sectionId === sectionId);
-
   const toggleSection = (sectionId: string) => {
     setExpandedSections((prev) => {
       const next = new Set(prev);
@@ -165,15 +155,17 @@ const LessonNavigator = ({
     <Stack spacing={2}>
       {sections.map((section, index) => {
         const isExpanded = expandedSections.has(section.id);
-        const summary = getSectionSummary(section.id);
-        const completedText =
-          summary && summary.total > 0
-            ? `${summary.completed}/${summary.total} bài đã hoàn thành`
-            : "Chưa có bài giảng";
-        const percent =
-          summary && summary.total
-            ? Math.round((summary.completed / summary.total) * 100)
-            : 0;
+        const lessonCountText = `${section.lessons.length} bài`;
+        const sectionSummaryText = section.lessons.length
+          ? "Chọn bài để học"
+          : "Chưa có bài giảng";
+        const sectionProgressValue =
+          sectionProgressById[section.id] ?? SECTION_PROGRESS_MIN_PERCENT;
+        const clampedProgressValue = Math.min(
+          SECTION_PROGRESS_MAX_PERCENT,
+          Math.max(SECTION_PROGRESS_MIN_PERCENT, sectionProgressValue),
+        );
+        const sectionProgressPercent = Math.round(clampedProgressValue);
 
         return (
           <Box
@@ -203,11 +195,8 @@ const LessonNavigator = ({
                   className="bg-[#000000]"
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {section.lessons.length} bài
+                  {lessonCountText}
                 </Typography>
-                {/* <Typography variant="caption" color="text.secondary">
-                  • 15:08
-                </Typography> */}
               </Stack>
               <Stack direction="row" alignItems="center" spacing={1}>
                 <Box flex={1}>
@@ -215,7 +204,7 @@ const LessonNavigator = ({
                     {section.title || `Học phần ${index + 1}`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {completedText}
+                    {sectionSummaryText}
                   </Typography>
                 </Box>
                 <IconButton size="small">
@@ -227,30 +216,18 @@ const LessonNavigator = ({
                   />
                 </IconButton>
               </Stack>
-
-              <Stack spacing={1} mt={1}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
+              {showSectionProgress ? (
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <LinearProgress
+                    variant="determinate"
+                    value={clampedProgressValue}
+                    sx={{ flex: 1 }}
+                  />
                   <Typography variant="caption" color="text.secondary">
-                    Tiến độ học tập
-                  </Typography>
-                  <Typography variant="caption" fontWeight={600}>
-                    {percent}%
+                    {sectionProgressPercent}%
                   </Typography>
                 </Stack>
-                <LinearProgress
-                  variant="determinate"
-                  value={percent}
-                  sx={{
-                    height: 6,
-                    borderRadius: 999,
-                    backgroundColor: "#E2E8F0",
-                    "& .MuiLinearProgress-bar": {
-                      borderRadius: 999,
-                      background: "linear-gradient(90deg, #3F6BFF 0%, #8A4DFF 100%)",
-                    },
-                  }}
-                />
-              </Stack>
+              ) : null}
             </Box>
 
             <Collapse in={isExpanded}>
@@ -262,6 +239,8 @@ const LessonNavigator = ({
                 ) : (
                   section.lessons.map((lesson, lessonIndex) => {
                     const isActive = lesson.id === selectedLessonId;
+                    const isCompleted =
+                      lesson.progressStatus === LESSON_PROGRESS_STATUS.COMPLETED;
                     const contentKind = inferLessonContentKind(lesson);
                     const typeMeta = LESSON_TYPE_META[contentKind] ?? LESSON_TYPE_META.unknown;
                     const thumbnail = lesson.mainResource?.thumbnail_url ?? null;
@@ -326,6 +305,11 @@ const LessonNavigator = ({
                             )}
                           </Stack>
                         </Box>
+                        {isCompleted ? (
+                          <Box className="text-[#22C55E]">
+                            <CheckCircleIcon fontSize="small" />
+                          </Box>
+                        ) : null}
                       </Box>
                     );
                   })

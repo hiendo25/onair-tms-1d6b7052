@@ -8,6 +8,7 @@ export type ResourceRow = Tables<"resources">;
 export type AssignmentRow = Tables<"assignments">;
 
 export type LessonTypeEnum = Database["public"]["Enums"]["lesson_type"];
+export type LessonProgressStatus = Database["public"]["Enums"]["lesson_progress_status"];
 
 export interface LearningLessonAttachment {
   bridgeId: LessonResourceRow["id"];
@@ -24,7 +25,9 @@ export interface LearningLesson extends LearningLessonBase {
   assignment: AssignmentRow | null;
 }
 
-export type LearningLessonSummary = LearningLessonBase;
+export type LearningLessonSummary = LearningLessonBase & {
+  progressStatus?: LessonProgressStatus | null;
+};
 
 export interface LearningSectionOutline extends SectionRow {
   lessons: LearningLessonSummary[];

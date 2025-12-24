@@ -1210,7 +1210,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
-          organization_id: string | null
+          organization_id: string
           position_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1222,7 +1222,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           position_id?: string | null
           start_date?: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1234,7 +1234,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           position_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
