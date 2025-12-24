@@ -6,10 +6,9 @@ import { PATHS } from "@/constants/path.constant";
 interface AssessmentLessonFrameProps {
   assignmentId: string | null;
   studentId: string | null;
-  onToggleCompletion: (completed: boolean) => void;
 }
 
-const AssessmentLessonFrame = ({ assignmentId, studentId, onToggleCompletion }: AssessmentLessonFrameProps) => {
+const AssessmentLessonFrame = ({ assignmentId, studentId }: AssessmentLessonFrameProps) => {
   if (!assignmentId) {
     return <Alert severity="warning">Chưa gắn bài kiểm tra cho bài học này.</Alert>;
   }
@@ -29,7 +28,6 @@ const AssessmentLessonFrame = ({ assignmentId, studentId, onToggleCompletion }: 
         employeeId={studentId}
         basePath={PATHS.MY_ASSIGNMENTS.ROOT}
         variant="embedded"
-        onSubmitted={() => onToggleCompletion(true)}
       />
     </Stack>
   );

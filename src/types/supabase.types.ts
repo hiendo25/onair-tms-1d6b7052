@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assignment_categories: {
@@ -1306,7 +1281,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
-          organization_id: string | null
+          organization_id: string
           position_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1318,7 +1293,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           position_id?: string | null
           start_date?: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1330,7 +1305,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           position_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
@@ -1487,6 +1462,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          metadata: Json | null
           name: string
           organization_id: string
           thumbnail_url: string | null
@@ -1497,6 +1473,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name: string
           organization_id: string
           thumbnail_url?: string | null
@@ -1507,6 +1484,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name?: string
           organization_id?: string
           thumbnail_url?: string | null
@@ -2194,6 +2172,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      serveys: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Relationships: []
       }
       surveys: {
         Row: {
@@ -3062,9 +3061,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],

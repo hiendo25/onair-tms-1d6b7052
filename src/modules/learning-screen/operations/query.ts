@@ -2,8 +2,15 @@ import { useTQuery } from "@/lib/queryClient";
 import { learningScreenRepository } from "@/repository";
 import type { LearningCourseOutline, LearningLesson } from "../types";
 
+export const LEARNING_COURSE_OUTLINE_QUERY_KEY = "learning-course-outline";
+export const LEARNING_LESSON_DETAIL_QUERY_KEY = "learning-lesson-detail";
+export const LESSON_DETAIL_STALE_TIME_MS = 10 * 60 * 1000;
+export const LESSON_DETAIL_GC_TIME_MS = 30 * 60 * 1000;
+
 interface LearningCourseOutlineQueryOptions {
   enabled?: boolean;
+  includeProgress?: boolean;
+  learningPathId?: string | null;
 }
 
 interface LearningLessonDetailQueryOptions {
@@ -15,8 +22,19 @@ export const useLearningCourseOutlineQuery = (
   options?: LearningCourseOutlineQueryOptions,
 ) => {
   return useTQuery<LearningCourseOutline>({
-    queryKey: ["learning-course-outline", courseId],
-    queryFn: () => learningScreenRepository.getCourseLearningOutline(courseId ?? ""),
+    queryKey: [
+      LEARNING_COURSE_OUTLINE_QUERY_KEY,
+      {
+        courseId,
+        includeProgress: options?.includeProgress ?? false,
+        learningPathId: options?.learningPathId ?? null,
+      },
+    ],
+    queryFn: () =>
+      learningScreenRepository.getCourseLearningOutline(courseId ?? "", {
+        includeProgress: options?.includeProgress,
+        learningPathId: options?.learningPathId,
+      }),
     enabled: Boolean(courseId) && (options?.enabled ?? true),
   });
 };
@@ -26,8 +44,10 @@ export const useLearningLessonDetailQuery = (
   options?: LearningLessonDetailQueryOptions,
 ) => {
   return useTQuery<LearningLesson | null>({
-    queryKey: ["learning-lesson-detail", lessonId],
+    queryKey: [LEARNING_LESSON_DETAIL_QUERY_KEY, lessonId],
     queryFn: () => learningScreenRepository.getLessonLearningDetail(lessonId ?? ""),
     enabled: Boolean(lessonId) && (options?.enabled ?? true),
+    staleTime: LESSON_DETAIL_STALE_TIME_MS,
+    gcTime: LESSON_DETAIL_GC_TIME_MS,
   });
 };
