@@ -59,15 +59,9 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         type: "item",
       },
       {
-        title: "Quản lý học viên",
-        key: "manage-org/student",
-        path: `${PATHS.EMPLOYEES.ROOT}?employee_type=student`,
-        type: "item",
-      },
-      {
-        title: "Quản lý giảng viên",
-        key: "manage-org/teacher",
-        path: `${PATHS.EMPLOYEES.ROOT}?employee_type=teacher`,
+        title: "Quản lý người dùng",
+        key: "manage-org/employees",
+        path: PATHS.EMPLOYEES.ROOT,
         type: "item",
       },
       {

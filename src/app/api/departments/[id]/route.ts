@@ -5,11 +5,12 @@ import { PATHS } from "@/constants/path.constant";
 import { departmentService } from "@/services";
 import type { UpdateDepartmentDto } from "@/types/dto/departments";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const payload: UpdateDepartmentDto = {
-      id: params.id,
+      id,
       ...body,
     };
 
@@ -34,9 +35,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await departmentService.deleteDepartment(params.id);
+    const { id } = await params;
+    await departmentService.deleteDepartment(id);
 
     revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
