@@ -5,11 +5,12 @@ import { PATHS } from "@/constants/path.constant";
 import { branchService } from "@/services";
 import type { UpdateBranchDto } from "@/types/dto/branches";
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const payload: UpdateBranchDto = {
-      id: params.id,
+      id,
       ...body,
     };
 
@@ -34,9 +35,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await branchService.deleteBranch(params.id);
+    const { id } = await params;
+    await branchService.deleteBranch(id);
 
     revalidatePath(PATHS.BRANCHES.ROOT);
 
