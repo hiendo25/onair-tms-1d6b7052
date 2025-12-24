@@ -39,6 +39,7 @@ import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useUserOrganization } from "@/modules/organization";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import type { EmployeeDto } from "@/types/dto/employees";
+import { Database } from "@/types/supabase.types";
 import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
 export default function EmployeeList() {
@@ -99,7 +100,7 @@ export default function EmployeeList() {
     search: debouncedSearch,
     departmentId: departmentFilter,
     branchId: branchFilter,
-    status: statusFilter !== "all" ? (statusFilter as "active" | "inactive") : undefined,
+    status: statusFilter !== "all" ? (statusFilter as Database["public"]["Enums"]["employee_status"]) : undefined,
     organizationId: organizationId,
   });
 
