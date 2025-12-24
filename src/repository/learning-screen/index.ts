@@ -5,6 +5,7 @@ import type { LearningCourseOutline, LearningLesson } from "@/modules/learning-s
 interface CourseOutlineOptions {
   includeProgress?: boolean;
   learningPathId?: string | null;
+  employeeId?: string | null;
 }
 
 const DEFAULT_OUTLINE: LearningCourseOutline = {
@@ -45,11 +46,15 @@ const getCourseLearningOutline = async (
 
   const params = new URLSearchParams({ courseId: trimmedCourseId });
   const trimmedLearningPathId = options?.learningPathId?.trim();
+  const trimmedEmployeeId = options?.employeeId?.trim();
   if (options?.includeProgress) {
     params.set("includeProgress", "true");
   }
   if (trimmedLearningPathId) {
     params.set("learningPathId", trimmedLearningPathId);
+  }
+  if (trimmedEmployeeId) {
+    params.set("employeeId", trimmedEmployeeId);
   }
   return fetchFromApi<LearningCourseOutline>(
     `/api/learning-screen/course-outline?${params.toString()}`,

@@ -135,6 +135,7 @@ const getResourcesByIds = async (resourceIds: string[]): Promise<ResourceRow[]> 
 const getLessonProgressRows = async (
   lessonIds: string[],
   learningPathId: string,
+  employeeId: string,
 ): Promise<LessonProgressRow[]> => {
   if (!lessonIds.length) {
     return [];
@@ -145,12 +146,18 @@ const getLessonProgressRows = async (
     return [];
   }
 
+  const trimmedEmployeeId = employeeId?.trim();
+  if (!trimmedEmployeeId) {
+    return [];
+  }
+
   const supabase = await createSVClient();
   const { data, error } = await supabase
     .from("lesson_progress")
     .select("lesson_id,status")
     .in("lesson_id", lessonIds)
-    .eq("learning_path_id", trimmedLearningPathId);
+    .eq("learning_path_id", trimmedLearningPathId)
+    .eq("employee_id", trimmedEmployeeId);
 
   if (error) {
     throw error;
