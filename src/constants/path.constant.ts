@@ -43,7 +43,7 @@ export const PATHS = {
   },
   STUDENTS: {
     ROOT: "/my-class",
-    LEARNINNG: (courseId: string) => `/learning-screen/${courseId}`,
+    LEARNINNG: (courseId: string) => `/my-class/learning-screen/${courseId}`,
   },
   ASSIGNMENTS: {
     ROOT: "/admin/assignments",

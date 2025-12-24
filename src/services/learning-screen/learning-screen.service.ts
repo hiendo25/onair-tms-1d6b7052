@@ -8,6 +8,7 @@ import type {
   ResourceRow,
 } from "@/modules/learning-screen/types";
 import type {
+  CourseHeaderRow,
   LessonProgressRow,
   LessonResourceBridgeRow,
   RawOutlineLessonRow,
@@ -196,4 +197,13 @@ const getLessonLearningDetail = async (lessonId: string): Promise<LearningLesson
   };
 };
 
-export { getCourseLearningOutline, getLessonLearningDetail };
+const getLearningCourseHeader = async (courseId: string): Promise<CourseHeaderRow | null> => {
+  const trimmedCourseId = courseId?.trim();
+  if (!trimmedCourseId) {
+    return null;
+  }
+
+  return await learningScreenServerRepository.getCourseHeaderById(trimmedCourseId);
+};
+
+export { getCourseLearningOutline, getLearningCourseHeader, getLessonLearningDetail };

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
-  LEARNING_SCREEN_SOURCE,
+  LEARNING_SCREEN_ROUTE_PREFIX,
   LESSON_PROGRESS_STATUS,
   LESSON_PROGRESS_STATUS_WEIGHT,
   SECTION_PROGRESS_MAX_PERCENT,
@@ -29,16 +29,6 @@ const createLessonLookup = (sections: LearningSectionOutline[]) => {
   return lookup;
 };
 
-const resolveSource = (sourceParam: string | null, learningPathId: string | null) => {
-  if (sourceParam === LEARNING_SCREEN_SOURCE.LEARNING_PATH) {
-    return LEARNING_SCREEN_SOURCE.LEARNING_PATH;
-  }
-  if (learningPathId) {
-    return LEARNING_SCREEN_SOURCE.LEARNING_PATH;
-  }
-  return LEARNING_SCREEN_SOURCE.CLASSROOM;
-};
-
 const getLessonProgressWeight = (status: LearningLessonSummary["progressStatus"]) => {
   const resolvedStatus = status ?? LESSON_PROGRESS_STATUS.NOT_STARTED;
   return LESSON_PROGRESS_STATUS_WEIGHT[resolvedStatus];
@@ -62,14 +52,15 @@ interface UseLearningScreenStateParams {
 export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParams) => {
   const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const sectionIdParam = searchParams.get("sectionId");
   const lessonIdParam = searchParams.get("lessonId");
   const learningPathIdParam = searchParams.get("learningPathId");
-  const sourceParam = searchParams.get("source");
-  const screenSource = resolveSource(sourceParam, learningPathIdParam);
-  const isLearningPathSource = screenSource === LEARNING_SCREEN_SOURCE.LEARNING_PATH;
+  const isLearningPathSource = Boolean(
+    pathname?.includes(LEARNING_SCREEN_ROUTE_PREFIX.LEARNING_PATH),
+  );
 
   const { data, isLoading, isError, refetch } = useLearningCourseOutlineQuery(courseId, {
     enabled: Boolean(courseId),
@@ -84,16 +75,6 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
 
   const lessonLookup = useMemo(() => createLessonLookup(sections), [sections]);
   const flatLessons = useMemo(() => Array.from(lessonLookup.values()), [lessonLookup]);
-
-  const lessonSectionLookup = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const section of sections) {
-      for (const lesson of section.lessons) {
-        map.set(lesson.id, section.id);
-      }
-    }
-    return map;
-  }, [sections]);
 
   const sectionLookup = useMemo(() => {
     return new Map(sections.map((section) => [section.id, section]));
@@ -168,8 +149,6 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
     : null;
   const isLessonRequestLoading = (isLessonLoading || isLessonFetching) && Boolean(selectedLessonId);
 
-  const selectedSectionId = selectedLessonId ? lessonSectionLookup.get(selectedLessonId) ?? null : null;
-
   useEffect(() => {
     if (!nextLessonId) {
       return;
@@ -182,7 +161,7 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
   }, [nextLessonId, queryClient]);
 
   useEffect(() => {
-    if (!selectedLessonId || !selectedSectionId) {
+    if (!selectedLessonId) {
       return;
     }
 
@@ -194,20 +173,20 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
       shouldReplace = true;
     }
 
-    if (params.get("sectionId") !== selectedSectionId) {
-      params.set("sectionId", selectedSectionId);
+    if (params.has("source")) {
+      params.delete("source");
       shouldReplace = true;
     }
 
-    if (params.get("source") !== screenSource) {
-      params.set("source", screenSource);
+    if (params.has("sectionId")) {
+      params.delete("sectionId");
       shouldReplace = true;
     }
 
     if (shouldReplace) {
       router.replace(`?${params.toString()}`, { scroll: false });
     }
-  }, [router, screenSource, searchParams, selectedLessonId, selectedSectionId]);
+  }, [router, searchParams, selectedLessonId]);
 
   const handleSelectLesson = useCallback(
     (lessonId: string) => {

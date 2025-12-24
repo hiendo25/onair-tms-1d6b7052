@@ -36,6 +36,7 @@ export type RawOutlineCourseRow = Tables<"courses"> & {
 };
 
 export type LessonProgressRow = Pick<Tables<"lesson_progress">, "lesson_id" | "status">;
+export type CourseHeaderRow = Pick<Tables<"courses">, "id" | "title">;
 
 const COURSE_OUTLINE_SELECT = `
   *,
@@ -158,6 +159,26 @@ const getLessonProgressRows = async (
   return data ?? [];
 };
 
+const getCourseHeaderById = async (courseId: string): Promise<CourseHeaderRow | null> => {
+  const trimmedCourseId = courseId?.trim();
+  if (!trimmedCourseId) {
+    return null;
+  }
+
+  const supabase = await createSVClient();
+  const { data, error } = await supabase
+    .from("courses")
+    .select("id,title")
+    .eq("id", trimmedCourseId)
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? null;
+};
+
 const getAssignmentById = async (assignmentId: string): Promise<Tables<"assignments"> | null> => {
   const trimmedAssignmentId = assignmentId?.trim();
   if (!trimmedAssignmentId) {
@@ -180,6 +201,7 @@ const getAssignmentById = async (assignmentId: string): Promise<Tables<"assignme
 
 export {
   getAssignmentById,
+  getCourseHeaderById,
   getCourseOutlineRaw,
   getLessonDetailRaw,
   getLessonProgressRows,
