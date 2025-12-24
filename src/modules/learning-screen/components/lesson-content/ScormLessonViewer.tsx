@@ -11,10 +11,9 @@ import type { ResourceRow } from "@/modules/learning-screen/types";
 
 interface ScormLessonViewerProps {
   resource: ResourceRow | null;
-  onToggleCompletion: (completed: boolean) => void;
 }
 
-const ScormLessonViewer = ({ resource, onToggleCompletion }: ScormLessonViewerProps) => {
+const ScormLessonViewer = ({ resource }: ScormLessonViewerProps) => {
   const { url, isLoading, error } = useResourceUrl(resource);
 
   return (
@@ -51,9 +50,6 @@ const ScormLessonViewer = ({ resource, onToggleCompletion }: ScormLessonViewerPr
             onClick={() => window.open(url, "_blank")}
           >
             Mở trong tab mới
-          </Button>
-          <Button variant="contained" onClick={() => onToggleCompletion(true)}>
-            Đánh dấu hoàn thành
           </Button>
         </Stack>
       ) : null}
