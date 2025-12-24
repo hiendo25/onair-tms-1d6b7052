@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, DialogContent, FilledInput, FilledInputProps, InputAdornment } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -10,61 +10,63 @@ import Typography from "@mui/material/Typography";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
 
 import useDebounce from "@/hooks/useDebounce";
-import { EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { useUserOrganization } from "@/modules/organization";
 import { SearchIcon } from "@/shared/assets/icons";
-import { useGetTeachersQuery } from "../../operation/queries";
+import { useGetAssignmentsV2Query } from "../../operations/query";
 
 import { columns } from "./columns";
+import { AssignmentSelectItem } from "./type";
 
-export type SimpleDialogTeacherSelectorRef = {
-  openDialog: (variable?: { value?: string[] }, options?: { onOk: (data: EmployeeTeacherTypeItem[]) => void }) => void;
+export type DialogAssignmentSelectorRef = {
+  openDialog: (variable?: { value?: string[] }, options?: { onOk: (data: AssignmentSelectItem[]) => void }) => void;
   closeDialog: () => void;
 };
-export interface SimpleDialogTeacherSelectorProps {
+export interface DialogAssignmentSelectorProps {
   disableMultipleSelect?: boolean;
-  onOk?: (data: EmployeeTeacherTypeItem[]) => void;
+  onOk?: (data: AssignmentSelectItem[]) => void;
   values?: string[];
-  excludeSelected?: boolean;
+  title?: React.ReactNode;
 }
-const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, SimpleDialogTeacherSelectorProps>(
-  ({ onOk, values: initialValues = [], disableMultipleSelect = false, excludeSelected = true }, ref) => {
+const DialogAssignmentSelector = forwardRef<DialogAssignmentSelectorRef, DialogAssignmentSelectorProps>(
+  ({ onOk, values = [], disableMultipleSelect = false, title = "Chọn bài kiểm tra" }, ref) => {
     const [openDialog, setOpenDialog] = useState(false);
-    const [dialogConfirm, setDialogConfirm] = useState<(data: EmployeeTeacherTypeItem[]) => void>();
+    const [dialogConfirm, setDialogConfirm] = useState<(data: AssignmentSelectItem[]) => void>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-    const [searchTeacherName, setSearchTeacherName] = useState("");
-    const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedItems, setSelectedItems] = useState<AssignmentSelectItem[]>([]);
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel | undefined>({
-      ids: new Set(initialValues),
+      ids: new Set(values),
       type: "include",
     });
-
+    const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
     const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
 
-    const searchDebouce = useDebounce(searchTeacherName, 600);
-    const { data: teachersData, isPending } = useGetTeachersQuery({
+    const searchQueryDebounce = useDebounce(searchQuery, 600);
+    const { data: assignmentsData, isPending } = useGetAssignmentsV2Query({
       queryParams: {
-        page: paginationModel.page + 1,
+        page: paginationModel.page,
         pageSize: paginationModel.pageSize,
-        exclude: excludeSelected ? initialValues : [], // exclude teacher selected
-        search: searchDebouce,
+        excludes: values,
+        search: searchQueryDebounce,
+        organizationId: organizationId,
       },
       enabled: openDialog,
     });
 
-    const teacherList = useMemo(() => teachersData?.data || [], [teachersData?.data]);
-    const rowCount = useMemo(() => teachersData?.count || 0, [teachersData?.count]);
+    const assignmentRows = useMemo(() => assignmentsData?.data || [], [assignmentsData?.data]);
+    const rowCount = useMemo(() => assignmentsData?.count || 0, [assignmentsData?.count]);
 
     const handleClose = () => {
       //Reset State after close
       setPaginationModel((prev) => ({ ...prev, page: 0 }));
       setRowSelectionModel((prev) => (prev ? { ...prev, ids: new Set() } : { ids: new Set(), type: "include" }));
       prevRowIdsSet.current = new Set();
-      setSelectTeacherList([]);
+      setSelectedItems([]);
       setOpenDialog(false);
     };
 
     const handleClickOk = useCallback(() => {
-      if (selectTeacherList) onOk?.(selectTeacherList), dialogConfirm?.(selectTeacherList);
+      if (selectedItems) onOk?.(selectedItems), dialogConfirm?.(selectedItems);
 
       handleClose();
     }, [rowSelectionModel]);
@@ -90,9 +92,9 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           const rowIds = [...newRowSelectModel.ids];
           const latestRowId = rowIds[rowIds.length - 1];
           console.log(newRowSelectModel);
-          const teacher = teacherList.find((tc) => tc.id === latestRowId);
+          const teacher = assignmentRows.find((tc) => tc.id === latestRowId);
 
-          setSelectTeacherList(() => {
+          setSelectedItems(() => {
             return teacher ? [teacher] : [];
           });
 
@@ -116,7 +118,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           const addedRow = newRowSelectModel.ids.difference(prevIdsSet);
           const removeRow = prevIdsSet.difference(new Set(newRowSelectModel.ids));
 
-          setSelectTeacherList((prevTeachers) => {
+          setSelectedItems((prevTeachers) => {
             /**
              * Get Teachers in newIdsSet of current Row Model
              */
@@ -125,7 +127,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
 
             if (addedRow.size > 0) {
               addedRow.forEach((rowId) => {
-                const teacher = teacherList.find((tc) => tc.id === rowId);
+                const teacher = assignmentRows.find((tc) => tc.id === rowId);
                 updateTeacherList = teacher ? [...updateTeacherList, teacher] : [...updateTeacherList];
               });
             }
@@ -155,13 +157,13 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           );
         }
       },
-      [teacherList, disableMultipleSelect],
+      [assignmentRows, disableMultipleSelect],
     );
 
-    const isDisabledOkButton = Boolean(!selectTeacherList.length);
+    const isDisabledOkButton = Boolean(!selectedItems.length);
 
-    const handleSearchTeacherName: FilledInputProps["onChange"] = (evt) => {
-      setSearchTeacherName(evt.target.value);
+    const handleChangeSearchQuery: FilledInputProps["onChange"] = (evt) => {
+      setSearchQuery(evt.target.value);
     };
 
     useImperativeHandle(ref, () => ({
@@ -177,12 +179,6 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
         setRowSelectionModel(undefined);
       },
     }));
-
-    useEffect(() => {
-      console.log({ rowSelectionModel, initialValues });
-
-      setRowSelectionModel({ ids: new Set(initialValues), type: "include" });
-    }, [initialValues, openDialog]);
     return (
       <Dialog open={openDialog} fullWidth maxWidth="md">
         <Toolbar
@@ -197,7 +193,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           })}
         >
           <Typography sx={{ flex: 1 }} variant="h6" component="div">
-            Chỉ định giảng viên phụ trách
+            {title}
           </Typography>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close" className="-mr-3">
             <CloseIcon />
@@ -212,8 +208,8 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           <div className="header mb-6">
             <FilledInput
               placeholder="Tìm kiếm..."
-              value={searchTeacherName}
-              onChange={handleSearchTeacherName}
+              value={searchQuery}
+              onChange={handleChangeSearchQuery}
               endAdornment={
                 <InputAdornment position="end">
                   <SearchIcon className="w-5 h-5" />
@@ -225,7 +221,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
           </div>
 
           <DataGrid
-            rows={teacherList}
+            rows={assignmentRows}
             columns={columns}
             rowCount={rowCount}
             loading={isPending}
@@ -276,4 +272,4 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
   },
 );
 
-export default memo(SimpleDialogTeacherSelector);
+export default memo(DialogAssignmentSelector);

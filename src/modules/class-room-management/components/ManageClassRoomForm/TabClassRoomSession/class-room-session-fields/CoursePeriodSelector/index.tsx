@@ -1,8 +1,8 @@
 import React, { useMemo, useRef } from "react";
 import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
-import { DateTimePickerProps } from "@mui/x-date-pickers";
+import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Controller, FieldValues, useFieldArray, UseFormReturn } from "react-hook-form";
 
 import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
@@ -13,8 +13,9 @@ import SimpleDialogTeacherSelector, {
 } from "@/modules/teacher/container/SimpleDialogTeacherSelector";
 import { CloseIcon, Edit05Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
+import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
 
 const CoursePeriodsWraper = styled(Box)(({ theme }) => ({
@@ -48,6 +49,30 @@ const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ onClick, teac
     </Button>
   );
 };
+
+const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) => <RHFDateTimePicker {...props} />)(
+  ({ theme }) => ({
+    background: "red",
+    ".MuiPickersInputBase-root": {
+      paddingLeft: 1.5,
+      paddingRight: 1.5,
+      borderRadius: "6px",
+      height: 30,
+    },
+    ".MuiPickersSectionList-root": {
+      paddingTop: "3px !important",
+      paddingBottom: "3px !important",
+      fontSize: "0.75rem",
+    },
+    ".MuiButtonBase-root": {
+      width: 24,
+      height: 24,
+      svg: {
+        fontSize: "1rem",
+      },
+    },
+  }),
+);
 interface CoursePeriodSelectorProps {
   sessionIndex: number;
   methods: UseFormReturn<ClassRoom>;
@@ -77,24 +102,29 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
 
   const errorMessage = errors.classRoomSessions?.[sessionIndex]?.coursesPeriod?.message;
 
-  const dateTimePickerSx: DateTimePickerProps["sx"] = useMemo(
-    () => ({
-      ".MuiPickersInputBase-root": {
-        paddingLeft: 1.5,
-        paddingRight: 1.5,
-        borderRadius: "6px",
-      },
-      ".MuiPickersSectionList-root": {
-        paddingTop: "4px",
-        paddingBottom: "4px",
-        fontSize: "0.75rem",
-      },
-      svg: {
-        fontSize: "1rem",
-      },
-    }),
-    [],
-  );
+  // const dateTimePickerSx: DateTimePickerProps["sx"] = useMemo(
+  //   () => ({
+  //     ".MuiPickersInputBase-root": {
+  //       paddingLeft: 1.5,
+  //       paddingRight: 1.5,
+  //       borderRadius: "6px",
+  //       height: 30,
+  //     },
+  //     ".MuiPickersSectionList-root": {
+  //       paddingTop: "3px !important",
+  //       paddingBottom: "3px !important",
+  //       fontSize: "0.75rem",
+  //     },
+  //     ".MuiButtonBase-root": {
+  //       width: 24,
+  //       height: 24,
+  //       svg: {
+  //         fontSize: "1rem",
+  //       },
+  //     },
+  //   }),
+  //   [],
+  // );
 
   /**
    * Check valid field before add course
@@ -114,7 +144,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
       startAt: "",
       endAt: "",
       course: { id: courseItem.id, title: courseItem.title || "" },
-      teacher: undefined,
+      teachers: [],
     });
   };
 
@@ -174,29 +204,49 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                 </div>
                 <div className="w-1/5">
                   <Controller
-                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.teacher`}
+                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.teachers`}
                     control={control}
-                    render={({ field: { onChange, value: teacherInfo }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value: teachers }, fieldState: { error } }) => (
                       <>
+                        {teachers.length ? (
+                          <div className="flex flex-col gap-2">
+                            {teachers.map((teacher) => (
+                              <div key={teacher.id}>
+                                <div className="flex items-center gap-2">
+                                  <IconButton
+                                    className="w-4 h-4"
+                                    onClick={() => {
+                                      const updateTeachers = teachers.filter((tc) => tc.id !== teacher.id);
+                                      onChange(updateTeachers);
+                                    }}
+                                  >
+                                    <CloseIcon className="text-xs" />
+                                  </IconButton>
+                                  <Avatar alt={teacher.name} className="w-7 h-7" />
+                                  <div className="text-sm">{teacher.name}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
                         <ButtonSelectTeacher
-                          teacherName={teacherInfo?.name}
                           onClick={() =>
                             dialogTeacherRef.current?.openDialog(undefined, {
                               onOk: (teachers) => {
-                                const teacher = teachers[0];
-                                onChange({
-                                  id: teacher?.id,
-                                  name: teacher?.profiles.full_name,
-                                  departmentName: teacher?.employee_departments[0]?.departments?.name || "",
-                                });
+                                const teacherValues = teachers.map((tc) => ({
+                                  id: tc.id,
+                                  name: tc.profiles.full_name,
+                                  departmentName: tc.employee_departments[0]?.departments?.name || "",
+                                }));
+                                onChange(teacherValues);
                               },
                             })
                           }
                         />
                         <SimpleDialogTeacherSelector
                           ref={dialogTeacherRef}
-                          disableMultipleSelect
-                          values={teacherInfo ? [teacherInfo.id] : []}
+                          values={teachers.map((tc) => tc.id)}
+                          excludeSelected={false}
                         />
                         {error?.message ? (
                           <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
@@ -206,19 +256,17 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                   />
                 </div>
                 <div className="w-2/5 flex gap-x-2 max-w-[360px]">
-                  <RHFDateTimePicker
+                  <StyledDateTimePicker
                     control={control}
                     name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.startAt`}
                     minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
                     maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
-                    sx={dateTimePickerSx}
                   />
-                  <RHFDateTimePicker
+                  <StyledDateTimePicker
                     control={control}
                     name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.endAt`}
                     minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
                     maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
-                    sx={dateTimePickerSx}
                   />
                 </div>
               </div>

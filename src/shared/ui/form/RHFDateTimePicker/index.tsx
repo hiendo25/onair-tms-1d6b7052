@@ -12,7 +12,7 @@ export const DATE_TIME_PICKER_FORMAT = {
 
 export type DateTimePickerFormat = keyof typeof DATE_TIME_PICKER_FORMAT;
 
-interface RHFDateTimePickerProps<T extends FieldValues> extends CustomDateTimePickerFieldProps {
+export interface RHFDateTimePickerProps<T extends FieldValues> extends CustomDateTimePickerFieldProps {
   className?: string;
   label?: React.ReactNode;
   control: Control<T>;
@@ -41,7 +41,6 @@ const RHFDateTimePicker = <T extends FieldValues>({
       control={control}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDateTimePickerField
-          {...restProps}
           value={getValueDatePicker(value)}
           ampm={false}
           format={format}
@@ -55,6 +54,7 @@ const RHFDateTimePicker = <T extends FieldValues>({
             actionBar: { actions: ["clear", "nextOrAccept"] }, // only show "OK"
           }}
           helperText={error?.message}
+          {...restProps}
         />
       )}
     />

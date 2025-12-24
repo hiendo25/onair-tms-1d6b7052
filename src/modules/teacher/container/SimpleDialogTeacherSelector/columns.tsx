@@ -1,5 +1,5 @@
 "use client";
-import { alpha,Chip, Typography } from "@mui/material";
+import { alpha, Chip, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
@@ -51,10 +51,8 @@ export const columns: GridColDef<EmployeeTeacherTypeItem>[] = [
     field: "branch",
     headerName: "Chi nhánh",
     width: 220,
-    renderCell: ({  row }) => {
-			console.log(row)
-      // Get branch from employee_branches or from department's branch
-      const directBranch = row.employee_branches[0]?.branches?.name;
+    renderCell: ({ row: { employee_branches } }) => {
+      const directBranch = employee_branches[0]?.branches?.name;
       return directBranch || "-";
     },
   },

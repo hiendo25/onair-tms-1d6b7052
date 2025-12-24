@@ -56,7 +56,7 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
       {!platform || !roomtype || !PLATFORMS.has(platform) || !ROOMS.has(roomtype) ? (
         <ClassRoomTypeBoxMenu />
       ) : (
-        <CreateClassRoomForm platform={platform} roomType={roomtype} />
+        <CreateClassRoomForm platform={platform} roomType={roomtype} isLearningPath={true} />
       )}
     </PageContainer>
   );

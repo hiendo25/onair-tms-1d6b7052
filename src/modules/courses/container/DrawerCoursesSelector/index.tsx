@@ -1,7 +1,7 @@
 "use client";
-import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { Alert, DialogContent, FilledInput, FilledInputProps, InputAdornment } from "@mui/material";
+import { Alert, DialogContent, Drawer, FilledInput, FilledInputProps } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
@@ -10,62 +10,60 @@ import Typography from "@mui/material/Typography";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
 
 import useDebounce from "@/hooks/useDebounce";
-import { EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { GetCoursesListMinimalResponse } from "@/repository/courses";
 import { SearchIcon } from "@/shared/assets/icons";
-import { useGetTeachersQuery } from "../../operation/queries";
+import { useGetCourseListMinimalQuery } from "../../operations/query";
 
 import { columns } from "./columns";
 
-export type SimpleDialogTeacherSelectorRef = {
-  openDialog: (variable?: { value?: string[] }, options?: { onOk: (data: EmployeeTeacherTypeItem[]) => void }) => void;
+export type DrawerCourseSelectorRef = {
+  openDialog: () => void;
   closeDialog: () => void;
 };
-export interface SimpleDialogTeacherSelectorProps {
+export interface DrawerCourseSelectorProps {
   disableMultipleSelect?: boolean;
-  onOk?: (data: EmployeeTeacherTypeItem[]) => void;
-  values?: string[];
-  excludeSelected?: boolean;
+  onOk?: (course: NonNullable<GetCoursesListMinimalResponse["data"]>) => void;
+  value?: string[];
 }
-const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, SimpleDialogTeacherSelectorProps>(
-  ({ onOk, values: initialValues = [], disableMultipleSelect = false, excludeSelected = true }, ref) => {
+const DrawerCourseSelector = forwardRef<DrawerCourseSelectorRef, DrawerCourseSelectorProps>(
+  ({ onOk, value = [], disableMultipleSelect = false }, ref) => {
     const [openDialog, setOpenDialog] = useState(false);
-    const [dialogConfirm, setDialogConfirm] = useState<(data: EmployeeTeacherTypeItem[]) => void>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
-    const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
-    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel | undefined>({
-      ids: new Set(initialValues),
+    const searchDebouce = useDebounce(searchTeacherName, 600);
+    const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
+    const [selectedCourseList, setSelectedCourseList] = useState<NonNullable<GetCoursesListMinimalResponse["data"]>>(
+      [],
+    );
+    const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel>({
+      ids: new Set(value),
       type: "include",
     });
 
-    const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
-
-    const searchDebouce = useDebounce(searchTeacherName, 600);
-    const { data: teachersData, isPending } = useGetTeachersQuery({
+    const { data: courseData, isPending } = useGetCourseListMinimalQuery({
       queryParams: {
         page: paginationModel.page + 1,
         pageSize: paginationModel.pageSize,
-        exclude: excludeSelected ? initialValues : [], // exclude teacher selected
+        excludes: value, // exclude teacher selected
         search: searchDebouce,
       },
       enabled: openDialog,
     });
 
-    const teacherList = useMemo(() => teachersData?.data || [], [teachersData?.data]);
-    const rowCount = useMemo(() => teachersData?.count || 0, [teachersData?.count]);
+    const courseList = useMemo(() => courseData?.data || [], [courseData?.data]);
+    const rowCount = useMemo(() => courseData?.count || 0, [courseData?.count]);
 
     const handleClose = () => {
       //Reset State after close
       setPaginationModel((prev) => ({ ...prev, page: 0 }));
-      setRowSelectionModel((prev) => (prev ? { ...prev, ids: new Set() } : { ids: new Set(), type: "include" }));
+      setRowSelectionModel((prev) => ({ ...prev, ids: new Set() }));
       prevRowIdsSet.current = new Set();
-      setSelectTeacherList([]);
+      setSelectedCourseList([]);
       setOpenDialog(false);
     };
 
     const handleClickOk = useCallback(() => {
-      if (selectTeacherList) onOk?.(selectTeacherList), dialogConfirm?.(selectTeacherList);
-
+      selectedCourseList && onOk?.(selectedCourseList);
       handleClose();
     }, [rowSelectionModel]);
 
@@ -89,10 +87,9 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
 
           const rowIds = [...newRowSelectModel.ids];
           const latestRowId = rowIds[rowIds.length - 1];
-          console.log(newRowSelectModel);
-          const teacher = teacherList.find((tc) => tc.id === latestRowId);
+          const teacher = courseList.find((tc) => tc.id === latestRowId);
 
-          setSelectTeacherList(() => {
+          setSelectedCourseList(() => {
             return teacher ? [teacher] : [];
           });
 
@@ -103,39 +100,35 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
            */
           prevRowIdsSet.current = updateRowModel;
 
-          setRowSelectionModel((prevModel) =>
-            prevModel
-              ? {
-                  ...prevModel,
-                  ids: updateRowModel,
-                }
-              : { ids: updateRowModel, type: "include" },
-          );
+          setRowSelectionModel((prevModel) => ({
+            ...prevModel,
+            ids: updateRowModel,
+          }));
         } else {
           const prevIdsSet = prevRowIdsSet.current || new Set();
           const addedRow = newRowSelectModel.ids.difference(prevIdsSet);
           const removeRow = prevIdsSet.difference(new Set(newRowSelectModel.ids));
 
-          setSelectTeacherList((prevTeachers) => {
+          setSelectedCourseList((prev) => {
             /**
              * Get Teachers in newIdsSet of current Row Model
              */
 
-            let updateTeacherList = [...prevTeachers];
+            let updateList = prev ? [...prev] : [];
 
             if (addedRow.size > 0) {
               addedRow.forEach((rowId) => {
-                const teacher = teacherList.find((tc) => tc.id === rowId);
-                updateTeacherList = teacher ? [...updateTeacherList, teacher] : [...updateTeacherList];
+                const teacher = courseList.find((tc) => tc.id === rowId);
+                updateList = teacher ? [...updateList, teacher] : [...updateList];
               });
             }
             if (removeRow.size > 0) {
               removeRow.forEach((rowId) => {
-                updateTeacherList = [...updateTeacherList].filter((it) => it.id !== rowId);
+                updateList = [...updateList].filter((it) => it.id !== rowId);
               });
             }
 
-            return updateTeacherList;
+            return updateList;
           });
           const updateRowModel =
             addedRow.size > 0 ? new Set([...prevIdsSet, ...newRowSelectModel.ids]) : newRowSelectModel.ids;
@@ -145,59 +138,43 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
            */
           prevRowIdsSet.current = updateRowModel;
 
-          setRowSelectionModel((prevModel) =>
-            prevModel
-              ? {
-                  ...prevModel,
-                  ids: updateRowModel,
-                }
-              : { ids: updateRowModel, type: "include" },
-          );
+          setRowSelectionModel((prevModel) => ({
+            ...prevModel,
+            ids: updateRowModel,
+          }));
         }
       },
-      [teacherList, disableMultipleSelect],
+      [courseList, disableMultipleSelect],
     );
 
-    const isDisabledOkButton = Boolean(!selectTeacherList.length);
+    const isDisabledOkButton = Boolean(!selectedCourseList?.length);
 
     const handleSearchTeacherName: FilledInputProps["onChange"] = (evt) => {
       setSearchTeacherName(evt.target.value);
     };
 
     useImperativeHandle(ref, () => ({
-      openDialog: (variables, options) => {
+      openDialog: () => {
         setOpenDialog(true);
-        const confirmFn = options?.onOk;
-        const values = variables?.value;
-        if (confirmFn) setDialogConfirm(() => confirmFn);
-        if (values) setRowSelectionModel({ ids: new Set(values), type: "include" });
       },
       closeDialog: () => {
         setOpenDialog(false);
-        setRowSelectionModel(undefined);
       },
     }));
 
-    useEffect(() => {
-      console.log({ rowSelectionModel, initialValues });
-
-      setRowSelectionModel({ ids: new Set(initialValues), type: "include" });
-    }, [initialValues, openDialog]);
     return (
-      <Dialog open={openDialog} fullWidth maxWidth="md">
+      <Drawer open={openDialog} anchor="right">
         <Toolbar
           sx={(theme) => ({
-            minHeight: 48,
             borderBottom: "1px solid",
             borderColor: theme.palette.grey[300],
             [theme.breakpoints.up("md")]: {
               paddingInline: "1rem",
-              minHeight: 60,
             },
           })}
         >
           <Typography sx={{ flex: 1 }} variant="h6" component="div">
-            Chỉ định giảng viên phụ trách
+            Chọn môn học
           </Typography>
           <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close" className="-mr-3">
             <CloseIcon />
@@ -214,51 +191,50 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
               placeholder="Tìm kiếm..."
               value={searchTeacherName}
               onChange={handleSearchTeacherName}
-              endAdornment={
-                <InputAdornment position="end">
-                  <SearchIcon className="w-5 h-5" />
-                </InputAdornment>
-              }
+              endAdornment={<SearchIcon />}
               size="small"
               sx={{ minWidth: 280 }}
             />
           </div>
-
-          <DataGrid
-            rows={teacherList}
-            columns={columns}
-            rowCount={rowCount}
-            loading={isPending}
-            density="standard"
-            pageSizeOptions={[10, 15, 20]}
-            checkboxSelection
-            disableColumnSelector
-            disableColumnSorting
-            disableColumnResize
-            // disableRowSelectionOnClick
-            disableColumnMenu
-            paginationMode="server"
-            onRowSelectionModelChange={handleRowSelectModelChange}
-            rowSelectionModel={rowSelectionModel}
-            paginationModel={paginationModel}
-            onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
-            sx={{
-              border: 0,
-              ".MuiDataGrid-columnHeaders": {
-                ".MuiDataGrid-columnHeaderCheckbox": {
-                  pointerEvents: "none",
+          <div>
+            <DataGrid
+              rows={courseList}
+              columns={columns}
+              rowCount={rowCount}
+              loading={isPending}
+              density="standard"
+              pageSizeOptions={[10, 15, 20]}
+              checkboxSelection
+              disableColumnSelector
+              disableColumnSorting
+              disableColumnResize
+              // disableRowSelectionOnClick
+              disableColumnMenu
+              paginationMode="server"
+              onRowSelectionModelChange={handleRowSelectModelChange}
+              rowSelectionModel={rowSelectionModel}
+              paginationModel={paginationModel}
+              onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
+              sx={{
+                border: 0,
+                ".MuiDataGrid-columnHeaders": {
+                  ".MuiDataGrid-columnHeaderCheckbox": {
+                    pointerEvents: "none",
+                  },
                 },
-              },
-            }}
-          />
+              }}
+            />
+          </div>
         </DialogContent>
         <Toolbar
           sx={(theme) => ({
+            minHeight: 48,
             borderTop: "1px solid",
             borderColor: theme.palette.grey[300],
             justifyContent: "end",
             [theme.breakpoints.up("md")]: {
               paddingInline: "1rem",
+              minHeight: 60,
             },
           })}
         >
@@ -271,9 +247,9 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
             </Button>
           </div>
         </Toolbar>
-      </Dialog>
+      </Drawer>
     );
   },
 );
 
-export default memo(SimpleDialogTeacherSelector);
+export default memo(DrawerCourseSelector);
