@@ -24,9 +24,8 @@ export default function StepAssignCourses({ onBack, onContinue, isLoading = fals
   const { enqueueSnackbar } = useSnackbar();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { control } = usePlanFormContext();
-  const organizationId = useUserOrganization((state) => state.data.organization.id);
-  const userId = useUserOrganization((state) => state.data.id);
-  const { data: availableCourses = [] } = useGetPlanCourseOptionsQuery(organizationId);
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const { data: availableCourses = [] } = useGetPlanCourseOptionsQuery(currentEmployee.organization.id);
   const { mutateAsync: createDraftCourse, isPending: isCreatingCourse } = useCreatePlanDraftCourseMutation();
   const { fields: programs } = useFieldArray({
     control,
@@ -34,15 +33,15 @@ export default function StepAssignCourses({ onBack, onContinue, isLoading = fals
   });
 
   const handleCreateCourse = async (course: { title: string; description?: string }) => {
-    if (!organizationId || !userId) {
+    if (!currentEmployee.organization.id || !currentEmployee.userId) {
       enqueueSnackbar("Thiếu thông tin tổ chức hoặc người dùng để tạo môn học.", { variant: "error" });
       return;
     }
 
     try {
       await createDraftCourse({
-        organizationId,
-        createdBy: userId,
+        organizationId: currentEmployee.organization.id,
+        createdBy: currentEmployee.userId,
         title: course.title,
         description: course.description,
       });
