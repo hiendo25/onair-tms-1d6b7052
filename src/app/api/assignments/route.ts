@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       search,
-      createdBy: employee.id,
+      // createdBy: employee.id,
       organizationId,
     });
 
