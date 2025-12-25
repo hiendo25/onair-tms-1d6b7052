@@ -11,6 +11,7 @@ interface LearningCourseOutlineQueryOptions {
   enabled?: boolean;
   includeProgress?: boolean;
   learningPathId?: string | null;
+  employeeId?: string | null;
 }
 
 interface LearningLessonDetailQueryOptions {
@@ -28,12 +29,14 @@ export const useLearningCourseOutlineQuery = (
         courseId,
         includeProgress: options?.includeProgress ?? false,
         learningPathId: options?.learningPathId ?? null,
+        employeeId: options?.employeeId ?? null,
       },
     ],
     queryFn: () =>
       learningScreenRepository.getCourseLearningOutline(courseId ?? "", {
         includeProgress: options?.includeProgress,
         learningPathId: options?.learningPathId,
+        employeeId: options?.employeeId,
       }),
     enabled: Boolean(courseId) && (options?.enabled ?? true),
   });

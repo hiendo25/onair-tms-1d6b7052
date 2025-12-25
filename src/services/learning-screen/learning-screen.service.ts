@@ -20,6 +20,7 @@ import type { Tables } from "@/types/supabase.types";
 interface CourseOutlineOptions {
   includeProgress?: boolean;
   learningPathId?: string | null;
+  employeeId?: string | null;
 }
 
 const toAttachment = (
@@ -116,12 +117,14 @@ const getCourseLearningOutline = async (
   const { sections: rawSections = [], ...courseInfo } = rawCourse;
   const { normalizedSections, lessonIds } = normalizeOutlineSections(rawSections);
   const learningPathId = options?.learningPathId?.trim();
+  const employeeId = options?.employeeId?.trim();
   const shouldIncludeProgress = Boolean(options?.includeProgress);
   const progressRows =
-    shouldIncludeProgress && learningPathId
+    shouldIncludeProgress && learningPathId && employeeId
       ? await learningScreenServerRepository.getLessonProgressRows(
         Array.from(lessonIds),
         learningPathId,
+        employeeId,
       )
       : [];
   const progressMap = buildProgressMap(progressRows);
@@ -206,4 +209,8 @@ const getLearningCourseHeader = async (courseId: string): Promise<CourseHeaderRo
   return await learningScreenServerRepository.getCourseHeaderById(trimmedCourseId);
 };
 
-export { getCourseLearningOutline, getLearningCourseHeader, getLessonLearningDetail };
+export {
+  getCourseLearningOutline,
+  getLearningCourseHeader,
+  getLessonLearningDetail,
+};

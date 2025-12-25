@@ -1,49 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import {
-  LEARNING_SCREEN_ROUTE_PREFIX,
-  LESSON_PROGRESS_STATUS,
-  LESSON_PROGRESS_STATUS_WEIGHT,
-  SECTION_PROGRESS_MAX_PERCENT,
-  SECTION_PROGRESS_MIN_PERCENT,
-} from "@/modules/learning-screen/constants";
+import { LEARNING_SCREEN_ROUTE_PREFIX } from "@/modules/learning-screen/constants";
+import { useLessonDetail } from "@/modules/learning-screen/hooks/useLessonDetail";
+import { useLessonSelectionFromUrl } from "@/modules/learning-screen/hooks/useLessonSelectionFromUrl";
+import { useSectionProgress } from "@/modules/learning-screen/hooks/useSectionProgress";
 import {
   LEARNING_LESSON_DETAIL_QUERY_KEY,
   LESSON_DETAIL_STALE_TIME_MS,
   useLearningCourseOutlineQuery,
-  useLearningLessonDetailQuery,
 } from "@/modules/learning-screen/operations/query";
-import type { LearningLessonSummary, LearningSectionOutline } from "@/modules/learning-screen/types";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { learningScreenRepository } from "@/repository";
-
-const createLessonLookup = (sections: LearningSectionOutline[]) => {
-  const lookup = new Map<string, LearningLessonSummary>();
-  for (const section of sections) {
-    for (const lesson of section.lessons) {
-      lookup.set(lesson.id, lesson);
-    }
-  }
-  return lookup;
-};
-
-const getLessonProgressWeight = (status: LearningLessonSummary["progressStatus"]) => {
-  const resolvedStatus = status ?? LESSON_PROGRESS_STATUS.NOT_STARTED;
-  return LESSON_PROGRESS_STATUS_WEIGHT[resolvedStatus];
-};
-
-const calculateSectionProgress = (lessons: LearningLessonSummary[]) => {
-  if (!lessons.length) {
-    return SECTION_PROGRESS_MIN_PERCENT;
-  }
-  const totalWeight = lessons.reduce(
-    (acc, lesson) => acc + getLessonProgressWeight(lesson.progressStatus),
-    LESSON_PROGRESS_STATUS_WEIGHT[LESSON_PROGRESS_STATUS.NOT_STARTED],
-  );
-  return (totalWeight / lessons.length) * SECTION_PROGRESS_MAX_PERCENT;
-};
 
 interface UseLearningScreenStateParams {
   courseId: string | null;
@@ -51,12 +20,13 @@ interface UseLearningScreenStateParams {
 
 export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParams) => {
   const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
-  const router = useRouter();
   const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const searchParamsString = searchParams.toString();
   const queryClient = useQueryClient();
-  const sectionIdParam = searchParams.get("sectionId");
   const lessonIdParam = searchParams.get("lessonId");
+  const sectionIdParam = searchParams.get("sectionId");
   const learningPathIdParam = searchParams.get("learningPathId");
   const isLearningPathSource = Boolean(
     pathname?.includes(LEARNING_SCREEN_ROUTE_PREFIX.LEARNING_PATH),
@@ -66,88 +36,58 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
     enabled: Boolean(courseId),
     includeProgress: isLearningPathSource,
     learningPathId: learningPathIdParam,
+    employeeId: studentId,
   });
 
   const course = data?.course ?? null;
   const sections = useMemo(() => data?.sections ?? [], [data?.sections]);
 
-  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
-
-  const lessonLookup = useMemo(() => createLessonLookup(sections), [sections]);
-  const flatLessons = useMemo(() => Array.from(lessonLookup.values()), [lessonLookup]);
-
-  const sectionLookup = useMemo(() => {
-    return new Map(sections.map((section) => [section.id, section]));
-  }, [sections]);
-
-  const sectionProgressById = useMemo<Record<string, number>>(() => {
-    if (!isLearningPathSource) {
-      return {};
-    }
-    const progressLookup: Record<string, number> = {};
-    for (const section of sections) {
-      progressLookup[section.id] = calculateSectionProgress(section.lessons);
-    }
-    return progressLookup;
-  }, [isLearningPathSource, sections]);
-
-  useEffect(() => {
-    setSelectedLessonId(null);
-  }, [courseId]);
-
-  useEffect(() => {
-    if (!flatLessons.length) {
-      setSelectedLessonId(null);
-      return;
-    }
-
-    if (lessonIdParam && lessonLookup.has(lessonIdParam)) {
-      setSelectedLessonId(lessonIdParam);
-      return;
-    }
-
-    if (sectionIdParam) {
-      const targetSection = sectionLookup.get(sectionIdParam);
-      const firstLesson = targetSection?.lessons?.[0];
-      if (firstLesson?.id) {
-        setSelectedLessonId(firstLesson.id);
+  const handleReplaceSearchParams = useCallback(
+    (nextSearchParams: URLSearchParams) => {
+      const next = nextSearchParams.toString();
+      if (next === searchParamsString) {
         return;
       }
-    }
-
-    setSelectedLessonId(flatLessons[0]?.id ?? null);
-  }, [flatLessons, lessonIdParam, lessonLookup, sectionIdParam, sectionLookup]);
-
-  const selectedLessonSummary = selectedLessonId ? lessonLookup.get(selectedLessonId) ?? null : null;
-  const nextLessonId = useMemo(() => {
-    if (!selectedLessonId) {
-      return null;
-    }
-    const currentIndex = flatLessons.findIndex((lesson) => lesson.id === selectedLessonId);
-    if (currentIndex < 0) {
-      return null;
-    }
-    return flatLessons[currentIndex + 1]?.id ?? null;
-  }, [flatLessons, selectedLessonId]);
-
+      router.replace(`?${next}`, { scroll: false });
+    },
+    [router, searchParamsString],
+  );
   const {
-    data: selectedLessonDetail,
-    isLoading: isLessonLoading,
-    isFetching: isLessonFetching,
-    isError: isLessonError,
-    error: lessonError,
-    refetch: refetchLessonDetail,
-  } = useLearningLessonDetailQuery(selectedLessonId, {
-    enabled: Boolean(selectedLessonId),
+    flatLessons,
+    selectedLessonId,
+    selectedLessonSummary,
+    handleSelectLesson,
+  } = useLessonSelectionFromUrl({
+    courseId,
+    sections,
+    lessonIdParam,
+    sectionIdParam,
+    searchParamsString,
+    onReplaceSearchParams: handleReplaceSearchParams,
   });
 
-  const selectedLesson = selectedLessonDetail ?? null;
-  const lessonErrorMessage = isLessonError
-    ? lessonError instanceof Error
-      ? lessonError.message
-      : "Không thể tải dữ liệu bài học."
-    : null;
-  const isLessonRequestLoading = (isLessonLoading || isLessonFetching) && Boolean(selectedLessonId);
+  const sectionProgressById = useSectionProgress(sections, isLearningPathSource);
+  const lessonIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    flatLessons.forEach((lesson, idx) => map.set(lesson.id, idx));
+    return map;
+  }, [flatLessons]);
+
+  const nextLessonId = useMemo(() => {
+    if (!selectedLessonId) return null;
+
+    const currentIndex = lessonIndexById.get(selectedLessonId);
+    if (currentIndex === undefined) return null;
+
+    return flatLessons[currentIndex + 1]?.id ?? null;
+  }, [flatLessons, lessonIndexById, selectedLessonId]);
+
+  const {
+    selectedLesson,
+    isLessonRequestLoading,
+    lessonErrorMessage,
+    refetchLessonDetail,
+  } = useLessonDetail(selectedLessonId);
 
   useEffect(() => {
     if (!nextLessonId) {
@@ -159,44 +99,6 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
       staleTime: LESSON_DETAIL_STALE_TIME_MS,
     });
   }, [nextLessonId, queryClient]);
-
-  useEffect(() => {
-    if (!selectedLessonId) {
-      return;
-    }
-
-    const params = new URLSearchParams(searchParams.toString());
-    let shouldReplace = false;
-
-    if (params.get("lessonId") !== selectedLessonId) {
-      params.set("lessonId", selectedLessonId);
-      shouldReplace = true;
-    }
-
-    if (params.has("source")) {
-      params.delete("source");
-      shouldReplace = true;
-    }
-
-    if (params.has("sectionId")) {
-      params.delete("sectionId");
-      shouldReplace = true;
-    }
-
-    if (shouldReplace) {
-      router.replace(`?${params.toString()}`, { scroll: false });
-    }
-  }, [router, searchParams, selectedLessonId]);
-
-  const handleSelectLesson = useCallback(
-    (lessonId: string) => {
-      if (!lessonId || lessonId === selectedLessonId) {
-        return;
-      }
-      setSelectedLessonId(lessonId);
-    },
-    [selectedLessonId],
-  );
 
   return {
     course,
