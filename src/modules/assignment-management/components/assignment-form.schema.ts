@@ -155,7 +155,7 @@ const questionSchema = zod
         });
       } else {
         // Check for duplicate correctOrder values
-        const orders = data.orderItems.map(item => item.correctOrder);
+        const orders = data.orderItems.map((item) => item.correctOrder);
         const uniqueOrders = new Set(orders);
         if (orders.length !== uniqueOrders.size) {
           ctx.addIssue({
@@ -174,16 +174,13 @@ const employeeItemSchema = zod.object({
   email: zod.string(),
   employeeCode: zod.string(),
   avatar: zod.string().nullable(),
-  empoyeeType: zod.enum(["teacher", "student"]),
+  employeeType: zod.enum(["teacher", "student"]),
 });
 
 const assignmentSchema = zod.object({
   name: zod.string().min(1, { message: "Tên bài kiểm tra không bỏ trống." }).max(200, "Vui lòng nhập tối đa 200 ký tự"),
   description: zod.string().min(1, { message: "Mô tả bài kiểm tra không bỏ trống." }),
-  assignmentCategories: zod
-    .array(zod.string())
-    .max(3, "Chọn tối đa 3 lĩnh vực.")
-    .optional(),
+  assignmentCategories: zod.array(zod.string()).max(3, "Chọn tối đa 3 lĩnh vực.").optional(),
   questions: zod.array(questionSchema).min(1, { message: "Tạo ít nhất 1 câu hỏi." }),
   assignedEmployees: zod.array(employeeItemSchema),
 });
@@ -206,6 +203,5 @@ export {
   type MatchingColumnItem,
   type MatchingMapping,
   type OrderItem,
-  type EmployeeItem
+  type EmployeeItem,
 };
-

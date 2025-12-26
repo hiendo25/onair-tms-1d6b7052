@@ -11,7 +11,7 @@ export type TeacherSelectedItem = {
   email: string;
   employeeCode: string;
   avatar: string | null;
-  empoyeeType: Exclude<EmployeeType, "admin" | "student">;
+  employeeType: Exclude<EmployeeType, "admin" | "student">;
 };
 export type StudentSelectedItem = {
   id: string;
@@ -19,7 +19,7 @@ export type StudentSelectedItem = {
   email: string;
   employeeCode: string;
   avatar: string | null;
-  empoyeeType: Exclude<EmployeeType, "admin" | "teacher">;
+  employeeType: Exclude<EmployeeType, "admin" | "teacher">;
 };
 
 type ClassRoomState = {

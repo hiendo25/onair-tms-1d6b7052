@@ -1,7 +1,6 @@
 "use client";
 import React, { useRef } from "react";
 import { useTransition } from "react";
-import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
@@ -16,8 +15,9 @@ import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDC
 interface CreateClassRoomFormProps {
   platform: ClassRoomPlatformType;
   roomType: ClassRoomType;
+  isLearningPath?: boolean;
 }
-const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roomType }) => {
+const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roomType, isLearningPath }) => {
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
@@ -26,7 +26,6 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
   const handleCancel = () => {
     router.push(PATHS.CLASSROOMS.ROOT);
   };
-
   const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
     onCreate(
       { formData, students },
@@ -46,6 +45,7 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
       onCancel={handleCancel}
       platform={platform}
       roomType={roomType}
+      isLearningPath={isLearningPath}
       ref={formClassRoomRef}
       isLoading={isLoading || isTransition}
     />

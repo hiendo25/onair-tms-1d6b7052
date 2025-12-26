@@ -19,11 +19,11 @@ export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["age
     title: "",
   };
 };
-interface AgendarFieldsProps {
+interface AgendaFieldsProps {
   sessionIndex: number;
   className?: string;
 }
-const AgendarFields: React.FC<AgendarFieldsProps> = ({ sessionIndex, className }) => {
+const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, className }) => {
   const { control, trigger } = useClassRoomFormContext();
 
   const {
@@ -74,7 +74,7 @@ const AgendarFields: React.FC<AgendarFieldsProps> = ({ sessionIndex, className }
     </div>
   );
 };
-export default memo(AgendarFields);
+export default memo(AgendaFieldsControl);
 
 interface AgendaFieldBoxProps {
   index: number;

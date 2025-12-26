@@ -1,4 +1,5 @@
-import { alpha, FormControl, FormLabel, MenuItem, MenuList, Select, styled } from "@mui/material";
+import React from "react";
+import { alpha, FormControl, FormLabel, InputAdornment, MenuItem, MenuList, Select, styled } from "@mui/material";
 import { Control, useController } from "react-hook-form";
 
 import { LinkIcon } from "@/shared/assets/icons";
@@ -6,7 +7,6 @@ import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
 import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
 import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
-import RHFSelectField from "@/shared/ui/form/RHFSelectField";
 import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
 import { ClassRoom } from "../../classroom-form.schema";
 
@@ -91,7 +91,11 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
         control={control}
         required
         label="Link tham dự"
-        startAdornment={<LinkIcon className="w-5 h-5" />}
+        startAdornment={
+          <InputAdornment position="start">
+            <LinkIcon className="w-5 h-5 text-blue-600" />
+          </InputAdornment>
+        }
         placeholder="https://..."
       />
       {value !== "google_meet" ? (
@@ -119,6 +123,7 @@ interface RoomChannelSelectProps {
   control: Control<ClassRoom>;
   index: number;
 }
+
 const RoomChannelSelect: React.FC<RoomChannelSelectProps> = ({ control, index }) => {
   return (
     <div>

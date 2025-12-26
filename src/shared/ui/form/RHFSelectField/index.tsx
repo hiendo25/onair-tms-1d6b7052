@@ -5,7 +5,7 @@ import { Controller } from "react-hook-form";
 
 import SelectField, { SelectFieldProps } from "../SelectField";
 
-type OptionType = { id: string | number; label?: string };
+type OptionType = { id?: string | number; label?: string };
 
 interface RHFSelectFieldProps<T extends FieldValues, K extends OptionType> {
   className?: string;

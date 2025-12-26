@@ -8,6 +8,8 @@ import type {
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import type { Database } from "@/types/supabase.types";
 
+import { GetAssignmentsQueryParams } from "./type";
+
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
   const supabase = createClient();
   const { page = 0, limit = 20, search, organizationId, createdBy } = params || {};
@@ -635,6 +637,67 @@ const getMyAssignments = async (employeeId: string, params?: GetMyAssignmentsPar
   };
 };
 
+export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) => {
+  const supabase = createClient();
+  const { page = 0, pageSize = 20, search, createdBy, organizationId } = queryParams || {};
+
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase.from("assignments").select(
+    `
+      id,
+      name,
+      description,
+      created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
+      created_at,
+      updated_at,
+      questions (
+        id,
+        label,
+        type,
+        score,
+        options,
+        created_at,
+        updated_at
+      ),
+      assignment_categories (
+        category_id,
+        categories (
+          id,
+          name
+        )
+      ),
+      assignmentEmployees:assignment_employees(count),
+      submissions:assignment_results(count)
+    `,
+    { count: "exact" },
+  );
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  if (createdBy) {
+    query = query.eq("created_by", createdBy);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+  return await query.order("created_at", { ascending: false }).range(from, to);
+};
+export type GetAssignmentsV2Response = Awaited<ReturnType<typeof getAssignmentsV2>>;
 export {
   getAssignments,
   getAssignmentById,

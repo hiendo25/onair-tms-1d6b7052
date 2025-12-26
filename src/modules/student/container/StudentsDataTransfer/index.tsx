@@ -19,14 +19,18 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 
 import useDebounce from "@/hooks/useDebounce";
 import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
-import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import { useUserOrganization } from "@/modules/organization";
+import { GetStudentsQueryParams } from "@/repository/employee";
 import { CloseIcon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
 import { cn } from "@/utils";
+// import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
+import { useGetStudentsQuery } from "../../operation/query";
 
 import CheckAllStudents from "./CheckAllStudent";
-import EmployeeFilter from "./EmployeeFilter";
+import EmployeeFilter, { EmployeeFilterProps } from "./EmployeeFilter";
+import usePreviousData from "./usePreviousData";
 
 const BoxWraper = styled("div")(({ theme }) => ({
   border: "1px solid",
@@ -55,33 +59,36 @@ const BoxContent = styled(Box)(() => ({
   overflowY: "auto",
   scrollbarWidth: "thin",
 }));
-export interface StudentsContainerProps {
-  seletedItems?: StudentSelectedItem[];
+export interface StudentDataTransferProps {
+  selectedItems?: StudentSelectedItem[];
   selectedStudentIds?: string[];
-  onChange: (data: StudentSelectedItem[]) => void;
+  onChange?: (data: StudentSelectedItem[]) => void;
 }
-const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = [], onChange }) => {
-  const [queryParams, setQueryParams] = React.useState({ page: 1, pageSize: 20, search: "" });
-  const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(seletedItems);
-  const [selectedDepartmentIds, setSelectedDepartmentIds] = React.useState<string[]>([]);
-  const [selectedBranchIds, setSelectedBranchIds] = React.useState<string[]>([]);
-  const searchEmployeeNameDebounce = useDebounce(queryParams.search, 600);
-  const { data: employeeData, isPending } = useGetEmployeeQuery({
+const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
+  selectedItems = [],
+  onChange,
+  selectedStudentIds,
+}) => {
+  const { orgId } = useUserOrganization((state) => state.currentOrganization);
+
+  const [queryParams, setQueryParams] = React.useState<Required<GetStudentsQueryParams>>({
+    page: 1,
+    pageSize: 20,
+    search: "",
+    departmentIds: [],
+    branchIds: [],
+    organizationId: orgId,
+    excludes: [],
+  });
+  const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(selectedItems);
+
+  const { data: employeeData, isPending } = useGetStudentsQuery({
     enabled: true,
     queryParams: {
       ...queryParams,
-      search: searchEmployeeNameDebounce,
-      organizationUnitIds: [...selectedDepartmentIds, ...selectedBranchIds],
-      // excludes: values,
+      search: useDebounce(queryParams.search, 600),
+      organizationId: orgId,
     },
-  });
-
-  const prevEmployeeList = React.useRef<EmployeeStudentWithProfileItem[]>([]);
-  const prevPaginationRef = React.useRef({
-    total: 0,
-    pageTotal: 1,
-    page: queryParams.page,
-    pageSize: queryParams.pageSize,
   });
 
   const employeeList = React.useMemo(() => {
@@ -89,109 +96,128 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
   }, [employeeData?.data]);
 
   const pageTotal = React.useMemo(() => {
-    if (!employeeData?.count) return 1;
-    return Math.ceil(employeeData.count / queryParams.pageSize);
+    return employeeData?.count ? Math.ceil(employeeData.count / queryParams.pageSize) : 1;
   }, [employeeData?.count, queryParams.pageSize]);
 
-  const total = React.useMemo(() => employeeData?.count || 0, [employeeData?.count]);
+  const totalItems = React.useMemo(() => employeeData?.count ?? 0, [employeeData?.count]);
+
+  const previousData = usePreviousData(
+    {
+      items: employeeList,
+      page: queryParams.page,
+      pageSize: queryParams.pageSize,
+      pageTotal: pageTotal,
+      total: totalItems,
+    },
+    [employeeList, queryParams, totalItems],
+  );
 
   const studentPagingCount = React.useMemo(() => {
     if (queryParams.page === pageTotal) {
-      return `${(queryParams.page - 1) * queryParams.pageSize} - ${prevPaginationRef.current.total}`;
+      return `${(queryParams.page - 1) * queryParams.pageSize} - ${previousData.total}`;
     }
     return `${(queryParams.page - 1) * queryParams.pageSize} - ${queryParams.page * queryParams.pageSize}`;
-  }, [queryParams, pageTotal, prevPaginationRef]);
+  }, [queryParams, pageTotal, previousData]);
 
-  const handleChagePage: PaginationProps["onChange"] = (evt, newPage) => {
+  console.table(previousData);
+  const handleChangePage: PaginationProps["onChange"] = (evt, newPage) => {
     setQueryParams((prev) => ({ ...prev, page: newPage }));
   };
 
   const handleAddEmployee = (emp: EmployeeStudentWithProfileItem) => {
-    setSelectedStudents((prevSelectedStudents) => {
-      const existItem = prevSelectedStudents.find((it) => it.id === emp.id);
-      const newSelectedStudents = existItem
-        ? prevSelectedStudents
-        : [
-            ...prevSelectedStudents,
-            {
-              id: emp.id,
-              email: emp.profiles.email,
-              fullName: emp.profiles.full_name,
-              employeeCode: emp.employee_code,
-              avatar: emp.profiles.avatar,
-              empoyeeType: emp.employee_type,
-            },
-          ];
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    const existItem = selectedStudents.find((it) => it.id === emp.id);
+
+    const newSelectedStudents = existItem
+      ? selectedStudents
+      : [
+          ...selectedStudents,
+          {
+            id: emp.id,
+            email: emp.profiles.email,
+            fullName: emp.profiles.full_name,
+            employeeCode: emp.employee_code,
+            avatar: emp.profiles.avatar,
+            employeeType: emp.employee_type,
+          },
+        ];
+    if (onChange) {
+      onChange?.(newSelectedStudents);
+      return;
+    }
+
+    setSelectedStudents(newSelectedStudents);
   };
 
   const handleRemoveItem = (itemId: string) => {
-    setSelectedStudents((prevSelectedStudents) => {
-      const newSelectedStudents = prevSelectedStudents.filter((item) => item.id !== itemId);
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    const updateStudents = selectedStudents.filter((item) => item.id !== itemId);
+    if (onChange) {
+      onChange?.(updateStudents);
+      return;
+    }
+
+    setSelectedStudents(updateStudents);
   };
 
   const handleCheckAllStudents = (checked?: boolean) => {
     const students = employeeData?.data;
     if (!students?.length) return;
 
-    setSelectedStudents((prevSelectedStudents) => {
-      const newSelectedStudents: StudentSelectedItem[] = [];
+    let newSelectedStudents: StudentSelectedItem[] = [];
 
-      const studentsFormated = students.map<StudentSelectedItem>((item) => ({
-        id: item.id,
-        fullName: item.profiles.full_name,
-        email: item.profiles.email || "",
-        employeeCode: item.employee_code,
-        empoyeeType: item.employee_type,
-        avatar: item.profiles.avatar || "",
-      }));
+    const studentsFormatted = students.map<StudentSelectedItem>((item) => ({
+      id: item.id,
+      fullName: item.profiles.full_name,
+      email: item.profiles.email || "",
+      employeeCode: item.employee_code,
+      employeeType: item.employee_type,
+      avatar: item.profiles.avatar || "",
+    }));
 
-      if (checked) {
-        const studentsMap = new Map<string, StudentSelectedItem>();
+    if (checked) {
+      const studentsMap = new Map<string, StudentSelectedItem>();
 
-        [...studentsFormated, ...prevSelectedStudents].forEach((item) => {
-          studentsMap.set(item.id, item);
-        });
+      [...studentsFormatted, ...selectedStudents].forEach((item) => {
+        studentsMap.set(item.id, item);
+      });
 
-        for (const [key, value] of studentsMap.entries()) {
-          newSelectedStudents.push(value);
-        }
-      } else {
-        prevSelectedStudents.forEach((sltItem) => {
-          if (studentsFormated.every((it) => it.id !== sltItem.id)) {
-            newSelectedStudents.push(sltItem);
-          }
-        });
+      for (const [key, value] of studentsMap.entries()) {
+        newSelectedStudents.push(value);
       }
-      onChange(newSelectedStudents);
-      return newSelectedStudents;
-    });
+    } else {
+      selectedStudents.forEach((sltItem) => {
+        if (studentsFormatted.every((it) => it.id !== sltItem.id)) {
+          newSelectedStudents.push(sltItem);
+        }
+      });
+    }
+    if (onChange) {
+      onChange?.(newSelectedStudents);
+      return;
+    }
+    setSelectedStudents(newSelectedStudents);
   };
 
-  const handleRemoveALl = () => {
+  const handleRemoveAll = () => {
+    if (onChange) {
+      onChange([]);
+      return;
+    }
     setSelectedStudents([]);
-    onChange([]);
+  };
+
+  const handleChangeFilter: EmployeeFilterProps["onChange"] = (type) => (newValues) => {
+    setQueryParams((prev) => ({
+      ...prev,
+      departmentIds: type === "department" ? newValues : prev.departmentIds,
+      branchIds: type === "branch" ? newValues : prev.branchIds,
+    }));
   };
 
   React.useEffect(() => {
-    if (isPending) return;
-    prevPaginationRef.current = { pageTotal, total, page: queryParams.page, pageSize: queryParams.pageSize };
-  }, [pageTotal, total, isPending, queryParams]);
+    console.log({ selectedItems, selectedStudents });
 
-  React.useEffect(() => {
-    if (isPending) return;
-    prevEmployeeList.current = employeeData?.data || [];
-  }, [isPending, employeeData]);
-
-  React.useEffect(() => {
-    if (!seletedItems.length) return;
-    setSelectedStudents(seletedItems);
-  }, [seletedItems]);
+    setSelectedStudents(selectedItems);
+  }, [selectedItems, selectedStudents]);
 
   return (
     <div className="employee-data-transfer relative">
@@ -200,22 +226,23 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
         <div className="w-1/2">
           <BoxWraper>
             <BoxHeader>
-              <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem" }}>{`Tất cả học viên (${total})`}</Typography>
+              <Typography
+                sx={{ fontWeight: "bold", fontSize: "0.875rem" }}
+              >{`Tất cả học viên (${totalItems})`}</Typography>
             </BoxHeader>
             <BoxToolbar>
               <CheckAllStudents
                 onCheckAll={handleCheckAllStudents}
                 selectedStudents={selectedStudents}
-                students={employeeData?.data}
+                students={employeeData?.data?.map((item) => ({ id: item.id, code: item.employee_code }))}
               />
               <EmployeeFilter
                 onSearch={(searchText) => {
                   setQueryParams((prev) => ({ ...prev, search: searchText }));
                 }}
-                setSelectedDepartmentIds={setSelectedDepartmentIds}
-                setSelectedBranchIds={setSelectedBranchIds}
-                seletectedBranchIds={selectedBranchIds}
-                selectedDepartmentIds={selectedDepartmentIds}
+                onChange={handleChangeFilter}
+                selectedBranchIds={queryParams.branchIds}
+                selectedDepartmentIds={queryParams.departmentIds}
               />
             </BoxToolbar>
             <Divider />
@@ -225,7 +252,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               })}
             >
               <div className="flex flex-col">
-                {(isPending && prevEmployeeList.current.length ? prevEmployeeList.current : employeeList).map((emp) => (
+                {(isPending && previousData.items.length ? previousData.items : employeeList).map((emp) => (
                   <StudentItem
                     key={emp.id}
                     data={{
@@ -252,15 +279,15 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               <div>
                 <Typography
                   sx={{ fontSize: "0.875rem", color: "text.secondary" }}
-                >{`Hiển thị ${studentPagingCount} trên ${total}`}</Typography>
+                >{`Hiển thị ${studentPagingCount} / ${totalItems}`}</Typography>
               </div>
               <Pagination
                 variant="text"
                 size="small"
                 shape="rounded"
-                count={isPending ? prevPaginationRef.current.pageTotal : pageTotal}
-                page={isPending ? prevPaginationRef.current.page : queryParams.page}
-                onChange={handleChagePage}
+                count={isPending ? previousData.pageTotal : pageTotal}
+                page={isPending ? previousData.page : queryParams.page}
+                onChange={handleChangePage}
                 disabled={isPending}
               />
             </div>
@@ -274,7 +301,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
               >{`Học viên đã chọn (${selectedStudents.length})`}</Typography>
             </BoxHeader>
             <BoxToolbar>
-              <Button variant="text" className="ml-auto" disabled={!selectedStudents.length} onClick={handleRemoveALl}>
+              <Button variant="text" className="ml-auto" disabled={!selectedStudents.length} onClick={handleRemoveAll}>
                 Xoá tất cả
               </Button>
             </BoxToolbar>
@@ -320,7 +347,7 @@ const StudentsContainer: React.FC<StudentsContainerProps> = ({ seletedItems = []
   );
 };
 
-export default StudentsContainer;
+export default StudentDataTransfer;
 
 interface StudentItemProps {
   data: {

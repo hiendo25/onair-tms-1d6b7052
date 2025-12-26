@@ -209,7 +209,7 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
               disableColumnSelector
               disableColumnSorting
               disableColumnResize
-              disableRowSelectionOnClick
+              // disableRowSelectionOnClick
               disableColumnMenu
               paginationMode="server"
               onRowSelectionModelChange={handleRowSelectModelChange}

@@ -1,5 +1,7 @@
 import { useTQuery } from "@/lib/queryClient";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
+import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
+import { GetAssignmentsQueryParams } from "@/repository/assignments/type";
 import * as assignmentService from "@/services/assignments/assignment.service";
 import type {
   AssignmentDto,
@@ -27,7 +29,7 @@ export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
       if (params?.search) {
         searchParams.set("search", params.search);
       }
-      if (params) {
+      if (params?.organizationId) {
         searchParams.set("organizationId", params?.organizationId);
       }
       const response = await fetch(`/api/assignments?${searchParams.toString()}`);
@@ -128,5 +130,16 @@ export const useGetMyAssignmentsQuery = (params?: GetMyAssignmentsParams) => {
       }
       return response.json();
     },
+  });
+};
+
+export const useGetAssignmentsV2Query = (variables?: { queryParams: GetAssignmentsQueryParams; enabled?: boolean }) => {
+  const { queryParams, enabled = true } = variables || {};
+  return useTQuery({
+    queryKey: [GET_ASSIGNMENTS, queryParams],
+    queryFn: async () => {
+      return await assignmentsRepository.getAssignmentsV2(queryParams);
+    },
+    enabled,
   });
 };

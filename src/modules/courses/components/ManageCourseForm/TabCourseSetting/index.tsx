@@ -3,21 +3,21 @@ import { Box, Typography } from "@mui/material";
 
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import { useUpsertCourseStore } from "@/modules/courses/store/upsert-course-context";
+import StudentDataTransfer, { StudentDataTransferProps } from "@/modules/student/container/StudentsDataTransfer";
 import { useUpsertCourseFormContext } from "../UpsertCourseFormContainer";
 
 import QrSetting from "./QrSetting";
-import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
-
+// import StudentsContainer, { StudentsContainerProps } from "./StudentsContainer";
 const TabClassRoomSetting = () => {
   const setStudents = useUpsertCourseStore((state) => state.actions.setSelectedStudents);
   const selectedStudents = useUpsertCourseStore((state) => state.state.selectedStudents);
 
-  const handleSelect: StudentsContainerProps["onChange"] = (employees) => {
+  const handleSelect: StudentDataTransferProps["onChange"] = (employees) => {
     const students = employees.map<StudentSelectedItem>((item) => ({
       id: item.id,
       avatar: item.avatar,
       email: item.email,
-      empoyeeType: item.empoyeeType,
+      employeeType: item.employeeType,
       employeeCode: item.employeeCode,
       fullName: item.fullName,
     }));
@@ -46,7 +46,7 @@ const TabClassRoomSetting = () => {
             Thêm học viên <span className="text-red-600">*</span>
           </Typography>
         </div>
-        <StudentsContainer seletedItems={selectedStudents} onChange={handleSelect} />
+        <StudentDataTransfer selectedItems={selectedStudents} onChange={handleSelect} />
       </Box>
     </div>
   );

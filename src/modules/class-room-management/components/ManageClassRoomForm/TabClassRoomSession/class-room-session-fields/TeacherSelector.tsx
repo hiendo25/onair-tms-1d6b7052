@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
+import React, { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
 import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
 
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
@@ -35,7 +35,7 @@ const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(
         avatar: item.profiles.avatar,
         id: item.id,
         fullName: item.profiles.full_name,
-        empoyeeType: item.employee_type,
+        employeeType: item.employee_type,
         employeeCode: item.employee_code,
         email: item.profiles.email,
       }));

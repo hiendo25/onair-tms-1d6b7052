@@ -6,6 +6,7 @@ import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
 import SingleSession, { SingleSessionRef } from "./SingleSession";
+import SingleSessionLearningPath from "./SingleSessionLearningPath";
 
 export const initClassSessionFormData = (init?: {
   sessionType?: "online" | "offline" | "live";
@@ -22,7 +23,7 @@ export const initClassSessionFormData = (init?: {
     sessionType: init?.sessionType ?? "live",
     agendas: [],
     coursesPeriod: [],
-    assessmentId: "",
+    assignments: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
   };
 };
@@ -37,6 +38,7 @@ const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessi
   const multipleSessionRef = useRef<MultipleSessionRef>(null);
   const { getValues } = methods;
   const classRoomType = getValues("roomType");
+  const isLearningPath = getValues("isLearningPath");
 
   useImperativeHandle(ref, () => ({
     checkAllFields: async () => {
@@ -48,6 +50,15 @@ const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessi
       return false;
     },
   }));
+
+  if (isLearningPath) {
+    return (
+      <div>
+        {classRoomType === "single" ? <SingleSessionLearningPath methods={methods} ref={singleSessionRef} /> : null}
+        {/* {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}  */}
+      </div>
+    );
+  }
   return (
     <div>
       {classRoomType === "single" ? <SingleSession methods={methods} ref={singleSessionRef} /> : null}

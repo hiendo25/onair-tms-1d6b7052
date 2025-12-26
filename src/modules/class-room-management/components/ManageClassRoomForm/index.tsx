@@ -21,10 +21,22 @@ export interface ManageClassRoomFormProps {
   initFormValue?: ClassRoomFormContainerProps["value"];
   students?: ClassRoomStore["state"]["selectedStudents"]; // init students
   teachers?: ClassRoomStore["state"]["selectedTeachers"]; // init teachers
+  isLearningPath?: boolean;
 }
 const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
   (
-    { onSubmit, initFormValue, action = "create", isLoading = false, teachers, students, platform, roomType, onCancel },
+    {
+      onSubmit,
+      initFormValue,
+      action = "create",
+      isLoading = false,
+      teachers,
+      students,
+      platform,
+      roomType,
+      onCancel,
+      isLearningPath = false,
+    },
     ref,
   ) => {
     return (
@@ -38,6 +50,7 @@ const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFo
           value={initFormValue}
           platform={platform}
           roomType={roomType}
+          isLearningPath={isLearningPath}
         />
       </ClassRoomProvider>
     );

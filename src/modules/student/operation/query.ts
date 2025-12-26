@@ -3,7 +3,8 @@ import { useTQuery } from "@/lib";
 import { employeeRepository } from "@/repository";
 import { GetStudentsQueryParams } from "@/repository/employee";
 
-const useGetStudentsQuery = (queryParams: GetStudentsQueryParams) => {
+const useGetStudentsQuery = (options?: { enabled?: boolean; queryParams: GetStudentsQueryParams }) => {
+  const { enabled = true, queryParams } = options || {};
   return useTQuery({
     queryKey: [QUERY_KEYS.GET_STUDENTS],
     queryFn: () => employeeRepository.getStudents(queryParams),

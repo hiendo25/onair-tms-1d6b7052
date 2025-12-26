@@ -6,7 +6,7 @@ import { MarkerPin01Icon } from "@/shared/assets/icons";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { type ClassRoom } from "../classroom-form.schema";
 
-import AgendarFields from "./class-room-session-fields/AgendarFields";
+import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
 import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
 import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
@@ -40,10 +40,7 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
         <div key={_sessionId}>
           <div className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
             <ClassRoomSessionFromToDate index={_index} control={control} />
-            {/* 
-             * Update BA no need teacher for class session 20/11/2025
-             /*
-            <TeacherSelector sessionIndex={_index} /> */}
+
             <CoursePeriodSelector sessionIndex={_index} methods={methods} />
             <AssessmentField sessionIndex={_index} control={control} />
             {sessionType === "live" && <RoomChannel control={control} index={_index} />}
@@ -60,7 +57,7 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
                 <QRCodeSettingFields sessionIndex={_index} control={control} />
               </>
             )}
-            <AgendarFields sessionIndex={_index} />
+            <AgendaFieldsControl sessionIndex={_index} />
           </div>
         </div>
       ))}

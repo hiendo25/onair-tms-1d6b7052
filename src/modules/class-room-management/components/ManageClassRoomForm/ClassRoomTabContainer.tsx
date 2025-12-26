@@ -10,7 +10,7 @@ import { tabClasses } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import { FieldErrors, UseFormTrigger } from "react-hook-form";
 
-import { CheckCircleIcon } from "@/shared/assets/icons";
+import { CheckCircleIcon, Loading } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 
 import { ClassRoom } from "./classroom-form.schema";
@@ -72,11 +72,13 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
 
     const handleChangeTab = useCallback(
       (_: React.SyntheticEvent, newTab: TabKeyType) =>
-        validateCurrentTabBeforeProceed(currentTab, () => {
-          setCurrentTab((oldTab) => {
-            const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
-            const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
-            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+        startGotoNextTab(() => {
+          validateCurrentTabBeforeProceed(currentTab, () => {
+            setCurrentTab((oldTab) => {
+              const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
+              const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+              return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+            });
           });
         }),
       [currentTab],
@@ -117,7 +119,11 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
                   value={tabKey}
                   label={
                     <div className="flex items-center gap-1">
-                      {tabsState[tabKey].status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
+                      {tabsState[tabKey].status === "valid" ? (
+                        <CheckCircleIcon className="w-5 h-5" />
+                      ) : icon ? (
+                        icon
+                      ) : null}
                       {tabName}
                     </div>
                   }
@@ -130,7 +136,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
             </ClassRoomTabList>
             <div className="tab-actions">{actions}</div>
           </div>
-          <div className="panels-wraper">
+          <div className="panels-wrapper">
             {items.map((item) => (
               <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
                 {item?.content}
