@@ -48,9 +48,9 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
           </div>
         }
       />
-      <DocumentFields />
       <ClassFieldSelector control={control} />
       <TextEditor label="Nội dung khóa học" control={control} name="description" required />
+      <DocumentFields />
       <ForWhomFields />
     </div>
   );

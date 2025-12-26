@@ -26,7 +26,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   }
 
   return (
-    <div className="depart-ment">
+    <div className="department">
       {departmentList.map((item) => (
         <div key={item.id}>
           <FormControlLabel

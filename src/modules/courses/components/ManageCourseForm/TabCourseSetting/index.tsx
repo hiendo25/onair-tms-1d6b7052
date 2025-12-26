@@ -26,7 +26,7 @@ const TabClassRoomSetting = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <Box component="div" className="bg-white p-6 rounded-xl hidden">
+      <Box component="div" className="rounded-xl hidden">
         <div className="mb-6 flex flex-col gap-2">
           <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
             Thiết lập thời gian hiệu lực cho môn học <span className="text-red-600">*</span>
