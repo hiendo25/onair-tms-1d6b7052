@@ -112,8 +112,13 @@ export default function StepPhases() {
 
   const handleDescriptionChange = (index: number, value: string) => {
     const updatedPhases = [...phases];
+    const currentPhase = updatedPhases[index];
+    if (!currentPhase) return;
+
     updatedPhases[index] = {
-      ...updatedPhases[index],
+      ...currentPhase,
+      order: currentPhase.order,
+      class_rooms: currentPhase.class_rooms,
       description: value,
     };
     setValue("phases", updatedPhases, { shouldValidate: false });
@@ -133,9 +138,14 @@ export default function StepPhases() {
     if (currentPhaseIndex === null) return;
 
     const updatedPhases = [...phases];
+    const currentPhase = updatedPhases[currentPhaseIndex];
+    if (!currentPhase) return;
+
     updatedPhases[currentPhaseIndex] = {
-      ...updatedPhases[currentPhaseIndex],
-      class_rooms: selectedClassRooms as ClassRoom[],
+      ...currentPhase,
+      order: currentPhase.order,
+      description: currentPhase.description,
+      class_rooms: selectedClassRooms,
     };
     // Only validate if class-rooms are being added
     const shouldValidate = selectedClassRooms.length > 0;
@@ -144,9 +154,14 @@ export default function StepPhases() {
 
   const handleRemoveClassRoom = (phaseIndex: number, classRoomId: string) => {
     const updatedPhases = [...phases];
+    const currentPhase = updatedPhases[phaseIndex];
+    if (!currentPhase) return;
+
     updatedPhases[phaseIndex] = {
-      ...updatedPhases[phaseIndex],
-      class_rooms: updatedPhases[phaseIndex].class_rooms.filter((room) => room.id !== classRoomId),
+      ...currentPhase,
+      order: currentPhase.order,
+      description: currentPhase.description,
+      class_rooms: currentPhase.class_rooms.filter((room) => room.id !== classRoomId),
     };
     setValue("phases", updatedPhases, { shouldValidate: false });
   };
@@ -316,7 +331,7 @@ export default function StepPhases() {
           open={dialogOpen}
           onClose={handleCloseDialog}
           onConfirm={handleConfirmSelection}
-          initialSelected={phases[currentPhaseIndex]?.class_rooms || []}
+          initialSelected={(phases[currentPhaseIndex]?.class_rooms || []) as ClassRoomItem[]}
           organizationId={organizationId}
           employeeId={employeeId}
           title="Chọn lớp học"

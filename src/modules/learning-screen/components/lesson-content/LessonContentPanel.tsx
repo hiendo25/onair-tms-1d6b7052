@@ -13,7 +13,6 @@ import type {
   LearningLesson,
   LearningLessonSummary,
 } from "@/modules/learning-screen/types";
-import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
 import { inferLessonContentKind } from "@/modules/learning-screen/utils/resource";
 
 import AssessmentLessonFrame from "./AssessmentLessonFrame";
@@ -27,36 +26,27 @@ const DESCRIPTION_COLLAPSED_HEIGHT = 320;
 interface LessonContentPanelProps {
   course: CourseRow;
   lesson: LearningLesson | null;
-  lessonProgress: StoredLessonProgress | null;
   orderedLessons: LearningLessonSummary[];
   selectedLessonSummary: LearningLessonSummary | null;
   onSelectLesson: (lessonId: string) => void;
-  onPersistVideoProgress: (lessonId: string, payload: { position: number; duration?: number }) => void;
-  onPersistDocumentProgress: (
-    lessonId: string,
-    payload: { page: number; totalPages?: number; zoom?: number },
-  ) => void;
-  onToggleCompletion: (lessonId: string, completed: boolean) => void;
   studentId: string | null;
   isLessonLoading: boolean;
   lessonError: string | null;
   onRetryLesson?: () => void;
+  learningPathId?: string | null;
 }
 
 const LessonContentPanel = ({
   course,
   lesson,
-  lessonProgress,
   orderedLessons,
   selectedLessonSummary,
   onSelectLesson,
-  onPersistVideoProgress,
-  onPersistDocumentProgress,
-  onToggleCompletion,
   studentId,
   isLessonLoading,
   lessonError,
   onRetryLesson,
+  learningPathId,
 }: LessonContentPanelProps) => {
   const descriptionRef = useRef<HTMLDivElement | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -148,7 +138,6 @@ const LessonContentPanel = ({
   const lessonIndex = orderedLessons.findIndex((item) => item.id === lesson.id);
   const prevLesson = orderedLessons[lessonIndex - 1] ?? null;
   const nextLesson = orderedLessons[lessonIndex + 1] ?? null;
-  const isCompleted = Boolean(lessonProgress?.completed);
   const contentKind = inferLessonContentKind(lesson);
 
   const renderLessonContent = () => {
@@ -157,11 +146,11 @@ const LessonContentPanel = ({
         <VideoLessonPlayer
           resource={lesson.mainResource ?? null}
           lesson={lesson}
-          lessonProgress={lessonProgress}
-          onProgressChange={(payload) => onPersistVideoProgress(lesson.id, payload)}
-          onToggleCompletion={(completed) => onToggleCompletion(lesson.id, completed)}
           onRequestNextLesson={nextLesson ? () => onSelectLesson(nextLesson.id) : undefined}
           nextLessonTitle={nextLesson?.title ?? null}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
         />
       );
     }
@@ -174,9 +163,10 @@ const LessonContentPanel = ({
           lesson={lesson}
           resource={lesson.mainResource ?? null}
           contentKind={documentKind}
-          lessonProgress={lessonProgress}
-          onProgressChange={(payload) => onPersistDocumentProgress(lesson.id, payload)}
-          onToggleCompletion={(completed) => onToggleCompletion(lesson.id, completed)}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }
@@ -185,7 +175,11 @@ const LessonContentPanel = ({
       return (
         <ScormLessonViewer
           resource={lesson.mainResource ?? null}
-          onToggleCompletion={(completed) => onToggleCompletion(lesson.id, completed)}
+          lesson={lesson}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }
@@ -196,7 +190,10 @@ const LessonContentPanel = ({
         <AssessmentLessonFrame
           assignmentId={assignmentId}
           studentId={studentId}
-          onToggleCompletion={(completed) => onToggleCompletion(lesson.id, completed)}
+          lesson={lesson}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }
@@ -336,7 +333,7 @@ const LessonContentPanel = ({
           <Stack
             direction={{ xs: "column", md: "row" }}
             spacing={1.5}
-            justifyContent="space-between"
+            justifyContent="flex-start"
             alignItems={{ xs: "stretch", md: "center" }}
           >
             <Stack direction="row" spacing={1}>
@@ -351,14 +348,6 @@ const LessonContentPanel = ({
                 </Button>
               ) : null}
             </Stack>
-
-            <Button
-              variant={isCompleted ? "outlined" : "contained"}
-              color={isCompleted ? "success" : "primary"}
-              onClick={() => onToggleCompletion(lesson.id, !isCompleted)}
-            >
-              {isCompleted ? "Đánh dấu chưa hoàn thành" : "Đánh dấu hoàn thành"}
-            </Button>
           </Stack>
         </Stack>
       </Box>

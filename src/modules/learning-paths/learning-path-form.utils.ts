@@ -12,7 +12,12 @@ export const buildLearningPathFormDefaultValues = (
       assignedEmployees: initialData?.info?.assignedEmployees || [],
     },
     phases: initialData?.phases || [],
-    settings: initialData?.settings || {},
+    settings: initialData?.settings || {
+      sequentialLearning: false,
+      completionCriteria: 80,
+      deadlineType: "none",
+      allowRetake: false,
+    },
   };
 };
 

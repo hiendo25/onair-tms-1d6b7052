@@ -166,6 +166,8 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({ selectedItems
 
     if (checked) {
       const studentsMap = new Map<string, StudentSelectedItem>();
+    if (checked) {
+      const studentsMap = new Map<string, StudentSelectedItem>();
 
       [...studentsFormatted, ...selectedStudents].forEach((item) => {
         studentsMap.set(item.id, item);
@@ -193,7 +195,6 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({ selectedItems
       onChange([]);
       return;
     }
-    setSelectedStudents([]);
   };
 
   const handleChangeFilter: EmployeeFilterProps["onChange"] = (type) => (newValues) => {

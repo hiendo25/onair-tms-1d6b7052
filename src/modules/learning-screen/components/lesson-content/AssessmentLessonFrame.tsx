@@ -2,14 +2,26 @@ import { Alert, Stack, Typography } from "@mui/material";
 
 import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
 import { PATHS } from "@/constants/path.constant";
+import type { LearningLesson, LearningLessonSummary } from "@/modules/learning-screen/types";
+import MarkLessonCompleteButton from "../MarkLessonCompleteButton";
 
 interface AssessmentLessonFrameProps {
   assignmentId: string | null;
   studentId: string | null;
-  onToggleCompletion: (completed: boolean) => void;
+  lesson: LearningLesson;
+  learningPathId?: string | null;
+  courseId?: string | null;
+  selectedLessonSummary?: LearningLessonSummary | null;
 }
 
-const AssessmentLessonFrame = ({ assignmentId, studentId, onToggleCompletion }: AssessmentLessonFrameProps) => {
+const AssessmentLessonFrame = ({
+  assignmentId,
+  studentId,
+  lesson,
+  learningPathId,
+  courseId,
+  selectedLessonSummary,
+}: AssessmentLessonFrameProps) => {
   if (!assignmentId) {
     return <Alert severity="warning">Chưa gắn bài kiểm tra cho bài học này.</Alert>;
   }
@@ -29,7 +41,14 @@ const AssessmentLessonFrame = ({ assignmentId, studentId, onToggleCompletion }: 
         employeeId={studentId}
         basePath={PATHS.MY_ASSIGNMENTS.ROOT}
         variant="embedded"
-        onSubmitted={() => onToggleCompletion(true)}
+      />
+
+      <MarkLessonCompleteButton
+        lessonId={lesson.id}
+        learningPathId={learningPathId}
+        courseId={courseId}
+        studentId={studentId}
+        selectedLessonSummary={selectedLessonSummary}
       />
     </Stack>
   );

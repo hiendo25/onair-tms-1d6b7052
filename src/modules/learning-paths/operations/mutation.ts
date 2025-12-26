@@ -79,3 +79,60 @@ export function useDeleteLearningPathMutation() {
   });
 }
 
+interface UpdateLearningPathResponse {
+  success: boolean;
+  message: string;
+  learning_path_id: string;
+}
+
+interface UpdateLearningPathMutationParams {
+  id: string;
+  data: LearningPathFormSchema;
+}
+
+async function updateLearningPath(
+  params: UpdateLearningPathMutationParams,
+  organizationId: string
+): Promise<UpdateLearningPathResponse> {
+  const response = await fetch(`/api/learning-paths/${params.id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "x-organization-id": organizationId,
+    },
+    body: JSON.stringify(params.data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to update learning path");
+  }
+
+  return response.json();
+}
+
+export function useUpdateLearningPathMutation() {
+  const queryClient = useQueryClient();
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+
+  return useTMutation({
+    mutationFn: (params: UpdateLearningPathMutationParams) => {
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+      return updateLearningPath(params, organizationId);
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate all learning paths queries to refetch the list
+      queryClient.invalidateQueries({
+        queryKey: LEARNING_PATHS_KEYS.lists(),
+      });
+      // Invalidate the specific learning path detail query
+      queryClient.invalidateQueries({
+        queryKey: LEARNING_PATHS_KEYS.detail(variables.id),
+      });
+    },
+  });
+}
+

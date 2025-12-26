@@ -12,8 +12,10 @@ import { GetAssignmentsQueryParams } from "./type";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
   const supabase = createClient();
-  const { page = 0, limit = 20, search, createdBy } = params || {};
+  const { page = 0, limit = 20, search, organizationId, createdBy } = params || {};
 
+  let query = supabase.from("assignments").select(
+    `
   let query = supabase.from("assignments").select(
     `
       id,
@@ -53,6 +55,8 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
     `,
     { count: "exact" },
   );
+    { count: "exact" },
+  );
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
@@ -61,6 +65,9 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
   if (createdBy) {
     query = query.eq("created_by", createdBy);
   }
+  // if (organizationId) {
+  //   query = query.eq("created_by", organizationId);
+  // }
 
   const from = page * limit;
   const to = from + limit - 1;

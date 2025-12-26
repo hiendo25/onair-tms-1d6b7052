@@ -55,7 +55,7 @@ export default function ClassRoomTableList() {
       page,
       limit: PAGE_SIZE,
       organizationId,
-      employeeId,
+      employeeId: employeeType !== "admin" ? employeeId : undefined,
       orderField: "created_at",
       orderBy: "desc",
     };
@@ -70,6 +70,7 @@ export default function ClassRoomTableList() {
     page,
     organizationId,
     employeeId,
+    employeeType,
   ]);
 
   const { data: classRoomsResult, isLoading, isError, refetch } = useGetClassRoomsPriorityQuery(queryInput);

@@ -7,14 +7,26 @@ import {
 } from "@mui/material";
 
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
-import type { ResourceRow } from "@/modules/learning-screen/types";
+import type { LearningLesson, LearningLessonSummary, ResourceRow } from "@/modules/learning-screen/types";
+import MarkLessonCompleteButton from "../MarkLessonCompleteButton";
 
 interface ScormLessonViewerProps {
   resource: ResourceRow | null;
-  onToggleCompletion: (completed: boolean) => void;
+  lesson: LearningLesson;
+  learningPathId?: string | null;
+  courseId?: string | null;
+  studentId?: string | null;
+  selectedLessonSummary?: LearningLessonSummary | null;
 }
 
-const ScormLessonViewer = ({ resource, onToggleCompletion }: ScormLessonViewerProps) => {
+const ScormLessonViewer = ({
+  resource,
+  lesson,
+  learningPathId,
+  courseId,
+  studentId,
+  selectedLessonSummary,
+}: ScormLessonViewerProps) => {
   const { url, isLoading, error } = useResourceUrl(resource);
 
   return (
@@ -44,19 +56,24 @@ const ScormLessonViewer = ({ resource, onToggleCompletion }: ScormLessonViewerPr
         </Box>
       )}
 
-      {url ? (
-        <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="space-between" alignItems="center">
+        {url && (
           <Button
             variant="outlined"
             onClick={() => window.open(url, "_blank")}
           >
             Mở trong tab mới
           </Button>
-          <Button variant="contained" onClick={() => onToggleCompletion(true)}>
-            Đánh dấu hoàn thành
-          </Button>
-        </Stack>
-      ) : null}
+        )}
+
+        <MarkLessonCompleteButton
+          lessonId={lesson.id}
+          learningPathId={learningPathId}
+          courseId={courseId}
+          studentId={studentId}
+          selectedLessonSummary={selectedLessonSummary}
+        />
+      </Stack>
     </Stack>
   );
 };

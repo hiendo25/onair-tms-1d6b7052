@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
@@ -8,7 +8,6 @@ import ZoomOutIcon from "@mui/icons-material/ZoomOut";
 import {
   Alert,
   Box,
-  Button,
   IconButton,
   Stack,
   Typography,
@@ -17,9 +16,10 @@ import {
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 import type {
   LearningLesson,
+  LearningLessonSummary,
   ResourceRow,
 } from "@/modules/learning-screen/types";
-import type { StoredLessonProgress } from "@/modules/learning-screen/utils/progressStorage";
+import MarkLessonCompleteButton from "../MarkLessonCompleteButton";
 
 
 const splitTextIntoPages = (content: string | null): string[] => {
@@ -50,9 +50,10 @@ interface DocumentLessonViewerProps {
   lesson: LearningLesson;
   resource: ResourceRow | null;
   contentKind: "pdf" | "document" | "text";
-  lessonProgress: StoredLessonProgress | null;
-  onProgressChange: (payload: { page: number; totalPages?: number; zoom?: number }) => void;
-  onToggleCompletion: (completed: boolean) => void;
+  learningPathId?: string | null;
+  courseId?: string | null;
+  studentId?: string | null;
+  selectedLessonSummary?: LearningLessonSummary | null;
 }
 
 const MIN_ZOOM = 0.6;
@@ -64,16 +65,17 @@ const DocumentLessonViewer = ({
   lesson,
   resource,
   contentKind,
-  lessonProgress,
-  onProgressChange,
-  onToggleCompletion,
+  learningPathId,
+  courseId,
+  studentId,
+  selectedLessonSummary,
 }: DocumentLessonViewerProps) => {
   const { url, error } = useResourceUrl(resource);
   const isPdf = contentKind === "pdf";
 
-  const [currentPage, setCurrentPage] = useState(lessonProgress?.document?.page ?? 1);
-  const [totalPages, setTotalPages] = useState(lessonProgress?.document?.totalPages ?? 1);
-  const [zoom, setZoom] = useState(lessonProgress?.document?.zoom ?? 1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [zoom, setZoom] = useState(1);
 
   const zoomPercent = useMemo(() => Math.round(zoom * 100), [zoom]);
 
@@ -101,27 +103,13 @@ const DocumentLessonViewer = ({
   useEffect(() => {
     if (isPdf) {
       setTotalPages(1);
-      setCurrentPage(lessonProgress?.document?.page ?? 1);
+      setCurrentPage(1);
       return;
     }
     const maxPages = Math.max(textPages.length, 1);
     setTotalPages(maxPages);
-    setCurrentPage(Math.min(lessonProgress?.document?.page ?? 1, maxPages));
-  }, [isPdf, textPages, lessonProgress?.document?.page]);
-
-  const progressChangeRef = useRef(onProgressChange);
-
-  useEffect(() => {
-    progressChangeRef.current = onProgressChange;
-  }, [onProgressChange]);
-
-  useEffect(() => {
-    progressChangeRef.current({
-      page: currentPage,
-      totalPages,
-      zoom,
-    });
-  }, [currentPage, totalPages, zoom]);
+    setCurrentPage(1);
+  }, [isPdf, textPages]);
 
   const handlePrevPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -140,11 +128,6 @@ const DocumentLessonViewer = ({
   };
 
   const showPageControls = !isPdf;
-  const isOnLastPage = showPageControls
-    ? totalPages > 1
-      ? currentPage === totalPages
-      : true
-    : true;
 
   return (
     <Stack spacing={2}>
@@ -258,15 +241,15 @@ const DocumentLessonViewer = ({
           </IconButton>
         </Stack>
 
-        <Button
-          variant={isOnLastPage ? "contained" : "outlined"}
-          color={isOnLastPage ? "primary" : "inherit"}
-          disabled={!isOnLastPage}
-          onClick={() => onToggleCompletion(true)}
-        >
-          {isOnLastPage ? "Hoàn thành bài học" : "Đọc hết để hoàn thành"}
-        </Button>
       </Stack>
+
+      <MarkLessonCompleteButton
+        lessonId={lesson.id}
+        learningPathId={learningPathId}
+        courseId={courseId}
+        studentId={studentId}
+        selectedLessonSummary={selectedLessonSummary}
+      />
     </Stack>
   );
 };
