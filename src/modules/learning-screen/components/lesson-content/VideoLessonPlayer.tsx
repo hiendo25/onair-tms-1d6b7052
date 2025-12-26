@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import { Box, Typography } from "@mui/material";
 
+import { useMarkLessonComplete } from "@/modules/learning-screen/hooks/useMarkLessonComplete";
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 import type {
   LearningLesson,
@@ -15,6 +16,9 @@ interface VideoLessonPlayerProps {
   lesson: LearningLesson;
   onRequestNextLesson?: () => void;
   nextLessonTitle?: string | null;
+  learningPathId?: string | null;
+  courseId?: string | null;
+  studentId?: string | null;
 }
 
 const VideoLessonPlayer = ({
@@ -22,8 +26,22 @@ const VideoLessonPlayer = ({
   lesson,
   onRequestNextLesson,
   nextLessonTitle,
+  learningPathId,
+  courseId,
+  studentId,
 }: VideoLessonPlayerProps) => {
   const { url, isLoading, error } = useResourceUrl(resource);
+  const { markComplete } = useMarkLessonComplete({
+    courseId: courseId ?? null,
+    learningPathId,
+    employeeId: studentId ?? null,
+  });
+
+  const handleVideoEnded = useCallback(() => {
+    if (learningPathId && lesson.id) {
+      markComplete(lesson.id);
+    }
+  }, [learningPathId, lesson.id, markComplete]);
 
   const handleStartNextLesson = useCallback(() => {
     onRequestNextLesson?.();
@@ -48,6 +66,7 @@ const VideoLessonPlayer = ({
             title={lesson.title ?? "Video bài giảng"}
             nextLessonTitle={nextLessonTitle ?? undefined}
             onStartNextLesson={handleStartNextLesson}
+            onEnded={handleVideoEnded}
             autoAdvanceTime={10}
             instanceKey={lesson.id}
           />

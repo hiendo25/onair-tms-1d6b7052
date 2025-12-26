@@ -12,4 +12,5 @@ export * as branchService from "./branches/branch.service";
 export * as departmentService from "./departments/department.service";
 export * as planService from "./plans/plan.service";
 export * as notificationService from "./notifications/notification.service";
-export * as serveyService from "./survey";
+export * as surveyService from "./survey";
+export * as lessonProgressService from "./lesson-progress/lesson-progress.service";

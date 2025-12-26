@@ -66,13 +66,6 @@ export type Database = {
             referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "assignment_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       assignment_results: {
@@ -124,13 +117,6 @@ export type Database = {
             referencedRelation: "assignments"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "assignment_results_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       assignments: {
@@ -158,15 +144,7 @@ export type Database = {
           name?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "assignments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       branches: {
         Row: {
@@ -461,13 +439,6 @@ export type Database = {
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "class_qr_codes_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       class_room_attendance: {
@@ -540,13 +511,6 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_room_employee_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -680,13 +644,6 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "class_rooms_created_by_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "class_rooms_organization_id_fkey"
             columns: ["organization_id"]
@@ -1002,13 +959,6 @@ export type Database = {
             referencedRelation: "courses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "class_sessions_courses_teacher_id_fkey"
-            columns: ["teacher_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       courses: {
@@ -1043,13 +993,6 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "courses_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "courses_organization_id_fkey"
             columns: ["organization_id"]
@@ -1193,13 +1136,6 @@ export type Database = {
             referencedRelation: "branches"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "fk_employee_branches_employee_id"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       employee_departments: {
@@ -1227,13 +1163,6 @@ export type Database = {
             columns: ["department_id"]
             isOneToOne: false
             referencedRelation: "departments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_employee_departments_employee_id"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1385,13 +1314,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "employments_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "employments_organization_unit_id_fkey"
             columns: ["organization_unit_id"]
             isOneToOne: false
@@ -1516,6 +1438,7 @@ export type Database = {
           id: string
           learning_path_id: string | null
           lesson_id: string
+          progress_percentage: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1527,6 +1450,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id: string
+          progress_percentage?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1538,6 +1462,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id?: string
+          progress_percentage?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1692,13 +1617,6 @@ export type Database = {
             referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "libraries_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: true
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
         ]
       }
       managers_employees: {
@@ -1714,22 +1632,7 @@ export type Database = {
           employee_id?: string
           manager_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "managers_employees_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "managers_employees_manager_id_fkey"
-            columns: ["manager_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       organization_units: {
         Row: {
@@ -1924,15 +1827,7 @@ export type Database = {
           id?: string
           phone_number?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_employee_id_fkey"
-            columns: ["employee_id"]
-            isOneToOne: true
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       questions: {
         Row: {
@@ -1977,13 +1872,6 @@ export type Database = {
             columns: ["assignment_id"]
             isOneToOne: false
             referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "questions_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -2041,13 +1929,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "resources_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "resources_library_id_fkey"
             columns: ["library_id"]
@@ -2229,13 +2110,6 @@ export type Database = {
           update_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "surveys_organization_id_fkey"
             columns: ["organization_id"]
@@ -2531,13 +2405,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "training_plan_surveys_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "training_plan_surveys_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -2685,20 +2552,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "training_plans_approved_by_fkey"
-            columns: ["approved_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "training_plans_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "training_plans_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -2783,13 +2636,6 @@ export type Database = {
           title: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "class_rooms_created_by_fkey"
-            columns: ["employee_id"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "class_rooms_organization_id_fkey"
             columns: ["organization_id"]

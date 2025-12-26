@@ -1,7 +1,8 @@
 import type { LessonProgressStatus } from "@/modules/learning-screen/types";
 
 export const LEARNING_SCREEN_ROUTE_PREFIX = {
-  LEARNING_PATH: "/learning-path/learning-screen",
+  LEARNING_PATH: "/learning-paths/learning-screen",
+  STANDALONE: "/learning-screen",
 } as const;
 
 export const LESSON_PROGRESS_STATUS = {

@@ -3,15 +3,22 @@
 import { Alert, Box, Button, CircularProgress, Stack, Typography } from "@mui/material";
 
 import { useLearningScreenState } from "@/modules/learning-screen/hooks/useLearningScreenState";
+import type { LearningPathWithDetails } from "@/repository/learning-paths";
 
 import LessonContentPanel from "./lesson-content/LessonContentPanel";
 import LessonNavigator from "./lesson-content/LessonNavigator";
 
 interface LearningScreenSectionProps {
   courseId: string | null;
+  learningPathData?: LearningPathWithDetails | null;
+  learningPathId?: string | null;
 }
 
-const LearningScreenSection = ({ courseId }: LearningScreenSectionProps) => {
+const LearningScreenSection = ({
+  courseId,
+  learningPathData,
+  learningPathId,
+}: LearningScreenSectionProps) => {
   const {
     course,
     sections,
@@ -31,6 +38,7 @@ const LearningScreenSection = ({ courseId }: LearningScreenSectionProps) => {
     sectionProgressById,
   } = useLearningScreenState({
     courseId,
+    learningPathId,
   });
 
   if (isLoading) {
@@ -99,6 +107,7 @@ const LearningScreenSection = ({ courseId }: LearningScreenSectionProps) => {
           onRetryLesson={refetchLessonDetail}
           onSelectLesson={handleSelectLesson}
           studentId={studentId}
+          learningPathId={learningPathId}
         />
 
         <Box

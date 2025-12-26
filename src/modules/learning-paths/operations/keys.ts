@@ -5,5 +5,6 @@ export const LEARNING_PATHS_KEYS = {
     [...LEARNING_PATHS_KEYS.lists(), params] as const,
   details: () => [...LEARNING_PATHS_KEYS.all, "detail"] as const,
   detail: (id: string) => [...LEARNING_PATHS_KEYS.details(), id] as const,
+  current: () => [...LEARNING_PATHS_KEYS.all, "current"] as const,
 };
 
