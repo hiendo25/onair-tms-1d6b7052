@@ -38,13 +38,23 @@ export async function getLessonProgress(
 ): Promise<LessonProgress | null> {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
+  // Normalize learning path ID: undefined or empty string becomes null
+  const normalizedLearningPathId: string | null = learningPathId || null;
+
+  let query = supabase
     .from("lesson_progress")
     .select("*")
     .eq("employee_id", employeeId)
-    .eq("lesson_id", lessonId)
-    .eq("learning_path_id", learningPathId || null)
-    .maybeSingle();
+    .eq("lesson_id", lessonId);
+
+  // Use .is() for null values, .eq() for non-null values
+  if (normalizedLearningPathId === null) {
+    query = query.is("learning_path_id", null);
+  } else {
+    query = query.eq("learning_path_id", normalizedLearningPathId);
+  }
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) {
     console.error("[LessonProgress] Error fetching progress:", error);
@@ -80,19 +90,47 @@ export async function upsertLessonProgress(data: {
     completed_at: data.completed_at || null,
   };
 
-  const { data: result, error } = await supabase
-    .from("lesson_progress")
-    .upsert(upsertData, {
-      onConflict: "employee_id,lesson_id,learning_path_id",
-      ignoreDuplicates: false,
-    })
-    .select()
-    .single();
+  // First, check if a record exists
+  const existing = await getLessonProgress(
+    data.employee_id,
+    data.lesson_id,
+    data.learning_path_id || null
+  );
 
-  if (error) {
-    console.error("[LessonProgress] Error upserting progress:", error);
-    throw new Error(`Failed to upsert lesson progress: ${error.message}`);
+  if (existing) {
+    // Update existing record
+    const { data: result, error } = await supabase
+      .from("lesson_progress")
+      .update({
+        current_position_seconds: upsertData.current_position_seconds,
+        progress_percentage: upsertData.progress_percentage,
+        status: upsertData.status,
+        started_at: upsertData.started_at,
+        completed_at: upsertData.completed_at,
+      })
+      .eq("id", existing.id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[LessonProgress] Error updating progress:", error);
+      throw new Error(`Failed to update lesson progress: ${error.message}`);
+    }
+
+    return mapToResponse(result);
+  } else {
+    // Insert new record
+    const { data: result, error } = await supabase
+      .from("lesson_progress")
+      .insert(upsertData)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("[LessonProgress] Error inserting progress:", error);
+      throw new Error(`Failed to insert lesson progress: ${error.message}`);
+    }
+
+    return mapToResponse(result);
   }
-
-  return mapToResponse(result);
 }

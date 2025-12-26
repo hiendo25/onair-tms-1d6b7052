@@ -33,6 +33,7 @@ interface LessonContentPanelProps {
   isLessonLoading: boolean;
   lessonError: string | null;
   onRetryLesson?: () => void;
+  learningPathId?: string | null;
 }
 
 const LessonContentPanel = ({
@@ -45,6 +46,7 @@ const LessonContentPanel = ({
   isLessonLoading,
   lessonError,
   onRetryLesson,
+  learningPathId,
 }: LessonContentPanelProps) => {
   const descriptionRef = useRef<HTMLDivElement | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -146,6 +148,9 @@ const LessonContentPanel = ({
           lesson={lesson}
           onRequestNextLesson={nextLesson ? () => onSelectLesson(nextLesson.id) : undefined}
           nextLessonTitle={nextLesson?.title ?? null}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
         />
       );
     }
@@ -158,6 +163,10 @@ const LessonContentPanel = ({
           lesson={lesson}
           resource={lesson.mainResource ?? null}
           contentKind={documentKind}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }
@@ -166,6 +175,11 @@ const LessonContentPanel = ({
       return (
         <ScormLessonViewer
           resource={lesson.mainResource ?? null}
+          lesson={lesson}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          studentId={studentId}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }
@@ -176,6 +190,10 @@ const LessonContentPanel = ({
         <AssessmentLessonFrame
           assignmentId={assignmentId}
           studentId={studentId}
+          lesson={lesson}
+          learningPathId={learningPathId}
+          courseId={course.id}
+          selectedLessonSummary={selectedLessonSummary}
         />
       );
     }

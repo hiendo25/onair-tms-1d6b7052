@@ -517,3 +517,37 @@ export const updateLearningPath = async (
   };
 };
 
+/**
+ * Get the current (most recently assigned) learning path for an employee
+ */
+export const getCurrentLearningPathForEmployee = async (employeeId: string): Promise<LearningPath | null> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("employee_learning_paths")
+    .select(`
+      learning_path:learning_path_id (
+        id,
+        name,
+        description,
+        thumbnail_url,
+        organization_id,
+        created_by,
+        metadata,
+        created_at,
+        updated_at
+      )
+    `)
+    .eq("employee_id", employeeId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch current learning path: ${error.message}`);
+  }
+
+  // Extract the learning_path object from the nested structure
+  return data?.learning_path as LearningPath | null;
+};
+

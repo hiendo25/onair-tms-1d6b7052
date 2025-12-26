@@ -16,8 +16,10 @@ import {
 import { useResourceUrl } from "@/modules/learning-screen/hooks/useResourceUrl";
 import type {
   LearningLesson,
+  LearningLessonSummary,
   ResourceRow,
 } from "@/modules/learning-screen/types";
+import MarkLessonCompleteButton from "../MarkLessonCompleteButton";
 
 
 const splitTextIntoPages = (content: string | null): string[] => {
@@ -48,6 +50,10 @@ interface DocumentLessonViewerProps {
   lesson: LearningLesson;
   resource: ResourceRow | null;
   contentKind: "pdf" | "document" | "text";
+  learningPathId?: string | null;
+  courseId?: string | null;
+  studentId?: string | null;
+  selectedLessonSummary?: LearningLessonSummary | null;
 }
 
 const MIN_ZOOM = 0.6;
@@ -59,6 +65,10 @@ const DocumentLessonViewer = ({
   lesson,
   resource,
   contentKind,
+  learningPathId,
+  courseId,
+  studentId,
+  selectedLessonSummary,
 }: DocumentLessonViewerProps) => {
   const { url, error } = useResourceUrl(resource);
   const isPdf = contentKind === "pdf";
@@ -232,6 +242,14 @@ const DocumentLessonViewer = ({
         </Stack>
 
       </Stack>
+
+      <MarkLessonCompleteButton
+        lessonId={lesson.id}
+        learningPathId={learningPathId}
+        courseId={courseId}
+        studentId={studentId}
+        selectedLessonSummary={selectedLessonSummary}
+      />
     </Stack>
   );
 };

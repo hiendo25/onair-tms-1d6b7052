@@ -102,3 +102,43 @@ export function useGetLearningPathQuery(id: string) {
   });
 }
 
+export interface CurrentLearningPathResponse {
+  success: boolean;
+  data: LearningPathWithDetails | null;
+}
+
+async function fetchCurrentLearningPath(organizationId: string): Promise<CurrentLearningPathResponse> {
+  const response = await fetch("/api/learning-paths/current", {
+    headers: {
+      "x-organization-id": organizationId,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch current learning path");
+  }
+
+  return response.json();
+}
+
+export interface UseGetCurrentLearningPathOptions {
+  enabled?: boolean;
+}
+
+export function useGetCurrentLearningPath(options?: UseGetCurrentLearningPathOptions) {
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+
+  return useTQuery<CurrentLearningPathResponse>({
+    queryKey: LEARNING_PATHS_KEYS.current(),
+    queryFn: () => {
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+      return fetchCurrentLearningPath(organizationId);
+    },
+    enabled: !!organizationId && (options?.enabled ?? true),
+  });
+}
+

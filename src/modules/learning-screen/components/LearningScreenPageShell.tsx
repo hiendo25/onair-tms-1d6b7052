@@ -2,6 +2,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { IconButton } from "@mui/material";
 import Link from "next/link";
 
+import type { LearningPathWithDetails } from "@/repository/learning-paths";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import LearningScreenSection from "./LearningScreenSection";
@@ -14,6 +15,8 @@ interface LearningScreenPageShellProps {
     title: string;
     path?: string;
   }[];
+  learningPathData?: LearningPathWithDetails | null;
+  learningPathId?: string | null;
 }
 
 const LearningScreenPageShell = ({
@@ -21,6 +24,8 @@ const LearningScreenPageShell = ({
   courseTitle,
   backHref,
   breadcrumbs,
+  learningPathData,
+  learningPathId,
 }: LearningScreenPageShellProps) => {
   return (
     <PageContainer
@@ -36,7 +41,11 @@ const LearningScreenPageShell = ({
       }
       breadcrumbs={breadcrumbs}
     >
-      <LearningScreenSection courseId={courseId} />
+      <LearningScreenSection
+        courseId={courseId}
+        learningPathData={learningPathData}
+        learningPathId={learningPathId}
+      />
     </PageContainer>
   );
 };

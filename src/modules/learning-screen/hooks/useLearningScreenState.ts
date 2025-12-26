@@ -16,9 +16,13 @@ import { learningScreenRepository } from "@/repository";
 
 interface UseLearningScreenStateParams {
   courseId: string | null;
+  learningPathId?: string | null;
 }
 
-export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParams) => {
+export const useLearningScreenState = ({
+  courseId,
+  learningPathId
+}: UseLearningScreenStateParams) => {
   const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
   const pathname = usePathname();
   const router = useRouter();
@@ -27,15 +31,12 @@ export const useLearningScreenState = ({ courseId }: UseLearningScreenStateParam
   const queryClient = useQueryClient();
   const lessonIdParam = searchParams.get("lessonId");
   const sectionIdParam = searchParams.get("sectionId");
-  const learningPathIdParam = searchParams.get("learningPathId");
-  const isLearningPathSource = Boolean(
-    pathname?.includes(LEARNING_SCREEN_ROUTE_PREFIX.LEARNING_PATH),
-  );
+  const isLearningPathSource = Boolean(learningPathId);
 
   const { data, isLoading, isError, refetch } = useLearningCourseOutlineQuery(courseId, {
     enabled: Boolean(courseId),
     includeProgress: isLearningPathSource,
-    learningPathId: learningPathIdParam,
+    learningPathId: learningPathId,
     employeeId: studentId,
   });
 
