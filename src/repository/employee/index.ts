@@ -19,8 +19,8 @@ export type GetStudentsQueryParams = {
   organizationId?: string;
 };
 
-const getStudents = async (queryParams: GetStudentsQueryParams) => {
-  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds, organizationId } = queryParams;
+const getStudents = async (queryParams?: GetStudentsQueryParams) => {
+  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds, organizationId } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 

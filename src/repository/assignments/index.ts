@@ -16,8 +16,6 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
 
   let query = supabase.from("assignments").select(
     `
-  let query = supabase.from("assignments").select(
-    `
       id,
       name,
       description,
@@ -53,8 +51,6 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
       assignmentEmployees:assignment_employees(count),
       submissions:assignment_results(count)
     `,
-    { count: "exact" },
-  );
     { count: "exact" },
   );
 
