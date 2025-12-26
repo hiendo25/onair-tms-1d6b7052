@@ -1,8 +1,9 @@
-import { ChangeEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Box, Button, FilledInput, FormHelperText, FormLabel, Popover, Typography } from "@mui/material";
 
 import useDebounce from "@/hooks/useDebounce";
 import { useGetAssignmentsQuery } from "@/modules/assignment-management/operations/query";
+import { useUserOrganization } from "@/modules/organization";
 import { cn } from "@/utils";
 
 export interface AssessmentSelectorProps {
@@ -22,9 +23,10 @@ const AssessmentSelector: React.FC<AssessmentSelectorProps> = ({
   placeholder,
 }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const { orgId: organizationId } = useUserOrganization((state) => state.currentOrganization);
   const [searchText, setSearchText] = useState("");
   const debourceText = useDebounce(searchText, 600);
-  const { data: assignments, isLoading } = useGetAssignmentsQuery({ search: debourceText });
+  const { data: assignments, isLoading } = useGetAssignmentsQuery({ search: debourceText, organizationId });
 
   type AssignmentItem = Exclude<typeof assignments, undefined>["data"][number];
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentItem>();

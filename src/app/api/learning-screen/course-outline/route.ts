@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { learningScreenService } from "@/services";
+import { createSVClient, learningScreenService } from "@/services";
 
 export async function GET(request: NextRequest) {
   try {
     const courseId = request.nextUrl.searchParams.get("courseId") ?? "";
+    const includeProgress = request.nextUrl.searchParams.get("includeProgress") === "true";
+    const learningPathId = request.nextUrl.searchParams.get("learningPathId");
+    const trimmedLearningPathId = learningPathId?.trim() ? learningPathId : null;
+    const employeeId = request.nextUrl.searchParams.get("employeeId");
+    const trimmedEmployeeId = employeeId?.trim() ? employeeId.trim() : null;
 
     if (!courseId.trim()) {
       return NextResponse.json(
@@ -13,7 +18,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const result = await learningScreenService.getCourseLearningOutline(courseId);
+    const result = await learningScreenService.getCourseLearningOutline(courseId, {
+      includeProgress,
+      learningPathId: trimmedLearningPathId,
+      employeeId: trimmedEmployeeId,
+    });
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {

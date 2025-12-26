@@ -1,7 +1,7 @@
 "use client";
-import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
+import { Alert, DialogContent, FilledInput, FilledInputProps, InputAdornment } from "@mui/material";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import IconButton from "@mui/material/IconButton";
@@ -12,7 +12,7 @@ import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid
 import useDebounce from "@/hooks/useDebounce";
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 import { SearchIcon } from "@/shared/assets/icons";
-import { useGetTeachersQuery } from "../../hooks/useGetTeacher";
+import { useGetTeachersQuery } from "../../operation/queries";
 
 import { columns } from "./columns";
 
@@ -24,16 +24,17 @@ export interface SimpleDialogTeacherSelectorProps {
   disableMultipleSelect?: boolean;
   onOk?: (data: EmployeeTeacherTypeItem[]) => void;
   values?: string[];
+  excludeSelected?: boolean;
 }
 const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, SimpleDialogTeacherSelectorProps>(
-  ({ onOk, values = [], disableMultipleSelect = false }, ref) => {
+  ({ onOk, values: initialValues = [], disableMultipleSelect = false, excludeSelected = true }, ref) => {
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogConfirm, setDialogConfirm] = useState<(data: EmployeeTeacherTypeItem[]) => void>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
     const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel | undefined>({
-      ids: new Set(values),
+      ids: new Set(initialValues),
       type: "include",
     });
 
@@ -44,7 +45,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
       queryParams: {
         page: paginationModel.page + 1,
         pageSize: paginationModel.pageSize,
-        exclude: values, // exclude teacher selected
+        exclude: excludeSelected ? initialValues : [], // exclude teacher selected
         search: searchDebouce,
       },
       enabled: openDialog,
@@ -165,17 +166,23 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
 
     useImperativeHandle(ref, () => ({
       openDialog: (variables, options) => {
-        setOpenDialog(true);
         const confirmFn = options?.onOk;
         const values = variables?.value;
         if (confirmFn) setDialogConfirm(() => confirmFn);
         if (values) setRowSelectionModel({ ids: new Set(values), type: "include" });
+        setOpenDialog(true);
       },
       closeDialog: () => {
         setOpenDialog(false);
         setRowSelectionModel(undefined);
       },
     }));
+
+    // useEffect(() => {
+    //   if (!initialValues) return;
+
+    //   setRowSelectionModel({ ids: new Set(initialValues), type: "include" });
+    // }, [initialValues]);
     return (
       <Dialog open={openDialog} fullWidth maxWidth="md">
         <Toolbar
@@ -207,50 +214,51 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
               placeholder="Tìm kiếm..."
               value={searchTeacherName}
               onChange={handleSearchTeacherName}
-              endAdornment={<SearchIcon />}
+              endAdornment={
+                <InputAdornment position="end">
+                  <SearchIcon className="w-5 h-5" />
+                </InputAdornment>
+              }
               size="small"
               sx={{ minWidth: 280 }}
             />
           </div>
-          <div>
-            <DataGrid
-              rows={teacherList}
-              columns={columns}
-              rowCount={rowCount}
-              loading={isPending}
-              density="standard"
-              pageSizeOptions={[10, 15, 20]}
-              checkboxSelection
-              disableColumnSelector
-              disableColumnSorting
-              disableColumnResize
-              disableRowSelectionOnClick
-              disableColumnMenu
-              paginationMode="server"
-              onRowSelectionModelChange={handleRowSelectModelChange}
-              rowSelectionModel={rowSelectionModel}
-              paginationModel={paginationModel}
-              onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
-              sx={{
-                border: 0,
-                ".MuiDataGrid-columnHeaders": {
-                  ".MuiDataGrid-columnHeaderCheckbox": {
-                    pointerEvents: "none",
-                  },
+
+          <DataGrid
+            rows={teacherList}
+            columns={columns}
+            rowCount={rowCount}
+            loading={isPending}
+            density="standard"
+            pageSizeOptions={[10, 15, 20]}
+            checkboxSelection
+            disableColumnSelector
+            disableColumnSorting
+            disableColumnResize
+            // disableRowSelectionOnClick
+            disableColumnMenu
+            paginationMode="server"
+            onRowSelectionModelChange={handleRowSelectModelChange}
+            rowSelectionModel={rowSelectionModel}
+            paginationModel={paginationModel}
+            onPaginationModelChange={isPending ? undefined : handlePaginationModelChange}
+            sx={{
+              border: 0,
+              ".MuiDataGrid-columnHeaders": {
+                ".MuiDataGrid-columnHeaderCheckbox": {
+                  pointerEvents: "none",
                 },
-              }}
-            />
-          </div>
+              },
+            }}
+          />
         </DialogContent>
         <Toolbar
           sx={(theme) => ({
-            minHeight: 48,
             borderTop: "1px solid",
             borderColor: theme.palette.grey[300],
             justifyContent: "end",
             [theme.breakpoints.up("md")]: {
               paddingInline: "1rem",
-              minHeight: 60,
             },
           })}
         >

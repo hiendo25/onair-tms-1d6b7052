@@ -8,14 +8,14 @@ import type {
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import type { Database } from "@/types/supabase.types";
 
+import { GetAssignmentsQueryParams } from "./type";
+
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
   const supabase = createClient();
-  const { page = 0, limit = 20, search, createdBy } = params || {};
+  const { page = 0, limit = 20, search, organizationId, createdBy } = params || {};
 
-  let query = supabase
-    .from("assignments")
-    .select(
-      `
+  let query = supabase.from("assignments").select(
+    `
       id,
       name,
       description,
@@ -51,8 +51,8 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
       assignmentEmployees:assignment_employees(count),
       submissions:assignment_results(count)
     `,
-      { count: "exact" },
-    );
+    { count: "exact" },
+  );
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
@@ -61,6 +61,9 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
   if (createdBy) {
     query = query.eq("created_by", createdBy);
   }
+  // if (organizationId) {
+  //   query = query.eq("created_by", organizationId);
+  // }
 
   const from = page * limit;
   const to = from + limit - 1;
@@ -144,11 +147,7 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
   return data as unknown as AssignmentDto;
 };
 
-export async function createAssignment(data: {
-  name: string;
-  description: string;
-  created_by: string;
-}) {
+export async function createAssignment(data: { name: string; description: string; created_by: string }) {
   const supabase = await createSVClient();
 
   const { data: assignment, error } = await supabase.from("assignments").insert(data).select().single();
@@ -211,7 +210,7 @@ export async function createQuestions(
   const supabase = await createSVClient();
 
   // Convert options to Json type for database
-  const questionsToInsert = questions.map(q => ({
+  const questionsToInsert = questions.map((q) => ({
     ...q,
     options: q.options as any, // Cast to Json type
   }));
@@ -248,7 +247,7 @@ export async function createAssignmentCategories(
   categories: Array<{
     assignment_id: string;
     category_id: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
@@ -289,10 +288,7 @@ export async function deleteAssignmentCategoriesByEmployeeId(employeeId: string)
   const assignmentIds = assignments.map((a) => a.id);
 
   // Delete all assignment_categories for these assignments
-  const { error } = await supabase
-    .from("assignment_categories")
-    .delete()
-    .in("assignment_id", assignmentIds);
+  const { error } = await supabase.from("assignment_categories").delete().in("assignment_id", assignmentIds);
 
   if (error) {
     throw new Error(`Failed to delete assignment categories by employee: ${error.message}`);
@@ -304,7 +300,7 @@ export async function createAssignmentEmployees(
   employees: Array<{
     assignment_id: string;
     employee_id: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
@@ -338,10 +334,7 @@ export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) 
 export async function nullifyLessonsAssignmentId(assignmentId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("lessons")
-    .update({ assignment_id: null })
-    .eq("assignment_id", assignmentId);
+  const { error } = await supabase.from("lessons").update({ assignment_id: null }).eq("assignment_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to nullify lessons assignment_id: ${error.message}`);
@@ -351,7 +344,7 @@ export async function nullifyLessonsAssignmentId(assignmentId: string) {
 const getAssignmentStudents = async (
   assignmentId: string,
   page: number = 0,
-  limit: number = 25
+  limit: number = 25,
 ): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
 
@@ -376,7 +369,7 @@ const getAssignmentStudents = async (
         )
       )
     `,
-      { count: "exact" }
+      { count: "exact" },
     )
     .eq("assignment_id", assignmentId)
     .order("employee_id", { ascending: true })
@@ -419,7 +412,7 @@ const getAssignmentStudents = async (
         max_score: result.max_score,
         status: result.status,
       },
-    ])
+    ]),
   );
 
   // Combine the data
@@ -469,10 +462,7 @@ const getAssignmentQuestions = async (assignmentId: string) => {
 async function getQuestionsByIds(questionIds: string[]) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("questions")
-    .select("*")
-    .in("id", questionIds);
+  const { data, error } = await supabase.from("questions").select("*").in("id", questionIds);
 
   if (error) {
     throw new Error(`Failed to fetch questions: ${error.message}`);
@@ -481,10 +471,7 @@ async function getQuestionsByIds(questionIds: string[]) {
   return data;
 }
 
-const getMyAssignments = async (
-  employeeId: string,
-  params?: GetMyAssignmentsParams
-): Promise<PaginatedResult<any>> => {
+const getMyAssignments = async (employeeId: string, params?: GetMyAssignmentsParams): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
   const { page = 0, limit = 25, search, status } = params || {};
 
@@ -524,9 +511,7 @@ const getMyAssignments = async (
       queryWithInnerJoin = queryWithInnerJoin.ilike("name", `%${search}%`);
     }
 
-    const result = await queryWithInnerJoin
-      .order("id", { ascending: false })
-      .range(from, to);
+    const result = await queryWithInnerJoin.order("id", { ascending: false }).range(from, to);
 
     data = result.data;
     error = result.error;
@@ -548,7 +533,7 @@ const getMyAssignments = async (
           employee_id
         )
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .eq("assignment_employees.employee_id", employeeId)
       .eq("assignment_results.employee_id", employeeId)
@@ -558,9 +543,7 @@ const getMyAssignments = async (
       queryWithLeftJoin = queryWithLeftJoin.ilike("name", `%${search}%`);
     }
 
-    const result = await queryWithLeftJoin
-      .order("id", { ascending: false })
-      .range(from, to);
+    const result = await queryWithLeftJoin.order("id", { ascending: false }).range(from, to);
 
     data = result.data;
     error = result.error;
@@ -586,9 +569,7 @@ const getMyAssignments = async (
       queryWithoutFilter = queryWithoutFilter.ilike("name", `%${search}%`);
     }
 
-    const result = await queryWithoutFilter
-      .order("id", { ascending: false })
-      .range(from, to);
+    const result = await queryWithoutFilter.order("id", { ascending: false }).range(from, to);
 
     data = result.data;
     error = result.error;
@@ -656,4 +637,72 @@ const getMyAssignments = async (
   };
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments, getQuestionsByIds };
+export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) => {
+  const supabase = createClient();
+  const { page = 0, pageSize = 20, search, createdBy, organizationId } = queryParams || {};
+
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase.from("assignments").select(
+    `
+      id,
+      name,
+      description,
+      created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
+      created_at,
+      updated_at,
+      questions (
+        id,
+        label,
+        type,
+        score,
+        options,
+        created_at,
+        updated_at
+      ),
+      assignment_categories (
+        category_id,
+        categories (
+          id,
+          name
+        )
+      ),
+      assignmentEmployees:assignment_employees(count),
+      submissions:assignment_results(count)
+    `,
+    { count: "exact" },
+  );
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  if (createdBy) {
+    query = query.eq("created_by", createdBy);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+  return await query.order("created_at", { ascending: false }).range(from, to);
+};
+export type GetAssignmentsV2Response = Awaited<ReturnType<typeof getAssignmentsV2>>;
+export {
+  getAssignments,
+  getAssignmentById,
+  getAssignmentStudents,
+  getAssignmentQuestions,
+  getMyAssignments,
+  getQuestionsByIds,
+};

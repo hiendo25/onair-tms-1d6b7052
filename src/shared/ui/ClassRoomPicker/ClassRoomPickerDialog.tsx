@@ -232,6 +232,11 @@ export default function ClassRoomPickerDialog({
                           )}
                         </Stack>
                       }
+                      slotProps={{
+                        secondary: {
+                          component: "div",
+                        },
+                      }}
                     />
                   </ListItemButton>
                 </ListItem>

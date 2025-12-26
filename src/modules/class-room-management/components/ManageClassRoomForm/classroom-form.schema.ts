@@ -31,8 +31,6 @@ const classRoomSessionSchema = zod
     title: zod.string(),
     description: zod.string(),
     thumbnailUrl: zod.string(),
-    // startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
-    // endDate: zod.iso.datetime({ error: "Ngày kết thúc không hợp lệ." }),
     startDate: zod.string().min(1, "Ngày bắt đầu không bỏ trống."),
     endDate: zod.string().min(1, "Ngày kết thúc không bỏ trống."),
     location: zod.string(), //only for CLASS_ROOM_PLATFORM.OFFLINE
@@ -51,35 +49,30 @@ const classRoomSessionSchema = zod
     }),
     coursesPeriod: zod
       .array(
-        zod
-          .object({
-            id: zod.number().optional(),
-            course: zod.object({
-              id: zod.string(),
-              title: zod.string(),
-            }),
-            teacher: zod
-              .object({
-                id: zod.string(),
-                name: zod.string(),
-                departmentName: zod.string(),
-              })
-              .optional(),
-            startAt: zod.string().min(1, "Không bỏ trống."),
-            endAt: zod.string().min(1, "Không bỏ trống."),
-          })
-          .superRefine(({ teacher }, ctx) => {
-            if (!teacher) {
-              ctx.addIssue({
-                code: "custom",
-                message: "Chọn giảng viên phụ trách.",
-                path: ["teacher"],
-              });
-            }
+        zod.object({
+          id: zod.number().optional(),
+          course: zod.object({
+            id: zod.string(),
+            title: zod.string(),
           }),
+          teachers: zod
+            .array(
+              zod.object({
+                recordId: zod.number().optional(),
+                teacherId: zod.string(),
+                teacherName: zod.string(),
+                teacherDepartment: zod.string(),
+              }),
+            )
+            .min(1, { error: "Chọn ít nhất 1 giảng viên phụ trách." }),
+          startAt: zod.string().min(1, "Không bỏ trống."),
+          endAt: zod.string().min(1, "Không bỏ trống."),
+        }),
       )
       .min(1, { error: "Chọn ít nhất 1 môn học." }),
-    assessmentId: zod.string().optional(),
+    assignments: zod.array(
+      zod.object({ recordId: zod.number().optional(), assignmentId: zod.string(), name: zod.string().optional() }),
+    ),
     sessionType: zod.enum([CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.OFFLINE, CLASS_ROOM_PLATFORM.LIVE]),
   })
   .superRefine(({ startDate, endDate, qrCode, sessionType, location, channelInfo, channelProvider }, ctx) => {
@@ -270,6 +263,7 @@ const classRoomSchema = zod
       CLASS_ROOM_PLATFORM.LIVE,
     ]),
     status: zod.enum(["publish", "draft", "pending", "deleted", "active", "deactive"]),
+    isLearningPath: zod.boolean(),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

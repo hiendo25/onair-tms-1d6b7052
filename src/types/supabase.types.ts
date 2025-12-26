@@ -165,6 +165,7 @@ export type Database = {
           description: string
           id: string
           name: string
+          organization_id: string | null
           updated_at: string
         }
         Insert: {
@@ -173,6 +174,7 @@ export type Database = {
           description: string
           id?: string
           name: string
+          organization_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -181,6 +183,7 @@ export type Database = {
           description?: string
           id?: string
           name?: string
+          organization_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -189,6 +192,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -665,6 +675,7 @@ export type Database = {
           employee_id: string | null
           end_at: string | null
           id: string
+          is_learning_path: boolean | null
           organization_id: string
           resource_id: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -680,6 +691,7 @@ export type Database = {
           employee_id?: string | null
           end_at?: string | null
           id?: string
+          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -695,6 +707,7 @@ export type Database = {
           employee_id?: string | null
           end_at?: string | null
           id?: string
+          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"]
@@ -800,7 +813,7 @@ export type Database = {
           {
             foreignKeyName: "class_session_assignment_session_id_fkey"
             columns: ["session_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
           },
@@ -1306,7 +1319,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
-          organization_id: string | null
+          organization_id: string
           position_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1318,7 +1331,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id: string
           position_id?: string | null
           start_date?: string | null
           status: Database["public"]["Enums"]["employee_status"]
@@ -1330,7 +1343,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          organization_id?: string | null
+          organization_id?: string
           position_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["employee_status"]
@@ -1487,6 +1500,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          metadata: Json | null
           name: string
           organization_id: string
           thumbnail_url: string | null
@@ -1497,6 +1511,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name: string
           organization_id: string
           thumbnail_url?: string | null
@@ -1507,6 +1522,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          metadata?: Json | null
           name?: string
           organization_id?: string
           thumbnail_url?: string | null
@@ -1538,6 +1554,7 @@ export type Database = {
           id: string
           learning_path_id: string | null
           lesson_id: string
+          progress_percentage: number
           started_at: string | null
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1549,6 +1566,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id: string
+          progress_percentage?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
@@ -1560,6 +1578,7 @@ export type Database = {
           id?: string
           learning_path_id?: string | null
           lesson_id?: string
+          progress_percentage?: number
           started_at?: string | null
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }

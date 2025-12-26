@@ -130,69 +130,79 @@ export default function LearningPathsContent() {
       field: "name",
       headerName: "Tên lộ trình",
       width: 360,
-      renderCell: (value, row) => (
-        <Box>
-          <Typography
-            variant="body2"
-            sx={{
-              fontWeight: 600,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              wordBreak: "break-word",
-            }}
-          >
-            {value}
-          </Typography>
-          {row.description && (
+      renderCell: (value, row) => {
+        const nameValue = typeof value === "string" ? value : "";
+        const descriptionValue = typeof row.description === "string" ? row.description : "";
+
+        return (
+          <Box>
             <Typography
-              variant="caption"
-              color="text.secondary"
+              variant="body2"
               sx={{
+                fontWeight: 600,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
-                WebkitLineClamp: 2,
+                WebkitLineClamp: 1,
                 WebkitBoxOrient: "vertical",
                 wordBreak: "break-word",
               }}
             >
-              {row.description}
+              {nameValue}
             </Typography>
-          )}
-        </Box>
-      ),
+            {descriptionValue && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  wordBreak: "break-word",
+                }}
+              >
+                {descriptionValue}
+              </Typography>
+            )}
+          </Box>
+        );
+      },
     },
     {
       id: "phase_count",
       field: "phase_count",
       headerName: "Số giai đoạn",
       width: 140,
-      renderCell: (value) => (
-        <Typography variant="body2">{value || 0}</Typography>
-      ),
+      renderCell: (value) => {
+        const count = typeof value === "number" ? value : 0;
+        return <Typography variant="body2">{count}</Typography>;
+      },
     },
     {
       id: "employee_count",
       field: "employee_count",
       headerName: "Số học viên",
       width: 140,
-      renderCell: (value) => (
-        <Typography variant="body2">{value || 0}</Typography>
-      ),
+      renderCell: (value) => {
+        const count = typeof value === "number" ? value : 0;
+        return <Typography variant="body2">{count}</Typography>;
+      },
     },
     {
       id: "created_at",
       field: "created_at",
       headerName: "Ngày tạo",
       width: 180,
-      renderCell: (value) => (
-        <Typography variant="body2">
-          {value ? fDateTime(value, FORMAT_DATE_TIME_CLEANER) : "—"}
-        </Typography>
-      ),
+      renderCell: (value) => {
+        const dateValue = typeof value === "string" ? value : null;
+        return (
+          <Typography variant="body2">
+            {dateValue ? fDateTime(dateValue, FORMAT_DATE_TIME_CLEANER) : "—"}
+          </Typography>
+        );
+      },
     },
     {
       id: "action",
@@ -201,7 +211,7 @@ export default function LearningPathsContent() {
       width: 120,
       fixed: "right",
       renderCell: (_value, row) => (
-        <IconButton disabled size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
+        <IconButton size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
           <MoreVertIcon fontSize="small" />
         </IconButton>
       ),

@@ -76,7 +76,11 @@ const AvatarName: React.FC<AvatarNameProps> = memo(({ label = "" }) => {
   const bgColor = useMemo(() => getColorFromName(label || ""), [label]);
   if (!label) return null;
   return (
-    <Box component="div" className="w-full h-full flex items-center justify-center" sx={{ backgroundColor: bgColor }}>
+    <Box
+      component="div"
+      className="w-full h-full flex items-center justify-center uppercase"
+      sx={{ backgroundColor: bgColor }}
+    >
       <span className="font-semibold text-sm">{label?.charAt(0)}</span>
     </Box>
   );

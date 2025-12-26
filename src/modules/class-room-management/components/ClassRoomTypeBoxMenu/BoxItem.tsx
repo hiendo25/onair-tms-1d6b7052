@@ -20,7 +20,7 @@ interface BoxItemProps {
 const BoxItem: React.FC<BoxItemProps> = memo(({ isActive, title, description, onClick, thumbnail }) => {
   return (
     <Box
-      className={cn("bg-white rounded-xl p-4 border relative", {
+      className={cn("bg-white rounded-xl p-4 border-2 relative", {
         "border-gray-200": !isActive,
         "border-blue-700!": isActive,
         "cursor-pointer": onClick,

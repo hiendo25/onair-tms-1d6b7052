@@ -265,14 +265,17 @@ export default function AssignmentList() {
                                 {assignment.name}
                               </Typography>
                             </TableCell>
-                            <TableCell>
-                              <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                              >
-                                {assignment.description}
-                              </ReactMarkdown>
-                            </TableCell>
+                            <Tooltip title={assignment.description}>
+                              <TableCell className="max-w-3xs">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                                  className="line-clamp-2"
+                                >
+                                  {assignment.description}
+                                </ReactMarkdown>
+                              </TableCell>
+                            </Tooltip>
                             <TableCell>{assignment.questions?.length || 0}</TableCell>
                             <TableCell>{totalScore}</TableCell>
                             <TableCell>{submittedCount}/{assignedCount}</TableCell>

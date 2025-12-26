@@ -19,7 +19,7 @@ export type StudentSelectedItem = {
   email: string;
   employeeCode: string;
   avatar: string | null;
-  empoyeeType: Exclude<EmployeeType, "admin" | "teacher">;
+  employeeType: Exclude<EmployeeType, "admin" | "teacher">;
 };
 
 type UpsertCourseState = {

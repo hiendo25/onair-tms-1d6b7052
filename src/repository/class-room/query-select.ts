@@ -106,7 +106,7 @@ const selectSession = `
   priority,
   session_type,
   courses_period:class_sessions_courses_period(${selectCoursePeriod}),
-  session_assignment:class_session_assignment(
+  session_assignments:class_session_assignment(
     id,
     assignments(${selectAssignment})
   ),
@@ -126,6 +126,7 @@ export const SELECT_CLASSROOM_DETAIL = `
   description,
   room_type,
   thumbnail_url,
+	is_learning_path,
   start_at,
   end_at,
   status,
@@ -213,9 +214,9 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
             start_at,
             end_at,
             course:courses(${selectCourseWithLessonSectionCount}),
-            teacher:employees(${selectEmployee})
+            teachers:employees(${selectEmployee})
           ),
-          session_assignment:class_session_assignment(
+          session_assignments:class_session_assignment(
             id,
             assignments(${selectAssignment})
           ),

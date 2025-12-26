@@ -99,6 +99,7 @@ const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
       sx={{
         border: "1px solid",
         borderColor: hasError ? "error.main" : "divider",
+        borderRadius: "8px !important",
         bgcolor: "white",
         "&:before": {
           display: "none",
@@ -109,6 +110,7 @@ const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         sx={{
+          borderColor: "divider",
           "& .MuiAccordionSummary-content": {
             margin: "12px 0",
             alignItems: "center",

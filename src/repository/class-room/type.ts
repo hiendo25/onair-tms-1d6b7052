@@ -12,6 +12,7 @@ export type CreateClassRoomPayload = Pick<
   | "title"
   | "organization_id"
   | "employee_id"
+  | "is_learning_path"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
@@ -29,13 +30,13 @@ export type UpdateClassRoomPayload = Pick<
 >;
 export type UpSertClassRoomPayload =
   | {
-    action: "create";
-    payload: CreateClassRoomPayload;
-  }
+      action: "create";
+      payload: CreateClassRoomPayload;
+    }
   | {
-    action: "update";
-    payload: UpdateClassRoomPayload;
-  };
+      action: "update";
+      payload: UpdateClassRoomPayload;
+    };
 
 export type CreatePivotClassRoomAndHashTagPayload = {
   class_room_id: string;
@@ -70,7 +71,7 @@ export enum ClassSessionModeFilter {
   All = "all",
   Online = "online",
   Offline = "offline",
-  Live = "live"
+  Live = "live",
 }
 
 export enum ClassRoomStatusFilter {

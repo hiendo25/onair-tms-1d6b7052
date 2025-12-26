@@ -20,6 +20,7 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   helpText?: React.ReactNode;
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  size?: "small" | "medium";
 }
 const RHFTextField = <T extends FieldValues>({
   className,
@@ -35,6 +36,7 @@ const RHFTextField = <T extends FieldValues>({
   helpText,
   sx,
   inputProps,
+  size,
 }: RHFTextFieldProps<T>) => {
   const fieldId = useId();
   return (
@@ -58,7 +60,7 @@ const RHFTextField = <T extends FieldValues>({
             }}
             placeholder={placeholder}
             disabled={disabled}
-            size="small"
+            size={size}
             id={fieldId}
             type={type}
             sx={{

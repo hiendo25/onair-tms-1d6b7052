@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import { isUndefined } from "lodash";
+import { boolean } from "zod";
 
 import { ClassRoom } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
@@ -18,6 +19,7 @@ import {
 } from "@/repository/class-room/type";
 import {
   CreateClassRoomSessionPayload,
+  CreatePivotClassSessionWithAssignmentPayload,
   CreatePivotClassSessionWithCoursePeriodPayload,
   UpSertClassRoomSessionPayload,
   UpsertPivotClassSessionWithCoursePeriodPayload,
@@ -55,6 +57,7 @@ export class UpsertClassRoomService {
       title,
       forWhom,
       docs,
+      isLearningPath,
     } = formData;
 
     const uniqueSlug = `${slug}-${new Date().getTime()}`;
@@ -75,6 +78,7 @@ export class UpsertClassRoomService {
         start_at: startDate,
         end_at: endDate,
         organization_id: organizationId,
+        is_learning_path: isLearningPath,
       },
     });
 
@@ -391,22 +395,32 @@ export class UpsertClassRoomService {
          */
         const oldSessionItem = oldSessions.find((item) => item.id === sessionId);
         const syncSessionWithAssignmentPromise = (async () => {
-          const oldSessionAssignment = oldSessionItem?.session_assignment;
+          const oldAssignments = oldSessionItem?.session_assignments;
 
-          if (!newSession.assessmentId) return;
+          const newAssignments = newSession.assignments;
+          if (!newSession.assignments.length) return;
 
-          if (oldSessionAssignment && oldSessionAssignment.assignments.id === newSession.assessmentId) return;
+          const assignmentAddNewItems = newAssignments.filter((newItem) =>
+            oldAssignments?.every((oldItem) => oldItem.assignments.id !== newItem.assignmentId),
+          );
+          const assignmentDeleteItems = oldAssignments?.filter((oldItem) =>
+            newAssignments?.every((newItem) => newItem.assignmentId !== oldItem.assignments.id),
+          );
 
-          if (oldSessionAssignment && oldSessionAssignment.assignments.id !== newSession.assessmentId) {
-            await classRoomSessionRepository.deletePivotClassSessionWithAssignment([oldSessionAssignment.id]);
+          if (assignmentDeleteItems?.length) {
+            await classRoomSessionRepository.bulkDeletePivotClassSessionWithAssignment(
+              assignmentDeleteItems.map((item) => item.id),
+            );
           }
 
-          const { data, error } = await classRoomSessionRepository.createPivotClassSessionWithAssignment({
-            assignment_id: newSession.assessmentId,
-            session_id: sessionData.id,
-            start_at: null,
-            end_at: null,
-          });
+          const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
+            assignmentAddNewItems.map((item) => ({
+              assignment_id: item.assignmentId,
+              session_id: sessionData.id,
+              start_at: null,
+              end_at: null,
+            })),
+          );
 
           if (error) {
             throw new Error(error.message);
@@ -419,41 +433,50 @@ export class UpsertClassRoomService {
 
         const syncSessionWithCoursePeriodPromise = (async () => {
           const oldCoursePeriods = oldSessionItem?.courses_period;
-          const newCoursePeriods = newSession.coursesPeriod;
+
+          const newCoursePeriods = newSession.coursesPeriod.reduce<
+            { id: number | undefined; courseId: string; startAt: string; endAt: string; teacherId: string }[]
+          >((acc, coursePeriod) => {
+            const flattenTeachers = coursePeriod.teachers.map((teacher) => ({
+              id: teacher.recordId,
+              courseId: coursePeriod.course.id,
+              startAt: coursePeriod.startAt,
+              endAt: coursePeriod.endAt,
+              teacherId: teacher.teacherId,
+            }));
+
+            return [...acc, ...flattenTeachers];
+          }, []);
 
           if (oldCoursePeriods) {
             const delList = oldCoursePeriods.filter((cp) => newCoursePeriods.every((ncp) => ncp.id !== cp.id));
             await classRoomSessionRepository.bulkDeletePivotClassSessionWithCoursePeriod(delList.map((cp) => cp.id));
           }
           //
-          const payloadCouses = newCoursePeriods
-            .map<UpsertPivotClassSessionWithCoursePeriodPayload | undefined>(
-              ({ teacher, course, startAt, endAt, id: sessionCoursePeriodId }) => {
-                const teacherId = teacher?.id;
-                if (!teacherId) return;
-                return sessionCoursePeriodId
-                  ? {
-                      action: "update",
-                      payload: {
-                        id: sessionCoursePeriodId,
-                        teacher_id: teacherId,
-                        start_at: dayjs(startAt).toISOString(),
-                        end_at: dayjs(endAt).toISOString(),
-                      },
-                    }
-                  : {
-                      action: "create",
-                      payload: {
-                        class_session_id: sessionData.id,
-                        course_id: course.id,
-                        teacher_id: teacherId,
-                        start_at: dayjs(startAt).toISOString(),
-                        end_at: dayjs(endAt).toISOString(),
-                      },
-                    };
-              },
-            )
-            .filter((pl) => !!pl);
+          const payloadCouses = newCoursePeriods.map<UpsertPivotClassSessionWithCoursePeriodPayload>(
+            ({ teacherId, courseId, startAt, endAt, id: sessionCoursePeriodId }) => {
+              return sessionCoursePeriodId
+                ? {
+                    action: "update",
+                    payload: {
+                      id: sessionCoursePeriodId,
+                      teacher_id: teacherId,
+                      start_at: dayjs(startAt).toISOString(),
+                      end_at: dayjs(endAt).toISOString(),
+                    },
+                  }
+                : {
+                    action: "create",
+                    payload: {
+                      class_session_id: sessionData.id,
+                      course_id: courseId,
+                      teacher_id: teacherId,
+                      start_at: dayjs(startAt).toISOString(),
+                      end_at: dayjs(endAt).toISOString(),
+                    },
+                  };
+            },
+          );
 
           Promise.all(
             payloadCouses.map(async (payloadCoursePeriod) => {
@@ -467,9 +490,9 @@ export class UpsertClassRoomService {
         /**
          * Update QRCode
          */
-        const upsertQrcodePromise = (async () => {
+        const upsertQrCodePromise = (async () => {
           if (newSession.sessionType !== "offline") return;
-          const createQrCodePayload = _this.mapUpSertQrcodeWithSession({
+          const createQrCodePayload = _this.mapUpSertQrCodeWithSession({
             classRoomId: classRoomId,
             classSessionId: sessionId,
             qrCode: newSession.qrCode,
@@ -486,7 +509,7 @@ export class UpsertClassRoomService {
          */
         await Promise.all([
           upsertAgendaPromise,
-          upsertQrcodePromise,
+          upsertQrCodePromise,
           syncSessionWithAssignmentPromise,
           syncSessionWithCoursePeriodPromise,
         ]);
@@ -549,14 +572,18 @@ export class UpsertClassRoomService {
            */
 
           const syncSessionWithAssignmentPromise = (async () => {
-            if (!classSession.assessmentId) return;
-            console.log("pass", classSession.assessmentId);
-            const { data, error } = await classRoomSessionRepository.createPivotClassSessionWithAssignment({
-              assignment_id: classSession.assessmentId,
-              session_id: sessionData.id,
-              start_at: null,
-              end_at: null,
-            });
+            if (!classSession.assignments.length) return;
+            const bulkCreateSessionWithAssignmentPayload =
+              classSession.assignments.map<CreatePivotClassSessionWithAssignmentPayload>((assignment) => ({
+                assignment_id: assignment.assignmentId,
+                end_at: null,
+                start_at: null,
+                session_id: sessionData.id,
+              }));
+
+            const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
+              bulkCreateSessionWithAssignmentPayload,
+            );
             if (error) {
               throw new Error(error.message);
             }
@@ -566,23 +593,29 @@ export class UpsertClassRoomService {
            * Sync class Session to with course Period
            */
           const syncSessionWithCoursePeriodPromise = (async () => {
-            const payloadCouses: CreatePivotClassSessionWithCoursePeriodPayload[] = classSession.coursesPeriod
-              .map(({ teacher, course, startAt, endAt }) => {
-                const teacherId = teacher?.id;
-                if (teacherId) {
-                  return {
-                    class_session_id: sessionData.id,
-                    course_id: course.id,
-                    teacher_id: teacher.id,
-                    start_at: dayjs(startAt).toISOString(),
-                    end_at: dayjs(endAt).toISOString(),
-                  };
-                }
-              })
-              .filter((pl) => !!pl);
+            const payloadCourses = classSession.coursesPeriod.reduce<CreatePivotClassSessionWithCoursePeriodPayload[]>(
+              (acc, { teachers, course, startAt, endAt }) => {
+                const coursesPayloadByTeachers = teachers
+                  .map((teacher) => {
+                    const teacherId = teacher?.teacherId;
+                    if (teacherId) {
+                      return {
+                        class_session_id: sessionData.id,
+                        course_id: course.id,
+                        teacher_id: teacherId,
+                        start_at: dayjs(startAt).toISOString(),
+                        end_at: dayjs(endAt).toISOString(),
+                      };
+                    }
+                  })
+                  .filter((pl) => !!pl);
+                return [...acc, ...coursesPayloadByTeachers];
+              },
+              [],
+            );
 
             const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithCoursePeriod(
-              payloadCouses,
+              payloadCourses,
             );
             if (error) {
               throw new Error(error.message);
@@ -590,7 +623,7 @@ export class UpsertClassRoomService {
           })();
 
           /**
-           * Run all promise in parrallel
+           * Run all promise in parallel
            */
           await Promise.all([
             agendaPromise,
@@ -690,7 +723,7 @@ export class UpsertClassRoomService {
    *  Helper: Map Update Qrcode payloads
    * -------------------------------------------------------- */
 
-  private mapUpSertQrcodeWithSession(data: {
+  private mapUpSertQrCodeWithSession(data: {
     qrCode: ClassRoom["classRoomSessions"][number]["qrCode"];
     classRoomId: string;
     classSessionId: string;

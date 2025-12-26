@@ -22,7 +22,7 @@ interface EditPlanFormProps {
 
 export default function EditPlanForm({ planId }: EditPlanFormProps) {
   const { show } = useNotifications();
-  const user = useUserOrganization((state) => state.data);
+  const user = useUserOrganization((state) => state.currentEmployee);
   const { data: planDetail, isLoading, isError } = useGetPlanDetailQuery(planId);
   const { mutateAsync: updatePlan, isPending } = useUpdatePlanMutation();
   const searchParams = useSearchParams();

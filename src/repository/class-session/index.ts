@@ -149,7 +149,16 @@ const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSe
   }
 };
 
-const deletePivotClassSessionWithAssignment = async (ids: number[]) => {
+const bulkCreatePivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload[]) => {
+  try {
+    return await supabase.from("class_session_assignment").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
+
+const bulkDeletePivotClassSessionWithAssignment = async (ids: number[]) => {
   try {
     return await supabase.from("class_session_assignment").delete().in("id", ids).select();
   } catch (err: any) {
@@ -169,8 +178,9 @@ export {
   upsertClassSession,
   bulkUpsertClassSession,
   bulkCreateClassSession,
-  deletePivotClassSessionWithAssignment,
+  bulkDeletePivotClassSessionWithAssignment,
   bulkDeletePivotClassSessionWithCoursePeriod,
   updatePivotClassSessionWithCoursePeriod,
   upsertPivotClassSessionWithCoursePeriod,
+  bulkCreatePivotClassSessionWithAssignment,
 };
