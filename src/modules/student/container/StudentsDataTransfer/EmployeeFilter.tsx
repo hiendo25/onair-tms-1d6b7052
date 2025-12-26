@@ -1,6 +1,16 @@
 import React, { memo, SetStateAction, useRef, useState } from "react";
 import { useId } from "react";
-import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonProps,
+  FilledInput,
+  InputAdornment,
+  List,
+  MenuItem,
+  Popover,
+  Typography,
+} from "@mui/material";
 
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
@@ -78,9 +88,13 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
         <FilledInput
           placeholder="Tìm kiếm..."
           onChange={(evt) => onSearch?.(evt.target.value)}
-          endAdornment={<SearchIcon />}
+          endAdornment={
+            <InputAdornment position="end">
+              <SearchIcon className="w-5 h-5" />
+            </InputAdornment>
+          }
           size="small"
-          className="w-full max-w-[240px]"
+          className="w-full max-w-60"
         />
       </div>
       <div>

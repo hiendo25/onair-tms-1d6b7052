@@ -32,7 +32,7 @@ import CheckAllStudents from "./CheckAllStudent";
 import EmployeeFilter, { EmployeeFilterProps } from "./EmployeeFilter";
 import usePreviousData from "./usePreviousData";
 
-const BoxWraper = styled("div")(({ theme }) => ({
+const BoxWrapper = styled("div")(({ theme }) => ({
   border: "1px solid",
   borderColor: theme.palette.grey[300],
   height: 680,
@@ -224,7 +224,7 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
       {employeeData?.error ? <Alert severity="error">{employeeData.error.message}</Alert> : null}
       <div className="flex gap-6">
         <div className="w-1/2">
-          <BoxWraper>
+          <BoxWrapper>
             <BoxHeader>
               <Typography
                 sx={{ fontWeight: "bold", fontSize: "0.875rem" }}
@@ -291,10 +291,10 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
                 disabled={isPending}
               />
             </div>
-          </BoxWraper>
+          </BoxWrapper>
         </div>
         <div className="w-1/2">
-          <BoxWraper>
+          <BoxWrapper>
             <BoxHeader>
               <Typography
                 sx={{ fontWeight: "bold", fontSize: "0.875rem" }}
@@ -340,7 +340,7 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
                 ))}
               </div>
             </BoxContent>
-          </BoxWraper>
+          </BoxWrapper>
         </div>
       </div>
     </div>

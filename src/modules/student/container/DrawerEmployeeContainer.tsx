@@ -18,21 +18,21 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import SwipeableDrawer, { SwipeableDrawerProps } from "@mui/material/SwipeableDrawer";
 
-import useGetEmployeeQuery from "@/modules/class-room-management/operation/query";
 import { useUserOrganization } from "@/modules/organization";
 import { CloseIcon, SearchIcon } from "@/shared/assets/icons";
 import Avatar from "@/shared/ui/Avatar";
+import { useGetStudentsQuery } from "../operation/query";
 type Anchor = "top" | "left" | "bottom" | "right";
 
-interface DrawerEmployeeProps {
+interface DrawerEmployeeContainerProps {
   open?: boolean;
   onClose?: () => void;
   onOpenChange: () => void;
   onOk?: () => void;
 }
-const DrawerEmployee: React.FC<DrawerEmployeeProps> = ({ open, onClose, onOk, onOpenChange }) => {
+const DrawerEmployeeContainer: React.FC<DrawerEmployeeContainerProps> = ({ open, onClose, onOk, onOpenChange }) => {
   const currentOrg = useUserOrganization((state) => state.currentOrganization);
-  const { data: employeeData, error } = useGetEmployeeQuery({
+  const { data: employeeData, error } = useGetStudentsQuery({
     enabled: true,
     queryParams: { page: 1, pageSize: 20, organizationId: currentOrg.orgId },
   });
@@ -146,7 +146,7 @@ const DrawerEmployee: React.FC<DrawerEmployeeProps> = ({ open, onClose, onOk, on
   );
 };
 
-export default DrawerEmployee;
+export default DrawerEmployeeContainer;
 
 interface EmployeeItemProps {
   fullName: string;

@@ -23,12 +23,12 @@ const TabClassRoomSetting = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl">
+    <div className="setting-container">
       <div className="flex items-center justify-between mb-6">
         <Typography component="h3" sx={{ fontSize: "16px", fontWeight: "bold" }}>
           Thêm học viên <span className="text-red-600">*</span>
         </Typography>
-        <Button variant="outlined" startIcon={<Download01Icon />}>
+        <Button variant="outlined" startIcon={<Download01Icon />} size="small">
           Import
         </Button>
       </div>
