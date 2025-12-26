@@ -3,10 +3,8 @@ import React, { memo } from "react";
 import { Typography } from "@mui/material";
 import { useController, useFormContext } from "react-hook-form";
 
-import StudentsContainer, {
-  StudentsContainerProps,
-} from "@/modules/class-room-management/components/ManageClassRoomForm/TabClassRoomSetting/StudentsContainer";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
+import StudentDataTransfer, { StudentDataTransferProps } from "@/modules/student/container/StudentsDataTransfer";
 import { type Assignment, type EmployeeItem } from "../../assignment-form.schema";
 
 interface TabAssignmentSettingsProps {}
@@ -25,18 +23,18 @@ const TabAssignmentSettings: React.FC<TabAssignmentSettingsProps> = () => {
     email: emp.email,
     employeeCode: emp.employeeCode,
     avatar: emp.avatar,
-    empoyeeType: emp.empoyeeType as "student", // Cast to student type for compatibility
+    employeeType: emp.employeeType as "student", // Cast to student type for compatibility
   }));
 
   // Adapter function to convert StudentsContainer onChange to form onChange
-  const handleStudentsChange: StudentsContainerProps["onChange"] = (students) => {
+  const handleStudentsChange: StudentDataTransferProps["onChange"] = (students) => {
     const employees: EmployeeItem[] = students.map((student) => ({
       id: student.id,
       fullName: student.fullName,
       email: student.email,
       employeeCode: student.employeeCode,
       avatar: student.avatar,
-      empoyeeType: student.empoyeeType,
+      employeeType: student.employeeType,
     }));
     onChange(employees);
   };
@@ -48,7 +46,7 @@ const TabAssignmentSettings: React.FC<TabAssignmentSettingsProps> = () => {
           Thêm học viên <span className="text-red-600">*</span>
         </Typography>
       </div>
-      <StudentsContainer seletedItems={selectedStudents} onChange={handleStudentsChange} />
+      <StudentDataTransfer selectedItems={selectedStudents} onChange={handleStudentsChange} />
     </div>
   );
 };

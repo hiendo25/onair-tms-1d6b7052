@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRef } from "react";
 import { Button, FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import { Control, useController } from "react-hook-form";
@@ -13,26 +13,25 @@ export interface AssessmentFieldProps {
   sessionIndex: number;
   control: Control<ClassRoom>;
 }
+type AssignmentSelectItem = ClassRoom["classRoomSessions"][number]["assignments"][number];
 const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control }) => {
-  const [selectedItem, setSelectedItem] = useState<{ id: string; name: string }[]>([]);
   const {
-    field: { value, onChange },
+    field: { value: assignments, onChange },
     fieldState: { error },
   } = useController({
     control,
     name: `classRoomSessions.${sessionIndex}.assignments`,
   });
   const assignmentDialogRef = useRef<DialogAssignmentSelectorRef>(null);
-  const handleSelect = () => {
+  const handleSelectAssignment = () => {
     assignmentDialogRef.current?.openDialog(
       { value: undefined },
       {
         onOk: (assignments) => {
-          const assignmentValues = assignments.map((item) => ({
-            id: item.id,
+          const assignmentValues = assignments.map<AssignmentSelectItem>((item) => ({
+            assignmentId: item.id,
             name: item.name,
           }));
-          setSelectedItem(assignmentValues);
           onChange(assignmentValues);
         },
       },
@@ -40,8 +39,10 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
   };
 
   const handleRemove = (assignmentId: string) => () => {
-    setSelectedItem((prevItems) => prevItems.filter((item) => item.id !== assignmentId));
+    const updateAssignments = assignments.filter((item) => item.assignmentId !== assignmentId);
+    onChange(updateAssignments);
   };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
@@ -50,21 +51,22 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
           <Typography className="text-xs text-gray-600">Chọn một hoặc nhiều bài kiểm tra.</Typography>
           {error?.message && <FormHelperText error>{error?.message}</FormHelperText>}
         </div>
-        <div className="flex items-center gap-4">
-          <Button variant="fill" onClick={handleSelect}>
-            Thêm
-          </Button>
-        </div>
+        <Button variant="fill" onClick={handleSelectAssignment}>
+          Thêm
+        </Button>
       </div>
       <div className="flex flex-col gap-3">
-        {selectedItem.map((item) => (
-          <div key={item.id} className="flex items-center gap-3">
-            <div>
-              <IconButton size="small" className="p-1!" sx={{ width: 24, height: 24 }} onClick={handleRemove(item.id)}>
-                <CloseIcon className="w-4 h-4" />
-              </IconButton>
-            </div>
-            <div>{item.name}</div>
+        {assignments.map((item) => (
+          <div key={item.assignmentId} className="flex items-center gap-3">
+            <IconButton
+              size="small"
+              className="p-1!"
+              sx={{ width: 24, height: 24 }}
+              onClick={handleRemove(item.assignmentId)}
+            >
+              <CloseIcon className="w-4 h-4" />
+            </IconButton>
+            <Typography className="text-sm font-medium text-blue-700">{item.name}</Typography>
           </div>
         ))}
       </div>

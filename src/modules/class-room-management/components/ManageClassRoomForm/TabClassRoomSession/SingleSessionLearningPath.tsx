@@ -1,13 +1,17 @@
 "use client";
 import { forwardRef, useImperativeHandle } from "react";
-import { InputAdornment } from "@mui/material";
+import { FormControl, InputAdornment, MenuItem, Select, Typography } from "@mui/material";
+import { TimePicker } from "@mui/x-date-pickers";
+import { DayCalendar } from "@mui/x-date-pickers/internals";
+import dayjs from "dayjs";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 
 import { MarkerPin01Icon } from "@/shared/assets/icons";
+import RHFSelectField from "@/shared/ui/form/RHFSelectField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { type ClassRoom } from "../classroom-form.schema";
 
-import AgendarFields from "./class-room-session-fields/AgendarFields";
+import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
 import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
 import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
@@ -20,6 +24,16 @@ export type SingleSessionLearningPathRef = {
 interface SingleSessionLearningPathProps {
   methods: UseFormReturn<ClassRoom>;
 }
+
+const dayOfWeekOptions = [
+  { label: "Thứ Hai", value: "mon" },
+  { label: "Thứ Ba", value: "tue" },
+  { label: "Thứ Tư", value: "wed" },
+  { label: "Thứ Năm", value: "thu" },
+  { label: "Thứ Sáu", value: "fri" },
+  { label: "Thứ Bảy", value: "sat" },
+  { label: "Chủ Nhật", value: "sun" },
+];
 const SingleSessionLearningPath = forwardRef<SingleSessionLearningPathRef, SingleSessionLearningPathProps>(
   ({ methods }, ref) => {
     const { control, getValues, trigger } = methods;
@@ -42,10 +56,36 @@ const SingleSessionLearningPath = forwardRef<SingleSessionLearningPathRef, Singl
           <div key={_sessionId}>
             <div className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
               <ClassRoomSessionFromToDate index={_index} control={control} />
-              {/* 
-             * Update BA no need teacher for class session 20/11/2025
-             /*
-            <TeacherSelector sessionIndex={_index} /> */}
+              <div className="flex items-center gap-2 max-w-[320px]">
+                <FormControl>
+                  <Select value="" onChange={() => {}}>
+                    {dayOfWeekOptions.map((day) => (
+                      <MenuItem key={day.value}>
+                        <div key={day.value}>
+                          <Typography className="text-sm font-medium">{day.label}</Typography>
+                        </div>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TimePicker ampm={false} closeOnSelect />
+              </div>
+              <div className="flex items-center gap-2 max-w-[320px]">
+                <FormControl>
+                  <Select value="" onChange={() => {}}>
+                    {dayOfWeekOptions.map((day) => (
+                      <MenuItem key={day.value}>
+                        <div key={day.value}>
+                          <Typography className="text-sm font-medium">{day.label}</Typography>
+                        </div>
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TimePicker ampm={false} closeOnSelect />
+              </div>
               <CoursePeriodSelector sessionIndex={_index} methods={methods} />
               <AssessmentField sessionIndex={_index} control={control} />
 
@@ -67,7 +107,7 @@ const SingleSessionLearningPath = forwardRef<SingleSessionLearningPathRef, Singl
                   <QRCodeSettingFields sessionIndex={_index} control={control} />
                 </>
               )}
-              <AgendarFields sessionIndex={_index} />
+              <AgendaFieldsControl sessionIndex={_index} />
             </div>
           </div>
         ))}

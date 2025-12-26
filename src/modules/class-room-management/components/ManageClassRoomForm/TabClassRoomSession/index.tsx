@@ -23,7 +23,7 @@ export const initClassSessionFormData = (init?: {
     sessionType: init?.sessionType ?? "live",
     agendas: [],
     coursesPeriod: [],
-    assessmentId: "",
+    assignments: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
   };
 };
@@ -55,7 +55,7 @@ const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessi
     return (
       <div>
         {classRoomType === "single" ? <SingleSessionLearningPath methods={methods} ref={singleSessionRef} /> : null}
-        {/* {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null} */}
+        {/* {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}  */}
       </div>
     );
   }

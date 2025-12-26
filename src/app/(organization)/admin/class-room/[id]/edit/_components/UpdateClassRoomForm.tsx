@@ -16,26 +16,30 @@ import type { GetClassRoomByIdData } from "../page";
 type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"], undefined>;
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
-type StudentType = Exclude<ManageClassRoomFormProps["students"], undefined>;
+type StudentItem = Exclude<ManageClassRoomFormProps["students"], undefined>[number];
 
 interface UpdateClassRoomFormProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
 const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const router = useRouter();
-  const { sessions, employees } = data;
+  const { sessions, employees, is_learning_path } = data;
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
   const { isLoading, onUpdate } = useCRUDClassRoom();
 
-  const platform = sessions.every((s) => s.session_type === "live")
-    ? "live"
-    : sessions.every((s) => s.session_type === "offline")
-    ? "offline"
-    : sessions.every((s) => s.session_type === "online")
-    ? "online"
-    : "hybrid";
+  const platform = useMemo(() => {
+    return sessions.every((s) => s.session_type === "live")
+      ? "live"
+      : sessions.every((s) => s.session_type === "offline")
+      ? "offline"
+      : sessions.every((s) => s.session_type === "online")
+      ? "online"
+      : "hybrid";
+  }, [sessions]);
+
+  console.log({ data });
 
   const initFormValue = useMemo((): UpdateClassRoomFormValue => {
     const { sessions, class_room_metadata, resources } = data;
@@ -60,20 +64,43 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
         description: agenda.description || "",
       }));
 
-      const coursePeriods = session.courses_period.map<ClassRoomSession["coursesPeriod"][number]>((cp) => ({
-        id: cp.id,
-        startAt: cp.start_at || "",
-        endAt: cp.end_at || "",
-        course: {
-          id: cp.course.id,
-          title: cp.course.title || "",
-        },
-        teacher: {
-          id: cp.teacher?.id || "",
-          name: cp.teacher?.profile?.full_name || "",
-          departmentName: "",
-        },
-      }));
+      const coursePeriodGroupByCourseId = Map.groupBy(session.courses_period, (item) => item.course.id);
+
+      console.log({ coursePeriodGroupByCourseId });
+
+      /**
+       * Grouping teachers by course Item
+       */
+      const periodsMap = new Map<string, ClassRoomSession["coursesPeriod"][number]>();
+
+      for (const { start_at, end_at, course, teacher, id: coursePeriodId } of session.courses_period) {
+        let item = periodsMap.get(course.id);
+
+        if (!item) {
+          item = {
+            id: coursePeriodId,
+            startAt: start_at || "",
+            endAt: end_at || "",
+            course: {
+              id: course.id,
+              title: course.title || "",
+            },
+            teachers: [],
+          };
+          periodsMap.set(course.id, item);
+        }
+
+        if (teacher && !item.teachers.some((t) => t.teacherId === teacher.id)) {
+          item.teachers.push({
+            recordId: coursePeriodId,
+            teacherId: teacher.id,
+            teacherName: teacher.profile?.full_name || "",
+            teacherDepartment: "",
+          });
+        }
+      }
+      const coursesPeriod = Array.from(periodsMap.values());
+
       return [
         ...acc,
         {
@@ -88,8 +115,12 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
           channelProvider: session.channel_provider || "zoom",
           channelInfo: channelInfo,
           agendas: agendas,
-          coursesPeriod: coursePeriods,
-          assessmentId: session.session_assignment?.assignments.id || "",
+          coursesPeriod: coursesPeriod,
+          assignments: session.session_assignments.map((item) => ({
+            recordId: item.id,
+            assignmentId: item.assignments.id,
+            name: item.assignments.name,
+          })),
           qrCode: {
             id: session.class_qr_codes[0]?.id,
             isLimitTimeScanQrCode:
@@ -125,11 +156,12 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       roomType: data.room_type || "single",
       classRoomId: data.id,
       platform: platform,
+      isLearningPath: is_learning_path ?? false,
     };
-  }, [data]);
+  }, [data, platform, is_learning_path]);
 
   const studentList = useMemo(() => {
-    return employees.reduce<StudentType>((acc, emp) => {
+    return employees.reduce<StudentItem[]>((acc, emp) => {
       return emp.employee && emp.employee.employee_type === "student"
         ? [
             ...acc,
@@ -138,7 +170,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
               avatar: emp.employee.profile?.avatar || "",
               email: emp.employee.profile?.email || "",
               employeeCode: emp.employee.employee_code,
-              empoyeeType: emp.employee.employee_type,
+              employeeType: emp.employee.employee_type,
               fullName: emp.employee.profile?.full_name || "",
             },
           ]

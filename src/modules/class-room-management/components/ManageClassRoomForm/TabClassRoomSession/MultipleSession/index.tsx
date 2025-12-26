@@ -1,23 +1,20 @@
 "use client";
-import { forwardRef, useCallback, useImperativeHandle, useRef, useState, useTransition } from "react";
+import { forwardRef, useImperativeHandle, useState, useTransition } from "react";
 import { Button, Divider, Typography } from "@mui/material";
-// import QuantityPersonField from "../class-room-session-fields/QuantityPersonField";
 import { useFieldArray, UseFormReturn } from "react-hook-form";
 
-import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { type ClassRoom } from "../../classroom-form.schema";
 import { initClassSessionFormData } from "..";
-import AgendarFields from "../class-room-session-fields/AgendarFields";
+import AgendaFieldsControl from "../class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "../class-room-session-fields/AssessmentField";
 import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
 import CoursePeriodSelector from "../class-room-session-fields/CoursePeriodSelector";
 import QRCodeSettingFields from "../class-room-session-fields/QRCodeSettingFields";
 import RoomChannel from "../class-room-session-fields/RoomChannel";
-import TeacherSelector, { TeacherSelectorRef } from "../class-room-session-fields/TeacherSelector";
 
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 
@@ -44,8 +41,6 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
-  const getTeachersByIndexSession = useClassRoomStore(({ actions }) => actions.getTeachersByIndexSession);
-  const teacherSelectorRefs = useRef(new Map<number, TeacherSelectorRef>());
   const [isTransition, startTransition] = useTransition();
   /**
    * Session init items to validate when click add more button.
@@ -61,14 +56,14 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
     if (sessionsState[index]?.isInit) {
       return "idle";
     }
+    console.log({ errors });
     const sessionError = errors.classRoomSessions?.[index];
-    const selectedTeacher = getTeachersByIndexSession(index);
     /**
      * qrcode check in tab setting
      */
     const { qrCode, ...restSessionError } = sessionError || {};
 
-    if (!selectedTeacher || !selectedTeacher.length || Object.keys(restSessionError).length) return "invalid";
+    if (Object.keys(restSessionError).length) return "invalid";
 
     return "valid";
   };
@@ -100,14 +95,6 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
       });
     });
 
-  const handleRemoveSession = useCallback((sessionIndex: number) => {
-    const teacherRef = teacherSelectorRefs.current.get(sessionIndex);
-    teacherRef?.removeTeachersBySessionIndex(sessionIndex);
-    setTimeout(() => {
-      remove(sessionIndex);
-    }, 0);
-  }, []);
-
   useImperativeHandle(ref, () => ({
     checkAllSessionFields: async () => {
       const isAllSessionValid = await trigger("classRoomSessions");
@@ -137,7 +124,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
               index={_index}
               key={_sessionId}
               title={title}
-              onRemove={classSessionsFields.length > 2 ? handleRemoveSession : undefined}
+              {...(classSessionsFields.length > 2 ? { onRemove: remove } : {})}
               status={hasErrorSession(_index)}
             >
               <div className="pt-6">
@@ -161,14 +148,6 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
                     label="Nội dung"
                     required
                   />
-                  {/* <TeacherSelector
-                    ref={(tRef) => {
-                      tRef && teacherSelectorRefs.current.set(_index, tRef);
-                    }}
-                    sessionIndex={_index}
-                    error={sessionsState[_index]?.isInit ? undefined : !getTeachersByIndexSession(_index)?.length}
-                    helperText="Hiện chưa có giáo viên nào được chọn"
-                  /> */}
 
                   {sessionType === "live" && <RoomChannel control={control} index={_index} />}
                   {sessionType === "offline" && (
@@ -184,7 +163,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
                       <QRCodeSettingFields sessionIndex={_index} control={control} />
                     </>
                   )}
-                  <AgendarFields sessionIndex={_index} />
+                  <AgendaFieldsControl sessionIndex={_index} />
                 </div>
               </div>
             </AccordionSessionItem>

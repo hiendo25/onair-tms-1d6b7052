@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import { isArray, isNull, isUndefined } from "lodash";
 
-type OptionType = { id: string | number; label?: string; [key: string]: any };
+type OptionType = { id?: string | number; label?: string; [key: string]: any };
 type ValueType = number | string | string[] | number[];
 
 export type SelectFieldProps = SelectProps<ValueType> & {

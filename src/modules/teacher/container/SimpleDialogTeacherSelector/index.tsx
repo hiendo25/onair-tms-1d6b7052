@@ -166,11 +166,11 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
 
     useImperativeHandle(ref, () => ({
       openDialog: (variables, options) => {
-        setOpenDialog(true);
         const confirmFn = options?.onOk;
         const values = variables?.value;
         if (confirmFn) setDialogConfirm(() => confirmFn);
         if (values) setRowSelectionModel({ ids: new Set(values), type: "include" });
+        setOpenDialog(true);
       },
       closeDialog: () => {
         setOpenDialog(false);
@@ -178,11 +178,11 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
       },
     }));
 
-    useEffect(() => {
-      console.log({ rowSelectionModel, initialValues });
+    // useEffect(() => {
+    //   if (!initialValues) return;
 
-      setRowSelectionModel({ ids: new Set(initialValues), type: "include" });
-    }, [initialValues, openDialog]);
+    //   setRowSelectionModel({ ids: new Set(initialValues), type: "include" });
+    // }, [initialValues]);
     return (
       <Dialog open={openDialog} fullWidth maxWidth="md">
         <Toolbar

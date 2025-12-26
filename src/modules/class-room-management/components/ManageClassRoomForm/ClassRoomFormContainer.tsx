@@ -1,13 +1,5 @@
 "use client";
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import React, { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
@@ -18,6 +10,7 @@ import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
 
+import ButtonSubmit from "./ButtonSubmit";
 import { ClassRoom, classRoomSchema } from "./classroom-form.schema";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
 import TabClassRoomInformation from "./TabClassRoomInformation";
@@ -164,7 +157,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           tabName: "Thông tin chung",
           tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
           icon: <GlobeIcon className="w-5 h-5" />,
-          content: <TabClassRoomInformation />,
+          content: <TabClassRoomInformation action={action} />,
         },
         {
           tabName: "Thời gian",
@@ -190,7 +183,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               content: <TabClassRoomSetting />,
             },
           ];
-    }, [isLearningPath]);
+    }, [isLearningPath, action]);
     /**
      * Init form value
      */
@@ -209,13 +202,13 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         "classRoomSessions",
         roomType === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],
       );
-    }, [roomType, platform]);
+    }, [roomType, platform, setValue]);
 
     useLayoutEffect(() => {
       if (!isLearningPath) return;
 
       setValue("isLearningPath", isLearningPath);
-    }, [isLearningPath]);
+    }, [isLearningPath, setValue]);
 
     useImperativeHandle(ref, () => ({
       resetForm: () => {
@@ -253,13 +246,13 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               >
                 Lưu nháp
               </Button> */}
-              <Button
+              <ButtonSubmit
                 onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmit(submitForm), "publish")}
                 disabled={isLoading}
                 loading={isLoading}
               >
                 {action === "create" ? "Đăng tải" : "Cập nhật"}
-              </Button>
+              </ButtonSubmit>
             </div>
           }
         />

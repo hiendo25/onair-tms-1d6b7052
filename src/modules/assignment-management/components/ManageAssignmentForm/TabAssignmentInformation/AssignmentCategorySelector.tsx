@@ -1,3 +1,4 @@
+import React from "react";
 import { Control, useController } from "react-hook-form";
 
 import { useCreateClassFieldMutation } from "@/modules/class-room-management/operation/mutation";
@@ -12,7 +13,7 @@ interface AssignmentCategorySelectorProps {
 
 const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({ control }) => {
   const {
-    field: { onChange, value: categoryList },
+    field: { onChange, value: categoryList = [] },
   } = useController({ control, name: "assignmentCategories" });
 
   const { data: categoryListData, isPending } = useGetClassFieldQuery();
