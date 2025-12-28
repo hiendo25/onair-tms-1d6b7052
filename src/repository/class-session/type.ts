@@ -14,6 +14,7 @@ export type BulkCreateClassRoomSessionsPayload = {
     | "channel_info"
     | "channel_provider"
     | "location"
+    | "weekly_schedule"
   >[];
 };
 
@@ -29,6 +30,7 @@ export type CreateClassRoomSessionPayload = Pick<
   | "channel_provider"
   | "location"
   | "class_room_id"
+  | "weekly_schedule"
 >;
 
 export type UpdateClassRoomSessionPayload = Pick<
@@ -43,6 +45,7 @@ export type UpdateClassRoomSessionPayload = Pick<
   | "channel_info"
   | "channel_provider"
   | "location"
+  | "weekly_schedule"
 >;
 export type UpSertClassRoomSessionPayload =
   | {
@@ -61,11 +64,11 @@ export type CreatePivotClassRoomSessionAndTeacherPayload = {
 
 export type CreatePivotClassSessionWithCoursePeriodPayload = Pick<
   ClassSessionsCoursesPeriod,
-  "class_session_id" | "course_id" | "teacher_id" | "start_at" | "end_at"
+  "class_session_id" | "course_id" | "teacher_id" | "start_at" | "end_at" | "weekly_schedule"
 >;
 export type UpdatePivotClassSessionWithCoursePeriodPayload = Pick<
   ClassSessionsCoursesPeriod,
-  "id" | "teacher_id" | "start_at" | "end_at"
+  "id" | "teacher_id" | "start_at" | "end_at" | "weekly_schedule"
 >;
 
 export type UpsertPivotClassSessionWithCoursePeriodPayload =

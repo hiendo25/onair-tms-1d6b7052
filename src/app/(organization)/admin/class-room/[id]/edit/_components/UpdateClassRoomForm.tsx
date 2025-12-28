@@ -23,7 +23,7 @@ interface UpdateClassRoomFormProps {
 }
 const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const router = useRouter();
-  const { sessions, employees, is_learning_path } = data;
+  const { sessions, employees, class_type } = data;
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
@@ -156,9 +156,9 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       roomType: data.room_type || "single",
       classRoomId: data.id,
       platform: platform,
-      isLearningPath: is_learning_path ?? false,
+      classType: class_type ?? "room",
     };
-  }, [data, platform, is_learning_path]);
+  }, [data, platform, class_type]);
 
   const studentList = useMemo(() => {
     return employees.reduce<StudentItem[]>((acc, emp) => {

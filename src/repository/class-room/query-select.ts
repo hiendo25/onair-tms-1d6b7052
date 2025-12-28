@@ -126,7 +126,7 @@ export const SELECT_CLASSROOM_DETAIL = `
   description,
   room_type,
   thumbnail_url,
-	is_learning_path,
+	class_type,
   start_at,
   end_at,
   status,

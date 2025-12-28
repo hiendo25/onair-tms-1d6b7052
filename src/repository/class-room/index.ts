@@ -38,6 +38,7 @@ import {
   CreatePivotClassRoomAndHashTagPayload,
   CreatePivotClassRoomWithResourcePayload,
   DeletePivotClassRoomAndEmployeePayload,
+  UpdateClassRoomPayload,
   UpSertClassRoomPayload,
 } from "./type";
 export * from "./type";
@@ -93,6 +94,16 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err?.message ?? "Unknown error craete Class Room");
+  }
+};
+
+const updateClassRoom = async (payload: UpdateClassRoomPayload) => {
+  try {
+    const { id, ...restPayload } = payload;
+    return await supabase.from("class_rooms").update(restPayload).eq("id", id).select().single();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error update Class Room");
   }
 };
 
@@ -712,6 +723,7 @@ const deletePivotClassRoomsWithResources = async (ids: number[]) => {
 
 export {
   createClassRoom,
+  updateClassRoom,
   createPivotClassRoomAndHashTag,
   createPivotClassRoomAndField,
   createPivotClassRoomsWithResources,

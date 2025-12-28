@@ -11,7 +11,7 @@ import { type ClassRoom } from "../../classroom-form.schema";
 import { initClassSessionFormData } from "..";
 import AgendaFieldsControl from "../class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "../class-room-session-fields/AssessmentField";
-import ClassRoomSessionFromToDate from "../class-room-session-fields/ClassRoomSessionFromToDate";
+import ClassRoomSessionFromToDate from "../class-room-session-fields/SessionFromToDate";
 import CoursePeriodSelector from "../class-room-session-fields/CoursePeriodSelector";
 import QRCodeSettingFields from "../class-room-session-fields/QRCodeSettingFields";
 import RoomChannel from "../class-room-session-fields/RoomChannel";

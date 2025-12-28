@@ -6,11 +6,11 @@ import { Control, useController } from "react-hook-form";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-interface ClassRoomSessionFromToDateProps {
+interface SessionFromToDateProps {
   control: Control<ClassRoom>;
   index: number;
 }
-const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({ control, index }) => {
+const SessionFromToDate: React.FC<SessionFromToDateProps> = ({ control, index }) => {
   const { getValues } = useClassRoomFormContext();
   const sessions = getValues("classRoomSessions");
   // const allStartAndEndDate = sessions.map((it) => ({ startDate: it.startDate, endDate: it.endDate }));
@@ -102,4 +102,4 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
     </div>
   );
 };
-export default memo(ClassRoomSessionFromToDate);
+export default memo(SessionFromToDate);

@@ -57,7 +57,7 @@ export class UpsertClassRoomService {
       title,
       forWhom,
       docs,
-      isLearningPath,
+      classType,
     } = formData;
 
     const uniqueSlug = `${slug}-${new Date().getTime()}`;
@@ -78,7 +78,7 @@ export class UpsertClassRoomService {
         start_at: startDate,
         end_at: endDate,
         organization_id: organizationId,
-        is_learning_path: isLearningPath,
+        class_type: classType,
       },
     });
 
@@ -137,6 +137,7 @@ export class UpsertClassRoomService {
       title,
       description,
       roomType,
+      classType,
     });
 
     console.log("Create Classroom", classRoomData);
@@ -176,7 +177,6 @@ export class UpsertClassRoomService {
   ) {
     const { formData, students } = payload;
     const userId = this.userId;
-    const organizationId = this.organizationId;
 
     const { data: classRoomDetail, error: classRoomDetailError } = await classRoomRepository.getClassRoomById(
       classRoomId,
@@ -191,23 +191,19 @@ export class UpsertClassRoomService {
 
     const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
     /**
-     * Step 1: Create ClassRoom
+     * Step 1: update ClassRoom
      */
-    const { data: classRoomData, error: updateError } = await classRoomRepository.upsertClassRoom({
-      action: "update",
-      payload: {
-        id: classRoomId,
-        description: description,
-        room_type: roomType,
-        slug: slug,
-        status: status,
-        thumbnail_url: thumbnailUrl,
-        title: title,
-        start_at: startDate,
-        end_at: endDate,
-        employee_id: userId,
-        organization_id: organizationId,
-      },
+    const { data: classRoomData, error: updateError } = await classRoomRepository.updateClassRoom({
+      id: classRoomId,
+      description: description,
+      room_type: roomType,
+      slug: slug,
+      status: status,
+      thumbnail_url: thumbnailUrl,
+      title: title,
+      start_at: startDate,
+      end_at: endDate,
+      employee_id: userId,
     });
 
     if (updateError) {
@@ -463,6 +459,7 @@ export class UpsertClassRoomService {
                       teacher_id: teacherId,
                       start_at: dayjs(startAt).toISOString(),
                       end_at: dayjs(endAt).toISOString(),
+                      weekly_schedule: null,
                     },
                   }
                 : {
@@ -473,6 +470,7 @@ export class UpsertClassRoomService {
                       teacher_id: teacherId,
                       start_at: dayjs(startAt).toISOString(),
                       end_at: dayjs(endAt).toISOString(),
+                      weekly_schedule: null,
                     },
                   };
             },
@@ -524,9 +522,10 @@ export class UpsertClassRoomService {
       roomType: ClassRoom["roomType"];
       title: string;
       description: string;
+      classType: ClassRoom["classType"];
     },
   ) {
-    const { title, description, roomType, classRoomSessions } = payload;
+    const { title, description, roomType, classRoomSessions, classType } = payload;
     const userId = this.userId;
     await Promise.all(
       classRoomSessions.map(async (classSession, _sessionIndex) => {
@@ -603,8 +602,9 @@ export class UpsertClassRoomService {
                         class_session_id: sessionData.id,
                         course_id: course.id,
                         teacher_id: teacherId,
-                        start_at: dayjs(startAt).toISOString(),
+                        start_at: classType === "learning_path" ? null : dayjs(startAt).toISOString(),
                         end_at: dayjs(endAt).toISOString(),
+                        weekly_schedule: null,
                       };
                     }
                   })
@@ -781,6 +781,7 @@ export class UpsertClassRoomService {
       start_at: classSession.startDate,
       session_type: classSession.sessionType,
       priority: index + 1,
+      weekly_schedule: null,
     };
 
     return sessionId
@@ -822,6 +823,7 @@ export class UpsertClassRoomService {
       session_type: classSession.sessionType,
       class_room_id: classRoomId,
       priority: index + 1,
+      weekly_schedule: null,
     };
   }
 

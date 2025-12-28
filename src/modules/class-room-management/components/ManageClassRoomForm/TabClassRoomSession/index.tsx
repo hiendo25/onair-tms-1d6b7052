@@ -1,15 +1,16 @@
 "use client";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 
+import { ClassType } from "@/model/enum-type.model";
 import { ClassRoom } from "../classroom-form.schema";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
 import SingleSession, { SingleSessionRef } from "./SingleSession";
-import SingleSessionLearningPath from "./SingleSessionLearningPath";
 
 export const initClassSessionFormData = (init?: {
   sessionType?: "online" | "offline" | "live";
+  classType: ClassType;
 }): ClassRoom["classRoomSessions"][number] => {
   return {
     title: "",
@@ -25,6 +26,8 @@ export const initClassSessionFormData = (init?: {
     coursesPeriod: [],
     assignments: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
+    weeklySchedule: undefined,
+    classType: init?.classType,
   };
 };
 
@@ -38,7 +41,6 @@ const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessi
   const multipleSessionRef = useRef<MultipleSessionRef>(null);
   const { getValues } = methods;
   const classRoomType = getValues("roomType");
-  const isLearningPath = getValues("isLearningPath");
 
   useImperativeHandle(ref, () => ({
     checkAllFields: async () => {
@@ -50,15 +52,6 @@ const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessi
       return false;
     },
   }));
-
-  if (isLearningPath) {
-    return (
-      <div>
-        {classRoomType === "single" ? <SingleSessionLearningPath methods={methods} ref={singleSessionRef} /> : null}
-        {/* {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}  */}
-      </div>
-    );
-  }
   return (
     <div>
       {classRoomType === "single" ? <SingleSession methods={methods} ref={singleSessionRef} /> : null}

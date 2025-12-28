@@ -8,10 +8,12 @@ import { type ClassRoom } from "../classroom-form.schema";
 
 import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
-import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
+import CoursePeriodLearningPath from "./class-room-session-fields/CoursePeriodLearningPath";
 import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
 import QRCodeSettingFields from "./class-room-session-fields/QRCodeSettingFields";
 import RoomChannel from "./class-room-session-fields/RoomChannel";
+import ClassRoomSessionFromToDate from "./class-room-session-fields/SessionFromToDate";
+import SessionFromToDateLearningPath from "./class-room-session-fields/SessionFromToDateLearningPath";
 
 export type SingleSessionRef = {
   checkAllSessionField: () => Promise<boolean>;
@@ -28,6 +30,8 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
     keyName: "_sessionId",
   });
 
+  const isLearningPath = getValues("classType") === "learning_path";
+
   useImperativeHandle(ref, () => ({
     checkAllSessionField: async () => {
       return await trigger("classRoomSessions");
@@ -39,9 +43,18 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ method
       {classSessionsFields.map(({ _sessionId, sessionType }, _index) => (
         <div key={_sessionId}>
           <div className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
-            <ClassRoomSessionFromToDate index={_index} control={control} />
+            {isLearningPath ? (
+              <>
+                <SessionFromToDateLearningPath sessionIndex={_index} control={control} />
+                <CoursePeriodLearningPath sessionIndex={_index} methods={methods} />
+              </>
+            ) : (
+              <>
+                <ClassRoomSessionFromToDate index={_index} control={control} />
+                <CoursePeriodSelector sessionIndex={_index} methods={methods} />
+              </>
+            )}
 
-            <CoursePeriodSelector sessionIndex={_index} methods={methods} />
             <AssessmentField sessionIndex={_index} control={control} />
             {sessionType === "live" && <RoomChannel control={control} index={_index} />}
             {sessionType === "offline" && (

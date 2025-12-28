@@ -1,5 +1,5 @@
 "use client";
-import React, { forwardRef, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
@@ -64,7 +64,7 @@ export const initClassRoomFormData = (oprions: {
     docs: [],
     platform: oprions?.platform,
     classRoomSessions: [],
-    isLearningPath: false,
+    classType: "room",
   };
 };
 
@@ -100,16 +100,14 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     });
 
     const {
-      getValues,
       setValue,
       handleSubmit,
       formState: { errors },
       trigger,
       reset,
-      watch,
     } = methods;
 
-    console.log({ errors, value: getValues(), selectedStudents, isLearningPath });
+    console.log({ errors, selectedStudents, isLearningPath });
 
     const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
@@ -187,28 +185,27 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     /**
      * Init form value
      */
-    useLayoutEffect(() => {
-      if (!initFormValue) return;
-      reset({ ...initFormValue });
-    }, [initFormValue, reset]);
 
-    useLayoutEffect(() => {
-      if (!roomType) return;
+    useEffect(() => {
+      const base = initClassRoomFormData({ platform, roomType });
 
-      const initSessionsFormData = initClassSessionFormData(
-        platform !== "hybrid" ? { sessionType: platform } : undefined,
+      if (initFormValue) {
+        reset(initFormValue);
+        return;
+      }
+
+      const initSessions = initClassSessionFormData(
+        platform !== "hybrid"
+          ? { sessionType: platform, classType: isLearningPath ? "learning_path" : "room" }
+          : undefined,
       );
-      setValue(
-        "classRoomSessions",
-        roomType === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],
-      );
-    }, [roomType, platform, setValue]);
 
-    useLayoutEffect(() => {
-      if (!isLearningPath) return;
-
-      setValue("isLearningPath", isLearningPath);
-    }, [isLearningPath, setValue]);
+      reset({
+        ...base,
+        classRoomSessions: roomType === "multiple" ? [initSessions, initSessions] : [initSessions],
+        classType: isLearningPath ? "learning_path" : "room",
+      });
+    }, [initFormValue, platform, roomType, isLearningPath, reset]);
 
     useImperativeHandle(ref, () => ({
       resetForm: () => {
