@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
 import { useMarkLessonComplete } from "@/modules/learning-screen/hooks/useMarkLessonComplete";
@@ -9,6 +9,11 @@ import type {
   LearningLesson,
   ResourceRow,
 } from "@/modules/learning-screen/types";
+import {
+  clearVideoPosition,
+  getVideoPosition,
+  saveVideoPosition,
+} from "@/modules/learning-screen/utils/video-position-storage";
 import VideoPlayer from "@/shared/ui/video-player";
 
 interface VideoLessonPlayerProps {
@@ -37,8 +42,59 @@ const VideoLessonPlayer = ({
     employeeId: studentId ?? null,
   });
 
+  // State to manage initial video position (only for learning paths)
+  const [initialTime, setInitialTime] = useState<number>(0);
+  const lastSavedTimeRef = useRef<number>(0);
+
+  // Load saved video position when lesson changes (only for learning paths)
+  useEffect(() => {
+    if (learningPathId && lesson.id) {
+      const savedPosition = getVideoPosition(lesson.id);
+      if (savedPosition && savedPosition.currentTime > 0) {
+        // Only resume if saved position is meaningful (at least 5 seconds in)
+        // and not too close to the end (at least 10 seconds before end)
+        const isValidPosition =
+          savedPosition.currentTime >= 5 &&
+          savedPosition.duration - savedPosition.currentTime >= 10;
+
+        if (isValidPosition) {
+          setInitialTime(savedPosition.currentTime);
+          lastSavedTimeRef.current = savedPosition.currentTime;
+        } else {
+          // Clear invalid position
+          clearVideoPosition(lesson.id);
+          setInitialTime(0);
+          lastSavedTimeRef.current = 0;
+        }
+      } else {
+        setInitialTime(0);
+        lastSavedTimeRef.current = 0;
+      }
+    } else {
+      setInitialTime(0);
+      lastSavedTimeRef.current = 0;
+    }
+  }, [lesson.id, learningPathId]);
+
+  // Handle video time updates - save position periodically (only for learning paths)
+  const handleTimeUpdate = useCallback(
+    (currentTime: number, isPlaying: boolean, duration: number) => {
+      if (!learningPathId || !lesson.id) return;
+
+      // Save position every 5 seconds to avoid too many localStorage writes
+      const timeSinceLastSave = Math.abs(currentTime - lastSavedTimeRef.current);
+      if (timeSinceLastSave >= 5) {
+        saveVideoPosition(lesson.id, currentTime, duration);
+        lastSavedTimeRef.current = currentTime;
+      }
+    },
+    [learningPathId, lesson.id],
+  );
+
   const handleVideoEnded = useCallback(() => {
     if (learningPathId && lesson.id) {
+      // Clear saved position when video completes
+      clearVideoPosition(lesson.id);
       markComplete(lesson.id);
     }
   }, [learningPathId, lesson.id, markComplete]);
@@ -67,6 +123,8 @@ const VideoLessonPlayer = ({
             nextLessonTitle={nextLessonTitle ?? undefined}
             onStartNextLesson={handleStartNextLesson}
             onEnded={handleVideoEnded}
+            onTimeUpdate={handleTimeUpdate}
+            initialTime={initialTime}
             autoAdvanceTime={10}
             instanceKey={lesson.id}
           />

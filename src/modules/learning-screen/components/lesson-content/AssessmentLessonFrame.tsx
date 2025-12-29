@@ -2,8 +2,8 @@ import { Alert, Stack, Typography } from "@mui/material";
 
 import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
 import { PATHS } from "@/constants/path.constant";
+import { useMarkLessonComplete } from "@/modules/learning-screen/hooks/useMarkLessonComplete";
 import type { LearningLesson, LearningLessonSummary } from "@/modules/learning-screen/types";
-import MarkLessonCompleteButton from "../MarkLessonCompleteButton";
 
 interface AssessmentLessonFrameProps {
   assignmentId: string | null;
@@ -22,6 +22,12 @@ const AssessmentLessonFrame = ({
   courseId,
   selectedLessonSummary,
 }: AssessmentLessonFrameProps) => {
+  const { markComplete } = useMarkLessonComplete({
+    courseId: courseId ?? null,
+    learningPathId,
+    employeeId: studentId ?? null,
+  });
+
   if (!assignmentId) {
     return <Alert severity="warning">Chưa gắn bài kiểm tra cho bài học này.</Alert>;
   }
@@ -29,6 +35,13 @@ const AssessmentLessonFrame = ({
   if (!studentId) {
     return <Alert severity="warning">Không xác định được thông tin người học. Vui lòng đăng nhập lại.</Alert>;
   }
+
+  const handleAssignmentSubmitted = () => {
+    // Automatically mark the lesson as complete when assignment is submitted
+    if (learningPathId) {
+      markComplete(lesson.id);
+    }
+  };
 
   return (
     <Stack spacing={2}>
@@ -41,14 +54,7 @@ const AssessmentLessonFrame = ({
         employeeId={studentId}
         basePath={PATHS.MY_ASSIGNMENTS.ROOT}
         variant="embedded"
-      />
-
-      <MarkLessonCompleteButton
-        lessonId={lesson.id}
-        learningPathId={learningPathId}
-        courseId={courseId}
-        studentId={studentId}
-        selectedLessonSummary={selectedLessonSummary}
+        onSubmitted={handleAssignmentSubmitted}
       />
     </Stack>
   );
