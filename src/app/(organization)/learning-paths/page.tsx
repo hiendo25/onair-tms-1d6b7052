@@ -14,7 +14,7 @@ const LearningPathsPage = () => {
   useEffect(() => {
     if (!isLoading && !currentLearningPathData?.data) {
       // If no current learning path, redirect to dashboard
-      router.push(PATHS.DASHBOARD);
+      // router.push(PATHS.DASHBOARD);
     }
   }, [isLoading, currentLearningPathData, router]);
 
