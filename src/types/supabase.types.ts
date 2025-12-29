@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       assignment_categories: {
@@ -165,7 +140,6 @@ export type Database = {
           description: string
           id: string
           name: string
-          organization_id: string | null
           updated_at: string
         }
         Insert: {
@@ -174,7 +148,6 @@ export type Database = {
           description: string
           id?: string
           name: string
-          organization_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -183,7 +156,6 @@ export type Database = {
           description?: string
           id?: string
           name?: string
-          organization_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -192,13 +164,6 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -675,7 +640,6 @@ export type Database = {
           employee_id: string | null
           end_at: string | null
           id: string
-          is_learning_path: boolean | null
           organization_id: string
           resource_id: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -691,7 +655,6 @@ export type Database = {
           employee_id?: string | null
           end_at?: string | null
           id?: string
-          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -707,7 +670,6 @@ export type Database = {
           employee_id?: string | null
           end_at?: string | null
           id?: string
-          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"]
@@ -813,7 +775,7 @@ export type Database = {
           {
             foreignKeyName: "class_session_assignment_session_id_fkey"
             columns: ["session_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
           },
@@ -2214,6 +2176,27 @@ export type Database = {
           },
         ]
       }
+      serveys: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       surveys: {
         Row: {
           created_at: string
@@ -3081,9 +3064,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],

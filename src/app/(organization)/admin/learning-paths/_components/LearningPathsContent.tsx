@@ -7,6 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
   Button,
@@ -92,6 +93,13 @@ export default function LearningPathsContent() {
   const handleEdit = () => {
     if (selectedLearningPathId) {
       router.push(PATHS.LEARNING_PATHS.EDIT(selectedLearningPathId));
+    }
+    handleMenuClose();
+  };
+
+  const handleViewDetail = () => {
+    if (selectedLearningPathId) {
+      router.push(PATHS.LEARNING_PATHS.DETAIL(selectedLearningPathId));
     }
     handleMenuClose();
   };
@@ -331,6 +339,12 @@ export default function LearningPathsContent() {
             horizontal: "right",
           }}
         >
+          <MenuItem onClick={handleViewDetail}>
+            <ListItemIcon>
+              <VisibilityIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText>Chi tiết</ListItemText>
+          </MenuItem>
           <MenuItem onClick={handleEdit}>
             <ListItemIcon>
               <EditIcon fontSize="small" />
@@ -348,4 +362,3 @@ export default function LearningPathsContent() {
     </PageContainer>
   );
 }
-

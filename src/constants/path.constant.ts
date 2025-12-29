@@ -83,6 +83,7 @@ export const PATHS = {
     ROOT: "/admin/learning-paths",
     CREATE: "/admin/learning-paths/create",
     EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
+    DETAIL: (id: string = ":id") => `/admin/learning-paths/${id}`,
   },
   MY_LEARNING_PATHS: "/learning-paths",
 } as const;

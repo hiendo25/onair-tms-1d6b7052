@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 
+import LearningPathChip from "@/modules/learning-paths/components/LearningPathChip";
 import type { ClassRoom } from "@/modules/learning-paths/learning-path-form.schema";
 
 interface ClassRoomAccordionItemProps {
@@ -83,12 +84,12 @@ const getSessionTypeInfo = (sessionType?: string) => {
 };
 
 const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
-                                                                         classRoom,
-                                                                         expanded,
-                                                                         hasError,
-                                                                         onExpandChange,
-                                                                         onDelete,
-                                                                       }) => {
+  classRoom,
+  expanded,
+  hasError,
+  onExpandChange,
+  onDelete,
+}) => {
   const sessionTypeInfo = getSessionTypeInfo(classRoom.session_type);
   const roomTypeLabel = getRoomTypeLabel(classRoom.room_type);
 
@@ -191,15 +192,9 @@ const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
                     {/* Course title chip */}
                     {session.course && (
                       <Stack direction="row" spacing={1} flexWrap="wrap">
-                        <Chip
-                          icon={<BookIcon sx={{ fontSize: 18, color: "text.secondary" }} />
-                          }
+                        <LearningPathChip
+                          icon={<BookIcon sx={{ fontSize: 18, color: "text.secondary" }} />}
                           label={`Môn học ${sessionIndex + 1}`}
-                          size="small"
-                          color="default"
-                          sx={{
-                            borderRadius: "6px", color: "black",
-                          }}
                         />
 
                         <Typography variant="body2">
@@ -212,34 +207,25 @@ const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
                     <Stack direction="row" spacing={1} flexWrap="wrap">
                       {/* Teacher */}
                       {session.teacher && (
-                        <Chip
+                        <LearningPathChip
                           icon={<PersonIcon sx={{ fontSize: 16 }} />}
                           label={`GV ${session.teacher.full_name}`}
-                          size="small"
-                          color="default"
-                          sx={{ borderRadius: "6px", color: "black" }}
                         />
                       )}
 
                       {/* Platform */}
                       {session.channel_provider && (
-                        <Chip
+                        <LearningPathChip
                           icon={<VideoCallIcon sx={{ fontSize: 16, color: "text.secondary" }} />}
                           label={getChannelProviderLabel(session.channel_provider)}
-                          size="small"
-                          color="default"
-                          sx={{ borderRadius: "6px", color: "black" }}
                         />
                       )}
 
                       {/* Schedule */}
                       {session.start_at && session.end_at && (
-                        <Chip
+                        <LearningPathChip
                           icon={<ScheduleIcon sx={{ fontSize: 16 }} />}
                           label={formatSchedule(session.start_at, session.end_at)}
-                          size="small"
-                          color="default"
-                          sx={{ borderRadius: "6px", color: "black" }}
                         />
                       )}
                     </Stack>
@@ -250,7 +236,7 @@ const ClassRoomAccordionItem: React.FC<ClassRoomAccordionItemProps> = ({
           </List>
         )}
       </AccordionDetails>
-    </Accordion>
+    </Accordion >
   );
 };
 
