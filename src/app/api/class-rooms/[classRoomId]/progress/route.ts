@@ -13,9 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import {
   buildProgressResponse,
-  countCompletedLessons,
-  getLessonIdsForClassRoom,
-  getLessonProgressRecords,
+  getClassRoomProgress,
   resolveLearningPathId,
 } from "@/services/progress/progress.service";
 
@@ -45,24 +43,18 @@ export async function GET(
     const providedLearningPathId = request.nextUrl.searchParams.get("learningPathId");
     const learningPathId = await resolveLearningPathId(employee.id, providedLearningPathId);
 
-    // Get all lesson IDs for this class room
-    const lessonIds = await getLessonIdsForClassRoom(classRoomId);
-
-    // Get progress records for all lessons
-    const progressRecords = await getLessonProgressRecords(
-      lessonIds,
+    // Get progress using optimized query
+    const { totalLessons, completedLessons } = await getClassRoomProgress(
+      classRoomId,
       employee.id,
       learningPathId,
     );
-
-    // Count completed lessons
-    const completedLessons = countCompletedLessons(progressRecords);
 
     // Build response
     const response = buildProgressResponse({
       entityId: classRoomId,
       entityType: "class_room",
-      totalLessons: lessonIds.length,
+      totalLessons,
       completedLessons,
       learningPathId,
       employeeId: employee.id,

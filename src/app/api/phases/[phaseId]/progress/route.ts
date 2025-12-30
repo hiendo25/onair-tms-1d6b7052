@@ -10,9 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import {
   buildProgressResponse,
-  countCompletedLessons,
-  getLessonIdsForPhase,
-  getLessonProgressRecords,
+  getPhaseProgress,
 } from "@/services/progress/progress.service";
 import { createSVClient } from "@/services/supabase/server";
 
@@ -55,24 +53,18 @@ export async function GET(
 
     const learningPathId = phase.learning_path_id;
 
-    // Get all lesson IDs for this phase
-    const lessonIds = await getLessonIdsForPhase(phaseId);
-
-    // Get progress records for all lessons
-    const progressRecords = await getLessonProgressRecords(
-      lessonIds,
+    // Get progress using optimized query
+    const { totalLessons, completedLessons } = await getPhaseProgress(
+      phaseId,
       employee.id,
       learningPathId,
     );
-
-    // Count completed lessons
-    const completedLessons = countCompletedLessons(progressRecords);
 
     // Build response
     const response = buildProgressResponse({
       entityId: phaseId,
       entityType: "phase",
-      totalLessons: lessonIds.length,
+      totalLessons,
       completedLessons,
       learningPathId,
       employeeId: employee.id,

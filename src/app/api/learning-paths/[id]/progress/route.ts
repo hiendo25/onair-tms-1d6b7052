@@ -10,9 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import {
   buildProgressResponse,
-  countCompletedLessons,
-  getLessonIdsForLearningPath,
-  getLessonProgressRecords,
+  getLearningPathProgress,
 } from "@/services/progress/progress.service";
 
 export async function GET(
@@ -37,24 +35,17 @@ export async function GET(
       );
     }
 
-    // Get all lesson IDs for this learning path
-    const lessonIds = await getLessonIdsForLearningPath(learningPathId);
-
-    // Get progress records for all lessons
-    const progressRecords = await getLessonProgressRecords(
-      lessonIds,
-      employee.id,
+    // Get progress using optimized query
+    const { totalLessons, completedLessons } = await getLearningPathProgress(
       learningPathId,
+      employee.id,
     );
-
-    // Count completed lessons
-    const completedLessons = countCompletedLessons(progressRecords);
 
     // Build response
     const response = buildProgressResponse({
       entityId: learningPathId,
       entityType: "learning_path",
-      totalLessons: lessonIds.length,
+      totalLessons,
       completedLessons,
       learningPathId,
       employeeId: employee.id,

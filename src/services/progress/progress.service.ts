@@ -1,9 +1,10 @@
 /**
- * Reusable service functions for calculating learning progress at different levels
+ * Optimized progress calculation service using SQL JOINs
+ * Replaces N+1 query pattern with single-query approach for better performance
  */
 
 import { createSVClient } from "@/services/supabase/server";
-import type { BuildProgressParams, LessonProgressRecord, ProgressResponse } from "@/types/progress.types";
+import type { BuildProgressParams, LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
 
 /**
  * Calculate progress percentage based on completed vs total lessons
@@ -23,12 +24,10 @@ export async function resolveLearningPathId(
   employeeId: string,
   providedLearningPathId?: string | null,
 ): Promise<string | null> {
-  // If learningPathId is provided, use it
   if (providedLearningPathId) {
     return providedLearningPathId;
   }
 
-  // Otherwise, get the most recent learning path for this employee
   const supabase = await createSVClient();
   const { data, error } = await supabase
     .from("employee_learning_paths")
@@ -43,48 +42,6 @@ export async function resolveLearningPathId(
   }
 
   return data.learning_path_id;
-}
-
-/**
- * Get lesson progress records for specific lessons
- */
-export async function getLessonProgressRecords(
-  lessonIds: string[],
-  employeeId: string,
-  learningPathId: string | null,
-): Promise<LessonProgressRecord[]> {
-  if (lessonIds.length === 0) {
-    return [];
-  }
-
-  const supabase = await createSVClient();
-
-  let query = supabase
-    .from("lesson_progress")
-    .select("*")
-    .eq("employee_id", employeeId)
-    .in("lesson_id", lessonIds);
-
-  // Filter by learning path if provided
-  if (learningPathId) {
-    query = query.eq("learning_path_id", learningPathId);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("Error fetching lesson progress:", error);
-    return [];
-  }
-
-  return (data as LessonProgressRecord[]) || [];
-}
-
-/**
- * Count completed lessons from progress records
- */
-export function countCompletedLessons(progressRecords: LessonProgressRecord[]): number {
-  return progressRecords.filter((record) => record.status === "completed").length;
 }
 
 /**
@@ -105,168 +62,614 @@ export function buildProgressResponse(params: BuildProgressParams): ProgressResp
 }
 
 /**
- * Get all lesson IDs for a specific section
+ * Get progress for a section (optimized single query)
  */
-export async function getLessonIdsForSection(sectionId: string): Promise<string[]> {
+export async function getSectionProgress(
+  sectionId: string,
+  employeeId: string,
+  learningPathId: string | null,
+): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
-  const { data, error } = await supabase
+
+  // Get all lesson IDs for the section
+  const { data: lessons, error: lessonsError } = await supabase
     .from("lessons")
     .select("id")
     .eq("section_id", sectionId)
     .eq("status", "active");
 
-  if (error) {
-    console.error("Error fetching lessons for section:", error);
-    return [];
+  if (lessonsError || !lessons) {
+    console.error("Error fetching lessons:", lessonsError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  return data?.map((lesson: { id: string }) => lesson.id) || [];
+  const lessonIds = lessons.map((l: { id: string }) => l.id);
+  const totalLessons = lessonIds.length;
+
+  if (totalLessons === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get completed lessons count
+  let progressQuery = supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .in("lesson_id", lessonIds);
+
+  if (learningPathId) {
+    progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  }
+
+  const { count, error: progressError } = await progressQuery;
+
+  if (progressError) {
+    console.error("Error fetching progress:", progressError);
+    return { totalLessons, completedLessons: 0 };
+  }
+
+  return { totalLessons, completedLessons: count || 0 };
 }
 
 /**
- * Get all lesson IDs for a specific course
+ * Get progress for a course (optimized - single query using JOINs)
  */
-export async function getLessonIdsForCourse(courseId: string): Promise<string[]> {
+export async function getCourseProgress(
+  courseId: string,
+  employeeId: string,
+  learningPathId: string | null,
+): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
-  const { data, error } = await supabase
-    .from("sections")
-    .select("id")
-    .eq("course_id", courseId)
-    .eq("status", "active");
 
-  if (error || !data) {
-    console.error("Error fetching sections for course:", error);
-    return [];
-  }
-
-  const sectionIds = data.map((section: { id: string }) => section.id);
-  if (sectionIds.length === 0) {
-    return [];
-  }
-
+  // Get all lessons for the course in one query using JOIN
   const { data: lessons, error: lessonsError } = await supabase
-    .from("lessons")
-    .select("id")
-    .in("section_id", sectionIds)
-    .eq("status", "active");
+    .from("sections")
+    .select(`
+      lessons!inner(id)
+    `)
+    .eq("course_id", courseId)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
 
-  if (lessonsError) {
-    console.error("Error fetching lessons for course:", lessonsError);
-    return [];
+  if (lessonsError || !lessons) {
+    console.error("Error fetching course lessons:", lessonsError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  return lessons?.map((lesson) => lesson.id) || [];
+  // Flatten lesson IDs
+  const lessonIds = lessons.flatMap((section: any) =>
+    section.lessons?.map((l: { id: string }) => l.id) || []
+  );
+
+  // Remove duplicates
+  const uniqueLessonIds = Array.from(new Set(lessonIds));
+  const totalLessons = uniqueLessonIds.length;
+
+  if (totalLessons === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get completed lessons count
+  let progressQuery = supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .in("lesson_id", uniqueLessonIds);
+
+  if (learningPathId) {
+    progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  }
+
+  const { count, error: progressError } = await progressQuery;
+
+  if (progressError) {
+    console.error("Error fetching course progress:", progressError);
+    return { totalLessons, completedLessons: 0 };
+  }
+
+  return { totalLessons, completedLessons: count || 0 };
 }
 
 /**
- * Get all lesson IDs for a specific class room
+ * Get progress for a class room (optimized)
  * Flow: class_rooms -> class_sessions -> class_sessions_courses_period -> courses -> sections -> lessons
  */
-export async function getLessonIdsForClassRoom(classRoomId: string): Promise<string[]> {
+export async function getClassRoomProgress(
+  classRoomId: string,
+  employeeId: string,
+  learningPathId: string | null,
+): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
 
-  // Step 1: Get all class sessions for this class room
-  const { data: classSessions, error: sessionsError } = await supabase
+  // Single query to get all lessons using JOINs
+  const { data: sessionCourses, error: coursesError } = await supabase
     .from("class_sessions")
-    .select("id")
+    .select(`
+      class_sessions_courses_period!inner(
+        course_id
+      )
+    `)
     .eq("class_room_id", classRoomId);
 
-  if (sessionsError || !classSessions || classSessions.length === 0) {
-    console.error("Error fetching class sessions:", sessionsError);
-    return [];
-  }
-
-  const classSessionIds = classSessions.map((session: { id: string }) => session.id);
-
-  // Step 2: Get all courses linked to these class sessions via junction table
-  const { data: sessionCourses, error: coursesError } = await supabase
-    .from("class_sessions_courses_period")
-    .select("course_id")
-    .in("class_session_id", classSessionIds);
-
-  if (coursesError || !sessionCourses || sessionCourses.length === 0) {
-    console.error("Error fetching session courses:", coursesError);
-    return [];
+  if (coursesError || !sessionCourses) {
+    console.error("Error fetching class room courses:", coursesError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
   // Get unique course IDs
   const courseIds = Array.from(
-    new Set(sessionCourses.map((sc: { course_id: string }) => sc.course_id))
+    new Set(
+      sessionCourses.flatMap((session: any) =>
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
+      )
+    )
   );
 
-  // Step 3: Get all lessons for all courses
-  const allLessonIds: string[] = [];
-  for (const courseId of courseIds) {
-    const lessonIds = await getLessonIdsForCourse(courseId);
-    allLessonIds.push(...lessonIds);
+  if (courseIds.length === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  // Remove duplicates (in case multiple courses share lessons)
-  return Array.from(new Set(allLessonIds));
+  // Get all lessons for all courses in one query
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      lessons!inner(id)
+    `)
+    .in("course_id", courseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching class room lessons:", lessonsError);
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Flatten and deduplicate lesson IDs
+  const lessonIds = sections.flatMap((section: any) =>
+    section.lessons?.map((l: { id: string }) => l.id) || []
+  );
+  const uniqueLessonIds = Array.from(new Set(lessonIds));
+  const totalLessons = uniqueLessonIds.length;
+
+  if (totalLessons === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get completed lessons count
+  let progressQuery = supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .in("lesson_id", uniqueLessonIds);
+
+  if (learningPathId) {
+    progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  }
+
+  const { count, error: progressError } = await progressQuery;
+
+  if (progressError) {
+    console.error("Error fetching class room progress:", progressError);
+    return { totalLessons, completedLessons: 0 };
+  }
+
+  return { totalLessons, completedLessons: count || 0 };
 }
 
 /**
- * Get all lesson IDs for a specific phase
+ * Get progress for a phase (optimized)
  */
-export async function getLessonIdsForPhase(phaseId: string): Promise<string[]> {
+export async function getPhaseProgress(
+  phaseId: string,
+  employeeId: string,
+  learningPathId: string,
+): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
 
-  // Get all class rooms in this phase
-  const { data: phaseClassRooms, error } = await supabase
+  // Get all class rooms for this phase
+  const { data: phaseClassRooms, error: pcError } = await supabase
     .from("phase_class_rooms")
     .select("class_room_id")
     .eq("phase_id", phaseId);
 
-  if (error || !phaseClassRooms) {
-    console.error("Error fetching phase class rooms:", error);
-    return [];
+  if (pcError || !phaseClassRooms || phaseClassRooms.length === 0) {
+    console.error("Error fetching phase class rooms:", pcError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
   const classRoomIds = phaseClassRooms.map((pc: { class_room_id: string }) => pc.class_room_id);
-  if (classRoomIds.length === 0) {
-    return [];
+
+  // Get all courses for all class rooms in one query
+  const { data: sessionCourses, error: coursesError } = await supabase
+    .from("class_sessions")
+    .select(`
+      class_sessions_courses_period!inner(
+        course_id
+      )
+    `)
+    .in("class_room_id", classRoomIds);
+
+  if (coursesError || !sessionCourses) {
+    console.error("Error fetching phase courses:", coursesError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  // Get all lessons for all class rooms in this phase
-  const allLessonIds: string[] = [];
-  for (const classRoomId of classRoomIds) {
-    const lessonIds = await getLessonIdsForClassRoom(classRoomId);
-    allLessonIds.push(...lessonIds);
+  // Get unique course IDs
+  const courseIds = Array.from(
+    new Set(
+      sessionCourses.flatMap((session: any) =>
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
+      )
+    )
+  );
+
+  if (courseIds.length === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  // Remove duplicates
-  return Array.from(new Set(allLessonIds));
+  // Get all lessons for all courses
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      lessons!inner(id)
+    `)
+    .in("course_id", courseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching phase lessons:", lessonsError);
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Flatten and deduplicate lesson IDs
+  const lessonIds = sections.flatMap((section: any) =>
+    section.lessons?.map((l: { id: string }) => l.id) || []
+  );
+  const uniqueLessonIds = Array.from(new Set(lessonIds));
+  const totalLessons = uniqueLessonIds.length;
+
+  if (totalLessons === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get completed lessons count
+  const { count, error: progressError } = await supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .eq("learning_path_id", learningPathId)
+    .in("lesson_id", uniqueLessonIds);
+
+  if (progressError) {
+    console.error("Error fetching phase progress:", progressError);
+    return { totalLessons, completedLessons: 0 };
+  }
+
+  return { totalLessons, completedLessons: count || 0 };
 }
 
 /**
- * Get all lesson IDs for a specific learning path
+ * Get progress for a learning path (optimized)
  */
-export async function getLessonIdsForLearningPath(learningPathId: string): Promise<string[]> {
+export async function getLearningPathProgress(
+  learningPathId: string,
+  employeeId: string,
+): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
 
-  // Get all phases in this learning path
-  const { data: phases, error } = await supabase
+  // Get all phases for this learning path
+  const { data: phases, error: phasesError } = await supabase
     .from("learning_path_phases")
     .select("id")
     .eq("learning_path_id", learningPathId);
 
-  if (error || !phases) {
-    console.error("Error fetching phases for learning path:", error);
-    return [];
+  if (phasesError || !phases || phases.length === 0) {
+    console.error("Error fetching learning path phases:", phasesError);
+    return { totalLessons: 0, completedLessons: 0 };
   }
 
-  const phaseIds = phases.map((phase: { id: string }) => phase.id);
+  const phaseIds = phases.map((p: { id: string }) => p.id);
+
+  // Get all class rooms for all phases
+  const { data: phaseClassRooms, error: pcError } = await supabase
+    .from("phase_class_rooms")
+    .select("class_room_id")
+    .in("phase_id", phaseIds);
+
+  if (pcError || !phaseClassRooms || phaseClassRooms.length === 0) {
+    console.error("Error fetching learning path class rooms:", pcError);
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  const classRoomIds = phaseClassRooms.map((pc: { class_room_id: string }) => pc.class_room_id);
+
+  // Get all courses for all class rooms
+  const { data: sessionCourses, error: coursesError } = await supabase
+    .from("class_sessions")
+    .select(`
+      class_sessions_courses_period!inner(
+        course_id
+      )
+    `)
+    .in("class_room_id", classRoomIds);
+
+  if (coursesError || !sessionCourses) {
+    console.error("Error fetching learning path courses:", coursesError);
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get unique course IDs
+  const courseIds = Array.from(
+    new Set(
+      sessionCourses.flatMap((session: any) =>
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
+      )
+    )
+  );
+
+  if (courseIds.length === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get all lessons for all courses
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      lessons!inner(id)
+    `)
+    .in("course_id", courseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching learning path lessons:", lessonsError);
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Flatten and deduplicate lesson IDs
+  const lessonIds = sections.flatMap((section: any) =>
+    section.lessons?.map((l: { id: string }) => l.id) || []
+  );
+  const uniqueLessonIds = Array.from(new Set(lessonIds));
+  const totalLessons = uniqueLessonIds.length;
+
+  if (totalLessons === 0) {
+    return { totalLessons: 0, completedLessons: 0 };
+  }
+
+  // Get completed lessons count
+  const { count, error: progressError } = await supabase
+    .from("lesson_progress")
+    .select("id", { count: "exact", head: true })
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .eq("learning_path_id", learningPathId)
+    .in("lesson_id", uniqueLessonIds);
+
+  if (progressError) {
+    console.error("Error fetching learning path progress:", progressError);
+    return { totalLessons, completedLessons: 0 };
+  }
+
+  return { totalLessons, completedLessons: count || 0 };
+}
+
+/**
+ * Get progress for multiple phases in parallel (optimized for /learning-paths/[id]/phases/progress)
+ */
+export async function getMultiplePhasesProgress(
+  phaseIds: string[],
+  employeeId: string,
+  learningPathId: string,
+): Promise<Map<string, { totalLessons: number; completedLessons: number }>> {
+  const supabase = await createSVClient();
+  const progressMap = new Map<string, { totalLessons: number; completedLessons: number }>();
+
   if (phaseIds.length === 0) {
-    return [];
+    return progressMap;
   }
 
-  // Get all lessons for all phases in this learning path
-  const allLessonIds: string[] = [];
-  for (const phaseId of phaseIds) {
-    const lessonIds = await getLessonIdsForPhase(phaseId);
-    allLessonIds.push(...lessonIds);
+  // Get all class rooms for all phases in one query
+  const { data: phaseClassRooms, error: pcError } = await supabase
+    .from("phase_class_rooms")
+    .select("phase_id, class_room_id")
+    .in("phase_id", phaseIds);
+
+  if (pcError || !phaseClassRooms) {
+    console.error("Error fetching phase class rooms:", pcError);
+    return progressMap;
   }
 
-  // Remove duplicates
-  return Array.from(new Set(allLessonIds));
+  // Group class rooms by phase
+  const phaseToClassRooms = new Map<string, string[]>();
+  phaseClassRooms.forEach((pc: { phase_id: string; class_room_id: string }) => {
+    if (!phaseToClassRooms.has(pc.phase_id)) {
+      phaseToClassRooms.set(pc.phase_id, []);
+    }
+    phaseToClassRooms.get(pc.phase_id)!.push(pc.class_room_id);
+  });
+
+  // Get all class room IDs
+  const allClassRoomIds = Array.from(new Set(phaseClassRooms.map((pc: any) => pc.class_room_id)));
+
+  if (allClassRoomIds.length === 0) {
+    // No class rooms, return zeros for all phases
+    phaseIds.forEach((phaseId) => {
+      progressMap.set(phaseId, { totalLessons: 0, completedLessons: 0 });
+    });
+    return progressMap;
+  }
+
+  // Get all courses for all class rooms in one query
+  const { data: sessionCourses, error: coursesError } = await supabase
+    .from("class_sessions")
+    .select(`
+      class_room_id,
+      class_sessions_courses_period!inner(
+        course_id
+      )
+    `)
+    .in("class_room_id", allClassRoomIds);
+
+  if (coursesError || !sessionCourses) {
+    console.error("Error fetching courses:", coursesError);
+    return progressMap;
+  }
+
+  // Map class rooms to courses
+  const classRoomToCourses = new Map<string, Set<string>>();
+  sessionCourses.forEach((session: any) => {
+    if (!classRoomToCourses.has(session.class_room_id)) {
+      classRoomToCourses.set(session.class_room_id, new Set());
+    }
+    session.class_sessions_courses_period?.forEach((scp: any) => {
+      classRoomToCourses.get(session.class_room_id)!.add(scp.course_id);
+    });
+  });
+
+  // Get all unique course IDs
+  const allCourseIds = Array.from(
+    new Set(
+      Array.from(classRoomToCourses.values()).flatMap((courses) => Array.from(courses))
+    )
+  );
+
+  if (allCourseIds.length === 0) {
+    phaseIds.forEach((phaseId) => {
+      progressMap.set(phaseId, { totalLessons: 0, completedLessons: 0 });
+    });
+    return progressMap;
+  }
+
+  // Get all lessons for all courses in one query
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      course_id,
+      lessons!inner(id)
+    `)
+    .in("course_id", allCourseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching lessons:", lessonsError);
+    return progressMap;
+  }
+
+  // Map courses to lessons
+  const courseToLessons = new Map<string, Set<string>>();
+  sections.forEach((section: any) => {
+    if (!courseToLessons.has(section.course_id)) {
+      courseToLessons.set(section.course_id, new Set());
+    }
+    section.lessons?.forEach((l: { id: string }) => {
+      courseToLessons.get(section.course_id)!.add(l.id);
+    });
+  });
+
+  // Calculate lessons for each phase
+  phaseIds.forEach((phaseId) => {
+    const classRoomIds = phaseToClassRooms.get(phaseId) || [];
+    const lessonIds = new Set<string>();
+
+    classRoomIds.forEach((classRoomId) => {
+      const courseIds = classRoomToCourses.get(classRoomId);
+      if (courseIds) {
+        courseIds.forEach((courseId) => {
+          const lessons = courseToLessons.get(courseId);
+          if (lessons) {
+            lessons.forEach((lessonId) => lessonIds.add(lessonId));
+          }
+        });
+      }
+    });
+
+    progressMap.set(phaseId, {
+      totalLessons: lessonIds.size,
+      completedLessons: 0, // Will be calculated next
+    });
+  });
+
+  // Get all unique lesson IDs across all phases
+  const allLessonIds = Array.from(
+    new Set(
+      Array.from(progressMap.values()).flatMap(() => {
+        const lessonIds = new Set<string>();
+        phaseIds.forEach((phaseId) => {
+          const classRoomIds = phaseToClassRooms.get(phaseId) || [];
+          classRoomIds.forEach((classRoomId) => {
+            const courseIds = classRoomToCourses.get(classRoomId);
+            if (courseIds) {
+              courseIds.forEach((courseId) => {
+                const lessons = courseToLessons.get(courseId);
+                if (lessons) {
+                  lessons.forEach((lessonId) => lessonIds.add(lessonId));
+                }
+              });
+            }
+          });
+        });
+        return Array.from(lessonIds);
+      })
+    )
+  );
+
+  if (allLessonIds.length === 0) {
+    return progressMap;
+  }
+
+  // Get all progress records in one query
+  const { data: progressRecords, error: progressError } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id")
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .eq("learning_path_id", learningPathId)
+    .in("lesson_id", allLessonIds);
+
+  if (progressError) {
+    console.error("Error fetching progress records:", progressError);
+    return progressMap;
+  }
+
+  // Create a set of completed lesson IDs for quick lookup
+  const completedLessonIds = new Set(
+    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || []
+  );
+
+  // Update completed counts for each phase
+  phaseIds.forEach((phaseId) => {
+    const classRoomIds = phaseToClassRooms.get(phaseId) || [];
+    const phaseLessonIds = new Set<string>();
+
+    classRoomIds.forEach((classRoomId) => {
+      const courseIds = classRoomToCourses.get(classRoomId);
+      if (courseIds) {
+        courseIds.forEach((courseId) => {
+          const lessons = courseToLessons.get(courseId);
+          if (lessons) {
+            lessons.forEach((lessonId) => phaseLessonIds.add(lessonId));
+          }
+        });
+      }
+    });
+
+    const completedCount = Array.from(phaseLessonIds).filter((lessonId) =>
+      completedLessonIds.has(lessonId)
+    ).length;
+
+    const existing = progressMap.get(phaseId)!;
+    progressMap.set(phaseId, {
+      totalLessons: existing.totalLessons,
+      completedLessons: completedCount,
+    });
+  });
+
+  return progressMap;
 }

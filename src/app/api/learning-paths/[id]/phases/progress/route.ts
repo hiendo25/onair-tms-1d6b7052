@@ -10,9 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import {
   buildProgressResponse,
-  countCompletedLessons,
-  getLessonIdsForPhase,
-  getLessonProgressRecords,
+  getMultiplePhasesProgress,
 } from "@/services/progress/progress.service";
 import { createSVClient } from "@/services/supabase/server";
 import type { ProgressResponse } from "@/types/progress.types";
@@ -60,34 +58,29 @@ export async function GET(
       return NextResponse.json([], { status: 200 });
     }
 
-    // Calculate progress for each phase
-    const progressPromises = phases.map(async (phase: { id: string }) => {
-      // Get all lesson IDs for this phase
-      const lessonIds = await getLessonIdsForPhase(phase.id);
+    // Get phase IDs
+    const phaseIds = phases.map((phase: { id: string }) => phase.id);
 
-      // Get progress records for all lessons in this phase
-      const progressRecords = await getLessonProgressRecords(
-        lessonIds,
-        employee.id,
-        learningPathId,
-      );
+    // Get progress for all phases in an optimized batch query
+    const progressMap = await getMultiplePhasesProgress(
+      phaseIds,
+      employee.id,
+      learningPathId,
+    );
 
-      // Count completed lessons
-      const completedLessons = countCompletedLessons(progressRecords);
+    // Build response array in the same order as phases
+    const progressResults: ProgressResponse[] = phases.map((phase: { id: string }) => {
+      const progress = progressMap.get(phase.id) || { totalLessons: 0, completedLessons: 0 };
 
-      // Build progress response for this phase
       return buildProgressResponse({
         entityId: phase.id,
         entityType: "phase",
-        totalLessons: lessonIds.length,
-        completedLessons,
+        totalLessons: progress.totalLessons,
+        completedLessons: progress.completedLessons,
         learningPathId,
         employeeId: employee.id,
       });
     });
-
-    // Wait for all progress calculations to complete
-    const progressResults: ProgressResponse[] = await Promise.all(progressPromises);
 
     return NextResponse.json(progressResults, { status: 200 });
   } catch (error) {
