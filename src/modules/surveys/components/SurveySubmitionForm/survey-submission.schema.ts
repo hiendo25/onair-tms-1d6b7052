@@ -1,15 +1,41 @@
 import * as zod from "zod";
 
-import { SurveyQuestionType } from "@/model/survey";
-
-const textAnswerSchema = zod.object({
-  type: zod.literal(["text"]),
-  text: zod.string(),
+const baseQuestionSchema = zod.object({
+  questionId: zod.string(),
+  questionName: zod.string(),
+  isRequired: zod.boolean(),
+});
+const questionWithTextAnswerSchema = baseQuestionSchema.extend({
+  type: zod.literal("text"),
+  answer: zod.object({ text: zod.string() }),
 });
 
-const checboxAnswerSchema = zod.object({
-  type: zod.literal(["checkbox"]),
-  values: zod.array(
+const questionWithSingleSelectSchema = baseQuestionSchema.extend({
+  type: zod.literal("radio"),
+  options: zod.array(
+    zod.object({
+      id: zod.string(),
+      text: zod.string().optional(),
+      isOther: zod.boolean(),
+    }),
+  ),
+  answer: zod.object({
+    value: zod.string(),
+    isOther: zod.boolean(),
+    text: zod.string(),
+  }),
+});
+
+const questionWithMultipleSelectSchema = baseQuestionSchema.extend({
+  type: zod.literal("checkbox"),
+  options: zod.array(
+    zod.object({
+      id: zod.string(),
+      text: zod.string().optional(),
+      isOther: zod.boolean(),
+    }),
+  ),
+  answer: zod.array(
     zod.object({
       value: zod.string(),
       text: zod.string(),
@@ -18,64 +44,63 @@ const checboxAnswerSchema = zod.object({
   ),
 });
 
-const radioAnswerSchema = zod.object({
-  type: zod.literal(["radio"]),
-  value: zod.string(),
-  isOther: zod.boolean(),
-  text: zod.string(),
-});
-
-const ratingAnswerSchema = zod.object({
-  type: zod.literal(["rating"]),
-  value: zod.number().min(1).max(5),
-});
-
-const ratingSortAnswerSchema = zod.object({
-  type: zod.literal(["rating_sort"]),
-  values: zod.array(
+const questionWithRatingAndSortSchema = baseQuestionSchema.extend({
+  type: zod.literal("rating_sort"),
+  options: zod.array(
     zod.object({
       id: zod.string(),
+      text: zod.string().optional(),
+      isOther: zod.boolean(),
+    }),
+  ),
+  answer: zod.array(
+    zod.object({
+      value: zod.string(),
+      text: zod.string(),
       priority: zod.number(),
     }),
   ),
 });
 
-const yesNoSchema = zod.object({
-  type: zod.literal(["yes_no"]),
-  value: zod.string(),
+const questionWithRatingSchema = baseQuestionSchema.extend({
+  type: zod.literal("rating"),
+  options: zod.array(
+    zod.object({
+      id: zod.string(),
+      text: zod.string().optional(),
+      isOther: zod.boolean(),
+    }),
+  ),
+  answer: zod.object({
+    value: zod.number().min(1).max(5).optional(),
+  }),
 });
 
-const questionAnswerSchema = zod
-  .object({
-    id: zod.string(),
-    type: zod.enum(["text", "radio", "checkbox", "rating", "rating_sort", "yes_no"]),
-    name: zod.string(),
-    options: zod.array(
-      zod.object({
-        id: zod.string(),
-        text: zod.string().optional(),
-        isOther: zod.boolean(),
-      }),
-    ),
-    isRequred: zod.boolean(),
-    answer: zod.union([
-      ratingAnswerSchema,
-      radioAnswerSchema,
-      yesNoSchema,
-      textAnswerSchema,
-      checboxAnswerSchema,
-      ratingSortAnswerSchema,
-    ]),
-  })
-  .refine((q) => q.type === q.answer.type, {
-    message: "Question type must match answer type",
-    path: ["answer"],
-  });
+const questionWithYesNoSchema = baseQuestionSchema.extend({
+  type: zod.literal("yes_no"),
+  answer: zod.object({
+    value: zod.enum(["yes", "no"]).optional(),
+  }),
+});
 
 export const surveySubmissionSchema = zod.object({
   surveyId: zod.string().optional(),
-  questions: zod.array(questionAnswerSchema),
+  questions: zod.array(
+    zod.discriminatedUnion("type", [
+      questionWithRatingSchema,
+      questionWithRatingAndSortSchema,
+      questionWithMultipleSelectSchema,
+      questionWithTextAnswerSchema,
+      questionWithSingleSelectSchema,
+      questionWithYesNoSchema,
+    ]),
+  ),
 });
 
 export type SurveySubmissionFormData = zod.infer<typeof surveySubmissionSchema>;
-export type QuestionAnswerSchema = zod.infer<typeof questionAnswerSchema>;
+export type QuestionWithRatingFormData = zod.infer<typeof questionWithRatingSchema>;
+export type QuestionWithMultipleSelectFormData = zod.infer<typeof questionWithMultipleSelectSchema>;
+export type QuestionWithRatingAndSortFormData = zod.infer<typeof questionWithRatingAndSortSchema>;
+export type QuestionWithTextAnswerFormData = zod.infer<typeof questionWithTextAnswerSchema>;
+export type QuestionWithSingleSelectFormData = zod.infer<typeof questionWithSingleSelectSchema>;
+export type QuestionWithYesNoFormData = zod.infer<typeof questionWithYesNoSchema>;

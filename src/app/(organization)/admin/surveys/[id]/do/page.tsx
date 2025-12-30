@@ -3,12 +3,11 @@ import { Typography } from "@mui/material";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
-import SurveySubmissionForm from "@/modules/surveys/components/SurveySubmitionForm";
+import { PATHS } from "@/constants/path.constant";
 import { surveysRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
 
 import SurveySubmissionFormClient from "./_components/SurveySubmissionFormClient";
-import QuestionCheckbox from "./question-types/QuestionCheckbox";
 
 type PageDoSurveyProps = {
   params: Promise<{ id: string }>;
@@ -42,13 +41,19 @@ const PageDoSurvey: React.FC<PageDoSurveyProps> = async ({ params }) => {
       title={`Làm khảo sát: ${surveyDetail.title}`}
       breadcrumbs={[
         {
+          title: "Danh sách khảo sát",
+          path: PATHS.SURVEYS.LIST,
+        },
+        {
           title: surveyDetail.title,
         },
       ]}
     >
-      <div className="header">
-        <Typography component="h2">{surveyDetail.title}</Typography>
-      </div>
+      <Typography component="div">{surveyDetail.description}</Typography>
+      <div className="h-6"></div>
+      <Typography component="h3" variant="h5" className="mb-6">
+        Câu hỏi khảo sát
+      </Typography>
       <SurveySubmissionFormClient data={surveyDetail} />
     </PageContainer>
   );

@@ -1,35 +1,44 @@
 import React from "react";
-import { Typography } from "@mui/material";
-import { useField } from "@mui/x-date-pickers/internals";
-import { Control, useFieldArray } from "react-hook-form";
+import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { useFormContext, useWatch } from "react-hook-form";
 
-import { FaceSadIcon, FaceSmileIcon } from "@/shared/assets/icons";
-import RHFRadioGroupField from "@/shared/ui/form/RHFRadioGroupField";
-import { SurveySubmissionFormData } from "../survey-submission.schema";
+import { QuestionWithYesNoFormData, SurveySubmissionFormData } from "../survey-submission.schema";
 
 interface YesNoTypeProps {
-  control: Control<SurveySubmissionFormData>;
   questionIndex: number;
 }
-const YesNoType: React.FC<YesNoTypeProps> = ({ control, questionIndex }) => {
-  const fieldsArr = useFieldArray({
-    control: control,
-    name: `questions.${questionIndex}.answer.values`,
-    keyName: "_answerId",
-  });
+const YES_NO_OPTIONS: { value: "yes" | "no"; label: string }[] = [
+  { label: "Có", value: "yes" },
+  {
+    label: "Không",
+    value: "no",
+  },
+];
+const YesNoType: React.FC<YesNoTypeProps> = ({ questionIndex }) => {
+  const { setValue, control } = useFormContext<SurveySubmissionFormData>();
+
+  const currentAnswer = useWatch({
+    control,
+    name: `questions.${questionIndex}.answer`,
+    exact: true,
+  }) as QuestionWithYesNoFormData["answer"];
+
+  const handleSelect = (newValue: "yes" | "no") => {
+    setValue(`questions.${questionIndex}.answer`, { value: newValue });
+  };
   return (
     <div className="yes-no-type flex items-center gap-3">
-      <RHFRadioGroupField
-        name={`questions.${questionIndex}.answer.values`}
-        control={control}
-        options={[
-          { label: "Có", value: "yes" },
-          {
-            label: "Không",
-            value: "no",
-          },
-        ]}
-      />
+      <RadioGroup aria-labelledby="demo-radio-buttons-group-label" defaultValue="female" name="radio-buttons-group">
+        {YES_NO_OPTIONS.map((opt) => (
+          <FormControlLabel
+            key={opt.value}
+            value="female"
+            control={<Radio value={opt.value} />}
+            label={opt.label}
+            onChange={() => handleSelect(opt.value)}
+          />
+        ))}
+      </RadioGroup>
     </div>
   );
 };
