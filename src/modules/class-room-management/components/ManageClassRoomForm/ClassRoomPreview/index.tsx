@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React, { memo } from "react";
 import { Control, useFormContext, UseFormReturn, useWatch } from "react-hook-form";
 
 import { ClassRoom } from "../classroom-form.schema";

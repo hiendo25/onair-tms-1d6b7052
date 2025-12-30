@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { NextRequest, NextResponse } from "next/server";
 
-import { employeesRepository, learningPathsRepository } from "@/repository";
-import { transformFormToMetadata, transformFormPhasesToInput } from "@/repository/learning-paths/transformers";
-import { createSVClient } from "@/services/supabase/server";
 import { PATHS } from "@/constants/path.constant";
+import { employeesRepository, learningPathsRepository } from "@/repository";
+import { transformFormPhasesToInput,transformFormToMetadata } from "@/repository/learning-paths/transformers";
+import { createSVClient } from "@/services/supabase/server";
 
 export async function GET(request: NextRequest) {
   try {

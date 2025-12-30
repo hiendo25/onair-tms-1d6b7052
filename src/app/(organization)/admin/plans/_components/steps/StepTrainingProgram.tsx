@@ -20,13 +20,13 @@ import {
 import dayjs from "dayjs";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 
+import { fIsBetween } from "@/lib";
 import { TrainingProgram, trainingProgramSchema } from "@/modules/plans/plan-form.schema";
 import { usePlanFormContext } from "@/modules/plans/use-plan-form-context";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { formatDateRange } from "../../helper";
-import { fIsBetween } from "@/lib";
 
 interface StepTrainingProgramProps {
   onContinue: () => void;
