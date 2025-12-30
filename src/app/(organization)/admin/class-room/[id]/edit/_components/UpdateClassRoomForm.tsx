@@ -89,7 +89,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
             weeklySchedule: {
               from: weekly_schedule?.from,
               to: weekly_schedule?.to,
-              isDuration: weekly_schedule?.isDuration,
+              isDuration: weekly_schedule?.isDuration || false,
               duration: weekly_schedule?.duration,
             },
           };

@@ -6,17 +6,17 @@ import { DayOfWeek } from "@/model/enum-type.model";
 
 type WeeklySchedulePayload = {
   from?: {
-    day: DayOfWeek;
-    time: string;
+    day?: DayOfWeek;
+    time?: string;
   };
   to?: {
-    day: DayOfWeek;
-    time: string | null;
+    day?: DayOfWeek;
+    time?: string;
   };
   isDuration?: boolean;
   duration?: {
-    hours: number;
-    minutes: number;
+    hours?: number;
+    minutes?: number;
   };
 };
 export type BulkCreateClassRoomSessionsPayload = {
@@ -33,7 +33,7 @@ export type BulkCreateClassRoomSessionsPayload = {
     | "channel_provider"
     | "location"
   > & {
-    weekly_schedule: WeeklySchedulePayload | null;
+    weekly_schedule: Pick<WeeklySchedulePayload, "from" | "to"> | null;
   })[];
 };
 
@@ -51,7 +51,7 @@ export type CreateClassRoomSessionPayload = Pick<
   | "class_room_id"
   | "weekly_schedule"
 > & {
-  weekly_schedule: WeeklySchedulePayload | null;
+  weekly_schedule: Pick<WeeklySchedulePayload, "from" | "to"> | null;
 };
 
 export type UpdateClassRoomSessionPayload = Pick<
@@ -68,7 +68,7 @@ export type UpdateClassRoomSessionPayload = Pick<
   | "location"
   | "weekly_schedule"
 > & {
-  weekly_schedule: WeeklySchedulePayload | null;
+  weekly_schedule: Pick<WeeklySchedulePayload, "from" | "to"> | null;
 };
 export type UpSertClassRoomSessionPayload =
   | {
