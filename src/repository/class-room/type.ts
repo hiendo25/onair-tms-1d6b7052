@@ -12,7 +12,7 @@ export type CreateClassRoomPayload = Pick<
   | "title"
   | "organization_id"
   | "employee_id"
-  | "is_learning_path"
+  | "class_type"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
@@ -25,7 +25,6 @@ export type UpdateClassRoomPayload = Pick<
   | "end_at"
   | "status"
   | "thumbnail_url"
-  | "organization_id"
   | "employee_id"
 >;
 export type UpSertClassRoomPayload =

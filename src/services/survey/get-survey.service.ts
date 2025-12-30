@@ -1,3 +1,0 @@
-class GetSurveyService {
-  async getAll() {}
-}

@@ -1,5 +1,5 @@
 "use client";
-import { Dispatch, memo,SetStateAction } from "react";
+import React, { Dispatch, memo, SetStateAction } from "react";
 import { Box, Typography } from "@mui/material";
 import Image from "next/image";
 

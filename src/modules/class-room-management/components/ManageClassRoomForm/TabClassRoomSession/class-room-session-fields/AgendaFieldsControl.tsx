@@ -1,15 +1,12 @@
-import React, { memo } from "react";
-import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import { Control, useController, useFieldArray } from "react-hook-form";
+import React, { memo, useCallback } from "react";
+import { Box, Button, FormLabel, Typography } from "@mui/material";
+import { Control, useFieldArray } from "react-hook-form";
 
-import { TrashIcon1 } from "@/shared/assets/icons";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { cn } from "@/utils";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
+
+import AgendaFormItem from "./AgendaFormItem";
 
 export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["agendas"][number] => {
   return {
@@ -22,9 +19,10 @@ export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["age
 interface AgendaFieldsProps {
   sessionIndex: number;
   className?: string;
+  control: Control<ClassRoom>;
 }
-const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, className }) => {
-  const { control, trigger } = useClassRoomFormContext();
+const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, className, control }) => {
+  const { trigger } = useClassRoomFormContext();
 
   const {
     fields: agendaFields,
@@ -36,32 +34,24 @@ const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, classN
     keyName: "_agendaId",
   });
 
-  const handleAddAgendaItem = async () => {
+  const handleAddAgendaItem = useCallback(async () => {
     const isValid = await trigger(`classRoomSessions.${sessionIndex}.agendas`);
     if (!isValid) return;
     append(getAgendaInitData());
-  };
+  }, [append, trigger, sessionIndex]);
+
   return (
     <div className={cn(className)}>
-      <div className="flex items-center">
-        <div className="pr-6 flex-1">
-          <FormLabel component="div">
-            Agenda <span className="text-xs text-gray-500 font-normal">(Lịch trình lớp học)</span>
-          </FormLabel>
-          <Typography className="text-xs text-gray-600">
-            Lên kế hoạch chi tiết cho từng buổi trong ngày đào tạo, đảm bảo tiến độ và người phụ trách rõ ràng.
-          </Typography>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="fill" onClick={handleAddAgendaItem}>
-            Thêm
-          </Button>
-        </div>
-      </div>
+      <AgendaHeader
+        title="Agenda"
+        subTitle="(Lịch trình lớp học)"
+        description="Lên kế hoạch chi tiết cho từng buổi trong ngày đào tạo, đảm bảo tiến độ và người phụ trách rõ ràng."
+        onClick={handleAddAgendaItem}
+      />
       {agendaFields.length ? (
         <div className="flex flex-col gap-4 mt-6">
           {agendaFields.map((field, _index) => (
-            <AgendaFieldBox
+            <AgendaFormItem
               key={field._agendaId}
               control={control}
               index={_index}
@@ -76,86 +66,26 @@ const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, classN
 };
 export default memo(AgendaFieldsControl);
 
-interface AgendaFieldBoxProps {
-  index: number;
-  sessionIndex: number;
-  remove: (index: number) => void;
-  control: Control<ClassRoom>;
+interface AgendaHeaderProps {
+  title?: React.ReactNode;
+  subTitle?: string;
+  description?: string;
+  onClick?: () => void;
 }
-const AgendaFieldBox: React.FC<AgendaFieldBoxProps> = ({ sessionIndex, index, remove, control }) => {
-  const {
-    field: { value: sessionStartDate },
-  } = useController({
-    control,
-    name: `classRoomSessions.${sessionIndex}.startDate`,
-  });
-  const {
-    field: { value: sessionEndDate },
-  } = useController({
-    control,
-    name: `classRoomSessions.${sessionIndex}.endDate`,
-  });
-
-  const {
-    field: { value: agendaStartDate },
-  } = useController({
-    control,
-    name: `classRoomSessions.${sessionIndex}.agendas.${index}.startDate`,
-  });
-
+const AgendaHeader: React.FC<AgendaHeaderProps> = memo(({ title, description, subTitle, onClick }) => {
   return (
-    <Box
-      sx={(theme) => ({
-        backgroundColor: theme.palette.grey[200],
-        padding: 2,
-        borderRadius: 1,
-      })}
-    >
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="w-1 h-4 bg-blue-600 block rounded-xl"></span>
-            <Typography sx={{ fontWeight: "bold" }}>Lịch trình {index + 1}</Typography>
-          </div>
-
-          <IconButton className="w-7 h-7 bg-white border rounded-md border-gray-300" onClick={() => remove(index)}>
-            <TrashIcon1 className="w-4 h-4" />
-          </IconButton>
-        </div>
-        <div>
-          <FormLabel component="div">
-            Thời gian diễn ra <span className="text-red-600">*</span>
-          </FormLabel>
-          <div className="flex items-center gap-4">
-            <RHFDateTimePicker
-              name={`classRoomSessions.${sessionIndex}.agendas.${index}.startDate`}
-              minDateTime={sessionStartDate ? dayjs(sessionStartDate) : dayjs()}
-              maxDateTime={sessionEndDate ? dayjs(sessionEndDate) : dayjs()}
-              control={control}
-            />
-            <RHFDateTimePicker
-              name={`classRoomSessions.${sessionIndex}.agendas.${index}.endDate`}
-              minDateTime={
-                agendaStartDate ? dayjs(agendaStartDate) : sessionStartDate ? dayjs(sessionStartDate) : dayjs()
-              }
-              maxDateTime={sessionEndDate ? dayjs(sessionEndDate) : dayjs()}
-              control={control}
-            />
-          </div>
-        </div>
-        <RHFTextField
-          label="Tiêu đề"
-          placeholder="Nhập tiêu đề"
-          name={`classRoomSessions.${sessionIndex}.agendas.${index}.title`}
-          control={control}
-        />
-        <RHFTextAreaField
-          name={`classRoomSessions.${sessionIndex}.agendas.${index}.description`}
-          label="Mô tả"
-          placeholder="Nhập mô tả"
-          control={control}
-        />
+    <div className="flex items-center">
+      <div className="pr-6 flex-1">
+        <FormLabel component="div">
+          {title} {subTitle ? <span className="text-xs text-gray-500 font-normal">{subTitle}</span> : null}
+        </FormLabel>
+        <Typography className="text-xs text-gray-600">{description}</Typography>
       </div>
-    </Box>
+      <div className="flex items-center gap-4">
+        <Button variant="fill" onClick={onClick}>
+          Thêm
+        </Button>
+      </div>
+    </div>
   );
-};
+});

@@ -1,18 +1,19 @@
 import React, { memo, useMemo } from "react";
 import { FormLabel } from "@mui/material";
 import dayjs from "dayjs";
-import { Control, useController } from "react-hook-form";
+import { Control, useController, useWatch } from "react-hook-form";
 
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-interface ClassRoomSessionFromToDateProps {
+interface SessionFromToDateProps {
   control: Control<ClassRoom>;
   index: number;
 }
-const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({ control, index }) => {
-  const { getValues } = useClassRoomFormContext();
-  const sessions = getValues("classRoomSessions");
+const SessionFromToDate: React.FC<SessionFromToDateProps> = ({ control, index }) => {
+  const sessions = useWatch({ control, name: "classRoomSessions" });
+  // const { getValues } = useClassRoomFormContext();
+  // const sessions = getValues("classRoomSessions");
   // const allStartAndEndDate = sessions.map((it) => ({ startDate: it.startDate, endDate: it.endDate }));
 
   const leftSessionList = useMemo(() => [...sessions].splice(0, index), [sessions]);
@@ -102,4 +103,4 @@ const ClassRoomSessionFromToDate: React.FC<ClassRoomSessionFromToDateProps> = ({
     </div>
   );
 };
-export default memo(ClassRoomSessionFromToDate);
+export default memo(SessionFromToDate);

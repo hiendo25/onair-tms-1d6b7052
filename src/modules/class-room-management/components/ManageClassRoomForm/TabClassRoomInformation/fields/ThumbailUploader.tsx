@@ -3,7 +3,7 @@
  * This file is kept for backward compatibility but will be removed in a future version.
  */
 
-import React from "react";
+import React, { memo } from "react";
 import { Control } from "react-hook-form";
 
 import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
@@ -39,4 +39,4 @@ const ThumbnailUploader: React.FC<ThumbnailUploaderProps> = ({ control, onChange
   );
 };
 
-export default ThumbnailUploader;
+export default memo(ThumbnailUploader);

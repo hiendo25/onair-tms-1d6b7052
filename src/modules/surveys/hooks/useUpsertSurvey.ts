@@ -4,14 +4,14 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
 import { EnumSurveyType } from "@/model/survey";
 import { useUserOrganization } from "@/modules/organization";
-import { serveyService } from "@/services";
-import { UpsertSurveyFormData } from "../components/UpsertSurveyForm/survey-form.schema";
+import { surveyService } from "@/services";
+import { UpsertSurveyFormData } from "../survey-form.schema";
 const useUpsertSurvey = () => {
   const {
     id: employeeId,
     organization: { id: organizationId },
   } = useUserOrganization((state) => state.currentEmployee);
-  const upsertSurvey = new serveyService.UpsertSurvey(organizationId, employeeId);
+  const upsertSurvey = new surveyService.UpsertSurvey(organizationId, employeeId);
 
   const queryClient = useQueryClient();
   const { mutate: createSurvey, isPending: isPendingCreate } = useTMutation({

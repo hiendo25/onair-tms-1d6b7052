@@ -174,7 +174,8 @@ const VideoPlayer = ({
 			if (initialPlaying) {
 				player.play().catch((error) => {
 					console.warn("Auto-play prevented:", error);
-					onTimeUpdate?.(player.currentTime, false);
+					const duration = player.state.duration ?? 0;
+					onTimeUpdate?.(player.currentTime, false, duration);
 				});
 			}
 		};
