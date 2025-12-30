@@ -5,13 +5,13 @@ import { Controller, useFormContext } from "react-hook-form";
 
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
 import { type ClassRoom } from "../classroom-form.schema";
 
 import ClassFieldSelector from "./fields/ClassFieldSelector";
 import ClassRoomSlugField from "./fields/ClassRoomSlugField";
 import DocumentFields from "./fields/DocumentFields";
 import ForWhomFields from "./fields/ForWhomFields";
-import ThumbnailUploader from "./fields/ThumbailUploader";
 
 interface TabClassRoomInformationProps {
   className?: string;
@@ -32,7 +32,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
           helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
         />
         <div className="h-3"></div>
-        <Controller
+        {/* <Controller
           control={control}
           name="slug"
           render={({ field: { value, onChange } }) => (
@@ -43,12 +43,13 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
               disableUpdateSlug={action === "edit"}
             />
           )}
-        />
+        /> */}
       </div>
-      <ThumbnailUploader
+      <RHFThumbnailUpload
+        control={control}
+        name="thumbnailUrl"
         label="Ảnh bìa đại diện"
         subTitle="Hình ảnh đại diện cho lớp học của bạn"
-        control={control}
         description={
           <div className="flex flex-wrap gap-2 items-center mb-2">
             <Typography className="text-xs">
@@ -58,11 +59,15 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
             <Typography className="text-xs">File đuôi jpg, png</Typography>
           </div>
         }
+        required
+        aspectRatio="21/9"
+        // width="480px"
       />
+
       <ClassFieldSelector control={control} />
       <TextEditor label="Nội dung khóa học" control={control} name="description" required />
-      <DocumentFields />
-      <ForWhomFields />
+      <DocumentFields control={control} />
+      <ForWhomFields control={control} />
     </div>
   );
 };
