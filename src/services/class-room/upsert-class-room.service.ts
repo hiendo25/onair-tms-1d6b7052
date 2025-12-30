@@ -75,8 +75,8 @@ export class UpsertClassRoomService {
         thumbnail_url: thumbnailUrl,
         title: title,
         employee_id: userId,
-        start_at: startDate,
-        end_at: endDate,
+        start_at: startDate || null,
+        end_at: endDate || null,
         organization_id: organizationId,
         class_type: classType,
       },
@@ -121,13 +121,14 @@ export class UpsertClassRoomService {
     /**
      * Step 5: Sync ClassRoom with Students
      */
-    const { data: employeeWithClassRoom } = await classRoomRepository.createPivotClassRoomAndEmployee(
-      students.map<CreatePivotClassRoomAndEmployeePayload>((std) => ({
-        class_room_id: classRoomData.id,
-        employee_id: std.id,
-      })),
-    );
-
+    if (classType !== "learning_path") {
+      const { data: employeeWithClassRoom } = await classRoomRepository.createPivotClassRoomAndEmployee(
+        students.map<CreatePivotClassRoomAndEmployeePayload>((std) => ({
+          class_room_id: classRoomData.id,
+          employee_id: std.id,
+        })),
+      );
+    }
     /**
      * Step 6: Create Class room Sessions
      */
@@ -186,8 +187,19 @@ export class UpsertClassRoomService {
       throw new Error(classRoomDetailError?.message || "Classroom not found.");
     }
 
-    const { categories, classRoomSessions, description, thumbnailUrl, roomType, slug, status, title, forWhom, docs } =
-      formData;
+    const {
+      categories,
+      classRoomSessions,
+      description,
+      thumbnailUrl,
+      roomType,
+      slug,
+      status,
+      title,
+      forWhom,
+      docs,
+      classType,
+    } = formData;
 
     const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
     /**
@@ -201,8 +213,8 @@ export class UpsertClassRoomService {
       status: status,
       thumbnail_url: thumbnailUrl,
       title: title,
-      start_at: startDate,
-      end_at: endDate,
+      start_at: startDate || null,
+      end_at: endDate || null,
       employee_id: userId,
     });
 
@@ -246,6 +258,7 @@ export class UpsertClassRoomService {
       roomType,
       oldSessions: classRoomDetail.sessions,
       newSessions: classRoomSessions,
+      classType: classType,
     });
 
     console.log("Update Susscess", classRoomData);
@@ -329,10 +342,11 @@ export class UpsertClassRoomService {
       oldSessions: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"];
       newSessions: ClassRoom["classRoomSessions"];
       roomType: ClassRoom["roomType"];
+      classType: ClassRoom["classType"];
     },
   ) {
     const _this = this;
-    const { title, description, oldSessions, newSessions, roomType } = data;
+    const { title, description, oldSessions, newSessions, roomType, classType } = data;
     /**
      * todo: compare new sessions List: classRoomSessions vs old Session List: classRoomDetail/sessions
      * - delete: these session has Id in classRoomSessions is not in classRoomDetail/sessions.
@@ -427,17 +441,26 @@ export class UpsertClassRoomService {
          * Sync class Session with course Period
          */
 
+        type WeeklyScheduleItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["weeklySchedule"];
         const syncSessionWithCoursePeriodPromise = (async () => {
           const oldCoursePeriods = oldSessionItem?.courses_period;
 
           const newCoursePeriods = newSession.coursesPeriod.reduce<
-            { id: number | undefined; courseId: string; startAt: string; endAt: string; teacherId: string }[]
+            {
+              id: number | undefined;
+              courseId: string;
+              startAt: string;
+              endAt: string;
+              teacherId: string;
+              weeklySchedule: WeeklyScheduleItem;
+            }[]
           >((acc, coursePeriod) => {
             const flattenTeachers = coursePeriod.teachers.map((teacher) => ({
               id: teacher.recordId,
               courseId: coursePeriod.course.id,
               startAt: coursePeriod.startAt,
               endAt: coursePeriod.endAt,
+              weeklySchedule: coursePeriod.weeklySchedule,
               teacherId: teacher.teacherId,
             }));
 
@@ -449,8 +472,31 @@ export class UpsertClassRoomService {
             await classRoomSessionRepository.bulkDeletePivotClassSessionWithCoursePeriod(delList.map((cp) => cp.id));
           }
           //
+
           const payloadCouses = newCoursePeriods.map<UpsertPivotClassSessionWithCoursePeriodPayload>(
-            ({ teacherId, courseId, startAt, endAt, id: sessionCoursePeriodId }) => {
+            ({ teacherId, courseId, startAt, endAt, id: sessionCoursePeriodId, weeklySchedule }) => {
+              const weeklyScheduleItem: UpsertPivotClassSessionWithCoursePeriodPayload["payload"]["weekly_schedule"] =
+                classType === "learning_path"
+                  ? {
+                      duration: weeklySchedule?.duration,
+                      from:
+                        weeklySchedule?.from?.day && weeklySchedule?.from?.time
+                          ? {
+                              day: weeklySchedule?.from.day,
+                              time: weeklySchedule?.from.time,
+                            }
+                          : undefined,
+                      to:
+                        weeklySchedule?.to?.day && weeklySchedule?.to?.time
+                          ? {
+                              day: weeklySchedule?.to.day,
+                              time: weeklySchedule?.to.time,
+                            }
+                          : undefined,
+                      isDuration: weeklySchedule?.isDuration,
+                    }
+                  : null;
+
               return sessionCoursePeriodId
                 ? {
                     action: "update",
@@ -459,7 +505,7 @@ export class UpsertClassRoomService {
                       teacher_id: teacherId,
                       start_at: dayjs(startAt).toISOString(),
                       end_at: dayjs(endAt).toISOString(),
-                      weekly_schedule: null,
+                      weekly_schedule: weeklyScheduleItem,
                     },
                   }
                 : {
@@ -470,7 +516,7 @@ export class UpsertClassRoomService {
                       teacher_id: teacherId,
                       start_at: dayjs(startAt).toISOString(),
                       end_at: dayjs(endAt).toISOString(),
-                      weekly_schedule: null,
+                      weekly_schedule: weeklyScheduleItem,
                     },
                   };
             },
@@ -527,6 +573,7 @@ export class UpsertClassRoomService {
   ) {
     const { title, description, roomType, classRoomSessions, classType } = payload;
     const userId = this.userId;
+
     await Promise.all(
       classRoomSessions.map(async (classSession, _sessionIndex) => {
         try {
@@ -593,18 +640,42 @@ export class UpsertClassRoomService {
            */
           const syncSessionWithCoursePeriodPromise = (async () => {
             const payloadCourses = classSession.coursesPeriod.reduce<CreatePivotClassSessionWithCoursePeriodPayload[]>(
-              (acc, { teachers, course, startAt, endAt }) => {
+              (acc, { teachers, course, startAt, endAt, weeklySchedule }) => {
                 const coursesPayloadByTeachers = teachers
                   .map((teacher) => {
                     const teacherId = teacher?.teacherId;
                     if (teacherId) {
+                      /**
+                       * For class type learning path
+                       */
+                      const weeklyScheduleItem: CreatePivotClassSessionWithCoursePeriodPayload["weekly_schedule"] =
+                        classType === "learning_path"
+                          ? {
+                              duration: weeklySchedule?.duration,
+                              from:
+                                weeklySchedule?.from?.day && weeklySchedule?.from?.time
+                                  ? {
+                                      day: weeklySchedule?.from.day,
+                                      time: weeklySchedule?.from.time,
+                                    }
+                                  : undefined,
+                              to:
+                                weeklySchedule?.to?.day && weeklySchedule?.to?.time
+                                  ? {
+                                      day: weeklySchedule?.to.day,
+                                      time: weeklySchedule?.to.time,
+                                    }
+                                  : undefined,
+                              isDuration: weeklySchedule?.isDuration,
+                            }
+                          : null;
                       return {
                         class_session_id: sessionData.id,
                         course_id: course.id,
                         teacher_id: teacherId,
                         start_at: classType === "learning_path" ? null : dayjs(startAt).toISOString(),
-                        end_at: dayjs(endAt).toISOString(),
-                        weekly_schedule: null,
+                        end_at: classType === "learning_path" ? null : dayjs(endAt).toISOString(),
+                        weekly_schedule: weeklyScheduleItem,
                       };
                     }
                   })
@@ -689,10 +760,6 @@ export class UpsertClassRoomService {
 
       startDate = firstSession?.startDate;
       endDate = lastSession?.endDate;
-    }
-
-    if (!startDate || !endDate) {
-      throw new Error("Room sessions is emplty date");
     }
 
     return { startDate, endDate };
@@ -812,18 +879,27 @@ export class UpsertClassRoomService {
     classRoomId: string,
     index: number,
   ): CreateClassRoomSessionPayload {
+    const { weeklySchedule } = classSession;
+    const weeklySchedulePayload: CreateClassRoomSessionPayload["weekly_schedule"] =
+      weeklySchedule?.from && weeklySchedule?.to
+        ? {
+            from: weeklySchedule.from,
+            to: weeklySchedule.to,
+          }
+        : null;
+
     return {
       title: roomType === "single" ? classRoomTitle : classSession.title,
       description: roomType === "single" ? classRoomDescription : classSession.description,
       location: classSession.location,
       channel_info: classSession.channelInfo,
       channel_provider: classSession.channelProvider,
-      end_at: classSession.endDate,
-      start_at: classSession.startDate,
+      end_at: classSession.endDate || null,
+      start_at: classSession.startDate || null,
       session_type: classSession.sessionType,
       class_room_id: classRoomId,
       priority: index + 1,
-      weekly_schedule: null,
+      weekly_schedule: weeklySchedulePayload,
     };
   }
 

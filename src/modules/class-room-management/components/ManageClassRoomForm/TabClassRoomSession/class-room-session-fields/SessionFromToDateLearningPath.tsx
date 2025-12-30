@@ -1,82 +1,131 @@
 "use client";
-import React, { memo } from "react";
-import { FormControl, FormLabel, MenuItem, Select, SelectProps, Typography } from "@mui/material";
+import React, { memo, useCallback, useMemo } from "react";
+import { FormControl, FormHelperText, FormLabel } from "@mui/material";
 import { TimePicker, TimePickerProps } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { Control, useController } from "react-hook-form";
+import { Control, FieldErrors, useController } from "react-hook-form";
 
 import { DAY_OFF_WEEK_OPTIONS } from "@/constants/date-time";
-import { DayOfWeek } from "@/model/enum-type.model";
+import DayOfWeekSelect, { DayOfWeekSelectProps } from "../../../DayOfWeekSelect";
 import { type ClassRoom } from "../../classroom-form.schema";
 
+type SessionWeeklyError = FieldErrors<{
+  from: string;
+  to: string;
+}>;
 interface SessionFromToDateLearningPathProps {
-  control: Control<ClassRoom>;
   sessionIndex: number;
+  control: Control<ClassRoom>;
 }
 const SessionFromToDateLearningPath: React.FC<SessionFromToDateLearningPathProps> = ({ control, sessionIndex }) => {
   const {
     field: { value, onChange },
+    fieldState: { error },
   } = useController({ control, name: `classRoomSessions.${sessionIndex}.weeklySchedule` });
 
-  const handleSelectDay =
+  console.log({ error });
+  const handleSelectDay = useCallback(
     (direction: "from" | "to"): DayOfWeekSelectProps["onChange"] =>
-    (optValue, option) => {
-      let updateDayValue = {};
-      if (direction === "from") {
-        updateDayValue = {
-          ...(value || {}),
-          [direction]: {
-            ...value?.[direction],
-            day: optValue,
-          },
-          to: {
-            day: "",
-            time: "",
-          },
-        };
-      } else {
-        updateDayValue = {
-          ...(value || {}),
-          [direction]: {
-            ...value?.[direction],
-            day: optValue,
-          },
-        };
-      }
-      onChange(updateDayValue);
-    };
+      (optValue, option) => {
+        let updateDayValue = { ...(value ?? {}) };
+        if (direction === "from") {
+          updateDayValue = {
+            ...(updateDayValue || {}),
+            from: {
+              ...updateDayValue?.from,
+              day: optValue,
+            },
+            to: undefined,
+          };
+        } else {
+          updateDayValue = {
+            ...(updateDayValue || {}),
+            to: {
+              ...updateDayValue?.to,
+              day: optValue,
+            },
+          };
+        }
+        onChange(updateDayValue);
+      },
+    [onChange, value],
+  );
 
-  const handleChangeTime =
+  const handleChangeTime = useCallback(
     (direction: "from" | "to"): TimePickerProps["onChange"] =>
-    (dateValue) => {
-      if (!dateValue) return;
-      const updateTimeValue = {
-        ...(value || {}),
-        [direction]: {
-          ...value?.[direction],
-          time: dateValue.toISOString(),
-        },
-      };
-      onChange(updateTimeValue);
-    };
-  console.log({ value });
-  const filterDayOptionBySelectedFrom = (options: typeof DAY_OFF_WEEK_OPTIONS) => {
-    const dayValue = value?.from.day;
+      (dateValue) => {
+        if (!dateValue) return;
 
-    if (!dayValue) return options;
+        let updateTimeValue = value ? { ...(value || {}) } : undefined;
+        if (direction === "from") {
+          updateTimeValue = {
+            ...(updateTimeValue || {}),
+            from: {
+              ...updateTimeValue?.from,
+              time: dateValue.toISOString(),
+            },
+            to: {
+              ...updateTimeValue?.to,
+              time: undefined,
+            },
+          };
+        }
 
-    const currentIndex = options.findIndex((opt) => opt.value === dayValue);
-    const currentOption = options[currentIndex];
-    if (currentIndex === -1 || !currentOption) return options;
+        if (direction === "to") {
+          updateTimeValue = {
+            ...(updateTimeValue || {}),
+            to: {
+              ...updateTimeValue?.to,
+              time: dateValue.toISOString(),
+            },
+          };
+        }
+        onChange(updateTimeValue);
+      },
+    [value, onChange],
+  );
 
-    const nextOption = options[currentIndex + 1] ?? options[0];
-
-    return nextOption ? [currentOption, nextOption] : [currentOption];
+  const getErrorMessage = (err: SessionWeeklyError) => {
+    return err?.from?.message || err?.to?.message || err?.root?.message;
   };
+  const filterDayOptionBySelectedFrom = useCallback(
+    (options: typeof DAY_OFF_WEEK_OPTIONS) => {
+      const dayValue = value?.from?.day;
+
+      if (!dayValue) return options;
+
+      const currentIndex = options.findIndex((opt) => opt.value === dayValue);
+      const currentOption = options[currentIndex];
+      if (currentIndex === -1 || !currentOption) return options;
+
+      const nextOption = options[currentIndex + 1] ?? options[0];
+
+      return nextOption ? [currentOption, nextOption] : [currentOption];
+    },
+    [value],
+  );
+
+  const maxFromTime = useMemo(() => {
+    if (!value?.to?.time) return dayjs().endOf("day");
+
+    if (value.to.time && value?.to?.day !== value?.from?.day) return dayjs().endOf("day");
+
+    return dayjs(value.to.time);
+  }, [value]);
+
+  const minToTime = useMemo(() => {
+    const baseTime = dayjs("2000-01-01");
+
+    if (!value?.from?.time) return baseTime.startOf("day").add(15, "minutes");
+
+    if (value?.from?.time && value?.to?.day !== value?.from?.day) return baseTime.startOf("day").add(15, "minutes");
+
+    return dayjs(value?.from?.time).add(15, "minutes");
+  }, [value]);
 
   return (
     <div>
-      <FormLabel>
+      <FormLabel component="div">
         Ngày diễn ra định kỳ hàng tuần <span className="text-red-600">*</span>
       </FormLabel>
       <div className="h-6"></div>
@@ -97,9 +146,10 @@ const SessionFromToDateLearningPath: React.FC<SessionFromToDateLearningPathProps
               <TimePicker
                 ampm={false}
                 minutesStep={5}
-                value={value?.from.time ? dayjs(value?.from.time) : dayjs().startOf("day")}
+                value={value?.from?.time ? dayjs(value?.from?.time) : null}
                 closeOnSelect
-                maxTime={value?.to?.time ? dayjs(value.to.time) : undefined}
+                minTime={dayjs().startOf("day")}
+                maxTime={maxFromTime}
                 onChange={handleChangeTime("from")}
               />
             </FormControl>
@@ -117,61 +167,24 @@ const SessionFromToDateLearningPath: React.FC<SessionFromToDateLearningPathProps
                 options={filterDayOptionBySelectedFrom(DAY_OFF_WEEK_OPTIONS)}
               />
             </FormControl>
+
             <FormControl>
               <TimePicker
                 ampm={false}
                 closeOnSelect
-                value={value?.to?.time ? dayjs(value?.to.time) : dayjs().startOf("day").add(15, "minutes")}
+                value={value?.to?.time ? dayjs(value?.to.time) : null}
                 onChange={handleChangeTime("to")}
-                minTime={value?.from?.time ? dayjs(value.from.time).add(15, "minutes") : undefined}
+                minTime={minToTime}
               />
             </FormControl>
           </div>
         </div>
       </div>
+
+      {getErrorMessage(error as SessionWeeklyError) ? (
+        <FormHelperText error>{getErrorMessage(error as SessionWeeklyError)}</FormHelperText>
+      ) : null}
     </div>
   );
 };
 export default memo(SessionFromToDateLearningPath);
-
-interface DayOfWeekSelectProps {
-  value?: DayOfWeek | string;
-  onChange: (value: DayOfWeek, option?: (typeof DAY_OFF_WEEK_OPTIONS)[number]) => void;
-  options: typeof DAY_OFF_WEEK_OPTIONS;
-}
-const DayOfWeekSelect: React.FC<DayOfWeekSelectProps> = ({ value = "", onChange, options }) => {
-  const handleChange: SelectProps["onChange"] = (evt) => {
-    const optValue = evt.target.value as DayOfWeek;
-    const option = options.find((opt) => opt.value === optValue);
-
-    if (optValue) onChange(optValue, option);
-  };
-  const getOptionFromValue = (optValue: DayOfWeek | string) => {
-    return options.find((opt) => opt.value === optValue);
-  };
-  return (
-    <Select
-      value={value ?? ""}
-      displayEmpty
-      onChange={handleChange}
-      renderValue={(selected) => {
-        return selected ? (
-          getOptionFromValue(selected)?.label
-        ) : (
-          <Typography className="text-sm text-gray-500">Chọn ngày</Typography>
-        );
-      }}
-    >
-      <MenuItem disabled value="">
-        <Typography className="text-sm font-medium">Chọn ngày</Typography>
-      </MenuItem>
-      {options.map((day) => (
-        <MenuItem key={day.value} value={day.value}>
-          <div key={day.value}>
-            <Typography className="text-sm font-medium">{day.label}</Typography>
-          </div>
-        </MenuItem>
-      ))}
-    </Select>
-  );
-};

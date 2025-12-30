@@ -1,6 +1,6 @@
 "use client";
-import { forwardRef, useImperativeHandle } from "react";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { forwardRef } from "react";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
@@ -19,59 +19,51 @@ export type SingleSessionRef = {
   checkAllSessionField: () => Promise<boolean>;
 };
 interface SingleSessionProps {
-  methods: UseFormReturn<ClassRoom>;
+  // methods: UseFormReturn<ClassRoom>;
+  control: Control<ClassRoom>;
 }
-const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ methods }, ref) => {
-  const { control, getValues, trigger } = methods;
 
+const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ control }, ref) => {
   const { fields: classSessionsFields } = useFieldArray({
     control,
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
 
-  const isLearningPath = getValues("classType") === "learning_path";
+  const isLearningPath = useWatch({ control, name: "classType" }) === "learning_path";
 
-  useImperativeHandle(ref, () => ({
-    checkAllSessionField: async () => {
-      return await trigger("classRoomSessions");
-    },
-  }));
-
+  console.log("render session");
   return (
     <div className="class-single-session">
       {classSessionsFields.map(({ _sessionId, sessionType }, _index) => (
-        <div key={_sessionId}>
-          <div className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
-            {isLearningPath ? (
-              <>
-                <SessionFromToDateLearningPath sessionIndex={_index} control={control} />
-                <CoursePeriodLearningPath sessionIndex={_index} methods={methods} />
-              </>
-            ) : (
-              <>
-                <ClassRoomSessionFromToDate index={_index} control={control} />
-                <CoursePeriodSelector sessionIndex={_index} methods={methods} />
-              </>
-            )}
-
-            <AssessmentField sessionIndex={_index} control={control} />
-            {sessionType === "live" && <RoomChannel control={control} index={_index} />}
-            {sessionType === "offline" && (
-              <>
-                <RHFTextField
-                  name={`classRoomSessions.${_index}.location`}
-                  control={control}
-                  label="Địa điểm tổ chức"
-                  required
-                  startAdornment={<MarkerPin01Icon />}
-                  placeholder="Nhập địa điểm tổ chức lớp học"
-                />
-                <QRCodeSettingFields sessionIndex={_index} control={control} />
-              </>
-            )}
-            <AgendaFieldsControl sessionIndex={_index} />
-          </div>
+        <div key={_sessionId} className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
+          {isLearningPath ? (
+            <>
+              <SessionFromToDateLearningPath sessionIndex={_index} control={control} />
+              <CoursePeriodLearningPath sessionIndex={_index} control={control} />
+            </>
+          ) : (
+            <>
+              <ClassRoomSessionFromToDate index={_index} control={control} />
+              <CoursePeriodSelector sessionIndex={_index} />
+            </>
+          )}
+          <AssessmentField sessionIndex={_index} control={control} />
+          {sessionType === "live" && <RoomChannel control={control} index={_index} />}
+          {sessionType === "offline" && (
+            <>
+              <RHFTextField
+                name={`classRoomSessions.${_index}.location`}
+                control={control}
+                label="Địa điểm tổ chức"
+                required
+                startAdornment={<MarkerPin01Icon />}
+                placeholder="Nhập địa điểm tổ chức lớp học"
+              />
+              <QRCodeSettingFields sessionIndex={_index} control={control} />
+            </>
+          )}
+          <AgendaFieldsControl sessionIndex={_index} control={control} />
         </div>
       ))}
     </div>

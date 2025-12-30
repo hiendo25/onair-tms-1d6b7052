@@ -1,36 +1,30 @@
 "use client";
-import { forwardRef, useImperativeHandle, useState, useTransition } from "react";
+import { forwardRef, memo, useCallback, useState, useTransition } from "react";
 import { Button, Divider, Typography } from "@mui/material";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
 
-import { MarkerPin01Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { type ClassRoom } from "../../classroom-form.schema";
+import { ClassRoom } from "../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import { initClassSessionFormData } from "..";
-import AgendaFieldsControl from "../class-room-session-fields/AgendaFieldsControl";
-import AssessmentField from "../class-room-session-fields/AssessmentField";
-import ClassRoomSessionFromToDate from "../class-room-session-fields/SessionFromToDate";
-import CoursePeriodSelector from "../class-room-session-fields/CoursePeriodSelector";
-import QRCodeSettingFields from "../class-room-session-fields/QRCodeSettingFields";
-import RoomChannel from "../class-room-session-fields/RoomChannel";
+import SessionFormItem from "../SessionFormItem";
 
 import AccordionSessionItem, { AccordionSessionItemProps } from "./AccordionSessionItem";
 
 export type MultipleSessionRef = {
   checkAllSessionFields: () => Promise<boolean>;
 };
+
 interface MultipleSessionProps {
-  methods: UseFormReturn<ClassRoom>;
+  className?: string;
+  control: Control<ClassRoom>;
 }
-const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ methods }, ref) => {
+const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ className, control }, ref) => {
   const {
-    control,
     getValues,
     trigger,
     formState: { errors },
-  } = methods;
+  } = useClassRoomFormContext();
 
   const {
     fields: classSessionsFields,
@@ -46,27 +40,32 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
    * Session init items to validate when click add more button.
    */
 
+  const classType = useWatch({ control, name: "classType" });
+
   const [sessionsState, setSessionsState] = useState<{
     [key: number]: {
       isInit: boolean;
     };
   }>(() => Object.fromEntries(classSessionsFields.map((fields, _index) => [_index, { isInit: true }])));
 
-  const hasErrorSession = (index: number): AccordionSessionItemProps["status"] => {
-    if (sessionsState[index]?.isInit) {
-      return "idle";
-    }
-    console.log({ errors });
-    const sessionError = errors.classRoomSessions?.[index];
-    /**
-     * qrcode check in tab setting
-     */
-    const { qrCode, ...restSessionError } = sessionError || {};
+  const hasErrorSession = useCallback(
+    (index: number): AccordionSessionItemProps["status"] => {
+      if (sessionsState[index]?.isInit) {
+        return "idle";
+      }
 
-    if (Object.keys(restSessionError).length) return "invalid";
+      const sessionError = errors.classRoomSessions?.[index];
+      /**
+       * qrcode check in tab setting
+       */
+      const { qrCode, ...restSessionError } = sessionError || {};
 
-    return "valid";
-  };
+      if (Object.keys(restSessionError).length) return "invalid";
+
+      return "valid";
+    },
+    [errors, sessionsState],
+  );
 
   const checkAllSessionFields = async (callback?: () => void) => {
     const isAllSessionValid = await trigger("classRoomSessions");
@@ -85,31 +84,23 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
 
     callback?.();
   };
-  const handleAddClassSession = () =>
-    checkAllSessionFields(() => {
-      startTransition(() => {
-        const nextSessionIndex = classSessionsFields.length;
-        const platform = getValues("platform");
-        append(initClassSessionFormData(platform !== "hybrid" ? { sessionType: platform } : undefined));
-        setSessionsState((prev) => ({ ...prev, [nextSessionIndex]: { isInit: true } }));
-      });
-    });
+  const handleAddClassSession = useCallback(
+    () =>
+      checkAllSessionFields(() => {
+        startTransition(() => {
+          const nextSessionIndex = classSessionsFields.length;
+          const platform = getValues("platform");
+          append(
+            initClassSessionFormData(
+              platform !== "hybrid" ? { sessionType: platform, classType: getValues("classType") } : undefined,
+            ),
+          );
+          setSessionsState((prev) => ({ ...prev, [nextSessionIndex]: { isInit: true } }));
+        });
+      }),
+    [],
+  );
 
-  useImperativeHandle(ref, () => ({
-    checkAllSessionFields: async () => {
-      const isAllSessionValid = await trigger("classRoomSessions");
-      setSessionsState((oldState) => {
-        const newState = { ...oldState };
-        for (const key in newState) {
-          if (newState[key]) {
-            newState[key].isInit = false;
-          }
-        }
-        return newState;
-      });
-      return isAllSessionValid;
-    },
-  }));
   return (
     <div className="class-multiple-session">
       <div className="inner rounded-xl">
@@ -127,45 +118,7 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
               {...(classSessionsFields.length > 2 ? { onRemove: remove } : {})}
               status={hasErrorSession(_index)}
             >
-              <div className="pt-6">
-                <div className="flex flex-col gap-6">
-                  <RHFTextField
-                    control={control}
-                    label="Tên lớp học"
-                    placeholder="Tên lớp học"
-                    name={`classRoomSessions.${_index}.title`}
-                    required
-                    helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
-                  />
-                  <ClassRoomSessionFromToDate index={_index} control={control} />
-                  <CoursePeriodSelector sessionIndex={_index} methods={methods} />
-                  <AssessmentField sessionIndex={_index} control={control} />
-                  {/* <QuantityPersonField control={control} fieldIndex={_index} /> */}
-                  <RHFRichEditor
-                    control={control}
-                    name={`classRoomSessions.${_index}.description`}
-                    placeholder="Nội dung"
-                    label="Nội dung"
-                    required
-                  />
-
-                  {sessionType === "live" && <RoomChannel control={control} index={_index} />}
-                  {sessionType === "offline" && (
-                    <>
-                      <RHFTextField
-                        name={`classRoomSessions.${_index}.location`}
-                        control={control}
-                        label="Địa điểm tổ chức"
-                        required
-                        startAdornment={<MarkerPin01Icon />}
-                        placeholder="Nhập địa điểm tổ chức lớp học"
-                      />
-                      <QRCodeSettingFields sessionIndex={_index} control={control} />
-                    </>
-                  )}
-                  <AgendaFieldsControl sessionIndex={_index} />
-                </div>
-              </div>
+              <SessionFormItem index={_index} control={control} isLearningPath={classType === "learning_path"} />
             </AccordionSessionItem>
           ))}
         </div>
@@ -186,4 +139,4 @@ const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ 
     </div>
   );
 });
-export default MultipleSession;
+export default memo(MultipleSession);

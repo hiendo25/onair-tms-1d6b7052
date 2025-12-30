@@ -73,7 +73,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
        */
       const periodsMap = new Map<string, ClassRoomSession["coursesPeriod"][number]>();
 
-      for (const { start_at, end_at, course, teacher, id: coursePeriodId } of session.courses_period) {
+      for (const { start_at, end_at, course, teacher, id: coursePeriodId, weekly_schedule } of session.courses_period) {
         let item = periodsMap.get(course.id);
 
         if (!item) {
@@ -86,6 +86,12 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
               title: course.title || "",
             },
             teachers: [],
+            weeklySchedule: {
+              from: weekly_schedule?.from,
+              to: weekly_schedule?.to,
+              isDuration: weekly_schedule?.isDuration,
+              duration: weekly_schedule?.duration,
+            },
           };
           periodsMap.set(course.id, item);
         }
@@ -129,6 +135,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
             startDate: session.class_qr_codes[0]?.checkin_start_time || "",
             endDate: session.class_qr_codes[0]?.checkin_end_time || "",
           },
+          weeklySchedule: session.weekly_schedule ?? undefined,
         } as UpdateClassRoomFormValue["classRoomSessions"][number],
       ];
     }, []);
@@ -205,6 +212,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       platform={platform}
       onSubmit={handleUpdateClassRoom}
       onCancel={handleCancelUpdate}
+      isLearningPath={class_type === "learning_path"}
       ref={formClassRoomRef}
     />
   );

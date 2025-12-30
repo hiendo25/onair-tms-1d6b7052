@@ -21,16 +21,33 @@ const courseResourceSchema = zod.object({
 
 const classRoomSessionAgendaSchema = zod.object({
   id: zod.string().optional(),
-  title: zod.string().min(1, { message: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
-  description: zod.string().min(1, { message: "Nội dung không bỏ trống." }),
-  startDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
-  endDate: zod.iso.datetime({ error: "Ngày bắt đầu không hợp lệ." }),
+  title: zod.string().min(1, { error: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
+  description: zod.string().min(1, { error: "Nội dung không bỏ trống." }),
+  startDate: zod.string(),
+  endDate: zod.string(),
 });
 
 const coursePeriodWeeklyScheduleSchema = zod.object({
   time: zod.string().optional(),
   day: zod.enum<DayOfWeek[]>(["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]).optional(),
 });
+const requireDate = (value: string | undefined, ctx: zod.RefinementCtx, path: (string | number)[], message: string) => {
+  if (!value) {
+    ctx.addIssue({ code: "custom", message, path });
+    return false;
+  }
+  if (!dayjs(value).isValid()) {
+    ctx.addIssue({ code: "custom", message: "Ngày không hợp lệ.", path });
+    return false;
+  }
+  return true;
+};
+const validateMeetingUrl = (provider: ClassSessionChannelProvider, url: string) => {
+  if (provider === "zoom") return zoomRegex.test(url);
+  if (provider === "google_meet") return googleMeetRegex.test(url);
+  if (provider === "microsoft_teams") return teamsRegex.test(url);
+  return false;
+};
 const classRoomSessionSchema = zod
   .object({
     id: zod.string().optional(),
@@ -75,8 +92,8 @@ const classRoomSessionSchema = zod
           endAt: zod.string(),
           weeklySchedule: zod
             .object({
-              from: coursePeriodWeeklyScheduleSchema,
-              to: coursePeriodWeeklyScheduleSchema,
+              from: coursePeriodWeeklyScheduleSchema.optional(),
+              to: coursePeriodWeeklyScheduleSchema.optional(),
               isDuration: zod.boolean(),
               duration: zod
                 .object({
@@ -94,8 +111,8 @@ const classRoomSessionSchema = zod
     ),
     weeklySchedule: zod
       .object({
-        from: coursePeriodWeeklyScheduleSchema,
-        to: coursePeriodWeeklyScheduleSchema,
+        from: coursePeriodWeeklyScheduleSchema.optional(),
+        to: coursePeriodWeeklyScheduleSchema.optional(),
       })
       .optional(),
     sessionType: zod.enum<ClassSessionType[]>(["live", "offline", "online"]),
@@ -103,60 +120,39 @@ const classRoomSessionSchema = zod
   })
   .superRefine(
     (
-      { startDate, endDate, qrCode, sessionType, location, channelInfo, channelProvider, classType, coursesPeriod },
+      {
+        startDate,
+        endDate,
+        qrCode,
+        sessionType,
+        location,
+        channelInfo,
+        channelProvider,
+        classType,
+        coursesPeriod,
+        weeklySchedule,
+      },
       ctx,
     ) => {
       if (classType === "room") {
-        if (!startDate) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày bắt đầu không bỏ trống.",
-            path: ["startDate"],
-          });
-        }
-        if (!endDate) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày kết thúc không bỏ trống.",
-            path: ["startDate"],
-          });
-        }
+        const startValid = requireDate(startDate, ctx, ["startDate"], "Ngày bắt đầu không bỏ trống.");
+        const endValid = requireDate(endDate, ctx, ["endDate"], "Ngày kết thúc không bỏ trống.");
 
-        if (startDate && !dayjs(startDate).isValid()) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày bắt đầu không hợp lệ.",
-            path: ["startDate"],
-          });
-        }
-
-        if (endDate && !dayjs(endDate).isValid()) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày kết thúc không hợp lệ.",
-            path: ["startDate"],
-          });
-        }
-        if (dayjs(startDate).isBefore(dayjs())) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày bắt đầu phải lớn hơn ngày hiện tại",
-            path: ["startDate"],
-          });
-        }
-        if (dayjs(endDate).isBefore(dayjs())) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày kết thúc phải lớn hơn ngày hiện tại",
-            path: ["endDate"],
-          });
-        }
-        if (dayjs(startDate).isAfter(endDate)) {
-          ctx.addIssue({
-            code: "custom",
-            message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
-            path: ["endDate"],
-          });
+        if (startValid && endValid) {
+          if (dayjs(startDate).isBefore(dayjs())) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Ngày bắt đầu phải lớn hơn ngày hiện tại.",
+              path: ["startDate"],
+            });
+          }
+          if (dayjs(startDate).isAfter(dayjs(endDate))) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
+              path: ["endDate"],
+            });
+          }
         }
 
         coursesPeriod.forEach((item, _index) => {
@@ -164,7 +160,7 @@ const classRoomSessionSchema = zod
             ctx.addIssue({
               code: "custom",
               message: "Ngày bắt đầu không bỏ trống.",
-              path: ["coursePeriod", _index, "startAt"],
+              path: ["coursesPeriod", _index, "startAt"],
             });
           }
         });
@@ -173,19 +169,56 @@ const classRoomSessionSchema = zod
             ctx.addIssue({
               code: "custom",
               message: "Ngày kết thúc không bỏ trống.",
-              path: ["coursePeriod", _index, "endAt"],
+              path: ["coursesPeriod", _index, "endAt"],
             });
           }
         });
       }
+
       if (classType === "learning_path") {
-        coursesPeriod.forEach((item, _index) => {
-          if (!item.weeklySchedule?.from.day || !item.weeklySchedule?.to.day) {
+        if (!weeklySchedule?.from?.day || !weeklySchedule?.from?.time) {
+          ctx.addIssue({
+            path: ["weeklySchedule", "from"],
+            code: "custom",
+            message: "Thời gian bắt đầu không bỏ trống.",
+          });
+        }
+        if (!weeklySchedule?.to?.day || !weeklySchedule?.to?.time) {
+          ctx.addIssue({
+            path: ["weeklySchedule", "to"],
+            code: "custom",
+            message: "Thời gian thúc không bỏ trống.",
+          });
+        }
+
+        coursesPeriod.forEach((item, _coursePeriodIndex) => {
+          if (!item?.weeklySchedule?.from?.day || !item?.weeklySchedule?.from?.time) {
+            ctx.addIssue({
+              path: ["coursesPeriod", _coursePeriodIndex, "weeklySchedule", "from"],
+              code: "custom",
+              message: "Thời gian bắt đầu không bỏ trống.",
+            });
+          }
+          if (!item?.weeklySchedule?.to?.day || !item?.weeklySchedule?.to?.time) {
             ctx.addIssue({
               code: "custom",
-              message: "Ngày không bỏ trống.",
-              path: ["coursePeriod", _index, "weeklySchedule", "from", "day"],
+              message: "Thời gian kết thúc không bỏ trống.",
+              path: ["coursesPeriod", _coursePeriodIndex, "weeklySchedule", "to"],
             });
+          }
+
+          if (item.weeklySchedule?.isDuration) {
+            if (
+              !item.weeklySchedule.duration ||
+              (!item.weeklySchedule.duration.hours && !item.weeklySchedule.duration?.minutes) ||
+              (item.weeklySchedule.duration?.hours === 0 && item.weeklySchedule.duration?.minutes === 0)
+            ) {
+              ctx.addIssue({
+                code: "custom",
+                message: "Thời lượng học không hợp lệ.",
+                path: ["coursesPeriod", _coursePeriodIndex, "weeklySchedule", "duration"],
+              });
+            }
           }
         });
       }
@@ -194,50 +227,23 @@ const classRoomSessionSchema = zod
        */
 
       if (sessionType === "live") {
-        if (!channelInfo.url.length) {
+        if (!channelInfo.url) {
           ctx.addIssue({
             code: "custom",
             message: "Url không bỏ trống",
             path: ["channelInfo", "url"],
           });
-        }
-        //   https://meet.google.com/
-        // https://app.zoom.us/
-
-        if (channelProvider === "zoom") {
-          const isZoom = zoomRegex.test(channelInfo.url);
-          if (!isZoom) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Link tham dự không hợp lệ.",
-              path: ["channelInfo", "url"],
-            });
-          }
-        }
-        if (channelProvider === "google_meet") {
-          const isGoogleMeet = googleMeetRegex.test(channelInfo.url);
-          if (!isGoogleMeet) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Link tham dự không hợp lệ.",
-              path: ["channelInfo", "url"],
-            });
-          }
-        }
-        if (channelProvider === "microsoft_teams") {
-          const isTeams = teamsRegex.test(channelInfo.url);
-
-          if (!isTeams) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Link tham dự không hợp lệ.",
-              path: ["channelInfo", "url"],
-            });
-          }
+        } else if (!validateMeetingUrl(channelProvider, channelInfo.url)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Link tham dự không hợp lệ.",
+            path: ["channelInfo", "url"],
+          });
         }
       }
+
       if (sessionType === "offline") {
-        if (!location.length) {
+        if (!location) {
           ctx.addIssue({
             code: "custom",
             message: "Địa điểm tổ chức không bỏ trống.",
@@ -245,37 +251,9 @@ const classRoomSessionSchema = zod
           });
         }
         if (qrCode.isLimitTimeScanQrCode) {
-          if (!qrCode.startDate) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Thời gian bắt đầu không bỏ trống",
-              path: ["qrCode", "startDate"],
-            });
-          } else {
-            if (!dayjs(qrCode.startDate).isValid()) {
-              ctx.addIssue({
-                code: "custom",
-                message: "Thời gian bắt đầu không hợp lệ.",
-                path: ["qrCode", "startDate"],
-              });
-            }
-          }
+          requireDate(qrCode.startDate, ctx, ["qrCode", "startDate"], "Thời gian bắt đầu không bỏ trống.");
+          requireDate(qrCode.endDate, ctx, ["qrCode", "endDate"], "Thời gian kết thúc không bỏ trống.");
 
-          if (!qrCode.endDate) {
-            ctx.addIssue({
-              code: "custom",
-              message: "Thời gian kết thúc không bỏ trống",
-              path: ["qrCode", "endDate"],
-            });
-          } else {
-            if (!dayjs(qrCode.endDate).isValid()) {
-              ctx.addIssue({
-                code: "custom",
-                message: "Thời gian kết thúc không hợp lệ.",
-                path: ["qrCode", "endDate"],
-              });
-            }
-          }
           if (qrCode.startDate && qrCode.endDate && dayjs(qrCode.startDate).isAfter(dayjs(qrCode.endDate))) {
             ctx.addIssue({
               code: "custom",
@@ -293,7 +271,7 @@ const classRoomSchema = zod
     classRoomId: zod.string(),
     title: zod
       .string()
-      .min(1, { message: "Tên lớp học không bỏ trống." })
+      .min(1, { error: "Tên lớp học không bỏ trống." })
       .max(TITLE_CLASS_ROOM_MAX_LENGTH, `Tiêu đề tối đa ${TITLE_CLASS_ROOM_MAX_LENGTH} ký tự.`),
     slug: zod.string(),
     description: zod.string().min(1, { error: "Không bỏ trống nội dung." }),

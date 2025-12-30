@@ -16,6 +16,7 @@ import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
 import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
 const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -32,22 +33,6 @@ interface ButtonSelectTeacherProps {
   onClick: () => void;
   teacherName?: string;
 }
-
-const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ onClick, teacherName }) => {
-  return (
-    <Button
-      disableRipple
-      variant="text"
-      size="small"
-      color={teacherName ? "inherit" : "primary"}
-      className="px-0 py-1 bg-transparent outline-0"
-      startIcon={teacherName ? <Edit05Icon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
-      onClick={onClick}
-    >
-      {teacherName ? teacherName : "Thêm"}
-    </Button>
-  );
-};
 
 const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) => (
   <RHFDateTimePicker
@@ -76,18 +61,15 @@ const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) =
 ))(({ theme }) => ({}));
 interface CoursePeriodSelectorProps {
   sessionIndex: number;
-  methods: UseFormReturn<ClassRoom>;
 }
 type TeacherSelectItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["teachers"][number];
-const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex, methods }) => {
+const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex }) => {
   const dialogCourseRef = useRef<SimpleDialogCourseSelectorRef>(null);
   const {
     control,
-    getValues,
-    watch,
     trigger,
     formState: { errors },
-  } = methods;
+  } = useClassRoomFormContext();
 
   const dialogTeacherRef = useRef<SimpleDialogTeacherSelectorRef>(null);
   const {
@@ -252,8 +234,16 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                             ))}
                           </div>
                         ) : null}
-                        <ButtonSelectTeacher onClick={() => handleOpenDialogTeacher(_indexField, teachers)} />
-
+                        <Button
+                          disableRipple
+                          variant="text"
+                          size="small"
+                          color="primary"
+                          className="px-0 py-1 bg-transparent outline-0"
+                          onClick={() => handleOpenDialogTeacher(_indexField, teachers)}
+                        >
+                          Thêm
+                        </Button>
                         {error?.message ? (
                           <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
                         ) : null}

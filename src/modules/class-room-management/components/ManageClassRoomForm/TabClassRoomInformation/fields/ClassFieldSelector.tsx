@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import { Control, useController } from "react-hook-form";
 
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
@@ -45,4 +46,4 @@ const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
     />
   );
 };
-export default ClassFieldSelector;
+export default memo(ClassFieldSelector);

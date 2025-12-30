@@ -42,6 +42,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
   const handleOpenDialog = () => setOpenDialog(true);
   const handleCloseDialog = () => setOpenDialog(false);
 
+  console.log("accord11111ion", { index });
   const handleConfirm = () => {
     startTransition(() => {
       setOpenDialog(false);
@@ -124,4 +125,7 @@ const AccordionSessionItem: React.FC<AccordionSessionItemProps> = ({
     </div>
   );
 };
-export default React.memo(AccordionSessionItem);
+export default React.memo(
+  AccordionSessionItem,
+  (prev, next) => prev.status === next.status && prev.title === next.title && prev.index === next.index,
+);

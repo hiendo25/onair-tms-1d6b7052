@@ -1,9 +1,9 @@
-import React, { useMemo, useRef } from "react";
+import React, { memo, useCallback, useMemo, useRef } from "react";
 import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Control, Controller, FieldErrors, useFieldArray } from "react-hook-form";
 import { useWatch } from "react-hook-form";
 
+import { DAY_OFF_WEEK_OPTIONS } from "@/constants/date-time";
 import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
   SimpleDialogCourseSelectorRef,
@@ -14,11 +14,17 @@ import SimpleDialogTeacherSelector, {
 import { CloseIcon, Edit05Icon, Trash01Icon } from "@/shared/assets/icons";
 import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
-import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
-import DurationTime from "./DurationTime";
+import ButtonAddCoursePeriod, { ButtonAddCoursePeriodProps } from "./ButtonAddCoursePeriod";
 import FromToDayTime from "./FromToDayTime";
+
+type CoursePeriodWeeklyErrors = FieldErrors<{
+  from: string;
+  to: string;
+  duration: string;
+}>;
 const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -31,38 +37,24 @@ const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
   },
 }));
 
-interface ButtonSelectTeacherProps {
-  onClick: () => void;
-  teacherName?: string;
-}
-
-const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ onClick }) => {
-  return (
-    <Button disableRipple variant="fill" size="small" color="primary" onClick={onClick}>
-      Chọn
-    </Button>
-  );
-};
-
 interface CoursePeriodLearningPathProps {
   sessionIndex: number;
-  methods: UseFormReturn<ClassRoom>;
+  control: Control<ClassRoom>;
 }
 type CoursePeriodItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number];
 type TeacherSelectItem = CoursePeriodItem["teachers"][number];
 
-const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ sessionIndex, methods }) => {
-  const dialogCourseRef = useRef<SimpleDialogCourseSelectorRef>(null);
+const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ sessionIndex, control }) => {
+  const sessionWeeklySchedule = useWatch({
+    control: control,
+    name: `classRoomSessions.${sessionIndex}.weeklySchedule`,
+    exact: true,
+  });
 
-  const {
-    control,
-    trigger,
-    formState: { errors },
-  } = methods;
-
-  const sessions = useWatch({ control, name: "classRoomSessions" });
+  // const sessions = useWatch({ control, name: "classRoomSessions" });
 
   const dialogTeacherRef = useRef<SimpleDialogTeacherSelectorRef>(null);
+
   const {
     fields: coursesFields,
     append,
@@ -73,49 +65,31 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
     name: `classRoomSessions.${sessionIndex}.coursesPeriod`,
     keyName: "_coursePeriod",
   });
-
-  const errorMessage = useMemo(() => {
-    return errors.classRoomSessions?.[sessionIndex]?.coursesPeriod?.message;
-  }, [errors, sessionIndex]);
-
+  console.log("render this");
   /**
    * Check valid field before add course
    */
-  const handleOpenDialogCourses = async () => {
-    if (coursesFields.length) {
-      const isValid = await trigger(`classRoomSessions.${sessionIndex}.coursesPeriod`);
-      if (!isValid) return;
-    }
-    dialogCourseRef.current?.openDialog?.();
-  };
 
-  const handleConfirmSelectCourse: SimpleDialogCourseSelectorProps["onOk"] = (courseList) => {
-    const defaultItem = sessions[sessionIndex]?.weeklySchedule;
+  const handleConfirmSelectCourse: ButtonAddCoursePeriodProps["onOk"] = (courseList) => {
+    const weeklyScheduleItem: CoursePeriodItem["weeklySchedule"] = sessionWeeklySchedule
+      ? {
+          from: sessionWeeklySchedule.from,
+          to: sessionWeeklySchedule.to,
+          isDuration: false,
+          duration: undefined,
+        }
+      : undefined;
     const courseListAppend = courseList.map<CoursePeriodItem>((item) => ({
       startAt: "",
       endAt: "",
       course: { id: item.id, title: item.title || "" },
       teachers: [],
-      weeklySchedule: {
-        from: {
-          time: defaultItem?.from?.time,
-          day: defaultItem?.from?.day,
-        },
-        to: {
-          time: defaultItem?.to?.time,
-          day: defaultItem?.to?.day,
-        },
-        isDuration: false,
-        duration: {
-          hours: 0,
-          minutes: 0,
-        },
-      },
+      weeklySchedule: weeklyScheduleItem,
     }));
     append(courseListAppend);
   };
 
-  const handleOpenDialogTeacher = (index: number, teachers: TeacherSelectItem[]) => {
+  const handleOpenDialogTeacher = useCallback((index: number, teachers: TeacherSelectItem[]) => {
     const currentCourse = coursesFields[index];
     if (!currentCourse) return;
     const initTeacherValues = teachers.map((tc) => tc.teacherId);
@@ -136,17 +110,7 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
         },
       },
     );
-  };
-
-  /**
-   * Get all Course ids selected from all class session
-   */
-  const courseList = useMemo(() => {
-    const courseSelectedIds = sessions.reduce<string[]>((acc, session) => {
-      return [...acc, ...session.coursesPeriod.map((course) => course.course.id)];
-    }, []);
-    return courseSelectedIds;
-  }, [sessions]);
+  }, []);
 
   return (
     <div className="course-period-container">
@@ -158,15 +122,12 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
           <Typography className="text-xs text-gray-600">
             Chọn môn học và chỉ định giảng viên kèm thời gian giảng dạy.
           </Typography>
-          {errorMessage && <FormHelperText error>{errorMessage}</FormHelperText>}
+          {/* {helperText && <FormHelperText error>{helperText}</FormHelperText>} */}
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="fill" onClick={handleOpenDialogCourses}>
-            Thêm
-          </Button>
+          <ButtonAddCoursePeriod sessionIndex={sessionIndex} onOk={handleConfirmSelectCourse} />
         </div>
       </div>
-
       {coursesFields.length ? (
         <div className="course-period-list">
           <CoursePeriodsWrapper>
@@ -192,7 +153,7 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
                       control={control}
                       render={({ field: { onChange, value: teachers }, fieldState: { error } }) => (
                         <>
-                          <div className="flex justify-between">
+                          <div className="flex justify-between mb-3">
                             <div>
                               <FormLabel component="div">
                                 Giảng viên phụ trách <span className="text-red-600">*</span>
@@ -202,7 +163,30 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
                                 học.
                               </Typography>
                             </div>
-                            <ButtonSelectTeacher onClick={() => handleOpenDialogTeacher(_indexField, teachers)} />
+                            <Button
+                              disableRipple
+                              variant="fill"
+                              size="small"
+                              color="primary"
+                              onClick={() => {
+                                dialogTeacherRef.current?.openDialog(
+                                  { value: teachers.map((tc) => tc.teacherId) },
+                                  {
+                                    onOk: (data) => {
+                                      const teacherValues = data.map<TeacherSelectItem>((tc) => ({
+                                        teacherId: tc.id,
+                                        teacherName: tc.profiles.full_name,
+                                        teacherDepartment: tc.employee_departments[0]?.departments?.name || "",
+                                      }));
+
+                                      onChange(teacherValues);
+                                    },
+                                  },
+                                );
+                              }}
+                            >
+                              Chọn
+                            </Button>
                           </div>
                           {teachers.length ? (
                             <div className="flex flex-col gap-2">
@@ -229,35 +213,18 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
                           {error?.message ? (
                             <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
                           ) : null}
+                          <SimpleDialogTeacherSelector ref={dialogTeacherRef} excludeSelected={false} />
                         </>
                       )}
                     />
                   </div>
                   <div className="h-4"></div>
-                  <Controller
-                    control={control}
-                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.weeklySchedule`}
-                    render={({ field: { value, onChange }, fieldState: { error } }) => (
-                      <div className="bg-white p-4 rounded-xl time">
-                        <div>
-                          <FormLabel component="div">
-                            Thời gian diễn ra <span className="text-red-600">*</span>
-                          </FormLabel>
-                          <div>
-                            <FromToDayTime value={value} onChange={onChange} />
-                            <div className="h-6"></div>
-                            <DurationTime
-                              control={control}
-                              sessionIndex={sessionIndex}
-                              coursePeriodIndex={_indexField}
-                            />
-                          </div>
-                          {/* {JSON.stringify(error)}
-                          {error?.message?.from?.message} */}
-                        </div>
-                      </div>
-                    )}
-                  />
+                  <div className="bg-white p-4 rounded-xl time">
+                    <FormLabel component="div">
+                      Thời gian diễn ra <span className="text-red-600">*</span>
+                    </FormLabel>
+                    <FromToDayTime control={control} sessionIndex={sessionIndex} coursePeriodIndex={_indexField} />
+                  </div>
                 </div>
               </React.Fragment>
             ))}
@@ -268,9 +235,7 @@ const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ ses
           <EmptyData description="Môn học đang trống." iconSize="small" className="mx-auto" />
         </div>
       )}
-      <SimpleDialogCourseSelector value={courseList} ref={dialogCourseRef} onOk={handleConfirmSelectCourse} />
-      <SimpleDialogTeacherSelector ref={dialogTeacherRef} excludeSelected={false} />
     </div>
   );
 };
-export default CoursePeriodLearningPath;
+export default memo(CoursePeriodLearningPath);

@@ -23,30 +23,6 @@ export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-export const TAB_NODES_CLASS_ROOM = new Map([
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-information"],
-    {
-      prev: null,
-      next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-      next: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-      next: null,
-    },
-  ],
-]);
-
 export const initClassRoomFormData = (oprions: {
   platform?: ClassRoomPlatformType;
   roomType?: ClassRoomType;
@@ -154,12 +130,16 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         {
           tabName: "Thông tin chung",
           tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          prev: null,
+          next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
           icon: <GlobeIcon className="w-5 h-5" />,
           content: <TabClassRoomInformation action={action} />,
         },
         {
           tabName: "Thời gian",
           tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+          prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          next: isLearningPath ? null : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
           icon: <CalendarDateIcon className="w-5 h-5" />,
           content: <TabClassRoomSession />,
         },
@@ -177,6 +157,8 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
             {
               tabName: "Thiết lập",
               tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+              prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              next: null,
               icon: <UsersPlusIcon className="w-5 h-5" />,
               content: <TabClassRoomSetting />,
             },
