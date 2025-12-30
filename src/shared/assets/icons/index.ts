@@ -1,3 +1,4 @@
+import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import Bell01Icon from "./Bell01Icon";
 import BellIcon from "./BellIcon";
@@ -135,4 +136,5 @@ export {
   VideoCameraRecordFillIcon,
   LogoutIcon,
   Menu05Icon,
+  ArrowRightIcon,
 };

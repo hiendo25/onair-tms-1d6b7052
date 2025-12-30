@@ -1,5 +1,5 @@
 "use client";
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, memo, useCallback, useEffect, useRef, useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import FormHelperText from "@mui/material/FormHelperText";
 import Portal from "@mui/material/Portal";
@@ -186,4 +186,4 @@ const Editor = forwardRef<HTMLDivElement, EditorProps>(
     );
   },
 );
-export default Editor;
+export default memo(Editor);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useId } from "react";
+import React, { memo, useId } from "react";
 import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
 import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -20,6 +20,7 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   helpText?: React.ReactNode;
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  size?: "small" | "medium";
 }
 const RHFTextField = <T extends FieldValues>({
   className,
@@ -35,6 +36,7 @@ const RHFTextField = <T extends FieldValues>({
   helpText,
   sx,
   inputProps,
+  size,
 }: RHFTextFieldProps<T>) => {
   const fieldId = useId();
   return (
@@ -51,14 +53,15 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            value={field.value ?? (type === "number" ? "" : "")}
+            value={field.value ?? ""}
             onChange={(evt) => {
-              const value = type === "number" ? Number.parseInt(evt.target.value) : evt.target.value;
+              const raw = evt.target.value;
+              const value = type === "number" ? (raw === "" ? undefined : Number(raw)) : raw;
               field.onChange(value);
             }}
             placeholder={placeholder}
             disabled={disabled}
-            size="small"
+            size={size}
             id={fieldId}
             type={type}
             sx={{
@@ -75,4 +78,4 @@ const RHFTextField = <T extends FieldValues>({
     />
   );
 };
-export default RHFTextField;
+export default memo(RHFTextField) as typeof RHFTextField;

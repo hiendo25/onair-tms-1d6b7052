@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { CLASS_ROOM_PLATFORM, ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
+import { ClassType } from "@/model/enum-type.model";
 import ClassRoomTypeBoxMenu from "@/modules/class-room-management/components/ClassRoomTypeBoxMenu";
 import PageContainer from "@/shared/ui/PageContainer";
 
@@ -13,12 +14,13 @@ interface CreateClassRoomPageProps {
   searchParams: Promise<
     {
       platform: ClassRoomPlatformType;
-      roomtype: ClassRoomType;
+      roomType: ClassRoomType;
+      classType: ClassType;
     } & Record<string, any>
   >;
 }
 const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchParams }) => {
-  const { platform, roomtype } = await searchParams;
+  const { platform, roomType, classType } = await searchParams;
 
   const PLATFORMS = new Map<ClassRoomPlatformType, ClassRoomPlatformType>([
     [CLASS_ROOM_PLATFORM.HYBRID, CLASS_ROOM_PLATFORM.HYBRID],
@@ -53,10 +55,10 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
         },
       ]}
     >
-      {!platform || !roomtype || !PLATFORMS.has(platform) || !ROOMS.has(roomtype) ? (
+      {!platform || !roomType || !PLATFORMS.has(platform) || !ROOMS.has(roomType) ? (
         <ClassRoomTypeBoxMenu />
       ) : (
-        <CreateClassRoomForm platform={platform} roomType={roomtype} />
+        <CreateClassRoomForm platform={platform} roomType={roomType} isLearningPath={classType === "learning_path"} />
       )}
     </PageContainer>
   );

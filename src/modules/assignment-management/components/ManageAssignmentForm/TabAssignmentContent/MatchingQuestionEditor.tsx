@@ -1,11 +1,11 @@
 "use client";
-import React, { memo, useEffect,useRef, useState } from "react";
+import React, { memo, useEffect, useRef, useState } from "react";
 import { Button, FormLabel, IconButton, TextField, Typography } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 
 import { TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { type MatchingColumnItem, type MatchingMapping,type MatchingQuestionData } from "../../../assignment-form.schema";
+import type { MatchingColumnItem, MatchingMapping, MatchingQuestionData } from "../../assignment-form.schema";
 
 interface MatchingQuestionEditorProps {
   matchingData: MatchingQuestionData;
@@ -51,7 +51,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
     const newColumnAItems = columnAItems.filter((_, idx) => idx !== index);
     const newColumnBItems = columnBItems.filter((_, idx) => idx !== index);
     const newMappings = correctMappings.filter(
-      (mapping) => mapping.columnAId !== itemAId && mapping.columnBId !== itemBId
+      (mapping) => mapping.columnAId !== itemAId && mapping.columnBId !== itemBId,
     );
 
     onChange({
@@ -62,9 +62,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
   };
 
   const handleColumnAChange = (itemId: string, value: string) => {
-    const newColumnAItems = columnAItems.map((item) =>
-      item.id === itemId ? { ...item, content: value } : item
-    );
+    const newColumnAItems = columnAItems.map((item) => (item.id === itemId ? { ...item, content: value } : item));
     onChange({
       ...matchingData,
       columnAItems: newColumnAItems,
@@ -72,9 +70,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
   };
 
   const handleColumnBChange = (itemId: string, value: string) => {
-    const newColumnBItems = columnBItems.map((item) =>
-      item.id === itemId ? { ...item, content: value } : item
-    );
+    const newColumnBItems = columnBItems.map((item) => (item.id === itemId ? { ...item, content: value } : item));
     onChange({
       ...matchingData,
       columnBItems: newColumnBItems,
@@ -94,16 +90,14 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
     if (!selectedColumnAId) return;
 
     // Check if this Column A item already has a mapping
-    const existingMappingIndex = correctMappings.findIndex(
-      (m) => m.columnAId === selectedColumnAId
-    );
+    const existingMappingIndex = correctMappings.findIndex((m) => m.columnAId === selectedColumnAId);
 
     let newMappings: MatchingMapping[];
 
     if (existingMappingIndex >= 0) {
       // Update existing mapping
       newMappings = correctMappings.map((m, idx) =>
-        idx === existingMappingIndex ? { columnAId: selectedColumnAId, columnBId: itemId } : m
+        idx === existingMappingIndex ? { columnAId: selectedColumnAId, columnBId: itemId } : m,
       );
     } else {
       // Add new mapping
@@ -165,10 +159,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
     });
 
     return (
-      <svg
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 1 }}
-      >
+      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
         {lines}
       </svg>
     );
@@ -207,9 +198,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
                   }`}
                   onClick={() => handleColumnAClick(item.id)}
                 >
-                  <Typography className="text-sm font-medium text-gray-700 mt-2 min-w-[20px]">
-                    {index + 1}.
-                  </Typography>
+                  <Typography className="text-sm font-medium text-gray-700 mt-2 min-w-[20px]">{index + 1}.</Typography>
                   <TextField
                     value={item.content}
                     onChange={(e) => {
@@ -237,14 +226,8 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
                   key={item.id}
                   id={`B-${item.id}`}
                   className={`flex items-start gap-2 p-2 rounded-lg border-2 transition-colors ${
-                    selectedColumnAId
-                      ? "cursor-pointer hover:border-blue-400"
-                      : ""
-                  } ${
-                    isMapped
-                      ? "border-green-300 bg-green-50"
-                      : "border-gray-200"
-                  }`}
+                    selectedColumnAId ? "cursor-pointer hover:border-blue-400" : ""
+                  } ${isMapped ? "border-green-300 bg-green-50" : "border-gray-200"}`}
                   onClick={() => handleColumnBClick(item.id)}
                 >
                   <TextField
@@ -276,13 +259,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
         </div>
       </div>
 
-      <Button
-        onClick={handleAddItems}
-        startIcon={<PlusIcon />}
-        variant="outlined"
-        size="small"
-        className="self-start"
-      >
+      <Button onClick={handleAddItems} startIcon={<PlusIcon />} variant="outlined" size="small" className="self-start">
         Thêm mục
       </Button>
     </div>
@@ -290,4 +267,3 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
 };
 
 export default memo(MatchingQuestionEditor);
-

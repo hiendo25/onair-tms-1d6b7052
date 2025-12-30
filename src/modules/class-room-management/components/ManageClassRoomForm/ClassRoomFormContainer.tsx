@@ -1,5 +1,5 @@
 "use client";
-import React, { forwardRef, useCallback, useImperativeHandle, useLayoutEffect, useRef } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
@@ -10,6 +10,7 @@ import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
 
+import ButtonSubmit from "./ButtonSubmit";
 import { ClassRoom, classRoomSchema } from "./classroom-form.schema";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
 import TabClassRoomInformation from "./TabClassRoomInformation";
@@ -21,30 +22,6 @@ export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-session": "clsTab-session",
   "clsTab-setting": "clsTab-setting",
 } as const;
-
-export const TAB_NODES_CLASS_ROOM = new Map([
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-information"],
-    {
-      prev: null,
-      next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-      next: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-      next: null,
-    },
-  ],
-]);
 
 export const initClassRoomFormData = (oprions: {
   platform?: ClassRoomPlatformType;
@@ -63,6 +40,7 @@ export const initClassRoomFormData = (oprions: {
     docs: [],
     platform: oprions?.platform,
     classRoomSessions: [],
+    classType: "room",
   };
 };
 
@@ -74,12 +52,16 @@ export interface ClassRoomFormContainerProps {
   onCancel?: () => void;
   platform: ClassRoomPlatformType;
   roomType?: ClassRoomType;
+  isLearningPath?: boolean;
   value?: ClassRoom;
   isLoading?: boolean;
   action?: "create" | "edit";
 }
 const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
-  ({ onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel }, ref) => {
+  (
+    { onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel, isLearningPath = false },
+    ref,
+  ) => {
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
@@ -94,7 +76,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     });
 
     const {
-      getValues,
       setValue,
       handleSubmit,
       formState: { errors },
@@ -102,15 +83,17 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       reset,
     } = methods;
 
-    console.log({ errors, value: getValues(), selectedStudents });
+    console.log({ errors, selectedStudents, isLearningPath });
 
-    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
+    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void, status: "draft" | "publish") => async () => {
       try {
-        const TAB_LIST = [
-          TAB_KEYS_CLASS_ROOM["clsTab-information"],
-          TAB_KEYS_CLASS_ROOM["clsTab-session"],
-          TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-        ];
+        const TAB_LIST = isLearningPath
+          ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
+          : [
+              TAB_KEYS_CLASS_ROOM["clsTab-information"],
+              TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+            ];
         const allTabsTriggers = await Promise.allSettled(
           TAB_LIST.map(async (key) => {
             const isValid = await trigger(getKeyFieldByTab(key));
@@ -142,6 +125,70 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       onCancel?.();
     };
 
+    const TAB_ITEMS = useMemo(() => {
+      const BASE_ITEMS = [
+        {
+          tabName: "Thông tin chung",
+          tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          prev: null,
+          next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+          icon: <GlobeIcon className="w-5 h-5" />,
+          content: <TabClassRoomInformation action={action} />,
+        },
+        {
+          tabName: "Thời gian",
+          tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+          prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          next: isLearningPath ? null : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+          icon: <CalendarDateIcon className="w-5 h-5" />,
+          content: <TabClassRoomSession />,
+        },
+        // {
+        //   tabName: "Tài nguyên",
+        //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
+        //   icon: <ClipboardIcon className="w-5 h-5" />,
+        //   content: <TabClassRoomResource />,
+        // },
+      ];
+      return isLearningPath
+        ? BASE_ITEMS
+        : [
+            ...BASE_ITEMS,
+            {
+              tabName: "Thiết lập",
+              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+              prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              next: null,
+              icon: <UsersPlusIcon className="w-5 h-5" />,
+              content: <TabClassRoomSetting />,
+            },
+          ];
+    }, [isLearningPath, action]);
+    /**
+     * Init form value
+     */
+
+    useEffect(() => {
+      const base = initClassRoomFormData({ platform, roomType });
+
+      if (initFormValue) {
+        reset(initFormValue);
+        return;
+      }
+
+      const initSessions = initClassSessionFormData(
+        platform !== "hybrid"
+          ? { sessionType: platform, classType: isLearningPath ? "learning_path" : "room" }
+          : undefined,
+      );
+
+      reset({
+        ...base,
+        classRoomSessions: roomType === "multiple" ? [initSessions, initSessions] : [initSessions],
+        classType: isLearningPath ? "learning_path" : "room",
+      });
+    }, [initFormValue, platform, roomType, isLearningPath, reset]);
+
     useImperativeHandle(ref, () => ({
       resetForm: () => {
         resetStore(); // Reset all selected value in classRoom store
@@ -149,58 +196,13 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       },
     }));
 
-    /**
-     * Init form value
-     */
-    useLayoutEffect(() => {
-      if (!initFormValue) return;
-      reset(initFormValue);
-    }, [initFormValue]);
-
-    useLayoutEffect(() => {
-      if (!roomType) return;
-
-      const initSessionsFormData = initClassSessionFormData(
-        platform !== "hybrid" ? { sessionType: platform } : undefined,
-      );
-      setValue(
-        "classRoomSessions",
-        roomType === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],
-      );
-    }, [roomType, platform]);
-
     return (
       <FormProvider {...methods}>
         <ClassRoomTabContainer
           ref={classRoomTabContainerRef}
           trigger={trigger}
           errors={errors}
-          items={[
-            {
-              tabName: "Thông tin chung",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-              icon: <GlobeIcon className="w-5 h-5" />,
-              content: <TabClassRoomInformation />,
-            },
-            {
-              tabName: "Thời gian",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-              icon: <CalendarDateIcon className="w-5 h-5" />,
-              content: <TabClassRoomSession />,
-            },
-            // {
-            //   tabName: "Tài nguyên",
-            //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-            //   icon: <ClipboardIcon className="w-5 h-5" />,
-            //   content: <TabClassRoomResource />,
-            // },
-            {
-              tabName: "Thiết lập",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-              icon: <UsersPlusIcon className="w-5 h-5" />,
-              content: <TabClassRoomSetting />,
-            },
-          ]}
+          items={TAB_ITEMS}
           actions={
             <div className="flex items-center gap-2">
               <IconButton
@@ -223,13 +225,13 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               >
                 Lưu nháp
               </Button> */}
-              <Button
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "publish")}
+              <ButtonSubmit
+                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmit(submitForm), "publish")}
                 disabled={isLoading}
                 loading={isLoading}
               >
                 {action === "create" ? "Đăng tải" : "Cập nhật"}
-              </Button>
+              </ButtonSubmit>
             </div>
           }
         />

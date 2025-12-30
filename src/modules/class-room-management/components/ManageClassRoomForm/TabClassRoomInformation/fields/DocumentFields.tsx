@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
 import { useFieldArray } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
@@ -35,10 +36,10 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
 
     const resourcesItemsMap = new Map(selectingItems.map((item) => [item.id, item]));
 
-    let resourceItemsMaped: Exclude<ClassRoom["docs"], undefined> = [];
+    let resourceAppendItems: Exclude<ClassRoom["docs"], undefined> = [];
     resourcesItemsMap.forEach((it) => {
-      resourceItemsMaped = [
-        ...resourceItemsMaped,
+      resourceAppendItems = [
+        ...resourceAppendItems,
         {
           id: it.id,
           mimeType: it.mime_type || "",
@@ -48,7 +49,7 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
       ];
     });
     remove(resourceItems.map((_, index) => index));
-    append(resourceItemsMaped);
+    append(resourceAppendItems);
   };
 
   return (
@@ -88,8 +89,8 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
           ))}
         </div>
       ) : null}
-      <Button onClick={handleSelectLibrary} startIcon={<CloudUploadIcon className="w-5 h-5" />}>
-        <Typography sx={{ fontSize: "0.75rem", fontWeight: "bold" }}>Tải lên</Typography>
+      <Button onClick={handleSelectLibrary} startIcon={<CloudUploadIcon className="w-5 h-5" />} size="small">
+        Tải lên
       </Button>
     </div>
   );

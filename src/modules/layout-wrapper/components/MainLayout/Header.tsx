@@ -77,7 +77,7 @@ export default function Header({ logo, title, menuOpen, onToggleMenu, actions, s
   );
 
   return (
-    <AppBar color="inherit" position="sticky" className="header-bar">
+    <AppBar color="inherit" position="sticky" className="header-bar z-20">
       <Toolbar sx={{ px: 2 }}>
         <Stack
           direction="row"

@@ -1,8 +1,7 @@
 import React, { useMemo, useRef } from "react";
 import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
-import { DateTimePickerProps } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Controller, useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 
 import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
@@ -13,11 +12,13 @@ import SimpleDialogTeacherSelector, {
 } from "@/modules/teacher/container/SimpleDialogTeacherSelector";
 import { CloseIcon, Edit05Icon } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
+import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
-const CoursePeriodsWraper = styled(Box)(({ theme }) => ({
+const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   ".course-period-item + .course-period-item": {
@@ -33,101 +34,121 @@ interface ButtonSelectTeacherProps {
   teacherName?: string;
 }
 
-const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ onClick, teacherName }) => {
-  return (
-    <Button
-      disableRipple
-      variant="text"
-      size="small"
-      color={teacherName ? "inherit" : "primary"}
-      className="px-0 py-1 bg-transparent outline-0"
-      startIcon={teacherName ? <Edit05Icon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
-      onClick={onClick}
-    >
-      {teacherName ? teacherName : "Thêm"}
-    </Button>
-  );
-};
+const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) => (
+  <RHFDateTimePicker
+    {...props}
+    sx={{
+      ".MuiPickersInputBase-root": {
+        paddingLeft: 1.5,
+        paddingRight: 1.5,
+        borderRadius: "6px",
+        height: 30,
+      },
+      ".MuiPickersSectionList-root": {
+        paddingTop: "3px !important",
+        paddingBottom: "3px !important",
+        fontSize: "0.75rem",
+      },
+      ".MuiButtonBase-root": {
+        width: 24,
+        height: 24,
+        svg: {
+          fontSize: "1rem",
+        },
+      },
+    }}
+  />
+))(({ theme }) => ({}));
 interface CoursePeriodSelectorProps {
   sessionIndex: number;
-  methods: UseFormReturn<ClassRoom>;
 }
-const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex, methods }) => {
+type TeacherSelectItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["teachers"][number];
+const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex }) => {
   const dialogCourseRef = useRef<SimpleDialogCourseSelectorRef>(null);
   const {
     control,
-    getValues,
-    watch,
     trigger,
     formState: { errors },
-  } = methods;
+  } = useClassRoomFormContext();
 
-  const classSessionStartDate = watch(`classRoomSessions.${sessionIndex}.startDate`);
-  const classSessionEndDate = watch(`classRoomSessions.${sessionIndex}.endDate`);
   const dialogTeacherRef = useRef<SimpleDialogTeacherSelectorRef>(null);
   const {
     fields: coursesFields,
     append,
+    update,
     remove,
   } = useFieldArray({
     control,
     name: `classRoomSessions.${sessionIndex}.coursesPeriod`,
     keyName: "_coursePeriod",
   });
+  const sessions = useWatch({ control, name: "classRoomSessions" });
 
-  const errorMessage = errors.classRoomSessions?.[sessionIndex]?.coursesPeriod?.message;
+  const classSessionStartDate = useMemo(() => {
+    return sessions?.[sessionIndex]?.startDate;
+  }, [sessions]);
 
-  const dateTimePickerSx: DateTimePickerProps["sx"] = useMemo(
-    () => ({
-      ".MuiPickersInputBase-root": {
-        paddingLeft: 1.5,
-        paddingRight: 1.5,
-        borderRadius: "6px",
-      },
-      ".MuiPickersSectionList-root": {
-        paddingTop: "4px",
-        paddingBottom: "4px",
-        fontSize: "0.75rem",
-      },
-      svg: {
-        fontSize: "1rem",
-      },
-    }),
-    [],
-  );
+  const classSessionEndDate = useMemo(() => {
+    return sessions?.[sessionIndex]?.endDate;
+  }, [sessions]);
+
+  const errorMessage = useMemo(() => {
+    return errors.classRoomSessions?.[sessionIndex]?.coursesPeriod?.message;
+  }, [errors, sessionIndex]);
 
   /**
    * Check valid field before add course
    */
-  const checkValidCourseBeforeOpenDialog = (open?: () => void) => async () => {
+  const handleOpenDialogCourses = async () => {
     if (coursesFields.length) {
       const isValid = await trigger(`classRoomSessions.${sessionIndex}.coursesPeriod`);
       if (!isValid) return;
     }
-    open?.();
+    dialogCourseRef.current?.openDialog?.();
   };
 
-  const handleConfirmSelectCourse: SimpleDialogCourseSelectorProps["onOk"] = (data) => {
-    const courseItem = data[0];
-    if (!courseItem) return;
-    append({
+  const handleConfirmSelectCourse: SimpleDialogCourseSelectorProps["onOk"] = (courseList) => {
+    const courseListAppend = courseList.map((item) => ({
       startAt: "",
       endAt: "",
-      course: { id: courseItem.id, title: courseItem.title || "" },
-      teacher: undefined,
-    });
+      course: { id: item.id, title: item.title || "" },
+      teachers: [],
+    }));
+    append(courseListAppend);
+  };
+
+  const handleOpenDialogTeacher = (index: number, teachers: TeacherSelectItem[]) => {
+    const currentCourse = coursesFields[index];
+    if (!currentCourse) return;
+    const initTeacherValues = teachers.map((tc) => tc.teacherId);
+    dialogTeacherRef.current?.openDialog(
+      { value: initTeacherValues },
+      {
+        onOk: (data) => {
+          const teacherValues = data.map<TeacherSelectItem>((tc) => ({
+            teacherId: tc.id,
+            teacherName: tc.profiles.full_name,
+            teacherDepartment: tc.employee_departments[0]?.departments?.name || "",
+          }));
+
+          update(index, {
+            ...currentCourse,
+            teachers: teacherValues,
+          });
+        },
+      },
+    );
   };
 
   /**
    * Get all Course ids selected from all class session
    */
   const courseList = useMemo(() => {
-    const sessions = getValues("classRoomSessions");
     const courseSelectedIds = sessions.reduce<string[]>((acc, session) => {
       return [...acc, ...session.coursesPeriod.map((course) => course.course.id)];
     }, []);
     return courseSelectedIds;
-  }, [watch(`classRoomSessions`)]);
+  }, [sessions]);
 
   return (
     <div className="course-period-container">
@@ -142,7 +163,7 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
           {errorMessage && <FormHelperText error>{errorMessage}</FormHelperText>}
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="fill" onClick={checkValidCourseBeforeOpenDialog(dialogCourseRef.current?.openDialog)}>
+          <Button variant="fill" onClick={handleOpenDialogCourses}>
             Thêm
           </Button>
         </div>
@@ -153,51 +174,76 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
           <div className="h-6"></div>
           <div className="flex mb-4 gap-4">
             <div className="w-6"></div>
-            <div className="w-80">
-              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>Tên môn học</Typography>
-            </div>
             <div className="w-1/5">
-              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>Giảng viên</Typography>
+              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>Tên môn học</Typography>
             </div>
             <div className="w-2/5">
               <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>Thời gian học</Typography>
             </div>
+            <div className="w-1/5">
+              <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>Giảng viên</Typography>
+            </div>
           </div>
-          <CoursePeriodsWraper>
-            {coursesFields.map((cField, _indexField) => (
-              <div key={cField._coursePeriod} className="course-period-item flex gap-4">
-                <IconButton size="small" onClick={() => remove(_indexField)} className="w-6 h-6">
+          <CoursePeriodsWrapper>
+            {coursesFields.map(({ _coursePeriod, course }, _indexField) => (
+              <div key={_coursePeriod} className="course-period-item flex gap-4">
+                <IconButton size="small" onClick={() => remove(_indexField)} className="w-6 h-6 bg-gray-100">
                   <CloseIcon className="w-4 h-4" />
                 </IconButton>
-                <div className="w-80">
-                  <Typography sx={{ fontSize: "0.875rem" }}>{cField.course.title}</Typography>
+                <div className="w-1/5">
+                  <Typography sx={{ fontSize: "0.875rem" }}>{course.title}</Typography>
+                </div>
+                <div className="w-2/5">
+                  <div className="flex gap-x-2 max-w-[380px]">
+                    <StyledDateTimePicker
+                      control={control}
+                      name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.startAt`}
+                      minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
+                      maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
+                    />
+                    <StyledDateTimePicker
+                      control={control}
+                      name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.endAt`}
+                      minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
+                      maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
+                    />
+                  </div>
                 </div>
                 <div className="w-1/5">
                   <Controller
-                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.teacher`}
+                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.teachers`}
                     control={control}
-                    render={({ field: { onChange, value: teacherInfo }, fieldState: { error } }) => (
+                    render={({ field: { onChange, value: teachers }, fieldState: { error } }) => (
                       <>
-                        <ButtonSelectTeacher
-                          teacherName={teacherInfo?.name}
-                          onClick={() =>
-                            dialogTeacherRef.current?.openDialog(undefined, {
-                              onOk: (teachers) => {
-                                const teacher = teachers[0];
-                                onChange({
-                                  id: teacher?.id,
-                                  name: teacher?.profiles.full_name,
-                                  departmentName: teacher?.employee_departments[0]?.departments?.name || "",
-                                });
-                              },
-                            })
-                          }
-                        />
-                        <SimpleDialogTeacherSelector
-                          ref={dialogTeacherRef}
-                          disableMultipleSelect
-                          values={teacherInfo ? [teacherInfo.id] : []}
-                        />
+                        {teachers.length ? (
+                          <div className="flex flex-col gap-2">
+                            {teachers.map((teacher) => (
+                              <div key={teacher.teacherId} className="flex items-center gap-2 group/teacher">
+                                <Avatar alt={teacher.teacherName} className="w-7 h-7" />
+                                <div className="text-sm">{teacher.teacherName}</div>{" "}
+                                <IconButton
+                                  className="w-4 h-4 opacity-0 group-hover/teacher:opacity-100 bg-gray-100"
+                                  onClick={() => {
+                                    const updateTeachers = teachers.filter((tc) => tc.teacherId !== teacher.teacherId);
+                                    onChange(updateTeachers);
+                                  }}
+                                >
+                                  <CloseIcon className="text-xs" />
+                                </IconButton>
+                              </div>
+                            ))}
+                          </div>
+                        ) : null}
+                        <Button
+                          disableRipple
+                          variant="text"
+                          size="small"
+                          color="primary"
+                          className="px-0 py-1 bg-transparent outline-0"
+                          onClick={() => handleOpenDialogTeacher(_indexField, teachers)}
+                        >
+                          Thêm
+                        </Button>
                         {error?.message ? (
                           <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
                         ) : null}
@@ -205,37 +251,17 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                     )}
                   />
                 </div>
-                <div className="w-2/5 flex gap-x-2 max-w-[360px]">
-                  <RHFDateTimePicker
-                    control={control}
-                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.startAt`}
-                    minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
-                    maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
-                    sx={dateTimePickerSx}
-                  />
-                  <RHFDateTimePicker
-                    control={control}
-                    name={`classRoomSessions.${sessionIndex}.coursesPeriod.${_indexField}.endAt`}
-                    minDateTime={classSessionStartDate ? dayjs(classSessionStartDate) : dayjs()}
-                    maxDateTime={classSessionEndDate ? dayjs(classSessionEndDate) : undefined}
-                    sx={dateTimePickerSx}
-                  />
-                </div>
               </div>
             ))}
-          </CoursePeriodsWraper>
+          </CoursePeriodsWrapper>
         </div>
       ) : (
         <div className="flex items-center justify-center">
           <EmptyData description="Môn học đang trống." iconSize="small" className="mx-auto" />
         </div>
       )}
-      <SimpleDialogCourseSelector
-        value={courseList}
-        ref={dialogCourseRef}
-        onOk={handleConfirmSelectCourse}
-        disableMultipleSelect
-      />
+      <SimpleDialogCourseSelector value={courseList} ref={dialogCourseRef} onOk={handleConfirmSelectCourse} />
+      <SimpleDialogTeacherSelector ref={dialogTeacherRef} excludeSelected={false} />
     </div>
   );
 };

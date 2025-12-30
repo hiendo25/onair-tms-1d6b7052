@@ -2,6 +2,7 @@ import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
+import { DayOfWeek } from "@/model/enum-type.model";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 import {
   GetClassRoomsQueryInput,
@@ -38,6 +39,7 @@ import {
   CreatePivotClassRoomAndHashTagPayload,
   CreatePivotClassRoomWithResourcePayload,
   DeletePivotClassRoomAndEmployeePayload,
+  UpdateClassRoomPayload,
   UpSertClassRoomPayload,
 } from "./type";
 export * from "./type";
@@ -63,6 +65,27 @@ const getClassRoomById = async (classRoomId: string) => {
             url: string;
             password: string;
           };
+          weekly_schedule: {
+            from: DayOfWeek;
+            time: string;
+          } | null;
+          courses_period: {
+            weekly_schedule: {
+              from: {
+                day: DayOfWeek;
+                time: string;
+              };
+              to: {
+                day: DayOfWeek;
+                time: string;
+              };
+              isDuration: boolean;
+              duration: {
+                hours: number;
+                minutes: number;
+              };
+            } | null;
+          }[];
         }[];
       }>();
     return { data, error };
@@ -93,6 +116,16 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err?.message ?? "Unknown error craete Class Room");
+  }
+};
+
+const updateClassRoom = async (payload: UpdateClassRoomPayload) => {
+  try {
+    const { id, ...restPayload } = payload;
+    return await supabase.from("class_rooms").update(restPayload).eq("id", id).select().single();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err?.message ?? "Unknown error update Class Room");
   }
 };
 
@@ -712,6 +745,7 @@ const deletePivotClassRoomsWithResources = async (ids: number[]) => {
 
 export {
   createClassRoom,
+  updateClassRoom,
   createPivotClassRoomAndHashTag,
   createPivotClassRoomAndField,
   createPivotClassRoomsWithResources,

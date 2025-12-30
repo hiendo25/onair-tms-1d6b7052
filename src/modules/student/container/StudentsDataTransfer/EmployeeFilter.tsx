@@ -1,6 +1,16 @@
-import { memo, SetStateAction, useRef, useState } from "react";
+import React, { memo, SetStateAction, useRef, useState } from "react";
 import { useId } from "react";
-import { Box, Button, ButtonProps, FilledInput, List, MenuItem, Popover, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  ButtonProps,
+  FilledInput,
+  InputAdornment,
+  List,
+  MenuItem,
+  Popover,
+  Typography,
+} from "@mui/material";
 
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
@@ -11,10 +21,9 @@ import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelecto
 export interface EmployeeFilterProps {
   className?: string;
   selectedDepartmentIds?: DepartmentSelectorProps["values"];
-  seletectedBranchIds?: BranchSelectorProps["values"];
-  setSelectedDepartmentIds: React.Dispatch<SetStateAction<string[]>>;
-  setSelectedBranchIds: React.Dispatch<SetStateAction<string[]>>;
+  selectedBranchIds?: BranchSelectorProps["values"];
   onSearch?: (value: string) => void;
+  onChange?: (type: "department" | "branch") => (values: string[]) => void;
 }
 const TAB_KEY = {
   branch: "branch",
@@ -38,11 +47,10 @@ const TAB_MENU_LIST = [
 ];
 const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
   className,
-  selectedDepartmentIds,
-  seletectedBranchIds,
+  selectedDepartmentIds = [],
+  selectedBranchIds = [],
   onSearch,
-  setSelectedDepartmentIds,
-  setSelectedBranchIds,
+  onChange,
 }) => {
   const [currentTabMenu, setCurrentTabMenu] = useState<keyof typeof TAB_KEY>(TAB_KEY.department);
   const id = useId();
@@ -60,18 +68,18 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
   };
 
   const handleSelectDepartmentIds: DepartmentSelectorProps["onSelect"] = (departmentId) => {
-    setSelectedDepartmentIds((prev) => {
-      const newList = [...prev];
-      const isExist = newList.includes(departmentId);
-      return isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
-    });
+    let newList = [...selectedDepartmentIds];
+    const isExist = newList.includes(departmentId);
+    newList = isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
+
+    onChange?.("department")(newList);
   };
   const handleSelectBranch: BranchSelectorProps["onSelect"] = (branchId) => {
-    setSelectedBranchIds((prev) => {
-      const newList = [...prev];
-      const isExist = newList.includes(branchId);
-      return isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
-    });
+    let newList = [...selectedBranchIds];
+    const isExist = newList.includes(branchId);
+    newList = isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
+
+    onChange?.("branch")(newList);
   };
 
   return (
@@ -80,9 +88,13 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
         <FilledInput
           placeholder="Tìm kiếm..."
           onChange={(evt) => onSearch?.(evt.target.value)}
-          endAdornment={<SearchIcon />}
+          endAdornment={
+            <InputAdornment position="end">
+              <SearchIcon className="w-5 h-5" />
+            </InputAdornment>
+          }
           size="small"
-          className="w-full max-w-[240px]"
+          className="w-full max-w-60"
         />
       </div>
       <div>
@@ -143,7 +155,7 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
             >
               <div>
                 {currentTabMenu === "branch" ? (
-                  <BranchSelector values={seletectedBranchIds} onSelect={handleSelectBranch} />
+                  <BranchSelector values={selectedBranchIds} onSelect={handleSelectBranch} />
                 ) : currentTabMenu === "department" ? (
                   <DepartmentSelector onSelect={handleSelectDepartmentIds} values={selectedDepartmentIds} />
                 ) : currentTabMenu === "role" ? (

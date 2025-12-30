@@ -1,28 +1,28 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 
 import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
 
-export interface BranchSelectorProps {
+export interface DepartmentSelectorProps {
   className?: string;
   onSelect?: (itemId: string) => void;
   values?: string[];
 }
-const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, values }) => {
-  const { data: branchData, isPending } = useGetOrganizationUnitDepartmentOrBranchQuery({
-    queryParams: { type: "branch" },
+const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSelect, values }) => {
+  const { data: departmentsData, isPending } = useGetOrganizationUnitDepartmentOrBranchQuery({
+    queryParams: { type: "department" },
   });
 
   const departmentList = useMemo(() => {
-    return branchData?.data || [];
-  }, [branchData?.data]);
+    return departmentsData?.data || [];
+  }, [departmentsData?.data]);
 
   const hasChecked = (itemId: string) => {
     return values?.some((val) => val === itemId);
   };
 
-  if (branchData?.error) {
-    return <Alert severity="error">{branchData.error.message}</Alert>;
+  if (departmentsData?.error) {
+    return <Alert severity="error">{departmentsData.error.message}</Alert>;
   }
 
   return (
@@ -41,4 +41,4 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
     </div>
   );
 };
-export default BranchSelector;
+export default DepartmentSelector;

@@ -1,4 +1,5 @@
-import { alpha,Box, Typography } from "@mui/material";
+import React from "react";
+import { alpha, Box, Typography } from "@mui/material";
 import Image from "next/image";
 import { Control, useController } from "react-hook-form";
 

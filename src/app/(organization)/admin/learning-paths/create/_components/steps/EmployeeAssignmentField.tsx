@@ -23,10 +23,9 @@ import {
 import Stack from "@mui/material/Stack";
 import { Control, useController } from "react-hook-form";
 
-import StudentsContainer
-  from "@/modules/class-room-management/components/ManageClassRoomForm/TabClassRoomSetting/StudentsContainer";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import type { EmployeeItem, LearningPathFormSchema } from "@/modules/learning-paths/learning-path-form.schema";
+import StudentDataTransfer from "@/modules/student/container/StudentsDataTransfer";
 
 export interface EmployeeAssignmentFieldProps {
   control: Control<LearningPathFormSchema>;
@@ -53,7 +52,7 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
       email: student.email,
       employeeCode: student.employeeCode,
       avatar: student.avatar || undefined,
-      empoyeeType: student.empoyeeType,
+      employeeType: student.employeeType,
     }));
     onEmployeesChange(employees);
   };
@@ -110,11 +109,7 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
           </RadioGroup>
           <Box>
             <Box>
-              <Button
-                variant="fill"
-                onClick={() => setShowEmployeeDialog(true)}
-                disabled={mode === "auto"}
-              >
+              <Button variant="fill" onClick={() => setShowEmployeeDialog(true)} disabled={mode === "auto"}>
                 Chọn học viên
               </Button>
             </Box>
@@ -124,9 +119,7 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
         {/* If auto mode, show text 'Tất cả học viên' */}
         {mode === "auto" && (
           <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, p: 2, mt: 1 }}>
-            <Typography variant="subtitle2">
-              Gán người mới tự động
-            </Typography>
+            <Typography variant="subtitle2">Gán người mới tự động</Typography>
 
             <Typography variant="body2" color="text.secondary">
               Tự động gán học viên mới vào lộ trình này
@@ -153,26 +146,20 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
             <Typography variant="h6" component="div">
               Chọn học viên
             </Typography>
-            <IconButton
-              edge="end"
-              color="inherit"
-              onClick={handleCloseDialog}
-              aria-label="close"
-              size="small"
-            >
+            <IconButton edge="end" color="inherit" onClick={handleCloseDialog} aria-label="close" size="small">
               <CloseIcon />
             </IconButton>
           </Box>
         </DialogTitle>
         <DialogContent dividers sx={{ p: 2 }}>
-          <StudentsContainer
-            seletedItems={(assignedEmployees || []).map((emp: EmployeeItem) => ({
+          <StudentDataTransfer
+            selectedItems={(assignedEmployees || []).map((emp: EmployeeItem) => ({
               id: emp.id,
               fullName: emp.fullName,
               email: emp.email,
               employeeCode: emp.employeeCode,
               avatar: emp.avatar || null,
-              empoyeeType: emp.empoyeeType as "student",
+              employeeType: emp.employeeType as "student",
             }))}
             onChange={handleEmployeeChange}
           />
@@ -189,4 +176,3 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
     </>
   );
 }
-

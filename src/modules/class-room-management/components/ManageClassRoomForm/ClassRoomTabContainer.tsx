@@ -10,11 +10,11 @@ import { tabClasses } from "@mui/material";
 import Tab from "@mui/material/Tab";
 import { FieldErrors, UseFormTrigger } from "react-hook-form";
 
-import { CheckCircleIcon } from "@/shared/assets/icons";
+import { CheckCircleIcon, Loading } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 
 import { ClassRoom } from "./classroom-form.schema";
-import { TAB_KEYS_CLASS_ROOM, TAB_NODES_CLASS_ROOM } from "./ClassRoomFormContainer";
+import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 import { getKeyFieldByTab } from "./utils";
 import { getStatusTabClassRoom } from "./utils";
 
@@ -25,6 +25,8 @@ type ClassRoomTabItem = {
   tabKey: TabKeyType;
   content?: React.ReactNode;
   icon?: React.ReactNode;
+  prev: TabKeyType | null;
+  next: TabKeyType | null;
 };
 type TabStateType = Record<TabKeyType, { status: ClassRoomTabStatus }>;
 export interface ClassRoomTabContainerRef {
@@ -72,11 +74,14 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
 
     const handleChangeTab = useCallback(
       (_: React.SyntheticEvent, newTab: TabKeyType) =>
-        validateCurrentTabBeforeProceed(currentTab, () => {
-          setCurrentTab((oldTab) => {
-            const nextTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.next;
-            const prevTab = TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
-            return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+        startGotoNextTab(() => {
+          validateCurrentTabBeforeProceed(currentTab, () => {
+            setCurrentTab((oldTab) => {
+              const mapTabItems = new Map(items.map((item) => [item.tabKey, item]));
+              const nextTab = mapTabItems.get(oldTab)?.next;
+              const prevTab = mapTabItems.get(oldTab)?.prev;
+              return newTab === nextTab || newTab === prevTab ? newTab : oldTab;
+            });
           });
         }),
       [currentTab],
@@ -89,8 +94,9 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
         validateCurrentTabBeforeProceed(currentTab, () => {
           startGotoNextTab(async () => {
             setCurrentTab((oldTab) => {
-              const newTab =
-                action === "next" ? TAB_NODES_CLASS_ROOM.get(oldTab)?.next : TAB_NODES_CLASS_ROOM.get(oldTab)?.prev;
+              const mapTabItems = new Map(items.map((item) => [item.tabKey, item]));
+
+              const newTab = action === "next" ? mapTabItems.get(oldTab)?.next : mapTabItems.get(oldTab)?.prev;
               return newTab ? newTab : oldTab;
             });
             const scrollContainer = document.querySelector(".main-layout__content");
@@ -99,6 +105,10 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
         }),
       [currentTab],
     );
+
+    const isHideButtonNextStep = useMemo(() => {
+      return !items.find((item) => item.tabKey === currentTab)?.next;
+    }, [currentTab, items]);
 
     useImperativeHandle(ref, () => ({
       setTabStatus: (tabKey, status) => {
@@ -117,7 +127,11 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
                   value={tabKey}
                   label={
                     <div className="flex items-center gap-1">
-                      {tabsState[tabKey].status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
+                      {tabsState[tabKey].status === "valid" ? (
+                        <CheckCircleIcon className="w-5 h-5" />
+                      ) : icon ? (
+                        icon
+                      ) : null}
                       {tabName}
                     </div>
                   }
@@ -130,18 +144,23 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
             </ClassRoomTabList>
             <div className="tab-actions">{actions}</div>
           </div>
-          <div className="panels-wraper">
+          <div className="panels-wrapper">
             {items.map((item) => (
               <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
                 {item?.content}
               </TabPanel>
             ))}
-            <div className={cn({ hidden: currentTab === "clsTab-setting" })}>
+            <div>
               <div className={cn("py-6 flex justify-between")}>
                 <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
                   Quay lại
                 </Button>
-                <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab}>
+                <Button
+                  variant="fill"
+                  onClick={goNextOrBackStep("next")}
+                  disabled={isGotoNextTab}
+                  className={cn({ hidden: isHideButtonNextStep })}
+                >
                   Tiếp tục
                 </Button>
               </div>

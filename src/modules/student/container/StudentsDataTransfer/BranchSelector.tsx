@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 
 import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
@@ -26,7 +26,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   }
 
   return (
-    <div className="depart-ment">
+    <div className="department">
       {departmentList.map((item) => (
         <div key={item.id}>
           <FormControlLabel

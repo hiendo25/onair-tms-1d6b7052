@@ -1,5 +1,3 @@
-import { PostgrestSingleResponse } from "@supabase/supabase-js";
-
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTQuery } from "@/lib";
 import { teacherRepository } from "@/repository";
