@@ -36,10 +36,10 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
 
     const resourcesItemsMap = new Map(selectingItems.map((item) => [item.id, item]));
 
-    let resourceItemsMaped: Exclude<ClassRoom["docs"], undefined> = [];
+    let resourceAppendItems: Exclude<ClassRoom["docs"], undefined> = [];
     resourcesItemsMap.forEach((it) => {
-      resourceItemsMaped = [
-        ...resourceItemsMaped,
+      resourceAppendItems = [
+        ...resourceAppendItems,
         {
           id: it.id,
           mimeType: it.mime_type || "",
@@ -49,7 +49,7 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
       ];
     });
     remove(resourceItems.map((_, index) => index));
-    append(resourceItemsMaped);
+    append(resourceAppendItems);
   };
 
   return (

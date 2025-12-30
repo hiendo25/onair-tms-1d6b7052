@@ -1,7 +1,7 @@
 "use client";
 import React, { memo } from "react";
 import { Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
@@ -32,7 +32,18 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
           helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
         />
         <div className="h-3"></div>
-        <ClassRoomSlugField control={control} disableUpdateSlug={action === "edit"} />
+        <Controller
+          control={control}
+          name="slug"
+          render={({ field: { value, onChange } }) => (
+            <ClassRoomSlugField
+              control={control}
+              value={value}
+              onChange={onChange}
+              disableUpdateSlug={action === "edit"}
+            />
+          )}
+        />
       </div>
       <ThumbnailUploader
         label="Ảnh bìa đại diện"

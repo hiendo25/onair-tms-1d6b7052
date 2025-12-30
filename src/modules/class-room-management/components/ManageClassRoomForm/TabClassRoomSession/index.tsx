@@ -1,15 +1,17 @@
 "use client";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { useWatch } from "react-hook-form";
 
+import { ClassType } from "@/model/enum-type.model";
 import { ClassRoom } from "../classroom-form.schema";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
 import SingleSession, { SingleSessionRef } from "./SingleSession";
-import SingleSessionLearningPath from "./SingleSessionLearningPath";
 
 export const initClassSessionFormData = (init?: {
   sessionType?: "online" | "offline" | "live";
+  classType: ClassType;
 }): ClassRoom["classRoomSessions"][number] => {
   return {
     title: "",
@@ -25,6 +27,8 @@ export const initClassSessionFormData = (init?: {
     coursesPeriod: [],
     assignments: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
+    weeklySchedule: undefined,
+    classType: init?.classType,
   };
 };
 
@@ -34,35 +38,17 @@ type TabClassRoomSessionRef = {
 interface TabClassRoomSessionProps {}
 const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessionProps>((props, ref) => {
   const methods = useClassRoomFormContext();
+  const { control, trigger } = methods;
+
   const singleSessionRef = useRef<SingleSessionRef>(null);
   const multipleSessionRef = useRef<MultipleSessionRef>(null);
-  const { getValues } = methods;
-  const classRoomType = getValues("roomType");
-  const isLearningPath = getValues("isLearningPath");
 
-  useImperativeHandle(ref, () => ({
-    checkAllFields: async () => {
-      if (multipleSessionRef.current && singleSessionRef.current) {
-        return classRoomType === "multiple"
-          ? await multipleSessionRef.current.checkAllSessionFields()
-          : await singleSessionRef.current.checkAllSessionField();
-      }
-      return false;
-    },
-  }));
+  const classRoomType = useWatch({ control, name: "roomType" });
 
-  if (isLearningPath) {
-    return (
-      <div>
-        {classRoomType === "single" ? <SingleSessionLearningPath methods={methods} ref={singleSessionRef} /> : null}
-        {/* {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}  */}
-      </div>
-    );
-  }
   return (
     <div>
-      {classRoomType === "single" ? <SingleSession methods={methods} ref={singleSessionRef} /> : null}
-      {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}
+      {classRoomType === "single" ? <SingleSession ref={singleSessionRef} control={control} /> : null}
+      {classRoomType === "multiple" ? <MultipleSession ref={multipleSessionRef} control={control} /> : null}
     </div>
   );
 });

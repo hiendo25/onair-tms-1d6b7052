@@ -1,7 +1,7 @@
 import React, { useMemo, useRef } from "react";
 import { Box, Button, FormHelperText, FormLabel, IconButton, styled, Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { Controller, useFieldArray, UseFormReturn } from "react-hook-form";
+import { Controller, useFieldArray, UseFormReturn, useWatch } from "react-hook-form";
 
 import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
@@ -16,6 +16,7 @@ import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
 import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
 const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -32,22 +33,6 @@ interface ButtonSelectTeacherProps {
   onClick: () => void;
   teacherName?: string;
 }
-
-const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ onClick, teacherName }) => {
-  return (
-    <Button
-      disableRipple
-      variant="text"
-      size="small"
-      color={teacherName ? "inherit" : "primary"}
-      className="px-0 py-1 bg-transparent outline-0"
-      startIcon={teacherName ? <Edit05Icon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
-      onClick={onClick}
-    >
-      {teacherName ? teacherName : "Thêm"}
-    </Button>
-  );
-};
 
 const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) => (
   <RHFDateTimePicker
@@ -76,21 +61,16 @@ const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) =
 ))(({ theme }) => ({}));
 interface CoursePeriodSelectorProps {
   sessionIndex: number;
-  methods: UseFormReturn<ClassRoom>;
 }
 type TeacherSelectItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["teachers"][number];
-const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex, methods }) => {
+const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionIndex }) => {
   const dialogCourseRef = useRef<SimpleDialogCourseSelectorRef>(null);
   const {
     control,
-    getValues,
-    watch,
     trigger,
     formState: { errors },
-  } = methods;
+  } = useClassRoomFormContext();
 
-  const classSessionStartDate = watch(`classRoomSessions.${sessionIndex}.startDate`);
-  const classSessionEndDate = watch(`classRoomSessions.${sessionIndex}.endDate`);
   const dialogTeacherRef = useRef<SimpleDialogTeacherSelectorRef>(null);
   const {
     fields: coursesFields,
@@ -102,6 +82,15 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
     name: `classRoomSessions.${sessionIndex}.coursesPeriod`,
     keyName: "_coursePeriod",
   });
+  const sessions = useWatch({ control, name: "classRoomSessions" });
+
+  const classSessionStartDate = useMemo(() => {
+    return sessions?.[sessionIndex]?.startDate;
+  }, [sessions]);
+
+  const classSessionEndDate = useMemo(() => {
+    return sessions?.[sessionIndex]?.endDate;
+  }, [sessions]);
 
   const errorMessage = useMemo(() => {
     return errors.classRoomSessions?.[sessionIndex]?.coursesPeriod?.message;
@@ -150,16 +139,16 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
       },
     );
   };
+
   /**
    * Get all Course ids selected from all class session
    */
   const courseList = useMemo(() => {
-    const sessions = getValues("classRoomSessions");
     const courseSelectedIds = sessions.reduce<string[]>((acc, session) => {
       return [...acc, ...session.coursesPeriod.map((course) => course.course.id)];
     }, []);
     return courseSelectedIds;
-  }, [watch(`classRoomSessions`)]);
+  }, [sessions]);
 
   return (
     <div className="course-period-container">
@@ -245,8 +234,16 @@ const CoursePeriodSelector: React.FC<CoursePeriodSelectorProps> = ({ sessionInde
                             ))}
                           </div>
                         ) : null}
-                        <ButtonSelectTeacher onClick={() => handleOpenDialogTeacher(_indexField, teachers)} />
-
+                        <Button
+                          disableRipple
+                          variant="text"
+                          size="small"
+                          color="primary"
+                          className="px-0 py-1 bg-transparent outline-0"
+                          onClick={() => handleOpenDialogTeacher(_indexField, teachers)}
+                        >
+                          Thêm
+                        </Button>
                         {error?.message ? (
                           <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
                         ) : null}

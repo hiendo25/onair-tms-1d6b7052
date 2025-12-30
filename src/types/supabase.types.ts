@@ -670,12 +670,12 @@ export type Database = {
       }
       class_rooms: {
         Row: {
+          class_type: Database["public"]["Enums"]["class_type"] | null
           created_at: string
           description: string | null
           employee_id: string | null
           end_at: string | null
           id: string
-          is_learning_path: boolean | null
           organization_id: string
           resource_id: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -686,12 +686,12 @@ export type Database = {
           title: string | null
         }
         Insert: {
+          class_type?: Database["public"]["Enums"]["class_type"] | null
           created_at?: string
           description?: string | null
           employee_id?: string | null
           end_at?: string | null
           id?: string
-          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type: Database["public"]["Enums"]["class_room_type"]
@@ -702,12 +702,12 @@ export type Database = {
           title?: string | null
         }
         Update: {
+          class_type?: Database["public"]["Enums"]["class_type"] | null
           created_at?: string
           description?: string | null
           employee_id?: string | null
           end_at?: string | null
           id?: string
-          is_learning_path?: boolean | null
           organization_id?: string
           resource_id?: string | null
           room_type?: Database["public"]["Enums"]["class_room_type"]
@@ -901,6 +901,7 @@ export type Database = {
           start_at: string | null
           title: string | null
           updated_at: string | null
+          weekly_schedule: Json | null
         }
         Insert: {
           channel_info?: Json | null
@@ -918,6 +919,7 @@ export type Database = {
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
+          weekly_schedule?: Json | null
         }
         Update: {
           channel_info?: Json | null
@@ -935,6 +937,7 @@ export type Database = {
           start_at?: string | null
           title?: string | null
           updated_at?: string | null
+          weekly_schedule?: Json | null
         }
         Relationships: [
           {
@@ -1006,6 +1009,7 @@ export type Database = {
           id: number
           start_at: string | null
           teacher_id: string | null
+          weekly_schedule: Json | null
         }
         Insert: {
           class_session_id?: string
@@ -1015,6 +1019,7 @@ export type Database = {
           id?: number
           start_at?: string | null
           teacher_id?: string | null
+          weekly_schedule?: Json | null
         }
         Update: {
           class_session_id?: string
@@ -1024,6 +1029,7 @@ export type Database = {
           id?: number
           start_at?: string | null
           teacher_id?: string | null
+          weekly_schedule?: Json | null
         }
         Relationships: [
           {
@@ -2914,12 +2920,21 @@ export type Database = {
         | "draft"
       class_room_type: "single" | "multiple"
       class_session_type: "online" | "offline" | "live"
+      class_type: "learning_path" | "room"
       course_status:
         | "published"
         | "pending"
         | "draft"
         | "deleted"
         | "unpublished"
+      day_of_week:
+        | "sunday"
+        | "monday"
+        | "tuesday"
+        | "wednesday"
+        | "thursday"
+        | "friday"
+        | "saturday"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
@@ -3102,12 +3117,22 @@ export const Constants = {
       ],
       class_room_type: ["single", "multiple"],
       class_session_type: ["online", "offline", "live"],
+      class_type: ["learning_path", "room"],
       course_status: [
         "published",
         "pending",
         "draft",
         "deleted",
         "unpublished",
+      ],
+      day_of_week: [
+        "sunday",
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
       ],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],

@@ -1,5 +1,5 @@
 "use client";
-import React, { useId } from "react";
+import React, { memo, useId } from "react";
 import { FormControl, FormLabel } from "@mui/material";
 import dynamic from "next/dynamic";
 import { Control, Controller, FieldValues, Path, PathValue } from "react-hook-form";

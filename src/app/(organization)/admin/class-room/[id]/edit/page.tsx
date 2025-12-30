@@ -55,6 +55,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
     (session) => getSessionStatus(dayjs(session.start_at), dayjs(session.end_at)) === "ongoing",
   );
 
+  console.log({ data });
   if (isClassRoomEnded) {
     redirect("/admin/class-room");
   }

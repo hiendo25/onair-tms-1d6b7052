@@ -89,6 +89,7 @@ const selectCoursePeriod = `
   id,
   start_at,
   end_at,
+	weekly_schedule,
 	course:courses(${selectCourse}),
   teacher:employees(${selectEmployee})
 `;
@@ -105,6 +106,7 @@ const selectSession = `
   channel_info,
   priority,
   session_type,
+	weekly_schedule,
   courses_period:class_sessions_courses_period(${selectCoursePeriod}),
   session_assignments:class_session_assignment(
     id,
@@ -126,7 +128,7 @@ export const SELECT_CLASSROOM_DETAIL = `
   description,
   room_type,
   thumbnail_url,
-	is_learning_path,
+	class_type,
   start_at,
   end_at,
   status,
