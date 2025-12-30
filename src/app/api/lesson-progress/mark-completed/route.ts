@@ -3,58 +3,23 @@
  *
  * Mark a lesson as completed
  * This immediately persists to database (no caching delay)
+ * Supports both cookie-based (web) and token-based (mobile) authentication
  */
 
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { COOKIE_ORGANIZATION_ID, HEADER_ORGANIZATION_ID } from "@/constants/api-headers.constant";
-import { employeesRepository } from "@/repository";
-import { createSVClient } from "@/services";
+import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import { markCompleted } from "@/services/lesson-progress/lesson-progress.service";
 import type { MarkCompletedRequest } from "@/types/dto/lesson-progress";
 
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate user
-    const supabase = await createSVClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
+    // Authenticate user and get employee
+    const authResult = await authenticateAndGetEmployee(request);
+    if ("error" in authResult) {
+      return authResult.error;
     }
-
-    // Get organization ID from header or cookie
-    const headerOrgId = request.headers.get(HEADER_ORGANIZATION_ID);
-    const cookieStore = await cookies();
-    const cookieOrgId = cookieStore.get(COOKIE_ORGANIZATION_ID)?.value;
-    const organizationId = headerOrgId || cookieOrgId;
-
-    if (!organizationId) {
-      return NextResponse.json(
-        { error: "Organization not found. Provide via x-organization-id header or cookie." },
-        { status: 403 }
-      );
-    }
-
-    // Get employee from user
-    const employee = await employeesRepository.getCurrentEmployee(
-      user.id,
-      organizationId
-    );
-
-    if (!employee) {
-      return NextResponse.json(
-        { error: "Employee not found" },
-        { status: 404 }
-      );
-    }
+    const { employee } = authResult;
 
     // Parse request body
     const body = await request.json();
