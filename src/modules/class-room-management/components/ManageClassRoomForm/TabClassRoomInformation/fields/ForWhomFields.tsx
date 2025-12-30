@@ -37,7 +37,7 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
 
     if (fieldCount >= MAX_FIELD_COUNT) return;
     append([{ description: "" }]);
-  }, [forWhomFields, append, trigger]);
+  }, [forWhomFields, append]);
 
   console.log("render ForWhomFields");
   return (
@@ -47,7 +47,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
           <BoxIcon>
             <MarkerPinIcon />
           </BoxIcon>
-          <FormLabel className="mb-0">Mục tiêu của lớp học</FormLabel>
+          <FormLabel className="mb-0" component="div">
+            Mục tiêu của lớp học
+          </FormLabel>
         </div>
         <Button startIcon={<PlusIcon />} variant="fill" size="small" onClick={handleAddMore}>
           Thêm
@@ -58,9 +60,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
           {forWhomFields.map((field, _index) => (
             <div className="for-whom-field flex" key={_index}>
               <RHFTextField
+                control={control}
                 name={`forWhom.${_index}.description`}
                 placeholder={`Mục tiêu ${_index + 1}`}
-                control={control}
               />
               <IconButton size="small" className="p-0 bg-transparent" onClick={() => remove(_index)}>
                 <TrashIcon1 className="w-4 h-4" />

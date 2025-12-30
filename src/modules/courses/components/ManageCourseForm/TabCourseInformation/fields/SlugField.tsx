@@ -9,12 +9,12 @@ interface SlugFieldProps {
   control: Control<UpsertCourseFormData>;
 }
 const SlugField: React.FC<SlugFieldProps> = ({ control }) => {
-  const { field, formState } = useController({ control, name: "slug" });
+  const { field } = useController({ control, name: "slug" });
   const title = useWatch({ control, name: "title" });
   const slug = slugify(title);
   useEffect(() => {
     field.onChange(slug);
-  }, [slug]);
+  }, [slug, field]);
   return (
     <>
       <div className="flex items-center gap-2">

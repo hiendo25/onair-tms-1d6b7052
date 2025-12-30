@@ -72,11 +72,12 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         platform: platform,
         roomType: roomType,
       }),
+      reValidateMode: "onChange",
       mode: "onChange",
     });
 
     const {
-      setValue,
+      control,
       handleSubmit,
       formState: { errors },
       trigger,
@@ -157,7 +158,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               content: <TabClassRoomSetting />,
             },
           ];
-    }, [isLearningPath, action]);
+    }, [action, isLearningPath]);
     /**
      * Init form value
      */

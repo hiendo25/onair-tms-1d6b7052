@@ -1,12 +1,13 @@
 "use client";
 import React, { memo } from "react";
 import { Typography } from "@mui/material";
-import { Controller, useFormContext } from "react-hook-form";
+import { Control, Controller, useFormContext } from "react-hook-form";
 
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
 import { type ClassRoom } from "../classroom-form.schema";
+import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 import ClassFieldSelector from "./fields/ClassFieldSelector";
 import ClassRoomSlugField from "./fields/ClassRoomSlugField";
@@ -16,10 +17,10 @@ import ForWhomFields from "./fields/ForWhomFields";
 interface TabClassRoomInformationProps {
   className?: string;
   action?: "create" | "edit";
+  control?: Control<ClassRoom>;
 }
 const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ action }) => {
-  const { control } = useFormContext<ClassRoom>();
-
+  const { control } = useClassRoomFormContext();
   return (
     <div className="bg-white rounded-xl p-3 md:p-6 flex flex-col gap-6 border border-gray-200">
       <div>
@@ -32,7 +33,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
           helpText={<Typography className="text-xs text-gray-600 text-right">Tối đa 100 ký tự</Typography>}
         />
         <div className="h-3"></div>
-        {/* <Controller
+        <Controller
           control={control}
           name="slug"
           render={({ field: { value, onChange } }) => (
@@ -43,7 +44,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
               disableUpdateSlug={action === "edit"}
             />
           )}
-        /> */}
+        />
       </div>
       <RHFThumbnailUpload
         control={control}

@@ -91,7 +91,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
     console.log({ errors, value: getValues() });
 
-    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "published") => async () => {
+    const triggerBeforeSubmitForm = (submitAction: () => void) => async () => {
       try {
         const TAB_LIST = [TAB_KEYS_MANAGE_COURSE["clsTab-information"], TAB_KEYS_MANAGE_COURSE["clsTab-section"]];
         const allTabsTriggers = await Promise.allSettled(
@@ -106,8 +106,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
 
         if (isSomeTabFailed) return;
 
-        setValue("status", status);
-
         submitAction();
       } catch (error) {
         console.log(error);
@@ -115,8 +113,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     };
 
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
-      console.log({ errors, data });
-
       onSubmit?.(data);
     };
 
@@ -139,7 +135,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     useLayoutEffect(() => {
       if (!initFormValue) return;
       reset(initFormValue);
-    }, [initFormValue]);
+    }, [initFormValue, reset]);
 
     return (
       <FormProvider {...methods}>
@@ -189,7 +185,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
                 Lưu nháp
               </Button> */}
               <Button
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "published")}
+                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm))}
                 disabled={isLoading}
                 loading={isLoading}
               >
