@@ -2,10 +2,10 @@ import { createClient } from "@/services/supabase/client";
 import type { Database } from "@/types/supabase.types";
 
 import type {
-  LearningPathMetadata,
-  PhaseInput,
   EmployeeLearningPathWithDetails,
+  LearningPathMetadata,
   PhaseClassRoomWithDetails,
+  PhaseInput,
   PhaseWithClassRooms,
 } from "./types";
 

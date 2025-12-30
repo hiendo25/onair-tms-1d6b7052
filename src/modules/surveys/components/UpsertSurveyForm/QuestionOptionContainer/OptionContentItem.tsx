@@ -1,4 +1,4 @@
-import { memo } from "react";
+import React, { memo } from "react";
 import { IconButton } from "@mui/material";
 import { Control, useController } from "react-hook-form";
 
