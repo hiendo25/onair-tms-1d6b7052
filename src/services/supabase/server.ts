@@ -33,3 +33,35 @@ export async function createSVClient() {
     },
   );
 }
+
+/**
+ * Create a Supabase client with token from Authorization header
+ * Used for mobile/API clients that use Bearer tokens
+ */
+export async function createSVClientWithToken(token: string) {
+  const cookieStore = await cookies();
+
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          } catch {
+            // Ignore cookie setting errors for token-based auth
+          }
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    },
+  );
+}
