@@ -13,6 +13,7 @@ type CoursePeriod = NonNullable<
 
 interface ClassRoomSubjectsProps {
   data: NonNullable<GetClassRoomBySlugResponse["data"]>;
+  isFromLearningPath?: boolean;
 }
 
 const getTeacherName = (teacher: CoursePeriod["teacher"]): string => {
@@ -23,10 +24,20 @@ const getTeacherAvatar = (teacher: CoursePeriod["teacher"]): string | undefined 
   return teacher?.profile?.avatar || undefined;
 };
 
-const SubjectCard = ({ coursePeriod }: { coursePeriod: CoursePeriod }) => {
+const SubjectCard = ({
+  coursePeriod,
+  isFromLearningPath,
+}: {
+  coursePeriod: CoursePeriod;
+  isFromLearningPath?: boolean;
+}) => {
   const formattedStartDate = dayjs(coursePeriod.start_at).format(FORMAT_DATE_TIME_SHORTER);
   const teacherName = getTeacherName(coursePeriod.teacher);
   const teacherAvatar = getTeacherAvatar(coursePeriod.teacher);
+  const courseId = coursePeriod.course.id || "";
+  const detailHref = isFromLearningPath
+    ? PATHS.MY_LEARNING_PATHS.LEARNING_SCREEN(courseId)
+    : PATHS.STUDENTS.LEARNINNG(courseId);
 
   const sectionCount = coursePeriod.course?.sections_count?.[0]?.count ?? 0;
   const lessonCount =
@@ -46,7 +57,7 @@ const SubjectCard = ({ coursePeriod }: { coursePeriod: CoursePeriod }) => {
         },
       }}
       component={"a"}
-      href={PATHS.STUDENTS.LEARNINNG(coursePeriod.course.id || "")}
+      href={detailHref}
     >
       <CardContent>
         <Stack spacing={1.5}>
@@ -93,7 +104,7 @@ const SubjectCard = ({ coursePeriod }: { coursePeriod: CoursePeriod }) => {
   );
 };
 
-export default function ClassRoomSubjects({ data }: ClassRoomSubjectsProps) {
+export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoomSubjectsProps) {
   const coursePeriods = useMemo(() => {
     if (data.sessions.length !== 1) return [];
 
@@ -123,7 +134,11 @@ export default function ClassRoomSubjects({ data }: ClassRoomSubjectsProps) {
         }}
       >
         {coursePeriods.map((coursePeriod) => (
-          <SubjectCard key={coursePeriod.id} coursePeriod={coursePeriod} />
+          <SubjectCard
+            key={coursePeriod.id}
+            coursePeriod={coursePeriod}
+            isFromLearningPath={isFromLearningPath}
+          />
         ))}
       </Box>
     </Stack>

@@ -85,7 +85,12 @@ export const PATHS = {
     EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
     DETAIL: (id: string = ":id") => `/admin/learning-paths/${id}`,
   },
-  MY_LEARNING_PATHS: "/learning-paths",
+  MY_LEARNING_PATHS: {
+    ROOT: "/my-learning-paths",
+    LEARNING_SCREEN: (courseId: string = ":courseId") =>
+      `/my-learning-paths/learning-screen/${courseId}`,
+    PHASE_DETAIL: (phaseId: string = ":phaseId") => `/my-learning-paths/phase/${phaseId}`,
+  }
 } as const;
 
 export const AUTH_PATHS = {

@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
+import { ROUTE_QUERY_KEYS, ROUTE_QUERY_VALUES } from "@/constants/route-query.constant";
 import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
@@ -25,6 +26,9 @@ interface ClassRoomDetailSectionProps {
 
 export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionProps) {
   const { id: employeeId, type: employeeType } = useUserOrganization((state) => state.currentEmployee);
+  const searchParams = useSearchParams();
+  const isFromLearningPath =
+    searchParams.get(ROUTE_QUERY_KEYS.SOURCE) === ROUTE_QUERY_VALUES.LEARNING_PATH;
   const [showJoinHorizontal, setShowJoinHorizontal] = useState<boolean>(false);
 
   const [tabValue, setTabValue] = useState(0);
@@ -102,7 +106,7 @@ export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionP
       <Stack position="relative">
         <ClassRoomHeader data={classRoomData} isAdminView={isAdminView} />
         <ClassRoomSeries data={classRoomData} isAdminView={isAdminView} />
-        <ClassRoomSubjects data={data} />
+        <ClassRoomSubjects data={data} isFromLearningPath={isFromLearningPath} />
         <Divider className={`${outOfMainJoinZoneClassName} invisible`} />
 
         {showJoinHorizontal && (

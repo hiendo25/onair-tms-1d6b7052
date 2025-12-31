@@ -4,8 +4,13 @@ import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material"
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
-import LearningPathDetailView from "@/modules/learning-paths/components/LearningPathDetailView";
-import { useGetCurrentLearningPath } from "@/modules/learning-paths/operations/query";
+import {
+  useGetCurrentLearningPath,
+  useGetLearningPathPhasesProgress,
+  useGetLearningPathProgress,
+  useGetLearningPathQuery,
+} from "@/modules/learning-paths/operations/query";
+import { LearningPathUserDetailView } from "@/modules/learning-paths/view-user";
 import PageContainer from "@/shared/ui/PageContainer";
 
 export default function LearningPathDetailContent() {
@@ -13,12 +18,28 @@ export default function LearningPathDetailContent() {
   const { data: currentLearningPathData, isLoading, error } = useGetCurrentLearningPath();
 
   const learningPath = currentLearningPathData?.data ?? null;
+  const learningPathId = learningPath?.id ?? null;
 
-  if (isLoading) {
+  const { data: LearningPathPhases, isError } = useGetLearningPathQuery(learningPathId!);
+
+  const { data: learningPathProgress, isLoading: isLoadingProgress } = useGetLearningPathProgress(
+    learningPathId,
+    {
+      enabled: !!learningPathId,
+    }
+  );
+  const { data: phasesProgress, isLoading: isLoadingPhasesProgress } =
+    useGetLearningPathPhasesProgress(learningPathId, {
+      enabled: !!learningPathId,
+    });
+
+  const isLoadingContent = isLoading || (learningPathId ? isLoadingProgress || isLoadingPhasesProgress : false);
+
+  if (isLoadingContent) {
     return (
       <PageContainer
         title="Đang tải lộ trình"
-        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS }]}
+        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, p: 3 }}>
           <CircularProgress size={24} />
@@ -32,7 +53,7 @@ export default function LearningPathDetailContent() {
     return (
       <PageContainer
         title="Lộ trình học tập"
-        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS }]}
+        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
       >
         <Box sx={{ p: 3 }}>
           <Stack spacing={2} alignItems="flex-start">
@@ -48,13 +69,16 @@ export default function LearningPathDetailContent() {
       </PageContainer>
     );
   }
-
   return (
     <PageContainer
       title={learningPath.name}
-      breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS }]}
+      breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
     >
-      <LearningPathDetailView learningPath={learningPath} showSettings={false} showAudience={false} />
+      <LearningPathUserDetailView
+        learningPath={LearningPathPhases?.data!}
+        learningPathProgress={learningPathProgress ?? null}
+        phasesProgress={phasesProgress ?? []}
+      />
     </PageContainer>
   );
 }
