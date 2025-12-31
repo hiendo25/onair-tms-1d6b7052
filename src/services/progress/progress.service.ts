@@ -354,6 +354,93 @@ export async function getPhaseProgress(
 }
 
 /**
+ * Get all lesson IDs for a learning path (structure only, no employee data)
+ * This is used for batch progress calculations
+ */
+export async function getLearningPathLessonIds(
+  learningPathId: string,
+): Promise<string[]> {
+  const supabase = await createSVClient();
+
+  // Get all phases for this learning path
+  const { data: phases, error: phasesError } = await supabase
+    .from("learning_path_phases")
+    .select("id")
+    .eq("learning_path_id", learningPathId);
+
+  if (phasesError || !phases || phases.length === 0) {
+    console.error("Error fetching learning path phases:", phasesError);
+    return [];
+  }
+
+  const phaseIds = phases.map((p: { id: string }) => p.id);
+
+  // Get all class rooms for all phases
+  const { data: phaseClassRooms, error: pcError } = await supabase
+    .from("phase_class_rooms")
+    .select("class_room_id")
+    .in("phase_id", phaseIds);
+
+  if (pcError || !phaseClassRooms || phaseClassRooms.length === 0) {
+    console.error("Error fetching learning path class rooms:", pcError);
+    return [];
+  }
+
+  const classRoomIds = phaseClassRooms.map((pc: { class_room_id: string }) => pc.class_room_id);
+
+  // Get all courses for all class rooms
+  const { data: sessionCourses, error: coursesError } = await supabase
+    .from("class_sessions")
+    .select(`
+      class_sessions_courses_period!inner(
+        course_id
+      )
+    `)
+    .in("class_room_id", classRoomIds);
+
+  if (coursesError || !sessionCourses) {
+    console.error("Error fetching learning path courses:", coursesError);
+    return [];
+  }
+
+  // Get unique course IDs
+  const courseIds = Array.from(
+    new Set(
+      sessionCourses.flatMap((session: any) =>
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
+      )
+    )
+  );
+
+  if (courseIds.length === 0) {
+    return [];
+  }
+
+  // Get all lessons for all courses
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      lessons!inner(id)
+    `)
+    .in("course_id", courseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching learning path lessons:", lessonsError);
+    return [];
+  }
+
+  // Flatten and deduplicate lesson IDs
+  const lessonIds = sections.flatMap((section: any) =>
+    section.lessons?.map((l: { id: string }) => l.id) || []
+  );
+  const uniqueLessonIds = Array.from(new Set(lessonIds));
+
+  return uniqueLessonIds;
+}
+
+/**
  * Get progress for a learning path (optimized)
  */
 export async function getLearningPathProgress(
