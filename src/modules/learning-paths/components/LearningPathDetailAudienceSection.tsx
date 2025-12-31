@@ -53,12 +53,14 @@ export default function LearningPathDetailAudienceSection({
             onChange={(event) => setSearchValue(event.target.value)}
             placeholder="Tìm kiếm theo tên, mã NV, email..."
             size="small"
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" />
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+              }
             }}
           />
           <Stack spacing={2}>

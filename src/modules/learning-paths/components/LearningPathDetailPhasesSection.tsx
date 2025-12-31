@@ -30,10 +30,12 @@ import LearningPathChip from "./LearningPathChip";
 
 interface LearningPathDetailPhasesSectionProps {
   phases: PhaseWithClassRooms[];
+  phaseCount: number;
 }
 
 export default function LearningPathDetailPhasesSection({
   phases,
+  phaseCount,
 }: LearningPathDetailPhasesSectionProps) {
   return (
     <Card sx={SECTION_CARD_SX}>
@@ -41,17 +43,18 @@ export default function LearningPathDetailPhasesSection({
         <Stack spacing={2}>
           <Stack spacing={0.5}>
             <Typography variant="h6" fontWeight={700}>
-              Giai đoạn học tập <span className="font-normal text-sm text-action-disabled">({phases.length} giai đoạn)</span>
+              Giai đoạn học tập <span className="font-normal text-sm text-action-disabled">({phaseCount} giai đoạn)</span>
             </Typography>
           </Stack>
 
-          {phases.length === 0 ? (
+          {phaseCount === 0 ? (
             <Typography variant="body2" color="text.secondary">
               Chưa có giai đoạn nào trong lộ trình.
             </Typography>
           ) : (
             phases.map((phase, phaseIndex) => {
               const phaseClassRooms = phase.phase_class_rooms ?? [];
+              const phaseClassRoomsCount = phase.phase_class_rooms_count ?? 0;
 
               return (
                 <Accordion
@@ -65,7 +68,7 @@ export default function LearningPathDetailPhasesSection({
                           {getPhaseLabel(phase, phaseIndex)}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {phaseClassRooms.length} lớp học
+                          {phaseClassRoomsCount} lớp học
                         </Typography>
                       </Stack>
                     </Stack>
@@ -86,7 +89,7 @@ export default function LearningPathDetailPhasesSection({
                           Lớp học trong giai đoạn
                         </Typography>
 
-                        {phaseClassRooms.length === 0 ? (
+                        {phaseClassRoomsCount === 0 ? (
                           <Typography variant="body2" color="text.secondary">
                             Chưa có lớp học nào trong giai đoạn.
                           </Typography>

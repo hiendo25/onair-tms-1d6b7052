@@ -104,4 +104,5 @@ export interface PhaseWithClassRooms {
   description: string | null;
   created_at: string;
   phase_class_rooms: PhaseClassRoomWithDetails[];
+  phase_class_rooms_count?: number;
 }

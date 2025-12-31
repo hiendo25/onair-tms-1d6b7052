@@ -37,7 +37,7 @@ export const getSettingsItems = (metadata: LearningPathMetadata | null): Setting
 
   return [
     {
-      id: "sequential",
+      id: "",
       label: metadata?.sequentialLearning ? "Học tuần tự theo thời gian" : "Không yêu cầu học tuần tự",
     },
     {

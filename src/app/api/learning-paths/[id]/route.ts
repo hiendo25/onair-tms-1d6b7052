@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { PATHS } from "@/constants/path.constant";
 import { learningPathsRepository } from "@/repository";
-import { transformFormToMetadata, transformFormPhasesToInput } from "@/repository/learning-paths/transformers";
+import { transformFormPhasesToInput, transformFormToMetadata } from "@/repository/learning-paths/transformers";
 
 export async function GET(
   request: NextRequest,

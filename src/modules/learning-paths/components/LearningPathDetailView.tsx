@@ -33,6 +33,8 @@ export default function LearningPathDetailView({
   const assignmentModeLabel = getAssignmentModeLabel(metadata);
   const phases = learningPath.learning_path_phases ?? [];
   const participants = learningPath.employee_learning_paths ?? [];
+  const phaseCount = learningPath.phase_count ?? 0;
+  const participantCount = learningPath.employee_count ?? 0;
   const hasSideSections = showSettings || showAudience;
 
   return (
@@ -89,13 +91,13 @@ export default function LearningPathDetailView({
 
                 <Stack direction="row" spacing={1} flexWrap="wrap">
                   <LearningPathChip label={assignmentModeLabel} />
-                  <LearningPathChip label={`${phases.length} giai đoạn`} />
-                  <LearningPathChip label={`${participants.length} học viên`} />
+                  <LearningPathChip label={`${phaseCount} giai đoạn`} />
+                  <LearningPathChip label={`${participantCount} học viên`} />
                 </Stack>
               </Stack>
             </Box>
           </Card>
-          <LearningPathDetailPhasesSection phases={phases} />
+          <LearningPathDetailPhasesSection phases={phases} phaseCount={phaseCount} />
         </Stack>
       </Grid>
 

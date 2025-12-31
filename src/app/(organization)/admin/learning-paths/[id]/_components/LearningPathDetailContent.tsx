@@ -50,9 +50,6 @@ export default function LearningPathDetailContent({ learningPathId }: LearningPa
     );
   }
 
-  console.log("learningPath", learningPath);
-
-
   return (
     <PageContainer
       title={learningPath.name}
