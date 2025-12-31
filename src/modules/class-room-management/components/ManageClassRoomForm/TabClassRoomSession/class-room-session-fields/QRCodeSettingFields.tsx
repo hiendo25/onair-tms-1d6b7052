@@ -6,19 +6,18 @@ import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
-import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 interface QRCodeSettingFieldsProps {
   className?: string;
   sessionIndex: number;
   control: Control<ClassRoom>;
 }
-const QRCodeSettingFields: React.FC<QRCodeSettingFieldsProps> = ({ sessionIndex, className }) => {
-  const { control, getValues } = useClassRoomFormContext();
-  const startDate = getValues(`classRoomSessions.${sessionIndex}.qrCode.startDate`);
+const QRCodeSettingFields: React.FC<QRCodeSettingFieldsProps> = ({ sessionIndex, className, control }) => {
+  const startDate = useWatch({ control, name: `classRoomSessions.${sessionIndex}.qrCode.startDate` });
   useWatch({
     control,
-    name: [`classRoomSessions.${sessionIndex}.qrCode.startDate`, `classRoomSessions.${sessionIndex}.qrCode.endDate`],
+    name: `classRoomSessions.${sessionIndex}.qrCode.endDate`,
   });
+
   return (
     <Controller
       name={`classRoomSessions.${sessionIndex}.qrCode.isLimitTimeScanQrCode`}

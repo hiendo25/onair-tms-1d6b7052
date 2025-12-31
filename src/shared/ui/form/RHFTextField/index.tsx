@@ -1,5 +1,5 @@
 "use client";
-import React, { useId } from "react";
+import React, { memo, useId } from "react";
 import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
 import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -53,9 +53,10 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            value={field.value ?? (type === "number" ? "" : "")}
+            value={field.value ?? ""}
             onChange={(evt) => {
-              const value = type === "number" ? Number.parseInt(evt.target.value) : evt.target.value;
+              const raw = evt.target.value;
+              const value = type === "number" ? (raw === "" ? undefined : Number(raw)) : raw;
               field.onChange(value);
             }}
             placeholder={placeholder}
@@ -77,4 +78,4 @@ const RHFTextField = <T extends FieldValues>({
     />
   );
 };
-export default RHFTextField;
+export default memo(RHFTextField) as typeof RHFTextField;

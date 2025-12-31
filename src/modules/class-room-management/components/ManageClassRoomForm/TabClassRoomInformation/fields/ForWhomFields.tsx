@@ -1,5 +1,5 @@
 "use client";
-import { useCallback } from "react";
+import React, { useCallback } from "react";
 import { Button, FormLabel, IconButton } from "@mui/material";
 import { useFieldArray } from "react-hook-form";
 
@@ -14,7 +14,8 @@ interface ForWhomFieldsProps {
   className?: string;
 }
 const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
-  const { control, setValue, trigger } = useClassRoomFormContext();
+  const { control, trigger } = useClassRoomFormContext();
+
   const {
     fields: forWhomFields,
     remove,
@@ -24,6 +25,7 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
     name: "forWhom",
     keyName: "_forWhomId",
   });
+
   const handleAddMore = useCallback(async () => {
     const fieldCount = forWhomFields.length;
     if (fieldCount > 0) {

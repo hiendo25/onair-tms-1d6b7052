@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { useRef } from "react";
 import { Button, FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
-import { Control, useController } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 
 import DialogAssignmentSelector, {
   DialogAssignmentSelectorRef,
@@ -15,63 +15,74 @@ export interface AssessmentFieldProps {
 }
 type AssignmentSelectItem = ClassRoom["classRoomSessions"][number]["assignments"][number];
 const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control }) => {
-  const {
-    field: { value: assignments, onChange },
-    fieldState: { error },
-  } = useController({
-    control,
-    name: `classRoomSessions.${sessionIndex}.assignments`,
-  });
   const assignmentDialogRef = useRef<DialogAssignmentSelectorRef>(null);
-  const handleSelectAssignment = () => {
-    assignmentDialogRef.current?.openDialog(
-      { value: undefined },
-      {
-        onOk: (assignments) => {
-          const assignmentValues = assignments.map<AssignmentSelectItem>((item) => ({
-            assignmentId: item.id,
-            name: item.name,
-          }));
-          onChange(assignmentValues);
-        },
-      },
-    );
-  };
 
-  const handleRemove = (assignmentId: string) => () => {
-    const updateAssignments = assignments.filter((item) => item.assignmentId !== assignmentId);
-    onChange(updateAssignments);
-  };
+  console.log("assignment");
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex-1">
-          <FormLabel component="div">Bài kiểm tra lớp học</FormLabel>
-          <Typography className="text-xs text-gray-600">Chọn một hoặc nhiều bài kiểm tra.</Typography>
-          {error?.message && <FormHelperText error>{error?.message}</FormHelperText>}
-        </div>
-        <Button variant="fill" onClick={handleSelectAssignment}>
-          Thêm
-        </Button>
-      </div>
-      <div className="flex flex-col gap-3">
-        {assignments.map((item) => (
-          <div key={item.assignmentId} className="flex items-center gap-3">
-            <IconButton
-              size="small"
-              className="p-1!"
-              sx={{ width: 24, height: 24 }}
-              onClick={handleRemove(item.assignmentId)}
+    <Controller
+      name={`classRoomSessions.${sessionIndex}.assignments`}
+      control={control}
+      render={({ field: { value: assignments, onChange }, fieldState: { error } }) => (
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <AssignmentHead title="Bài kiểm tra lớp học" description="Chọn một hoặc nhiều bài kiểm tra." />
+            {error?.message && <FormHelperText error>{error?.message}</FormHelperText>}
+            <Button
+              variant="fill"
+              onClick={() =>
+                assignmentDialogRef.current?.openDialog(
+                  { value: assignments.map((item) => item.assignmentId) },
+                  {
+                    onOk: (assignments) => {
+                      const assignmentValues = assignments.map<AssignmentSelectItem>((item) => ({
+                        assignmentId: item.id,
+                        name: item.name,
+                      }));
+                      onChange(assignmentValues);
+                    },
+                  },
+                )
+              }
             >
-              <CloseIcon className="w-4 h-4" />
-            </IconButton>
-            <Typography className="text-sm font-medium text-blue-700">{item.name}</Typography>
+              Thêm
+            </Button>
           </div>
-        ))}
-      </div>
-      <DialogAssignmentSelector ref={assignmentDialogRef} />
-    </div>
+          <div className="flex flex-col gap-3">
+            {assignments.map(({ assignmentId, name }) => (
+              <div key={assignmentId} className="flex items-center gap-3">
+                <IconButton
+                  size="small"
+                  className="p-1!"
+                  sx={{ width: 24, height: 24 }}
+                  onClick={() => {
+                    const updateAssignments = assignments.filter((item) => item.assignmentId !== assignmentId);
+                    onChange(updateAssignments);
+                  }}
+                >
+                  <CloseIcon className="w-4 h-4" />
+                </IconButton>
+                <Typography className="text-sm font-medium text-blue-700">{name}</Typography>
+              </div>
+            ))}
+          </div>
+          <DialogAssignmentSelector ref={assignmentDialogRef} />
+        </div>
+      )}
+    />
   );
 };
 export default AssessmentField;
+
+interface AssignmentHeadProps {
+  title: string;
+  description: string;
+}
+const AssignmentHead: React.FC<AssignmentHeadProps> = memo(({ title, description }) => {
+  return (
+    <div className="flex-1">
+      <FormLabel component="div">{title}</FormLabel>
+      <Typography className="text-xs text-gray-600">{description}</Typography>
+    </div>
+  );
+});

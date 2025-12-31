@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { memo, useEffect } from "react";
 import { Typography } from "@mui/material";
-import { Control, useController, useWatch } from "react-hook-form";
+import { Control, Controller, useController, useWatch } from "react-hook-form";
 
 import { slugify } from "@/utils/slugify";
 import { ClassRoom } from "../../classroom-form.schema";
@@ -8,13 +8,17 @@ import { ClassRoom } from "../../classroom-form.schema";
 interface ClassRoomSlugFieldProps {
   control: Control<ClassRoom>;
   disableUpdateSlug?: boolean;
+  onChange: (...event: any[]) => void;
+  value: string;
 }
-const ClassRoomSlugField: React.FC<ClassRoomSlugFieldProps> = ({ control, disableUpdateSlug = false }) => {
-  const {
-    field: { value, onChange },
-  } = useController({ control, name: "slug" });
-  const title = useWatch({ control, name: "title" });
-
+const ClassRoomSlugField: React.FC<ClassRoomSlugFieldProps> = ({
+  control,
+  onChange,
+  value,
+  disableUpdateSlug = false,
+}) => {
+  const title = useWatch({ control, name: "title", exact: true });
+  console.log("sluggg");
   useEffect(() => {
     if (disableUpdateSlug) return;
     if (!title) return;
@@ -28,4 +32,4 @@ const ClassRoomSlugField: React.FC<ClassRoomSlugFieldProps> = ({ control, disabl
     </div>
   );
 };
-export default ClassRoomSlugField;
+export default memo(ClassRoomSlugField);

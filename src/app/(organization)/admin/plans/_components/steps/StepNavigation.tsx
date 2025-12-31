@@ -1,7 +1,7 @@
 "use client";
 
-import SharedStepNavigation, { StepConfig } from "@/shared/ui/StepNavigation";
 import { PlanStepId } from "@/modules/plans/plan-step.utils";
+import SharedStepNavigation, { StepConfig } from "@/shared/ui/StepNavigation";
 
 export interface Step {
   id: PlanStepId;

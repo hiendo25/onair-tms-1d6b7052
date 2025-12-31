@@ -1,9 +1,7 @@
+import React from "react";
 import SvgIcon from "@mui/material/SvgIcon";
 
-const GlobeFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const GlobeFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
@@ -24,12 +22,7 @@ const GlobeFlag: React.FC<React.SVGProps<SVGSVGElement>> = ({
         </g>
         <defs>
           <clipPath id="clip0_986_1789">
-            <rect
-              width="24"
-              height="24"
-              fill="white"
-              transform="translate(0 0.5)"
-            />
+            <rect width="24" height="24" fill="white" transform="translate(0 0.5)" />
           </clipPath>
         </defs>
       </svg>

@@ -1,6 +1,6 @@
 "use client";
 
-import { PropsWithChildren, useState } from "react";
+import React, { PropsWithChildren, useState } from "react";
 import {
   Accordion,
   AccordionDetails,
