@@ -4,7 +4,7 @@
  */
 
 import { createSVClient } from "@/services/supabase/server";
-import type { BuildProgressParams, LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
+import type { BuildProgressParams, LessonProgressResponse,LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
 
 /**
  * Calculate progress percentage based on completed vs total lessons
@@ -672,4 +672,70 @@ export async function getMultiplePhasesProgress(
   });
 
   return progressMap;
+}
+
+/**
+ * Get progress for a single lesson
+ * For lessons: totalLessons is always 1, completedLessons is 1 if status is "completed", 0 otherwise
+ */
+export async function getLessonProgressData(
+  lessonId: string,
+  employeeId: string,
+  learningPathId: string | null,
+): Promise<LessonProgressResponse> {
+  const supabase = await createSVClient();
+
+  // Check if lesson exists and is active
+  const { data: lesson, error: lessonError } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("id", lessonId)
+    .eq("status", "active")
+    .maybeSingle();
+
+  if (lessonError) {
+    console.error("Error fetching lesson:", lessonError);
+    throw new Error(`Failed to fetch lesson: ${lessonError.message}`);
+  }
+
+  if (!lesson) {
+    throw new Error("Lesson not found or inactive");
+  }
+
+  // Get lesson progress record
+  let progressQuery = supabase
+    .from("lesson_progress")
+    .select("status, current_position_seconds")
+    .eq("employee_id", employeeId)
+    .eq("lesson_id", lessonId);
+
+  if (learningPathId) {
+    progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  } else {
+    progressQuery = progressQuery.is("learning_path_id", null);
+  }
+
+  const { data: progress, error: progressError } = await progressQuery.maybeSingle();
+
+  if (progressError) {
+    console.error("Error fetching lesson progress:", progressError);
+    throw new Error(`Failed to fetch lesson progress: ${progressError.message}`);
+  }
+
+  // For a single lesson: totalLessons = 1, completedLessons = 1 if completed, 0 otherwise
+  const isCompleted = progress?.status === "completed";
+  const totalLessons = 1;
+  const completedLessons = isCompleted ? 1 : 0;
+  const currentPositionSeconds = progress?.current_position_seconds || null;
+
+  return {
+    entityId: lessonId,
+    entityType: "lesson" as const,
+    totalLessons,
+    completedLessons,
+    progressPercentage: calculateProgressPercentage(completedLessons, totalLessons),
+    learningPathId,
+    employeeId,
+    currentPositionSeconds,
+  };
 }

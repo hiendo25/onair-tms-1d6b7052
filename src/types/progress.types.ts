@@ -8,10 +8,10 @@ import { Database } from "@/types/supabase.types";
  * Base progress response structure
  */
 export interface ProgressResponse {
-  /** The ID of the entity (learning path, phase, class room, course, or section) */
+  /** The ID of the entity (learning path, phase, class room, course, section, or lesson) */
   entityId: string;
   /** The type of entity this progress belongs to */
-  entityType: "learning_path" | "phase" | "class_room" | "course" | "section";
+  entityType: "learning_path" | "phase" | "class_room" | "course" | "section" | "lesson";
   /** Total number of lessons in this entity */
   totalLessons: number;
   /** Number of completed lessons */
@@ -49,4 +49,13 @@ export interface LessonProgressRecord {
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
+}
+
+/**
+ * Lesson-specific progress response that extends base ProgressResponse
+ * Includes video/content position tracking
+ */
+export interface LessonProgressResponse extends ProgressResponse {
+  /** Current position in seconds for video/content lessons */
+  currentPositionSeconds: number | null;
 }
