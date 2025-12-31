@@ -8,10 +8,12 @@
  * - learningPathId (optional): If not provided, will get the most recent learning path for the employee
  *
  * OPTIMIZATIONS APPLIED:
- * 1. Batch fetch all sections for the course
- * 2. Batch fetch all lessons for all sections
+ * 1. Batch fetch all sections for the course (ordered by priority)
+ * 2. Batch fetch all lessons for all sections (ordered by priority)
  * 3. Single batch query for all lesson progress data
  * 4. In-memory calculation for nested structure
+ *
+ * Performance: 3 queries regardless of section/lesson count
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -23,10 +25,34 @@ import {
   resolveLearningPathId,
 } from "@/services/progress/progress.service";
 import { createSVClient } from "@/services/supabase/server";
-import type { ProgressResponse } from "@/types/progress.types";
+import type { LessonProgressResponse, ProgressResponse } from "@/types/progress.types";
 
+// Database response types
+interface SectionRecord {
+  id: string;
+  priority: number | null;
+}
+
+interface LessonRecord {
+  id: string;
+  section_id: string;
+  priority: number | null;
+}
+
+interface LessonProgressRecord {
+  lesson_id: string;
+  status: "in_progress" | "completed";
+  current_position_seconds: number | null;
+}
+
+interface LessonProgressData {
+  isCompleted: boolean;
+  currentPositionSeconds: number | null;
+}
+
+// API response types
 interface SectionWithLessonsProgress extends ProgressResponse {
-  lessons: ProgressResponse[];
+  lessons: LessonProgressResponse[];
 }
 
 interface CourseProgressWithRelations extends ProgressResponse {
@@ -62,12 +88,14 @@ export async function GET(
     const supabase = await createSVClient();
 
     // Step 1: Fetch all sections for this course
-    const { data: sections, error: sectionsError } = await supabase
+    const { data: sectionsData, error: sectionsError } = await supabase
       .from("sections")
-      .select("id, order_index")
+      .select("id, priority")
       .eq("course_id", courseId)
       .eq("status", "active")
-      .order("order_index", { ascending: true });
+      .order("priority", { ascending: true });
+
+    const sections = sectionsData as SectionRecord[] | null;
 
     if (sectionsError) {
       console.error("[API] Error fetching sections:", sectionsError);
@@ -93,15 +121,17 @@ export async function GET(
       return NextResponse.json(courseProgress, { status: 200 });
     }
 
-    const sectionIds = sections.map((s: any) => s.id);
+    const sectionIds = sections.map((section) => section.id);
 
     // Step 2: Fetch all lessons for all sections in one query
-    const { data: lessons, error: lessonsError } = await supabase
+    const { data: lessonsData, error: lessonsError } = await supabase
       .from("lessons")
-      .select("id, section_id, order_index")
+      .select("id, section_id, priority")
       .in("section_id", sectionIds)
       .eq("status", "active")
-      .order("order_index", { ascending: true });
+      .order("priority", { ascending: true });
+
+    const lessons = lessonsData as LessonRecord[] | null;
 
     if (lessonsError) {
       console.error("[API] Error fetching lessons:", lessonsError);
@@ -113,7 +143,7 @@ export async function GET(
 
     if (!lessons || lessons.length === 0) {
       // No lessons, return course with sections but no lessons
-      const sectionsWithProgress: SectionWithLessonsProgress[] = sections.map((section: any) => ({
+      const sectionsWithProgress: SectionWithLessonsProgress[] = sections.map((section) => ({
         entityId: section.id,
         entityType: "section" as const,
         totalLessons: 0,
@@ -138,21 +168,21 @@ export async function GET(
       return NextResponse.json(courseProgress, { status: 200 });
     }
 
-    const lessonIds = lessons.map((l: any) => l.id);
+    const lessonIds = lessons.map((lesson) => lesson.id);
 
-    // Step 3: Batch fetch progress for all lessons at once
+    // Step 3: Batch fetch progress for all lessons at once (including current_position_seconds)
     let progressQuery = supabase
       .from("lesson_progress")
-      .select("lesson_id, status")
+      .select("lesson_id, status, current_position_seconds")
       .eq("employee_id", employee.id)
-      .eq("status", "completed")
       .in("lesson_id", lessonIds);
 
     if (learningPathId) {
       progressQuery = progressQuery.eq("learning_path_id", learningPathId);
     }
 
-    const { data: progressData, error: progressError } = await progressQuery;
+    const { data: progressDataRaw, error: progressError } = await progressQuery;
+    const progressData = progressDataRaw as LessonProgressRecord[] | null;
 
     if (progressError) {
       console.error("[API] Error fetching progress data:", progressError);
@@ -163,29 +193,41 @@ export async function GET(
     }
 
     // Step 4: Build lookup maps for efficient in-memory processing
-    const completedLessonIds = new Set(
-      progressData?.map((p: any) => p.lesson_id) || []
-    );
+    const lessonProgressMap = new Map<string, LessonProgressData>();
+
+    if (progressData) {
+      progressData.forEach((progress) => {
+        lessonProgressMap.set(progress.lesson_id, {
+          isCompleted: progress.status === "completed",
+          currentPositionSeconds: progress.current_position_seconds,
+        });
+      });
+    }
 
     // Group lessons by section
-    const lessonsBySection = new Map<string, any[]>();
-    lessons.forEach((lesson: any) => {
-      if (!lessonsBySection.has(lesson.section_id)) {
-        lessonsBySection.set(lesson.section_id, []);
+    const lessonsBySection = new Map<string, LessonRecord[]>();
+    lessons.forEach((lesson) => {
+      const sectionLessons = lessonsBySection.get(lesson.section_id);
+      if (!sectionLessons) {
+        lessonsBySection.set(lesson.section_id, [lesson]);
+      } else {
+        sectionLessons.push(lesson);
       }
-      lessonsBySection.get(lesson.section_id)!.push(lesson);
     });
 
     // Step 5: Build nested response structure
     let totalCourseLessons = 0;
     let totalCourseCompletedLessons = 0;
 
-    const sectionsWithProgress: SectionWithLessonsProgress[] = sections.map((section: any) => {
-      const sectionLessons = lessonsBySection.get(section.id) || [];
+    const sectionsWithProgress: SectionWithLessonsProgress[] = sections.map((section) => {
+      const sectionLessons = lessonsBySection.get(section.id) ?? [];
 
-      // Build lesson progress for this section
-      const lessonProgressList: ProgressResponse[] = sectionLessons.map((lesson: any) => {
-        const isCompleted = completedLessonIds.has(lesson.id);
+      // Build lesson progress for this section (with currentPositionSeconds)
+      const lessonProgressList: LessonProgressResponse[] = sectionLessons.map((lesson) => {
+        const progress = lessonProgressMap.get(lesson.id);
+        const isCompleted = progress?.isCompleted ?? false;
+        const currentPositionSeconds = progress?.currentPositionSeconds ?? null;
+
         return {
           entityId: lesson.id,
           entityType: "lesson",
@@ -194,14 +236,16 @@ export async function GET(
           progressPercentage: isCompleted ? 100 : 0,
           learningPathId,
           employeeId: employee.id,
+          currentPositionSeconds,
         };
       });
 
       // Calculate section progress
       const sectionTotalLessons = sectionLessons.length;
-      const sectionCompletedLessons = sectionLessons.filter((l: any) =>
-        completedLessonIds.has(l.id)
-      ).length;
+      const sectionCompletedLessons = sectionLessons.filter((lesson) => {
+        const progress = lessonProgressMap.get(lesson.id);
+        return progress?.isCompleted ?? false;
+      }).length;
 
       // Accumulate for course totals
       totalCourseLessons += sectionTotalLessons;
