@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, FormHelperText, Stack, Typography } from "@mui/material";
 import { FormProvider, SubmitHandler, useFieldArray, useForm, useFormContext } from "react-hook-form";
 
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
@@ -18,10 +18,16 @@ import { SurveySubmissionFormData, surveySubmissionSchema } from "./survey-submi
 export interface SurveySubmissionFormProps {
   initialData?: SurveySubmissionFormData;
   onSubmit: (data: SurveySubmissionFormData) => void;
+  onCancel?: () => void;
   isLoading?: boolean;
 }
 
-const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData, onSubmit, isLoading = false }) => {
+const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({
+  initialData,
+  onSubmit,
+  isLoading = false,
+  onCancel,
+}) => {
   const methods = useForm<SurveySubmissionFormData>({
     resolver: zodResolver(surveySubmissionSchema),
     defaultValues: { questions: [] },
@@ -30,7 +36,6 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
   const {
     control,
     formState: { errors },
-    getValues,
     reset,
     handleSubmit,
   } = methods;
@@ -41,12 +46,16 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
     keyName: "_questionId",
   });
 
-  const handleCancel = () => {};
+  const handleCancel = () => {
+    onCancel?.();
+  };
   const submitFormData: SubmitHandler<SurveySubmissionFormData> = (formData) => {
-    console.log({ formData });
     onSubmit(formData);
   };
 
+  const getErrorMessage = (index: number) => {
+    return errors?.["questions"]?.[index]?.["answer"]?.message;
+  };
   useEffect(() => {
     if (!initialData) return;
     reset(initialData);
@@ -110,6 +119,9 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
                   <Typography className="mb-2 text-sm">Thứ tự tăng dần từ dưới lên trên.</Typography>
                   <RatingSortItemType control={control} questionIndex={_questionIndex} question={question} />
                 </div>
+              )}
+              {getErrorMessage(_questionIndex) && (
+                <FormHelperText error>{getErrorMessage(_questionIndex)}</FormHelperText>
               )}
             </QuestionItemWrapper>
           ))}

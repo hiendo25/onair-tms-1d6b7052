@@ -94,16 +94,66 @@ const questionWithYesNoSchema = baseQuestionSchema.extend({
 
 export const surveySubmissionSchema = zod.object({
   surveyId: zod.string(),
-  questions: zod.array(
-    zod.discriminatedUnion("type", [
-      questionWithRatingSchema,
-      questionWithRatingAndSortSchema,
-      questionWithMultipleSelectSchema,
-      questionWithTextAnswerSchema,
-      questionWithSingleSelectSchema,
-      questionWithYesNoSchema,
-    ]),
-  ),
+  questions: zod
+    .array(
+      zod.discriminatedUnion("type", [
+        questionWithRatingSchema,
+        questionWithRatingAndSortSchema,
+        questionWithMultipleSelectSchema,
+        questionWithTextAnswerSchema,
+        questionWithSingleSelectSchema,
+        questionWithYesNoSchema,
+      ]),
+    )
+    .superRefine((questions, ctx) => {
+      questions.forEach((question, index) => {
+        if (question.isRequired && question.type === "text" && !question.answer.value) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Không bỏ trống.",
+            path: [index, "answer", "value"],
+          });
+        }
+
+        if (question.isRequired && question.type === "checkbox" && !question.answer.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng lựa chọn câu trả lời.",
+            path: [index, "answer"],
+          });
+        }
+
+        if (question.isRequired && question.type === "radio" && !question.answer) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng lựa chọn câu trả lời.",
+            path: [index, "answer"],
+          });
+        }
+
+        if (question.isRequired && question.type === "rating" && (!question.answer || !question.answer.value)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng đánh giá.",
+            path: [index, "answer"],
+          });
+        }
+        if (question.isRequired && question.type === "sort_rating" && !question.answer.length) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui lòng đánh giá.",
+            path: [index, "answer"],
+          });
+        }
+        if (question.isRequired && question.type === "yes_no" && (!question.answer || !question.answer.value)) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Vui trả lời có hoặc không.",
+            path: [index, "answer"],
+          });
+        }
+      });
+    }),
 });
 
 export type SurveySubmissionFormData = zod.infer<typeof surveySubmissionSchema>;

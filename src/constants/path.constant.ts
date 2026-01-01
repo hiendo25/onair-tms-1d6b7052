@@ -70,8 +70,8 @@ export const PATHS = {
     LIST: "/admin/surveys/list",
     EDIT: (id: string = ":id") => `/admin/surveys/${id}/edit`,
     STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
-    DO: (id: string = ":id") => `/surveys/${id}/do`,
-    THANK_YOU: (id: string = ":id") => `/surveys/${id}/do/thank-you`,
+    DO: (id: string = ":id") => `/admin/surveys/${id}/do`,
+    THANK_YOU: (id: string = ":id") => `/admin/surveys/${id}/do/thank-you`,
   },
   PLANS: {
     ROOT: "/admin/plans",
