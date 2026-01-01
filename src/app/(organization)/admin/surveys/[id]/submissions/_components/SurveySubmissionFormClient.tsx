@@ -12,7 +12,6 @@ interface SurveySubmissionFormClientProps {
   data: NonNullable<GetSurveyByIdResponse["data"]>;
 }
 const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({ data }) => {
-  console.log({ data });
   const router = useRouter();
   const [isTransition, startTransition] = useTransition();
   const { create: submitSurvey, isLoading } = useSubmissionSurvey();

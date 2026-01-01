@@ -8,7 +8,7 @@ const baseQuestionSchema = zod.object({
 });
 const questionWithTextAnswerSchema = baseQuestionSchema.extend({
   type: zod.literal<Extract<SurveyQuestionType, "text">>("text"),
-  answer: zod.object({ value: zod.string() }),
+  answer: zod.object({ value: zod.string().max(800, { error: "Tối đa 800 ký tự" }) }),
 });
 
 const questionWithSingleSelectSchema = baseQuestionSchema.extend({

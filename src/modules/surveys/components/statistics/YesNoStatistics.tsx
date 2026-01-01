@@ -25,14 +25,16 @@ export interface YesNoStatisticsProps {
   };
 }
 type YesNoType = "yes" | "no";
+const OPTIONS: YesNoType[] = ["yes", "no"];
+
+const getOptionYesNoName = (type: "yes" | "no") => {
+  return {
+    yes: "có",
+    no: "Không",
+  }[type];
+};
+
 const YesNoStatistics: React.FC<YesNoStatisticsProps> = ({ stats }) => {
-  const getOptionYesNoName = (type: "yes" | "no") => {
-    return {
-      yes: "có",
-      no: "Không",
-    }[type];
-  };
-  const OPTIONS: YesNoType[] = ["yes", "no"];
   return (
     <TableContainer>
       <Table>

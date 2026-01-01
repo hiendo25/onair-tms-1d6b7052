@@ -26,20 +26,10 @@ function RatingStatistics({ stats }: RatingStatisticsProps) {
   const sortedRatings = [...ratings].sort((a, b) => b.rating - a.rating);
 
   const getPercent = (count: number) => {
-    return Math.floor((count * 100) / subtotal);
+    return Math.floor(((count * 100) / subtotal) * 100) / 100;
   };
   return (
     <Box>
-      <Box sx={{ backgroundColor: "grey.50", p: 2, borderRadius: 1, mb: 3 }}>
-        <Stack direction="row" spacing={2} alignItems="center" justifyContent="space-between">
-          <Typography variant="body2" color="text.secondary">
-            Điểm trung bình
-          </Typography>
-          <Typography variant="h4" color="primary.main" fontWeight="bold">
-            {averageRating}
-          </Typography>
-        </Stack>
-      </Box>
       <TableContainer>
         <Table>
           <TableHead>
@@ -77,7 +67,7 @@ function RatingStatistics({ stats }: RatingStatisticsProps) {
                 </TableCell>
               </TableRow>
             ))}
-            <TableRow sx={{ backgroundColor: "grey.50", fontWeight: "bold" }}>
+            <TableRow>
               <TableCell>
                 <Typography variant="body2" fontWeight="bold">
                   Tổng cộng
@@ -92,6 +82,22 @@ function RatingStatistics({ stats }: RatingStatisticsProps) {
                 <Typography variant="body2" fontWeight="bold">
                   100%
                 </Typography>
+              </TableCell>
+              <TableCell></TableCell>
+            </TableRow>
+            <TableRow sx={{ backgroundColor: "grey.50", fontWeight: "bold" }}>
+              <TableCell>
+                <Typography variant="body2" fontWeight="bold">
+                  Điểm trung bình
+                </Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Typography variant="body2" fontWeight="bold">
+                  {averageRating}
+                </Typography>
+              </TableCell>
+              <TableCell align="center">
+                <Typography variant="body2" fontWeight="bold"></Typography>
               </TableCell>
               <TableCell></TableCell>
             </TableRow>

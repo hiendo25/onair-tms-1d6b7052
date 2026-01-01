@@ -122,10 +122,14 @@ export class SubmissionSurveyService {
   ): SurveyResponseAnswerValueType<"sort_rating"> | null {
     if (!question.answer) return null;
 
-    return question.answer.map((ans) => ({
+    /**
+     * Using index value save in priority to grant score sorted from user
+     * min score 1
+     */
+    return question.answer.map((ans, index) => ({
       optionId: ans.optionId,
       optionText: ans.optionText,
-      priority: ans.priority,
+      priority: index + 1,
     }));
   }
   private getAnswerText(question: QuestionWithTextAnswerFormData): SurveyResponseAnswerValueType<"text"> | null {

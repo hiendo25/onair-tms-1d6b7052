@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Stack, Typography } from "@mui/material";
+import { isUndefined } from "lodash";
 
 import { SurveyQuestionType } from "@/model/survey";
 import ChoiceStatistics, { ChoiceStatisticsProps } from "@/modules/surveys/components/statistics/ChoiceStatistics";
@@ -36,13 +37,20 @@ export default function ResponseStatistics(props: ResponseStatisticsProps) {
 
   return (
     <Stack spacing={3}>
-      {questions.map(({ question_type: questionType, id: questionId, name: questionName, options }) => (
+      {questions.map(({ question_type: questionType, id: questionId, name: questionName, options }, index) => (
         <div className="question-item" key={questionId}>
-          <div className="question-item__head mb-4">
-            <Typography variant="h6">{questionName}</Typography>
-            <Typography variant="body2" color="text.secondary">
-              {`(${getQuestionTypeName(questionType)})`}
-            </Typography>
+          <div className="question-item__head mb-4 flex gap-3">
+            <span className="w-6 h-6 bg-blue-600 inline-flex items-center justify-center text-white rounded-full text-sm font-medium mt-1">
+              {index + 1}
+            </span>
+            <div className="flex-1">
+              <Typography variant="h6" component="p">
+                {questionName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {`(${getQuestionTypeName(questionType)})`}
+              </Typography>
+            </div>
           </div>
           <div className="question-item__body">
             {questionType === "text" && <TextStatisticItem questionId={questionId} />}
@@ -126,6 +134,7 @@ const TextStatisticItem: React.FC<TextStatisticItemProps> = ({ questionId }) => 
 interface RatingStatisticItemProps {
   questionId: string;
 }
+const RATING_VALUE_KEYS = [1, 2, 3, 4, 5];
 const RatingStatisticItem: React.FC<RatingStatisticItemProps> = ({ questionId }) => {
   const { getAnswersByQuestionId } = useSurveyStatistic();
 
@@ -134,14 +143,18 @@ const RatingStatisticItem: React.FC<RatingStatisticItemProps> = ({ questionId })
   const ratingStats = React.useMemo((): RatingStatisticsProps["stats"] | undefined => {
     if (!ratingsResponse || ratingsResponse.length === 0) return;
 
-    const initialRatings = [1, 2, 3, 4, 5].reduce<Record<number, number>>((acc, r) => ({ ...acc, [r]: 0 }), {});
+    const initialRatings = RATING_VALUE_KEYS.reduce<Record<number, number>>((acc, r) => ({ ...acc, [r]: 0 }), {});
 
     const { total, sum, ratingsMap } = ratingsResponse.reduce(
       (acc, res) => {
         const value = res.answer_value.value;
-        acc.total += 1;
-        acc.sum += value;
-        acc.ratingsMap[value] ? (acc.ratingsMap[value] += 1) : 1;
+        if (RATING_VALUE_KEYS.includes(value)) {
+          acc.total += 1;
+          acc.sum += value;
+          if (!isUndefined(acc.ratingsMap[value])) {
+            acc.ratingsMap[value] += 1;
+          }
+        }
         return acc;
       },
       {
@@ -322,11 +335,11 @@ const YesNoStatisticsItem: React.FC<YesNoStatisticsItemProps> = ({ questionId })
     return {
       yes: {
         count: yesCount,
-        percentage: Math.floor((yesCount * 100) / totalCount),
+        percentage: Math.floor(((yesCount * 100) / totalCount) * 100) / 100,
       },
       no: {
         count: noCount,
-        percentage: Math.floor((noCount * 100) / totalCount),
+        percentage: Math.floor(((noCount * 100) / totalCount) * 100) / 100,
       },
       subtotal: totalCount,
     };

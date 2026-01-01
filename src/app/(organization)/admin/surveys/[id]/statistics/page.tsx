@@ -23,8 +23,6 @@ export default async function SurveyStatisticsPage({ params }: PageProps) {
     notFound();
   }
 
-  console.log({ surveyDetailData });
-
   const sortedQuestions = surveyDetailData.questions.sort((a, b) => a.priority - b.priority);
 
   return (

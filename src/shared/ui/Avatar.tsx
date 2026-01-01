@@ -33,8 +33,8 @@ const Avatar: React.FC<AvatarProps> = ({
         {
           "rounded-full": variant === "circle",
           "rounded-lg": variant === "rounded",
-          "w-8 h-8": size === "small",
-          "w-10 h-10": size === "medium",
+          "w-7 h-7": size === "small",
+          "w-9 h-9": size === "medium",
           "w-12 h-12": size === "large",
         },
         className,
@@ -58,11 +58,11 @@ const Avatar: React.FC<AvatarProps> = ({
               }}
             />
           ) : (
-            <AvatarName label={alt} />
+            <AvatarName label={alt} size={size} />
           )}
         </>
       ) : (
-        <AvatarName label={alt} />
+        <AvatarName label={alt} size={size} />
       )}
     </div>
   );
@@ -71,8 +71,9 @@ export default memo(Avatar);
 
 interface AvatarNameProps {
   label: string | null;
+  size?: "small" | "medium" | "large";
 }
-const AvatarName: React.FC<AvatarNameProps> = memo(({ label = "" }) => {
+const AvatarName: React.FC<AvatarNameProps> = memo(({ label = "", size = "medium" }) => {
   const bgColor = useMemo(() => getColorFromName(label || ""), [label]);
   if (!label) return null;
   return (
@@ -81,7 +82,15 @@ const AvatarName: React.FC<AvatarNameProps> = memo(({ label = "" }) => {
       className="w-full h-full flex items-center justify-center uppercase"
       sx={{ backgroundColor: bgColor }}
     >
-      <span className="font-semibold text-sm">{label?.charAt(0)}</span>
+      <span
+        className={cn("font-semibold text-sm", {
+          "text-xs": size === "small",
+          "text-base": size === "medium",
+          "text-lg": size === "large",
+        })}
+      >
+        {label?.charAt(0)}
+      </span>
     </Box>
   );
 });

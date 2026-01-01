@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import dayjs from "dayjs";
 
+import Avatar from "@/shared/ui/Avatar";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 
 type ResponseItem = { content: string; createdAt: string; id: string; fullName: string; avatar?: string };
@@ -16,10 +17,25 @@ function TextStatistics({ responses }: TextStatisticsProps) {
     },
     {
       id: "createdAt",
+      field: "fullName",
+      headerName: "Người đánh giá",
+      width: 220,
+      renderCell(value, { fullName, avatar }) {
+        return (
+          <div className="flex items-center gap-2">
+            <Avatar alt={fullName} src={avatar} size="small" />
+            <span className="flex-1">{fullName}</span>
+          </div>
+        );
+      },
+    },
+    {
+      id: "createdAt",
       field: "createdAt",
       headerName: "Ngày gửi",
+      width: 160,
       renderCell(value, { createdAt }) {
-        return dayjs(createdAt).format("DD/MM/YYYY");
+        return dayjs(createdAt).format("DD/MM/YYYY - HH:ss");
       },
     },
   ];

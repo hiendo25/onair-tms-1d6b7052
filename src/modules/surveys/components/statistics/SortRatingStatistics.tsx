@@ -25,7 +25,7 @@ export interface SortRatingStatisticsProps {
 const SortRatingStatistics: React.FC<SortRatingStatisticsProps> = ({ stats: { options, totalScore } }) => {
   const getPercentScore = (score: number) => {
     if (score === 0 || totalScore === 0) return 0;
-    return Math.floor((score * 100) / totalScore);
+    return Math.floor(((score * 100) / totalScore) * 100) / 100;
   };
   return (
     <TableContainer>

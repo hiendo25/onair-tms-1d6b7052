@@ -24,7 +24,7 @@ export interface ChoiceStatisticsProps {
 const ChoiceStatistics: React.FC<ChoiceStatisticsProps> = ({ stats: { options, subtotal } }) => {
   const getPercent = (count: number) => {
     if (count === 0 || subtotal === 0) return 0;
-    return Math.floor((count * 100) / subtotal);
+    return Math.floor(((count * 100) / subtotal) * 100) / 100;
   };
   return (
     <TableContainer>
