@@ -127,7 +127,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
         </>
       );
     },
-    [mini, isFullyExpanded, menuItems, handleToggleSidebarExpanded, hasDrawerTransitions, topSlot],
+    [mini, isFullyExpanded, menuItems, hasDrawerTransitions, topSlot, bottomSlot],
   );
   return (
     <React.Fragment>

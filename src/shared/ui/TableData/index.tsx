@@ -78,8 +78,9 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   const { page, pageSize, total, perPageOptions } = tablePagination;
 
   const rowsList = useMemo(() => {
-    return rows?.slice(0, pageSize) || [];
-  }, [pageSize, rows]);
+    const from = (page - 1) * pageSize;
+    return rows?.slice(from, from + pageSize) || [];
+  }, [pageSize, rows, page]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
     if (pagination?.onChangePage) {
@@ -93,6 +94,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
       };
     });
   };
+
   const onChangePageSize: TablePaginationOwnProps["onRowsPerPageChange"] = (evt) => {
     const newPageSize = parseInt(evt.target.value);
 
@@ -120,6 +122,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     },
     [rowKey],
   );
+
   const columnCount = useMemo(() => {
     return showRowCount ? columns.length + 1 : columns.length;
   }, [showRowCount, columns]);
@@ -130,7 +133,6 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     setTablePagination((prev) => ({ ...prev, ...pagination, page: pagination.page ?? prev.page }));
   }, [pagination]);
 
-  console.log({ pagination });
   return (
     <TableRowDataProvider<T>
       initState={{

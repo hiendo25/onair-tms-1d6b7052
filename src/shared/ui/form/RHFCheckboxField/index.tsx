@@ -3,6 +3,8 @@ import { Checkbox, CheckboxProps, FormControl, FormControlLabel, FormHelperText 
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
+import { cn } from "@/utils";
+
 interface RHFCheckboxFieldProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
@@ -26,7 +28,7 @@ const RHFCheckboxField = <T extends FieldValues>({
       name={name}
       control={control}
       render={({ field, fieldState: { error } }) => (
-        <FormControl className={className} error={!!error}>
+        <div>
           <FormControlLabel
             {...field}
             {...(typeof field.value === "boolean"
@@ -34,7 +36,6 @@ const RHFCheckboxField = <T extends FieldValues>({
                   checked: field.value,
                 }
               : {})}
-            // checked={field.value}
             control={<Checkbox {...checkbox} />}
             name={name}
             label={label}
@@ -45,9 +46,9 @@ const RHFCheckboxField = <T extends FieldValues>({
             }}
           />
           {error?.message ? <FormHelperText error={!!error}>{error.message}</FormHelperText> : null}
-        </FormControl>
+        </div>
       )}
     />
   );
 };
-export default RHFCheckboxField;
+export default memo(RHFCheckboxField) as typeof RHFCheckboxField;

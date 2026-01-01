@@ -5,7 +5,7 @@ import { useTMutation } from "@/lib";
 import { EnumSurveyType } from "@/model/survey";
 import { useUserOrganization } from "@/modules/organization";
 import { surveyService } from "@/services";
-import { UpsertSurveyFormData } from "../survey-form.schema";
+import { UpsertSurveyFormData } from "../components/UpsertSurveyForm/survey-form.schema";
 const useUpsertSurvey = () => {
   const {
     id: employeeId,

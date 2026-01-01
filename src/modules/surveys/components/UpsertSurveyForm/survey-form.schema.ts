@@ -2,7 +2,7 @@ import * as zod from "zod";
 
 import { SurveyQuestionType } from "@/model/survey";
 
-const questionTypeValues: SurveyQuestionType[] = ["text", "radio", "checkbox", "rating", "yes_no", "rating_sort"];
+const questionTypeValues: SurveyQuestionType[] = ["text", "radio", "checkbox", "rating", "yes_no", "sort_rating"];
 
 const surveyQuestionSchema = zod
   .object({
@@ -19,7 +19,7 @@ const surveyQuestionSchema = zod
     ),
   })
   .superRefine(({ type, options }, ctx) => {
-    const questionMultipleOptionsKeys: SurveyQuestionType[] = ["radio", "checkbox", "rating_sort"];
+    const questionMultipleOptionsKeys: SurveyQuestionType[] = ["radio", "checkbox", "sort_rating"];
     if (questionMultipleOptionsKeys.includes(type)) {
       console.log({ options });
       if (options.length < 2) {
@@ -29,6 +29,16 @@ const surveyQuestionSchema = zod
           path: ["options"],
         });
       }
+
+      options.forEach((opt, index) => {
+        if (!opt.content.length && !opt.is_other) {
+          ctx.addIssue({
+            code: "custom",
+            message: "Không bỏ trống.",
+            path: ["options", index, "content"],
+          });
+        }
+      });
     }
   });
 

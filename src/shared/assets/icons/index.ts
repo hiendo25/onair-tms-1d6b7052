@@ -14,6 +14,7 @@ import ClassIcon from "./ClassIcon";
 import ClipboardIcon from "./ClipboardIcon";
 import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
+import Copy07Icon from "./Copy07Icon";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
 import Download01Icon from "./Download01Icon";
 import Edit02Icon from "./Edit02Icon";
@@ -43,6 +44,7 @@ import GoogleIcon from "./GoogleIcon";
 import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
 import InforCircleIcon from "./InforCircleIcon";
+import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
 import Loading from "./LoadingIcon";
 import LogoOnairIcon from "./LogoOnairIcon";
@@ -137,4 +139,6 @@ export {
   LogoutIcon,
   Menu05Icon,
   ArrowRightIcon,
+  LineChartUp01Icon,
+  Copy07Icon,
 };

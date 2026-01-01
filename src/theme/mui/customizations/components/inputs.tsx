@@ -245,7 +245,7 @@ export const inputsCustomizations: Components<Theme> = {
   MuiFormControlLabel: {
     styleOverrides: {
       root: ({ theme }) => ({
-        marginLeft: "-10px",
+        marginLeft: "-8px",
       }),
     },
   },

@@ -1,6 +1,7 @@
 import { createClient } from "@/services";
 export * from "./surveys-questions";
 export * from "./surveys-questions-options";
+import { AnswerByQuestionType, SurveyResponseAnswerValueType } from "./survey-responses/type";
 import { CreateSurveyPayload, UpdateSurveyPayload, UpsertSurveyPayload } from "./type";
 const createSurvey = async (payload: CreateSurveyPayload) => {
   const supabase = createClient();
@@ -127,12 +128,7 @@ interface GetPlanningSurveysParams {
   limit?: number;
 }
 
-const getPlanningSurveys = async ({
-  organizationId,
-  search,
-  page = 1,
-  limit = 10,
-}: GetPlanningSurveysParams) => {
+const getPlanningSurveys = async ({ organizationId, search, page = 1, limit = 10 }: GetPlanningSurveysParams) => {
   const supabase = createClient();
   const from = (page - 1) * limit;
   const to = from + limit - 1;
@@ -160,4 +156,81 @@ const getPlanningSurveys = async ({
   };
 };
 
-export { createSurvey, updateSurvey, upsertSurvey, getSurveys, getSurveyById, getPlanningSurveys };
+const getSurveyResponsesById = async (surveyId: string) => {
+  const supabase = createClient();
+  try {
+    return await supabase
+      .from("surveys")
+      .select(
+        `
+				id,
+				title,
+				description,
+				responseCount:surveys_response(count),
+				questions:surveys_questions(
+					id, 
+					question_type, 
+					name, 
+					priority, 
+					options:surveys_questions_options(
+						id, 
+						option_text, 
+						is_other, 
+						priority
+					)
+				),
+				responses:surveys_response(
+					id,
+					employees(
+						id, 
+						employee_type, 
+						employee_code, 
+						profiles(
+							id, 
+							full_name, 
+							avatar
+						)
+					),
+					target_id,
+					target_type,
+					created_at,
+					survey_id,
+					answers:surveys_answers(
+						id, 
+						question_id, 
+						question_text, 
+						question_type, 
+						answer_value,
+						created_at
+					),
+					created_at
+				)
+			`,
+      )
+      .eq("id", surveyId)
+      .maybeSingle()
+      .overrideTypes<
+        {
+          responses: Array<{
+            answers: Array<
+              Omit<{ id: string; question_id: string; question_text: string }, never> & AnswerByQuestionType
+            >;
+          }>;
+        },
+        { merge: true }
+      >();
+  } catch (err: any) {
+    throw new Error(`Unable get response by ${surveyId}`);
+  }
+};
+export type GetSurveyResponsesById = Awaited<ReturnType<typeof getSurveyResponsesById>>;
+
+export {
+  createSurvey,
+  updateSurvey,
+  upsertSurvey,
+  getSurveys,
+  getSurveyById,
+  getPlanningSurveys,
+  getSurveyResponsesById,
+};

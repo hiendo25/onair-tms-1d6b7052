@@ -24,7 +24,9 @@ export default function PageContainer(props: PageContainerProps) {
       })}
     >
       <div className="h-6 md:h-8"></div>
-      <PageHeader breadcrumbs={breadcrumbs} actions={actions} pageTitle={title} />
+      {(title || actions || breadcrumbs) && (
+        <PageHeader breadcrumbs={breadcrumbs} actions={actions} pageTitle={title} />
+      )}
       <div className="h-6"></div>
       <div className="flex flex-col w-full flex-1">{children}</div>
     </div>

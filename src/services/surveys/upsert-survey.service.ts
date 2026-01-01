@@ -1,5 +1,7 @@
+import dayjs from "dayjs";
+
 import { EnumSurveyType } from "@/model/survey";
-import { UpsertSurveyFormData } from "@/modules/surveys/survey-form.schema";
+import { UpsertSurveyFormData } from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
 import { surveysRepository } from "@/repository";
 import { CreateSurveyQuestionPayload, UpsertSurveyQuestionPayload } from "@/repository/surveys/surveys-questions/type";
 import {
@@ -20,13 +22,14 @@ export class UpsertSurvey {
   async createSurvey(variables: { formData: UpsertSurveyFormData; type: EnumSurveyType }) {
     const { formData, type } = variables;
 
+    const timestamp = new Date().getTime();
     const surveyPayload: CreateSurveyPayload = {
       created_by: this.userId,
       organization_id: this.organizationId,
       description: formData.description,
       title: formData.name,
       survey_type: type,
-      slug: formData.slug,
+      slug: `${formData.slug}-${timestamp}`,
     };
     const { data: surveyData, error: surveyError } = await surveysRepository.createSurvey(surveyPayload);
 

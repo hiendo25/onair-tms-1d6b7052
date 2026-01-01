@@ -34,7 +34,13 @@ const RHFRadioGroupField = <T extends FieldValues>({
               {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
-          <RadioGroup row={direction === "horizontal"} aria-labelledby="Radio" {...field} name="radio-buttons-group">
+          <RadioGroup
+            row={direction === "horizontal"}
+            aria-labelledby="Radio"
+            {...field}
+            name="radio-buttons-group"
+            className="w-fit"
+          >
             {options.map((opt) => (
               <FormControlLabel
                 key={opt.value}
