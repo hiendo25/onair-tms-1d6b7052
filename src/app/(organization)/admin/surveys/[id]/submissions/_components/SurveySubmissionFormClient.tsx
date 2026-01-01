@@ -35,7 +35,7 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
           priority: opt.priority || 0,
         }));
 
-        let questionItem: QuestionFormItem;
+        let questionItem: QuestionFormItem | undefined;
         switch (question.question_type) {
           case "text": {
             questionItem = {
@@ -92,6 +92,9 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
               answer: options.map((opt) => ({ optionId: opt.id, priority: opt.priority, optionText: opt.text })),
             };
             break;
+          }
+          default: {
+            questionItem = undefined;
           }
         }
 

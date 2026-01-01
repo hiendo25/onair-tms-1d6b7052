@@ -2965,11 +2965,11 @@ export type Database = {
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
+        | "checkbox"
+        | "radio"
         | "text"
         | "rating"
         | "sort_rating"
-        | "checkbox"
-        | "radio"
         | "yes_no"
       survey_target_type: "class_room" | "learning_path"
       survey_type: "planning" | "classroom"
@@ -3166,11 +3166,11 @@ export const Constants = {
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
       survey_question_type: [
+        "checkbox",
+        "radio",
         "text",
         "rating",
         "sort_rating",
-        "checkbox",
-        "radio",
         "yes_no",
       ],
       survey_target_type: ["class_room", "learning_path"],

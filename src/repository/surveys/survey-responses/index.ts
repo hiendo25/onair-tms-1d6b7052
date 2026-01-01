@@ -1,11 +1,6 @@
 import { createClient } from "@/services";
 
-import {
-  AnswerByQuestionType,
-  CreateAnswerResponsePayload,
-  CreateSurveyResponsePayload,
-  SurveyResponseAnswerValueType,
-} from "./type";
+import { AnswerByQuestionType, CreateAnswerResponsePayload, CreateSurveyResponsePayload } from "./type";
 
 const createResponse = async (payload: CreateSurveyResponsePayload) => {
   const supabase = createClient();
