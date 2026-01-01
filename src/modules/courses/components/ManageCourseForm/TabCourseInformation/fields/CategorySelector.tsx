@@ -9,10 +9,6 @@ interface CategorySelectorProps {
   control: Control<UpsertCourseFormData>;
 }
 const CategorySelector: React.FC<CategorySelectorProps> = ({ control }) => {
-  const {
-    field: { onChange, value: classFieldList },
-  } = useController({ control, name: "categories" });
-
   const { data: fieldListData, isPending } = useGetCategoriesQuery();
   const { mutate: createClassField, isPending: isCreateLoading } = useCreateCategoriesMutation();
 
@@ -25,10 +21,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ control }) => {
     });
   };
   const fieldList = fieldListData?.data || [];
-  const handleRemoveItem = (value: string) => {
-    const newClassFields = [...classFieldList].filter((f) => f !== value);
-    onChange(newClassFields);
-  };
+
   return (
     <RHFMultipleSelectField
       label="Chủ đề"
@@ -37,7 +30,6 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({ control }) => {
       required
       placeholder="Chọn chủ đề"
       onInputEnter={handleEnter}
-      onRemove={handleRemoveItem}
       isLoading={isCreateLoading}
       options={fieldList.map((it) => ({
         label: it.name || "",

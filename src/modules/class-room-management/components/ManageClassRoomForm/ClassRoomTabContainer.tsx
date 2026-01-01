@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useImperativeHandle, useMemo, useState } from "react";
+import React, { memo, useCallback, useImperativeHandle, useMemo, useState } from "react";
 import { useTransition } from "react";
 import TabContext from "@mui/lab/TabContext";
 import TabList, { TabListProps } from "@mui/lab/TabList";
@@ -171,7 +171,7 @@ const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRo
     );
   },
 );
-export default ClassRoomTabContainer;
+export default memo(ClassRoomTabContainer);
 
 const ClassRoomTabList = styled((props: TabListProps) => <TabList {...props} />)(() => {
   const theme = useTheme();

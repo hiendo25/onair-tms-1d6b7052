@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { memo } from "react";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
 import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
@@ -152,4 +152,4 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
   );
 };
 
-export default RHFThumbnailUpload;
+export default memo(RHFThumbnailUpload) as typeof RHFThumbnailUpload;

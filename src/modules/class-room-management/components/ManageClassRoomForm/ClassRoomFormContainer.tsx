@@ -23,7 +23,7 @@ export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-export const initClassRoomFormData = (oprions: {
+export const initClassRoomFormData = (option: {
   platform?: ClassRoomPlatformType;
   roomType?: ClassRoomType;
 }): Partial<ClassRoom> => {
@@ -35,10 +35,10 @@ export const initClassRoomFormData = (oprions: {
     classRoomId: "",
     slug: "",
     status: "draft",
-    roomType: oprions?.roomType,
+    roomType: option?.roomType,
     forWhom: [],
     docs: [],
-    platform: oprions?.platform,
+    platform: option?.platform,
     classRoomSessions: [],
     classType: "room",
   };
@@ -72,11 +72,12 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         platform: platform,
         roomType: roomType,
       }),
+      reValidateMode: "onChange",
       mode: "onChange",
     });
 
     const {
-      setValue,
+      control,
       handleSubmit,
       formState: { errors },
       trigger,
@@ -85,7 +86,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
     console.log({ errors, selectedStudents, isLearningPath });
 
-    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void, status: "draft" | "publish") => async () => {
+    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void) => async () => {
       try {
         const TAB_LIST = isLearningPath
           ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
@@ -105,8 +106,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
         if (isSomeTabFailed) return;
 
-        setValue("status", status);
-
         submitAction();
       } catch (error) {
         console.log(error);
@@ -114,14 +113,16 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     };
 
     const submitForm: SubmitHandler<ClassRoom> = (data) => {
-      console.log({ errors, data, selectedStudents });
+      onSubmit?.({ ...data, status: "publish" }, selectedStudents);
+    };
 
-      onSubmit?.(data, selectedStudents);
+    const submitDraftForm: SubmitHandler<ClassRoom> = (data) => {
+      onSubmit?.({ ...data, status: "draft" }, selectedStudents);
     };
 
     const cancelCreateClassRoom = () => {
-      resetStore(); // Reset all selected value in classRoom store
-      reset(); //Reset Form
+      resetStore();
+      reset();
       onCancel?.();
     };
 
@@ -143,12 +144,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           icon: <CalendarDateIcon className="w-5 h-5" />,
           content: <TabClassRoomSession />,
         },
-        // {
-        //   tabName: "Tài nguyên",
-        //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-        //   icon: <ClipboardIcon className="w-5 h-5" />,
-        //   content: <TabClassRoomResource />,
-        // },
       ];
       return isLearningPath
         ? BASE_ITEMS
@@ -163,7 +158,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               content: <TabClassRoomSetting />,
             },
           ];
-    }, [isLearningPath, action]);
+    }, [action, isLearningPath]);
     /**
      * Init form value
      */
@@ -221,12 +216,12 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
                 variant="outlined"
                 className="border-gray-300"
                 disabled={isLoading}
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "draft")}
+                onClick={submitDraftForm}
               >
                 Lưu nháp
               </Button> */}
               <ButtonSubmit
-                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmit(submitForm), "publish")}
+                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmit(submitForm))}
                 disabled={isLoading}
                 loading={isLoading}
               >

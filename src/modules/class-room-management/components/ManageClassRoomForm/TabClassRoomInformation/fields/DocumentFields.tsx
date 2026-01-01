@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
+import React, { memo } from "react";
 import { Box, Button, FormLabel, IconButton, Typography } from "@mui/material";
-import { useFieldArray } from "react-hook-form";
+import { Control, useFieldArray } from "react-hook-form";
 import { useFormContext } from "react-hook-form";
 
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
@@ -17,10 +17,11 @@ import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
 import { ClassRoom } from "../../classroom-form.schema";
 interface DocumentFieldsProps {
   className?: string;
+  control: Control<ClassRoom>;
 }
-const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
+const DocumentFields: React.FC<DocumentFieldsProps> = ({ className, control }) => {
   const openLibrary = useLibraryStore((state) => state.openLibrary);
-  const { control } = useFormContext<ClassRoom>();
+
   const {
     fields: resourceItems,
     remove,
@@ -31,6 +32,7 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
     keyName: "_docs",
   });
 
+  console.log("render doccc");
   const handleSelectLibrary = async () => {
     const selectingItems = await openLibrary({ mode: "multiple", selectedIds: resourceItems.map((item) => item.id) });
 
@@ -95,4 +97,4 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className }) => {
     </div>
   );
 };
-export default DocumentFields;
+export default memo(DocumentFields);
