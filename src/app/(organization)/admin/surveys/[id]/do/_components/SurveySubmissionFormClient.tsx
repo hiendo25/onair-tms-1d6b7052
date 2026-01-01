@@ -1,13 +1,17 @@
 "use client";
 import React, { useMemo } from "react";
+import { enqueueSnackbar } from "notistack";
 
-import SurveySubmissionForm, { SurveySubmissionFormProps } from "@/modules/surveys/components/SurveySubmitionForm";
+import SurveySubmissionForm, { SurveySubmissionFormProps } from "@/modules/surveys/components/SurveySubmissionForm";
+import { useSubmissionSurvey } from "@/modules/surveys/hooks/useSubmissionSurvey";
 import { GetSurveyByIdResponse } from "@/repository/surveys";
 interface SurveySubmissionFormClientProps {
   data: NonNullable<GetSurveyByIdResponse["data"]>;
 }
 const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({ data }) => {
   console.log({ data });
+
+  const { create, isLoading } = useSubmissionSurvey();
 
   type QuestionFormItem = Exclude<SurveySubmissionFormProps["initialData"], undefined>["questions"][number];
   const surveyFormData = useMemo((): Exclude<SurveySubmissionFormProps["initialData"], undefined> => {
@@ -28,15 +32,13 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
           priority: opt.priority || 0,
         }));
 
-        console.log({ options });
-
         let questionItem: QuestionFormItem;
         switch (question.question_type) {
           case "text": {
             questionItem = {
               ...baseQuestion,
               type: "text",
-              answer: { text: "" },
+              answer: { value: "" },
             };
             break;
           }
@@ -54,7 +56,7 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
               type: "radio",
               ...baseQuestion,
               options: options,
-              answer: { isOther: false, text: "", value: "" },
+              answer: undefined,
             };
             break;
           }
@@ -79,12 +81,12 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
             };
             break;
           }
-          case "rating_sort": {
+          case "sort_rating": {
             questionItem = {
-              type: "rating_sort",
+              type: "sort_rating",
               ...baseQuestion,
               options: options,
-              answer: options.map((opt) => ({ value: opt.id, priority: opt.priority, text: opt.text })),
+              answer: options.map((opt) => ({ optionId: opt.id, priority: opt.priority, optionText: opt.text })),
             };
             break;
           }
@@ -94,6 +96,17 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
       }, []),
     };
   }, [data]);
-  return <SurveySubmissionForm initialData={surveyFormData} onSubmit={() => {}} />;
+
+  const handleSubmitForm: SurveySubmissionFormProps["onSubmit"] = (data) => {
+    create(
+      { formData: data, targetId: undefined, targetType: undefined },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          enqueueSnackbar("Gửi khảo sát thành công", { variant: "success" });
+        },
+      },
+    );
+  };
+  return <SurveySubmissionForm initialData={surveyFormData} onSubmit={handleSubmitForm} isLoading={isLoading} />;
 };
 export default SurveySubmissionFormClient;

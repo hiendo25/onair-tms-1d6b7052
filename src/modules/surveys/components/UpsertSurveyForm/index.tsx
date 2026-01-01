@@ -3,7 +3,6 @@
 import React, { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
 import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 
 import {
@@ -13,12 +12,13 @@ import {
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 
+import ButtonCancelConfirmation from "./ButtonCancelConfirmation";
 import SlugField from "./SlugField";
 import SurveyQuestionContainer from "./SurveyQuestionsContainer";
-
 export interface UpsertSurveyFormProps {
   initialData?: UpsertSurveyFormData;
   onSubmit: (data: UpsertSurveyFormData) => void;
+  onCancel?: () => void;
   isLoading?: boolean;
 }
 
@@ -29,7 +29,7 @@ const initUpsertFormData: UpsertSurveyFormData = {
   slug: "",
 };
 
-const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubmit, isLoading = false }) => {
+const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubmit, isLoading = false, onCancel }) => {
   const methods = useForm<UpsertSurveyFormData>({
     resolver: zodResolver(upsertSurveyFormSchema),
     defaultValues: initUpsertFormData,
@@ -38,24 +38,21 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
   const {
     control,
     formState: { errors },
-    getValues,
     reset,
     handleSubmit,
   } = methods;
-  const router = useRouter();
 
-  const handleCancel = () => {};
+  const handleCancel = useCallback(() => {
+    onCancel?.();
+  }, [onCancel]);
 
-  console.log({ values: getValues(), errors });
   const submitFormData: SubmitHandler<UpsertSurveyFormData> = (formData) => {
-    console.log({ formData });
     onSubmit(formData);
   };
 
   useEffect(() => {
-    if (!initialData) return;
-    reset(initialData);
-  }, [initialData]);
+    initialData ? reset(initialData) : reset();
+  }, [initialData, reset]);
 
   return (
     <FormProvider {...methods}>
@@ -67,7 +64,7 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
         <div className="flex flex-col gap-3">
           <RHFTextField control={control} name="name" label="Tên khảo sát" placeholder="Nhập tên khảo sát" required />
           <div className="flex flex-col gap-3">
-            <SlugField control={control} />
+            <SlugField control={control} disableUpdate={!!initialData} />
           </div>
           <RHFTextAreaField
             control={control}
@@ -85,7 +82,6 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
             {errors.questions.message}
           </Typography>
         )}
-
         <Typography variant="h5" component="h4">
           Câu hỏi khảo sát
         </Typography>
@@ -94,9 +90,12 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
       </Stack>
       <div className="h-6"></div>
       <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-        <Button variant="outlined" onClick={handleCancel} disabled={isLoading}>
-          Hủy
-        </Button>
+        <ButtonCancelConfirmation
+          onOk={handleCancel}
+          action={initialData ? "update" : "create"}
+          loading={isLoading}
+          initialData={initialData}
+        />
         <Button variant="contained" onClick={handleSubmit(submitFormData)} loading={isLoading} disabled={isLoading}>
           {initialData ? "Cập nhật" : "Tạo khảo sát"}
         </Button>
@@ -106,4 +105,4 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
 };
 
 export default UpsertSurveyForm;
-export const useUpsertServeyFormContext = useFormContext<UpsertSurveyFormData>;
+export const useUpsertSurveyFormContext = useFormContext<UpsertSurveyFormData>;

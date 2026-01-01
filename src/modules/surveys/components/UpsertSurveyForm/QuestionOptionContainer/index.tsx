@@ -11,21 +11,21 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Box, Button, FormLabel, IconButton, Stack } from "@mui/material";
-import { Control, useFieldArray, useWatch } from "react-hook-form";
+import { Control, useFieldArray } from "react-hook-form";
 
-import { Trash01Icon } from "@/shared/assets/icons";
+import { SurveyQuestionType } from "@/model/survey";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { UpsertSurveyFormData } from "../survey-form.schema";
 import SortableItem from "../SortableItem";
+import { UpsertSurveyFormData } from "../survey-form.schema";
 
 import OptionContentItem from "./OptionContentItem";
 
 interface QuestionOptionsContainerProps {
   questionIndex: number;
+  questionType: Extract<SurveyQuestionType, "sort_rating" | "radio" | "checkbox">;
   control: Control<UpsertSurveyFormData>;
 }
-const QuestionOptionsContainer = ({ control, questionIndex }: QuestionOptionsContainerProps) => {
+const QuestionOptionsContainer = ({ control, questionIndex, questionType }: QuestionOptionsContainerProps) => {
   const [activeDragOptionId, setActiveDragOptionId] = useState<UniqueIdentifier>();
 
   const {
@@ -89,16 +89,12 @@ const QuestionOptionsContainer = ({ control, questionIndex }: QuestionOptionsCon
     return optionsFields.some((it) => it.is_other);
   }, [optionsFields]);
   return (
-    <Box>
-      <FormLabel>
-        Tùy chọn <span className="text-red-600">*</span>
-      </FormLabel>
-      <div className="h-3"></div>
+    <div className="question-options">
       <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
         <SortableContext items={optionsFields.map((field) => field._optionId)} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-2">
             {optionsFields.map((field, _optIndex) => (
-              <SortableItem key={field._optionId} id={field._optionId} padding={2} noBorder>
+              <SortableItem key={field._optionId} id={field._optionId} padding={2}>
                 <OptionContentItem
                   questionIndex={questionIndex}
                   optionIndex={_optIndex}
@@ -124,20 +120,18 @@ const QuestionOptionsContainer = ({ control, questionIndex }: QuestionOptionsCon
       </DndContext>
       <Stack spacing={2} sx={{ mt: 1 }}>
         <div className="flex gap-2 items-center">
-          {!alreadyHasOtherType && (
-            <>
-              <Button variant="outlined" size="small" onClick={handleAddOption("other")}>
-                Tự nhập
-              </Button>
-            </>
-          )}{" "}
           <Button variant="outlined" size="small" startIcon={<PlusIcon />} onClick={handleAddOption()}>
             Thêm tùy chọn
           </Button>
+          {!alreadyHasOtherType && questionType !== "sort_rating" && (
+            <Button variant="outlined" size="small" onClick={handleAddOption("other")}>
+              Tự nhập
+            </Button>
+          )}
         </div>
         {/* {error?.message ? <FormHelperText error>{error.message}</FormHelperText> : null} */}
       </Stack>
-    </Box>
+    </div>
   );
 };
 export default QuestionOptionsContainer;

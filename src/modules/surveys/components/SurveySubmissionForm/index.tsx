@@ -3,7 +3,6 @@
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
 import { FormProvider, SubmitHandler, useFieldArray, useForm, useFormContext } from "react-hook-form";
 
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
@@ -22,14 +21,10 @@ export interface SurveySubmissionFormProps {
   isLoading?: boolean;
 }
 
-const initUpsertFormData: SurveySubmissionFormData = {
-  questions: [],
-};
-
 const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData, onSubmit, isLoading = false }) => {
   const methods = useForm<SurveySubmissionFormData>({
     resolver: zodResolver(surveySubmissionSchema),
-    defaultValues: initUpsertFormData,
+    defaultValues: { questions: [] },
   });
 
   const {
@@ -45,10 +40,8 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
     name: "questions",
     keyName: "_questionId",
   });
-  const router = useRouter();
 
   const handleCancel = () => {};
-  console.log({ values: getValues(), errors });
   const submitFormData: SubmitHandler<SurveySubmissionFormData> = (formData) => {
     console.log({ formData });
     onSubmit(formData);
@@ -61,7 +54,7 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
 
   return (
     <FormProvider {...methods}>
-      <Stack spacing={3} className="">
+      <Stack spacing={3}>
         <div className="flex flex-col gap-6">
           {questionFields.map((question, _questionIndex) => (
             <QuestionItemWrapper index={_questionIndex} key={question._questionId} label={question.questionName}>
@@ -71,7 +64,7 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
                     Trả lời {question.isRequired && <span className="text-red-600">*</span>}
                   </Typography>
                   <RHFTextAreaField
-                    name={`questions.${_questionIndex}.answer.text`}
+                    name={`questions.${_questionIndex}.answer.value`}
                     control={control}
                     placeholder="Nhập nội dung"
                   />
@@ -109,7 +102,7 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({ initialData
                   <RatingItemType control={control} questionIndex={_questionIndex} />
                 </div>
               )}
-              {question.type === "rating_sort" && (
+              {question.type === "sort_rating" && (
                 <div className="answer">
                   <Typography className="font-semibold mb-2">
                     Trả lời {question.isRequired && <span className="text-red-600">*</span>}

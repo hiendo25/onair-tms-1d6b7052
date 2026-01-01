@@ -26,8 +26,9 @@ const RadioItemType: React.FC<RadioItemTypeProps> = ({ questionIndex, question }
         `questions.${questionIndex}.answer`,
         {
           isOther: newOption.isOther,
-          text: newOption.text || "",
-          value: newOption.id,
+          optionText: newOption.isOther ? "Khác" : newOption?.text || "",
+          optionId: newOption.id,
+          otherText: "",
         },
         { shouldDirty: true },
       );
@@ -38,20 +39,19 @@ const RadioItemType: React.FC<RadioItemTypeProps> = ({ questionIndex, question }
   const handleChangeText: OutlinedInputProps["onChange"] = (evt) => {
     const text = evt.target.value;
 
-    setValue(
-      `questions.${questionIndex}.answer`,
-      {
-        ...currentAnswer,
-        text,
-      },
-      {
-        shouldDirty: true,
-      },
-    );
+    if (!currentAnswer) return;
+
+    const updateAnswer = {
+      ...currentAnswer,
+      otherText: text,
+    };
+    setValue(`questions.${questionIndex}.answer`, updateAnswer, {
+      shouldDirty: true,
+    });
   };
 
   const hasSelected = (optionId: string) => {
-    return currentAnswer.value === optionId;
+    return currentAnswer?.optionId === optionId;
   };
 
   return (
@@ -69,7 +69,7 @@ const RadioItemType: React.FC<RadioItemTypeProps> = ({ questionIndex, question }
               <OutlinedInput
                 key={option.id}
                 placeholder="Nhập lựa chọn khác"
-                value={currentAnswer.text}
+                value={currentAnswer?.otherText}
                 onChange={handleChangeText}
               />
             </FormControl>

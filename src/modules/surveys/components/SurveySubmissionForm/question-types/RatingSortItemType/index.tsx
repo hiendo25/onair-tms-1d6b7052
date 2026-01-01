@@ -53,8 +53,8 @@ const RatingSortItemType: React.FC<RatingSortItemTypeProps> = ({ questionIndex, 
       setActiveDragSectionId(undefined);
       if (!overId || activeId === overId) return;
 
-      const activeIndex = answers.findIndex((ans) => ans.value === activeId);
-      const overIndex = answers.findIndex((ans) => ans.value === overId);
+      const activeIndex = answers.findIndex((ans) => ans.optionId === activeId);
+      const overIndex = answers.findIndex((ans) => ans.optionId === overId);
 
       if (activeIndex === -1 || overIndex === -1) return;
 
@@ -65,7 +65,7 @@ const RatingSortItemType: React.FC<RatingSortItemTypeProps> = ({ questionIndex, 
   );
 
   const draggingItem = useMemo(() => {
-    const indexActiveSection = answers.findIndex((sec) => sec.value === activeDragSectionId);
+    const indexActiveSection = answers.findIndex((ans) => ans.optionId === activeDragSectionId);
     const activeSectionDrag = answers[indexActiveSection];
     if (indexActiveSection === -1 || !activeSectionDrag) return;
 
@@ -74,11 +74,11 @@ const RatingSortItemType: React.FC<RatingSortItemTypeProps> = ({ questionIndex, 
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-      <SortableContext items={answers.map((ans) => ans.value)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={answers.map((ans) => ans.optionId)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col gap-2">
           {answers.map((ans, _indexSection) => (
-            <SortableItem id={ans.value} key={ans.value} subLabel={`${_indexSection + 1}`}>
-              {ans.text}
+            <SortableItem id={ans.optionId} key={ans.optionId} subLabel={`${_indexSection + 1}`}>
+              {ans.optionText}
             </SortableItem>
           ))}
         </div>
@@ -86,11 +86,11 @@ const RatingSortItemType: React.FC<RatingSortItemTypeProps> = ({ questionIndex, 
       <DragOverlay dropAnimation={null}>
         {draggingItem ? (
           <SortableItem
-            id={draggingItem.data.value}
+            id={draggingItem.data.optionId}
             subLabel={`${draggingItem.index + 1}`}
-            key={draggingItem.data.value}
+            key={draggingItem.data.optionId}
           >
-            {draggingItem.data.text}
+            {draggingItem.data.optionText}
           </SortableItem>
         ) : null}
       </DragOverlay>

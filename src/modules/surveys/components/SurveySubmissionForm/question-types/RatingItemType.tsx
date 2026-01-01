@@ -10,6 +10,7 @@ interface RatingItemTypeProps {
   questionIndex: number;
   control: Control<SurveySubmissionFormData>;
 }
+type RatingValue = Exclude<QuestionWithRatingFormData["answer"], undefined>["value"];
 const RatingItemType: React.FC<RatingItemTypeProps> = ({ questionIndex, control }) => {
   return (
     <Controller
@@ -17,7 +18,7 @@ const RatingItemType: React.FC<RatingItemTypeProps> = ({ questionIndex, control 
       name={`questions.${questionIndex}.answer.value`}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <>
-          <HoverRating value={value as QuestionWithRatingFormData["answer"]["value"]} onChange={onChange} />
+          <HoverRating value={value as RatingValue} onChange={onChange} />
           {error?.message ? <FormHelperText error>{error.message}</FormHelperText> : null}
         </>
       )}

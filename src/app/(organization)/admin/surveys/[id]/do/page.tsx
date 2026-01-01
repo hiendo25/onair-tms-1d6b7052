@@ -23,7 +23,7 @@ export async function generateMetadata(
   const { data: surveyDetail, error } = await surveysRepository.getSurveyById(id);
 
   return {
-    title: surveyDetail?.title || "Sửa survey",
+    title: surveyDetail?.title || "Làm khảo sát",
     description: surveyDetail?.description,
   };
 }

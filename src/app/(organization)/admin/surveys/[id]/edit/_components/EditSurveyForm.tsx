@@ -18,7 +18,6 @@ type SurveyFormDataInitial = Exclude<UpsertSurveyFormProps["initialData"], undef
 export default function EditSurveyForm({ data }: EditSurveyFormProps) {
   const { update, isLoading } = useUpsertSurvey();
   const router = useRouter();
-  console.log({ data });
   const { enqueueSnackbar } = useSnackbar();
   const [isTransition, startTransition] = useTransition();
   const initFormData: UpsertSurveyFormProps["initialData"] = useMemo(() => {
@@ -72,7 +71,18 @@ export default function EditSurveyForm({ data }: EditSurveyFormProps) {
       },
     );
   };
+
+  const handleCancel = () => {
+    startTransition(() => {
+      router.push(PATHS.SURVEYS.LIST);
+    });
+  };
   return (
-    <UpsertSurveyForm initialData={initFormData} onSubmit={handleUpdateSurvey} isLoading={isLoading || isTransition} />
+    <UpsertSurveyForm
+      initialData={initFormData}
+      onSubmit={handleUpdateSurvey}
+      onCancel={handleCancel}
+      isLoading={isLoading || isTransition}
+    />
   );
 }

@@ -22,15 +22,16 @@ const CheckboxItemType: React.FC<CheckboxItemTypeProps> = ({ questionIndex, ques
 
   const handleSelectOption = useCallback(
     (option: OptionItem) => {
-      const existItem = currentAnswer.find((item) => item.value === option.id);
-      const updatedAnswers = existItem
-        ? currentAnswer.filter((item) => item.value !== option.id)
+      const existItem = currentAnswer.find((item) => item.optionId === option.id);
+      const updatedAnswers: QuestionWithMultipleSelectFormData["answer"] = existItem
+        ? currentAnswer.filter((item) => item.optionId !== option.id)
         : [
             ...currentAnswer,
             {
+              optionId: option.id,
+              optionText: option.text || "",
               isOther: option.isOther,
-              text: option.text || "",
-              value: option.id,
+              otherText: "",
             },
           ];
 
@@ -46,7 +47,9 @@ const CheckboxItemType: React.FC<CheckboxItemTypeProps> = ({ questionIndex, ques
     (evt) => {
       const text = evt.target.value;
 
-      const updatedAnswers = currentAnswer.map((item) => (item.value === optionId ? { ...item, text: text } : item));
+      const updatedAnswers = currentAnswer.map((item) =>
+        item.optionId === optionId ? { ...item, otherText: text } : item,
+      );
 
       setValue(`questions.${questionIndex}.answer`, updatedAnswers, {
         shouldDirty: true,
@@ -54,11 +57,11 @@ const CheckboxItemType: React.FC<CheckboxItemTypeProps> = ({ questionIndex, ques
     };
 
   const hasSelected = (itemId: string) => {
-    return currentAnswer.some((item) => item.value === itemId);
+    return currentAnswer.some((item) => item.optionId === itemId);
   };
 
   const getOtherTextValue = useCallback(
-    (optionId: string) => currentAnswer.find((item) => item.value === optionId)?.text || "",
+    (optionId: string) => currentAnswer.find((item) => item.optionId === optionId)?.otherText || "",
     [currentAnswer],
   );
 

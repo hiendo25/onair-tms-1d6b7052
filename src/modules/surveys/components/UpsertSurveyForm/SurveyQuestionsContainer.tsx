@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -11,26 +11,25 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Button } from "@mui/material";
+import { get } from "lodash";
 import { Control, FieldErrors, useFieldArray } from "react-hook-form";
 
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { UpsertSurveyFormData } from "./survey-form.schema";
-import { useUpsertServeyFormContext } from ".";
+import { useUpsertSurveyFormContext } from ".";
 
 import QuestionContentItem from "./QuestionContentItem";
 import SortableItem from "./SortableItem";
+import { UpsertSurveyFormData } from "./survey-form.schema";
 
 interface SurveyQuestionContainerProps {
   className?: string;
   control: Control<UpsertSurveyFormData>;
   errors: FieldErrors<UpsertSurveyFormData>;
 }
-const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ control, errors }) => {
-  // const {
-  //   formState: { errors },
-  // } = useUpsertServeyFormContext();
+const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ errors, control }) => {
   const [activeDragQuestionId, setActiveDragQuestionId] = useState<UniqueIdentifier>();
-  console.log(errors);
+
+  const questionsError = get(errors, "questions");
   const {
     fields: questionsFields,
     append,
@@ -83,7 +82,6 @@ const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ contr
   const handleAddQuestion = () => {
     append([{ label: "", type: "checkbox", is_required: false, options: [] }]);
   };
-
   return (
     <div className="sections-container flex flex-col gap-6">
       <DndContext sensors={sensors} onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
@@ -97,7 +95,7 @@ const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ contr
                 questionIndex={_questionIndex}
                 control={control}
                 onRemove={remove}
-                error={errors["questions"]?.[_questionIndex]}
+                error={questionsError?.[_questionIndex]}
               />
             </SortableItem>
           ))}
@@ -122,4 +120,4 @@ const SurveyQuestionContainer: React.FC<SurveyQuestionContainerProps> = ({ contr
   );
 };
 
-export default SurveyQuestionContainer;
+export default memo(SurveyQuestionContainer);

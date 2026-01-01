@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
-import { QuestionWithYesNoFormData, SurveySubmissionFormData } from "../survey-submission.schema";
+import { SurveySubmissionFormData } from "../survey-submission.schema";
 
 interface YesNoTypeProps {
   questionIndex: number;
@@ -16,12 +16,6 @@ const YES_NO_OPTIONS: { value: "yes" | "no"; label: string }[] = [
 ];
 const YesNoType: React.FC<YesNoTypeProps> = ({ questionIndex }) => {
   const { setValue, control } = useFormContext<SurveySubmissionFormData>();
-
-  const currentAnswer = useWatch({
-    control,
-    name: `questions.${questionIndex}.answer`,
-    exact: true,
-  }) as QuestionWithYesNoFormData["answer"];
 
   const handleSelect = (newValue: "yes" | "no") => {
     setValue(`questions.${questionIndex}.answer`, { value: newValue });
@@ -42,4 +36,4 @@ const YesNoType: React.FC<YesNoTypeProps> = ({ questionIndex }) => {
     </div>
   );
 };
-export default YesNoType;
+export default memo(YesNoType);
