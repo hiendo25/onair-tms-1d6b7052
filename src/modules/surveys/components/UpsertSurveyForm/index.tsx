@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
+import { Controller, FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
 
 import {
   UpsertSurveyFormData,
@@ -11,6 +11,7 @@ import {
 } from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import TinyEditor from "@/shared/ui/form/TinyEditor";
 
 import ButtonCancelConfirmation from "./ButtonCancelConfirmation";
 import SlugField from "./SlugField";
@@ -66,14 +67,13 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
           <div className="flex flex-col gap-3">
             <SlugField control={control} disableUpdate={!!initialData} />
           </div>
-          <RHFTextAreaField
+
+          <Controller
             control={control}
             name="description"
-            label="Mô tả"
-            placeholder="Nhập mô tả khảo sát"
-            required
-            minRows={3}
-            maxRows={6}
+            render={({ field, fieldState: { error } }) => (
+              <TinyEditor {...field} helperText={error?.message} error={!!error} />
+            )}
           />
         </div>
 

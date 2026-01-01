@@ -5,18 +5,15 @@ import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import { surveysRepository } from "@/repository";
-import HtmlContent from "@/shared/ui/HtmlContent";
 import PageContainer from "@/shared/ui/PageContainer";
 
-import SurveySubmissionFormClient from "./_components/SurveySubmissionFormClient";
-
-type PageDoSurveyProps = {
+type PageThankYouProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata(
-  { params, searchParams }: PageDoSurveyProps,
+  { params, searchParams }: PageThankYouProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { id } = await params;
@@ -28,7 +25,7 @@ export async function generateMetadata(
     description: surveyDetail?.description,
   };
 }
-const PageDoSurvey: React.FC<PageDoSurveyProps> = async ({ params }) => {
+const PageThankYou: React.FC<PageThankYouProps> = async ({ params }) => {
   const { id: surveyId } = await params;
 
   const { data: surveyDetail, error } = await surveysRepository.getSurveyById(surveyId);
@@ -50,13 +47,12 @@ const PageDoSurvey: React.FC<PageDoSurveyProps> = async ({ params }) => {
         },
       ]}
     >
-      <HtmlContent content={surveyDetail.description} />
+      <Typography component="div">{surveyDetail.description}</Typography>
       <div className="h-6"></div>
       <Typography component="h3" variant="h5" className="mb-6">
         Câu hỏi khảo sát
       </Typography>
-      <SurveySubmissionFormClient data={surveyDetail} />
     </PageContainer>
   );
 };
-export default PageDoSurvey;
+export default PageThankYou;
