@@ -1,5 +1,3 @@
-import dayjs from "dayjs";
-
 import {
   QuestionWithMultipleSelectFormData,
   QuestionWithRatingAndSortFormData,
@@ -51,7 +49,7 @@ export class SubmissionSurveyService {
     }
 
     return {
-      ...questionData,
+      ...surveyData,
       questions: questionData,
     };
   }

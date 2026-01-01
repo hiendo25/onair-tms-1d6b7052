@@ -1,17 +1,15 @@
+import React from "react";
 import type { ButtonBaseProps } from "@mui/material/ButtonBase";
 import ButtonBase from "@mui/material/ButtonBase";
 import SvgIcon from "@mui/material/SvgIcon";
 
-import type { EditorToolbarItemProps } from "../../types";
-
-export function ToolbarItem({
-  sx,
-  icon,
-  label,
-  active,
-  disabled,
-  ...other
-}: ButtonBaseProps & EditorToolbarItemProps) {
+interface ToolbarItemProps extends ButtonBaseProps {
+  icon?: React.ReactNode;
+  label?: string;
+  active?: boolean;
+  disabled?: boolean;
+}
+export function ToolbarItem({ sx, icon, label, active, disabled, ...other }: ToolbarItemProps) {
   return (
     <ButtonBase
       sx={{

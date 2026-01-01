@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { alpha } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
+import { Editor } from "@tiptap/react";
 
 import { editorClasses } from "../classes";
-import type { EditorToolbarProps } from "../types";
 
 import HeadingBlock from "./components/HeadingBlock";
 import { ToolbarItem } from "./components/toolbar-item";
@@ -12,7 +12,11 @@ import { ToolbarItem } from "./components/toolbar-item";
  * https://remixicon.com
  */
 
-const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor, fullItem, fullScreen, onToggleFullScreen }) => {
+export interface EditorToolbarProps {
+  editor: Editor | null;
+}
+
+const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor }) => {
   if (!editor) {
     return null;
   }
@@ -30,7 +34,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor, fullItem, fullScr
         borderTopRightRadius: "inherit",
         borderTopLeftRadius: "inherit",
         rowGap: "12px",
-        borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+        borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.3)}`,
       }}
       className={editorClasses.toolbar.root}
     >
@@ -85,98 +89,80 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({ editor, fullItem, fullScr
         />
       </Stack>
       {/* Text align */}
-      {fullItem && (
-        <Stack direction="row" spacing={0.5}>
-          <ToolbarItem
-            aria-label="Align left"
-            active={editor.isActive({ textAlign: "left" })}
-            className={editorClasses.toolbar.alignLeft}
-            onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            icon={<path d="M3 4H21V6H3V4ZM3 19H17V21H3V19ZM3 14H21V16H3V14ZM3 9H17V11H3V9Z" />}
-          />
-          <ToolbarItem
-            aria-label="Align center"
-            active={editor.isActive({ textAlign: "center" })}
-            className={editorClasses.toolbar.alignCenter}
-            onClick={() => editor.chain().focus().setTextAlign("center").run()}
-            icon={<path d="M3 4H21V6H3V4ZM5 19H19V21H5V19ZM3 14H21V16H3V14ZM5 9H19V11H5V9Z" />}
-          />
-          <ToolbarItem
-            aria-label="Align right"
-            active={editor.isActive({ textAlign: "right" })}
-            className={editorClasses.toolbar.alignRight}
-            onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            icon={<path d="M3 4H21V6H3V4ZM7 19H21V21H7V19ZM3 14H21V16H3V14ZM7 9H21V11H7V9Z" />}
-          />
-          <ToolbarItem
-            aria-label="Align justify"
-            active={editor.isActive({ textAlign: "justify" })}
-            className={editorClasses.toolbar.alignJustify}
-            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-            icon={<path d="M3 4H21V6H3V4ZM3 19H21V21H3V19ZM3 14H21V16H3V14ZM3 9H21V11H3V9Z" />}
-          />
-        </Stack>
-      )}
+
+      <Stack direction="row" spacing={0.5}>
+        <ToolbarItem
+          aria-label="Align left"
+          active={editor.isActive({ textAlign: "left" })}
+          className={editorClasses.toolbar.alignLeft}
+          onClick={() => editor.chain().focus().setTextAlign("left").run()}
+          icon={<path d="M3 4H21V6H3V4ZM3 19H17V21H3V19ZM3 14H21V16H3V14ZM3 9H17V11H3V9Z" />}
+        />
+        <ToolbarItem
+          aria-label="Align center"
+          active={editor.isActive({ textAlign: "center" })}
+          className={editorClasses.toolbar.alignCenter}
+          onClick={() => editor.chain().focus().setTextAlign("center").run()}
+          icon={<path d="M3 4H21V6H3V4ZM5 19H19V21H5V19ZM3 14H21V16H3V14ZM5 9H19V11H5V9Z" />}
+        />
+        <ToolbarItem
+          aria-label="Align right"
+          active={editor.isActive({ textAlign: "right" })}
+          className={editorClasses.toolbar.alignRight}
+          onClick={() => editor.chain().focus().setTextAlign("right").run()}
+          icon={<path d="M3 4H21V6H3V4ZM7 19H21V21H7V19ZM3 14H21V16H3V14ZM7 9H21V11H7V9Z" />}
+        />
+        <ToolbarItem
+          aria-label="Align justify"
+          active={editor.isActive({ textAlign: "justify" })}
+          className={editorClasses.toolbar.alignJustify}
+          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+          icon={<path d="M3 4H21V6H3V4ZM3 19H21V21H3V19ZM3 14H21V16H3V14ZM3 9H21V11H3V9Z" />}
+        />
+      </Stack>
 
       {/* Blockquote - Hr line */}
-      {fullItem && (
-        <Stack direction="row" spacing={0.5}>
-          <ToolbarItem
-            aria-label="Blockquote"
-            active={editor.isActive("blockquote")}
-            className={editorClasses.toolbar.blockquote}
-            onClick={() => editor.chain().focus().toggleBlockquote().run()}
-            icon={
-              <path d="M4.58341 17.3211C3.55316 16.2274 3 15 3 13.0103C3 9.51086 5.45651 6.37366 9.03059 4.82318L9.92328 6.20079C6.58804 8.00539 5.93618 10.346 5.67564 11.822C6.21263 11.5443 6.91558 11.4466 7.60471 11.5105C9.40908 11.6778 10.8312 13.159 10.8312 15C10.8312 16.933 9.26416 18.5 7.33116 18.5C6.2581 18.5 5.23196 18.0095 4.58341 17.3211ZM14.5834 17.3211C13.5532 16.2274 13 15 13 13.0103C13 9.51086 15.4565 6.37366 19.0306 4.82318L19.9233 6.20079C16.588 8.00539 15.9362 10.346 15.6756 11.822C16.2126 11.5443 16.9156 11.4466 17.6047 11.5105C19.4091 11.6778 20.8312 13.159 20.8312 15C20.8312 16.933 19.2642 18.5 17.3312 18.5C16.2581 18.5 15.232 18.0095 14.5834 17.3211Z" />
-            }
-          />
-          <ToolbarItem
-            aria-label="Horizontal"
-            className={editorClasses.toolbar.hr}
-            onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            icon={<path d="M2 11H4V13H2V11ZM6 11H18V13H6V11ZM20 11H22V13H20V11Z" />}
-          />
-        </Stack>
-      )}
+
+      <Stack direction="row" spacing={0.5}>
+        <ToolbarItem
+          aria-label="Blockquote"
+          active={editor.isActive("blockquote")}
+          className={editorClasses.toolbar.blockquote}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          icon={
+            <path d="M4.58341 17.3211C3.55316 16.2274 3 15 3 13.0103C3 9.51086 5.45651 6.37366 9.03059 4.82318L9.92328 6.20079C6.58804 8.00539 5.93618 10.346 5.67564 11.822C6.21263 11.5443 6.91558 11.4466 7.60471 11.5105C9.40908 11.6778 10.8312 13.159 10.8312 15C10.8312 16.933 9.26416 18.5 7.33116 18.5C6.2581 18.5 5.23196 18.0095 4.58341 17.3211ZM14.5834 17.3211C13.5532 16.2274 13 15 13 13.0103C13 9.51086 15.4565 6.37366 19.0306 4.82318L19.9233 6.20079C16.588 8.00539 15.9362 10.346 15.6756 11.822C16.2126 11.5443 16.9156 11.4466 17.6047 11.5105C19.4091 11.6778 20.8312 13.159 20.8312 15C20.8312 16.933 19.2642 18.5 17.3312 18.5C16.2581 18.5 15.232 18.0095 14.5834 17.3211Z" />
+          }
+        />
+        <ToolbarItem
+          aria-label="Horizontal"
+          className={editorClasses.toolbar.hr}
+          onClick={() => editor.chain().focus().setHorizontalRule().run()}
+          icon={<path d="M2 11H4V13H2V11ZM6 11H18V13H6V11ZM20 11H22V13H20V11Z" />}
+        />
+      </Stack>
+
       {/* Undo - Redo */}
-      {fullItem && (
-        <Stack direction="row" spacing={0.5}>
-          <ToolbarItem
-            aria-label="Undo"
-            className={editorClasses.toolbar.undo}
-            disabled={!editor.can().chain().focus().undo().run()}
-            onClick={() => editor.chain().focus().undo().run()}
-            icon={
-              <path d="M8 7V11L2 6L8 1V5H13C17.4183 5 21 8.58172 21 13C21 17.4183 17.4183 21 13 21H4V19H13C16.3137 19 19 16.3137 19 13C19 9.68629 16.3137 7 13 7H8Z" />
-            }
-          />
-          <ToolbarItem
-            aria-label="Redo"
-            className={editorClasses.toolbar.redo}
-            disabled={!editor.can().chain().focus().redo().run()}
-            onClick={() => editor.chain().focus().redo().run()}
-            icon={
-              <path d="M16 7H11C7.68629 7 5 9.68629 5 13C5 16.3137 7.68629 19 11 19H20V21H11C6.58172 21 3 17.4183 3 13C3 8.58172 6.58172 5 11 5H16V1L22 6L16 11V7Z" />
-            }
-          />
-        </Stack>
-      )}
-      {fullItem && (
-        <Stack direction="row" spacing={0.5}>
-          <ToolbarItem
-            aria-label="Fullscreen"
-            className={editorClasses.toolbar.fullscreen}
-            onClick={onToggleFullScreen}
-            icon={
-              fullScreen ? (
-                <path d="M18 7H22V9H16V3H18V7ZM8 9H2V7H6V3H8V9ZM18 17V21H16V15H22V17H18ZM8 15V21H6V17H2V15H8Z" />
-              ) : (
-                <path d="M16 3H22V9H20V5H16V3ZM2 3H8V5H4V9H2V3ZM20 19V15H22V21H16V19H20ZM4 19H8V21H2V15H4V19Z" />
-              )
-            }
-          />
-        </Stack>
-      )}
+
+      <Stack direction="row" spacing={0.5}>
+        <ToolbarItem
+          aria-label="Undo"
+          className={editorClasses.toolbar.undo}
+          disabled={!editor.can().chain().focus().undo().run()}
+          onClick={() => editor.chain().focus().undo().run()}
+          icon={
+            <path d="M8 7V11L2 6L8 1V5H13C17.4183 5 21 8.58172 21 13C21 17.4183 17.4183 21 13 21H4V19H13C16.3137 19 19 16.3137 19 13C19 9.68629 16.3137 7 13 7H8Z" />
+          }
+        />
+        <ToolbarItem
+          aria-label="Redo"
+          className={editorClasses.toolbar.redo}
+          disabled={!editor.can().chain().focus().redo().run()}
+          onClick={() => editor.chain().focus().redo().run()}
+          icon={
+            <path d="M16 7H11C7.68629 7 5 9.68629 5 13C5 16.3137 7.68629 19 11 19H20V21H11C6.58172 21 3 17.4183 3 13C3 8.58172 6.58172 5 11 5H16V1L22 6L16 11V7Z" />
+          }
+        />
+      </Stack>
     </Stack>
   );
 };

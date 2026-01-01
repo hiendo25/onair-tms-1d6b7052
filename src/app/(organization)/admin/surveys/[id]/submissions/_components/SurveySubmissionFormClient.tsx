@@ -1,7 +1,10 @@
 "use client";
 import React, { useMemo } from "react";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 
+import { PATHS } from "@/constants/path.constant";
 import SurveySubmissionForm, { SurveySubmissionFormProps } from "@/modules/surveys/components/SurveySubmissionForm";
 import { useSubmissionSurvey } from "@/modules/surveys/hooks/useSubmissionSurvey";
 import { GetSurveyByIdResponse } from "@/repository/surveys";
@@ -10,8 +13,9 @@ interface SurveySubmissionFormClientProps {
 }
 const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({ data }) => {
   console.log({ data });
-
-  const { create, isLoading } = useSubmissionSurvey();
+  const router = useRouter();
+  const [isTransition, startTransition] = useTransition();
+  const { create: submitSurvey, isLoading } = useSubmissionSurvey();
 
   type QuestionFormItem = Exclude<SurveySubmissionFormProps["initialData"], undefined>["questions"][number];
   const surveyFormData = useMemo((): Exclude<SurveySubmissionFormProps["initialData"], undefined> => {
@@ -98,15 +102,30 @@ const SurveySubmissionFormClient: React.FC<SurveySubmissionFormClientProps> = ({
   }, [data]);
 
   const handleSubmitForm: SurveySubmissionFormProps["onSubmit"] = (data) => {
-    create(
+    submitSurvey(
       { formData: data, targetId: undefined, targetType: undefined },
       {
-        onSuccess(data, variables, onMutateResult, context) {
-          enqueueSnackbar("Gửi khảo sát thành công", { variant: "success" });
+        onSuccess(data) {
+          startTransition(() => {
+            enqueueSnackbar("Gửi khảo sát thành công", { variant: "success" });
+            router.push(PATHS.SURVEYS.THANK_YOU(data.survey_id, { responseId: data.id }));
+          });
         },
       },
     );
   };
-  return <SurveySubmissionForm initialData={surveyFormData} onSubmit={handleSubmitForm} isLoading={isLoading} />;
+  const handleCancel = () => {
+    startTransition(() => {
+      router.back();
+    });
+  };
+  return (
+    <SurveySubmissionForm
+      initialData={surveyFormData}
+      onSubmit={handleSubmitForm}
+      onCancel={handleCancel}
+      isLoading={isLoading || isTransition}
+    />
+  );
 };
 export default SurveySubmissionFormClient;

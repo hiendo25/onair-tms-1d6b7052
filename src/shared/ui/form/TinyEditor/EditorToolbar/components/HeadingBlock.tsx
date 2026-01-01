@@ -2,16 +2,16 @@ import React, { useCallback, useState } from "react";
 import { alpha, MenuItem } from "@mui/material";
 import ButtonBase from "@mui/material/ButtonBase";
 import Menu from "@mui/material/Menu";
+import { Editor } from "@tiptap/react";
 
 import { ParagraphIcon } from "@/shared/assets/icons";
-import type { EditorToolbarProps } from "../../types";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 const HEADING_OPTIONS = ["Heading 1", "Heading 2", "Heading 3", "Heading 4", "Heading 5", "Heading 6"];
 
 interface HeadingBlockProps {
-  editor: Exclude<EditorToolbarProps["editor"], null>;
+  editor: Editor;
 }
 const HeadingBlock: React.FC<HeadingBlockProps> = ({ editor }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

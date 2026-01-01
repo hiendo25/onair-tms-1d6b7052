@@ -71,7 +71,7 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
   };
 
   const handleCopyLink = (surveyId: string) => async () => {
-    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.DO(surveyId)}`;
+    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.SUBMISSIONS(surveyId)}`;
     const isCopied = await copy(surveyUrl);
     notifications.show(isCopied ? "Đã sao chép liên kết khảo sát" : "Không thể sao chép liên kết", {
       severity: isCopied ? "success" : "error",

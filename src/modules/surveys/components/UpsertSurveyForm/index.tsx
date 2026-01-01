@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { Controller, FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import {
   UpsertSurveyFormData,
   upsertSurveyFormSchema,
 } from "@/modules/surveys/components/UpsertSurveyForm/survey-form.schema";
-import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import TinyEditor from "@/shared/ui/form/TinyEditor";
+import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
 
 import ButtonCancelConfirmation from "./ButtonCancelConfirmation";
 import SlugField from "./SlugField";
@@ -31,6 +30,7 @@ const initUpsertFormData: UpsertSurveyFormData = {
 };
 
 const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubmit, isLoading = false, onCancel }) => {
+  const buttonActionRef = useRef<"submit" | "cancel">(null);
   const methods = useForm<UpsertSurveyFormData>({
     resolver: zodResolver(upsertSurveyFormSchema),
     defaultValues: initUpsertFormData,
@@ -44,15 +44,21 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
   } = methods;
 
   const handleCancel = useCallback(() => {
+    buttonActionRef.current === "cancel";
     onCancel?.();
   }, [onCancel]);
 
-  const submitFormData: SubmitHandler<UpsertSurveyFormData> = (formData) => {
-    onSubmit(formData);
+  const handleSubmitForm = () => {
+    buttonActionRef.current === "submit";
+    handleSubmit(onSubmit)();
   };
 
   useEffect(() => {
+    buttonActionRef.current = null;
     initialData ? reset(initialData) : reset();
+    return () => {
+      buttonActionRef.current = null;
+    };
   }, [initialData, reset]);
 
   return (
@@ -67,14 +73,7 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
           <div className="flex flex-col gap-3">
             <SlugField control={control} disableUpdate={!!initialData} />
           </div>
-
-          <Controller
-            control={control}
-            name="description"
-            render={({ field, fieldState: { error } }) => (
-              <TinyEditor {...field} helperText={error?.message} error={!!error} />
-            )}
-          />
+          <RHFTinyEditor control={control} name="description" minHeight={220} label="Mô tả" required />
         </div>
 
         {errors.questions?.message && (
@@ -92,11 +91,15 @@ const UpsertSurveyForm: React.FC<UpsertSurveyFormProps> = ({ initialData, onSubm
       <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
         <ButtonCancelConfirmation
           onOk={handleCancel}
-          action={initialData ? "update" : "create"}
-          loading={isLoading}
+          loading={isLoading && buttonActionRef.current === "cancel"}
           initialData={initialData}
         />
-        <Button variant="contained" onClick={handleSubmit(submitFormData)} loading={isLoading} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleSubmitForm}
+          loading={isLoading && buttonActionRef.current === "submit"}
+          disabled={isLoading}
+        >
           {initialData ? "Cập nhật" : "Tạo khảo sát"}
         </Button>
       </Box>

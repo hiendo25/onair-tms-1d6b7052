@@ -10,13 +10,13 @@ import PageContainer from "@/shared/ui/PageContainer";
 
 import SurveySubmissionFormClient from "./_components/SurveySubmissionFormClient";
 
-type PageDoSurveyProps = {
+type PageSubmissionsSurveyProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
 
 export async function generateMetadata(
-  { params, searchParams }: PageDoSurveyProps,
+  { params, searchParams }: PageSubmissionsSurveyProps,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { id } = await params;
@@ -28,7 +28,7 @@ export async function generateMetadata(
     description: surveyDetail?.description,
   };
 }
-const PageDoSurvey: React.FC<PageDoSurveyProps> = async ({ params }) => {
+const PageSubmissionsSurvey: React.FC<PageSubmissionsSurveyProps> = async ({ params }) => {
   const { id: surveyId } = await params;
 
   const { data: surveyDetail, error } = await surveysRepository.getSurveyById(surveyId);
@@ -59,4 +59,4 @@ const PageDoSurvey: React.FC<PageDoSurveyProps> = async ({ params }) => {
     </PageContainer>
   );
 };
-export default PageDoSurvey;
+export default PageSubmissionsSurvey;

@@ -9,12 +9,14 @@ type EditorContainerProps = BoxProps & {
   error?: boolean;
   disabled?: boolean;
   fullScreen?: boolean;
+  minHeight?: number;
+  maxHeight?: number;
 };
 export const EditorContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "error" && prop !== "disabled" && prop !== "fullScreen",
-})<EditorContainerProps>(({ error, disabled, fullScreen, theme }) => ({
-  minHeight: 360,
-  maxHeight: 650,
+})<EditorContainerProps>(({ error, disabled, fullScreen, theme, minHeight = 280, maxHeight = 680 }) => ({
+  minHeight,
+  maxHeight,
   borderRadius: theme.shape.borderRadius,
   border: `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
   scrollbarWidth: "thin",

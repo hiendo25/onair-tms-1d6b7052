@@ -5,13 +5,16 @@ import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { Editor } from "@tiptap/react";
 
 import { editorClasses } from "../../classes";
-import type { EditorToolbarProps } from "../../types";
 
 import { ToolbarItem } from "./toolbar-item";
 
-export function LinkBlock({ editor }: Pick<EditorToolbarProps, "editor">) {
+interface EditorToolbarProps {
+  editor: Editor;
+}
+export function LinkBlock({ editor }: EditorToolbarProps) {
   const [url, setUrl] = useState("");
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);

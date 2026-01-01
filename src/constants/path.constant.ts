@@ -70,8 +70,11 @@ export const PATHS = {
     LIST: "/admin/surveys/list",
     EDIT: (id: string = ":id") => `/admin/surveys/${id}/edit`,
     STATISTICS: (id: string = ":id") => `/admin/surveys/${id}/statistics`,
-    DO: (id: string = ":id") => `/admin/surveys/${id}/do`,
-    THANK_YOU: (id: string = ":id") => `/admin/surveys/${id}/do/thank-you`,
+    SUBMISSIONS: (id: string = ":id") => `/admin/surveys/${id}/submissions`,
+    THANK_YOU: (id: string = ":id", searchParams?: { responseId: string }) =>
+      searchParams
+        ? `/admin/surveys/${id}/thank-you?responseId=${searchParams.responseId}`
+        : `/admin/surveys/${id}/thank-you`,
   },
   PLANS: {
     ROOT: "/admin/plans",

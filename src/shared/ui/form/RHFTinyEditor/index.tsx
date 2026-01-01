@@ -1,16 +1,11 @@
 "use client";
 import React, { memo, useId } from "react";
 import { FormControl, FormLabel } from "@mui/material";
-import dynamic from "next/dynamic";
 import { Control, Controller, FieldValues, Path, PathValue } from "react-hook-form";
 
-import EditorSkeleton from "../Editor/EditorSkeleton";
+import TinyEditor from "../TinyEditor";
 
-const DynamicEditor = dynamic(() => import("../Editor"), {
-  ssr: false,
-  loading: () => <EditorSkeleton aspect="auto" className="aspect-21/9" />,
-});
-interface RHFRichEditorProps<T extends FieldValues> {
+interface RHFTinyEditorProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
   placeholder?: React.ReactNode | string;
@@ -22,16 +17,16 @@ interface RHFRichEditorProps<T extends FieldValues> {
   maxHeight?: number;
   required?: boolean;
 }
-const RHFRichEditor = <T extends FieldValues>({
+const RHFTinyEditor = <T extends FieldValues>({
   label,
   control,
   defaultValue,
   name,
   className,
+  required,
   minHeight,
   maxHeight,
-  required,
-}: RHFRichEditorProps<T>) => {
+}: RHFTinyEditorProps<T>) => {
   const fieldId = useId();
 
   return (
@@ -47,11 +42,11 @@ const RHFRichEditor = <T extends FieldValues>({
               {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
-          <DynamicEditor
+          <TinyEditor
             {...field}
-            // minHeight={minHeight}
-            // maxHeight={maxHeight}
             error={!!error}
+            minHeight={minHeight}
+            maxHeight={maxHeight}
             helperText={error?.message}
           />
         </FormControl>
@@ -60,4 +55,4 @@ const RHFRichEditor = <T extends FieldValues>({
   );
 };
 
-export default RHFRichEditor;
+export default RHFTinyEditor;

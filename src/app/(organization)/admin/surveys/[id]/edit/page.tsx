@@ -44,9 +44,7 @@ export default async function EditSurveyPage({ params }: EditSurveyPageProps) {
         { title: "edit" },
       ]}
     >
-      <div className="w-full max-w-[1080px] mx-auto">
-        <EditSurveyForm data={surveyDetail} />
-      </div>
+      <EditSurveyForm data={surveyDetail} />
     </PageContainer>
   );
 }

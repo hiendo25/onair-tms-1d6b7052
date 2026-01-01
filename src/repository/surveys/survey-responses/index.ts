@@ -1,6 +1,11 @@
 import { createClient } from "@/services";
 
-import { CreateAnswerResponsePayload, CreateSurveyResponsePayload, SurveyResponseAnswerValueType } from "./type";
+import {
+  AnswerByQuestionType,
+  CreateAnswerResponsePayload,
+  CreateSurveyResponsePayload,
+  SurveyResponseAnswerValueType,
+} from "./type";
 
 const createResponse = async (payload: CreateSurveyResponsePayload) => {
   const supabase = createClient();
@@ -20,7 +25,7 @@ const bulkCreateAnswerResponse = async (payload: CreateAnswerResponsePayload[]) 
   }
 };
 
-const getResponsesBySurveyId = async (surveyId: string) => {
+const getSurveyResponseById = async (surveyResponseId: string) => {
   const supabase = createClient();
   try {
     return await supabase
@@ -28,21 +33,51 @@ const getResponsesBySurveyId = async (surveyId: string) => {
       .select(
         `
 				id,
-				employees(id, employee_type, employee_code, profiles(id, full_name, avatar)),
+				employees(
+					id, 
+					employee_type, 
+					employee_code, 
+					profiles(
+						id, 
+						full_name, 
+						avatar
+						)
+					),
 				target_id,
 				target_type,
 				created_at,
 				survey_id,
-				answers:surveys_answers(id, question_id, question_text, question_type, answer_value)
+				survey:surveys(
+					id, 
+					title
+				),
+				answers:surveys_answers(
+					id, 
+					question_id, 
+					question_text, 
+					question_type, 
+					answer_value
+				)
 			`,
         { count: "exact" },
       )
-      .eq("survey_id", surveyId)
-      .overrideTypes<Array<{ answers: Array<{ answer_value: SurveyResponseAnswerValueType }> }>, { merge: true }>();
+      .eq("id", surveyResponseId)
+      .single()
+      .overrideTypes<
+        {
+          responses: Array<{
+            answers: Array<
+              Omit<{ id: string; question_id: string; question_text: string }, never> & AnswerByQuestionType
+            >;
+          }>;
+        },
+        { merge: true }
+      >();
   } catch (err: any) {
-    throw new Error(`Unable get response by ${surveyId}`);
+    throw new Error(`Unable get response by ${surveyResponseId}`);
   }
 };
-export type GetResponseBySurveyIdResponse = Awaited<ReturnType<typeof getResponsesBySurveyId>>;
 
-export { createResponse, bulkCreateAnswerResponse, getResponsesBySurveyId };
+export type GetSurveyResponseByIdResponse = Awaited<ReturnType<typeof getSurveyResponseById>>;
+
+export { createResponse, bulkCreateAnswerResponse, getSurveyResponseById };

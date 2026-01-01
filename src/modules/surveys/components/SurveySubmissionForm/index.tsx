@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, FormHelperText, Stack, Typography } from "@mui/material";
-import { FormProvider, SubmitHandler, useFieldArray, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form";
 
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 
+import ButtonCancelSubmission from "./ButtonCancelSubmission";
 import CheckboxItemType from "./question-types/CheckboxItemType";
 import RadioItemType from "./question-types/RadioItemType";
 import RatingItemType from "./question-types/RatingItemType";
@@ -28,6 +29,7 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({
   isLoading = false,
   onCancel,
 }) => {
+  const buttonActionRef = useRef<"cancel" | "submit">(null);
   const methods = useForm<SurveySubmissionFormData>({
     resolver: zodResolver(surveySubmissionSchema),
     defaultValues: { questions: [] },
@@ -47,18 +49,24 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({
   });
 
   const handleCancel = () => {
+    buttonActionRef.current = "cancel";
     onCancel?.();
   };
-  const submitFormData: SubmitHandler<SurveySubmissionFormData> = (formData) => {
-    onSubmit(formData);
-  };
 
+  const handleSubmitForm = () => {
+    buttonActionRef.current = "submit";
+    handleSubmit(onSubmit)();
+  };
   const getErrorMessage = (index: number) => {
     return errors?.["questions"]?.[index]?.["answer"]?.message;
   };
+
   useEffect(() => {
     if (!initialData) return;
     reset(initialData);
+    return () => {
+      buttonActionRef.current = null;
+    };
   }, [initialData, reset]);
 
   return (
@@ -129,10 +137,17 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({
       </Stack>
       <div className="h-6"></div>
       <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-        <Button variant="outlined" onClick={handleCancel} disabled={isLoading}>
-          Hủy
-        </Button>
-        <Button variant="contained" onClick={handleSubmit(submitFormData)} loading={isLoading} disabled={isLoading}>
+        <ButtonCancelSubmission
+          onOk={handleCancel}
+          disabled={isLoading}
+          loading={isLoading && buttonActionRef.current === "cancel"}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSubmitForm}
+          loading={isLoading && buttonActionRef.current === "submit"}
+          disabled={isLoading}
+        >
           Nộp khảo sát
         </Button>
       </Box>
@@ -141,4 +156,4 @@ const SurveySubmissionForm: React.FC<SurveySubmissionFormProps> = ({
 };
 
 export default SurveySubmissionForm;
-export const useSurveySubmission = useFormContext<SurveySubmissionFormData>;
+export const useSurveySubmissionForm = useFormContext<SurveySubmissionFormData>;

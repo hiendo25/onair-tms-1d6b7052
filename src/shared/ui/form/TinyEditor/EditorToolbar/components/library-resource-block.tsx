@@ -1,14 +1,17 @@
 import React, { useCallback, useState } from "react";
 import { Button, Popover, Stack, TextField, Typography } from "@mui/material";
+import { Editor } from "@tiptap/react";
 
 import { editorClasses } from "../../classes";
-import { EditorToolbarProps } from "../../types";
 
 import { ToolbarItem } from "./toolbar-item";
 // import { useStoreLibrary } from "@onair/store/library";
 
 const FILE_TYPES = ["video/mp4", "application/pdf", "image/png", "image/jpeg"];
-type LibraryResourceBlockProps = Pick<EditorToolbarProps, "editor">;
+type LibraryResourceBlockProps = {
+  editor: Editor;
+};
+
 const LibraryResourceBlock: React.FC<LibraryResourceBlockProps> = ({ editor }) => {
   // const onOpenResource = useStoreLibrary((state) => state.onOpenResource);
 
