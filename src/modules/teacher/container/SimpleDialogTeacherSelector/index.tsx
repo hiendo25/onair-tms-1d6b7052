@@ -1,5 +1,6 @@
 "use client";
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useTransition } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, DialogContent, FilledInput, FilledInputProps, InputAdornment } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -33,6 +34,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
     const [selectTeacherList, setSelectTeacherList] = useState<EmployeeTeacherTypeItem[]>([]);
+    const [isTransition, startTransition] = useTransition();
     const [rowSelectionModel, setRowSelectionModel] = useState<GridRowSelectionModel | undefined>({
       ids: new Set(initialValues),
       type: "include",
@@ -64,10 +66,14 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
     };
 
     const handleClickOk = useCallback(() => {
-      if (selectTeacherList) onOk?.(selectTeacherList), dialogConfirm?.(selectTeacherList);
+      if (!selectTeacherList) return;
 
-      handleClose();
-    }, [rowSelectionModel]);
+      startTransition(() => {
+        onOk?.(selectTeacherList);
+        dialogConfirm?.(selectTeacherList);
+        handleClose();
+      });
+    }, [selectTeacherList, onOk, dialogConfirm]);
 
     const handlePaginationModelChange: Exclude<DataGridProps["onPaginationModelChange"], undefined> = useCallback(
       (paginationModel) => {
@@ -266,7 +272,13 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
             <Button autoFocus color="inherit" variant="outlined" onClick={handleClose} sx={{ minWidth: 96 }}>
               Huỷ
             </Button>
-            <Button autoFocus onClick={handleClickOk} sx={{ minWidth: 96 }} disabled={isDisabledOkButton}>
+            <Button
+              autoFocus
+              onClick={handleClickOk}
+              sx={{ minWidth: 96 }}
+              disabled={isDisabledOkButton}
+              loading={isTransition}
+            >
               Xác nhận
             </Button>
           </div>

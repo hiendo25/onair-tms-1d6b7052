@@ -1,14 +1,14 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
 import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
 
+import { FILE_TYPES, FileTypes, ImageFileType } from "@/constants/file.constant";
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
 import { CloseIcon } from "@/shared/assets/icons";
 import { cn } from "@/utils";
-
 export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = FieldValues> {
   control: Control<TFieldValues>;
   name: FieldPath<TFieldValues>;
@@ -18,6 +18,7 @@ export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = Fiel
   required?: boolean;
   aspectRatio?: string; // e.g., "21/9", "16/9", "4/3"
   width?: string; // e.g., "480px", "100%"
+  accepts?: ImageFileType[];
   onChange?: (url: string) => void;
 }
 
@@ -53,6 +54,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
   required = false,
   aspectRatio = "21/9",
   onChange,
+  accepts = [],
 }: RHFThumbnailUploadProps<TFieldValues>) => {
   const openResource = useLibraryStore((state) => state.openLibrary);
   const {
@@ -70,10 +72,12 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
     const resourceItem = resource[0];
     const path = resourceItem?.path;
 
-    if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path) {
+    if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path || !resourceItem?.extension) {
       return;
     }
-
+    if (!accepts.includes(`.${resourceItem.extension}` as ImageFileType)) {
+      return;
+    }
     field.onChange(path);
     onChange?.(path);
   };

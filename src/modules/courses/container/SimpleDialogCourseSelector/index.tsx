@@ -1,5 +1,6 @@
 "use client";
 import { forwardRef, memo, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { useTransition } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { Alert, DialogContent, FilledInput, FilledInputProps } from "@mui/material";
 import Button from "@mui/material/Button";
@@ -30,7 +31,8 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
     const [openDialog, setOpenDialog] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
-    const searchDebouce = useDebounce(searchTeacherName, 600);
+    const searchDebounce = useDebounce(searchTeacherName, 600);
+    const [isTransition, startTransition] = useTransition();
     const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
     const [selectedCourseList, setSelectedCourseList] = useState<NonNullable<GetCoursesListMinimalResponse["data"]>>(
       [],
@@ -45,7 +47,7 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
         page: paginationModel.page + 1,
         pageSize: paginationModel.pageSize,
         excludes: value, // exclude teacher selected
-        search: searchDebouce,
+        search: searchDebounce,
       },
       enabled: openDialog,
     });
@@ -63,9 +65,11 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
     };
 
     const handleClickOk = useCallback(() => {
-      selectedCourseList && onOk?.(selectedCourseList);
-      handleClose();
-    }, [rowSelectionModel]);
+      startTransition(() => {
+        selectedCourseList && onOk?.(selectedCourseList);
+        handleClose();
+      });
+    }, [onOk, selectedCourseList]);
 
     const handlePaginationModelChange: Exclude<DataGridProps["onPaginationModelChange"], undefined> = useCallback(
       (paginationModel) => {
@@ -243,7 +247,13 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
             <Button autoFocus color="inherit" variant="outlined" onClick={handleClose} sx={{ minWidth: 96 }}>
               Huỷ
             </Button>
-            <Button autoFocus onClick={handleClickOk} sx={{ minWidth: 96 }} disabled={isDisabledOkButton}>
+            <Button
+              autoFocus
+              onClick={handleClickOk}
+              sx={{ minWidth: 96 }}
+              disabled={isDisabledOkButton}
+              loading={isTransition}
+            >
               Xác nhận
             </Button>
           </div>
