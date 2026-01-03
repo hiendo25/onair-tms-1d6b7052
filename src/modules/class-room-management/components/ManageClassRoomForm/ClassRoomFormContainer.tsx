@@ -147,6 +147,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       return isLearningPath
         ? BASE_ITEMS
         : [
+            ...BASE_ITEMS,
             {
               tabName: "Thiết lập",
               tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
@@ -155,7 +156,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               icon: <UsersPlusIcon className="w-5 h-5" />,
               content: <TabClassRoomSetting />,
             },
-            ...BASE_ITEMS,
           ];
     }, [action, isLearningPath]);
     /**
