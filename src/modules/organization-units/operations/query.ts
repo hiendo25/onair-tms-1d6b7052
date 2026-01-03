@@ -50,7 +50,7 @@ export const useGetOrganizationUnitsByOrgQuery = ({
 };
 
 export const useGetOrganizationUnitDepartmentOrBranchQuery = (options?: {
-  queryParams: { type: "department" | "branch" };
+  queryParams: { type: "department" | "branch"; organizationId?: string };
   enabled?: boolean;
 }) => {
   const { queryParams, enabled = true } = options || {};
