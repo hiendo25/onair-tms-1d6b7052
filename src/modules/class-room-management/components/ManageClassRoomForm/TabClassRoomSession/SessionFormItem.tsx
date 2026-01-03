@@ -80,8 +80,7 @@ const SessionFormItem: React.FC<SessionFormItemProps> = ({ index, isLearningPath
           </>
         )}
       />
-
-      <AgendaFieldsControl sessionIndex={index} control={control} />
+      {isLearningPath ? null : <AgendaFieldsControl sessionIndex={index} control={control} />}
     </div>
   );
 };

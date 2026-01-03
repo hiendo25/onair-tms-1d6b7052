@@ -34,7 +34,9 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
             label={item.name}
             checked={hasChecked(item.id)}
             onChange={(evt, checked) => onSelect?.(item.id)}
-            sx={{ ".MuiFormControlLabel-label": { fontSize: "0.875rem" } }}
+            sx={{
+              ".MuiFormControlLabel-label": { fontSize: "0.875rem" },
+            }}
           />
         </div>
       ))}

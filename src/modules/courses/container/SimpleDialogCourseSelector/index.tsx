@@ -11,6 +11,7 @@ import Typography from "@mui/material/Typography";
 import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid";
 
 import useDebounce from "@/hooks/useDebounce";
+import { useUserOrganization } from "@/modules/organization";
 import { GetCoursesListMinimalResponse } from "@/repository/courses";
 import { SearchIcon } from "@/shared/assets/icons";
 import { useGetCourseListMinimalQuery } from "../../operations/query";
@@ -28,6 +29,7 @@ export interface SimpleDialogCourseSelectorProps {
 }
 const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, SimpleDialogCourseSelectorProps>(
   ({ onOk, value = [], disableMultipleSelect = false }, ref) => {
+    const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
     const [openDialog, setOpenDialog] = useState(false);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const [searchTeacherName, setSearchTeacherName] = useState("");
@@ -48,6 +50,7 @@ const SimpleDialogCourseSelector = forwardRef<SimpleDialogCourseSelectorRef, Sim
         pageSize: paginationModel.pageSize,
         excludes: value, // exclude teacher selected
         search: searchDebounce,
+        organizationId,
       },
       enabled: openDialog,
     });

@@ -12,6 +12,7 @@ import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid
 
 import useDebounce from "@/hooks/useDebounce";
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { SearchIcon } from "@/shared/assets/icons";
 import { useGetTeachersQuery } from "../../operation/queries";
 
@@ -29,6 +30,7 @@ export interface SimpleDialogTeacherSelectorProps {
 }
 const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, SimpleDialogTeacherSelectorProps>(
   ({ onOk, values: initialValues = [], disableMultipleSelect = false, excludeSelected = true }, ref) => {
+    const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
     const [openDialog, setOpenDialog] = useState(false);
     const [dialogConfirm, setDialogConfirm] = useState<(data: EmployeeTeacherTypeItem[]) => void>();
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
@@ -49,6 +51,7 @@ const SimpleDialogTeacherSelector = forwardRef<SimpleDialogTeacherSelectorRef, S
         pageSize: paginationModel.pageSize,
         exclude: excludeSelected ? initialValues : [], // exclude teacher selected
         search: searchDebouce,
+        organizationId,
       },
       enabled: openDialog,
     });

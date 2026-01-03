@@ -44,7 +44,7 @@ const BoxWrapper = styled("div")(({ theme }) => ({
 
 const BoxHeader = styled(Box)(({ theme }) => ({
   paddingInline: "16px",
-  paddingBlock: "12px",
+  paddingBlock: "16px",
   backgroundColor: theme.palette.grey[200],
 }));
 
@@ -69,15 +69,18 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
   onChange,
   selectedStudentIds,
 }) => {
-  const { orgId } = useUserOrganization((state) => state.currentOrganization);
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
 
   const [queryParams, setQueryParams] = React.useState<Required<GetStudentsQueryParams>>({
     page: 1,
     pageSize: 20,
-    search: "",
+    search: {
+      key: "full_name",
+      search: "",
+    },
     departmentIds: [],
     branchIds: [],
-    organizationId: orgId,
+    organizationId,
     excludes: [],
   });
   const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(selectedItems);
@@ -87,7 +90,7 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
     queryParams: {
       ...queryParams,
       search: useDebounce(queryParams.search, 600),
-      organizationId: orgId,
+      organizationId,
     },
   });
 
@@ -119,7 +122,6 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
     return `${(queryParams.page - 1) * queryParams.pageSize} - ${queryParams.page * queryParams.pageSize}`;
   }, [queryParams, pageTotal, previousData]);
 
-  console.table(previousData);
   const handleChangePage: PaginationProps["onChange"] = (evt, newPage) => {
     setQueryParams((prev) => ({ ...prev, page: newPage }));
   };
@@ -204,6 +206,9 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
     }
     setSelectedStudents([]);
   };
+  const handleSearchTextQuery: EmployeeFilterProps["onSearch"] = (key, searchText) => {
+    setQueryParams((prev) => ({ ...prev, search: { key, search: searchText } }));
+  };
 
   const handleChangeFilter: EmployeeFilterProps["onChange"] = (type) => (newValues) => {
     setQueryParams((prev) => ({
@@ -237,9 +242,8 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
                 students={employeeData?.data?.map((item) => ({ id: item.id, code: item.employee_code }))}
               />
               <EmployeeFilter
-                onSearch={(searchText) => {
-                  setQueryParams((prev) => ({ ...prev, search: searchText }));
-                }}
+                onSearch={handleSearchTextQuery}
+                querySearch={queryParams.search}
                 onChange={handleChangeFilter}
                 selectedBranchIds={queryParams.branchIds}
                 selectedDepartmentIds={queryParams.departmentIds}
@@ -401,9 +405,10 @@ const StudentItem: React.FC<StudentItemProps> = React.memo(
               />
               <Typography sx={{ fontWeight: 600, fontSize: "0.875rem" }}>{fullName}</Typography>
             </div>
-            <div className="flex gap-2">
-              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{departmentName}</Typography>
+            <div className="flex gap-2 items-center">
               <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{email}</Typography>
+              <span className="text-xs text-gray-400">-</span>
+              <Typography sx={{ fontSize: "0.75rem", color: "text.secondary" }}>{departmentName}</Typography>
             </div>
           </div>
           {onRemove ? (

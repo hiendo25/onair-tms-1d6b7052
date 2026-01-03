@@ -13,7 +13,10 @@ export type GetStudentsQueryParams = {
   page?: number;
   pageSize?: number;
   excludes?: string[];
-  search?: string;
+  search?: {
+    key: "full_name" | "code" | "email";
+    search: string;
+  };
   departmentIds?: string[];
   branchIds?: string[];
   organizationId?: string;
@@ -37,9 +40,10 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
         full_name,
         gender,
         avatar,
-        email
+        email,
+				employee_id
       ),
-      employee_departments(
+      employee_departments!inner(
         id,
         department_id,
         departments(
@@ -48,7 +52,7 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
           branch_id
         )
       ),
-      employee_branches(
+      employee_branches!inner(
         id,
         branch_id,
         branches(
@@ -68,18 +72,25 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
   }
 
   if (departmentIds?.length) {
-    studentQuery = studentQuery.in("employee_departments.department_id", departmentIds);
+    studentQuery = studentQuery.filter("employee_departments.department_id", "in", `(${departmentIds.join(",")})`);
   }
 
   if (branchIds?.length) {
-    studentQuery = studentQuery.in("employee_branches.branch_id", branchIds);
+    studentQuery = studentQuery.filter("employee_branches.branch_id", "in", `(${branchIds.join(",")})`);
   }
 
   if (excludes?.length) {
     studentQuery = studentQuery.not("id", "in", `(${excludes.join(",")})`);
   }
-  if (search) {
-    studentQuery = studentQuery.ilike("profiles.full_name", `%${search}%`);
+  if (search && search.search) {
+    const keysMap = {
+      full_name: "profiles.full_name ",
+      code: "employee_code",
+      email: "profiles.email",
+    };
+    const keyName = keysMap[search.key];
+    const keyword = `%${search.search}%`;
+    studentQuery = studentQuery.ilike(keyName, `${keyword}`);
   }
 
   return await studentQuery
