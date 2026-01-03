@@ -1,6 +1,8 @@
 import React, { useMemo } from "react";
 import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 
+import { useGetBranchesQuery } from "@/modules/branch/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
 
 export interface BranchSelectorProps {
@@ -9,21 +11,27 @@ export interface BranchSelectorProps {
   values?: string[];
 }
 const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, values }) => {
-  const { data: branchData, isPending } = useGetOrganizationUnitDepartmentOrBranchQuery({
-    queryParams: { type: "branch" },
-  });
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
+  const {
+    data: branchesData,
+    isLoading,
+    error,
+  } = useGetBranchesQuery(
+    {
+      organizationId: organizationId!,
+    },
+    {
+      enabled: !!organizationId,
+    },
+  );
 
   const departmentList = useMemo(() => {
-    return branchData?.data || [];
-  }, [branchData?.data]);
+    return branchesData?.data || [];
+  }, [branchesData?.data]);
 
   const hasChecked = (itemId: string) => {
     return values?.some((val) => val === itemId);
   };
-
-  if (branchData?.error) {
-    return <Alert severity="error">{branchData.error.message}</Alert>;
-  }
 
   return (
     <div className="department">

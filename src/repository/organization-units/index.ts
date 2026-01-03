@@ -10,12 +10,12 @@ interface GetOrganizationUnitsByOrgParams {
 }
 
 export const getOrganizationUnitsByOrg = async ({
-                                                  organizationId,
-                                                  type,
-                                                  search,
-                                                  page = 1,
-                                                  limit = 10,
-                                                }: GetOrganizationUnitsByOrgParams) => {
+  organizationId,
+  type,
+  search,
+  page = 1,
+  limit = 10,
+}: GetOrganizationUnitsByOrgParams) => {
   if (!organizationId) {
     return { data: [], total: 0, page, limit };
   }
@@ -98,8 +98,8 @@ export const getOrganizationUnitsByOrg = async ({
     if (departmentsResult.error) throw new Error(departmentsResult.error.message);
 
     // Combine and add type field
-    const branches = (branchesResult.data || []).map(b => ({ ...b, type: "branch" as const }));
-    const departments = (departmentsResult.data || []).map(d => ({ ...d, type: "department" as const }));
+    const branches = (branchesResult.data || []).map((b) => ({ ...b, type: "branch" as const }));
+    const departments = (departmentsResult.data || []).map((d) => ({ ...d, type: "department" as const }));
 
     // Combine and sort by name
     const combined = [...branches, ...departments].sort((a, b) => a.name.localeCompare(b.name));
@@ -126,14 +126,8 @@ export async function getOrganizationUnitsByOrganizationId(organizationId: strin
 
   // Fetch from both branches and departments tables
   const [branchesResult, departmentsResult] = await Promise.all([
-    supabase
-      .from("branches")
-      .select("id, name, organization_id")
-      .eq("organization_id", organizationId),
-    supabase
-      .from("departments")
-      .select("id, name, organization_id")
-      .eq("organization_id", organizationId),
+    supabase.from("branches").select("id, name, organization_id").eq("organization_id", organizationId),
+    supabase.from("departments").select("id, name, organization_id").eq("organization_id", organizationId),
   ]);
 
   if (branchesResult.error) {
@@ -145,8 +139,8 @@ export async function getOrganizationUnitsByOrganizationId(organizationId: strin
   }
 
   // Combine and add type field for backwards compatibility
-  const branches = (branchesResult.data || []).map(b => ({ ...b, type: "branch" as const }));
-  const departments = (departmentsResult.data || []).map(d => ({ ...d, type: "department" as const }));
+  const branches = (branchesResult.data || []).map((b) => ({ ...b, type: "branch" as const }));
+  const departments = (departmentsResult.data || []).map((d) => ({ ...d, type: "department" as const }));
 
   return [...branches, ...departments];
 }
@@ -163,7 +157,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
 
       // Add type field and parent_id as null for backwards compatibility
       if (result.data) {
-        result.data = result.data.map(item => ({
+        result.data = result.data.map((item) => ({
           ...item,
           type: "branch" as const,
           parent_id: null,
@@ -182,7 +176,7 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
 
       // Add type field and map branch_id to parent_id for backwards compatibility
       if (result.data) {
-        result.data = result.data.map(item => ({
+        result.data = result.data.map((item) => ({
           ...item,
           type: "department" as const,
           parent_id: item.branch_id,
@@ -197,13 +191,13 @@ export const getOrganizationDepartmentOrBranch = async (type?: "department" | "b
         supabase.from("departments").select("id, name, branch_id, organization_id"),
       ]);
 
-      const branches = (branchesResult.data || []).map(b => ({
+      const branches = (branchesResult.data || []).map((b) => ({
         ...b,
         type: "branch" as const,
         parent_id: null,
       }));
 
-      const departments = (departmentsResult.data || []).map(d => ({
+      const departments = (departmentsResult.data || []).map((d) => ({
         ...d,
         type: "department" as const,
         parent_id: d.branch_id,
