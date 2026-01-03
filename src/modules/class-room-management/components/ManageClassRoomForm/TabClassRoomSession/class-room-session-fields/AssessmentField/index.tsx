@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { useRef } from "react";
 import { Button, FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import { Control, Controller } from "react-hook-form";
@@ -16,8 +16,6 @@ export interface AssessmentFieldProps {
 type AssignmentSelectItem = ClassRoom["classRoomSessions"][number]["assignments"][number];
 const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control }) => {
   const assignmentDialogRef = useRef<DialogAssignmentSelectorRef>(null);
-
-  console.log("assignment");
 
   return (
     <Controller

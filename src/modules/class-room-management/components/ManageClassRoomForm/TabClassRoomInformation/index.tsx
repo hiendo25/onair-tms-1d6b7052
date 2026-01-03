@@ -51,6 +51,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
         name="thumbnailUrl"
         label="Ảnh bìa đại diện"
         subTitle="Hình ảnh đại diện cho lớp học của bạn"
+        accepts={[".jpg", ".jpeg", ".png"]}
         description={
           <div className="flex flex-wrap gap-2 items-center mb-2">
             <Typography className="text-xs">

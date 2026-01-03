@@ -163,13 +163,20 @@ const classRoomSessionSchema = zod
               path: ["coursesPeriod", _index, "startAt"],
             });
           }
-        });
-        coursesPeriod.forEach((item, _index) => {
+
           if (!item.endAt) {
             ctx.addIssue({
               code: "custom",
               message: "Ngày kết thúc không bỏ trống.",
               path: ["coursesPeriod", _index, "endAt"],
+            });
+          }
+
+          if (item.endAt && item.startAt && dayjs(startDate).isAfter(dayjs(endDate))) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
+              path: ["coursesPeriod", _index, "startAt"],
             });
           }
         });

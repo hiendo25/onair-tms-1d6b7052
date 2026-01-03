@@ -63,7 +63,7 @@ const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ contro
               <QRCodeSettingFields sessionIndex={_index} control={control} />
             </>
           )}
-          <AgendaFieldsControl sessionIndex={_index} control={control} />
+          {isLearningPath ? null : <AgendaFieldsControl sessionIndex={_index} control={control} />}
         </div>
       ))}
     </div>
