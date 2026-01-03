@@ -75,9 +75,11 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
     if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path || !resourceItem?.extension) {
       return;
     }
-    if (!accepts.includes(`.${resourceItem.extension}` as ImageFileType)) {
+
+    if (accepts.length && !accepts.includes(`.${resourceItem.extension}` as ImageFileType)) {
       return;
     }
+
     field.onChange(path);
     onChange?.(path);
   };
