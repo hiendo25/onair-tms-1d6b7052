@@ -11,6 +11,7 @@ import {
   GitIcon,
   MonitorIcon,
   SquareFourIcon,
+  Star01Icon,
   UsersIcon,
   UsersIcon2,
 } from "@/shared/assets/icons";
@@ -191,6 +192,14 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         path: PATHS.SURVEYS.CREATE,
       },
     ],
+  },
+  {
+    title: "Gamification",
+    icon: React.createElement(Star01Icon),
+    key: "gamifications",
+    path: PATHS.GAMIFICATIONS.ROOT,
+    persCheck: [],
+    type: "item",
   },
   // {
   //   title: "Báo cáo",
