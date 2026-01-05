@@ -121,7 +121,7 @@ export const getLearningPathById = async (id: string): Promise<LearningPath | nu
 /**
  * Get learning path with full details including phases and classrooms
  */
-export interface LearningPathWithDetails extends LearningPath {
+export interface LearningPathWithDetails extends LearningPathWithCounts {
   learning_path_phases: PhaseWithClassRooms[];
   employee_learning_paths: EmployeeLearningPathWithDetails[];
 }
@@ -185,7 +185,8 @@ export const getLearningPathWithDetails = async (id: string): Promise<LearningPa
               )
             )
           )
-        )
+        ),
+        phase_class_rooms_count:phase_class_rooms(count)
       ),
       employee_learning_paths (
         employee_id,
@@ -199,7 +200,9 @@ export const getLearningPathWithDetails = async (id: string): Promise<LearningPa
             avatar
           )
         )
-      )
+      ),
+      learning_path_phases_count:learning_path_phases(count),
+      employee_learning_paths_count:employee_learning_paths(count)
     `)
     .eq("id", id)
     .order("order_index", { foreignTable: "learning_path_phases", ascending: true })
@@ -210,7 +213,153 @@ export const getLearningPathWithDetails = async (id: string): Promise<LearningPa
     throw new Error(`Failed to fetch learning path details: ${error.message}`);
   }
 
-  return data as unknown as LearningPathWithDetails;
+  if (!data) {
+    return null;
+  }
+
+  type LearningPathWithDetailsQuery = LearningPath & {
+    learning_path_phases: PhaseWithClassRoomsQuery[];
+    employee_learning_paths: EmployeeLearningPathWithDetails[];
+    learning_path_phases_count?: Array<{ count: number }> | null;
+    employee_learning_paths_count?: Array<{ count: number }> | null;
+  };
+
+  type PhaseWithClassRoomsQuery = Omit<PhaseWithClassRooms, "phase_class_rooms_count"> & {
+    phase_class_rooms_count?: Array<{ count: number }> | null;
+  };
+
+  const { learning_path_phases_count, employee_learning_paths_count, ...rest } =
+    data as LearningPathWithDetailsQuery;
+
+  const phasesWithCounts = rest.learning_path_phases.map((phase) => {
+    const { phase_class_rooms_count, ...phaseRest } = phase;
+
+    return {
+      ...phaseRest,
+      phase_class_rooms_count: phase_class_rooms_count?.[0]?.count || 0,
+    };
+  });
+
+  return {
+    ...rest,
+    learning_path_phases: phasesWithCounts,
+    phase_count: learning_path_phases_count?.[0]?.count || 0,
+    employee_count: employee_learning_paths_count?.[0]?.count || 0,
+  } as LearningPathWithDetails;
+};
+
+// --------------
+
+export interface LearningPathPhaseDetail {
+  phase: PhaseWithClassRooms;
+  learningPath: {
+    id: string;
+    name: string;
+    organization_id: string;
+  };
+}
+
+export const getLearningPathPhaseDetail = async (
+  phaseId: string,
+  organizationId: string
+): Promise<LearningPathPhaseDetail | null> => {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("learning_path_phases")
+    .select(`
+      id,
+      learning_path_id,
+      order_index,
+      description,
+      created_at,
+      learning_path:learning_path_id (
+        id,
+        name,
+        organization_id
+      ),
+      phase_class_rooms (
+        id,
+        phase_id,
+        class_room_id,
+        order_index,
+        class_room:class_room_id (
+          id,
+          title,
+          description,
+          room_type,
+          slug,
+          class_sessions (
+            id,
+            title,
+            start_at,
+            end_at,
+            session_type,
+            channel_provider,
+            class_sessions_courses_period (
+              id,
+              course_id,
+              teacher_id,
+              start_at,
+              end_at,
+              courses (
+                id,
+                title
+              ),
+              teacher:teacher_id (
+                id,
+                profiles!inner (
+                  full_name
+                )
+              )
+            ),
+            class_session_teacher (
+              teacher_id,
+              teacher:teacher_id (
+                id,
+                profiles!inner (
+                  full_name
+                )
+              )
+            )
+          )
+        )
+      ),
+      phase_class_rooms_count:phase_class_rooms(count)
+    `)
+    .eq("id", phaseId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch learning path phase detail: ${error.message}`);
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  type PhaseDetailQuery = Omit<PhaseWithClassRooms, "phase_class_rooms_count"> & {
+    phase_class_rooms_count?: Array<{ count: number }> | null;
+    learning_path: {
+      id: string;
+      name: string;
+      organization_id: string;
+    } | null;
+  };
+
+  const { learning_path, phase_class_rooms_count, ...phaseRest } = data as PhaseDetailQuery;
+
+  if (!learning_path || learning_path.organization_id !== organizationId) {
+    return null;
+  }
+
+  return {
+    learningPath: learning_path,
+    phase: {
+      ...phaseRest,
+      phase_class_rooms_count: phase_class_rooms_count?.[0]?.count || 0,
+    },
+  };
 };
 
 /**
@@ -550,4 +699,3 @@ export const getCurrentLearningPathForEmployee = async (employeeId: string): Pro
   // Extract the learning_path object from the nested structure
   return data?.learning_path as LearningPath | null;
 };
-
