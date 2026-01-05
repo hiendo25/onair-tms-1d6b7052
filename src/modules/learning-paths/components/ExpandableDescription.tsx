@@ -84,7 +84,7 @@ export default function ExpandableDescription({
   }
 
   return (
-    <Stack spacing={0.5}>
+    <Stack spacing={0.5} minHeight={81}>
       <Typography
         ref={descriptionRef}
         component="p"
@@ -104,7 +104,10 @@ export default function ExpandableDescription({
         <Button
           size="small"
           variant="text"
-          onClick={() => setIsExpanded((prev) => !prev)}
+          onClick={(event) => {
+            event.preventDefault();
+            setIsExpanded((prev) => !prev);
+          }}
           sx={{ alignSelf: "flex-start", px: 0, minWidth: "auto" }}
         >
           {isExpanded ? collapseLabel : expandLabel}

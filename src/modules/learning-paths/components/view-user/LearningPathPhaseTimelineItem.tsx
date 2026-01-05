@@ -167,6 +167,112 @@ export default function LearningPathPhaseTimelineItem({
   const progressLabel =
     item.status === PHASE_STATUS.LOCKED ? "Chưa mở" : `${item.progressPercentage}%`;
   const accentColor = PHASE_ACCENT_COLORS[item.status];
+  const phaseHref = PATHS.MY_LEARNING_PATHS.PHASE_DETAIL(item.phase.id);
+  const isLocked = item.status === PHASE_STATUS.LOCKED;
+  const cardContent = (
+    <Stack spacing={1.5} sx={{ position: "relative", zIndex: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Chip
+            size="small"
+            label={statusMeta.label}
+            color={statusMeta.chipColor}
+            variant={item.status === PHASE_STATUS.LOCKED ? "outlined" : "filled"}
+          />
+          <Typography variant="caption" color="text.secondary">
+            {item.classRoomCount} lớp học
+          </Typography>
+        </Stack>
+        <Typography variant="subtitle2" fontWeight={700} color={statusMeta.valueColor}>
+          {progressLabel}
+        </Typography>
+      </Stack>
+
+      <Typography variant="subtitle1" fontWeight={700}>
+        {label}
+      </Typography>
+
+      <Stack spacing={0.5}>
+        <Typography variant="overline" color="text.secondary">
+          Mô tả giai đoạn
+        </Typography>
+        <Box
+          sx={{
+            p: 1.25,
+            borderRadius: 1.5,
+            border: "1px solid",
+            borderColor: "divider",
+            bgcolor: "rgba(248, 250, 252, 0.9)",
+          }}
+        >
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
+            {description}
+          </Typography>
+        </Box>
+      </Stack>
+    </Stack>
+  );
+  const cardSx = {
+    p: 2.5,
+    borderRadius: 2,
+    boxShadow: "0 14px 32px rgba(15, 23, 42, 0.08)",
+    borderColor: "divider",
+    bgcolor: PHASE_CARD_STYLES[item.status].bgcolor,
+    borderLeft: align === "left" ? `4px solid ${accentColor}` : undefined,
+    borderRight: align === "right" ? `4px solid ${accentColor}` : undefined,
+    position: "relative",
+    overflow: "hidden",
+    display: "block",
+    textDecoration: "none",
+    cursor: isLocked ? "not-allowed" : "pointer",
+    transition: isLocked ? "none" : "transform 0.2s ease, box-shadow 0.2s ease",
+    ...(isLocked
+      ? {}
+      : {
+        "&:hover": {
+          transform: "translateY(-2px)",
+          boxShadow: "0 18px 36px rgba(15, 23, 42, 0.12)",
+        },
+      }),
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      inset: 0,
+      background:
+        "linear-gradient(120deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
+      opacity: 0.6,
+      pointerEvents: "none",
+    },
+  } as const;
+  const nodeContent = (
+    <>
+      <PhaseStatusIndicator status={item.status} progress={item.progressPercentage} />
+      <PhaseIndexBadge index={item.orderIndex} />
+    </>
+  );
+  const nodeSx = {
+    position: "relative",
+    cursor: isLocked ? "not-allowed" : "pointer",
+    textDecoration: "none",
+    display: "inline-flex",
+    transition: isLocked ? "none" : "transform 0.2s ease",
+    ...(isLocked
+      ? {}
+      : {
+        "&:hover": {
+          transform: "translateY(-2px)",
+        },
+      }),
+  } as const;
 
   return (
     <Box
@@ -185,90 +291,15 @@ export default function LearningPathPhaseTimelineItem({
           order: { xs: 2, md: 0 },
         }}
       >
-        <Card
-          component={Link}
-          href={PATHS.MY_LEARNING_PATHS.PHASE_DETAIL(item.phase.id)}
-          variant="outlined"
-          sx={{
-            p: 2.5,
-            borderRadius: 2,
-            boxShadow: "0 14px 32px rgba(15, 23, 42, 0.08)",
-            borderColor: "divider",
-            bgcolor: PHASE_CARD_STYLES[item.status].bgcolor,
-            borderLeft: align === "left" ? `4px solid ${accentColor}` : undefined,
-            borderRight: align === "right" ? `4px solid ${accentColor}` : undefined,
-            position: "relative",
-            overflow: "hidden",
-            display: "block",
-            textDecoration: "none",
-            cursor: "pointer",
-            transition: "transform 0.2s ease, box-shadow 0.2s ease",
-            "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 18px 36px rgba(15, 23, 42, 0.12)",
-            },
-            "&::after": {
-              content: '""',
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(120deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0))",
-              opacity: 0.6,
-              pointerEvents: "none",
-            },
-          }}
-        >
-          <Stack spacing={1.5} sx={{ position: "relative", zIndex: 1 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Chip
-                  size="small"
-                  label={statusMeta.label}
-                  color={statusMeta.chipColor}
-                  variant={item.status === PHASE_STATUS.LOCKED ? "outlined" : "filled"}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  {item.classRoomCount} lớp học
-                </Typography>
-              </Stack>
-              <Typography variant="subtitle2" fontWeight={700} color={statusMeta.valueColor}>
-                {progressLabel}
-              </Typography>
-            </Stack>
-
-            <Typography variant="subtitle1" fontWeight={700}>
-              {label}
-            </Typography>
-
-            <Stack spacing={0.5}>
-              <Typography variant="overline" color="text.secondary">
-                Mô tả giai đoạn
-              </Typography>
-              <Box
-                sx={{
-                  p: 1.25,
-                  borderRadius: 1.5,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "rgba(248, 250, 252, 0.9)",
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
-                  {description}
-                </Typography>
-              </Box>
-            </Stack>
-          </Stack>
-        </Card>
+        {isLocked ? (
+          <Card variant="outlined" sx={cardSx}>
+            {cardContent}
+          </Card>
+        ) : (
+          <Card component={Link} href={phaseHref} variant="outlined" sx={cardSx}>
+            {cardContent}
+          </Card>
+        )}
       </Box>
 
       <Box
@@ -278,24 +309,15 @@ export default function LearningPathPhaseTimelineItem({
           justifyContent: "center",
         }}
       >
-        <Box
-          component={Link}
-          href={PATHS.MY_LEARNING_PATHS.PHASE_DETAIL(item.phase.id)}
-          sx={{
-            position: "relative",
-            cursor: "pointer",
-            textDecoration: "none",
-            display: "inline-flex",
-            transition: "transform 0.2s ease",
-            "&:hover": {
-              transform: "translateY(-2px)",
-            },
-          }}
-          aria-label={`Xem chi tiết ${label}`}
-        >
-          <PhaseStatusIndicator status={item.status} progress={item.progressPercentage} />
-          <PhaseIndexBadge index={item.orderIndex} />
-        </Box>
+        {isLocked ? (
+          <Box sx={nodeSx} aria-disabled>
+            {nodeContent}
+          </Box>
+        ) : (
+          <Box component={Link} href={phaseHref} sx={nodeSx} aria-label={`Xem chi tiết ${label}`}>
+            {nodeContent}
+          </Box>
+        )}
       </Box>
     </Box>
   );
