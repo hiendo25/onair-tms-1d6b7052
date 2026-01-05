@@ -25,6 +25,7 @@ import type { GamificationRuleWithDefault } from "@/repository/gamification-rule
 // Map trigger types to Vietnamese labels
 const TRIGGER_LABELS: Record<TargetTriggerType, string> = {
   course_completed: "Hoàn thành môn học",
+  class_completed: "Hoàn thành lớp học",
   phase_completed: "Hoàn thành giai đoạn lộ trình học tập",
   learning_path_completed: "Hoàn thành lộ trình học tập",
 };

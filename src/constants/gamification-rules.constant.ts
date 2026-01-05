@@ -20,6 +20,7 @@ export interface DefaultGamificationRule {
  */
 export const TARGET_TRIGGER_TYPES = [
   "course_completed",
+  "class_completed",
   "phase_completed",
   "learning_path_completed",
 ] as const satisfies readonly RuleTriggerType[];
@@ -35,6 +36,16 @@ export const DEFAULT_GAMIFICATION_RULES: Record<TargetTriggerType, DefaultGamifi
     rule_name: "Complete Course (>80% Progress)",
     trigger_type: "course_completed" satisfies RuleTriggerType,
     xp_amount: 500,
+    conditions: {
+      min_progress_percentage: 80,
+    },
+    is_active: true,
+    priority: 100,
+  },
+  class_completed: {
+    rule_name: "Complete Class (>80% Progress)",
+    trigger_type: "class_completed" satisfies RuleTriggerType,
+    xp_amount: 400,
     conditions: {
       min_progress_percentage: 80,
     },
