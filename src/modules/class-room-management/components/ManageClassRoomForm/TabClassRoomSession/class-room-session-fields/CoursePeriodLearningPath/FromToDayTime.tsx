@@ -15,7 +15,7 @@ import { Control, FieldErrors, useController, useWatch } from "react-hook-form";
 import { DAY_OFF_WEEK_OPTIONS } from "@/constants/date-time";
 import DayOfWeekSelect, { DayOfWeekSelectProps } from "@/modules/class-room-management/components/DayOfWeekSelect";
 import { ArrowRightIcon } from "@/shared/assets/icons";
-import { IOSSwitch } from "@/shared/ui/form/CustomSwithcher";
+import { IOSSwitch } from "@/shared/ui/form/CustomSwitcher";
 import type { ClassRoom } from "../../../classroom-form.schema";
 type CoursePeriodWeeklyErrors = FieldErrors<{
   from: string;

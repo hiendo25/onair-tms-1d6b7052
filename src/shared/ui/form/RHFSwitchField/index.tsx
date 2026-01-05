@@ -1,15 +1,10 @@
 "use client";
 import React, { memo, useId } from "react";
-import {
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Typography,
-} from "@mui/material";
+import { FormControl, FormHelperText, FormLabel, Typography } from "@mui/material";
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
-import { Android12Switch } from "../CustomSwithcher";
+import { Android12Switch } from "../CustomSwitcher";
 interface RHFSwitcherFieldProps<T extends FieldValues> {
   control: Control<T>;
   name: Path<T>;
@@ -44,14 +39,10 @@ const RHFSwitcherField = <T extends FieldValues>({
           <div className="flex gap-x-1 items-center -ml-2">
             <Android12Switch value={field.value} onChange={field.onChange} />
             {onValue || offValue ? (
-              <Typography sx={{ fontSize: "0.875rem" }}>
-                {field.value ? onValue : offValue}
-              </Typography>
+              <Typography sx={{ fontSize: "0.875rem" }}>{field.value ? onValue : offValue}</Typography>
             ) : null}
           </div>
-          {error?.message ? (
-            <FormHelperText error={!!error}>{error.message}</FormHelperText>
-          ) : null}
+          {error?.message ? <FormHelperText error={!!error}>{error.message}</FormHelperText> : null}
         </FormControl>
       )}
     />

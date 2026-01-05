@@ -1687,6 +1687,60 @@ export type Database = {
           },
         ]
       }
+      levels: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          icon: string | null
+          id: string
+          organization_id: string
+          score_required: number
+          status: Database["public"]["Enums"]["level_status"]
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization_id?: string
+          score_required?: number
+          status?: Database["public"]["Enums"]["level_status"]
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization_id?: string
+          score_required?: number
+          status?: Database["public"]["Enums"]["level_status"]
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       libraries: {
         Row: {
           created_at: string
@@ -2945,6 +2999,7 @@ export type Database = {
       hashtag_type: "class_room"
       lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
+      level_status: "deleted" | "active" | "inactive"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -3142,6 +3197,7 @@ export const Constants = {
       hashtag_type: ["class_room"],
       lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
+      level_status: ["deleted", "active", "inactive"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],

@@ -1,8 +1,8 @@
 import React from "react";
-import { Box, FormControlLabel, IconButton, styled,Typography, TypographyProps } from "@mui/material";
+import { Box, FormControlLabel, IconButton, styled, Typography, TypographyProps } from "@mui/material";
 import dayjs from "dayjs";
 
-import { Android12Switch, IOSSwitch } from "@/shared/ui/form/CustomSwithcher";
+import { Android12Switch, IOSSwitch } from "@/shared/ui/form/CustomSwitcher";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 interface QrSettingProps {

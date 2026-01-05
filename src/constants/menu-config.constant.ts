@@ -193,21 +193,21 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
       },
     ],
   },
-  // {
-  //   title: "Báo cáo",
-  //   icon: React.createElement(BarChart10Icon),
-  //   key: "manage-report",
-  //   path: PATHS.REPORTS.ROOT,
-  //   type: "item",
-  //   children: [
-  //     {
-  //       title: "Báo cáo tổng quan",
-  //       key: "report-overview",
-  //       path: PATHS.REPORTS.OVER_VIEW,
-  //       type: "item",
-  //     },
-  //   ],
-  // },
+  {
+    title: "Thiết lập",
+    icon: React.createElement(BarChart10Icon),
+    key: "/admin/settings",
+    path: PATHS.SETTINGS.ROOT,
+    type: "item",
+    children: [
+      {
+        title: "Danh hiệu",
+        key: "/admin/settings/rankings",
+        path: PATHS.SETTINGS.RANKINGS,
+        type: "item",
+      },
+    ],
+  },
 ];
 
 const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [

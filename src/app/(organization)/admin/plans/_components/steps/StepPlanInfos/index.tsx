@@ -3,15 +3,7 @@
 import React, { useCallback, useState } from "react";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useSnackbar } from "notistack";
 import { useWatch } from "react-hook-form";
@@ -74,12 +66,7 @@ export default function StepPlanInfo({
     }
 
     await onExecutePlan();
-  }, [
-    enqueueSnackbar,
-    onExecutePlan,
-    surveyValue,
-    trigger,
-  ]);
+  }, [enqueueSnackbar, onExecutePlan, surveyValue, trigger]);
 
   return (
     <>
@@ -119,41 +106,24 @@ export default function StepPlanInfo({
             />
 
             <Box sx={{ p: 2.5, borderRadius: 2, bgcolor: "grey.50", border: "1px dashed", borderColor: "divider" }}>
-              <Typography sx={{ mb: 1, fontSize: "0.9rem", fontWeight: 600 }}>
-                Thời gian triển khai
-              </Typography>
+              <Typography sx={{ mb: 1, fontSize: "0.9rem", fontWeight: 600 }}>Thời gian triển khai</Typography>
               <Typography variant="body2" sx={{ color: "text.secondary", mb: 1.5 }}>
                 Xác định thời gian bắt đầu và kết thúc để chúng tôi giúp bạn theo dõi tiến độ.
               </Typography>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-                <RHFDateTimePicker
-                  control={control}
-                  name="info.startDate"
-                />
-                <RHFDateTimePicker
-                  control={control}
-                  name="info.endDate"
-                  minDateTime={dayjs(planStartDate)}
-                />
+                <RHFDateTimePicker control={control} name="info.startDate" />
+                <RHFDateTimePicker control={control} name="info.endDate" minDateTime={dayjs(planStartDate)} />
               </Box>
             </Box>
 
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
               <Box>
-                <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
-                  Ngân sách
-                </Typography>
-                <RHFInputDecimalField
-                  name="info.budget"
-                  placeholder="VD: 50.000.000"
-                  size="small"
-                />
+                <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>Ngân sách</Typography>
+                <RHFInputDecimalField control={control} name="info.budget" placeholder="VD: 50.000.000" size="small" />
               </Box>
 
               <Box>
-                <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>
-                  Khảo sát
-                </Typography>
+                <Typography sx={{ mb: 1, fontSize: "0.875rem", fontWeight: 500 }}>Khảo sát</Typography>
                 <PlanSurveySection />
               </Box>
             </Box>
@@ -190,11 +160,7 @@ export default function StepPlanInfo({
         </CardContent>
       </Card>
 
-      <SurveyResultDialog
-        open={isResultDialogOpen}
-        onClose={() => setResultDialogOpen(false)}
-        survey={surveyValue}
-      />
+      <SurveyResultDialog open={isResultDialogOpen} onClose={() => setResultDialogOpen(false)} survey={surveyValue} />
     </>
   );
 }
