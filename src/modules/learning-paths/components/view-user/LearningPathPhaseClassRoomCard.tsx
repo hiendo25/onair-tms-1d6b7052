@@ -10,8 +10,10 @@ import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import { Box, Card, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 
+import { toPlainText } from "../../learning-path-text.utils";
 import { CLASSROOM_PROGRESS_STATUS, ClassRoomProgressStatus, DEFAULT_COUNT } from "../../learning-path-user.constants";
 import { PhaseClassRoomCardItem } from "../../types";
+import ExpandableDescription from "../ExpandableDescription";
 
 
 const MODE_ICONS: Record<string, typeof ComputerRoundedIcon> = {
@@ -86,6 +88,7 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
   const isCompleted = item.status === CLASSROOM_PROGRESS_STATUS.COMPLETED;
   const cardProps = item.href ? { component: Link, href: item.href } : {};
   const viewMeta = getPhaseClassRoomViewMeta(item);
+  const description = toPlainText(item.description);
 
   return (
     <Card
@@ -115,9 +118,9 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
             <Chip size="small" label={viewMeta.statusLabel} color={viewMeta.statusColor} />
             <Stack direction="row" spacing={0.5} alignItems="center">
               {/* <ModeIcon sx={{ fontSize: 18, color: "text.secondary" }} /> */}
-              <Typography variant="body2" color="text.secondary">
+              {/* <Typography variant="body2" color="text.secondary">
                 {viewMeta.modeLabel}
-              </Typography>
+              </Typography> */}
             </Stack>
           </Stack>
           {isCompleted ? (
@@ -131,10 +134,8 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
           <Typography variant="subtitle1" fontWeight={700} color="text.primary">
             {item.title}
           </Typography>
-          {item.description ? (
-            <Typography variant="body2" color="text.secondary">
-              {item.description}
-            </Typography>
+          {description ? (
+            <ExpandableDescription text={description} lineClamp={2} />
           ) : null}
         </Stack>
 
