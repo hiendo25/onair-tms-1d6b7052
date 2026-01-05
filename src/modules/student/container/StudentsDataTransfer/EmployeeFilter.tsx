@@ -7,7 +7,6 @@ import {
   FilledInput,
   FilledInputProps,
   FormControl,
-  IconButton,
   InputAdornment,
   MenuItem,
   Popover,
@@ -19,7 +18,6 @@ import {
 } from "@mui/material";
 
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
-import { cn } from "@/utils";
 
 import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
 import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
@@ -53,7 +51,6 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
   const [search, setSearch] = useState(querySearch);
   const id = useId();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>();
-
   const filterId = useRef(`employee-filter-${id}`);
 
   const open = !!anchorEl;
@@ -90,6 +87,11 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
     const value = evt.target.value;
     const searchKey = search.key;
     onSearch?.(searchKey, value);
+    setSearch((prev) => ({
+      ...prev,
+      key: searchKey,
+      search: value,
+    }));
   };
 
   const handleChangeSearchKey: SelectProps<SearchKeyName>["onChange"] = (evt) => {
@@ -124,9 +126,6 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
     ];
   }, [handleSelectBranch, handleSelectDepartmentIds, selectedDepartmentIds, selectedBranchIds]);
 
-  useEffect(() => {
-    setSearch((prev) => ({ ...prev, search: querySearch.search }));
-  }, [querySearch.search]);
   return (
     <div className="w-full flex items-center gap-3">
       <div className="flex bg-gray-100 gap-1 rounded-lg p-1  max-w-96 flex-1">
@@ -161,6 +160,7 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
             placeholder="Tìm kiếm..."
             value={search.search}
             onChange={handleSearch}
+            spellCheck={false}
             size="small"
             endAdornment={
               <InputAdornment position="end">

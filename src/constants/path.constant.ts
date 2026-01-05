@@ -90,10 +90,9 @@ export const PATHS = {
   },
   MY_LEARNING_PATHS: {
     ROOT: "/my-learning-paths",
-    LEARNING_SCREEN: (courseId: string = ":courseId") =>
-      `/my-learning-paths/learning-screen/${courseId}`,
+    LEARNING_SCREEN: (courseId: string = ":courseId") => `/my-learning-paths/learning-screen/${courseId}`,
     PHASE_DETAIL: (phaseId: string = ":phaseId") => `/my-learning-paths/phase/${phaseId}`,
-  }
+  },
   SETTINGS: {
     ROOT: "/admin/settings",
     RANKINGS: "/admin/settings/rankings",
