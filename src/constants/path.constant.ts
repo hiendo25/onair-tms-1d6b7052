@@ -88,6 +88,10 @@ export const PATHS = {
     EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
   },
   MY_LEARNING_PATHS: "/learning-paths",
+  SETTINGS: {
+    ROOT: "/admin/settings",
+    RANKINGS: "/admin/settings/rankings",
+  },
 } as const;
 
 export const AUTH_PATHS = {

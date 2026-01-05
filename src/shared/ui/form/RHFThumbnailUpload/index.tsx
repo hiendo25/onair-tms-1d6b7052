@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo, useMemo } from "react";
+import { Children } from "react";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
 import { Control, FieldPath, FieldValues, useController } from "react-hook-form";
@@ -20,6 +21,7 @@ export interface RHFThumbnailUploadProps<TFieldValues extends FieldValues = Fiel
   width?: string; // e.g., "480px", "100%"
   accepts?: ImageFileType[];
   onChange?: (url: string) => void;
+  children?: (url: string | undefined, onChange: () => void) => React.ReactNode;
 }
 
 /**
@@ -55,6 +57,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
   aspectRatio = "21/9",
   onChange,
   accepts = [],
+  children,
 }: RHFThumbnailUploadProps<TFieldValues>) => {
   const openResource = useLibraryStore((state) => state.openLibrary);
   const {
@@ -83,6 +86,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
     field.onChange(path);
     onChange?.(path);
   };
+  // const element = Children.only(children);
 
   return (
     <div>
@@ -94,64 +98,66 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
       {subTitle && <Typography className="text-xs mb-4">{subTitle}</Typography>}
       {description && <div className="description">{description}</div>}
 
-      <div
-        className={cn(
-          "thumbnail-wrapper",
-          "bg-gray-100 rounded-xl border border-dashed border-gray-300",
-          "flex items-center justify-center w-full max-w-[480px]",
-          error && "border-red-500",
-        )}
-        style={{
-          aspectRatio: aspectRatio,
-        }}
-      >
-        {field.value && (
-          <div className="preview-url relative w-full h-full overflow-hidden rounded-xl">
-            <Image src={field.value} alt="thumbnail" fill className="w-full h-full object-cover" />
-            <IconButton
-              sx={{
-                width: "2rem",
-                height: "2rem",
-                position: "absolute",
-                right: "0.5rem",
-                top: "0.5rem",
-                bgcolor: "rgba(255, 255, 255, 0.9)",
-                "&:hover": {
-                  bgcolor: "rgba(255, 255, 255, 1)",
-                },
-              }}
-              onClick={handleRemoveThumbnail}
-            >
-              <CloseIcon className="w-4 h-4" />
-            </IconButton>
-          </div>
-        )}
-
+      {children ? (
+        children(field.value, handleOpenResource)
+      ) : (
         <div
-          className={cn("cursor-pointer", { "opacity-0 hidden pointer-events-none": field.value })}
-          onClick={handleOpenResource}
+          className={cn(
+            "thumbnail-wrapper",
+            "bg-gray-100 rounded-xl border border-dashed border-gray-300",
+            "flex items-center justify-center w-full max-w-[480px]",
+            error && "border-red-500",
+          )}
+          style={{ aspectRatio }}
         >
-          <Image
-            src="/assets/icons/upload-cloud.svg"
-            width={80}
-            height={40}
-            alt="upload icon"
-            className="mb-3 mx-auto"
-          />
-          <Typography
-            sx={(theme) => ({
-              color: theme.palette.primary["dark"],
-              backgroundColor: theme.palette.primary["lighter"],
-              fontWeight: "bold",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "0.75rem",
-            })}
+          {field.value && (
+            <div className="preview-url relative w-full h-full overflow-hidden rounded-xl">
+              <Image src={field.value} alt="thumbnail" fill className="w-full h-full object-cover" />
+              <IconButton
+                sx={{
+                  width: "2rem",
+                  height: "2rem",
+                  position: "absolute",
+                  right: "0.5rem",
+                  top: "0.5rem",
+                  bgcolor: "rgba(255, 255, 255, 0.9)",
+                  "&:hover": {
+                    bgcolor: "rgba(255, 255, 255, 1)",
+                  },
+                }}
+                onClick={handleRemoveThumbnail}
+              >
+                <CloseIcon className="w-4 h-4" />
+              </IconButton>
+            </div>
+          )}
+
+          <div
+            className={cn("cursor-pointer", { "opacity-0 hidden pointer-events-none": field.value })}
+            onClick={handleOpenResource}
           >
-            Tải ảnh lên
-          </Typography>
+            <Image
+              src="/assets/icons/upload-cloud.svg"
+              width={80}
+              height={40}
+              alt="upload icon"
+              className="mb-3 mx-auto"
+            />
+            <Typography
+              sx={(theme) => ({
+                color: theme.palette.primary["dark"],
+                backgroundColor: theme.palette.primary["lighter"],
+                fontWeight: "bold",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "0.75rem",
+              })}
+            >
+              Tải ảnh lên
+            </Typography>
+          </div>
         </div>
-      </div>
+      )}
 
       {error?.message && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
     </div>

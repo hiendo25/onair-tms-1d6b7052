@@ -1,12 +1,10 @@
-"use client";
-import React, { memo, useId } from "react";
-import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
-import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
-import { Controller } from "react-hook-form";
+import React, { useId } from "react";
+import { FormControl, FormHelperText, FormLabel, SxProps, TextFieldProps, Theme } from "@mui/material";
+import { Control, Controller, FieldValues, Path, useFormContext } from "react-hook-form";
 
-import InputNumber from "../InputNumber";
+import { InputDecimalField } from "./InputDecimalField";
 
-export interface RHFTextFieldProps<T extends FieldValues> {
+interface RHFInputDecimalFieldProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
   placeholder?: string;
@@ -16,26 +14,23 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   disabled?: boolean;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
+  type?: "number" | "text";
   helpText?: React.ReactNode;
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   size?: "small" | "medium";
 }
-const RHFTextField = <T extends FieldValues>({
-  className,
-  control,
+
+export const RHFInputDecimalField = <T extends FieldValues>({
   name,
+  control,
   label,
-  placeholder,
   required,
-  disabled,
-  endAdornment,
-  startAdornment,
-  helpText,
+  className,
   sx,
-  inputProps,
-  size,
-}: RHFTextFieldProps<T>) => {
+  helpText,
+  ...restProps
+}: RHFInputDecimalFieldProps<T>) => {
   const fieldId = useId();
   return (
     <Controller
@@ -49,21 +44,13 @@ const RHFTextField = <T extends FieldValues>({
               {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
-          <OutlinedInput
+          <InputDecimalField
             {...field}
+            {...restProps}
+            onChange={(value) => field.onChange(value ? Number(value) : "")}
             value={field.value ?? ""}
-            onChange={field.onChange}
-            placeholder={placeholder}
-            disabled={disabled}
-            size={size}
-            id={fieldId}
-            type="text"
-            sx={{
-              background: "white",
-            }}
-            startAdornment={startAdornment}
-            endAdornment={endAdornment}
-            inputProps={inputProps}
+            error={!!error}
+            helperText={error?.message}
           />
           {error?.message ? <FormHelperText>{error.message}</FormHelperText> : null}
           {helpText && !error?.message ? <div className="mt-2">{helpText}</div> : null}
@@ -72,4 +59,3 @@ const RHFTextField = <T extends FieldValues>({
     />
   );
 };
-export default memo(RHFTextField) as typeof RHFTextField;

@@ -4,9 +4,7 @@ import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme }
 import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
-import InputNumber from "../InputNumber";
-
-export interface RHFTextFieldProps<T extends FieldValues> {
+export interface RHFNumberFieldProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
   placeholder?: string;
@@ -21,7 +19,7 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   size?: "small" | "medium";
 }
-const RHFTextField = <T extends FieldValues>({
+const RHFNumberField = <T extends FieldValues>({
   className,
   control,
   name,
@@ -35,8 +33,13 @@ const RHFTextField = <T extends FieldValues>({
   sx,
   inputProps,
   size,
-}: RHFTextFieldProps<T>) => {
+}: RHFNumberFieldProps<T>) => {
   const fieldId = useId();
+  const parseNumber = (formattedValue: string): number => {
+    const numberValue = formattedValue.replace(/[^\d]/g, "");
+    return parseInt(numberValue);
+  };
+  const formatNumber = (num: string) => Number(num).toLocaleString("vi-VN");
   return (
     <Controller
       name={name}
@@ -51,13 +54,16 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            value={field.value ?? ""}
-            onChange={field.onChange}
+            value={field.value ? formatNumber(field.value) : 0}
+            onChange={(evt) => {
+              const rawValue = evt.target.value;
+              const parsedValueToNumber = rawValue === "" ? 0 : parseNumber(rawValue);
+              field.onChange(parsedValueToNumber);
+            }}
             placeholder={placeholder}
             disabled={disabled}
             size={size}
             id={fieldId}
-            type="text"
             sx={{
               background: "white",
             }}
@@ -72,4 +78,4 @@ const RHFTextField = <T extends FieldValues>({
     />
   );
 };
-export default memo(RHFTextField) as typeof RHFTextField;
+export default memo(RHFNumberField) as typeof RHFNumberField;

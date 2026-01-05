@@ -1,7 +1,12 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import Switch, { SwitchProps } from "@mui/material/Switch";
+import Switch, { SwitchProps as MUISwitchProps } from "@mui/material/Switch";
 
+import { cn } from "@/utils";
+
+interface SwitchProps extends MUISwitchProps {
+  loading?: boolean;
+}
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 62,
   height: 34,
@@ -58,7 +63,7 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const Android12Switch = styled((props: SwitchProps) => <Switch {...props} />)(({ theme }) => ({
+const Android12Switch = styled(({ loading, ...props }: SwitchProps) => <Switch {...props} />)(({ theme }) => ({
   padding: 8,
   "&.MuiSwitch-sizeSmall": {
     width: 48,
@@ -134,8 +139,8 @@ const Android12Switch = styled((props: SwitchProps) => <Switch {...props} />)(({
   },
 }));
 
-const IOSSwitch = styled((props: SwitchProps) => (
-  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple {...props} />
+const IOSSwitch = styled(({ loading, ...restProps }: SwitchProps) => (
+  <Switch focusVisibleClassName=".Mui-focusVisible" disableRipple className={cn({ loading: loading })} {...restProps} />
 ))(({ theme }) => ({
   width: 42,
   height: 26,
