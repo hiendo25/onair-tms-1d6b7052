@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
-import LearningScreenClient from "@/app/(organization)/learning-screen/[courseId]/_components/LearningScreenClient";
 import { learningScreenService } from "@/services";
+
+import LearningScreenClient from "./_components/LearningScreenClient";
 
 interface LearningPathScreenPageProps {
   params: Promise<{

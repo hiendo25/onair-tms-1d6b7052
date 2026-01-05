@@ -15,6 +15,7 @@ import {
   UsersIcon2,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
+import RouteIcon from '@mui/icons-material/Route';
 
 import { PATHS } from "./path.constant";
 import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions.constant";
@@ -24,9 +25,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-      persCheck?: PermissionValue;
-      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-    }
+    persCheck?: PermissionValue;
+    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+  }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -222,6 +223,13 @@ const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
     icon: React.createElement(UsersIcon2),
     key: "my-class",
     path: PATHS.STUDENTS.ROOT,
+    persCheck: [],
+  },
+  {
+    title: "Lộ trình của tôi",
+    icon: React.createElement(RouteIcon),
+    key: "my-learning-paths",
+    path: PATHS.MY_LEARNING_PATHS.ROOT,
     persCheck: [],
   },
 ];
