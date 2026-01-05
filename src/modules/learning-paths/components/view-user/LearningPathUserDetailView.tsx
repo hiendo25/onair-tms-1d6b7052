@@ -1,51 +1,32 @@
 "use client";
 
-import { useMemo } from "react";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import { Box, Card, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 
-import {
-  DEFAULT_COMPLETION_CRITERIA,
-  getSettingsItems,
-} from "@/modules/learning-paths/components/learning-path-detail.utils";
+import { getSettingsItems } from "@/modules/learning-paths/components/learning-path-detail.utils";
+import type { LearningPathProgressSummary, PhaseTimelineItem } from "@/modules/learning-paths/types";
 import type { LearningPathWithDetails } from "@/repository/learning-paths";
 import { parseMetadata } from "@/repository/learning-paths/transformers";
-import type { ProgressResponse } from "@/types/progress.types";
 
-import { buildLearningPathProgressSummary, buildPhaseTimelineItems } from "./learning-path-user.utils";
 import LearningPathPhaseTimeline from "./LearningPathPhaseTimeline";
 
 const PROGRESS_CARD_SHADOW = "0 24px 50px rgba(15, 23, 42, 0.12)";
-const PROGRESS_CARD_BG =
-  "linear-gradient(120deg, rgba(224, 242, 254, 0.9) 0%, rgba(238, 242, 255, 0.9) 45%, rgba(240, 253, 244, 0.9) 100%)";
 const PROGRESS_BAR_GRADIENT =
   "linear-gradient(90deg, #2563EB 0%, #4F46E5 55%, #16A34A 100%)";
 
 export interface LearningPathUserDetailViewProps {
   learningPath: LearningPathWithDetails;
-  learningPathProgress?: ProgressResponse | null;
-  phasesProgress?: ProgressResponse[] | null;
+  timelineItems: PhaseTimelineItem[];
+  progressSummary: LearningPathProgressSummary;
 }
 
 export default function LearningPathUserDetailView({
   learningPath,
-  learningPathProgress = null,
-  phasesProgress = null,
+  timelineItems,
+  progressSummary,
 }: LearningPathUserDetailViewProps) {
-  const phases = learningPath.learning_path_phases ?? [];
   const metadata = parseMetadata(learningPath.metadata);
   const settingsItems = getSettingsItems(metadata);
-  const completionCriteria = metadata?.completionCriteria ?? DEFAULT_COMPLETION_CRITERIA;
-
-  const timelineItems = useMemo(() => {
-    return buildPhaseTimelineItems(phases, phasesProgress ?? [], {
-      sequentialLearning: metadata?.sequentialLearning ?? true,
-    });
-  }, [phases, phasesProgress, metadata?.sequentialLearning]);
-
-  const progressSummary = useMemo(() => {
-    return buildLearningPathProgressSummary(learningPathProgress, timelineItems, completionCriteria);
-  }, [learningPathProgress, timelineItems, completionCriteria]);
   const remainingPhases = Math.max(0, progressSummary.totalPhases - progressSummary.completedPhases);
 
   return (
@@ -62,7 +43,6 @@ export default function LearningPathUserDetailView({
         <Box
           sx={{
             p: { xs: 2.5, md: 3 },
-            // backgroundImage: PROGRESS_CARD_BG,
           }}
         >
           <Stack spacing={3}>
@@ -98,7 +78,7 @@ export default function LearningPathUserDetailView({
               ) : null}
               <Stack direction="row" spacing={1} alignItems="center">
                 <Typography variant="caption" color="text.secondary">
-                  Mốc hoàn thành: {completionCriteria}%
+                  Mốc hoàn thành: {progressSummary.completionCriteria}%
                 </Typography>
                 {progressSummary.isCompletionReached ? (
                   <Chip

@@ -8,9 +8,9 @@ import Link from "next/link";
 
 import { PATHS } from "@/constants/path.constant";
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
+import { PHASE_STATUS, PROGRESS_COMPLETED_PERCENT } from "../../learning-path-user.constants";
+import { PhaseTimelineItem } from "../../types";
 
-import { PHASE_STATUS, PROGRESS_COMPLETED_PERCENT } from "./learning-path-user.constants";
-import type { PhaseTimelineItem } from "./learning-path-user.types";
 
 const NODE_SIZE = 88;
 const NODE_INNER_SIZE = 64;

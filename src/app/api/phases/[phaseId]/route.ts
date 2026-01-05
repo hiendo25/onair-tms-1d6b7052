@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { learningPathsRepository } from "@/repository";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
+import { getLearningPathPhaseDetailForEmployee } from "@/services/learning-paths/learning-path-phase-detail.service";
 
 export async function GET(
   request: NextRequest,
@@ -20,9 +20,10 @@ export async function GET(
       return NextResponse.json({ error: "Phase ID is required" }, { status: 400 });
     }
 
-    const phaseDetail = await learningPathsRepository.getLearningPathPhaseDetail(
+    const phaseDetail = await getLearningPathPhaseDetailForEmployee(
       phaseId,
-      employee.organization_id
+      employee.organization_id,
+      employee.id
     );
 
     if (!phaseDetail) {

@@ -2,12 +2,12 @@ import LearningPathPhaseDetailContent from "./_components/LearningPathPhaseDetai
 
 interface LearningPathPhasePageProps {
   params: Promise<{
-    phaseId: string;
+    id: string;
   }>;
 }
 
 export default async function LearningPathPhasePage({ params }: LearningPathPhasePageProps) {
-  const { phaseId } = await params;
+  const { id } = await params;
 
-  return <LearningPathPhaseDetailContent phaseId={phaseId} />;
+  return <LearningPathPhaseDetailContent phaseId={id} />;
 }

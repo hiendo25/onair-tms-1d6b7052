@@ -1,39 +1,28 @@
 "use client";
 
-import { useMemo } from "react";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import { Box, Card, Grid, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
 
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
-import type { PhaseWithClassRooms } from "@/repository/learning-paths";
-import type { ProgressResponse } from "@/types/progress.types";
+import { PhaseDetailData } from "../../types";
 
-import { buildPhaseDetailData } from "./learning-path-phase.utils";
 import LearningPathPhaseClassRoomCard from "./LearningPathPhaseClassRoomCard";
 
 const PHASE_PROGRESS_CARD_BG = "rgba(59, 130, 246, 0.08)";
 
 export interface LearningPathPhaseDetailViewProps {
   learningPathName: string;
-  phase: PhaseWithClassRooms;
-  phaseProgress?: ProgressResponse | null;
-  classRoomsProgress?: ProgressResponse[] | null;
+  detailData: PhaseDetailData;
   onBack?: () => void;
 }
 
 export default function LearningPathPhaseDetailView({
   learningPathName,
-  phase,
-  phaseProgress = null,
-  classRoomsProgress = null,
+  detailData,
   onBack,
 }: LearningPathPhaseDetailViewProps) {
-  const detailData = useMemo(() => {
-    return buildPhaseDetailData(phase, phaseProgress, classRoomsProgress ?? []);
-  }, [phase, phaseProgress, classRoomsProgress]);
-
-  const phaseLabel = getPhaseLabel(phase, 0);
-  const phaseDescription = phase.description || "Chưa có mô tả cho giai đoạn này.";
+  const phaseLabel = getPhaseLabel(detailData.phase, 0);
+  const phaseDescription = detailData.phase.description || "Chưa có mô tả cho giai đoạn này.";
 
   return (
     <Stack spacing={4}>

@@ -1,6 +1,11 @@
 import { useTQuery } from "@/lib/queryClient";
+import type {
+  LearningPathPhaseDetailViewData,
+  LearningPathProgressSummary,
+  PhaseTimelineItem,
+} from "@/modules/learning-paths/types";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import type { LearningPathPhaseDetail, LearningPathWithCounts, LearningPathWithDetails } from "@/repository/learning-paths";
+import type { LearningPathWithCounts, LearningPathWithDetails } from "@/repository/learning-paths";
 import type { ProgressResponse } from "@/types/progress.types";
 
 import { LEARNING_PATHS_KEYS } from "./keys";
@@ -144,94 +149,49 @@ export function useGetCurrentLearningPath(options?: UseGetCurrentLearningPathOpt
     enabled: !!organizationId && (options?.enabled ?? true),
   });
 }
+
+export interface CurrentLearningPathSummaryResponse {
+  success: boolean;
+  data: {
+    learningPath: LearningPathWithDetails | null;
+    learningPathProgress: ProgressResponse | null;
+    phasesProgress: ProgressResponse[];
+    timelineItems: PhaseTimelineItem[];
+    progressSummary: LearningPathProgressSummary | null;
+  };
+}
+
+async function fetchCurrentLearningPathSummary(organizationId: string): Promise<CurrentLearningPathSummaryResponse> {
+  const response = await fetch("/api/learning-paths/current/summary", {
+    headers: {
+      "x-organization-id": organizationId,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to fetch current learning path summary");
+  }
+
+  return response.json();
+}
+
+export function useGetCurrentLearningPathSummary(options?: UseGetCurrentLearningPathOptions) {
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+
+  return useTQuery<CurrentLearningPathSummaryResponse>({
+    queryKey: LEARNING_PATHS_KEYS.currentSummary(),
+    queryFn: () => {
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+      return fetchCurrentLearningPathSummary(organizationId);
+    },
+    enabled: !!organizationId && (options?.enabled ?? true),
+  });
+}
 // --------------
-
-async function fetchLearningPathProgress(
-  learningPathId: string,
-  organizationId: string
-): Promise<ProgressResponse> {
-  const response = await fetch(`/api/learning-paths/${learningPathId}/progress`, {
-    headers: {
-      "x-organization-id": organizationId,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch learning path progress");
-  }
-
-  return response.json();
-}
-
-export interface UseGetLearningPathProgressOptions {
-  enabled?: boolean;
-}
-
-export function useGetLearningPathProgress(
-  learningPathId: string | null | undefined,
-  options?: UseGetLearningPathProgressOptions
-) {
-  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
-  const organizationId = currentEmployee.organization.id;
-
-  return useTQuery<ProgressResponse>({
-    queryKey: learningPathId
-      ? LEARNING_PATHS_KEYS.progress(learningPathId)
-      : LEARNING_PATHS_KEYS.progress(EMPTY_QUERY_ID),
-    queryFn: () => {
-      if (!learningPathId || !organizationId) {
-        throw new Error("Learning path ID or organization ID not found");
-      }
-      return fetchLearningPathProgress(learningPathId, organizationId);
-    },
-    enabled: !!learningPathId && !!organizationId && (options?.enabled ?? true),
-  });
-}
-
-async function fetchLearningPathPhasesProgress(
-  learningPathId: string,
-  organizationId: string
-): Promise<ProgressResponse[]> {
-  const response = await fetch(`/api/learning-paths/${learningPathId}/phases/progress`, {
-    headers: {
-      "x-organization-id": organizationId,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch learning path phases progress");
-  }
-
-  return response.json();
-}
-
-export interface UseGetLearningPathPhasesProgressOptions {
-  enabled?: boolean;
-}
-
-export function useGetLearningPathPhasesProgress(
-  learningPathId: string | null | undefined,
-  options?: UseGetLearningPathPhasesProgressOptions
-) {
-  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
-  const organizationId = currentEmployee.organization.id;
-
-  return useTQuery<ProgressResponse[]>({
-    queryKey: learningPathId
-      ? LEARNING_PATHS_KEYS.phasesProgress(learningPathId)
-      : LEARNING_PATHS_KEYS.phasesProgress(EMPTY_QUERY_ID),
-    queryFn: () => {
-      if (!learningPathId || !organizationId) {
-        throw new Error("Learning path ID or organization ID not found");
-      }
-      return fetchLearningPathPhasesProgress(learningPathId, organizationId);
-    },
-    enabled: !!learningPathId && !!organizationId && (options?.enabled ?? true),
-  });
-}
-
 async function fetchPhaseProgress(
   phaseId: string,
   organizationId: string
@@ -333,7 +293,7 @@ export function useGetClassRoomsProgress(
 
 export interface PhaseDetailResponse {
   success: boolean;
-  data: LearningPathPhaseDetail;
+  data: LearningPathPhaseDetailViewData;
 }
 
 async function fetchPhaseDetail(

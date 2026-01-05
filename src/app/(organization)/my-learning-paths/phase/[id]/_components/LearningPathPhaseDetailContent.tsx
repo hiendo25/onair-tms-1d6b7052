@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
-import {
-  useGetClassRoomsProgress,
-  useGetPhaseById,
-  useGetPhaseProgress,
-} from "@/modules/learning-paths/operations/query";
-import { LearningPathPhaseDetailView } from "@/modules/learning-paths/view-user";
+import { LearningPathPhaseDetailView } from "@/modules/learning-paths/components/view-user";
+import { useGetPhaseById } from "@/modules/learning-paths/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
 
 interface LearningPathPhaseDetailContentProps {
@@ -23,28 +19,12 @@ export default function LearningPathPhaseDetailContent({
   const router = useRouter();
   const { data: phaseDetailData, isLoading, error } = useGetPhaseById(phaseId);
   const phaseDetail = phaseDetailData?.data ?? null;
-  const phase = phaseDetail?.phase ?? null;
-  const learningPathId = phase?.learning_path_id ?? null;
+  const detailData = phaseDetail?.detailData ?? null;
+  const phase = detailData?.phase ?? null;
   const learningPathName = phaseDetail?.learningPath?.name ?? "Lộ trình học tập";
   const phaseBreadcrumbLabel = phase ? getPhaseLabel(phase, 0) : "Chi tiết giai đoạn";
 
-  const { data: phaseProgress, isLoading: isLoadingPhaseProgress } = useGetPhaseProgress(phaseId, {
-    enabled: !!phaseId,
-  });
-
-  const classRoomIds = Array.from(
-    new Set(phase?.phase_class_rooms?.map((classRoomItem) => classRoomItem.class_room.id) ?? [])
-  );
-
-  const { data: classRoomsProgress, isLoading: isLoadingClassRoomsProgress } = useGetClassRoomsProgress(
-    classRoomIds,
-    learningPathId,
-    {
-      enabled: !!classRoomIds.length,
-    }
-  );
-
-  const isLoadingContent = isLoading || isLoadingPhaseProgress || isLoadingClassRoomsProgress;
+  const isLoadingContent = isLoading;
 
   if (isLoadingContent) {
     return (
@@ -84,7 +64,7 @@ export default function LearningPathPhaseDetailContent({
     );
   }
 
-  if (!phase) {
+  if (!detailData || !phase) {
     return (
       <PageContainer
         title="Không tìm thấy giai đoạn"
@@ -114,9 +94,7 @@ export default function LearningPathPhaseDetailContent({
     >
       <LearningPathPhaseDetailView
         learningPathName={learningPathName}
-        phase={phase}
-        phaseProgress={phaseProgress ?? null}
-        classRoomsProgress={classRoomsProgress ?? []}
+        detailData={detailData}
         onBack={() => router.push(PATHS.MY_LEARNING_PATHS.ROOT)}
       />
     </PageContainer>

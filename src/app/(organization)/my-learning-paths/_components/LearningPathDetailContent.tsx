@@ -4,36 +4,18 @@ import { Box, Button, CircularProgress, Stack, Typography } from "@mui/material"
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
-import {
-  useGetCurrentLearningPath,
-  useGetLearningPathPhasesProgress,
-  useGetLearningPathProgress,
-  useGetLearningPathQuery,
-} from "@/modules/learning-paths/operations/query";
-import { LearningPathUserDetailView } from "@/modules/learning-paths/view-user";
+import { LearningPathUserDetailView } from "@/modules/learning-paths/components/view-user";
+import { useGetCurrentLearningPathSummary } from "@/modules/learning-paths/operations/query";
 import PageContainer from "@/shared/ui/PageContainer";
 
 export default function LearningPathDetailContent() {
   const router = useRouter();
-  const { data: currentLearningPathData, isLoading, error } = useGetCurrentLearningPath();
+  const { data: currentLearningPathData, isLoading, error } = useGetCurrentLearningPathSummary();
 
-  const learningPath = currentLearningPathData?.data ?? null;
-  const learningPathId = learningPath?.id ?? null;
-
-  const { data: LearningPathPhases, isError } = useGetLearningPathQuery(learningPathId!);
-
-  const { data: learningPathProgress, isLoading: isLoadingProgress } = useGetLearningPathProgress(
-    learningPathId,
-    {
-      enabled: !!learningPathId,
-    }
-  );
-  const { data: phasesProgress, isLoading: isLoadingPhasesProgress } =
-    useGetLearningPathPhasesProgress(learningPathId, {
-      enabled: !!learningPathId,
-    });
-
-  const isLoadingContent = isLoading || (learningPathId ? isLoadingProgress || isLoadingPhasesProgress : false);
+  const learningPath = currentLearningPathData?.data.learningPath ?? null;
+  const timelineItems = currentLearningPathData?.data.timelineItems ?? [];
+  const progressSummary = currentLearningPathData?.data.progressSummary ?? null;
+  const isLoadingContent = isLoading;
 
   if (isLoadingContent) {
     return (
@@ -49,7 +31,7 @@ export default function LearningPathDetailContent() {
     );
   }
 
-  if (error || !learningPath) {
+  if (error || !learningPath || !progressSummary) {
     return (
       <PageContainer
         title="Lộ trình học tập"
@@ -75,9 +57,9 @@ export default function LearningPathDetailContent() {
       breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
     >
       <LearningPathUserDetailView
-        learningPath={LearningPathPhases?.data!}
-        learningPathProgress={learningPathProgress ?? null}
-        phasesProgress={phasesProgress ?? []}
+        learningPath={learningPath}
+        timelineItems={timelineItems}
+        progressSummary={progressSummary}
       />
     </PageContainer>
   );

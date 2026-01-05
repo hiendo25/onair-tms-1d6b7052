@@ -4,7 +4,7 @@
  */
 
 import { createSVClient } from "@/services/supabase/server";
-import type { BuildProgressParams, LessonProgressResponse,LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
+import type { BuildProgressParams, LessonProgressResponse, LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
 
 /**
  * Calculate progress percentage based on completed vs total lessons

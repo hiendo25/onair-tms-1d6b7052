@@ -2,7 +2,8 @@
 
 import { Box, Card, Stack, Typography } from "@mui/material";
 
-import type { PhaseTimelineItem } from "./learning-path-user.types";
+import { PhaseTimelineItem } from "../../types";
+
 import LearningPathPhaseTimelineItem from "./LearningPathPhaseTimelineItem";
 
 const TIMELINE_LINE_WIDTH = 3;

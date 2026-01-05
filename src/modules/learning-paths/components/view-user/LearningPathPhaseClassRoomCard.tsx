@@ -10,14 +10,59 @@ import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import { Box, Card, Chip, LinearProgress, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 
-import type { PhaseClassRoomCardItem } from "./learning-path-phase.types";
-import { CLASSROOM_PROGRESS_STATUS } from "./learning-path-user.constants";
+import { CLASSROOM_PROGRESS_STATUS, ClassRoomProgressStatus, DEFAULT_COUNT } from "../../learning-path-user.constants";
+import { PhaseClassRoomCardItem } from "../../types";
+
 
 const MODE_ICONS: Record<string, typeof ComputerRoundedIcon> = {
   online: ComputerRoundedIcon,
   live: LiveTvRoundedIcon,
   offline: LocationOnRoundedIcon,
   pending: HelpOutlineRoundedIcon,
+};
+
+const CLASSROOM_MODE_LABELS: Record<string, string> = {
+  live: "Live",
+  online: "Online",
+  offline: "Trực tiếp",
+  pending: "Chưa xác định",
+};
+
+const CLASSROOM_STATUS_LABELS: Record<ClassRoomProgressStatus, string> = {
+  [CLASSROOM_PROGRESS_STATUS.COMPLETED]: "Hoàn thành",
+  [CLASSROOM_PROGRESS_STATUS.IN_PROGRESS]: "Đang học",
+  [CLASSROOM_PROGRESS_STATUS.NOT_STARTED]: "Chưa bắt đầu",
+};
+
+type PhaseClassRoomStatusColor = "success" | "info" | "warning" | "default";
+
+const CLASSROOM_STATUS_COLORS: Record<ClassRoomProgressStatus, PhaseClassRoomStatusColor> = {
+  [CLASSROOM_PROGRESS_STATUS.COMPLETED]: "success",
+  [CLASSROOM_PROGRESS_STATUS.IN_PROGRESS]: "info",
+  [CLASSROOM_PROGRESS_STATUS.NOT_STARTED]: "default",
+};
+
+const EMPTY_SCHEDULE_LABEL = "Chưa có lịch";
+const SESSION_LABEL_SUFFIX = "buổi";
+
+const getDurationLabel = (sessionCount: number): string => {
+  if (sessionCount === 0) {
+    return EMPTY_SCHEDULE_LABEL;
+  }
+
+  return `${sessionCount} ${SESSION_LABEL_SUFFIX}`;
+};
+
+const getPhaseClassRoomViewMeta = (item: PhaseClassRoomCardItem) => {
+  const sessionCount = Number.isFinite(item.sessionCount) ? item.sessionCount : DEFAULT_COUNT;
+  const modeLabel = CLASSROOM_MODE_LABELS[item.modeKey] ?? CLASSROOM_MODE_LABELS.pending;
+
+  return {
+    modeLabel,
+    durationLabel: getDurationLabel(sessionCount),
+    statusLabel: CLASSROOM_STATUS_LABELS[item.status],
+    statusColor: CLASSROOM_STATUS_COLORS[item.status],
+  };
 };
 
 const STATUS_CARD_BORDER: Record<PhaseClassRoomCardItem["status"], string> = {
@@ -40,6 +85,7 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
   const ModeIcon = MODE_ICONS[item.modeKey] ?? MODE_ICONS.pending;
   const isCompleted = item.status === CLASSROOM_PROGRESS_STATUS.COMPLETED;
   const cardProps = item.href ? { component: Link, href: item.href } : {};
+  const viewMeta = getPhaseClassRoomViewMeta(item);
 
   return (
     <Card
@@ -66,11 +112,11 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
       <Stack spacing={2}>
         <Stack direction="row" alignItems="center" justifyContent="space-between">
           <Stack direction="row" spacing={1} alignItems="center">
-            <Chip size="small" label={item.statusLabel} color={item.statusColor} />
+            <Chip size="small" label={viewMeta.statusLabel} color={viewMeta.statusColor} />
             <Stack direction="row" spacing={0.5} alignItems="center">
               {/* <ModeIcon sx={{ fontSize: 18, color: "text.secondary" }} /> */}
               <Typography variant="body2" color="text.secondary">
-                {item.modeLabel}
+                {viewMeta.modeLabel}
               </Typography>
             </Stack>
           </Stack>
@@ -95,7 +141,7 @@ export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPha
         <Stack direction="row" spacing={1} alignItems="center">
           <ScheduleRoundedIcon sx={{ fontSize: 18, color: "text.secondary" }} />
           <Typography variant="body2" color="text.secondary">
-            {item.durationLabel}
+            {viewMeta.durationLabel}
           </Typography>
         </Stack>
 
