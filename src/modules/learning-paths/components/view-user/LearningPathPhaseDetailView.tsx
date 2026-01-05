@@ -5,10 +5,12 @@ import { Box, Card, Grid, IconButton, LinearProgress, Stack, Typography } from "
 
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
 import { PhaseDetailData } from "../../types";
+import ExpandableDescription from "../ExpandableDescription";
 
 import LearningPathPhaseClassRoomCard from "./LearningPathPhaseClassRoomCard";
 
-const PHASE_PROGRESS_CARD_BG = "rgba(59, 130, 246, 0.08)";
+const PHASE_PROGRESS_CARD_BG = "rgba(189, 190, 193, 0.08)";
+const DEFAULT_PHASE_DESCRIPTION = "Chưa có mô tả cho giai đoạn này.";
 
 export interface LearningPathPhaseDetailViewProps {
   learningPathName: string;
@@ -22,7 +24,6 @@ export default function LearningPathPhaseDetailView({
   onBack,
 }: LearningPathPhaseDetailViewProps) {
   const phaseLabel = getPhaseLabel(detailData.phase, 0);
-  const phaseDescription = detailData.phase.description || "Chưa có mô tả cho giai đoạn này.";
 
   return (
     <Stack spacing={4}>
@@ -39,9 +40,10 @@ export default function LearningPathPhaseDetailView({
           <Typography variant="h4" fontWeight={700}>
             {phaseLabel}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {phaseDescription}
-          </Typography>
+          <ExpandableDescription
+            text={detailData.phase.description}
+            fallbackText={DEFAULT_PHASE_DESCRIPTION}
+          />
         </Stack>
       </Stack>
 
@@ -49,7 +51,7 @@ export default function LearningPathPhaseDetailView({
         sx={{
           borderRadius: 2,
           border: "1px solid",
-          borderColor: "primary.100",
+          borderColor: "#cccc",
           bgcolor: PHASE_PROGRESS_CARD_BG,
           boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
         }}

@@ -12,6 +12,28 @@ import { LEARNING_PATHS_KEYS } from "./keys";
 
 const EMPTY_QUERY_ID = "unknown";
 
+const getErrorMessage = async (response: Response, fallback: string): Promise<string> => {
+  try {
+    const errorData: unknown = await response.json();
+
+    if (errorData && typeof errorData === "object") {
+      const errorRecord = errorData as Record<string, unknown>;
+      const message = errorRecord.message;
+      if (typeof message === "string" && message.trim()) {
+        return message;
+      }
+      const errorMessage = errorRecord.error;
+      if (typeof errorMessage === "string" && errorMessage.trim()) {
+        return errorMessage;
+      }
+    }
+  } catch {
+    return fallback;
+  }
+
+  return fallback;
+};
+
 export interface LearningPathsListResponse {
   success: boolean;
   data: LearningPathWithCounts[];
@@ -48,8 +70,8 @@ async function fetchLearningPaths(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch learning paths");
+    const message = await getErrorMessage(response, "Failed to fetch learning paths");
+    throw new Error(message);
   }
 
   return response.json();
@@ -87,8 +109,8 @@ async function fetchLearningPath(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch learning path");
+    const message = await getErrorMessage(response, "Failed to fetch learning path");
+    throw new Error(message);
   }
 
   return response.json();
@@ -123,8 +145,8 @@ async function fetchCurrentLearningPath(organizationId: string): Promise<Current
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch current learning path");
+    const message = await getErrorMessage(response, "Failed to fetch current learning path");
+    throw new Error(message);
   }
 
   return response.json();
@@ -169,8 +191,8 @@ async function fetchCurrentLearningPathSummary(organizationId: string): Promise<
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch current learning path summary");
+    const message = await getErrorMessage(response, "Failed to fetch current learning path summary");
+    throw new Error(message);
   }
 
   return response.json();
@@ -203,8 +225,8 @@ async function fetchPhaseProgress(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch phase progress");
+    const message = await getErrorMessage(response, "Failed to fetch phase progress");
+    throw new Error(message);
   }
 
   return response.json();
@@ -251,8 +273,8 @@ async function fetchClassRoomsProgress(
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to fetch class room progress");
+        const message = await getErrorMessage(response, "Failed to fetch class room progress");
+        throw new Error(message);
       }
 
       return response.json() as Promise<ProgressResponse>;
@@ -307,8 +329,8 @@ async function fetchPhaseDetail(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Failed to fetch phase detail");
+    const message = await getErrorMessage(response, "Failed to fetch phase detail");
+    throw new Error(message);
   }
 
   return response.json();

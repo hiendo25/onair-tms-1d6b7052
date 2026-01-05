@@ -17,7 +17,8 @@ export async function GET(
     const { phaseId } = await params;
 
     if (!phaseId) {
-      return NextResponse.json({ error: "Phase ID is required" }, { status: 400 });
+      const message = "Phase ID is required";
+      return NextResponse.json({ error: message, message }, { status: 400 });
     }
 
     const phaseDetail = await getLearningPathPhaseDetailForEmployee(
@@ -27,7 +28,8 @@ export async function GET(
     );
 
     if (!phaseDetail) {
-      return NextResponse.json({ error: "Phase not found" }, { status: 404 });
+      const message = "Phase not found";
+      return NextResponse.json({ error: message, message }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -40,9 +42,12 @@ export async function GET(
   } catch (error) {
     console.error("[API] Error fetching phase detail:", error);
 
+    const errorMessage = error instanceof Error ? error.message : "Failed to fetch phase detail";
+
     return NextResponse.json(
       {
-        error: error instanceof Error ? error.message : "Failed to fetch phase detail",
+        error: errorMessage,
+        message: errorMessage,
       },
       { status: 500 }
     );

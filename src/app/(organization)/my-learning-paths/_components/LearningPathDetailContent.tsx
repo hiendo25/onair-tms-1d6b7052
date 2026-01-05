@@ -10,14 +10,23 @@ import PageContainer from "@/shared/ui/PageContainer";
 
 export default function LearningPathDetailContent() {
   const router = useRouter();
-  const { data: currentLearningPathData, isLoading, error } = useGetCurrentLearningPathSummary();
+  const {
+    data: currentLearningPathData,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useGetCurrentLearningPathSummary();
 
   const learningPath = currentLearningPathData?.data.learningPath ?? null;
   const timelineItems = currentLearningPathData?.data.timelineItems ?? [];
   const progressSummary = currentLearningPathData?.data.progressSummary ?? null;
+  const hasContent = Boolean(learningPath && progressSummary);
   const isLoadingContent = isLoading;
+  const errorMessage =
+    error instanceof Error ? error.message : "Không thể tải lộ trình học tập. Vui lòng thử lại.";
 
-  if (isLoadingContent) {
+  if (isLoadingContent && !hasContent) {
     return (
       <PageContainer
         title="Đang tải lộ trình"
@@ -31,7 +40,33 @@ export default function LearningPathDetailContent() {
     );
   }
 
-  if (error || !learningPath || !progressSummary) {
+  if (error && !hasContent) {
+    return (
+      <PageContainer
+        title="Lộ trình học tập"
+        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
+      >
+        <Box sx={{ p: 3 }}>
+          <Stack spacing={2} alignItems="flex-start">
+            <Typography variant="h6">Không thể tải lộ trình học tập</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {errorMessage}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Button variant="contained" onClick={() => refetch()} disabled={isFetching}>
+                Thử lại
+              </Button>
+              <Button variant="outlined" onClick={() => router.push(PATHS.DASHBOARD)}>
+                Về trang chủ
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      </PageContainer>
+    );
+  }
+
+  if (!learningPath || !progressSummary) {
     return (
       <PageContainer
         title="Lộ trình học tập"

@@ -17,16 +17,25 @@ export default function LearningPathPhaseDetailContent({
   phaseId,
 }: LearningPathPhaseDetailContentProps) {
   const router = useRouter();
-  const { data: phaseDetailData, isLoading, error } = useGetPhaseById(phaseId);
+  const {
+    data: phaseDetailData,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useGetPhaseById(phaseId);
   const phaseDetail = phaseDetailData?.data ?? null;
   const detailData = phaseDetail?.detailData ?? null;
   const phase = detailData?.phase ?? null;
+  const hasDetail = Boolean(detailData && phase);
   const learningPathName = phaseDetail?.learningPath?.name ?? "Lộ trình học tập";
   const phaseBreadcrumbLabel = phase ? getPhaseLabel(phase, 0) : "Chi tiết giai đoạn";
 
   const isLoadingContent = isLoading;
+  const errorMessage =
+    error instanceof Error ? error.message : "Không thể tải giai đoạn học tập. Vui lòng thử lại.";
 
-  if (isLoadingContent) {
+  if (isLoadingContent && !hasDetail) {
     return (
       <PageContainer
         title="Đang tải giai đoạn"
@@ -43,7 +52,33 @@ export default function LearningPathPhaseDetailContent({
     );
   }
 
-  if (error || !phaseDetail) {
+  if (error && !hasDetail) {
+    return (
+      <PageContainer
+        title="Không thể tải giai đoạn"
+        breadcrumbs={[{ title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT }]}
+      >
+        <Box sx={{ p: 3 }}>
+          <Stack spacing={2} alignItems="flex-start">
+            <Typography variant="h6">Không thể tải giai đoạn học tập</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {errorMessage}
+            </Typography>
+            <Stack direction="row" spacing={1} flexWrap="wrap">
+              <Button variant="contained" onClick={() => refetch()} disabled={isFetching}>
+                Thử lại
+              </Button>
+              <Button variant="outlined" onClick={() => router.push(PATHS.MY_LEARNING_PATHS.ROOT)}>
+                Quay lại lộ trình
+              </Button>
+            </Stack>
+          </Stack>
+        </Box>
+      </PageContainer>
+    );
+  }
+
+  if (!phaseDetail) {
     return (
       <PageContainer
         title="Giai đoạn học tập"

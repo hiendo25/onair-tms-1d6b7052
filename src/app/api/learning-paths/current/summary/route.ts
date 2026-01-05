@@ -23,13 +23,14 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error fetching current learning path summary:", error);
 
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to fetch current learning path summary";
+
     return NextResponse.json(
       {
         success: false,
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch current learning path summary",
+        message: errorMessage,
+        error: errorMessage,
       },
       { status: 500 },
     );
