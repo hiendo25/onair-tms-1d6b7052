@@ -6,6 +6,7 @@ import { Control, Controller } from "react-hook-form";
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
 import { type ClassRoom } from "../classroom-form.schema";
 
 import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
@@ -49,7 +50,7 @@ const SessionFormItem: React.FC<SessionFormItemProps> = ({ index, isLearningPath
 
       <AssessmentField sessionIndex={index} control={control} />
 
-      <RHFRichEditor
+      <RHFTinyEditor
         control={control}
         name={`classRoomSessions.${index}.description`}
         placeholder="Nội dung"
@@ -79,8 +80,7 @@ const SessionFormItem: React.FC<SessionFormItemProps> = ({ index, isLearningPath
           </>
         )}
       />
-
-      <AgendaFieldsControl sessionIndex={index} control={control} />
+      {isLearningPath ? null : <AgendaFieldsControl sessionIndex={index} control={control} />}
     </div>
   );
 };

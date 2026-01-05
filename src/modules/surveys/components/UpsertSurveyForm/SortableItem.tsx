@@ -32,15 +32,15 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, children, padding = 4, 
       })}
     >
       <div
-        className={cn("flex justify-start gap-4 bg-white  rounded-lg items-start", {
+        className={cn("flex justify-start gap-3 bg-white  rounded-lg items-start", {
           "opacity-0": isDragging,
           "p-4": padding === 4,
           "p-3": padding === 3,
           "p-2": padding === 2,
-          "border border-gray-200": !noBorder,
+          "border border-gray-300": !noBorder,
         })}
       >
-        <IconButton className="w-fit bg-transparent text-blue-600 p-1 mt-1.5 h-auto" disableRipple {...listeners}>
+        <IconButton className="w-fit bg-transparent text-blue-600 p-1 mt-2 h-auto" disableRipple {...listeners}>
           <Dot2RowVerticalIcon className="w-4 h-4" />
         </IconButton>
         <div className="flex-1">{children}</div>

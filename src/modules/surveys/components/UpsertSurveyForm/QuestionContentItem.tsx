@@ -16,10 +16,10 @@ import { QUESTION_TYPE_OPTIONS } from "@/constants/survey.constant";
 import { FaceSadIcon, FaceSmileIcon, Trash01Icon } from "@/shared/assets/icons";
 import RHFCheckboxField from "@/shared/ui/form/RHFCheckboxField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { UpsertSurveyFormData } from "../../survey-form.schema";
 
 import QuestionRatingType from "./question-fields-type/QuestionRatingType";
 import QuestionOptionContainer from "./QuestionOptionContainer";
+import { UpsertSurveyFormData } from "./survey-form.schema";
 interface QuestionContentItemProps {
   questionIndex: number;
   control: Control<UpsertSurveyFormData>;
@@ -32,11 +32,9 @@ const QuestionContentItem: React.FC<QuestionContentItemProps> = ({ questionIndex
     name: `questions.${questionIndex}.type`,
   });
 
-  console.log({ error });
-  const handleChangeType = () => {};
   return (
     <Stack spacing={2}>
-      <div className="flex flex-wrap items-center">
+      <div className="flex flex-wrap justify-between items-center">
         <FormLabel component="div" className="mb-0 text-[16px]">{`Câu hỏi ${questionIndex + 1}`}</FormLabel>
         <IconButton color="error" onClick={() => onRemove?.(questionIndex)} size="small">
           <Trash01Icon className="w-4 h-4" />
@@ -78,9 +76,16 @@ const QuestionContentItem: React.FC<QuestionContentItemProps> = ({ questionIndex
         />
       </div>
       <div className="question-type-options">
-        {error?.options && <FormHelperText error={!!error?.options}>{error?.options?.root?.message}</FormHelperText>}
-        {["rating_sort", "radio", "checkbox"].includes(questionType) && (
-          <QuestionOptionContainer control={control} questionIndex={questionIndex} />
+        {(questionType === "sort_rating" || questionType === "radio" || questionType === "checkbox") && (
+          <div className={`question-${questionType}`}>
+            <FormLabel component="div">
+              Tùy chọn <span className="text-red-600">*</span>
+            </FormLabel>
+            {error?.options && (
+              <FormHelperText error={!!error?.options}>{error?.options?.root?.message}</FormHelperText>
+            )}
+            <QuestionOptionContainer control={control} questionIndex={questionIndex} questionType={questionType} />
+          </div>
         )}
         {questionType === "text" && (
           <div className="flex items-center justify-center">

@@ -1,13 +1,13 @@
 import React, { memo } from "react";
 import { Box, FormLabel, IconButton, Typography } from "@mui/material";
-import dayjs from "dayjs";
-import { Control, Controller } from "react-hook-form";
+import { Control } from "react-hook-form";
 
 import { TrashIcon1 } from "@/shared/assets/icons";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { ClassRoom } from "../../../classroom-form.schema";
+
+import AgendaFromToDate from "./AgendaFromToDate";
 
 interface AgendaFormItemProps {
   index: number;
@@ -38,37 +38,7 @@ const AgendaFormItem: React.FC<AgendaFormItemProps> = ({ sessionIndex, index, re
           <FormLabel component="div">
             Thời gian diễn ra <span className="text-red-600">*</span>
           </FormLabel>
-          <Controller
-            control={control}
-            name={`classRoomSessions.${sessionIndex}`}
-            render={({
-              field: {
-                value: { startDate, endDate, agendas },
-                onChange,
-              },
-            }) => (
-              <div className="flex items-center gap-4">
-                <RHFDateTimePicker
-                  name={`classRoomSessions.${sessionIndex}.agendas.${index}.startDate`}
-                  minDateTime={startDate ? dayjs(startDate) : dayjs()}
-                  maxDateTime={endDate ? dayjs(endDate) : dayjs()}
-                  control={control}
-                />
-                <RHFDateTimePicker
-                  name={`classRoomSessions.${sessionIndex}.agendas.${index}.endDate`}
-                  minDateTime={
-                    agendas[index]?.startDate
-                      ? dayjs(agendas[index]?.startDate)
-                      : startDate
-                      ? dayjs(startDate)
-                      : dayjs()
-                  }
-                  maxDateTime={endDate ? dayjs(endDate) : dayjs()}
-                  control={control}
-                />
-              </div>
-            )}
-          />
+          <AgendaFromToDate control={control} sessionIndex={sessionIndex} agendaIndex={index} />
         </div>
         <RHFTextField
           label="Tiêu đề"

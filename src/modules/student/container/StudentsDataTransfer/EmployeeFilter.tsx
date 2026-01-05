@@ -1,58 +1,56 @@
-import React, { memo, SetStateAction, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useId } from "react";
 import {
   Box,
   Button,
   ButtonProps,
   FilledInput,
+  FilledInputProps,
+  FormControl,
+  IconButton,
   InputAdornment,
-  List,
   MenuItem,
   Popover,
+  Select,
+  SelectProps,
+  Tab,
+  Tabs,
   Typography,
 } from "@mui/material";
 
 import { FilterFunnelIcon, SearchIcon } from "@/shared/assets/icons";
-import EmptyData from "@/shared/ui/EmptyData";
+import { cn } from "@/utils";
 
 import BranchSelector, { BranchSelectorProps } from "./BranchSelector";
 import DepartmentSelector, { DepartmentSelectorProps } from "./DepartmentSelector";
 
+type SearchKeyName = "full_name" | "email" | "code";
 export interface EmployeeFilterProps {
   className?: string;
   selectedDepartmentIds?: DepartmentSelectorProps["values"];
   selectedBranchIds?: BranchSelectorProps["values"];
-  onSearch?: (value: string) => void;
+  onSearch?: (key: SearchKeyName, value: string) => void;
   onChange?: (type: "department" | "branch") => (values: string[]) => void;
+  querySearch: { key: SearchKeyName; search: string };
 }
-const TAB_KEY = {
-  branch: "branch",
-  department: "department",
-  role: "role",
-} as const;
 
-const TAB_MENU_LIST = [
-  {
-    label: "Chi nhánh",
-    key: TAB_KEY.branch,
-  },
-  {
-    label: "Phòng ban",
-    key: TAB_KEY.department,
-  },
-  {
-    label: "Vai trò",
-    key: TAB_KEY.role,
-  },
+type TabKeys = "branch" | "department" | "role";
+
+const KEY_NAME_OPTIONS: { label: string; value: SearchKeyName }[] = [
+  { label: "Email", value: "email" },
+  { label: "Tên", value: "full_name" },
+  { label: "Code", value: "code" },
 ];
+
 const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
   className,
   selectedDepartmentIds = [],
   selectedBranchIds = [],
+  querySearch,
   onSearch,
   onChange,
 }) => {
-  const [currentTabMenu, setCurrentTabMenu] = useState<keyof typeof TAB_KEY>(TAB_KEY.department);
+  const [search, setSearch] = useState(querySearch);
   const id = useId();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement>();
 
@@ -67,50 +65,144 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
     setAnchorEl(evt.currentTarget);
   };
 
-  const handleSelectDepartmentIds: DepartmentSelectorProps["onSelect"] = (departmentId) => {
-    let newList = [...selectedDepartmentIds];
-    const isExist = newList.includes(departmentId);
-    newList = isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
+  const handleSelectDepartmentIds = useCallback<Exclude<DepartmentSelectorProps["onSelect"], undefined>>(
+    (departmentId) => {
+      let newList = [...selectedDepartmentIds];
+      const isExist = newList.includes(departmentId);
+      newList = isExist ? newList.filter((it) => it !== departmentId) : [...newList, departmentId];
 
-    onChange?.("department")(newList);
+      onChange?.("department")(newList);
+    },
+    [onChange, selectedDepartmentIds],
+  );
+  const handleSelectBranch = useCallback<Exclude<BranchSelectorProps["onSelect"], undefined>>(
+    (branchId) => {
+      let newList = [...selectedBranchIds];
+      const isExist = newList.includes(branchId);
+      newList = isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
+
+      onChange?.("branch")(newList);
+    },
+    [onChange, selectedBranchIds],
+  );
+
+  const handleSearch: FilledInputProps["onChange"] = (evt) => {
+    const value = evt.target.value;
+    const searchKey = search.key;
+    onSearch?.(searchKey, value);
   };
-  const handleSelectBranch: BranchSelectorProps["onSelect"] = (branchId) => {
-    let newList = [...selectedBranchIds];
-    const isExist = newList.includes(branchId);
-    newList = isExist ? newList.filter((it) => it !== branchId) : [...newList, branchId];
 
-    onChange?.("branch")(newList);
+  const handleChangeSearchKey: SelectProps<SearchKeyName>["onChange"] = (evt) => {
+    const key = evt.target.value;
+    setSearch((prev) => ({
+      ...prev,
+      key,
+    }));
   };
 
+  const TAB_MENU_LIST: SimpleBasicTabProps["items"] = useMemo(() => {
+    return [
+      {
+        label: "Chi nhánh",
+        key: "branch",
+        panel: <BranchSelector values={selectedBranchIds} onSelect={handleSelectBranch} />,
+      },
+      {
+        label: "Phòng ban",
+        key: "department",
+        panel: <DepartmentSelector onSelect={handleSelectDepartmentIds} values={selectedDepartmentIds} />,
+      },
+      {
+        label: "Vai trò",
+        key: "role",
+        panel: (
+          <Typography sx={{ fontSize: "0.875rem" }} variant="body2" color="textDisabled">
+            Đang trống
+          </Typography>
+        ),
+      },
+    ];
+  }, [handleSelectBranch, handleSelectDepartmentIds, selectedDepartmentIds, selectedBranchIds]);
+
+  useEffect(() => {
+    setSearch((prev) => ({ ...prev, search: querySearch.search }));
+  }, [querySearch.search]);
   return (
-    <div className="w-full flex items-center">
-      <div className="flex-1 flex">
-        <FilledInput
-          placeholder="Tìm kiếm..."
-          onChange={(evt) => onSearch?.(evt.target.value)}
-          endAdornment={
-            <InputAdornment position="end">
-              <SearchIcon className="w-5 h-5" />
-            </InputAdornment>
-          }
-          size="small"
-          className="w-full max-w-60"
-        />
+    <div className="w-full flex items-center gap-3">
+      <div className="flex bg-gray-100 gap-1 rounded-lg p-1  max-w-96 flex-1">
+        <FormControl size="small" variant="filled" sx={{ width: 100 }}>
+          <Select
+            value={search.key}
+            onChange={handleChangeSearchKey}
+            sx={{
+              height: 36,
+              background: "white",
+              "&.MuiFilledInput-root": {
+                backgroundColor: "white",
+              },
+            }}
+            MenuProps={{
+              sx: (theme) => ({
+                ".MuiList-root ": {
+                  padding: 1,
+                },
+              }),
+            }}
+          >
+            {KEY_NAME_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value} sx={{ fontSize: "0.875rem" }}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth>
+          <FilledInput
+            placeholder="Tìm kiếm..."
+            value={search.search}
+            onChange={handleSearch}
+            size="small"
+            endAdornment={
+              <InputAdornment position="end">
+                <SearchIcon className="w-5 h-5" />
+              </InputAdornment>
+            }
+            className="w-full"
+            sx={(theme) => ({
+              "&:hover": {
+                background: theme.palette.grey[200],
+              },
+              "&.Mui-focused": {
+                background: theme.palette.grey[200],
+              },
+            })}
+          />
+        </FormControl>
       </div>
+
       <div>
         <Button
           aria-describedby={filterId.current}
-          variant="outlined"
-          color="inherit"
           onClick={handleOpenFilter}
-          sx={{ paddingBlock: 1, minWidth: "auto" }}
-          startIcon={<FilterFunnelIcon className="w-3 h-3" />}
-          size="small"
+          sx={(theme) => ({
+            background: theme.palette.grey[200],
+            color: theme.palette.grey[800],
+            height: "44px",
+            "&:hover": {
+              background: theme.palette.grey[200],
+              boxShadow: "none",
+            },
+            "&.Mui-focused": {
+              background: theme.palette.grey[200],
+            },
+          })}
+          startIcon={
+            <InputAdornment position="start">
+              <FilterFunnelIcon className="w-5 h-5" />
+            </InputAdornment>
+          }
         >
-          <Typography sx={{ fontSize: "0.875rem" }}>Lọc</Typography>
-          {/* <span className="w-5 h-5 text-xs bg-gray-600 rounded-full inline-flex items-center justify-center ml-2 text-white">
-                {1}
-              </span> */}
+          Bộ lọc
         </Button>
         <Popover
           id={filterId.current}
@@ -119,52 +211,15 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
           onClose={handleClose}
           anchorOrigin={{
             vertical: "bottom",
-            horizontal: "left",
+            horizontal: "center",
           }}
           transformOrigin={{
             vertical: "top",
-            horizontal: "left",
+            horizontal: "center",
           }}
         >
-          <div className="flex gap-2 min-w-[450px] max-h-[400px]">
-            <div className="w-36">
-              <List>
-                {TAB_MENU_LIST.map((item) => (
-                  <MenuItem
-                    key={item.key}
-                    onClick={() => setCurrentTabMenu(item.key)}
-                    sx={(theme) => ({
-                      backgroundColor: item.key === currentTabMenu ? theme.palette.grey[200] : undefined,
-                    })}
-                  >
-                    {item.label}
-                  </MenuItem>
-                ))}
-              </List>
-            </div>
-            <Box
-              sx={(theme) => ({
-                scrollbarWidth: "thin",
-                flex: 1,
-                flexDirection: "column",
-                overflowY: "auto",
-                p: 2,
-                borderLeft: "1px solid",
-                borderColor: theme.palette.grey[200],
-              })}
-            >
-              <div>
-                {currentTabMenu === "branch" ? (
-                  <BranchSelector values={selectedBranchIds} onSelect={handleSelectBranch} />
-                ) : currentTabMenu === "department" ? (
-                  <DepartmentSelector onSelect={handleSelectDepartmentIds} values={selectedDepartmentIds} />
-                ) : currentTabMenu === "role" ? (
-                  <div className="flex items-center justify-center p-4">
-                    <EmptyData iconSize="small" description="Hiện chưa có vai trò nào." />
-                  </div>
-                ) : null}
-              </div>
-            </Box>
+          <div className="w-[320px] max-h-[400px]">
+            <SimpleBasicTabs items={TAB_MENU_LIST} />
           </div>
         </Popover>
       </div>
@@ -173,3 +228,72 @@ const EmployeeFilter: React.FC<EmployeeFilterProps> = ({
 };
 
 export default memo(EmployeeFilter);
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  tabKey: TabKeys;
+  value: TabKeys;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, tabKey, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== tabKey}
+      id={`simple-tabpanel-${tabKey}`}
+      aria-labelledby={`simple-tab-${tabKey}`}
+      {...other}
+    >
+      {value === tabKey && <Box sx={{ p: 2 }}>{children}</Box>}
+    </div>
+  );
+}
+
+function a11yProps(key: string) {
+  return {
+    id: `simple-tab-${key}`,
+    "aria-controls": `simple-tabpanel-${key}`,
+  };
+}
+
+interface SimpleBasicTabProps {
+  items: { label: string; key: TabKeys; panel?: React.ReactNode }[];
+}
+const SimpleBasicTabs: React.FC<SimpleBasicTabProps> = ({ items }) => {
+  const [value, setValue] = React.useState<TabKeys>("branch");
+
+  const handleChange = (event: React.SyntheticEvent, newValue: TabKeys) => {
+    setValue(newValue);
+  };
+
+  return (
+    <Box>
+      <Tabs
+        value={value}
+        onChange={handleChange}
+        aria-label="Employee filter basic tab"
+        variant="scrollable"
+        // orientation="vertical"
+      >
+        {items.map((tab) => (
+          <Tab
+            key={tab.key}
+            value={tab.key}
+            label={tab.label}
+            {...a11yProps(tab.key)}
+            sx={{
+              textTransform: "initial",
+            }}
+          />
+        ))}
+      </Tabs>
+      {items.map((tab, index) => (
+        <CustomTabPanel key={tab.key} value={value} tabKey={tab.key}>
+          {tab.panel}
+        </CustomTabPanel>
+      ))}
+    </Box>
+  );
+};

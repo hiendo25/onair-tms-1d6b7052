@@ -12,6 +12,10 @@ export default function CreateSurveyForm() {
   const { enqueueSnackbar } = useSnackbar();
   const { create, isLoading } = useUpsertSurvey();
   const [isTransition, startTransition] = useTransition();
+
+  const handleCancel = () => {
+    router.push(PATHS.SURVEYS.LIST);
+  };
   const handleSubmit: UpsertSurveyFormProps["onSubmit"] = (formData) => {
     create(
       { type: "classroom", formData: formData },
@@ -26,5 +30,5 @@ export default function CreateSurveyForm() {
     );
   };
 
-  return <UpsertSurveyForm onSubmit={handleSubmit} isLoading={isLoading || isTransition} />;
+  return <UpsertSurveyForm onSubmit={handleSubmit} onCancel={handleCancel} isLoading={isLoading || isTransition} />;
 }

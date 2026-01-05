@@ -4,10 +4,11 @@ export interface GetTeacherQueryParams {
   pageSize?: number;
   search?: string;
   exclude?: string[];
+  organizationId?: string;
 }
 
 const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
-  const { page = 1, pageSize = 20, search = "", exclude } = queryParams || {};
+  const { page = 1, pageSize = 20, search = "", exclude, organizationId } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -21,6 +22,7 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
       employee_code,
       status,
       employee_type,
+			organization_id,
       profiles!inner(
         id,
         full_name,
@@ -60,6 +62,9 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
   }
   if (search) {
     teacherQuery = teacherQuery.ilike("profiles.full_name", `%${search}%`);
+  }
+  if (organizationId) {
+    teacherQuery = teacherQuery.eq("organization_id", organizationId);
   }
 
   const { data, error, count, status, statusText } = await teacherQuery

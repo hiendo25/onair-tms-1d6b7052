@@ -1,0 +1,65 @@
+import React, { memo, PropsWithChildren } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { IconButton, Typography } from "@mui/material";
+
+import { Dot2RowVerticalIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
+
+interface SortableItemProps extends PropsWithChildren {
+  id: string;
+  label?: React.ReactNode;
+  subLabel?: string;
+  isError?: boolean;
+}
+const SortableItem: React.FC<SortableItemProps> = ({ id, children, subLabel, isError }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...attributes}
+      style={style}
+      className={cn("border border-gray-300 rounded-lg overflow-hidden", {
+        "border-dashed border-gray-300": isDragging,
+        "border-solid": !isDragging,
+      })}
+    >
+      <div
+        className={cn("flex gap-2 bg-white p-3", {
+          "opacity-0": isDragging,
+        })}
+      >
+        <div className="flex flex-row gap-2 items-center">
+          <IconButton className="w-fit bg-transparent text-blue-600 p-1 h-auto" disableRipple {...listeners}>
+            <Dot2RowVerticalIcon className="w-4 h-4" />
+          </IconButton>
+          {subLabel ? (
+            <Typography
+              sx={(theme) => ({
+                width: "24px",
+                height: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "8px",
+                backgroundColor: theme.palette.primary.main,
+                color: "white",
+                fontSize: "0.75rem",
+                fontWeight: "bold",
+              })}
+            >
+              {subLabel}
+            </Typography>
+          ) : null}
+        </div>
+        <div className="flex-1 section-sortable-content">{children}</div>
+      </div>
+    </div>
+  );
+};
+export default memo(SortableItem);

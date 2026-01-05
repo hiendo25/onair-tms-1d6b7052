@@ -1,5 +1,6 @@
-import React, { useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import { Button, ButtonProps } from "@mui/material";
+import { useWatch } from "react-hook-form";
 
 import { ClassRoom } from "./classroom-form.schema";
 import { useClassRoomFormContext } from "./ClassRoomFormContainer";
@@ -8,15 +9,19 @@ interface ButtonSubmitProps extends ButtonProps {
   isLoading?: boolean;
 }
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ isLoading, initialValue, children, ...buttonProps }) => {
-  const { getValues, watch } = useClassRoomFormContext();
-  const fieldsCheck: (keyof ClassRoom)[] = ["title", "description", "thumbnailUrl", "categories", "classRoomSessions"];
+  const values = useWatch<ClassRoom>({
+    name: ["title", "description", "thumbnailUrl", "categories", "classRoomSessions"],
+  });
   const isDisabledButton = useMemo(() => {
-    return fieldsCheck.some((field) => !getValues(field));
-  }, [initialValue, watch(fieldsCheck)]);
+    return values.some((v) => {
+      if (Array.isArray(v)) return v.length === 0;
+      return !v;
+    });
+  }, [values]);
   return (
     <Button {...buttonProps} disabled={isLoading || isDisabledButton} loading={isLoading}>
       {children}
     </Button>
   );
 };
-export default ButtonSubmit;
+export default memo(ButtonSubmit);

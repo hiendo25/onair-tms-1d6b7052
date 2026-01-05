@@ -1,17 +1,19 @@
 "use client";
-import React, { useCallback } from "react";
+import React, { memo, useCallback } from "react";
 import { Button, FormLabel, IconButton } from "@mui/material";
-import { useFieldArray } from "react-hook-form";
+import { Control, useFieldArray } from "react-hook-form";
 
 import { MarkerPinIcon, TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import BoxIcon from "../../TabClassRoomResource/BoxIcon";
 
 const MAX_FIELD_COUNT = 4;
 interface ForWhomFieldsProps {
   className?: string;
+  control: Control<ClassRoom>;
 }
 const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
   const { control, trigger } = useClassRoomFormContext();
@@ -35,8 +37,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
 
     if (fieldCount >= MAX_FIELD_COUNT) return;
     append([{ description: "" }]);
-  }, [forWhomFields]);
+  }, [forWhomFields, append]);
 
+  console.log("render ForWhomFields");
   return (
     <div className={className}>
       <div className="flex justify-between items-center">
@@ -44,7 +47,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
           <BoxIcon>
             <MarkerPinIcon />
           </BoxIcon>
-          <FormLabel className="mb-0">Mục tiêu của lớp học</FormLabel>
+          <FormLabel className="mb-0" component="div">
+            Mục tiêu của lớp học
+          </FormLabel>
         </div>
         <Button startIcon={<PlusIcon />} variant="fill" size="small" onClick={handleAddMore}>
           Thêm
@@ -55,9 +60,9 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
           {forWhomFields.map((field, _index) => (
             <div className="for-whom-field flex" key={_index}>
               <RHFTextField
+                control={control}
                 name={`forWhom.${_index}.description`}
                 placeholder={`Mục tiêu ${_index + 1}`}
-                control={control}
               />
               <IconButton size="small" className="p-0 bg-transparent" onClick={() => remove(_index)}>
                 <TrashIcon1 className="w-4 h-4" />
@@ -69,4 +74,4 @@ const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
     </div>
   );
 };
-export default ForWhomFields;
+export default memo(ForWhomFields);

@@ -18,6 +18,8 @@ interface RHFRichEditorProps<T extends FieldValues> {
   name: Path<T>;
   type?: "text";
   defaultValue?: PathValue<T, Path<T>>;
+  minHeight?: number;
+  maxHeight?: number;
   required?: boolean;
 }
 const RHFRichEditor = <T extends FieldValues>({
@@ -26,6 +28,8 @@ const RHFRichEditor = <T extends FieldValues>({
   defaultValue,
   name,
   className,
+  minHeight,
+  maxHeight,
   required,
 }: RHFRichEditorProps<T>) => {
   const fieldId = useId();
@@ -43,7 +47,13 @@ const RHFRichEditor = <T extends FieldValues>({
               {required ? <span className="ml-1 text-red-600">*</span> : null}
             </FormLabel>
           ) : null}
-          <DynamicEditor {...field} error={!!error} helperText={error?.message} />
+          <DynamicEditor
+            {...field}
+            // minHeight={minHeight}
+            // maxHeight={maxHeight}
+            error={!!error}
+            helperText={error?.message}
+          />
         </FormControl>
       )}
     />

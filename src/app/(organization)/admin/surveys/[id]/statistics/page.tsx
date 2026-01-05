@@ -1,13 +1,12 @@
-import { Suspense } from "react";
+import { Typography } from "@mui/material";
 import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
-import { MOCK_SURVEYS } from "@/constants/survey.constant";
-import { MOCK_SURVEY_RESPONSES } from "@/constants/survey-statistics.constant";
 import { surveysRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
 
-import SurveyStatistics from "./_components/SurveyStatistics";
+import ResponseStatistics from "./_components/ResponseStatistics";
+import SurveyStatisticProvider from "./_components/SurveyStatisticProvider";
 
 interface PageProps {
   params: Promise<{
@@ -16,29 +15,31 @@ interface PageProps {
 }
 
 export default async function SurveyStatisticsPage({ params }: PageProps) {
-  const { id } = await params;
+  const { id: surveyId } = await params;
 
-  const { data: surveyDetail, error } = await surveysRepository.getSurveyById(id);
-  // Find survey from mock data
-  const survey = MOCK_SURVEYS.find((s) => s.id === "1");
+  const { data: surveyDetailData, error: ErrorSurveyDetail } = await surveysRepository.getSurveyResponsesById(surveyId);
 
-  if (!survey || !surveyDetail) {
+  if (!surveyDetailData || ErrorSurveyDetail) {
     notFound();
   }
 
-  // Get responses for this survey
-  const responses = MOCK_SURVEY_RESPONSES["1"] || [];
+  const sortedQuestions = surveyDetailData.questions.sort((a, b) => a.priority - b.priority);
 
   return (
     <PageContainer
-      title={`Thống kê: ${surveyDetail.title}`}
+      title={`Thống kê: ${surveyDetailData.title}`}
       breadcrumbs={[
         { title: "Khảo sát", path: PATHS.SURVEYS.LIST },
-        { title: surveyDetail.title },
+        { title: surveyDetailData.title },
         { title: "Thống kê" },
       ]}
     >
-      <SurveyStatistics survey={survey} responses={responses} />
+      <SurveyStatisticProvider data={{ questions: sortedQuestions, responses: surveyDetailData.responses }}>
+        <Typography variant="h6" gutterBottom>
+          {`Tổng số phản hồi: ${surveyDetailData.responseCount[0]?.count}`}
+        </Typography>
+        <ResponseStatistics />
+      </SurveyStatisticProvider>
     </PageContainer>
   );
 }

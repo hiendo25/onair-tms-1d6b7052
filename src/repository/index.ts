@@ -35,3 +35,7 @@ export * as plansRepository from "./plans";
 export * as userPreferenceRepository from "./user-preferences";
 export * as learningPathsRepository from "./learning-paths";
 export * as lessonProgressRepository from "./lesson-progress";
+export * as surveyResponseRepository from "./surveys/survey-responses";
+export * as surveyAnswerRepository from "./surveys/surveys-answers";
+export * as surveyQuestionRepository from "./surveys/surveys-questions";
+export * as surveyQuestionOptionRepository from "./surveys/surveys-questions-options";

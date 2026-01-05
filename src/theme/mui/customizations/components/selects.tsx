@@ -11,6 +11,11 @@ export const selectsCustomizations: Components<Theme> = {
       IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => (
         <KeyboardArrowDownIcon fontSize="small" {...props} ref={ref} />
       )),
+      MenuProps: {
+        PopoverClasses: {
+          paper: "paper-select",
+        },
+      },
     },
     styleOverrides: {
       root: ({ theme }) => ({
@@ -68,6 +73,7 @@ export const selectsCustomizations: Components<Theme> = {
           },
         ],
       }),
+
       select: ({ theme }) => ({
         display: "flex",
         alignItems: "center",
@@ -82,6 +88,22 @@ export const selectsCustomizations: Components<Theme> = {
       outlined: () => ({
         minHeight: "20px",
         lineHeight: 1,
+      }),
+    },
+  },
+  MuiMenu: {
+    styleOverrides: {
+      root: (theme) => ({}),
+      paper: {
+        border: "none",
+      },
+      list: () => ({
+        ".MuiMenuItem-root": {
+          "&:focus-visible": {
+            outline: "none",
+            outlineOffset: 0,
+          },
+        },
       }),
     },
   },

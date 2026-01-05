@@ -1,15 +1,15 @@
 "use client";
-import React, { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, IconButton } from "@mui/material";
-import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { ClassRoomType } from "@/model/class-room.model";
-import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
+import { CalendarDateIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
 
+import ButtonCancel from "./ButtonCancel";
 import ButtonSubmit from "./ButtonSubmit";
 import { ClassRoom, classRoomSchema } from "./classroom-form.schema";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
@@ -23,7 +23,7 @@ export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-export const initClassRoomFormData = (oprions: {
+export const initClassRoomFormData = (option: {
   platform?: ClassRoomPlatformType;
   roomType?: ClassRoomType;
 }): Partial<ClassRoom> => {
@@ -35,10 +35,10 @@ export const initClassRoomFormData = (oprions: {
     classRoomId: "",
     slug: "",
     status: "draft",
-    roomType: oprions?.roomType,
+    roomType: option?.roomType,
     forWhom: [],
     docs: [],
-    platform: oprions?.platform,
+    platform: option?.platform,
     classRoomSessions: [],
     classType: "room",
   };
@@ -62,6 +62,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     { onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel, isLearningPath = false },
     ref,
   ) => {
+    const buttonActionRef = useRef<"submit" | "cancel">(null);
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
@@ -72,11 +73,12 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         platform: platform,
         roomType: roomType,
       }),
+      reValidateMode: "onChange",
       mode: "onChange",
     });
 
     const {
-      setValue,
+      control,
       handleSubmit,
       formState: { errors },
       trigger,
@@ -85,7 +87,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
     console.log({ errors, selectedStudents, isLearningPath });
 
-    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void, status: "draft" | "publish") => async () => {
+    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void) => async () => {
       try {
         const TAB_LIST = isLearningPath
           ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
@@ -105,23 +107,21 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
         if (isSomeTabFailed) return;
 
-        setValue("status", status);
-
         submitAction();
       } catch (error) {
         console.log(error);
       }
     };
 
-    const submitForm: SubmitHandler<ClassRoom> = (data) => {
-      console.log({ errors, data, selectedStudents });
-
-      onSubmit?.(data, selectedStudents);
+    const handleSubmitForm = () => {
+      buttonActionRef.current = "submit";
+      handleSubmit((data) => onSubmit?.({ ...data, status: "publish" }, selectedStudents))();
     };
 
-    const cancelCreateClassRoom = () => {
-      resetStore(); // Reset all selected value in classRoom store
-      reset(); //Reset Form
+    const handleCancel = () => {
+      buttonActionRef.current = "cancel";
+      resetStore();
+      reset();
       onCancel?.();
     };
 
@@ -143,12 +143,6 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           icon: <CalendarDateIcon className="w-5 h-5" />,
           content: <TabClassRoomSession />,
         },
-        // {
-        //   tabName: "Tài nguyên",
-        //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-        //   icon: <ClipboardIcon className="w-5 h-5" />,
-        //   content: <TabClassRoomResource />,
-        // },
       ];
       return isLearningPath
         ? BASE_ITEMS
@@ -163,7 +157,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
               content: <TabClassRoomSetting />,
             },
           ];
-    }, [isLearningPath, action]);
+    }, [action, isLearningPath]);
     /**
      * Init form value
      */
@@ -187,6 +181,9 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
         classRoomSessions: roomType === "multiple" ? [initSessions, initSessions] : [initSessions],
         classType: isLearningPath ? "learning_path" : "room",
       });
+      return () => {
+        buttonActionRef.current = null;
+      };
     }, [initFormValue, platform, roomType, isLearningPath, reset]);
 
     useImperativeHandle(ref, () => ({
@@ -205,30 +202,15 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           items={TAB_ITEMS}
           actions={
             <div className="flex items-center gap-2">
-              <IconButton
-                className="border rounded-lg border-gray-300 bg-white"
-                onClick={cancelCreateClassRoom}
-                disabled={isLoading}
-              >
-                <CloseIcon />
-              </IconButton>
-              {/* <IconButton className="border rounded-lg border-gray-300 bg-white" disabled={isLoading}>
-                <EyeIcon />
-              </IconButton> */}
-              {/* <Button
-                size="large"
-                color="inherit"
-                variant="outlined"
-                className="border-gray-300"
-                disabled={isLoading}
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "draft")}
-              >
-                Lưu nháp
-              </Button> */}
+              <ButtonCancel
+                onOk={handleCancel}
+                loading={isLoading && buttonActionRef.current === "cancel"}
+                initialData={initFormValue}
+              />
               <ButtonSubmit
-                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmit(submitForm), "publish")}
+                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmitForm)}
                 disabled={isLoading}
-                loading={isLoading}
+                loading={isLoading && buttonActionRef.current === "submit"}
               >
                 {action === "create" ? "Đăng tải" : "Cập nhật"}
               </ButtonSubmit>

@@ -3,12 +3,12 @@
 import * as React from "react";
 import { useTransition } from "react";
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Card, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
+import { Box, Button, IconButton, InputAdornment, Stack, TextField } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { useUserOrganization } from "@/modules/organization";
@@ -16,7 +16,8 @@ import { usePermissions } from "@/modules/permission-wrapper";
 import Can from "@/modules/permission-wrapper/components/Can";
 import { useGetSurveysQuery } from "@/modules/surveys/operation/queries";
 import { GetSurveysQueryParams } from "@/repository/surveys";
-import { Edit02Icon, EyeIcon, Trash01Icon } from "@/shared/assets/icons";
+import { SearchIcon } from "@/shared/assets/icons";
+import { Copy07Icon, Edit02Icon, LineChartUp01Icon, Trash01Icon } from "@/shared/assets/icons";
 import TableData from "@/shared/ui/TableData";
 
 import { surveyColumns } from "./survey-columns";
@@ -25,9 +26,10 @@ interface SurveyListContainerProps {
 }
 const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) => {
   const organization = useUserOrganization((state) => state.currentOrganization);
-  const [querParams, setQueryParams] = React.useState<GetSurveysQueryParams>({
+  const [queryParams, setQueryParams] = React.useState<GetSurveysQueryParams>({
     page: 1,
     pageSize: 10,
+    search: "",
   });
 
   const {
@@ -36,14 +38,18 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     isLoading,
   } = useGetSurveysQuery({
     queryParams: {
-      ...querParams,
+      ...queryParams,
       organizationId: organization.orgId,
     },
   });
+
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
+  const { copy } = useCopyToClipboard();
+  const { hasPermissions } = usePermissions();
 
+  const canCreateOrUpdate = hasPermissions([{ $or: "survey:create" }, { $or: "survey:update" }]);
   const [isTransition, startTransition] = useTransition();
 
   const surveyList = React.useMemo(() => {
@@ -54,22 +60,8 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     return surveysData?.count || 0;
   }, [surveysData]);
 
-  const [searchQuery, setSearchQuery] = React.useState("");
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [selectedSurveyId, setSelectedSurveyId] = React.useState<string | null>(null);
-
-  const { hasPermissions } = usePermissions();
-
-  const canCreateOrUpdate = hasPermissions([{ $or: "survey:create" }, { $or: "survey:update" }]);
-
-  // const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
-
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-    setQueryParams((prev) => ({ ...prev, page: 1 }));
+    setQueryParams((prev) => ({ ...prev, page: 1, search: event.target.value }));
   };
 
   const handleCreateSurvey = () => {
@@ -78,49 +70,14 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     });
   };
 
-  // const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, surveyId: string) => {
-  //   event.stopPropagation();
-  //   setAnchorEl(event.currentTarget);
-  //   setSelectedSurveyId(surveyId);
-  // };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedSurveyId(null);
+  const handleCopyLink = (surveyId: string) => async () => {
+    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.SUBMISSIONS(surveyId)}`;
+    const isCopied = await copy(surveyUrl);
+    notifications.show(isCopied ? "Đã sao chép liên kết khảo sát" : "Không thể sao chép liên kết", {
+      severity: isCopied ? "success" : "error",
+      autoHideDuration: 3000,
+    });
   };
-
-  const handleCopyLink = async () => {
-    if (!selectedSurveyId) return;
-
-    const surveyUrl = `${window.location.origin}${PATHS.SURVEYS.SUBMIT(selectedSurveyId)}`;
-    try {
-      await navigator.clipboard.writeText(surveyUrl);
-      notifications.show("Đã sao chép liên kết khảo sát", {
-        severity: "success",
-        autoHideDuration: 3000,
-      });
-    } catch (error) {
-      notifications.show("Không thể sao chép liên kết", {
-        severity: "error",
-        autoHideDuration: 3000,
-      });
-    }
-    handleMenuClose();
-  };
-
-  // const handleViewStatistics = () => {
-  //   if (selectedSurveyId) {
-  //     router.push(PATHS.SURVEYS.STATISTICS(selectedSurveyId));
-  //   }
-  //   handleMenuClose();
-  // };
-
-  // const handleEdit = () => {
-  //   if (selectedSurveyId) {
-  //     router.push(PATHS.SURVEYS.EDIT(selectedSurveyId));
-  //   }
-  //   handleMenuClose();
-  // };
 
   const handleDeleteSurvey = (surveyId: string, surveyName: string) => async () => {
     const confirmed = await dialogs.confirm(
@@ -134,18 +91,18 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
     );
 
     if (!confirmed) {
-      handleMenuClose();
+      // handleMenuClose();
       return;
     }
 
-    notifications.show("Xóa khảo sát thành công!", {
-      severity: "success",
+    notifications.show("Hiện chức năng chưa cho phép xóa.", {
+      severity: "info",
       autoHideDuration: 3000,
     });
-    handleMenuClose();
+    // handleMenuClose();
   };
 
-  const handleViewDetail = (surveyId: string) => () => {
+  const handleViewStatistics = (surveyId: string) => () => {
     router.push(PATHS.SURVEYS.STATISTICS(surveyId));
   };
 
@@ -162,18 +119,26 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
             field: "action",
             headerName: "Hành động",
             fixed: "right",
-            width: 140,
+            width: 180,
             renderCell: (value, { id: surveyId, title }) => {
               return (
                 <>
+                  <IconButton
+                    size="small"
+                    className="text-blue-600 bg-transparent hover:bg-blue-50"
+                    title="View"
+                    onClick={handleCopyLink(surveyId)}
+                  >
+                    <Copy07Icon className="w-4 h-4" />
+                  </IconButton>
                   <Can pers={["survey:read"]}>
                     <IconButton
                       size="small"
                       className="text-blue-600 bg-transparent hover:bg-blue-50"
                       title="View"
-                      onClick={handleViewDetail(surveyId)}
+                      onClick={handleViewStatistics(surveyId)}
                     >
-                      <EyeIcon className="w-4 h-4" />
+                      <LineChartUp01Icon className="w-4 h-4" />
                     </IconButton>
                   </Can>
                   <Can pers={["survey:update"]}>
@@ -211,7 +176,7 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
       >
         <TextField
           placeholder="Tìm kiếm khảo sát..."
-          value={searchQuery}
+          value={queryParams.search}
           onChange={handleSearchChange}
           sx={{ width: { xs: "100%", sm: 300 } }}
           slotProps={{
@@ -243,8 +208,8 @@ const SurveyListContainer: React.FC<SurveyListContainerProps> = ({ className }) 
         minWidth={1200}
         pagination={{
           total: totalCount,
-          page: querParams.page,
-          pageSize: querParams.pageSize,
+          page: queryParams.page,
+          pageSize: queryParams.pageSize,
           onChangePage: handleChangePage,
         }}
       />
