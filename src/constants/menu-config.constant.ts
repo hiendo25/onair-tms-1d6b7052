@@ -1,4 +1,5 @@
 import React from "react";
+import RouteIcon from '@mui/icons-material/Route';
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 
 import {
@@ -15,7 +16,6 @@ import {
   UsersIcon2,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
-import RouteIcon from '@mui/icons-material/Route';
 
 import { PATHS } from "./path.constant";
 import { PATHS_WITH_PERMISSIONS } from "./path-with-permissions.constant";

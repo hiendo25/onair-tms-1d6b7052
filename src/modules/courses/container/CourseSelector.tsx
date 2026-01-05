@@ -1,3 +1,5 @@
+import React from "react";
+
 import { useGetCourseListQuery } from "../operations/query";
 interface CourseSelectorProps {
   value: string;
