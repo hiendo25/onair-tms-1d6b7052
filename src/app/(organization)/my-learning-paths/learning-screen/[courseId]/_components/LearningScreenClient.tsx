@@ -25,7 +25,7 @@ const LearningScreenClient = ({
   const isLearningPathMode = Boolean(learningPathData);
   const learningPathId = learningPathData?.id ?? null;
 
-  const backHref = isLearningPathMode ? PATHS.MY_LEARNING_PATHS : PATHS.DASHBOARD;
+  const backHref = isLearningPathMode ? PATHS.MY_LEARNING_PATHS.ROOT : PATHS.DASHBOARD;
 
   const breadcrumbs = useMemo(() => {
     if (isLearningPathMode) {
@@ -36,7 +36,7 @@ const LearningScreenClient = ({
         },
         {
           title: "Lộ trình học tập",
-          path: PATHS.MY_LEARNING_PATHS,
+          path: PATHS.MY_LEARNING_PATHS.ROOT,
         },
         {
           title: courseTitle ?? "Khóa học",

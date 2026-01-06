@@ -1,4 +1,5 @@
 import React from "react";
+import RouteIcon from '@mui/icons-material/Route';
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
 
 import {
@@ -25,9 +26,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-      persCheck?: PermissionValue;
-      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-    }
+    persCheck?: PermissionValue;
+    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+  }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -194,6 +195,21 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     ],
   },
   {
+    title: "Thiết lập",
+    icon: React.createElement(BarChart10Icon),
+    key: "/admin/settings",
+    path: PATHS.SETTINGS.ROOT,
+    type: "item",
+    children: [
+      {
+        title: "Danh hiệu",
+        key: "/admin/settings/rankings",
+        path: PATHS.SETTINGS.RANKINGS,
+        type: "item",
+      },
+    ],
+  },
+  {
     title: "Gamification",
     icon: React.createElement(Star01Icon),
     key: "gamifications",
@@ -231,6 +247,13 @@ const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
     icon: React.createElement(UsersIcon2),
     key: "my-class",
     path: PATHS.STUDENTS.ROOT,
+    persCheck: [],
+  },
+  {
+    title: "Lộ trình của tôi",
+    icon: React.createElement(RouteIcon),
+    key: "my-learning-paths",
+    path: PATHS.MY_LEARNING_PATHS.ROOT,
     persCheck: [],
   },
 ];

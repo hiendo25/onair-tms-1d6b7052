@@ -1,0 +1,148 @@
+"use client";
+import React, { memo, useCallback, useMemo, useState } from "react";
+import { useRef } from "react";
+import { IconButton, Typography } from "@mui/material";
+import { useQueryClient } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
+
+import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useDialogs } from "@/hooks/useDialogs/useDialogs";
+import { useUserOrganization } from "@/modules/organization";
+import { GetLevelQueryParams, GetLevelsResponse } from "@/repository/level";
+import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
+import { IOSSwitch } from "@/shared/ui/form/CustomSwitcher";
+import TableData, { TableDataProps } from "@/shared/ui/TableData";
+import { useDeleteLevelMutation, useToggleActiveStatusLevelMutation } from "../../operations/mutations";
+import { useGetLevelsQuery } from "../../operations/query";
+import DrawerUpdateLevelForm, { DrawerUpdateLevelFormRef } from "../DrawerUpdateLevelForm";
+
+import { getLevelColumns } from "./level-colums";
+type LevelItem = NonNullable<GetLevelsResponse["data"]>[number];
+interface ListManageLevelsProps {}
+const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
+  const dialog = useDialogs();
+  const { enqueueSnackbar } = useSnackbar();
+  const actionRecordRef = useRef<LevelItem>(null);
+
+  const drawerUpdateRef = useRef<DrawerUpdateLevelFormRef>(null);
+  const [queryParams, setQueryParams] = useState<GetLevelQueryParams>({ organizationId, page: 1, pageSize: 10 });
+
+  const { data, isPending } = useGetLevelsQuery({ queryParams });
+  const { mutate: deleteLevel, isPending: isPendingDelete } = useDeleteLevelMutation();
+  const { mutate: toggleActive, isPending: isPendingUpdateStatus } = useToggleActiveStatusLevelMutation();
+  const queryClient = useQueryClient();
+
+  const rows = useMemo(() => data?.data ?? [], [data]);
+  const rowCount = useMemo(() => data?.count ?? 0, [data]);
+
+  const handleUpdateLevel = (record: LevelItem) => () => {
+    drawerUpdateRef.current?.open({
+      id: record.id,
+      description: record.description ?? "",
+      icon: record.icon ?? "",
+      scoreRequired: record.score_required,
+      title: record.title,
+    });
+  };
+
+  const handleDeleteItem = (record: LevelItem) => async () => {
+    actionRecordRef.current = record;
+    const isConfirmed = await dialog.confirm(
+      <Typography>
+        Lưu ý xóa là không thể khôi phục lại dữ liệu đã mất, Bạn chắc chắn muốn xóa {`"${record.title}"`}
+      </Typography>,
+      { severity: "error", title: "Xác nhận xóa" },
+    );
+    if (!isConfirmed) return;
+
+    deleteLevel(
+      { recordId: record.id },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          queryClient.invalidateQueries({
+            queryKey: [QUERY_KEYS.GET_LEVELS],
+          });
+          enqueueSnackbar("Xóa thành công", { variant: "success" });
+          actionRecordRef.current = null;
+        },
+      },
+    );
+  };
+
+  const handleToggleActiveItem = (row: LevelItem, status: "active" | "inactive") => () => {
+    toggleActive(
+      { recordId: row.id, status },
+      {
+        onSuccess(data, variables, onMutateResult, context) {
+          const message = data.status === "active" ? "Kích hoạt thành công." : "Ngừng kích hoạt thành công";
+          queryClient.invalidateQueries({
+            queryKey: [QUERY_KEYS.GET_LEVELS],
+          });
+          enqueueSnackbar(message, { variant: "success" });
+        },
+      },
+    );
+  };
+  const onChangePage = useCallback((page: number) => {
+    setQueryParams((prev) => ({ ...prev, page }));
+  }, []);
+
+  const onChangePageSize = useCallback((pageSize: number) => {
+    setQueryParams((prev) => ({ ...prev, pageSize }));
+  }, []);
+
+  const baseColumns = useMemo(() => {
+    return getLevelColumns();
+  }, []);
+
+  const levelColumns: TableDataProps<NonNullable<GetLevelsResponse["data"]>[number]>["columns"] = [
+    ...baseColumns,
+    {
+      id: "actions",
+      field: "actions",
+      headerName: "Hành động",
+      renderCell(value, row) {
+        return (
+          <div className="flex items-center gap-2">
+            <IOSSwitch
+              size="small"
+              loading
+              checked={row.status === "active"}
+              onChange={handleToggleActiveItem(row, row.status === "active" ? "inactive" : "active")}
+            />
+            <span className="mx-2 text-gray-300">|</span>
+            <IconButton size="small" className="bg-white text-blue-600" onClick={handleUpdateLevel(row)}>
+              <Edit02Icon className="w-4 h-4" />
+            </IconButton>
+            <IconButton
+              size="small"
+              className="bg-white text-red-600"
+              onClick={handleDeleteItem(row)}
+              loading={isPendingDelete && row.id === actionRecordRef.current?.id}
+            >
+              <Trash01Icon className="w-4 h-4" />
+            </IconButton>
+          </div>
+        );
+      },
+    },
+  ];
+  return (
+    <>
+      <TableData
+        rows={rows}
+        columns={levelColumns}
+        loading={isPending}
+        showRowCount
+        pagination={{
+          total: rowCount,
+          onChangePage,
+          onChangePageSize,
+        }}
+      />
+      <DrawerUpdateLevelForm ref={drawerUpdateRef} />
+    </>
+  );
+};
+export default memo(ListManageLevels);

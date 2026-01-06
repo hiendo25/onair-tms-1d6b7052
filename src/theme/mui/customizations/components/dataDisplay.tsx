@@ -103,17 +103,45 @@ export const dataDisplayCustomizations: Components<Theme> = {
 
   MuiChip: {
     defaultProps: {
-      size: "small",
       variant: "filled",
     },
     styleOverrides: {
       root: ({ theme }) => ({
         border: "1px solid",
-        borderRadius: "999px",
-        [`& .${chipClasses.label}`]: {
-          fontWeight: 600,
+        borderRadius: 6,
+        padding: 0,
+        [`& .${chipClasses.icon}`]: {
+          width: 16,
+          height: 16,
+          marginRight: -2,
+          marginLeft: 8,
         },
         variants: [
+          {
+            props: { size: "small" },
+            style: {
+              maxHeight: 24,
+              [`& .${chipClasses.label}`]: {
+                fontSize: theme.typography.caption.fontSize,
+              },
+              [`& .${svgIconClasses.root}`]: {
+                fontSize: theme.typography.caption.fontSize,
+              },
+            },
+          },
+          {
+            props: { size: "medium" },
+            style: {
+              maxHeight: 28,
+              [`& .${chipClasses.label}`]: {
+                fontSize: theme.typography.caption.fontSize,
+              },
+              [`& .${svgIconClasses.root}`]: {
+                fontSize: theme.typography.caption.fontSize,
+              },
+            },
+          },
+
           {
             props: {
               color: "default",
@@ -141,17 +169,144 @@ export const dataDisplayCustomizations: Components<Theme> = {
           },
           {
             props: {
+              color: "primary",
+              variant: "filled",
+            },
+            style: {
+              backgroundColor: alpha(theme.palette.primary.light, 0.16),
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.primary.dark,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.primary.dark,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.primary["darker"],
+                backgroundColor: theme.palette.primary["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.primary["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.primary["light"],
+                },
+              }),
+            },
+          },
+          {
+            props: {
+              color: "secondary",
+              variant: "filled",
+            },
+            style: {
+              backgroundColor: alpha(theme.palette.secondary.light, 0.16),
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.secondary.dark,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.secondary.dark,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.secondary["darker"],
+                backgroundColor: theme.palette.secondary["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.secondary["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.secondary["light"],
+                },
+              }),
+            },
+          },
+          {
+            props: {
               color: "success",
               variant: "filled",
             },
             style: {
-              borderColor: success["main"],
-              backgroundColor: success[8],
+              backgroundColor: alpha(theme.palette.success.light, 0.16),
               [`& .${chipClasses.label}`]: {
-                color: success["main"],
+                color: theme.palette.success.dark,
               },
               [`& .${chipClasses.icon}`]: {
-                color: success["main"],
+                color: theme.palette.success.dark,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.success["darker"],
+                backgroundColor: theme.palette.success["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.success["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.success["light"],
+                },
+              }),
+            },
+          },
+          {
+            props: {
+              color: "warning",
+              variant: "filled",
+            },
+            style: {
+              backgroundColor: alpha(theme.palette.warning.light, 0.16),
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.warning.dark,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.warning.dark,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.warning["darker"],
+                backgroundColor: theme.palette.warning["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.warning["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.warning["light"],
+                },
+              }),
+            },
+          },
+
+          {
+            props: {
+              color: "error",
+              variant: "filled",
+            },
+            style: {
+              backgroundColor: alpha(theme.palette.error.light, 0.16),
+
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.error.main,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.error.main,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.error["darker"],
+                backgroundColor: theme.palette.error["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.error["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.error["light"],
+                },
+              }),
+            },
+          },
+          {
+            props: {
+              color: "success",
+              variant: "outlined",
+            },
+            style: {
+              borderColor: theme.palette.success.main,
+              backgroundColor: "white",
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.success.main,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.success.main,
               },
               ...theme.applyStyles("dark", {
                 borderColor: success["darker"],
@@ -168,49 +323,113 @@ export const dataDisplayCustomizations: Components<Theme> = {
           {
             props: {
               color: "error",
+              variant: "outlined",
             },
             style: {
-              borderColor: error["light"],
-              backgroundColor: error["lighter"],
+              borderColor: theme.palette.error.main,
+              backgroundColor: "white",
               [`& .${chipClasses.label}`]: {
-                color: error["main"],
+                color: theme.palette.error.main,
               },
               [`& .${chipClasses.icon}`]: {
-                color: error["main"],
+                color: theme.palette.error.main,
               },
               ...theme.applyStyles("dark", {
-                borderColor: error["darker"],
-                backgroundColor: error["darker"],
+                borderColor: theme.palette.error["darker"],
+                backgroundColor: theme.palette.error["darker"],
                 [`& .${chipClasses.label}`]: {
-                  color: error["light"],
+                  color: theme.palette.error["light"],
                 },
                 [`& .${chipClasses.icon}`]: {
-                  color: error["light"],
+                  color: theme.palette.error["light"],
                 },
               }),
             },
           },
           {
-            props: { size: "small" },
+            props: {
+              color: "warning",
+              variant: "outlined",
+            },
             style: {
-              maxHeight: 20,
+              borderColor: theme.palette.warning.main,
+              backgroundColor: "white",
               [`& .${chipClasses.label}`]: {
-                fontSize: theme.typography.caption.fontSize,
+                color: theme.palette.warning.main,
               },
-              [`& .${svgIconClasses.root}`]: {
-                fontSize: theme.typography.caption.fontSize,
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.warning.main,
               },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.warning["darker"],
+                backgroundColor: theme.palette.warning["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.warning["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.warning["light"],
+                },
+              }),
             },
           },
           {
-            props: { size: "medium" },
+            props: {
+              color: "primary",
+              variant: "outlined",
+            },
             style: {
+              borderColor: theme.palette.primary.main,
+              backgroundColor: "white",
               [`& .${chipClasses.label}`]: {
-                fontSize: theme.typography.caption.fontSize,
+                color: theme.palette.primary.main,
               },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.primary.main,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.primary["darker"],
+                backgroundColor: theme.palette.primary["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.primary["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.primary["light"],
+                },
+              }),
+            },
+          },
+          {
+            props: {
+              color: "secondary",
+              variant: "outlined",
+            },
+            style: {
+              borderColor: theme.palette.secondary.main,
+              backgroundColor: "white",
+              [`& .${chipClasses.label}`]: {
+                color: theme.palette.secondary.main,
+              },
+              [`& .${chipClasses.icon}`]: {
+                color: theme.palette.secondary.main,
+              },
+              ...theme.applyStyles("dark", {
+                borderColor: theme.palette.secondary["darker"],
+                backgroundColor: theme.palette.secondary["darker"],
+                [`& .${chipClasses.label}`]: {
+                  color: theme.palette.secondary["light"],
+                },
+                [`& .${chipClasses.icon}`]: {
+                  color: theme.palette.secondary["light"],
+                },
+              }),
             },
           },
         ],
+      }),
+      label: ({ theme }) => ({
+        paddingLeft: 8,
+        paddingRight: 8,
+        fontWeight: 500,
       }),
     },
   },

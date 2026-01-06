@@ -86,10 +86,19 @@ export const PATHS = {
     ROOT: "/admin/learning-paths",
     CREATE: "/admin/learning-paths/create",
     EDIT: (id: string = ":id") => `/admin/learning-paths/edit/${id}`,
+    DETAIL: (id: string = ":id") => `/admin/learning-paths/${id}`,
   },
-  MY_LEARNING_PATHS: "/learning-paths",
+  MY_LEARNING_PATHS: {
+    ROOT: "/my-learning-paths",
+    LEARNING_SCREEN: (courseId: string = ":courseId") => `/my-learning-paths/learning-screen/${courseId}`,
+    PHASE_DETAIL: (phaseId: string = ":phaseId") => `/my-learning-paths/phase/${phaseId}`,
+  },
   GAMIFICATIONS: {
     ROOT: "/admin/gamifications",
+  },
+  SETTINGS: {
+    ROOT: "/admin/settings",
+    RANKINGS: "/admin/settings/rankings",
   },
 } as const;
 

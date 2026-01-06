@@ -52,10 +52,7 @@ export default function LearningPathForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formSubmitStateRef = useRef<boolean>(false);
 
-  const defaultValues = useMemo(
-    () => buildLearningPathFormDefaultValues(initialData),
-    [initialData]
-  );
+  const defaultValues = useMemo(() => buildLearningPathFormDefaultValues(initialData), [initialData]);
 
   const methods = useForm<LearningPathFormValues, undefined, LearningPathFormSchema>({
     resolver: zodResolver(learningPathSchema),
@@ -137,12 +134,9 @@ export default function LearningPathForm({
         router.push(PATHS.LEARNING_PATHS.ROOT);
       }
     } catch (error) {
-      notifications.show(
-        error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo lộ trình học tập",
-        {
-          severity: "error",
-        }
-      );
+      notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo lộ trình học tập", {
+        severity: "error",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -195,7 +189,7 @@ export default function LearningPathForm({
             >
               <CloseIcon />
             </IconButton>
-            <Button size="large" onClick={handleClickSubmit} disabled={isLoading}>
+            <Button onClick={handleClickSubmit} disabled={isLoading}>
               {mode === "edit" ? "Cập nhật" : "Đăng tải"}
             </Button>
           </div>
@@ -204,4 +198,3 @@ export default function LearningPathForm({
     </FormProvider>
   );
 }
-
