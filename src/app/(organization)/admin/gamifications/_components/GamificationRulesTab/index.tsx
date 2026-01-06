@@ -188,7 +188,6 @@ const GamificationRulesTab: React.FC = () => {
             const rule = rules.find((r) => r.trigger_type === triggerType);
             const isActive = rule?.is_active ?? false;
             const xpAmount = rule?.xp_amount ?? 0;
-            const isDefault = rule?.is_default ?? true;
 
             return (
               <Box
@@ -218,11 +217,6 @@ const GamificationRulesTab: React.FC = () => {
                   label={
                     <Typography variant="body1" sx={{ minWidth: 250 }}>
                       {TRIGGER_LABELS[triggerType]}
-                      {isDefault && (
-                        <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                          (mặc định)
-                        </Typography>
-                      )}
                     </Typography>
                   }
                 />
