@@ -45,8 +45,10 @@ export const MultilineSvgText = ({
   if (typeof maxLines === "number" && maxLines > 0 && lines.length > maxLines) {
     displayLines = lines.slice(0, maxLines);
     const lastIndex = displayLines.length - 1;
-    displayLines[lastIndex] = `${displayLines[lastIndex].replace(/\.*$/, "")}${ELLIPSIS}`;
+    displayLines[lastIndex] = `${displayLines?.[lastIndex]?.replace(/\.*$/, "")}${ELLIPSIS}`;
   }
+  const lineCount = displayLines.length > 0 ? displayLines.length : 1;
+  const startDy = lineCount > 1 ? -((lineCount - 1) * lineHeight) / 2 : 0;
 
   return (
     <text x={x} y={y} fontSize={fontSize} dominantBaseline={dominantBaseline ?? DEFAULT_DOMINANT_BASELINE} {...rest}>
@@ -56,7 +58,7 @@ export const MultilineSvgText = ({
         </tspan>
       ) : (
         displayLines.map((line, index) => (
-          <tspan key={`${line}-${index}`} x={x} dy={index === 0 ? 0 : lineHeight}>
+          <tspan key={`${line}-${index}`} x={x} dy={index === 0 ? startDy : lineHeight}>
             {line}
           </tspan>
         ))

@@ -81,10 +81,9 @@ export const useGenerateMap = (dataLength: number, currentStepIndex = 0) => {
   const { svgPath, mapHeight } = useMemo(() => {
     const lastIndex = dataLength - 1;
     const loopCount = Math.ceil(Math.max(lastIndex, 0) / 2);
-    const heightLoopCount = Math.max(loopCount - 1, 0);
     return {
       svgPath: generateZigZagPath(loopCount, lastIndex),
-      mapHeight: calculateTotalHeight(heightLoopCount),
+      mapHeight: calculateTotalHeight(loopCount),
     };
   }, [dataLength]);
   useEffect(() => {

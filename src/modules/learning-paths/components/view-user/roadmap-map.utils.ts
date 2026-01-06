@@ -90,7 +90,7 @@ export const generateZigZagPath = (loopCount: number, lastIndex: number): string
 };
 
 export const calculateTotalHeight = (loopCount: number): number => {
-  if (loopCount <= 0) return 100; // Minimum height when there are no loops.
+  if (loopCount <= 0) return MIN_MAP_HEIGHT;
 
   let currentY = MAP_START_Y; // Start point matches generateZigZagPath.
 
@@ -118,9 +118,14 @@ export const calculateTotalHeight = (loopCount: number): number => {
 
 export const getPeriodLayoutByIndex = (index = 0, totalItems = 9): PeriodLayout => {
   const y = index === 0 ? 0 : Math.ceil(index / 2) * PERIOD_VERTICAL_GAP;
+  const lastIndex = totalItems - 1;
   let x = 0;
   if (index !== 0) {
-    x = index % 4 <= 1 ? PERIOD_RIGHT_OFFSET : PERIOD_LEFT_OFFSET;
+    if (index === lastIndex && shouldExtendLastRowToCenter(lastIndex)) {
+      x = 0;
+    } else {
+      x = index % 4 <= 1 ? PERIOD_RIGHT_OFFSET : PERIOD_LEFT_OFFSET;
+    }
   }
 
   // StrokeDashoffset steps down from 2000 to 0.

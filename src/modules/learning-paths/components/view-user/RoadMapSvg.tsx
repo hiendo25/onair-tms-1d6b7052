@@ -14,18 +14,19 @@ const ROAD_PROGRESS_COLOR = "#B8CBFF";
 const ROAD_DASH_COLOR = "#FFFFFF";
 const ROAD_PROGRESS_TRANSITION = "stroke-dashoffset 2s ease";
 
-const PERIOD_ACTIVE_OUTER = "#CFE0FF";
+const PERIOD_ACTIVE_OUTER = "#CCDCFF";
 const PERIOD_INACTIVE_OUTER = "#E5E5E5";
 const PERIOD_ACTIVE_STROKE = "#1D4ED8";
-const PERIOD_ACTIVE_ICON = "#1D4ED8";
-const PERIOD_INACTIVE_ICON = "#98A2B3";
+const PERIOD_ACTIVE_ICON = "#007AFF";
+const PERIOD_INACTIVE_ICON = "#C4CDD5";
 const PERIOD_INNER_BG = "#FFFFFF";
 const PERIOD_INACTIVE_STROKE = "#C7CDD6";
 const PERIOD_ACTIVE_LABEL_BG = "#DCE6FF";
 const PERIOD_ACTIVE_LABEL_COLOR = "#1D4ED8";
 const PERIOD_INACTIVE_LABEL_BG = "#EEF0F3";
 const PERIOD_INACTIVE_LABEL_COLOR = "#8A94A6";
-const PERIOD_PROGRESS_TRACK_COLOR = "#C7D8FF";
+const PERIOD_PROGRESS_TRACK_COLOR = "#90C5FF";
+const PERIOD_PROGRESS_INACTIVE_TRACK_COLOR = "#C4CDD5"
 const PERIOD_NUMBER_ACTIVE = "#1D4ED8";
 const PERIOD_NUMBER_INACTIVE = "#8A94A6";
 const PERIOD_NUMBER_FONT_SIZE = 20;
@@ -42,9 +43,9 @@ const NODE_CONTENT_OFFSET_Y = 75;
 const NODE_OUTER_RADIUS = 36;
 const NODE_RING_RADIUS = 26;
 const NODE_INNER_RADIUS = 20;
-const NODE_RING_WIDTH = 3;
+const NODE_RING_WIDTH = 1;
 const NODE_PROGRESS_RING_RADIUS = 30;
-const NODE_PROGRESS_RING_WIDTH = 7;
+const NODE_PROGRESS_RING_WIDTH = 4;
 const NODE_ICON_CENTER_X = 155;
 const NODE_ICON_CENTER_Y = 27;
 const NODE_ICON_OFFSET_X = NODE_CENTER_X - NODE_ICON_CENTER_X;
@@ -210,6 +211,7 @@ const PeriodShape = ({ status, orderIndex, progressPercentage, isLast }: PeriodS
   const outerColor = status === "locked" ? PERIOD_INACTIVE_OUTER : PERIOD_ACTIVE_OUTER;
   const numberColor = status === "locked" ? PERIOD_NUMBER_INACTIVE : PERIOD_NUMBER_ACTIVE;
   const ringProgressColor = status === "locked" ? PERIOD_INACTIVE_ICON : PERIOD_ACTIVE_ICON;
+  const progressColor = status === "locked" ? PERIOD_PROGRESS_INACTIVE_TRACK_COLOR : PERIOD_PROGRESS_TRACK_COLOR;
   const progressOffset = getProgressRingOffset(progressPercentage, PROGRESS_RING_CIRCUMFERENCE);
   const displayOrder = String(orderIndex).padStart(2, "0");
   const iconColor = isActive || isCompleted ? PERIOD_ACTIVE_ICON : PERIOD_INACTIVE_ICON;
@@ -222,7 +224,7 @@ const PeriodShape = ({ status, orderIndex, progressPercentage, isLast }: PeriodS
         cy={NODE_CENTER_Y}
         r={NODE_PROGRESS_RING_RADIUS}
         fill="none"
-        stroke={PERIOD_PROGRESS_TRACK_COLOR}
+        stroke={progressColor}
         strokeWidth={NODE_PROGRESS_RING_WIDTH}
       />
       <circle
@@ -242,8 +244,6 @@ const PeriodShape = ({ status, orderIndex, progressPercentage, isLast }: PeriodS
         cy={NODE_CENTER_Y}
         r={NODE_RING_RADIUS}
         fill={PERIOD_INNER_BG}
-        stroke={ringColor}
-        strokeWidth={NODE_RING_WIDTH}
       />
       <circle cx={NODE_CENTER_X} cy={NODE_CENTER_Y} r={NODE_INNER_RADIUS} fill={PERIOD_INNER_BG} />
       {showNumber ? (
