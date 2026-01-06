@@ -14,3 +14,6 @@ export * as planService from "./plans/plan.service";
 export * as notificationService from "./notifications/notification.service";
 export * as surveyService from "./surveys";
 export * as lessonProgressService from "./lesson-progress/lesson-progress.service";
+export * as gamificationRulesService from "./gamifications/rules";
+export * as gamificationXpService from "./gamifications/xp-transactions";
+export * as gamificationXpDataService from "./gamifications/xp";

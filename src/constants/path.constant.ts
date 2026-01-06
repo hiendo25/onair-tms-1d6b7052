@@ -93,9 +93,8 @@ export const PATHS = {
     LEARNING_SCREEN: (courseId: string = ":courseId") => `/my-learning-paths/learning-screen/${courseId}`,
     PHASE_DETAIL: (phaseId: string = ":phaseId") => `/my-learning-paths/phase/${phaseId}`,
   },
-  SETTINGS: {
-    ROOT: "/admin/settings",
-    RANKINGS: "/admin/settings/rankings",
+  GAMIFICATIONS: {
+    ROOT: "/admin/gamifications",
   },
 } as const;
 
