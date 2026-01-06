@@ -83,7 +83,7 @@ const UpsertLevelForm = forwardRef<UpsertLevelFormRef, UpsertLevelFormProps>(
             control={control}
             name="icon"
             required
-            label="Huy hiệu"
+            label="Icon"
             aspectRatio="1/1"
             accepts={[".jpeg", ".jpg", ".png", ".svg"]}
           >

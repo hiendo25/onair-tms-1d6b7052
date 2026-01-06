@@ -1,16 +1,9 @@
 import { useTMutation } from "@/lib";
-
+import { client } from "@/services/api";
 const useUpdateOrganizationMutation = () => {
   return useTMutation({
     mutationFn: async (organizationId: string) => {
-      try {
-        return await fetch("/api/organization", {
-          method: "POST",
-          body: JSON.stringify({ organizationId }),
-        });
-      } catch (err) {
-        console.log(err);
-      }
+      client.post("organization/switch", { organizationId });
     },
   });
 };

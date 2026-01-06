@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleLessonCompletion } from "@/services/gamifications/event-handler";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import { markCompleted } from "@/services/lesson-progress/lesson-progress.service";
 import type { MarkCompletedRequest } from "@/types/dto/lesson-progress";
@@ -52,7 +53,42 @@ export async function POST(request: NextRequest) {
       currentPositionSeconds,
     });
 
-    return NextResponse.json(result, { status: 200 });
+    // Handle gamification
+    // Option 1: Synchronous (wait for result) - Better UX, user sees XP awards immediately
+    // Option 2: Asynchronous (background) - Better performance, faster response time
+    //
+    // Currently using synchronous approach for better user experience
+    // If performance becomes an issue, switch to async by uncommenting below
+
+    const gamificationResult = await handleLessonCompletion({
+      employeeId: employee.id,
+      organizationId: employee.organization_id,
+      lessonId,
+      learningPathId: learningPathId || null,
+    });
+
+    // For async approach (better performance), uncomment this and comment out above:
+    // handleLessonCompletion({
+    //   employeeId: employee.id,
+    //   organizationId: employee.organization_id,
+    //   lessonId,
+    //   learningPathId: learningPathId || null,
+    // }).catch((error) => {
+    //   console.error("[Gamification] Error processing XP awards:", error);
+    // });
+
+    // Return result with gamification info
+    return NextResponse.json(
+      {
+        ...result,
+        gamification: {
+          xpAwarded: gamificationResult.xpAwarded,
+          awards: gamificationResult.awards,
+        },
+        // For async: { processing: true, message: "XP awards are being processed" }
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("[API] Error marking lesson as completed:", error);
 

@@ -12,6 +12,7 @@ import {
   GitIcon,
   MonitorIcon,
   SquareFourIcon,
+  Star01Icon,
   UsersIcon,
   UsersIcon2,
 } from "@/shared/assets/icons";
@@ -194,20 +195,28 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     ],
   },
   {
-    title: "Thiết lập",
-    icon: React.createElement(BarChart10Icon),
-    key: "/admin/settings",
-    path: PATHS.SETTINGS.ROOT,
+    title: "Gamification",
+    icon: React.createElement(Star01Icon),
+    key: "gamifications",
+    path: PATHS.GAMIFICATIONS.ROOT,
+    persCheck: [],
     type: "item",
-    children: [
-      {
-        title: "Danh hiệu",
-        key: "/admin/settings/rankings",
-        path: PATHS.SETTINGS.RANKINGS,
-        type: "item",
-      },
-    ],
   },
+  // {
+  //   title: "Báo cáo",
+  //   icon: React.createElement(BarChart10Icon),
+  //   key: "manage-report",
+  //   path: PATHS.REPORTS.ROOT,
+  //   type: "item",
+  //   children: [
+  //     {
+  //       title: "Báo cáo tổng quan",
+  //       key: "report-overview",
+  //       path: PATHS.REPORTS.OVER_VIEW,
+  //       type: "item",
+  //     },
+  //   ],
+  // },
 ];
 
 const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
