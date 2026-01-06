@@ -6,7 +6,7 @@ import { AUTH_PATHS } from "./constants/path.constant";
 import { organizationsRepository, userPreferenceRepository } from "./repository";
 import { authRepository } from "./repository";
 import { GetOrganizationsByUserIdResponse } from "./repository/organizations";
-
+import { updateSession } from "./services";
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const authPaths = [AUTH_PATHS.SIGNIN, AUTH_PATHS.SIGNUP] as string[];
@@ -16,12 +16,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const user = await authRepository.getCurrentUser();
-  if (!user) {
+  const { data: userClaims, error } = await authRepository.getClaims();
+  console.log({
+    userClaims: JSON.stringify(userClaims),
+    meta: userClaims?.claims?.app_metadata,
+    usermeta: userClaims?.claims?.user_metadata,
+  });
+  if (!userClaims) {
     return NextResponse.redirect(new URL(AUTH_PATHS.SIGNIN, request.url));
   }
 
-  const organizations = await organizationsRepository.getOrganizationsByUserId(user.id);
+  const userId = userClaims.claims.sub;
+
+  const organizations = await organizationsRepository.getOrganizationsByUserId(userId);
   const defaultOrganization = organizations[0];
 
   if (pathname === "/no-organization") {
@@ -35,18 +42,20 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/no-organization", request.url));
   }
 
-  return await applyOrganizationMiddleware(request, user, defaultOrganization);
+  return await applyOrganizationMiddleware(request, userId, defaultOrganization);
 }
 
 async function applyOrganizationMiddleware(
   request: NextRequest,
-  user: User,
+  userId: string,
   defaultOrganization: GetOrganizationsByUserIdResponse[number],
 ) {
-  const { data: userReference, error } = await userPreferenceRepository.getUserPreferencesByUserId(user.id);
+  const { data: userReference, error } = await userPreferenceRepository.getUserPreferencesByUserId(userId);
+
   const response = NextResponse.next();
+
+  console.log({ defaultOrganization });
   const {
-    user_id: userId,
     organization: { id: organizationId },
   } = defaultOrganization;
 

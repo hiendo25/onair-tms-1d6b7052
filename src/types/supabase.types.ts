@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       assignment_categories: {
@@ -1293,6 +1318,155 @@ export type Database = {
           },
         ]
       }
+      employee_xp_balances: {
+        Row: {
+          current_level: number
+          current_streak_days: number
+          employee_id: string
+          id: string
+          last_activity_date: string | null
+          last_calculated_at: string
+          longest_streak_days: number
+          organization_id: string
+          rank_branch: number | null
+          rank_department: number | null
+          rank_organization: number | null
+          total_xp: number
+          updated_at: string
+          xp_this_month: number
+          xp_this_quarter: number
+          xp_this_week: number
+          xp_this_year: number
+          xp_today: number
+        }
+        Insert: {
+          current_level?: number
+          current_streak_days?: number
+          employee_id: string
+          id?: string
+          last_activity_date?: string | null
+          last_calculated_at?: string
+          longest_streak_days?: number
+          organization_id: string
+          rank_branch?: number | null
+          rank_department?: number | null
+          rank_organization?: number | null
+          total_xp?: number
+          updated_at?: string
+          xp_this_month?: number
+          xp_this_quarter?: number
+          xp_this_week?: number
+          xp_this_year?: number
+          xp_today?: number
+        }
+        Update: {
+          current_level?: number
+          current_streak_days?: number
+          employee_id?: string
+          id?: string
+          last_activity_date?: string | null
+          last_calculated_at?: string
+          longest_streak_days?: number
+          organization_id?: string
+          rank_branch?: number | null
+          rank_department?: number | null
+          rank_organization?: number | null
+          total_xp?: number
+          updated_at?: string
+          xp_this_month?: number
+          xp_this_quarter?: number
+          xp_this_week?: number
+          xp_this_year?: number
+          xp_today?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_xp_balances_employee"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_balances_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_xp_transactions: {
+        Row: {
+          awarded_by: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          reason: string | null
+          rule_id: string | null
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount: number
+          year_month: string | null
+        }
+        Insert: {
+          awarded_by?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          reason?: string | null
+          rule_id?: string | null
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount: number
+          year_month?: string | null
+        }
+        Update: {
+          awarded_by?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          reason?: string | null
+          rule_id?: string | null
+          trigger_type?: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount?: number
+          year_month?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_xp_transactions_awarded_by"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_employee"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_rule"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           created_at: string
@@ -1419,6 +1593,103 @@ export type Database = {
           },
         ]
       }
+      gamification_rules: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          id: string
+          is_active: boolean
+          max_times_per_day: number | null
+          max_times_per_week: number | null
+          max_times_total: number | null
+          organization_id: string
+          priority: number
+          rule_name: string
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at: string
+          xp_amount: number
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_times_per_day?: number | null
+          max_times_per_week?: number | null
+          max_times_total?: number | null
+          organization_id: string
+          priority?: number
+          rule_name: string
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at?: string
+          xp_amount: number
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_times_per_day?: number | null
+          max_times_per_week?: number | null
+          max_times_total?: number | null
+          organization_id?: string
+          priority?: number
+          rule_name?: string
+          trigger_type?: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at?: string
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gamification_rules_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_settings: {
+        Row: {
+          created_at: string
+          enable_leaderboards: boolean
+          enable_streaks: boolean
+          id: string
+          is_enabled: boolean
+          metadata: Json | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enable_leaderboards?: boolean
+          enable_streaks?: boolean
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enable_leaderboards?: boolean
+          enable_streaks?: boolean
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gamification_settings_organization"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hash_tags: {
         Row: {
           created_at: string
@@ -1442,6 +1713,50 @@ export type Database = {
           type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Relationships: []
+      }
+      leaderboard_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          period_type: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id: string | null
+          scope_type: string
+          snapshot_data: Json
+          snapshot_date: string
+          total_participants: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          period_type: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id?: string | null
+          scope_type: string
+          snapshot_data: Json
+          snapshot_date: string
+          total_participants?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          period_type?: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id?: string | null
+          scope_type?: string
+          snapshot_data?: Json
+          snapshot_date?: string
+          total_participants?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_leaderboard_snapshots_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       learning_path_phases: {
         Row: {
@@ -1803,6 +2118,60 @@ export type Database = {
             columns: ["manager_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json | null
+          employee_id: string
+          id: string
+          is_read: boolean
+          organization_id: string
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -2248,27 +2617,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      serveys: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          title: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Relationships: []
       }
       surveys: {
         Row: {
@@ -2900,6 +3248,34 @@ export type Database = {
           total: number
         }[]
       }
+      get_branch_leaderboard: {
+        Args: {
+          p_branch_id: string
+          p_limit?: number
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
+        }[]
+      }
+      get_department_leaderboard: {
+        Args: {
+          p_department_id: string
+          p_limit?: number
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
+        }[]
+      }
       get_filtered_employees: {
         Args:
           | {
@@ -2920,6 +3296,20 @@ export type Database = {
         Returns: {
           employee_id: string
           total_count: number
+        }[]
+      }
+      get_organization_leaderboard: {
+        Args: {
+          p_limit?: number
+          p_organization_id: string
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
         }[]
       }
       get_training_plan_detail_counts: {
@@ -2997,9 +3387,17 @@ export type Database = {
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
+      leaderboard_period:
+        | "daily"
+        | "weekly"
+        | "monthly"
+        | "quarterly"
+        | "yearly"
+        | "all_time"
       lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
       level_status: "deleted" | "active" | "inactive"
+      notification_type: "class_room" | "survey" | "system"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -3014,6 +3412,17 @@ export type Database = {
         | "order"
         | "fill"
       resource_kind: "folder" | "file"
+      rule_trigger_type:
+        | "lesson_completed"
+        | "assignment_graded"
+        | "attendance_present"
+        | "class_completed"
+        | "course_completed"
+        | "phase_completed"
+        | "learning_path_completed"
+        | "daily_login"
+        | "streak_milestone"
+        | "manual_award"
       status: "active" | "deactive"
       survey_question_type:
         | "checkbox"
@@ -3156,6 +3565,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
@@ -3195,9 +3607,18 @@ export const Constants = {
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
+      leaderboard_period: [
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "yearly",
+        "all_time",
+      ],
       lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
       level_status: ["deleted", "active", "inactive"],
+      notification_type: ["class_room", "survey", "system"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
@@ -3213,6 +3634,18 @@ export const Constants = {
         "fill",
       ],
       resource_kind: ["folder", "file"],
+      rule_trigger_type: [
+        "lesson_completed",
+        "assignment_graded",
+        "attendance_present",
+        "class_completed",
+        "course_completed",
+        "phase_completed",
+        "learning_path_completed",
+        "daily_login",
+        "streak_milestone",
+        "manual_award",
+      ],
       status: ["active", "deactive"],
       survey_question_type: [
         "checkbox",

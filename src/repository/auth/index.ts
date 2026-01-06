@@ -60,4 +60,9 @@ export const ensureGetCurrentUser = async () => {
   return data.user;
 };
 
+export const getClaims = async () => {
+  const supabase = await createSVClient();
+  return await supabase.auth.getClaims();
+};
+
 export { authSignOut, authSignInWithPassword, authSignInWithGoogle, authSignUp, authServerSignOut, getServerSession };

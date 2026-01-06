@@ -29,7 +29,7 @@ export * as coursesLessonsRepository from "./courses-lessons";
 export * as learningScreenRepository from "./learning-screen";
 export * as learningScreenServerRepository from "./learning-screen/server";
 export * as permissionRepository from "./permissions";
-export * as notificationsRepository from "./notifications";
+export * as notificationsRepository from "./notifications/_oldIndex";
 export * as surveysRepository from "./surveys";
 export * as plansRepository from "./plans";
 export * as userPreferenceRepository from "./user-preferences";
