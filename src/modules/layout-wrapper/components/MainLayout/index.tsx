@@ -84,11 +84,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               </Link>
             </div>
           ),
-          // bottom: (
-          //   <div className="px-4 py-2">
-          //     <AccountSetting />
-          //   </div>
-          // ),
         }}
       />
       {/* Main content */}

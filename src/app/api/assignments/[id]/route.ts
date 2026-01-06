@@ -5,7 +5,6 @@ import { PATHS } from "@/constants/path.constant";
 import { employeesRepository } from "@/repository";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
-import { UserOrganizationService } from "@/services/organization/user-organization.service";
 import type { UpdateAssignmentDto } from "@/types/dto/assignments";
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

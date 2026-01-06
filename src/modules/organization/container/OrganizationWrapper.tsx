@@ -5,9 +5,8 @@ import { forbidden, redirect, RedirectType } from "next/navigation";
 
 import { PermissionProvider } from "@/modules/permission-wrapper/store/PermissionProvider";
 import { authRepository } from "@/repository";
-import { UserOrganizationService } from "@/services/organization/user-organization.service";
+import { userOrganizationService } from "@/services";
 import { OrganizationProvider, OrganizationProviderProps } from "../store/OrganizationProvider";
-
 const OrganizationWrapper = async ({ children }: { readonly children: React.ReactNode }) => {
   const currentUser = await authRepository.getCurrentUser();
 
@@ -15,14 +14,15 @@ const OrganizationWrapper = async ({ children }: { readonly children: React.Reac
     await authRepository.authServerSignOut();
     redirect("/auth/signin", RedirectType.replace);
   }
+  const userId = currentUser.id;
 
-  const userOrganization = new UserOrganizationService(currentUser.id);
   const cookieStore = await cookies();
   const organizationId = cookieStore.get("organization_id")?.value;
+
   const [employees, organizations, { roles, permissions }] = await Promise.all([
-    userOrganization.getEmployees(),
-    userOrganization.getOrganizations(),
-    userOrganization.getRolesPermissions(),
+    userOrganizationService.getEmployees(userId),
+    userOrganizationService.getOrganizations(userId),
+    userOrganizationService.getRolesPermissions(userId),
   ]);
 
   const currentEmployee = employees.find((epl) => epl.organization.id === organizationId);
@@ -31,46 +31,40 @@ const OrganizationWrapper = async ({ children }: { readonly children: React.Reac
     forbidden();
   }
 
-  const organizationsStore = organizations.reduce((acc, orgEpl): OrganizationProviderProps["organizations"] => {
-    return [
-      ...acc,
-      {
-        employeeId: orgEpl.employee_id,
-        orgId: orgEpl.organization.id,
-        orgName: orgEpl.organization?.name || "",
-        orgLogo: orgEpl.organization?.logo || "",
-        orgDomain: orgEpl.organization?.subdomain || "",
-        userId: orgEpl.user_id,
-        orgFavicon: orgEpl.organization.favicon || "",
-        orgShortName: orgEpl.organization.shortname || "",
-      },
-    ];
-  }, []);
+  const organizationsStore = organizations.map((orgEpl): OrganizationProviderProps["organizations"][number] => {
+    return {
+      employeeId: orgEpl.employee_id,
+      orgId: orgEpl.organization.id,
+      orgName: orgEpl.organization?.name || "",
+      orgLogo: orgEpl.organization?.logo || "",
+      orgDomain: orgEpl.organization?.subdomain || "",
+      userId: orgEpl.user_id,
+      orgFavicon: orgEpl.organization.favicon || "",
+      orgShortName: orgEpl.organization.shortname || "",
+    };
+  });
 
-  const employeesStore = employees.reduce((acc, employee): OrganizationProviderProps["employees"] => {
-    return [
-      ...acc,
-      {
-        id: employee.id,
-        status: employee.status,
-        code: employee.employee_code,
-        type: employee.employee_type || "student",
-        userId: currentEmployee.user_id,
-        organization: {
-          id: employee.organization.id,
-          name: employee.organization.name,
-        },
-        profile: employee.profiles
-          ? {
-              fullName: employee.profiles.full_name,
-              avatarUrl: employee.profiles.avatar || "",
-              email: employee.profiles.email,
-              gender: employee.profiles.gender,
-            }
-          : null,
+  const employeesStore = employees.map((employee): OrganizationProviderProps["employees"][number] => {
+    return {
+      id: employee.id,
+      status: employee.status,
+      code: employee.employee_code,
+      type: employee.employee_type || "student",
+      userId: employee.user_id,
+      organization: {
+        id: employee.organization.id,
+        name: employee.organization.name,
       },
-    ];
-  }, []);
+      profile: employee.profiles
+        ? {
+            fullName: employee.profiles.full_name,
+            avatarUrl: employee.profiles.avatar || "",
+            email: employee.profiles.email,
+            gender: employee.profiles.gender,
+          }
+        : null,
+    };
+  });
 
   return (
     <OrganizationProvider

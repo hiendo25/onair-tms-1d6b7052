@@ -1,5 +1,6 @@
 import { supabase } from "@/services";
 import { createSVClient } from "@/services";
+import { SupabaseUser } from "@/types/supabase-user.type";
 
 const authSignOut = async () => {
   return await supabase.auth.signOut();
@@ -45,19 +46,37 @@ const getServerSession = async () => {
 };
 export type GetServerSessionResponse = Awaited<ReturnType<typeof getServerSession>>;
 
-export const getCurrentUser = async () => {
+const getCurrentUser = async () => {
   const supabase = await createSVClient();
-  const { data, error } = await supabase.auth.getUser();
-  return data.user;
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  return user ? (user as SupabaseUser) : null;
 };
 
-export const ensureGetCurrentUser = async () => {
+const ensureGetCurrentUser = async () => {
   const supabase = await createSVClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
     throw new Error(error.message);
   }
-  return data.user;
+  return data.user as SupabaseUser;
 };
 
-export { authSignOut, authSignInWithPassword, authSignInWithGoogle, authSignUp, authServerSignOut, getServerSession };
+const getClaims = async () => {
+  const supabase = await createSVClient();
+  return await supabase.auth.getClaims();
+};
+
+export {
+  authSignOut,
+  authSignInWithPassword,
+  authSignInWithGoogle,
+  getCurrentUser,
+  ensureGetCurrentUser,
+  authSignUp,
+  authServerSignOut,
+  getServerSession,
+  getClaims,
+};
