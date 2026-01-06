@@ -42,3 +42,4 @@ export * as surveyQuestionOptionRepository from "./surveys/surveys-questions-opt
 export * as levelRepository from "./level";
 export * as gamificationRulesRepository from "./gamification-rules";
 export * as xpTransactionsRepository from "./xp-transactions";
+export * as gamificationXpRepository from "./gamification-xp";

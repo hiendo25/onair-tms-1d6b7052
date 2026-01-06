@@ -1295,12 +1295,12 @@ export type Database = {
       }
       employee_xp_balances: {
         Row: {
-          current_level: number
           current_streak_days: number
           employee_id: string
           id: string
           last_activity_date: string | null
           last_calculated_at: string
+          level_id: string | null
           longest_streak_days: number
           organization_id: string
           rank_branch: number | null
@@ -1315,12 +1315,12 @@ export type Database = {
           xp_today: number
         }
         Insert: {
-          current_level?: number
           current_streak_days?: number
           employee_id: string
           id?: string
           last_activity_date?: string | null
           last_calculated_at?: string
+          level_id?: string | null
           longest_streak_days?: number
           organization_id: string
           rank_branch?: number | null
@@ -1335,12 +1335,12 @@ export type Database = {
           xp_today?: number
         }
         Update: {
-          current_level?: number
           current_streak_days?: number
           employee_id?: string
           id?: string
           last_activity_date?: string | null
           last_calculated_at?: string
+          level_id?: string | null
           longest_streak_days?: number
           organization_id?: string
           rank_branch?: number | null
@@ -1355,6 +1355,13 @@ export type Database = {
           xp_today?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "employee_xp_balances_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fk_xp_balances_employee"
             columns: ["employee_id"]
@@ -1449,7 +1456,6 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
-          level_id: string | null
           organization_id: string
           position_id: string | null
           start_date: string | null
@@ -1462,7 +1468,6 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          level_id?: string | null
           organization_id: string
           position_id?: string | null
           start_date?: string | null
@@ -1475,7 +1480,6 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
-          level_id?: string | null
           organization_id?: string
           position_id?: string | null
           start_date?: string | null
@@ -1483,13 +1487,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "employees_level_id_fkey"
-            columns: ["level_id"]
-            isOneToOne: false
-            referencedRelation: "levels"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "employees_organization_id_fkey"
             columns: ["organization_id"]
