@@ -1449,6 +1449,7 @@ export type Database = {
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
           id: string
+          level_id: string | null
           organization_id: string
           position_id: string | null
           start_date: string | null
@@ -1461,6 +1462,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          level_id?: string | null
           organization_id: string
           position_id?: string | null
           start_date?: string | null
@@ -1473,6 +1475,7 @@ export type Database = {
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
           id?: string
+          level_id?: string | null
           organization_id?: string
           position_id?: string | null
           start_date?: string | null
@@ -1480,6 +1483,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "employees_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "employees_organization_id_fkey"
             columns: ["organization_id"]
@@ -2538,27 +2548,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      serveys: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          title: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Relationships: []
       }
       surveys: {
         Row: {

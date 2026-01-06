@@ -64,12 +64,12 @@ const getLevels = async (params?: GetLevelQueryParams) => {
 				created_at,
 				icon,
 				status,
-				createdBy:employees(
+				createdBy:employees!levels_created_by_fkey(
 					id,
 					employee_code,
 					profiles(
 					id,
-					full_name, 
+					full_name,
 					email
 				)
 				)

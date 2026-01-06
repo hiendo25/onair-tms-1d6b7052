@@ -137,16 +137,6 @@ const GamificationRulesTab: React.FC = () => {
     }
   };
 
-  const hasChanges = () => {
-    return rules.some((rule) => {
-      const original = originalRules.find((r) => r.trigger_type === rule.trigger_type);
-      return (
-        original &&
-        (original.xp_amount !== rule.xp_amount || original.is_active !== rule.is_active)
-      );
-    });
-  };
-
   const handleCloseSnackbar = () => {
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
@@ -176,7 +166,7 @@ const GamificationRulesTab: React.FC = () => {
               variant="contained"
               startIcon={<SaveIcon />}
               onClick={handleSaveAll}
-              disabled={!hasChanges() || savingAll}
+              disabled={savingAll}
             >
               {savingAll ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
