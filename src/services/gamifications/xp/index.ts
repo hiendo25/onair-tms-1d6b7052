@@ -1,10 +1,10 @@
-import * as gamificationXpRepository from "@/repository/gamification-xp";
+import { gamificationXpRepository } from "@/repository";
 
 interface LevelInfo {
   id: string;
   title: string;
-  description: string;
-  icon: string;
+  description: string | null;
+  icon: string | null;
   scoreRequired: number;
 }
 
