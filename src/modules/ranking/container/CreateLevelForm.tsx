@@ -32,7 +32,7 @@ function CreateLevelForm() {
       onSuccess(data, variables, onMutateResult, context) {
         startTransition(() => {
           enqueueSnackbar("Tạo cấp độ thành công.", { variant: "success" });
-          router.push(PATHS.SETTINGS.RANKINGS);
+          router.push(PATHS.GAMIFICATIONS.ROOT);
         });
       },
     });
@@ -40,7 +40,7 @@ function CreateLevelForm() {
 
   const handleCancel: UpsertLevelFormProps["onCancel"] = () => {
     startTransition(() => {
-      router.push(PATHS.SETTINGS.RANKINGS);
+      router.push(PATHS.GAMIFICATIONS.ROOT);
     });
   };
   return <UpsertLevelForm onCancel={handleCancel} onSubmit={handleCreateLevel} isLoading={isPending || isTransition} />;

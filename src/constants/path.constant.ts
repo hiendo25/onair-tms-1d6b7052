@@ -96,10 +96,6 @@ export const PATHS = {
   GAMIFICATIONS: {
     ROOT: "/admin/gamifications",
   },
-  SETTINGS: {
-    ROOT: "/admin/settings",
-    RANKINGS: "/admin/settings/rankings",
-  },
 } as const;
 
 export const AUTH_PATHS = {

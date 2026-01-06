@@ -195,21 +195,6 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     ],
   },
   {
-    title: "Thiết lập",
-    icon: React.createElement(BarChart10Icon),
-    key: "/admin/settings",
-    path: PATHS.SETTINGS.ROOT,
-    type: "item",
-    children: [
-      {
-        title: "Danh hiệu",
-        key: "/admin/settings/rankings",
-        path: PATHS.SETTINGS.RANKINGS,
-        type: "item",
-      },
-    ],
-  },
-  {
     title: "Gamification",
     icon: React.createElement(Star01Icon),
     key: "gamifications",

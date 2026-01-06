@@ -5,6 +5,7 @@ import { Box, Tab, Tabs } from "@mui/material";
 
 import GamificationRulesTab from "../GamificationRulesTab";
 import LeaderboardTab from "../LeaderboardTab";
+import RankingsTab from "../RankingsTab";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -41,6 +42,7 @@ const GamificationContainer: React.FC = () => {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="gamification tabs">
           <Tab label="Cấu hình điểm thưởng" id="gamification-tab-0" sx={{ textTransform: "none" }} />
           <Tab label="Bảng xếp hạng phòng" id="gamification-tab-1" sx={{ textTransform: "none" }} />
+          <Tab label="Cấu hình danh hiệu" id="gamification-tab-2" sx={{ textTransform: "none" }} />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>
@@ -48,6 +50,9 @@ const GamificationContainer: React.FC = () => {
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
         <LeaderboardTab />
+      </TabPanel>
+      <TabPanel value={tabValue} index={2}>
+        <RankingsTab />
       </TabPanel>
     </Box>
   );
