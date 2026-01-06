@@ -122,6 +122,7 @@ export default function LearningPathPhaseDetailContent({
 
   return (
     <PageContainer
+      title="Chi tiết giai đoạn"
       breadcrumbs={[
         { title: "Lộ trình học tập", path: PATHS.MY_LEARNING_PATHS.ROOT },
         { title: phaseBreadcrumbLabel },

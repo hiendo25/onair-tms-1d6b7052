@@ -58,8 +58,6 @@ export default function LearningPathUserDetailView({
     ? `url(${learningPath.thumbnail_url})`
     : HERO_FALLBACK_BG;
 
-  const timelineSection = <LearningPathPhaseTimeline items={timelineItems} />;
-
   return (
     <Stack spacing={4}>
       <Card sx={{ ...SECTION_CARD_SX, borderRadius: HERO_IMAGE_RADIUS }}>
@@ -85,13 +83,13 @@ export default function LearningPathUserDetailView({
               {learningPath.name}
             </Typography>
             <ExpandableDescription text={learningPath.description} />
-            {heroTags.length > 0 ? (
+            {/* {heroTags.length > 0 ? (
               <Stack direction="row" spacing={1} flexWrap="wrap">
                 {heroTags.map((tag) => (
                   <LearningPathChip key={tag.id} label={tag.label} />
                 ))}
               </Stack>
-            ) : null}
+            ) : null} */}
           </Stack>
         </Box>
       </Card>
@@ -210,11 +208,11 @@ export default function LearningPathUserDetailView({
                 </Typography>
               </Stack>
             </Box>
-            {timelineSection}
+            <LearningPathPhaseTimeline items={timelineItems} />
           </Stack>
         </Box>
       ) : (
-        timelineSection
+        <LearningPathPhaseTimeline items={timelineItems} />
       )}
     </Stack>
   );

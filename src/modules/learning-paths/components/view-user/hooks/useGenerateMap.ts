@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  calculateTotalHeight,
-  generateZigZagPath,
+  getMapLayout,
   getPeriodLayoutByIndex,
   NODE_CENTER_X,
   NODE_CENTER_Y,
@@ -73,58 +72,43 @@ const buildProgressOffsets = (
 };
 
 export const useGenerateMap = (dataLength: number, currentStepIndex = 0) => {
-  // Always generate path and height from the same loop count.
   const pathRef = useRef<SVGPathElement | null>(null);
   const [realPathLength, setRealPathLength] = useState(0);
-  const [dashOffset, setDashOffset] = useState(0);
   const [progressOffsets, setProgressOffsets] = useState<number[]>([]);
-  const { svgPath, mapHeight } = useMemo(() => {
-    const lastIndex = dataLength - 1;
-    const loopCount = Math.ceil(Math.max(lastIndex, 0) / 2);
-    return {
-      svgPath: generateZigZagPath(loopCount, lastIndex),
-      mapHeight: calculateTotalHeight(loopCount),
-    };
-  }, [dataLength]);
+  const { mapPath, mapHeight } = useMemo(() => getMapLayout(dataLength), [dataLength]);
   useEffect(() => {
     let rafId: number;
 
     rafId = requestAnimationFrame(() => {
       const path = pathRef.current;
 
-      if (path?.getTotalLength) {
-        const length = path.getTotalLength();
-        setRealPathLength(length);
+      if (!path?.getTotalLength) {
+        setRealPathLength(0);
+        setProgressOffsets([]);
+        return;
       }
+
+      const length = path.getTotalLength();
+      setRealPathLength(length);
+      setProgressOffsets(buildProgressOffsets(path, length, dataLength));
     });
 
     return () => {
       cancelAnimationFrame(rafId);
     };
-  }, [svgPath]);
-  useEffect(() => {
-    if (realPathLength <= 0) return;
-    const path = pathRef.current;
-    if (!path) {
-      setProgressOffsets([]);
-      return;
-    }
-    setProgressOffsets(buildProgressOffsets(path, realPathLength, dataLength));
-  }, [dataLength, realPathLength]);
-  useEffect(() => {
-    if (realPathLength <= 0) return;
-    if (currentStepIndex >= dataLength) {
-      setDashOffset(0);
-      return;
-    }
+  }, [mapPath, dataLength]);
+
+  const dashOffset = useMemo(() => {
+    if (realPathLength <= 0) return 0;
+    if (currentStepIndex >= dataLength) return 0;
 
     const safeIndex = Math.max(currentStepIndex, 0);
     const nextOffset = progressOffsets[safeIndex];
-    setDashOffset(typeof nextOffset === "number" ? nextOffset : realPathLength);
+    return typeof nextOffset === "number" ? nextOffset : realPathLength;
   }, [currentStepIndex, dataLength, realPathLength, progressOffsets]);
   return {
     mapHeight,
-    mapPath: svgPath,
+    mapPath,
     pathRef,
     realPathLength,
     dashOffset,

@@ -32,7 +32,7 @@ const EMPTY_PROGRESS = { totalLessons: 0, completedLessons: 0 };
 
 const resolveClassRoomModeKey = (classRoom: PhaseClassRoomWithProgress["class_room"]): string => {
   const sessionType = classRoom.class_sessions?.[0]?.session_type ?? null;
-  return (classRoom.room_type ?? sessionType ?? "pending") as string;
+  return (sessionType ?? "pending") as string;
 };
 
 const resolveSessionCount = (classRoom: PhaseClassRoomWithProgress["class_room"]): number => {
@@ -49,6 +49,30 @@ const resolveProgressStatus = (progressPercentage: number): ClassRoomProgressSta
   }
 
   return CLASSROOM_PROGRESS_STATUS.NOT_STARTED;
+};
+
+const applySequentialClassRoomLocking = (
+  classRooms: PhaseClassRoomCardItem[],
+): PhaseClassRoomCardItem[] => {
+  let canAccess = true;
+
+  return classRooms.map((classRoom) => {
+    const isLocked = !canAccess;
+
+    if (classRoom.status !== CLASSROOM_PROGRESS_STATUS.COMPLETED) {
+      canAccess = false;
+    }
+
+    if (!isLocked) {
+      return { ...classRoom, isLocked: false };
+    }
+
+    return {
+      ...classRoom,
+      isLocked: true,
+      href: null,
+    };
+  });
 };
 
 const buildClassRoomCardItem = (
@@ -98,8 +122,10 @@ const buildPhaseDetailData = (
   phase: PhaseWithClassRoomsWithProgress,
   phaseProgress: ProgressResponse | null,
 ): PhaseDetailData => {
-  const classRooms = (phase.phase_class_rooms ?? []).map((classRoomItem) =>
-    buildClassRoomCardItem(classRoomItem, classRoomItem.progress),
+  const classRooms = applySequentialClassRoomLocking(
+    (phase.phase_class_rooms ?? []).map((classRoomItem) =>
+      buildClassRoomCardItem(classRoomItem, classRoomItem.progress),
+    ),
   );
 
   return {

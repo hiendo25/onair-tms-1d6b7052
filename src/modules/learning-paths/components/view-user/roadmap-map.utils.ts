@@ -116,6 +116,16 @@ export const calculateTotalHeight = (loopCount: number): number => {
   return Math.max(currentY - MAP_BOTTOM_PADDING, MIN_MAP_HEIGHT);
 };
 
+export const getMapLayout = (dataLength: number): { mapPath: string; mapHeight: number } => {
+  const lastIndex = dataLength - 1;
+  const loopCount = Math.ceil(Math.max(lastIndex, 0) / 2);
+
+  return {
+    mapPath: generateZigZagPath(loopCount, lastIndex),
+    mapHeight: calculateTotalHeight(loopCount),
+  };
+};
+
 export const getPeriodLayoutByIndex = (index = 0, totalItems = 9): PeriodLayout => {
   const y = index === 0 ? 0 : Math.ceil(index / 2) * PERIOD_VERTICAL_GAP;
   const lastIndex = totalItems - 1;
