@@ -9,7 +9,7 @@ import { getPhaseLabel, SECTION_CARD_SX } from "@/modules/learning-paths/compone
 import { PHASE_STATUS } from "../../learning-path-user.constants";
 import { PhaseTimelineItem } from "../../types";
 
-import RoadMapSVG from "./RoadMapSVG";
+import RoadMapSVG from "./road-map-svg";
 
 const EMPTY_DESCRIPTION = "Chưa có mô tả cho giai đoạn này.";
 const ROADMAP_CONTAINER_MAX_WIDTH = 1320;
