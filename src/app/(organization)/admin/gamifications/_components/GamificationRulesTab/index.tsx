@@ -167,7 +167,7 @@ const GamificationRulesTab: React.FC = () => {
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
             <Box display="flex" alignItems="center" gap={1}>
               <EmojiEventsIcon color="primary" />
-              <Typography variant="h6" component="h2">
+              <Typography variant="subtitle1" component="h2">
                 Cấu hình điểm thưởng
               </Typography>
             </Box>
