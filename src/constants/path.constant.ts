@@ -96,6 +96,9 @@ export const PATHS = {
   GAMIFICATIONS: {
     ROOT: "/admin/gamifications",
   },
+  MY_GAMIFICATION: {
+    ROOT: "/my-gamification",
+  },
 } as const;
 
 export const AUTH_PATHS = {

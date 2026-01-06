@@ -10,7 +10,7 @@ const getLevelColumns = (): TableDataProps<NonNullable<GetLevelsResponse["data"]
   {
     id: "icon",
     field: "icon",
-    headerName: "Huy hiệu",
+    headerName: "Icon",
     renderCell(value, { icon, title }) {
       if (!icon) return <span>no icon</span>;
       return <Image src={icon} alt={title} width={48} height={48} />;
