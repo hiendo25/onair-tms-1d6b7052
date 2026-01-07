@@ -399,11 +399,11 @@ export const getEmployeesByUserId = async (userId: string) => {
 };
 export type GetEmployeesByUserIdResponse = Awaited<ReturnType<typeof getEmployeesByUserId>>;
 
-const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: string; organizationId: string }) => {
+const getOneEmployee = async (variables: { userId: string; organizationId: string }) => {
   const { userId, organizationId } = variables;
   try {
     const supabase = createClient();
-    return await supabase
+    const { data, error } = await supabase
       .from("employees")
       .select(
         `
@@ -436,12 +436,14 @@ const getOneEmployeeByUserIdWithOrganizationId = async (variables: { userId: str
       .eq("user_id", userId)
       .eq("organization_id", organizationId)
       .maybeSingle();
+    if (error) {
+      throw new Error(error?.message);
+    }
+    return data;
   } catch (err) {
     console.log(err);
-    throw new Error("Can't getOneEmployeeByUserIdWithOrganizationId");
+    throw new Error("Can't getOneEmployee");
   }
 };
-export type GetOneEmployeeByUserIdWithOrganizationId = Awaited<
-  ReturnType<typeof getOneEmployeeByUserIdWithOrganizationId>
->;
-export { getEmployees, getEmployeeById, getOneEmployeeByUserIdWithOrganizationId };
+export type getOneEmployee = Awaited<ReturnType<typeof getOneEmployee>>;
+export { getEmployees, getEmployeeById, getOneEmployee };

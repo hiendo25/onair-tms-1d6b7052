@@ -34,16 +34,18 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
 
   try {
     const adminSupabase = await createServiceRoleClient();
-    const supabaseClient = createClient();
     const temporaryPassword = "123456";
 
-    const { data, error } = await supabaseClient.rpc("get_user_id_by_email", { user_email: payload.email });
+    const { data, error } = await adminSupabase.rpc("get_user_id_by_email", { user_email: payload.email });
 
     if (!data) {
       const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
         email: payload.email,
         password: temporaryPassword,
         email_confirm: true,
+        app_metadata: {
+          active_organization_id: organizationId,
+        },
       });
       if (authError || !authData.user) {
         throw new Error(`Failed to create auth user: ${authError?.message || "Unknown error"}`);
@@ -142,12 +144,12 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
     }
 
     if (!currentReferenceData) {
-      const { data: referenceData, error: referenceError } = await userPreferenceRepository.createUserPreference({
+      const { error: referenceError } = await userPreferenceRepository.createUserPreference({
         user_id: userId,
         default_organization_id: organizationId,
       });
 
-      if (referenceError || !referenceData) {
+      if (referenceError) {
         throw new Error(referenceError.message);
       }
     }
@@ -193,22 +195,22 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
   }
 }
 
-async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<CreateEmployeeResult> {
-  // const supabase = await createSVClient();
-  // const {
-  //   data: { user: currentUser },
-  //   error: userError,
-  // } = await supabase.auth.getUser();
+// async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<CreateEmployeeResult> {
+//   // const supabase = await createSVClient();
+//   // const {
+//   //   data: { user: currentUser },
+//   //   error: userError,
+//   // } = await supabase.auth.getUser();
 
-  // if (userError || !currentUser) {
-  //   throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
-  // }
+//   // if (userError || !currentUser) {
+//   //   throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+//   // }
 
-  // const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
-  // console.log(`Creating employee in organization: ${organizationId}`);
+//   // const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+//   // console.log(`Creating employee in organization: ${organizationId}`);
 
-  return createEmployeeCore(payload, payload.organizationId);
-}
+//   return createEmployeeCore(payload, payload.organizationId);
+// }
 
 async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
@@ -324,7 +326,7 @@ async function getEmployeeById(id: string): Promise<EmployeeDto> {
 
 export {
   createEmployeeCore,
-  createEmployeeWithRelations,
+  // createEmployeeWithRelations,
   updateEmployeeWithRelations,
   deleteEmployeeWithRelations,
   getEmployees,

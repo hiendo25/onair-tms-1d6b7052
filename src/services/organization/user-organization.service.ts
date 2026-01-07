@@ -1,84 +1,36 @@
+import { cache } from "react";
+
 import { buildPermission, Permissions, Resources } from "@/constants/permission.constant";
-import {
-  employeesRepository,
-  organizationsRepository,
-  permissionRepository,
-  userPreferenceRepository,
-} from "@/repository";
-import { GetEmployeesByUserIdResponse } from "@/repository/employees";
-export class UserOrganizationService {
-  private userId;
+import { employeesRepository, organizationsRepository, permissionRepository } from "@/repository";
 
-  constructor(userId: string) {
-    this.userId = userId;
-  }
+export const getOrganizations = cache(async (userId: string) => {
+  return await organizationsRepository.getOrganizationsByUserId(userId);
+});
 
-  async getOrganizations() {
-    const organizations = await organizationsRepository.getOrganizationsByUserId(this.userId);
-    return organizations;
-  }
+export const getEmployees = cache(async (userId: string) => {
+  return await employeesRepository.getEmployeesByUserId(userId);
+});
 
-  async getEmployeeByOrganizationId(organizationId: string) {
-    const { data: employee, error } = await employeesRepository.getOneEmployeeByUserIdWithOrganizationId({
-      userId: this.userId,
-      organizationId: organizationId,
-    });
+export const getCurrentEmployee = cache(async (userId: string, organizationId: string) => {
+  return await employeesRepository.getOneEmployee({
+    userId,
+    organizationId,
+  });
+});
 
-    if (!employee) {
-      throw new Error("Main employee undefined");
-    }
-    return employee;
-  }
-
-  async getEmployees() {
-    const employees = await employeesRepository.getEmployeesByUserId(this.userId);
-
-    return employees;
-  }
-
-  async getCurrentEmployee(organizationId: string) {
-    const { data: employee, error } = await employeesRepository.getOneEmployeeByUserIdWithOrganizationId({
-      userId: this.userId,
-      organizationId: organizationId,
-    });
-
-    if (!employee) {
-      throw new Error("Main employee undefined");
-    }
-
-    return employee;
-  }
-
-  async getPermissions() {
-    const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
-
-    return userRoles
-      ? userRoles.reduce<Permissions[]>((sumPers, ur) => {
-          const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
-            const resource = rolePer.resource_code as Resources;
-            const perAction = buildPermission(resource, rolePer.action_code);
-            return [...subPers, perAction];
-          }, []);
-          return [...sumPers, ...pers];
-        }, [])
-      : [];
-  }
-
-  async getRolesPermissions() {
-    const { data: userRoles } = await permissionRepository.getUserRolesByUserId(this.userId);
-    console.log({ userRoles });
-    const pers = userRoles?.reduce<Permissions[]>((sumPers, ur) => {
-      const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
-        const resource = rolePer.resource_code as Resources;
-        const perAction = buildPermission(resource, rolePer.action_code);
-        return [...subPers, perAction];
-      }, []);
-      return [...sumPers, ...pers];
+export const getRolesPermissions = cache(async (userId: string) => {
+  const { data: userRoles } = await permissionRepository.getUserRolesByUserId(userId);
+  const pers = userRoles?.reduce<Permissions[]>((sumPers, ur) => {
+    const pers = ur.role.role_permissions.reduce<Permissions[]>((subPers, rolePer) => {
+      const resource = rolePer.resource_code as Resources;
+      const perAction = buildPermission(resource, rolePer.action_code);
+      return [...subPers, perAction];
     }, []);
+    return [...sumPers, ...pers];
+  }, []);
 
-    return {
-      permissions: pers || [],
-      roles: userRoles?.map((urRole) => urRole.role.code) || [],
-    };
-  }
-}
+  return {
+    permissions: pers || [],
+    roles: userRoles?.map((urRole) => urRole.role.code) || [],
+  };
+});

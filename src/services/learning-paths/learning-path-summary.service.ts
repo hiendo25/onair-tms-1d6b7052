@@ -1,4 +1,4 @@
-import type { LearningPathProgressSummary, PhaseTimelineItem } from "@/modules/learning-paths/types";
+import type { HighlightPhaseSummary, LearningPathProgressSummary, PhaseTimelineItem } from "@/modules/learning-paths/types";
 import { learningPathsRepository } from "@/repository";
 import type { PhaseWithClassRooms } from "@/repository/learning-paths";
 import type { LearningPathWithDetails } from "@/repository/learning-paths";
@@ -19,6 +19,7 @@ const PROGRESS_COMPLETED_PERCENT = 100;
 const PROGRESS_EMPTY_PERCENT = 0;
 const DEFAULT_COUNT = 0;
 const DEFAULT_COMPLETION_CRITERIA = 80;
+const INVALID_INDEX = -1;
 
 const PHASE_STATUS = {
   COMPLETED: "completed",
@@ -122,12 +123,43 @@ const buildLearningPathProgressSummary = (
   };
 };
 
+const findHighlightPhaseIndex = (items: PhaseTimelineItem[]): number => {
+  if (items.length === DEFAULT_COUNT) return INVALID_INDEX;
+
+  const activeIndex = items.findIndex((item) => item.status === PHASE_STATUS.ACTIVE);
+  if (activeIndex >= DEFAULT_COUNT) return activeIndex;
+
+  for (let index = items.length - 1; index >= DEFAULT_COUNT; index -= 1) {
+    if (items?.[index]?.status === PHASE_STATUS.COMPLETED) {
+      return index;
+    }
+  }
+
+  return DEFAULT_COUNT;
+};
+
+const buildHighlightPhaseSummary = (
+  timelineItems: PhaseTimelineItem[],
+): HighlightPhaseSummary | null => {
+  const highlightIndex = findHighlightPhaseIndex(timelineItems);
+  if (highlightIndex < DEFAULT_COUNT) return null;
+
+  const highlightItem = timelineItems[highlightIndex];
+
+  return {
+    phase: highlightItem?.phase!,
+    orderIndex: highlightItem?.orderIndex ?? highlightIndex + 1,
+    progressPercentage: highlightItem?.progressPercentage ?? PROGRESS_EMPTY_PERCENT,
+    completedLessons: highlightItem?.completedLessons ?? DEFAULT_COUNT,
+    totalLessons: highlightItem?.totalLessons ?? DEFAULT_COUNT,
+  };
+};
+
 export interface CurrentLearningPathSummary {
   learningPath: LearningPathWithDetails | null;
-  learningPathProgress: ProgressResponse | null;
-  phasesProgress: ProgressResponse[];
   timelineItems: PhaseTimelineItem[];
   progressSummary: LearningPathProgressSummary | null;
+  highlightPhaseSummary: HighlightPhaseSummary | null;
 }
 
 export async function getCurrentLearningPathSummaryForEmployee(
@@ -138,10 +170,9 @@ export async function getCurrentLearningPathSummaryForEmployee(
   if (!currentLearningPath) {
     return {
       learningPath: null,
-      learningPathProgress: null,
-      phasesProgress: [],
       timelineItems: [],
       progressSummary: null,
+      highlightPhaseSummary: null,
     };
   }
 
@@ -150,10 +181,9 @@ export async function getCurrentLearningPathSummaryForEmployee(
   if (!learningPath) {
     return {
       learningPath: null,
-      learningPathProgress: null,
-      phasesProgress: [],
       timelineItems: [],
       progressSummary: null,
+      highlightPhaseSummary: null,
     };
   }
 
@@ -200,12 +230,12 @@ export async function getCurrentLearningPathSummaryForEmployee(
     timelineItems,
     completionCriteria,
   );
+  const highlightPhaseSummary = buildHighlightPhaseSummary(timelineItems);
 
   return {
     learningPath,
-    learningPathProgress,
-    phasesProgress,
     timelineItems,
     progressSummary,
+    highlightPhaseSummary,
   };
 }
