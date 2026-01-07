@@ -27,19 +27,7 @@ import {
 import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
 import { useGetDepartmentRankingQuery } from "@/modules/gamification-ranking/operations/query";
-
-const getRankIcon = (rank: number): string => {
-  switch (rank) {
-    case 1:
-      return "👑"; // Crown for 1st place
-    case 2:
-      return "🥈"; // Silver medal for 2nd place
-    case 3:
-      return "🌟"; // Star for 3rd place
-    default:
-      return "";
-  }
-};
+import ProgressBar from "@/shared/ui/ProgressBar";
 
 const LeaderboardTab: React.FC = () => {
   const { organizationId } = useOrganizationId();
@@ -51,7 +39,7 @@ const LeaderboardTab: React.FC = () => {
   const { data: departmentsData, isLoading: isDepartmentsLoading } =
     useGetDepartmentsQuery(
       { organizationId: organizationId || "" },
-      { enabled: !!organizationId }
+      { enabled: !!organizationId },
     );
 
   // Fetch department ranking
@@ -65,7 +53,7 @@ const LeaderboardTab: React.FC = () => {
       page: page + 1, // API uses 1-indexed pages
       limit: rowsPerPage,
     },
-    { enabled: !!selectedDepartmentId }
+    { enabled: !!selectedDepartmentId },
   );
 
   // Set first department as default when departments load
@@ -89,7 +77,7 @@ const LeaderboardTab: React.FC = () => {
   };
 
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -187,7 +175,7 @@ const LeaderboardTab: React.FC = () => {
             <TableContainer>
               <Table sx={{ tableLayout: "fixed" }}>
                 <TableHead sx={{
-                  backgroundColor: "grey.200"
+                  backgroundColor: "grey.200",
                 }}>
                   <TableRow>
                     <TableCell sx={{ width: "100px", minWidth: "100px" }}>Thứ hạng</TableCell>
@@ -219,15 +207,10 @@ const LeaderboardTab: React.FC = () => {
                       >
                         {/* Rank */}
                         <TableCell>
-                          <Box display="flex" alignItems="center" gap={0.5}>
-                            <Typography variant="body2" fontWeight="medium">
+                          <Box display="flex" alignItems="center">
+                            <Typography align="center" variant="body2" fontWeight="medium">
                               #{employee.rank}
                             </Typography>
-                            {getRankIcon(employee.rank) && (
-                              <Typography variant="body2">
-                                {getRankIcon(employee.rank)}
-                              </Typography>
-                            )}
                           </Box>
                         </TableCell>
 
@@ -253,61 +236,7 @@ const LeaderboardTab: React.FC = () => {
 
                         {/* Completion Progress */}
                         <TableCell>
-                          <Box sx={{ position: "relative", width: "100%" }}>
-                            <Box
-                              sx={{
-                                position: "relative",
-                                height: 18,
-                                borderRadius: "9px",
-                                backgroundColor: "#BBDEFB",
-                                overflow: "hidden",
-                              }}
-                            >
-                              {/* Filled portion with dot for very low percentages */}
-                              {employee.completionPercentage > 0 && (
-                                <Box
-                                  sx={{
-                                    position: "absolute",
-                                    left: 0,
-                                    top: 0,
-                                    height: "100%",
-                                    width: `${Math.max(employee.completionPercentage, 0)}%`,
-                                    minWidth: employee.completionPercentage > 0 && employee.completionPercentage < 3 ? "10px" : "0",
-                                    backgroundColor: "#42A5F5",
-                                    borderRadius: "9px",
-                                    transition: "width 0.3s ease",
-                                  }}
-                                />
-                              )}
-
-                              {/* Percentage text */}
-                              <Box
-                                sx={{
-                                  position: "absolute",
-                                  left: 0,
-                                  right: 0,
-                                  top: 0,
-                                  bottom: 0,
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  zIndex: 3,
-                                }}
-                              >
-                                <Typography
-                                  variant="caption"
-                                  sx={{
-                                    color: "white",
-                                    fontWeight: 500,
-                                    fontSize: "0.7rem",
-                                    textShadow: "0px 1px 2px rgba(0,0,0,0.2)",
-                                  }}
-                                >
-                                  {employee.completionPercentage}%
-                                </Typography>
-                              </Box>
-                            </Box>
-                          </Box>
+                          <ProgressBar value={employee.completionPercentage} />
                         </TableCell>
 
                         {/* Points */}

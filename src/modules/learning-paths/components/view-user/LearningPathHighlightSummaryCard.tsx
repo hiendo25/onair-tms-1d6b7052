@@ -1,14 +1,12 @@
 "use client";
 
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
-import { Box, LinearProgress, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
+
+import ProgressBar from "@/shared/ui/ProgressBar";
 
 import type { PhaseHighlightSummary } from "./learning-path-user.utils";
 
-const SUMMARY_BAR_HEIGHT = 16;
-const SUMMARY_BAR_RADIUS = 16;
-const SUMMARY_BAR_TRACK = "#ACDAFF";
-const SUMMARY_LABEL_COLOR = "#fff";
 const SUMMARY_ICON_COLOR = "#64748B";
 const SUMMARY_TITLE_LINE_CLAMP = 2;
 
@@ -54,36 +52,7 @@ export default function LearningPathHighlightSummaryCard({
         </Stack>
 
 
-        <Box sx={{ position: "relative" }}>
-          <LinearProgress
-            variant="determinate"
-            value={summary.progressPercentage}
-            sx={{
-              height: SUMMARY_BAR_HEIGHT,
-              borderRadius: SUMMARY_BAR_RADIUS,
-              bgcolor: SUMMARY_BAR_TRACK,
-              "& .MuiLinearProgress-bar": {
-                borderRadius: SUMMARY_BAR_RADIUS,
-                backgroundColor: "#2196F5",
-                boxShadow: "inset 0 -4px 4px 0 rgba(0, 0, 0, 0.16)",
-              },
-            }}
-          />
-          <Typography
-            variant="caption"
-            fontWeight={700}
-            sx={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: SUMMARY_LABEL_COLOR,
-            }}
-          >
-            {summary.progressPercentage}%
-          </Typography>
-        </Box>
+        <ProgressBar value={summary.progressPercentage} />
       </Stack>
     </Box>
   );
