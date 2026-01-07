@@ -17,3 +17,4 @@ export * as lessonProgressService from "./lesson-progress/lesson-progress.servic
 export * as gamificationRulesService from "./gamifications/rules";
 export * as gamificationXpService from "./gamifications/xp-transactions";
 export * as gamificationXpDataService from "./gamifications/xp";
+export * as gamificationRankingService from "./gamifications/ranking";
