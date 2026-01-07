@@ -1,10 +1,10 @@
 import React from "react";
-import { IconButton, styled,Typography, TypographyProps } from "@mui/material";
+import { IconButton, styled, Typography, TypographyProps } from "@mui/material";
 import dayjs from "dayjs";
 import { Control, Controller, useFieldArray } from "react-hook-form";
 
 import { ChevronDownIcon } from "@/shared/assets/icons";
-import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
+import { Android12Switch } from "@/shared/ui/form/CustomSwitcher";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import { ClassRoom } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";

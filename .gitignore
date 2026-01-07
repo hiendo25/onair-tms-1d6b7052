@@ -40,6 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-/src/types/supabase.types*
+/src/types/supabase.*
 # agent
 AGENTS.md

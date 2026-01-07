@@ -8,8 +8,9 @@ export default function SnackbarProvider({ children }: { readonly children: Reac
       backgroundColor: "white",
       color: theme.palette.grey[800],
       width: 320,
-      boxShadow: "0px 2px 3px -1px rgb(0,0,0,0.1), 0px 3px 6px -6px rgb(0,0,0,0.2)",
-
+      boxShadow: "0px 2px 4px -2px rgb(0,0,0,0.1), 0px 3px 6px -8px rgb(0,0,0,0.2)",
+      border: "1px solid",
+      borderColor: theme.palette.grey[300],
       fontWeight: 500,
       ".MuiAlert-message": {
         flex: 1,
@@ -47,7 +48,7 @@ export default function SnackbarProvider({ children }: { readonly children: Reac
   }, []);
   return (
     <NotiSnackbarProvider
-      maxSnack={6}
+      maxSnack={3}
       autoHideDuration={2000}
       anchorOrigin={{
         horizontal: "center",

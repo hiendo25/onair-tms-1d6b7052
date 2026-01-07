@@ -1,7 +1,6 @@
 "use server";
 import { Metadata, ResolvingMetadata } from "next";
 
-import { organizationsRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
 type OrganizationsProps = {
   params: Promise<{ slug: string }>;
@@ -22,7 +21,7 @@ export default async function Organizations(props: OrganizationsProps) {
   return (
     <PageContainer>
       <div className="flex items-center justify-center">
-        <div>Hien tai ban chua co org</div>
+        <div>Danh sach organizations</div>
       </div>
     </PageContainer>
   );

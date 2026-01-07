@@ -16,7 +16,6 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   disabled?: boolean;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
-  type?: "number" | "text";
   helpText?: React.ReactNode;
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -30,7 +29,6 @@ const RHFTextField = <T extends FieldValues>({
   placeholder,
   required,
   disabled,
-  type = "text",
   endAdornment,
   startAdornment,
   helpText,
@@ -54,16 +52,12 @@ const RHFTextField = <T extends FieldValues>({
           <OutlinedInput
             {...field}
             value={field.value ?? ""}
-            onChange={(evt) => {
-              const raw = evt.target.value;
-              const value = type === "number" ? (raw === "" ? undefined : Number(raw)) : raw;
-              field.onChange(value);
-            }}
+            onChange={field.onChange}
             placeholder={placeholder}
             disabled={disabled}
             size={size}
             id={fieldId}
-            type={type}
+            type="text"
             sx={{
               background: "white",
             }}
