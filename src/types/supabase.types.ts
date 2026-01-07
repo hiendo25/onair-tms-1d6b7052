@@ -9,6 +9,12 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      antidigital_djf: {
+        Row: {}
+        Insert: {}
+        Update: {}
+        Relationships: []
+      }
       assignment_categories: {
         Row: {
           assignment_id: string
@@ -65,6 +71,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "assignments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignment_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "assignment_employees_employee_id_fkey"
@@ -128,6 +141,13 @@ export type Database = {
             foreignKeyName: "assignment_results_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "assignment_results_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -162,6 +182,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "assignments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "assignments_created_by_fkey"
             columns: ["created_by"]
@@ -336,6 +363,13 @@ export type Database = {
             foreignKeyName: "class_attendances_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "class_attendances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -475,6 +509,13 @@ export type Database = {
             foreignKeyName: "class_qr_codes_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "class_qr_codes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -551,6 +592,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_employee_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "class_room_employee_employee_id_fkey"
@@ -693,6 +741,13 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "class_rooms_created_by_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "class_rooms_created_by_fkey"
             columns: ["employee_id"]
@@ -849,6 +904,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "class_sessions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_session_teacher_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "class_session_teacher_teacher_id_fkey"
@@ -1025,6 +1087,13 @@ export type Database = {
             foreignKeyName: "class_sessions_courses_teacher_id_fkey"
             columns: ["teacher_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "class_sessions_courses_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1062,6 +1131,13 @@ export type Database = {
           title?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "courses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "courses_created_by_fkey"
             columns: ["created_by"]
@@ -1216,6 +1292,13 @@ export type Database = {
             foreignKeyName: "fk_employee_branches_employee_id"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "fk_employee_branches_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1252,6 +1335,13 @@ export type Database = {
             foreignKeyName: "fk_employee_departments_employee_id"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "fk_employee_departments_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1281,6 +1371,13 @@ export type Database = {
             foreignKeyName: "employee_learning_paths_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_learning_paths_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1289,6 +1386,183 @@ export type Database = {
             columns: ["learning_path_id"]
             isOneToOne: false
             referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_xp_balances: {
+        Row: {
+          current_streak_days: number
+          employee_id: string
+          id: string
+          last_activity_date: string | null
+          last_calculated_at: string
+          level_id: string | null
+          longest_streak_days: number
+          organization_id: string
+          rank_branch: number | null
+          rank_department: number | null
+          rank_organization: number | null
+          total_xp: number
+          updated_at: string
+          xp_this_month: number
+          xp_this_quarter: number
+          xp_this_week: number
+          xp_this_year: number
+          xp_today: number
+        }
+        Insert: {
+          current_streak_days?: number
+          employee_id: string
+          id?: string
+          last_activity_date?: string | null
+          last_calculated_at?: string
+          level_id?: string | null
+          longest_streak_days?: number
+          organization_id: string
+          rank_branch?: number | null
+          rank_department?: number | null
+          rank_organization?: number | null
+          total_xp?: number
+          updated_at?: string
+          xp_this_month?: number
+          xp_this_quarter?: number
+          xp_this_week?: number
+          xp_this_year?: number
+          xp_today?: number
+        }
+        Update: {
+          current_streak_days?: number
+          employee_id?: string
+          id?: string
+          last_activity_date?: string | null
+          last_calculated_at?: string
+          level_id?: string | null
+          longest_streak_days?: number
+          organization_id?: string
+          rank_branch?: number | null
+          rank_department?: number | null
+          rank_organization?: number | null
+          total_xp?: number
+          updated_at?: string
+          xp_this_month?: number
+          xp_this_quarter?: number
+          xp_this_week?: number
+          xp_this_year?: number
+          xp_today?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_xp_balances_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_balances_employee"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "fk_xp_balances_employee"
+            columns: ["employee_id"]
+            isOneToOne: true
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_balances_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_xp_transactions: {
+        Row: {
+          awarded_by: string | null
+          created_at: string
+          employee_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          reason: string | null
+          rule_id: string | null
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount: number
+          year_month: string | null
+        }
+        Insert: {
+          awarded_by?: string | null
+          created_at?: string
+          employee_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          reason?: string | null
+          rule_id?: string | null
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount: number
+          year_month?: string | null
+        }
+        Update: {
+          awarded_by?: string | null
+          created_at?: string
+          employee_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          reason?: string | null
+          rule_id?: string | null
+          trigger_type?: Database["public"]["Enums"]["rule_trigger_type"]
+          xp_amount?: number
+          year_month?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_xp_transactions_awarded_by"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_awarded_by"
+            columns: ["awarded_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_employee"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_employee"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_xp_transactions_rule"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_rules"
             referencedColumns: ["id"]
           },
         ]
@@ -1371,6 +1645,13 @@ export type Database = {
             foreignKeyName: "employees_roles_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_roles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1407,6 +1688,13 @@ export type Database = {
             foreignKeyName: "employments_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1415,6 +1703,103 @@ export type Database = {
             columns: ["organization_unit_id"]
             isOneToOne: false
             referencedRelation: "organization_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_rules: {
+        Row: {
+          conditions: Json | null
+          created_at: string
+          id: string
+          is_active: boolean
+          max_times_per_day: number | null
+          max_times_per_week: number | null
+          max_times_total: number | null
+          organization_id: string
+          priority: number
+          rule_name: string
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at: string
+          xp_amount: number
+        }
+        Insert: {
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_times_per_day?: number | null
+          max_times_per_week?: number | null
+          max_times_total?: number | null
+          organization_id: string
+          priority?: number
+          rule_name: string
+          trigger_type: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at?: string
+          xp_amount: number
+        }
+        Update: {
+          conditions?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_times_per_day?: number | null
+          max_times_per_week?: number | null
+          max_times_total?: number | null
+          organization_id?: string
+          priority?: number
+          rule_name?: string
+          trigger_type?: Database["public"]["Enums"]["rule_trigger_type"]
+          updated_at?: string
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gamification_rules_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_settings: {
+        Row: {
+          created_at: string
+          enable_leaderboards: boolean
+          enable_streaks: boolean
+          id: string
+          is_enabled: boolean
+          metadata: Json | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enable_leaderboards?: boolean
+          enable_streaks?: boolean
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enable_leaderboards?: boolean
+          enable_streaks?: boolean
+          id?: string
+          is_enabled?: boolean
+          metadata?: Json | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_gamification_settings_organization"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1442,6 +1827,50 @@ export type Database = {
           type?: Database["public"]["Enums"]["hashtag_type"] | null
         }
         Relationships: []
+      }
+      leaderboard_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          period_type: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id: string | null
+          scope_type: string
+          snapshot_data: Json
+          snapshot_date: string
+          total_participants: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          period_type: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id?: string | null
+          scope_type: string
+          snapshot_data: Json
+          snapshot_date: string
+          total_participants?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          period_type?: Database["public"]["Enums"]["leaderboard_period"]
+          scope_id?: string | null
+          scope_type?: string
+          snapshot_data?: Json
+          snapshot_date?: string
+          total_participants?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_leaderboard_snapshots_organization"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       learning_path_phases: {
         Row: {
@@ -1514,6 +1943,13 @@ export type Database = {
             foreignKeyName: "learning_paths_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "learning_paths_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1564,6 +2000,13 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "lesson_progress_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "lesson_progress_employee_id_fkey"
             columns: ["employee_id"]
@@ -1687,6 +2130,67 @@ export type Database = {
           },
         ]
       }
+      levels: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          icon: string | null
+          id: string
+          organization_id: string
+          score_required: number
+          status: Database["public"]["Enums"]["level_status"]
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization_id?: string
+          score_required?: number
+          status?: Database["public"]["Enums"]["level_status"]
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization_id?: string
+          score_required?: number
+          status?: Database["public"]["Enums"]["level_status"]
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "levels_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       libraries: {
         Row: {
           created_at: string
@@ -1718,6 +2222,13 @@ export type Database = {
             foreignKeyName: "libraries_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: true
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "libraries_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -1741,8 +2252,22 @@ export type Database = {
             foreignKeyName: "managers_employees_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "managers_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "managers_employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "managers_employees_manager_id_fkey"
@@ -1951,6 +2476,13 @@ export type Database = {
             foreignKeyName: "profiles_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: true
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "profiles_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: true
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2000,6 +2532,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "assignments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "questions_created_by_fkey"
@@ -2063,6 +2602,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "resources_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "resources_created_by_fkey"
             columns: ["created_by"]
@@ -2195,27 +2741,6 @@ export type Database = {
           },
         ]
       }
-      serveys: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          title: string | null
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          title?: string | null
-        }
-        Relationships: []
-      }
       surveys: {
         Row: {
           created_at: string
@@ -2255,6 +2780,13 @@ export type Database = {
             foreignKeyName: "surveys_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "surveys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2269,37 +2801,39 @@ export type Database = {
       }
       surveys_answers: {
         Row: {
-          content: string | null
+          answer_value: Json | null
           created_at: string
           id: number
-          option_id: string
           question_id: string
+          question_text: string | null
+          question_type:
+            | Database["public"]["Enums"]["survey_question_type"]
+            | null
           response_id: string
         }
         Insert: {
-          content?: string | null
+          answer_value?: Json | null
           created_at?: string
           id?: number
-          option_id?: string
           question_id?: string
+          question_text?: string | null
+          question_type?:
+            | Database["public"]["Enums"]["survey_question_type"]
+            | null
           response_id?: string
         }
         Update: {
-          content?: string | null
+          answer_value?: Json | null
           created_at?: string
           id?: number
-          option_id?: string
           question_id?: string
+          question_text?: string | null
+          question_type?:
+            | Database["public"]["Enums"]["survey_question_type"]
+            | null
           response_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "surveys_answers_option_id_fkey"
-            columns: ["option_id"]
-            isOneToOne: false
-            referencedRelation: "surveys_questions_options"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "surveys_answers_question_id_fkey"
             columns: ["question_id"]
@@ -2398,20 +2932,33 @@ export type Database = {
           employee_id: string
           id: string
           survey_id: string
+          target_id: string | null
+          target_type: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Insert: {
           created_at?: string
           employee_id?: string
           id?: string
           survey_id?: string
+          target_id?: string | null
+          target_type?: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Update: {
           created_at?: string
           employee_id?: string
           id?: string
           survey_id?: string
+          target_id?: string | null
+          target_type?: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "surveys_response_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "surveys_response_employee_id_fkey"
             columns: ["employee_id"]
@@ -2552,6 +3099,13 @@ export type Database = {
           target_unit_ids?: string[] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "training_plan_surveys_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
           {
             foreignKeyName: "training_plan_surveys_created_by_fkey"
             columns: ["created_by"]
@@ -2710,8 +3264,22 @@ export type Database = {
             foreignKeyName: "training_plans_approved_by_fkey"
             columns: ["approved_by"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "training_plans_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plans_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
           },
           {
             foreignKeyName: "training_plans_created_by_fkey"
@@ -2809,6 +3377,13 @@ export type Database = {
             foreignKeyName: "class_rooms_created_by_fkey"
             columns: ["employee_id"]
             isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "class_rooms_created_by_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
@@ -2821,8 +3396,55 @@ export type Database = {
           },
         ]
       }
+      department_gamification_ranking: {
+        Row: {
+          avatar: string | null
+          completion_percentage: number | null
+          current_xp: number | null
+          department_id: string | null
+          department_name: string | null
+          department_rank: number | null
+          email: string | null
+          employee_code: string | null
+          employee_id: string | null
+          full_name: string | null
+          level_icon: string | null
+          level_id: string | null
+          level_score_required: number | null
+          level_title: string | null
+          max_possible_xp: number | null
+          organization_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_xp_balances_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_employee_departments_department_id"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      calculate_max_possible_xp: {
+        Args: { p_employee_id: string; p_organization_id: string }
+        Returns: number
+      }
       count_class_room_runtime_status_by_employee: {
         Args: {
           p_employee_id: string
@@ -2836,6 +3458,38 @@ export type Database = {
         Returns: {
           runtime_status: string
           total: number
+        }[]
+      }
+      count_learning_path_items: {
+        Args: { p_employee_id: string }
+        Returns: Json
+      }
+      get_branch_leaderboard: {
+        Args: {
+          p_branch_id: string
+          p_limit?: number
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
+        }[]
+      }
+      get_department_leaderboard: {
+        Args: {
+          p_department_id: string
+          p_limit?: number
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
         }[]
       }
       get_filtered_employees: {
@@ -2858,6 +3512,20 @@ export type Database = {
         Returns: {
           employee_id: string
           total_count: number
+        }[]
+      }
+      get_organization_leaderboard: {
+        Args: {
+          p_limit?: number
+          p_organization_id: string
+          p_period?: Database["public"]["Enums"]["leaderboard_period"]
+        }
+        Returns: {
+          current_level: number
+          employee_id: string
+          employee_name: string
+          rank: number
+          total_xp: number
         }[]
       }
       get_training_plan_detail_counts: {
@@ -2935,8 +3603,16 @@ export type Database = {
       employee_type: "admin" | "student" | "teacher"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
+      leaderboard_period:
+        | "daily"
+        | "weekly"
+        | "monthly"
+        | "quarterly"
+        | "yearly"
+        | "all_time"
       lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
+      level_status: "deleted" | "active" | "inactive"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -2951,14 +3627,26 @@ export type Database = {
         | "order"
         | "fill"
       resource_kind: "folder" | "file"
+      rule_trigger_type:
+        | "lesson_completed"
+        | "assignment_graded"
+        | "attendance_present"
+        | "class_completed"
+        | "course_completed"
+        | "phase_completed"
+        | "learning_path_completed"
+        | "daily_login"
+        | "streak_milestone"
+        | "manual_award"
       status: "active" | "deactive"
       survey_question_type:
-        | "text"
-        | "rating"
-        | "rating_sort"
         | "checkbox"
         | "radio"
+        | "text"
+        | "rating"
+        | "sort_rating"
         | "yes_no"
+      survey_target_type: "class_room" | "learning_path"
       survey_type: "planning" | "classroom"
       training_plan_status:
         | "pending"
@@ -3131,8 +3819,17 @@ export const Constants = {
       employee_type: ["admin", "student", "teacher"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
+      leaderboard_period: [
+        "daily",
+        "weekly",
+        "monthly",
+        "quarterly",
+        "yearly",
+        "all_time",
+      ],
       lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
+      level_status: ["deleted", "active", "inactive"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],
@@ -3148,15 +3845,28 @@ export const Constants = {
         "fill",
       ],
       resource_kind: ["folder", "file"],
+      rule_trigger_type: [
+        "lesson_completed",
+        "assignment_graded",
+        "attendance_present",
+        "class_completed",
+        "course_completed",
+        "phase_completed",
+        "learning_path_completed",
+        "daily_login",
+        "streak_milestone",
+        "manual_award",
+      ],
       status: ["active", "deactive"],
       survey_question_type: [
-        "text",
-        "rating",
-        "rating_sort",
         "checkbox",
         "radio",
+        "text",
+        "rating",
+        "sort_rating",
         "yes_no",
       ],
+      survey_target_type: ["class_room", "learning_path"],
       survey_type: ["planning", "classroom"],
       training_plan_status: [
         "pending",
