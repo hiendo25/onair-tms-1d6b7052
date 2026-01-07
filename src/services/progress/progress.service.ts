@@ -547,6 +547,117 @@ export async function getLearningPathProgress(
 }
 
 /**
+ * Get progress for multiple courses in parallel (optimized batch query)
+ */
+export async function getMultipleCoursesProgress(
+  courseIds: string[],
+  employeeId: string,
+  learningPathId: string | null,
+): Promise<Map<string, { totalLessons: number; completedLessons: number }>> {
+  const supabase = await createSVClient();
+  const progressMap = new Map<string, { totalLessons: number; completedLessons: number }>();
+
+  if (courseIds.length === 0) {
+    return progressMap;
+  }
+
+  // Get all lessons for all courses in one query
+  const { data: sections, error: lessonsError } = await supabase
+    .from("sections")
+    .select(`
+      course_id,
+      lessons!inner(id)
+    `)
+    .in("course_id", courseIds)
+    .eq("status", "active")
+    .eq("lessons.status", "active");
+
+  if (lessonsError || !sections) {
+    console.error("Error fetching course lessons:", lessonsError);
+    // Return zeros for all courses
+    courseIds.forEach((courseId) => {
+      progressMap.set(courseId, { totalLessons: 0, completedLessons: 0 });
+    });
+    return progressMap;
+  }
+
+  // Map courses to their lesson IDs
+  const courseToLessons = new Map<string, Set<string>>();
+  sections.forEach((section: any) => {
+    if (!courseToLessons.has(section.course_id)) {
+      courseToLessons.set(section.course_id, new Set());
+    }
+    section.lessons?.forEach((l: { id: string }) => {
+      courseToLessons.get(section.course_id)!.add(l.id);
+    });
+  });
+
+  // Initialize progress map with total lesson counts
+  courseIds.forEach((courseId) => {
+    const lessonIds = courseToLessons.get(courseId);
+    progressMap.set(courseId, {
+      totalLessons: lessonIds ? lessonIds.size : 0,
+      completedLessons: 0, // Will be calculated next
+    });
+  });
+
+  // Get all unique lesson IDs across all courses
+  const allLessonIds = Array.from(
+    new Set(
+      Array.from(courseToLessons.values()).flatMap((lessons) => Array.from(lessons))
+    )
+  );
+
+  if (allLessonIds.length === 0) {
+    return progressMap;
+  }
+
+  // Get all progress records in one query
+  let progressQuery = supabase
+    .from("lesson_progress")
+    .select("lesson_id")
+    .eq("employee_id", employeeId)
+    .eq("status", "completed")
+    .in("lesson_id", allLessonIds);
+
+  if (learningPathId) {
+    progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  }
+
+  const { data: progressRecords, error: progressError } = await progressQuery;
+
+  if (progressError) {
+    console.error("Error fetching progress records:", progressError);
+    return progressMap;
+  }
+
+  // Create a set of completed lesson IDs for quick lookup
+  const completedLessonIds = new Set(
+    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || []
+  );
+
+  // Update completed counts for each course
+  courseIds.forEach((courseId) => {
+    const courseLessonIds = courseToLessons.get(courseId);
+    if (!courseLessonIds) {
+      return;
+    }
+
+    const completedCount = Array.from(courseLessonIds).filter((lessonId) =>
+      completedLessonIds.has(lessonId)
+    ).length;
+
+    const existing = progressMap.get(courseId)!;
+    progressMap.set(courseId, {
+      totalLessons: existing.totalLessons,
+      completedLessons: completedCount,
+    });
+  });
+
+  return progressMap;
+}
+
+/**
  * Get progress for multiple phases in parallel (optimized for /learning-paths/[id]/phases/progress)
  */
 export async function getMultiplePhasesProgress(
@@ -765,7 +876,7 @@ export async function getMultiplePhasesProgress(
  * Get progress for a single lesson
  * For lessons: totalLessons is always 1, completedLessons is 1 if status is "completed", 0 otherwise
  */
-export async function getLessonProgressData(
+export async function getLessonProgress(
   lessonId: string,
   employeeId: string,
   learningPathId: string | null,
