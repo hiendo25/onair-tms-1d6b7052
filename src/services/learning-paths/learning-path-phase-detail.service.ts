@@ -39,6 +39,21 @@ const resolveSessionCount = (classRoom: PhaseClassRoomWithProgress["class_room"]
   return classRoom.class_sessions?.length ?? DEFAULT_COUNT;
 };
 
+const resolveCourseCount = (classRoom: PhaseClassRoomWithProgress["class_room"]): number => {
+  if (!classRoom.class_sessions?.length) {
+    return DEFAULT_COUNT;
+  }
+
+  return classRoom.class_sessions.reduce((total, session) => {
+    const countFromQuery = session.class_sessions_courses_period_count?.[0]?.count;
+    const resolvedCount = Number.isFinite(countFromQuery)
+      ? countFromQuery
+      : session.class_sessions_courses_period?.length ?? DEFAULT_COUNT;
+
+    return total + resolvedCount!;
+  }, DEFAULT_COUNT);
+};
+
 const resolveProgressStatus = (progressPercentage: number): ClassRoomProgressStatus => {
   if (progressPercentage >= PROGRESS_COMPLETED_PERCENT) {
     return CLASSROOM_PROGRESS_STATUS.COMPLETED;
@@ -84,13 +99,16 @@ const buildClassRoomCardItem = (
   const status = resolveProgressStatus(progressPercentage);
   const modeKey = resolveClassRoomModeKey(classRoom);
   const sessionCount = resolveSessionCount(classRoom);
+  const courseCount = resolveCourseCount(classRoom);
 
   return {
     id: classRoom.id,
     title: classRoom.title ?? "Lớp học chưa đặt tên",
     description: classRoom.description,
-    modeKey,
+    roomType: classRoom.room_type!,
+    sessionType: classRoom.class_sessions[0]?.session_type!,
     sessionCount,
+    courseCount,
     progressPercentage,
     status,
     href: classRoom.slug
