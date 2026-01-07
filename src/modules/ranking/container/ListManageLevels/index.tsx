@@ -1,7 +1,7 @@
 "use client";
 import React, { memo, useCallback, useMemo, useState } from "react";
 import { useRef } from "react";
-import { IconButton, Typography } from "@mui/material";
+import { Alert, IconButton, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 
@@ -102,9 +102,10 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
       id: "actions",
       field: "actions",
       headerName: "Hành động",
+      align: "right",
       renderCell(value, row) {
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex justify-end items-center gap-2">
             <IOSSwitch
               size="small"
               loading
@@ -141,6 +142,18 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
           onChangePageSize,
         }}
       />
+
+      <Alert className="mt-4" severity="info">
+        <Typography variant="body2" sx={{
+          color: "info.dark"
+        }}>
+          Lưu ý: <br/>
+          Mỗi học viên chỉ có 1 danh hiệu tại 1 thời điểm <br/>
+          Danh hiệu được tự động cập nhật theo thành tích <br/>
+          Thứ tự ưu tiên quyết định danh hiệu nào được hiển thị khi đáp ứng nhiều điều kiện
+        </Typography>
+      </Alert>
+
       <DrawerUpdateLevelForm ref={drawerUpdateRef} />
     </>
   );

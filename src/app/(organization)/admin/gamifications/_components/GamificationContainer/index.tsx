@@ -42,7 +42,7 @@ const GamificationContainer: React.FC = () => {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="gamification tabs">
           <Tab label="Cấu hình điểm thưởng" id="gamification-tab-0" sx={{ textTransform: "none" }} />
           <Tab label="Bảng xếp hạng" id="gamification-tab-1" sx={{ textTransform: "none" }} />
-          <Tab label="Cấu hình danh hiệu" id="gamification-tab-2" sx={{ textTransform: "none" }} />
+          <Tab label="Danh hiệu" id="gamification-tab-2" sx={{ textTransform: "none" }} />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>

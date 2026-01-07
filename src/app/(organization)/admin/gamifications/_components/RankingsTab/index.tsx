@@ -19,7 +19,10 @@ const RankingsTab: React.FC = () => {
       }}>
         <div>
           <Typography component="p" variant="subtitle1">
-            Thiết lập danh hiệu tự động theo thành tích.
+            Quản lý danh hiệu
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Thiết lập danh hiệu tự động theo thành tích
           </Typography>
         </div>
         <div className="flex items-center mb-6 mt-4">
@@ -33,7 +36,7 @@ const RankingsTab: React.FC = () => {
               </InputAdornment>
             }
           >
-            Thêm mới
+            Tạo danh hiệu mới
           </Button>
         </div>
       </Box>
