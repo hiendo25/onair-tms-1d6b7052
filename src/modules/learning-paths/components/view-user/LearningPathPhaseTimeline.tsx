@@ -32,48 +32,38 @@ export default function LearningPathPhaseTimeline({ items }: LearningPathPhaseTi
 
   if (items.length === 0) {
     return (
-      <Card sx={{ ...SECTION_CARD_SX, borderRadius: TIMELINE_CARD_RADIUS }}>
-        <Box
-          sx={{
-            px: 2,
-            py: 4,
-            textAlign: "center",
-            borderRadius: EMPTY_STATE_RADIUS,
-            border: EMPTY_STATE_BORDER,
-            borderColor: "divider",
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Chưa có giai đoạn nào trong lộ trình.
-          </Typography>
-        </Box>
-      </Card>
+      <Box
+        sx={{
+          px: 2,
+          py: 4,
+          textAlign: "center",
+          borderRadius: EMPTY_STATE_RADIUS,
+          border: EMPTY_STATE_BORDER,
+          borderColor: "divider",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          Chưa có giai đoạn nào trong lộ trình.
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <Card
-      sx={{
-        ...SECTION_CARD_SX,
-        borderRadius: TIMELINE_CARD_RADIUS,
-        bgcolor: "background.paper",
-      }}
-    >
-      <Stack spacing={2} sx={{ p: { xs: 1, md: 3 } }}>
-        <Box sx={{ display: "flex", justifyContent: "center" }}>
-          <Box sx={{ width: "100%", maxWidth: { xs: "100%", lg: ROADMAP_CONTAINER_MAX_WIDTH } }}>
-            <RoadMapSVG
-              data={mapData}
-              currentStepIndex={currentStepIndex}
-              onPressPeriod={(index) => {
-                if (index < 0 || index >= phaseLinks.length) return;
-                router.push(phaseLinks?.[index]!);
-              }}
-              onPressPeriodLocked={() => { }}
-            />
-          </Box>
+    <Stack spacing={2} sx={{ p: { xs: 1, md: 3 } }}>
+      <Box sx={{ display: "flex", justifyContent: "center" }}>
+        <Box sx={{ width: "100%", maxWidth: { xs: "100%", lg: ROADMAP_CONTAINER_MAX_WIDTH } }}>
+          <RoadMapSVG
+            data={mapData}
+            currentStepIndex={currentStepIndex}
+            onPressPeriod={(index) => {
+              if (index < 0 || index >= phaseLinks.length) return;
+              router.push(phaseLinks?.[index]!);
+            }}
+            onPressPeriodLocked={() => { }}
+          />
         </Box>
-      </Stack>
-    </Card>
+      </Box>
+    </Stack>
   );
 }
