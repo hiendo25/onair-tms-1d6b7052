@@ -12,7 +12,7 @@ export const ROOM_PROVIDERS = Constants.public.Enums.channel_provider.reduce(
         break;
       case "google_meet":
         icon = GoogleMeetIcon;
-        break;  
+        break;
       case "microsoft_teams":
         icon = MicrosoftTeamIcon;
         break;
