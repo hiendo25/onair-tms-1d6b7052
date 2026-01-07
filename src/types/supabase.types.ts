@@ -2269,39 +2269,37 @@ export type Database = {
       }
       surveys_answers: {
         Row: {
-          answer_value: Json | null
+          content: string | null
           created_at: string
           id: number
+          option_id: string
           question_id: string
-          question_text: string | null
-          question_type:
-            | Database["public"]["Enums"]["survey_question_type"]
-            | null
           response_id: string
         }
         Insert: {
-          answer_value?: Json | null
+          content?: string | null
           created_at?: string
           id?: number
+          option_id?: string
           question_id?: string
-          question_text?: string | null
-          question_type?:
-            | Database["public"]["Enums"]["survey_question_type"]
-            | null
           response_id?: string
         }
         Update: {
-          answer_value?: Json | null
+          content?: string | null
           created_at?: string
           id?: number
+          option_id?: string
           question_id?: string
-          question_text?: string | null
-          question_type?:
-            | Database["public"]["Enums"]["survey_question_type"]
-            | null
           response_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "surveys_answers_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "surveys_questions_options"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "surveys_answers_question_id_fkey"
             columns: ["question_id"]
@@ -2400,24 +2398,18 @@ export type Database = {
           employee_id: string
           id: string
           survey_id: string
-          target_id: string | null
-          target_type: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Insert: {
           created_at?: string
           employee_id?: string
           id?: string
           survey_id?: string
-          target_id?: string | null
-          target_type?: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Update: {
           created_at?: string
           employee_id?: string
           id?: string
           survey_id?: string
-          target_id?: string | null
-          target_type?: Database["public"]["Enums"]["survey_target_type"] | null
         }
         Relationships: [
           {
@@ -2961,13 +2953,12 @@ export type Database = {
       resource_kind: "folder" | "file"
       status: "active" | "deactive"
       survey_question_type:
-        | "checkbox"
-        | "radio"
         | "text"
         | "rating"
-        | "sort_rating"
+        | "rating_sort"
+        | "checkbox"
+        | "radio"
         | "yes_no"
-      survey_target_type: "class_room" | "learning_path"
       survey_type: "planning" | "classroom"
       training_plan_status:
         | "pending"
@@ -3159,14 +3150,13 @@ export const Constants = {
       resource_kind: ["folder", "file"],
       status: ["active", "deactive"],
       survey_question_type: [
-        "checkbox",
-        "radio",
         "text",
         "rating",
-        "sort_rating",
+        "rating_sort",
+        "checkbox",
+        "radio",
         "yes_no",
       ],
-      survey_target_type: ["class_room", "learning_path"],
       survey_type: ["planning", "classroom"],
       training_plan_status: [
         "pending",
