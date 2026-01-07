@@ -16,7 +16,6 @@ const ASSIGNMENT_MODE_LABELS: Record<LearningPathMetadata["assignmentMode"], str
 
 export const SECTION_CARD_SX = {
   borderRadius: 2,
-  border: "1px solid",
   borderColor: "divider",
   boxShadow: "0 16px 40px rgba(15, 23, 42, 0.08)",
 };

@@ -15,6 +15,14 @@ export interface PhaseTimelineItem {
   classRoomCount: number;
 }
 
+export interface HighlightPhaseSummary {
+  phase: PhaseWithClassRooms;
+  orderIndex: number;
+  progressPercentage: number;
+  completedLessons: number;
+  totalLessons: number;
+}
+
 export interface LearningPathProgressSummary {
   overallProgress: number;
   completedPhases: number;
@@ -40,6 +48,7 @@ export interface PhaseClassRoomCardItem {
   progressPercentage: number;
   status: ClassRoomProgressStatus;
   href?: string | null;
+  isLocked?: boolean;
 }
 
 export interface PhaseProgressSummary {

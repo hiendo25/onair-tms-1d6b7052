@@ -21,6 +21,7 @@ export default function LearningPathDetailContent() {
   const learningPath = currentLearningPathData?.data.learningPath ?? null;
   const timelineItems = currentLearningPathData?.data.timelineItems ?? [];
   const progressSummary = currentLearningPathData?.data.progressSummary ?? null;
+  const highlightPhaseSummary = currentLearningPathData?.data.highlightPhaseSummary ?? null;
   const hasContent = Boolean(learningPath && progressSummary);
   const isLoadingContent = isLoading;
   const errorMessage =
@@ -95,6 +96,7 @@ export default function LearningPathDetailContent() {
         learningPath={learningPath}
         timelineItems={timelineItems}
         progressSummary={progressSummary}
+        highlightPhaseSummary={highlightPhaseSummary}
       />
     </PageContainer>
   );
