@@ -4,12 +4,11 @@ import { JSX } from "react";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
 import SignalCellularAltRoundedIcon from "@mui/icons-material/SignalCellularAltRounded";
-import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
 import { Box, Button, Card, CircularProgress, IconButton, Stack, Typography } from "@mui/material";
 import Link from "next/link";
 
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
-import { DEFAULT_COUNT, PROGRESS_COMPLETED_PERCENT } from "@/modules/learning-paths/learning-path-user.constants";
+import { PROGRESS_COMPLETED_PERCENT } from "@/modules/learning-paths/learning-path-user.constants";
 import { PhaseDetailData } from "../../types";
 import ExpandableDescription from "../ExpandableDescription";
 
@@ -19,9 +18,8 @@ const DETAIL_CARD_BORDER = "1px solid rgba(226, 232, 240, 0.7)";
 const DETAIL_CARD_SHADOW = "0 30px 60px rgba(15, 23, 42, 0.08)";
 const DETAIL_CARD_RADIUS = 4;
 const DETAIL_CARD_MAX_WIDTH = 564;
-const HEADER_BADGE_BG = "rgba(239, 246, 255, 0.9)";
-const HEADER_BADGE_BORDER = "rgba(59, 130, 246, 0.3)";
-const HEADER_BADGE_COLOR = "#2563EB";
+const HEADER_BADGE_BORDER = "#E0D9D9";
+const HEADER_BADGE_COLOR = "#3F9AFF";
 const HEADER_BADGE_ICON_SIZE = 16;
 const HEADER_BADGE_RADIUS = 999;
 const HEADER_BADGE_PADDING_X = 1.5;
@@ -62,7 +60,6 @@ const PhaseInfoBadge = ({ icon, label }: PhaseInfoBadgeProps) => {
         borderRadius: HEADER_BADGE_RADIUS,
         border: "1px solid",
         borderColor: HEADER_BADGE_BORDER,
-        bgcolor: HEADER_BADGE_BG,
         color: HEADER_BADGE_COLOR,
         fontWeight: 600,
         fontSize: 13,
@@ -86,9 +83,6 @@ export default function LearningPathPhaseDetailView({
   const phaseIndex = phaseIndexRaw > 0 ? phaseIndexRaw : DEFAULT_PHASE_INDEX;
   const phaseIndexLabel = String(phaseIndex).padStart(2, "0");
   const progressPercentage = detailData.summary.progressPercentage;
-  const totalSessions = detailData.classRooms.reduce((acc, item) => acc + item.sessionCount, DEFAULT_COUNT);
-  const sessionLabel =
-    totalSessions > DEFAULT_COUNT ? `${totalSessions} buổi` : "Chưa có buổi học";
   const startHref = detailData.classRooms.find((classRoom) => Boolean(classRoom.href))?.href ?? null;
 
   return (
@@ -176,10 +170,6 @@ export default function LearningPathPhaseDetailView({
                 icon={<AutoAwesomeRoundedIcon sx={{ fontSize: HEADER_BADGE_ICON_SIZE }} />}
                 label={`${progressPercentage}% tiến độ`}
               />
-              <PhaseInfoBadge
-                icon={<TimerRoundedIcon sx={{ fontSize: HEADER_BADGE_ICON_SIZE }} />}
-                label={sessionLabel}
-              />
             </Stack>
           </Stack>
 
@@ -193,12 +183,12 @@ export default function LearningPathPhaseDetailView({
             <ExpandableDescription
               text={detailData.phase.description}
               fallbackText={DEFAULT_PHASE_DESCRIPTION}
-              textProps={{ align: "center" }}
+              textProps={{ align: "left" }}
             />
           </Box>
 
           <Stack spacing={2} alignSelf="stretch">
-            <Typography variant="overline" fontWeight={700} color="text.secondary">
+            <Typography className="font-extrabold text-xs text-[#A69B98]">
               {LIST_SECTION_LABEL}
             </Typography>
             {detailData.classRooms.length === 0 ? (
@@ -231,7 +221,6 @@ export default function LearningPathPhaseDetailView({
               size="large"
               fullWidth
               sx={{
-                borderRadius: 999,
                 textTransform: "none",
                 fontWeight: 700,
                 fontSize: 16,

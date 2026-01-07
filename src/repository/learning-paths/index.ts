@@ -157,6 +157,7 @@ export const getLearningPathWithDetails = async (id: string): Promise<LearningPa
               end_at,
               session_type,
               channel_provider,
+              class_sessions_courses_period_count:class_sessions_courses_period(count),
               class_sessions_courses_period (
                 id,
                 course_id,
@@ -296,6 +297,7 @@ export const getLearningPathPhaseDetail = async (
             end_at,
             session_type,
             channel_provider,
+            class_sessions_courses_period_count:class_sessions_courses_period(count),
             class_sessions_courses_period (
               id,
               course_id,
