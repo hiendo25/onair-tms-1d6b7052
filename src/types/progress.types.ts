@@ -8,10 +8,10 @@ import { Database } from "@/types/supabase.types";
  * Base progress response structure
  */
 export interface ProgressResponse {
-  /** The ID of the entity (learning path, phase, class room, course, section, lesson, or employee) */
+  /** The ID of the entity (learning path, phase, class room, class session, course, section, lesson, or employee) */
   entityId: string;
   /** The type of entity this progress belongs to */
-  entityType: "learning_path" | "phase" | "class_room" | "course" | "section" | "lesson" | "employee";
+  entityType: "learning_path" | "phase" | "class_room" | "class_session" | "course" | "section" | "lesson" | "employee";
   /** Total number of lessons in this entity */
   totalLessons: number;
   /** Number of completed lessons */
