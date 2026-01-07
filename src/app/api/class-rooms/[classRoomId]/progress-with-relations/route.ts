@@ -40,8 +40,7 @@ interface SessionCourseRecord {
 }
 
 // API response types
-interface ClassSessionWithCoursesProgress {
-  id: string;
+interface ClassSessionWithCoursesProgress extends ProgressResponse {
   courses: ProgressResponse[];
 }
 
@@ -131,7 +130,13 @@ export async function GET(
     if (!sessionCourses || sessionCourses.length === 0) {
       // No courses, return class room with sessions but no courses
       const sessionsWithProgress: ClassSessionWithCoursesProgress[] = sessions.map((session) => ({
-        id: session.id,
+        entityId: session.id,
+        entityType: "class_session" as const,
+        totalLessons: 0,
+        completedLessons: 0,
+        progressPercentage: 0,
+        learningPathId,
+        employeeId: employee.id,
         courses: [],
       }));
 
@@ -176,15 +181,19 @@ export async function GET(
     const sessionsWithProgress: ClassSessionWithCoursesProgress[] = sessions.map((session) => {
       const sessionCourseIds = coursesBySession.get(session.id) ?? [];
 
+      // Track session-level totals
+      let sessionTotalLessons = 0;
+      let sessionCompletedLessons = 0;
+
       // Build course progress for this session
       const courseProgressList: ProgressResponse[] = sessionCourseIds.map((courseId) => {
         const progress = courseProgressMap.get(courseId);
         const totalLessons = progress?.totalLessons ?? 0;
         const completedLessons = progress?.completedLessons ?? 0;
 
-        // Accumulate for class room totals
-        totalClassRoomLessons += totalLessons;
-        totalClassRoomCompletedLessons += completedLessons;
+        // Accumulate for session totals
+        sessionTotalLessons += totalLessons;
+        sessionCompletedLessons += completedLessons;
 
         return buildProgressResponse({
           entityId: courseId,
@@ -196,8 +205,21 @@ export async function GET(
         });
       });
 
+      // Accumulate for class room totals
+      totalClassRoomLessons += sessionTotalLessons;
+      totalClassRoomCompletedLessons += sessionCompletedLessons;
+
       return {
-        id: session.id,
+        entityId: session.id,
+        entityType: "class_session" as const,
+        totalLessons: sessionTotalLessons,
+        completedLessons: sessionCompletedLessons,
+        progressPercentage: calculateProgressPercentage(
+          sessionCompletedLessons,
+          sessionTotalLessons
+        ),
+        learningPathId,
+        employeeId: employee.id,
         courses: courseProgressList,
       };
     });
