@@ -1,6 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
 import type {
-  HighlightPhaseSummary,
   LearningPathPhaseDetailViewData,
   LearningPathProgressSummary,
   PhaseTimelineItem,
@@ -179,7 +178,6 @@ export interface CurrentLearningPathSummaryResponse {
     learningPath: LearningPathWithDetails | null;
     timelineItems: PhaseTimelineItem[];
     progressSummary: LearningPathProgressSummary | null;
-    highlightPhaseSummary: HighlightPhaseSummary | null;
   };
 }
 

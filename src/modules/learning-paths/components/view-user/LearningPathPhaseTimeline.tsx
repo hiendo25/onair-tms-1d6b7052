@@ -50,7 +50,7 @@ export default function LearningPathPhaseTimeline({ items }: LearningPathPhaseTi
   }
 
   return (
-    <Stack spacing={2} sx={{ p: { xs: 1, md: 3 } }}>
+    <Stack spacing={2}>
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         <Box sx={{ width: "100%", maxWidth: { xs: "100%", lg: ROADMAP_CONTAINER_MAX_WIDTH } }}>
           <RoadMapSVG

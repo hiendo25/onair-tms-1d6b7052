@@ -64,6 +64,7 @@ export interface PhaseClassRoomWithDetails {
       end_at: string | null;
       session_type: Database["public"]["Enums"]["class_session_type"] | null;
       channel_provider: Database["public"]["Enums"]["channel_provider"] | null;
+      class_sessions_courses_period_count?: Array<{ count: number }> | null;
       class_sessions_courses_period: Array<{
         id: number;
         course_id: string;
