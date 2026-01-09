@@ -6,6 +6,7 @@ import {
   coursesRepository,
   employeeBranchesRepository,
   employeeDepartmentsRepository,
+  employeeRepository,
   employeesRepository,
   libraryRepository,
   managersEmployeesRepository,
@@ -324,6 +325,15 @@ async function getEmployeeById(id: string): Promise<EmployeeDto> {
   return employeesRepository.getEmployeeById(id);
 }
 
+/**
+ * Get employee's department ID
+ * @param employeeId - The employee's UUID
+ * @returns The department ID or null if not found
+ */
+async function getEmployeeDepartmentId(employeeId: string): Promise<string | null> {
+  return employeeRepository.getEmployeeDepartmentId(employeeId);
+}
+
 export {
   createEmployeeCore,
   // createEmployeeWithRelations,
@@ -331,4 +341,5 @@ export {
   deleteEmployeeWithRelations,
   getEmployees,
   getEmployeeById,
+  getEmployeeDepartmentId,
 };

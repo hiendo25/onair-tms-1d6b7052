@@ -19,3 +19,11 @@ export const useGetEmployeeQuery = (id: string) => {
     enabled: !!id,
   });
 };
+
+export const useGetEmployeeDepartmentIdQuery = (employeeId: string, options?: { enabled?: boolean }) => {
+  return useTQuery<string | null>({
+    queryKey: [GET_EMPLOYEES, employeeId, "department"],
+    queryFn: () => employeeService.getEmployeeDepartmentId(employeeId),
+    enabled: options?.enabled !== false && !!employeeId,
+  });
+};
