@@ -1,38 +1,9 @@
 import { useTQuery } from "@/lib/queryClient";
-
-interface DepartmentRankingEmployee {
-  employeeId: string;
-  employeeCode: string;
-  fullName: string;
-  email: string;
-  avatar: string | null;
-  departmentId: string;
-  departmentName: string;
-  currentXp: number;
-  maxPossibleXp: number;
-  completionPercentage: number;
-  level: {
-    id: string | null;
-    title: string | null;
-    icon: string | null;
-    scoreRequired: number | null;
-  };
-  rank: number;
-}
-
-interface DepartmentRankingResult {
-  employees: DepartmentRankingEmployee[];
-  total: number;
-  page: number;
-  limit: number;
-  departmentId: string;
-}
-
-interface GetDepartmentRankingParams {
-  departmentId: string;
-  page?: number;
-  limit?: number;
-}
+import type {
+  DepartmentRankingEmployee,
+  DepartmentRankingResult,
+  GetDepartmentRankingParams,
+} from "@/types/gamification.types";
 
 /**
  * Fetch department-specific gamification ranking

@@ -96,7 +96,7 @@ export default function DepartmentLeaderboard({
                   {top3[1].fullName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {top3[1].currentXp} XP
+                  {top3[1].currentXp} điểm
                 </Typography>
               </Box>
             )}
@@ -124,7 +124,7 @@ export default function DepartmentLeaderboard({
                   {top3[0].fullName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {top3[0].currentXp} XP
+                  {top3[0].currentXp} điểm
                 </Typography>
               </Box>
             )}
@@ -151,7 +151,7 @@ export default function DepartmentLeaderboard({
                   {top3[2].fullName}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {top3[2].currentXp} XP
+                  {top3[2].currentXp} điểm
                 </Typography>
               </Box>
             )}
@@ -241,7 +241,7 @@ export default function DepartmentLeaderboard({
                         fontWeight={600}
                         color={isCurrentUser ? "primary" : "text.secondary"}
                       >
-                        {employee.currentXp} XP
+                        {employee.currentXp} điểm
                       </Typography>
                     </Box>
                   );

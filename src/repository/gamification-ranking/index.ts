@@ -1,37 +1,9 @@
 import { createSVClient } from "@/services/supabase/server";
-
-export interface DepartmentRankingEmployee {
-  employee_id: string;
-  organization_id: string;
-  employee_code: string;
-  full_name: string;
-  email: string;
-  avatar: string | null;
-  department_id: string;
-  department_name: string;
-  current_xp: number;
-  max_possible_xp: number;
-  completion_percentage: number;
-  level_id: string | null;
-  level_title: string | null;
-  level_icon: string | null;
-  level_score_required: number | null;
-  department_rank: number;
-}
-
-export interface GetDepartmentRankingParams {
-  departmentId: string;
-  organizationId: string;
-  page?: number;
-  limit?: number;
-}
-
-export interface GetDepartmentRankingResult {
-  data: DepartmentRankingEmployee[];
-  total: number;
-  page: number;
-  limit: number;
-}
+import type {
+  DepartmentRankingEmployeeDb,
+  GetDepartmentRankingParamsDb,
+  GetDepartmentRankingResultDb,
+} from "@/types/gamification.types";
 
 /**
  * Get department-specific gamification ranking
@@ -49,8 +21,8 @@ export interface GetDepartmentRankingResult {
  * });
  */
 export async function getDepartmentRanking(
-  params: GetDepartmentRankingParams
-): Promise<GetDepartmentRankingResult> {
+  params: GetDepartmentRankingParamsDb
+): Promise<GetDepartmentRankingResultDb> {
   const supabase = await createSVClient();
   const { departmentId, organizationId, page = 1, limit = 50 } = params;
 
@@ -70,7 +42,7 @@ export async function getDepartmentRanking(
   }
 
   return {
-    data: (data as DepartmentRankingEmployee[]) || [],
+    data: (data as DepartmentRankingEmployeeDb[]) || [],
     total: count || 0,
     page,
     limit,
@@ -93,7 +65,7 @@ export async function getDepartmentRanking(
 export async function getEmployeeDepartmentRank(
   employeeId: string,
   organizationId: string
-): Promise<DepartmentRankingEmployee | null> {
+): Promise<DepartmentRankingEmployeeDb | null> {
   const supabase = await createSVClient();
 
   const { data, error } = await supabase
@@ -109,5 +81,5 @@ export async function getEmployeeDepartmentRank(
     );
   }
 
-  return data as DepartmentRankingEmployee | null;
+  return data as DepartmentRankingEmployeeDb | null;
 }
