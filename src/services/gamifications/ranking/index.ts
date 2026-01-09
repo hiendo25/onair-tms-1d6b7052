@@ -1,32 +1,5 @@
 import { gamificationRankingRepository } from "@/repository";
-
-export interface DepartmentRankingEmployee {
-  employeeId: string;
-  employeeCode: string;
-  fullName: string;
-  email: string;
-  avatar: string | null;
-  departmentId: string;
-  departmentName: string;
-  currentXp: number;
-  maxPossibleXp: number;
-  completionPercentage: number;
-  level: {
-    id: string | null;
-    title: string | null;
-    icon: string | null;
-    scoreRequired: number | null;
-  };
-  rank: number;
-}
-
-export interface DepartmentRankingResult {
-  employees: DepartmentRankingEmployee[];
-  total: number;
-  page: number;
-  limit: number;
-  departmentId: string;
-}
+import type { DepartmentRankingEmployee, DepartmentRankingResult } from "@/types/gamification.types";
 
 /**
  * Get department gamification ranking with formatted data
