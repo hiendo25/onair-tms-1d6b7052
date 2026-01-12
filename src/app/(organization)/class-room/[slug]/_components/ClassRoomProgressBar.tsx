@@ -4,28 +4,20 @@ import { Box, LinearProgress, Stack, Typography } from "@mui/material";
 
 interface ClassRoomProgressBarProps {
   value: number;
-  size: "md" | "sm" | "xs",
+  size: "md" | "sm" | "xs";
 }
 
-const calculateSize = (size: "md" | "sm" | "xs") => {
-  if (size === "md") {
-    return 16
-  }
-  if (size === "sm") {
-    return 14
-  }
-  if (size === "xs") {
-    return 12
-  }
-
-  return 12;
-}
+const SIZE_MAP: Record<ClassRoomProgressBarProps["size"], number> = {
+  md: 16,
+  sm: 14,
+  xs: 12,
+};
 
 export default function ClassRoomProgressBar({
   value,
   size,
 }: ClassRoomProgressBarProps) {
-  const sizeValue = calculateSize(size)
+  const sizeValue = SIZE_MAP[size];
   return (
     <Box sx={{ position: "relative", mt: 2 }}>
       <LinearProgress

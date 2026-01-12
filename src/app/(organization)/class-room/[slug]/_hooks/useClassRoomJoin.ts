@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { resolveJoinUrl } from "@/utils/class-room-session";
+import { CLASS_SESSION_TYPE } from "../_constants";
 
 interface UseClassRoomJoinOptions {
   data: GetClassRoomBySlugResponse["data"];
@@ -31,17 +31,14 @@ export const useClassRoomJoin = ({
   const isSingleSession = useMemo(() => data?.room_type === "single", [data?.room_type]);
 
   const isAllOnline = useMemo(
-    () => data?.sessions.every((session) => session.session_type !== "offline") ?? true,
+    () =>
+      data?.sessions.every((session) => session.session_type !== CLASS_SESSION_TYPE.OFFLINE) ?? true,
     [data?.sessions],
   );
 
   const firstSessionId = useMemo(() => data?.sessions[0]?.id, [data?.sessions]);
 
   const classRoomSlug = useMemo(() => data?.slug || "", [data?.slug]);
-
-  const canJoin = useMemo(() => {
-    return dayjs().isBefore(dayjs(data?.end_at));
-  }, [data?.end_at]);
 
   const openQRDialog = useCallback((sessionId: string) => {
     setSelectedSessionForQR(sessionId);
@@ -126,7 +123,7 @@ export const useClassRoomJoin = ({
       setDialogOpen(false);
 
       const selectedSession = data?.sessions.find((session) => session.id === sessionId);
-      const isOnline = selectedSession?.session_type !== "offline";
+      const isOnline = selectedSession?.session_type !== CLASS_SESSION_TYPE.OFFLINE;
 
       joinSession({
         sessionId,
@@ -148,9 +145,6 @@ export const useClassRoomJoin = ({
 
     isSingleSession,
     isAllOnline,
-    isAdminView,
-    canJoin,
-
     handleClickJoin,
     handleSelectSession,
     handleCloseDialog,

@@ -2,13 +2,11 @@
 import { useMemo, useState } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 
-import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { ClassRoomDetailWithProgress } from "@/services/class-room/class-room-progress-mapping.service";
 import { CLASS_SESSION_TYPE } from "../_constants";
 import { useClassRoomJoin } from "../_hooks/useClassRoomJoin";
 
+import ClassRoomQrDialogs from "./ClassRoomQrDialogs";
 import ClassRoomSeriesCard from "./ClassRoomSeriesCard";
 import ClassRoomSeriesSessionDetail from "./ClassRoomSeriesSessionDetail";
 
@@ -21,8 +19,6 @@ interface ClassRoomSeriesProps {
 }
 
 const ClassRoomSeries = ({ data, isAdminView, isFromLearningPath }: ClassRoomSeriesProps) => {
-  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
-
   const [selectedSession, setSelectedSession] = useState<
     (ClassRoomSession & { index: number }) | null
   >(null);
@@ -100,39 +96,15 @@ const ClassRoomSeries = ({ data, isAdminView, isFromLearningPath }: ClassRoomSer
         onClickJoin={onClickJoinSession}
         isFromLearningPath={isFromLearningPath}
       />
-
-      {isAdminView ? (
-        data && (
-          <QRCodeViewDialog
-            open={qrViewOpen}
-            onClose={closeQRView}
-            classRoom={
-              {
-                id: data.id,
-                title: data.title,
-                class_sessions: data.sessions?.map((s) => ({
-                  id: s.id,
-                  title: s.title,
-                  start_at: s.start_at,
-                  end_at: s.end_at,
-                  is_online: s.session_type !== CLASS_SESSION_TYPE.OFFLINE,
-                })),
-              } as any
-            }
-          />
-        )
-      ) : (
-        <QRScannerDialog
-          open={qrDialogOpen}
-          onClose={() => {
-            closeQRDialog();
-          }}
-          employeeId={employeeId}
-          classRoomId={data?.id || ""}
-          sessionId={selectedSessionForQR || ""}
-          classTitle={data?.title || ""}
-        />
-      )}
+      <ClassRoomQrDialogs
+        classRoom={data}
+        isAdminView={isAdminView}
+        qrDialogOpen={qrDialogOpen}
+        qrViewOpen={qrViewOpen}
+        selectedSessionForQR={selectedSessionForQR}
+        onCloseQrDialog={closeQRDialog}
+        onCloseQrView={closeQRView}
+      />
     </>
   );
 };
