@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useMemo } from "react";
+import React, { memo, useEffect, useMemo, useState } from "react";
 import { Children } from "react";
 import { FormHelperText, FormLabel, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
@@ -60,10 +60,17 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
   children,
 }: RHFThumbnailUploadProps<TFieldValues>) => {
   const openResource = useLibraryStore((state) => state.openLibrary);
+  const [errorMessage, setErrorMessage] = useState<string>();
   const {
     field,
     fieldState: { error },
-  } = useController({ control, name });
+  } = useController({
+    control,
+    name,
+    rules: {
+      validate: (val) => /\.(png|jpe?g)$/i.test(val) || "Only PNG or JPG allowed",
+    },
+  });
 
   const handleRemoveThumbnail = () => {
     field.onChange("");
@@ -76,18 +83,24 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
     const path = resourceItem?.path;
 
     if (!resourceItem || !resourceItem.mime_type?.includes("image") || !path || !resourceItem?.extension) {
+      setErrorMessage(`Vui lòng chọn hình hình ảnh định dạng ${accepts.join(",")}.`);
       return;
     }
 
     if (accepts.length && !accepts.includes(`.${resourceItem.extension}` as ImageFileType)) {
+      setErrorMessage(`Định dạng không hợp lệ, chỉ chấp nhận ${accepts.join(",")}.`);
       return;
     }
-
+    setErrorMessage(undefined);
     field.onChange(path);
     onChange?.(path);
   };
   // const element = Children.only(children);
 
+  useEffect(() => {
+    const errorMessage = error?.message;
+    setErrorMessage(errorMessage);
+  }, [error]);
   return (
     <div>
       <FormLabel component="div" className="mb-2 inline-block">
@@ -104,9 +117,12 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
         <div
           className={cn(
             "thumbnail-wrapper",
-            "bg-gray-100 rounded-xl border border-dashed border-gray-300",
+            "rounded-xl border border-dashed",
             "flex items-center justify-center w-full max-w-[480px]",
-            error && "border-red-500",
+            {
+              "border-red-500 bg-red-50": !!errorMessage,
+              "border-gray-300 bg-gray-100": !errorMessage,
+            },
           )}
           style={{ aspectRatio }}
         >
@@ -159,7 +175,7 @@ const RHFThumbnailUpload = <TFieldValues extends FieldValues = FieldValues>({
         </div>
       )}
 
-      {error?.message && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
+      {errorMessage && <FormHelperText error={!!error || !!errorMessage}>{errorMessage}</FormHelperText>}
     </div>
   );
 };

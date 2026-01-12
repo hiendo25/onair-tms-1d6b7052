@@ -81,6 +81,10 @@ const FromToDateCourse: React.FC<FromToDateCourseProps> = ({ sessionIndex, contr
       <StyledDateTimePicker
         control={control}
         name={`classRoomSessions.${sessionIndex}.coursesPeriod.${courseIndex}.startAt`}
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         minDateTime={
           limitationCoursePeriodDate?.minDate
             ? dayjs(limitationCoursePeriodDate.minDate)
@@ -101,6 +105,10 @@ const FromToDateCourse: React.FC<FromToDateCourseProps> = ({ sessionIndex, contr
       <StyledDateTimePicker
         control={control}
         name={`classRoomSessions.${sessionIndex}.coursesPeriod.${courseIndex}.endAt`}
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         minDateTime={
           currentPeriod?.startAt
             ? dayjs(currentPeriod.startAt)
