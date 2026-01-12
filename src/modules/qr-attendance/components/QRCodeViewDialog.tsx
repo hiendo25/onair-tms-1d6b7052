@@ -92,11 +92,11 @@ const QRCodeViewDialog: React.FC<QRCodeViewDialogProps> = ({ open, onClose, clas
           location: session.location,
           qrCode: qrCode
             ? {
-                id: qrCode.id,
-                qr_code: qrCode.qr_code!,
-                checkin_start_time: qrCode.checkin_start_time,
-                checkin_end_time: qrCode.checkin_end_time,
-              }
+              id: qrCode.id,
+              qr_code: qrCode.qr_code!,
+              checkin_start_time: qrCode.checkin_start_time,
+              checkin_end_time: qrCode.checkin_end_time,
+            }
             : null,
         };
       })
@@ -257,9 +257,7 @@ const QRCodeViewDialog: React.FC<QRCodeViewDialogProps> = ({ open, onClose, clas
             <Tabs
               value={selectedTab}
               onChange={(_, newValue) => setSelectedTab(newValue)}
-              variant="scrollable"
               scrollButtons="auto"
-              centered
               sx={{ borderBottom: 1, borderColor: "divider", justifySelf: "center" }}
             >
               {sessionsWithQR.map((session, index) => (
@@ -295,7 +293,7 @@ interface QRCodeSessionCardProps {
 
 const QRCodeSessionCard: React.FC<QRCodeSessionCardProps> = ({ session, sessionIndex, classRoom, qrRef, onDownload }) => {
   const now = new Date();
-  const isExpired = session.qrCode?.checkin_end_time 
+  const isExpired = session.qrCode?.checkin_end_time
     ? new Date(session.qrCode.checkin_end_time) < now
     : false;
   const isActive = session.qrCode?.checkin_start_time && session.qrCode?.checkin_end_time
@@ -323,21 +321,21 @@ const QRCodeSessionCard: React.FC<QRCodeSessionCardProps> = ({ session, sessionI
           {/* Status Chip */}
           <Box display="flex" justifyContent="center" mt={2}>
             {isExpired ? (
-              <Chip 
-                label="Mã QR đã hết hiệu lực" 
-                color="error" 
+              <Chip
+                label="Mã QR đã hết hiệu lực"
+                color="error"
                 size="small"
               />
             ) : isActive ? (
-              <Chip 
-                label="Đang điểm danh" 
-                color="success" 
+              <Chip
+                label="Đang điểm danh"
+                color="success"
                 size="small"
               />
             ) : (
-              <Chip 
+              <Chip
                 label={`Buổi ${sessionIndex}`}
-                color="default" 
+                color="default"
                 size="small"
               />
             )}

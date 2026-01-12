@@ -50,3 +50,15 @@ export const ROOM_PROVIDERS = Constants.public.Enums.channel_provider.reduce(
 );
 
 export const queryClassName = "scroll__to__view";
+
+export const CLASSROOM_DETAIL_TEXT = {
+  EMPTY_INFO: "Chưa có thông tin",
+  SCHEDULE_FALLBACK: "Thời gian chưa được cập nhật",
+  WEEKLY_LABEL: "Lặp lại hàng tuần",
+} as const;
+
+export const CLASS_SESSION_TYPE = {
+  OFFLINE: "offline",
+  ONLINE: "online",
+  LIVE: "live",
+} as const;

@@ -1,19 +1,21 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Box, Divider, Stack, Tab, Tabs } from "@mui/material";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { Box, CircularProgress, Divider, Stack } from "@mui/material";
+import { useSearchParams } from "next/navigation";
 
-import { ROUTE_QUERY_KEYS, ROUTE_QUERY_VALUES } from "@/constants/route-query.constant";
+import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
 import { useGetClassRoomQuery } from "@/modules/class-room-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import EmptyData from "@/shared/ui/EmptyData";
 import PageContainer from "@/shared/ui/PageContainer";
 import { queryClassName } from "../_constants";
 
 import ClassRoomAgenda from "./ClassRoomAgenda";
+import ClassRoomDescriptions from "./ClassRoomDes";
 import ClassRoomDocuments from "./ClassRoomDocuments";
 import ClassRoomHeader from "./ClassRoomHeader";
 import ClassRoomJoinHorizontal from "./ClassRoomJoinHorizontal";
+import ClassRoomObjectives from "./ClassRoomObjectives";
 import ClassRoomSeries from "./ClassRoomSeries";
 import ClassRoomSubjects from "./ClassRoomSubjects";
 
@@ -21,17 +23,23 @@ const offsetValue = -0.1;
 const outOfMainJoinZoneClassName = "join-horizontal-zone";
 
 interface ClassRoomDetailSectionProps {
-  data: NonNullable<GetClassRoomBySlugResponse["data"]>;
+  slug: string;
 }
 
-export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionProps) {
+export default function ClassRoomDetailSection({ slug }: ClassRoomDetailSectionProps) {
   const { id: employeeId, type: employeeType } = useUserOrganization((state) => state.currentEmployee);
   const searchParams = useSearchParams();
-  const isFromLearningPath =
-    searchParams.get(ROUTE_QUERY_KEYS.SOURCE) === ROUTE_QUERY_VALUES.LEARNING_PATH;
+  const learningPathId = searchParams.get(ROUTE_QUERY_KEYS.LEARNING_PATH_ID);
+  const isFromLearningPath = Boolean(learningPathId);
   const [showJoinHorizontal, setShowJoinHorizontal] = useState<boolean>(false);
 
   const [tabValue, setTabValue] = useState(0);
+  const {
+    data: classRoomResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetClassRoomQuery(slug, { learningPathId });
 
   const handleChangeTab = (event: React.SyntheticEvent, value: number) => {
     const sections = document.getElementsByClassName(queryClassName);
@@ -77,21 +85,30 @@ export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionP
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (!data || !data) return;
+  const classRoomData = classRoomResponse?.data ?? null;
+  const errorMessage =
+    classRoomResponse?.error?.message ?? (error instanceof Error ? error.message : null);
 
-  //   const classRoomData = data;
+  if (isLoading) {
+    return (
+      <PageContainer title="Chi tiết lớp học" breadcrumbs={[{ title: "Lớp học", path: "/class-room/list" }]}>
+        <Box className="flex items-center justify-center py-10">
+          <CircularProgress />
+        </Box>
+      </PageContainer>
+    );
+  }
 
-  //   const canAccess =
-  //     classRoomData.employees.find((employee) => employee.employee?.id === user.id) ||
-  //     classRoomData.owner?.id === user.id ||
-  //     user.employeeType === "admin" ||
-  //     classRoomData.sessions.find((section) => section.courses_period?.some((coursePeriod) => coursePeriod.teacher?.id === user.id));
-
-  //   if (!canAccess) return window.history.length > 2 ? router.back() : router.push("/");
-  // }, [data]);
-
-  const classRoomData = data;
+  if (isError || !classRoomData) {
+    return (
+      <PageContainer title="Chi tiết lớp học" breadcrumbs={[{ title: "Lớp học", path: "/class-room/list" }]}>
+        <EmptyData
+          title="Không tìm thấy lớp học"
+          description={errorMessage ?? "Vui lòng thử lại sau."}
+        />
+      </PageContainer>
+    );
+  }
 
   const isAdminView = classRoomData.owner?.id === employeeId || employeeType === "admin" || employeeType === "teacher";
 
@@ -100,24 +117,32 @@ export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionP
       title="Chi tiết lớp học"
       breadcrumbs={[
         { title: "Lớp học", path: "/class-room/list" },
-        { title: classRoomData.title || "Chi tiết", path: `/class-room/${data.slug}` },
+        { title: classRoomData.title || "Chi tiết", path: `/class-room/${classRoomData.slug}` },
       ]}
     >
       <Stack position="relative">
-        <ClassRoomHeader data={classRoomData} isAdminView={isAdminView} />
-        <ClassRoomSeries data={classRoomData} isAdminView={isAdminView} />
-        <ClassRoomSubjects data={data} isFromLearningPath={isFromLearningPath} />
+        <ClassRoomHeader
+          data={classRoomData}
+          isAdminView={isAdminView}
+          isFromLearningPath={isFromLearningPath}
+        />
+        <ClassRoomSeries
+          data={classRoomData}
+          isAdminView={isAdminView}
+          isFromLearningPath={isFromLearningPath}
+        />
+        <ClassRoomSubjects data={classRoomData} isFromLearningPath={isFromLearningPath} />
         <Divider className={`${outOfMainJoinZoneClassName} invisible`} />
 
         {showJoinHorizontal && (
           <Box className="z-101 top-0 left-0 sticky w-full bg-white pt-3 pb-2">
-            <ClassRoomJoinHorizontal data={classRoomData} />
+            <ClassRoomJoinHorizontal data={classRoomData} isFromLearningPath={isFromLearningPath} />
           </Box>
         )}
 
-        <Box sx={{ width: "100%", mt: 3 }}>
+        <Box sx={{ width: "100%", mt: 3 }} >
           <Box sx={{ borderBottom: 1, borderColor: "divider", pb: 4 }}>
-            <Tabs
+            {/* <Tabs
               value={tabValue}
               onChange={handleChangeTab}
               sx={{
@@ -128,20 +153,23 @@ export default function ClassRoomDetailSection({ data }: ClassRoomDetailSectionP
               <Tab label="Nội dung lớp học" />
               <Tab label="Agenda" />
               <Tab label="Tài liệu" />
-            </Tabs>
+            </Tabs> */}
 
-            <Box sx={{ pt: 2 }} className={`${queryClassName}`}>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: classRoomData.description || "<p>Chưa có nội dung lớp học</p>",
-                }}
-              />
+            <Box mt={6} className={`${queryClassName}`}>
+              <ClassRoomDescriptions description={classRoomData.description!} />
             </Box>
-            <Box mt={4} className={`${queryClassName}`}>
-              <ClassRoomAgenda data={classRoomData} />
-            </Box>
-            <Box mt={4} className={`${queryClassName}`}>
+            {
+              !isFromLearningPath && (
+                <Box mt={4} className={`${queryClassName}`}>
+                  <ClassRoomAgenda data={classRoomData} />
+                </Box>
+              )
+            }
+            <Box mt={6} className={`${queryClassName}`}>
               <ClassRoomDocuments data={classRoomData} />
+            </Box>
+            <Box mt={6}>
+              <ClassRoomObjectives data={classRoomData} />
             </Box>
           </Box>
         </Box>

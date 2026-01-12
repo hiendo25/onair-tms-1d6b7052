@@ -7,7 +7,8 @@ import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import { Box, Card, Chip, IconButton, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 
-import { formatFileSize } from "@/utils";
+import { formatFileSize } from "@/utils/format-file";
+
 
 interface FileListItemProps {
   file: File;

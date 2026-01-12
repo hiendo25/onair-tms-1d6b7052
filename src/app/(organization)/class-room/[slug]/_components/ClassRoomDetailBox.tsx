@@ -1,143 +1,41 @@
 import React, { useMemo } from "react";
-import { Avatar, Box, Stack, Typography } from "@mui/material";
-import dayjs from "dayjs";
+import { Avatar, AvatarGroup, Stack, Tooltip, Typography } from "@mui/material";
 
-import { FORMAT_DATE_LABEL_WITHOUT_YEAR, FORMAT_TIME } from "@/lib";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { VideoCameraRecordFillIcon } from "@/shared/assets/icons";
 import MicrophoneIcon from "@/shared/assets/icons/MicrophoneIcon";
-import { ROOM_PROVIDERS } from "../_constants";
+import { CLASS_SESSION_TYPE, CLASSROOM_DETAIL_TEXT, ROOM_PROVIDERS } from "../_constants";
 
-export enum ClassroomMiniBoxType {
-  DATE = "DATE",
-  ROOM = "ROOM",
-  HOST = "HOST",
-  LOCATION = "LOCATION",
-}
+import ClassRoomDetailDateInfo from "./ClassRoomDetailDateInfo";
+import ClassRoomMiniBox from "./ClassRoomMiniBox";
 
-interface ClassroomMiniBoxProps {
+interface ClassRoomDetailBoxProps {
   data: GetClassRoomBySlugResponse["data"];
+  isFromLearningPath?: boolean;
 }
 
-const MiniBox = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Box
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      height={40}
-      width={40}
-      border="0.765px solid #DCE3E8"
-      borderRadius="8px"
-    >
-      {children}
-    </Box>
-  );
-};
-
-const MiniBoxDate = ({ startDate }: { startDate: Date | string }) => {
-  const month = dayjs(startDate).format("MM");
-  const day = dayjs(startDate).format("DD");
-  return (
-    <Stack width={40} height={40}>
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        height={18}
-        bgcolor="text.secondary"
-        borderRadius="8px 8px 0 0"
-      >
-        <Typography color="white" fontWeight={600} variant="caption" fontSize={10}>
-          Thg {startDate ? month : "--"}
-        </Typography>
-      </Box>
-      <Box border="0.765px solid #DCE3E8" borderRadius="0 0 8px 8px">
-        <Typography fontWeight={800} color="text.secondary" variant="body2" align="center">
-          {startDate ? day : "--"}
-        </Typography>
-      </Box>
-    </Stack>
-  );
-};
-
-const DateDetail = ({ startDate, endDate }: { startDate?: Date | string; endDate?: Date | string }) => {
-  const isSameDay = dayjs(startDate).isSame(endDate, "day");
-  const isSameYear = dayjs(startDate).isSame(endDate, "year");
-
-  const filledDate = startDate && endDate;
-
-  return (
-    <Stack spacing={2} alignItems="center" direction="row">
-      <MiniBoxDate startDate={startDate!} />
-      <Stack spacing={0.4}>
-        {filledDate ? (
-          <>
-            {isSameDay ? (
-              <Stack>
-                <Typography variant="subtitle2" textTransform="capitalize">
-                  {dayjs(startDate).format(FORMAT_DATE_LABEL_WITHOUT_YEAR)}
-                </Typography>
-
-                <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                  {dayjs(startDate).format(FORMAT_TIME)} - {dayjs(endDate).format(FORMAT_TIME)}
-                </Typography>
-              </Stack>
-            ) : (
-              <Stack direction="row" spacing={0.5}>
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2" textTransform="capitalize">
-                    {dayjs(startDate).format(`${FORMAT_DATE_LABEL_WITHOUT_YEAR}${!isSameYear ? ", YYYY" : ""}`)}
-                  </Typography>
-
-                  <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                    {dayjs(startDate).format(FORMAT_TIME)}
-                  </Typography>
-                </Stack>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  -
-                </Typography>
-                <Stack spacing={0.5}>
-                  <Typography variant="subtitle2" textTransform="capitalize" fontWeight={600}>
-                    {dayjs(endDate).format(`${FORMAT_DATE_LABEL_WITHOUT_YEAR}${!isSameYear ? ", YYYY" : ""}`)}
-                  </Typography>
-                  <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                    {dayjs(endDate).format("HH:mm")}
-                  </Typography>
-                </Stack>
-              </Stack>
-            )}
-          </>
-        ) : (
-          <Typography color="text.secondary" fontWeight={400} variant="subtitle2">
-            Chưa có thông tin
-          </Typography>
-        )}
-      </Stack>
-    </Stack>
-  );
-};
-
-export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) => {
+export const ClassRoomDetailBox: React.FC<ClassRoomDetailBoxProps> = ({ data, isFromLearningPath }) => {
   const isSingle = data?.room_type === "single";
+  const primarySession = data?.sessions?.[0];
 
   const location = useMemo(() => {
     if (!isSingle) return null;
 
-    const session = data?.sessions?.[0];
+    const session = primarySession;
 
     return {
-      isOnline: session?.session_type !== "offline",
+      isOnline: session?.session_type !== CLASS_SESSION_TYPE.OFFLINE,
       location: session?.location,
       channel_provider: session?.channel_provider,
       channel_info: session?.channel_info,
     };
-  }, [data?.sessions]);
+  }, [isSingle, primarySession]);
 
   const lectures = useMemo(() => {
     return (
-      data?.sessions
-        .flatMap((session) => session.courses_period.flatMap((coursePeriod) => coursePeriod.teacher))
+      (data?.sessions ?? [])
+        .flatMap((session) => session.courses_period ?? [])
+        .flatMap((coursePeriod) => (coursePeriod.teacher ? [coursePeriod.teacher] : []))
         .map((teacher) => ({
           id: teacher?.employee_code,
           fullName: teacher?.profile?.full_name || "Unknown",
@@ -148,14 +46,19 @@ export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) =>
 
   return (
     <Stack spacing={1.5}>
-      <DateDetail startDate={data?.start_at || undefined} endDate={data?.end_at || undefined} />
+      <ClassRoomDetailDateInfo
+        startDate={data?.start_at || primarySession?.start_at || undefined}
+        endDate={data?.end_at || primarySession?.end_at || undefined}
+        weeklySchedule={primarySession?.weekly_schedule}
+        isFromLearningPath={isFromLearningPath}
+      />
 
       {isSingle && (
         <Stack spacing={1.5}>
           <Stack spacing={2} alignItems="center" direction="row">
-            <MiniBox>
+            <ClassRoomMiniBox>
               <VideoCameraRecordFillIcon />
-            </MiniBox>
+            </ClassRoomMiniBox>
             <Stack spacing={0.4}>
               <Typography variant="subtitle2" fontWeight={600}>
                 {location?.isOnline ? "Nền tảng tổ chức lớp học" : "Địa chỉ"}
@@ -175,7 +78,7 @@ export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) =>
                 </Stack>
               ) : (
                 <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                  {location?.location || "Chưa có thông tin"}
+                  {location?.location || CLASSROOM_DETAIL_TEXT.EMPTY_INFO}
                 </Typography>
               )}
             </Stack>
@@ -183,50 +86,21 @@ export const ClassRoomDetailBox: React.FC<ClassroomMiniBoxProps> = ({ data }) =>
         </Stack>
       )}
 
-      <Stack spacing={1.5}>
-        <Stack spacing={2} alignItems="start" direction="row">
-          <MiniBox>
-            <MicrophoneIcon width={20} height={20} />
-          </MiniBox>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Stack alignSelf="start">
-              <Stack spacing={0.4}>
-                <Typography variant="subtitle2" fontWeight={600}>
-                  Giảng viên
-                </Typography>
-                <Stack flexDirection="row" alignItems="center">
-                  {lectures.length > 0 ? (
-                    lectures.map((lecture, index) => (
-                      <Stack
-                        key={lecture.id || "" + index}
-                        alignItems="center"
-                        direction="row"
-                        spacing={0.5}
-                        className="no-underline"
-                        ml={index !== 0 ? 0.5 : 0}
-                      >
-                        <Avatar
-                          alt={lecture.fullName}
-                          src={lecture.avatar || undefined}
-                          sx={{
-                            width: 16,
-                            height: 16,
-                          }}
-                        />
-                        <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                          {lecture.fullName}
-                        </Typography>
-                      </Stack>
-                    ))
-                  ) : (
-                    <Typography color="text.secondary" variant="body2" fontWeight={500}>
-                      Chưa có thông tin
-                    </Typography>
-                  )}
-                </Stack>
-              </Stack>
-            </Stack>
-          </Stack>
+      <Stack spacing={2} direction="row" alignItems="center">
+        <ClassRoomMiniBox>
+          <MicrophoneIcon width={20} height={20} />
+        </ClassRoomMiniBox>
+        <Stack direction="column" alignItems="start">
+          <Typography variant="subtitle2" fontWeight={600}>
+            Giảng viên
+          </Typography>
+          <AvatarGroup max={4}>
+            {lectures.map((lecture) => (
+              <Tooltip key={lecture.id} title={lecture.fullName}>
+                <Avatar alt={lecture.fullName} src={lecture.avatar!} className="w-4 h-4" />
+              </Tooltip>
+            ))}
+          </AvatarGroup>
         </Stack>
       </Stack>
     </Stack>

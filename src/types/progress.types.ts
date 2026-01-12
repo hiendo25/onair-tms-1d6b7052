@@ -25,6 +25,20 @@ export interface ProgressResponse {
 }
 
 /**
+ * Progress response for a class session with nested course progress
+ */
+export interface ClassSessionWithCoursesProgress extends ProgressResponse {
+  courses: ProgressResponse[];
+}
+
+/**
+ * Progress response for a class room with nested sessions and courses
+ */
+export interface ClassRoomProgressWithRelations extends ProgressResponse {
+  class_sessions: ClassSessionWithCoursesProgress[];
+}
+
+/**
  * Input parameters for building a progress response
  * Excludes progressPercentage as it's calculated
  */

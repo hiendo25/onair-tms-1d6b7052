@@ -93,20 +93,20 @@ const mappingPathWithRolePermissions = (
       const correctMenuItem: MenuItemType =
         menuItem.type === "group"
           ? {
-              key: menuItem.key,
-              title: menuItem.title,
-              type: "group",
-              children: childItems.filter((item) => item.type !== "group"),
-            }
+            key: menuItem.key,
+            title: menuItem.title,
+            type: "group",
+            children: childItems.filter((item) => item.type !== "group"),
+          }
           : {
-              icon: menuItem.icon,
-              key: menuItem.key,
-              subTitle: menuItem.subTitle,
-              title: menuItem.title,
-              path: menuItem.path,
-              type: "item",
-              children: childItems || [],
-            };
+            icon: menuItem.icon,
+            key: menuItem.key,
+            subTitle: menuItem.subTitle,
+            title: menuItem.title,
+            path: menuItem.path,
+            type: "item",
+            children: childItems || [],
+          };
 
       allMenuItems = [...allMenuItems, correctMenuItem];
     }
