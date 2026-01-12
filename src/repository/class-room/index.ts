@@ -258,7 +258,7 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
     const trimmed = q.trim();
     if (trimmed) {
       const escaped = sanitizeSearchTerm(trimmed);
-      builder = builder.or([`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`].join(","));
+      builder = builder.or([`title.ilike.%${escaped}%`].join(","));
     }
   }
 

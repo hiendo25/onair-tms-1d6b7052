@@ -1,13 +1,15 @@
 import { useCallback, useMemo, useState } from "react";
-import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
+import { resolveJoinUrl } from "@/utils/class-room-session";
+import { CLASS_SESSION_TYPE } from "../_constants";
 
 interface UseClassRoomJoinOptions {
   data: GetClassRoomBySlugResponse["data"];
   isAdminView?: boolean;
+  isFromLearningPath?: boolean;
 }
 
 interface JoinSessionOptions {
@@ -15,7 +17,11 @@ interface JoinSessionOptions {
   isOnline: boolean;
 }
 
-export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoinOptions) => {
+export const useClassRoomJoin = ({
+  data,
+  isAdminView = false,
+  isFromLearningPath = false,
+}: UseClassRoomJoinOptions) => {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
@@ -25,17 +31,14 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
   const isSingleSession = useMemo(() => data?.room_type === "single", [data?.room_type]);
 
   const isAllOnline = useMemo(
-    () => data?.sessions.every((session) => session.session_type !== "offline") ?? true,
+    () =>
+      data?.sessions.every((session) => session.session_type !== CLASS_SESSION_TYPE.OFFLINE) ?? true,
     [data?.sessions],
   );
 
   const firstSessionId = useMemo(() => data?.sessions[0]?.id, [data?.sessions]);
 
   const classRoomSlug = useMemo(() => data?.slug || "", [data?.slug]);
-
-  const canJoin = useMemo(() => {
-    return dayjs().isBefore(dayjs(data?.end_at));
-  }, [data?.end_at]);
 
   const openQRDialog = useCallback((sessionId: string) => {
     setSelectedSessionForQR(sessionId);
@@ -62,6 +65,21 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
     [router, classRoomSlug],
   );
 
+  const openJoinLink = useCallback(
+    (sessionId: string) => {
+      const selectedSession = data?.sessions.find((session) => session.id === sessionId);
+      const joinUrl = resolveJoinUrl(selectedSession);
+
+      if (!joinUrl) {
+        return false;
+      }
+
+      window.open(joinUrl, "_blank");
+      return true;
+    },
+    [data?.sessions],
+  );
+
   const joinSession = useCallback(
     ({ sessionId, isOnline }: JoinSessionOptions) => {
       if (!isOnline) {
@@ -74,9 +92,13 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
         return;
       }
 
+      if (isFromLearningPath && openJoinLink(sessionId)) {
+        return;
+      }
+
       navigateToClassRoomCountDown(sessionId);
     },
-    [openQRDialog, openQRView, navigateToClassRoomCountDown, isAdminView],
+    [openQRDialog, openQRView, navigateToClassRoomCountDown, isAdminView, isFromLearningPath, openJoinLink],
   );
 
   const handleClickJoin = useCallback(() => {
@@ -101,7 +123,7 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
       setDialogOpen(false);
 
       const selectedSession = data?.sessions.find((session) => session.id === sessionId);
-      const isOnline = selectedSession?.session_type !== "offline";
+      const isOnline = selectedSession?.session_type !== CLASS_SESSION_TYPE.OFFLINE;
 
       joinSession({
         sessionId,
@@ -123,9 +145,6 @@ export const useClassRoomJoin = ({ data, isAdminView = false }: UseClassRoomJoin
 
     isSingleSession,
     isAllOnline,
-    isAdminView,
-    canJoin,
-
     handleClickJoin,
     handleSelectSession,
     handleCloseDialog,

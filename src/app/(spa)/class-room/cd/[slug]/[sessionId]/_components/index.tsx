@@ -23,7 +23,7 @@ const ClassRoomCountDownSection = ({ sessionId }: ClassRoomCountDownSection) => 
   });
   const classSession = data ?? null;
   const classRoom = classSession?.class_room ?? null;
-  const { id: userEmployeeId, employeeType, organization } = useUserOrganization((state) => state.data);
+  const { id: userEmployeeId, type: employeeType, organization } = useUserOrganization((state) => state.currentEmployee);
 
   const assignees = classRoom?.assignees ?? [];
   const teacherAssignments = classSession?.teacherAssignments ?? [];
@@ -62,7 +62,7 @@ const ClassRoomCountDownSection = ({ sessionId }: ClassRoomCountDownSection) => 
 
   useEffect(() => {
     if (shouldRedirectToForbidden) {
-      router.replace("/403");
+      // router.replace("/403");
     }
   }, [shouldRedirectToForbidden, router]);
 

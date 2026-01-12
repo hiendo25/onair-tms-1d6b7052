@@ -11,6 +11,8 @@ import ClassOnline from "@/shared/assets/icons/phase-detail/ClassOnline";
 import { CLASSROOM_PROGRESS_STATUS, DEFAULT_COUNT } from "../../learning-path-user.constants";
 import { PhaseClassRoomCardItem } from "../../types";
 
+import { buildLearningPathClassRoomHref } from "./learning-path-user.utils";
+
 
 const ACTION_ICON_SIZE = 28;
 const ACTION_ICON_BG = "rgba(148, 163, 184, 0.12)";
@@ -79,13 +81,18 @@ const getPhaseClassRoomViewMeta = (item: PhaseClassRoomCardItem) => {
 
 export interface LearningPathPhaseClassRoomCardProps {
   item: PhaseClassRoomCardItem;
+  learningPathId?: string | null;
 }
 
-export default function LearningPathPhaseClassRoomCard({ item }: LearningPathPhaseClassRoomCardProps) {
+export default function LearningPathPhaseClassRoomCard({
+  item,
+  learningPathId,
+}: LearningPathPhaseClassRoomCardProps) {
   const ModeIcon = MODE_ICONS[item.sessionType];
-  const isLocked = item.isLocked ?? item.status === CLASSROOM_PROGRESS_STATUS.NOT_STARTED;
-  const isClickable = Boolean(item.href) && !isLocked;
-  const cardProps = isClickable ? { component: Link, href: item.href } : {};
+  const isLocked = item.isLocked ?? item.status === CLASSROOM_PROGRESS_STATUS.NOT_STARTED;;
+  const href = buildLearningPathClassRoomHref(item.slug, learningPathId);
+  const isClickable = Boolean(href) && !isLocked;
+  const cardProps = isClickable ? { component: Link, href } : {};
   const viewMeta = getPhaseClassRoomViewMeta(item);
 
   return (

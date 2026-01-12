@@ -1,3 +1,5 @@
+import { PATHS } from "@/constants/path.constant";
+import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
 import type { LearningPathProgressSummary } from "@/modules/learning-paths/types";
 import type { LearningPathWithDetails } from "@/repository/learning-paths";
 import { PROGRESS_EMPTY_PERCENT } from "../../learning-path-user.constants";
@@ -10,6 +12,23 @@ export interface CompletionBannerData {
   title: string;
   subtitle: string;
 }
+
+export const buildLearningPathClassRoomHref = (
+  slug: string | null | undefined,
+  learningPathId: string | null | undefined,
+): string | null => {
+  const normalizedSlug = slug?.trim();
+  const normalizedLearningPathId = learningPathId?.trim();
+  if (!normalizedSlug || !normalizedLearningPathId) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    [ROUTE_QUERY_KEYS.LEARNING_PATH_ID]: normalizedLearningPathId,
+  });
+
+  return `${PATHS.CLASSROOMS.DETAIL_CLASSROOM(normalizedSlug)}?${params.toString()}`;
+};
 
 export const buildCompletionBannerData = (
   learningPath: LearningPathWithDetails,

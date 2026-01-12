@@ -1,66 +1,82 @@
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
 
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
-import { FilePdfIcon } from "@/shared/assets/icons";
+import { resolveDocumentIcon } from "@/utils/format-file";
 
 interface ClassRoomDocumentsProps {
   data: NonNullable<GetClassRoomBySlugResponse["data"]>;
 }
+const CARD_RADIUS = 16;
+const ICON_SIZE = 48;
+const DOCUMENT_SHADOW = "0px 10px 24px rgba(15, 23, 42, 0.08)";
+
 
 const ClassRoomDocuments = ({ data }: ClassRoomDocumentsProps) => {
-
-  if(data.resources.length === 0) {
-    return (
-      <Stack alignItems={"center"}>
-        <Typography variant="h5" fontWeight="bold" mb={3} color="#002880">
-          Tài liệu
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Chưa có tài liệu cho lớp học này.
-        </Typography>
-      </Stack>
-    );
-  }
-
-  const documents = data.resources;
-
-
+  const documents = data.resources ?? [];
   return (
-    <Box sx={{ width: "100%" }}>
-      <Typography variant="h5" fontWeight="bold" mb={3}>
+    <Stack spacing={2}>
+      <Typography component="h1" variant="h3" className="leading-9 text-[24px] md:leading-11 md:text-[26px]">
         Tài liệu
       </Typography>
-      <Stack gap={2} direction="row" flexWrap="wrap">
-        {documents.map((doc, index) => (
-          <div key={doc.id + index}>
-            <Card sx={{ padding: "20px" }}>
-              <CardContent>
-                <a
-                  href={doc.resource.path || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="cursor-pointer w-full h-full"
-                >
-                  <FilePdfIcon style={{ height: 48, width: 48 }} />
-                  <Typography
-                    variant="body2"
-                    textAlign="center"
-                    mt={2}
-                    maxWidth={230}
-                    minWidth={230}
-                    className="line-clamp-1"
-                    textOverflow={"ellipsis"}
-                    fontWeight={600}
+
+      {documents.length === 0 ? (
+        <Typography variant="body1" color="text.secondary">
+          Chưa có mục tiêu cho lớp học này.
+        </Typography>
+      ) : (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "repeat(2, 1fr)",
+              md: "repeat(4, 1fr)",
+            },
+            gap: 2,
+          }}
+        >
+          {documents.map((doc, index) => {
+            const resource = doc.resource;
+            const Icon = resolveDocumentIcon(resource);
+
+            return (
+              <Card
+                key={doc.id + index}
+                variant="outlined"
+                sx={{
+                  borderRadius: `${CARD_RADIUS}px`,
+                  borderColor: "divider",
+                  boxShadow: DOCUMENT_SHADOW,
+                  height: "100%",
+                }}
+              >
+                <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                  <a
+                    href={resource?.path || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="cursor-pointer w-full h-full"
                   >
-                    {doc.resource.name || `Tài liệu ${index + 1}`}
-                  </Typography>
-                </a>
-              </CardContent>
-            </Card>
-          </div>
-        ))}
-      </Stack>
-    </Box>
+                    <Stack spacing={1.5}>
+                      <Icon style={{ width: ICON_SIZE, height: ICON_SIZE }} />
+                      <Typography
+                        variant="body2"
+                        fontWeight={600}
+                        className="line-clamp-2"
+                        textOverflow={"ellipsis"}
+                        sx={{ minHeight: 40 }}
+                      >
+                        {resource?.name || `Tài liệu ${index + 1}`}
+                      </Typography>
+                    </Stack>
+                  </a>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </Box>
+      )}
+    </Stack>
   );
 };
 

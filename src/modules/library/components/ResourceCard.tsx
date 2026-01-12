@@ -2,7 +2,7 @@
 
 import { Box, Card, CardContent, Typography } from "@mui/material";
 
-import { formatFileSize } from "@/utils";
+import { formatFileSize } from "@/utils/format-file";
 import { Resource } from "../types";
 
 import { ResourceActionMenu } from "./ResourceActionMenu";

@@ -86,7 +86,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           ),
         }}
       />
-      {/* Main content */}
       <MainLayoutContent className="main-layout__content">
         <Header
           menuOpen={isExpanded}
