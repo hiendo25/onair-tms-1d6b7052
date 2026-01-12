@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import FileUpload from "@/shared/ui/form/FileUpload";
+import RHFNumberField from "@/shared/ui/form/RHFNumberField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { Database } from "@/types/supabase.types";
 import {
@@ -285,12 +286,11 @@ const TabAssignmentContent: React.FC<TabAssignmentContentProps> = () => {
                         </Select>
                       </FormControl>
 
-                      <RHFTextField
+                      <RHFNumberField
                         control={control}
                         name={`questions.${index}.score`}
                         label="Điểm"
                         placeholder="0"
-                        type="number"
                         required
                         sx={{ width: "25%" }}
                         inputProps={{ min: 0.1, step: 0.1 }}

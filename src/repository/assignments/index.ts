@@ -20,6 +20,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
       name,
       description,
       created_by,
+			organization_id,
       createdBy:employees!assignments_created_by_fkey (
         id,
         employee_code,
@@ -61,9 +62,9 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
   if (createdBy) {
     query = query.eq("created_by", createdBy);
   }
-  // if (organizationId) {
-  //   query = query.eq("created_by", organizationId);
-  // }
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
 
   const from = page * limit;
   const to = from + limit - 1;
@@ -147,7 +148,12 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
   return data as unknown as AssignmentDto;
 };
 
-export async function createAssignment(data: { name: string; description: string; created_by: string }) {
+export async function createAssignment(data: {
+  name: string;
+  description: string;
+  created_by: string;
+  organization_id: string;
+}) {
   const supabase = await createSVClient();
 
   const { data: assignment, error } = await supabase.from("assignments").insert(data).select().single();

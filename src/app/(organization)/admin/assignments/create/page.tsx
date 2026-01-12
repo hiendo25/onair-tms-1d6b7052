@@ -17,12 +17,12 @@ export default function CreateAssignmentPage() {
   const router = useRouter();
   const formAssignmentRef = useRef<ManageAssignmentFormRef>(null);
   const { mutate: createAssignment, isPending: isLoading } = useCreateAssignmentMutation();
-  const currentOrg = useUserOrganization((state) => state.currentOrganization);
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
   const handleCreateAssignment: ManageAssignmentFormProps["onSubmit"] = (formData) => {
     const payload = {
       ...formData,
       assignedEmployees: formData.assignedEmployees.map((emp) => emp.id),
-      organizationId: currentOrg.orgId,
+      organizationId,
     };
 
     createAssignment(payload, {
