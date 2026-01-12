@@ -14,7 +14,7 @@ interface CreateAssignmentResult {
 
 async function createAssignmentWithRelations(
   payload: CreateAssignmentDto,
-  createdBy: string
+  createdBy: string,
 ): Promise<CreateAssignmentResult> {
   let assignmentId: string | null = null;
 
@@ -24,6 +24,7 @@ async function createAssignmentWithRelations(
       name: payload.name,
       description: payload.description,
       created_by: createdBy,
+      organization_id: payload.organizationId,
     });
 
     assignmentId = assignmentData.id;
@@ -267,4 +268,3 @@ export {
   getAssignmentQuestions,
   getMyAssignments,
 };
-

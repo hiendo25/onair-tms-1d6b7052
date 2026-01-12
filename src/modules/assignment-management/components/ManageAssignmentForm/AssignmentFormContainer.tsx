@@ -129,7 +129,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               >
                 <CloseIcon />
               </IconButton>
-              <Button size="large" onClick={handleClickSubmit} disabled={isLoading} loading={isLoading}>
+              <Button onClick={handleClickSubmit} disabled={isLoading} loading={isLoading}>
                 {action === "edit" ? "Cập nhật" : "Tạo bài kiểm tra"}
               </Button>
             </div>
