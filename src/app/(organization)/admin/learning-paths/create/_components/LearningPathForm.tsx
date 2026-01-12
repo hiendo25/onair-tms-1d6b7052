@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { PATHS } from "@/constants/path.constant";
+import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import {
   LearningPathFormSchema,
@@ -41,6 +42,17 @@ const TAB_KEYS = {
   "tab-settings": "tab-settings" as const,
 };
 
+const CANCEL_CONFIRM_MESSAGE = {
+  create: "Hủy bỏ sẽ mất toàn bộ dữ liệu đã nhập, bạn vẫn muốn hủy?",
+  edit: "Hủy bỏ sẽ không thể khôi phục lại những thay đổi đã cập nhât, bạn vẫn muốn hủy?",
+} as const;
+
+const CANCEL_CONFIRM_DIALOG = {
+  title: "Lưu ý",
+  cancelText: "Quay lại",
+  severity: "warning" as const,
+};
+
 export default function LearningPathForm({
   mode,
   initialData,
@@ -49,6 +61,7 @@ export default function LearningPathForm({
 }: LearningPathFormProps) {
   const router = useRouter();
   const notifications = useNotifications();
+  const dialogs = useDialogs();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const formSubmitStateRef = useRef<boolean>(false);
 
@@ -61,7 +74,7 @@ export default function LearningPathForm({
 
   const {
     trigger,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = methods;
 
   const handleTriggerFieldsByTab = async (tabKey: TabKeyType) => {
@@ -147,7 +160,12 @@ export default function LearningPathForm({
     handleFormSubmit();
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    if (isDirty) {
+      const confirm = await dialogs.confirm(CANCEL_CONFIRM_MESSAGE[mode], CANCEL_CONFIRM_DIALOG);
+      if (!confirm) return;
+    }
+
     router.push(PATHS.LEARNING_PATHS.ROOT);
   };
 
