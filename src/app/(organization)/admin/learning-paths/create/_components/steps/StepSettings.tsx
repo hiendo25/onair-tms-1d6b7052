@@ -4,9 +4,7 @@ import {
   Box,
   Card,
   CardContent,
-  FormControl,
   FormControlLabel,
-  FormLabel,
   OutlinedInput,
   Radio,
   RadioGroup,
@@ -23,10 +21,15 @@ interface StepSettingsProps {
   isLoading?: boolean;
 }
 
-export default function StepSettings({ onSubmit, isLoading = false }: StepSettingsProps) {
-  const { control, watch } = useLearningPathFormContext();
+const DEADLINE_TYPE = {
+  NONE: "none",
+  HOURS: "hours",
+} as const;
 
-  const deadlineType = watch("settings.deadlineType");
+export default function StepSettings({ onSubmit, isLoading = false }: StepSettingsProps) {
+  const { control, watch, setValue, clearErrors } = useLearningPathFormContext();
+
+  const deadlineType = watch("settings.deadlineType") ?? DEADLINE_TYPE.NONE;
 
   return (
     <Card sx={{ border: "1px solid", borderColor: "divider" }}>
@@ -125,16 +128,27 @@ export default function StepSettings({ onSubmit, isLoading = false }: StepSettin
             <Controller
               name="settings.deadlineType"
               control={control}
-              defaultValue="none"
+              defaultValue={DEADLINE_TYPE.NONE}
               render={({ field }) => (
-                <RadioGroup {...field} value={field.value || "none"}>
+                <RadioGroup
+                  {...field}
+                  value={field.value || DEADLINE_TYPE.NONE}
+                  onChange={(event) => {
+                    const nextValue = event.target.value as typeof DEADLINE_TYPE[keyof typeof DEADLINE_TYPE];
+                    field.onChange(nextValue);
+                    if (nextValue !== DEADLINE_TYPE.NONE) return;
+
+                    setValue("settings.deadlineHours", undefined, { shouldDirty: true, shouldValidate: true });
+                    clearErrors("settings.deadlineHours");
+                  }}
+                >
                   <FormControlLabel
-                    value="none"
+                    value={DEADLINE_TYPE.NONE}
                     control={<Radio />}
                     label="Không giới hạn thời gian"
                   />
                   <FormControlLabel
-                    value="hours"
+                    value={DEADLINE_TYPE.HOURS}
                     control={<Radio />}
                     label={
                       <Box
@@ -160,17 +174,19 @@ export default function StepSettings({ onSubmit, isLoading = false }: StepSettin
                             <OutlinedInput
                               {...hoursField}
                               value={hoursField.value ?? ""}
-                              onChange={(e) => hoursField.onChange(e.target.value === "" ? "" : Number(e.target.value))}
+                              onChange={(e) =>
+                                hoursField.onChange(e.target.value === "" ? undefined : Number(e.target.value))
+                              }
                               type="number"
                               size="small"
-                              disabled={deadlineType === "none"}
+                              disabled={deadlineType === DEADLINE_TYPE.NONE}
                               inputProps={{
                                 min: 1,
                               }}
                               onClick={(e) => e.stopPropagation()}
                               sx={{
                                 width: 80,
-                                bgcolor: deadlineType === "none" ? "grey.200" : "white",
+                                bgcolor: deadlineType === DEADLINE_TYPE.NONE ? "grey.200" : "white",
                                 "& input": {
                                   textAlign: "center",
                                 },
@@ -224,4 +240,3 @@ export default function StepSettings({ onSubmit, isLoading = false }: StepSettin
     </Card>
   );
 }
-
