@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
@@ -11,6 +11,7 @@ import { PATHS } from "@/constants/path.constant";
 import { fDateTime } from "@/lib";
 import { ClassSessionType } from "@/model/class-session.model";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import QRCodeScannerV2, { QRCodeScannerV2Ref } from "@/modules/qr-attendance/components/QRCodeScannerDialogV2";
 import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
 import { ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { Image } from "@/shared/ui/Image";
@@ -60,7 +61,7 @@ const ClassRoomCard = ({
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | undefined>();
   const employeeId = useUserOrganization((state) => state.currentEmployee.id);
-
+  const qrCodeRef = useRef<QRCodeScannerV2Ref>(null);
   const navigateToSession = useCallback(
     (sessions: ClassRoomSessionDetailDto, sessionType?: ClassSessionType) => {
       if (!sessions || !slug) {
@@ -100,7 +101,8 @@ const ClassRoomCard = ({
         if (roomType === ClassRoomTypeFilter.Single && sessions?.[0]?.id) {
           setSelectedSessionId(sessions[0].id);
         }
-        setQrScannerOpen(true);
+        // setQrScannerOpen(true);
+        qrCodeRef.current?.onOpen({ title: "lop hoc a", description: "123131313" });
       }
     },
     [actionDisabled, navigateToSession, roomType, sessionType, sessions],
@@ -195,7 +197,8 @@ const ClassRoomCard = ({
         actionLabel={sessionType === "offline" ? "Quét mã QR" : undefined}
         onSelectSession={handleSelectSession}
       />
-      <QRScannerDialog
+      <QRCodeScannerV2 ref={qrCodeRef} />
+      {/* <QRScannerDialog
         open={qrScannerOpen}
         onClose={() => {
           setQrScannerOpen(false);
@@ -205,7 +208,7 @@ const ClassRoomCard = ({
         classRoomId={classRoomId}
         sessionId={selectedSessionId}
         classTitle={title}
-      />
+      /> */}
     </>
   );
 };
