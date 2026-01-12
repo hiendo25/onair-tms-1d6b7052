@@ -1,11 +1,14 @@
 import {
   DefaultError,
   QueryClient,
+  QueryKey,
   useMutation,
   UseMutationOptions,
   UseMutationResult,
   useQueries,
   useQuery,
+  UseQueryOptions,
+  UseQueryResult,
 } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 
@@ -28,20 +31,35 @@ const getQueryClient = () => {
 // Custom mutation hook with interceptor
 function useTMutation<TData = unknown, TError = DefaultError, TVariables = void, TOnMutateResult = unknown>(
   options: UseMutationOptions<TData, TError, TVariables, TOnMutateResult>,
+  queryClient?: QueryClient,
 ): UseMutationResult<TData, TError, TVariables, TOnMutateResult> {
   const { enqueueSnackbar } = useSnackbar();
 
-  return useMutation({
-    ...options,
-    onError: (error, variables, onMutateResult, context) => {
-      // Interceptor: Show error notification
-      const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra!";
-      enqueueSnackbar(errorMessage, { variant: "error" });
-
-      // Call original onError if provided
-      options?.onError?.(error, variables, onMutateResult, context);
+  return useMutation(
+    {
+      ...options,
+      onError: (error, variables, onMutateResult, context) => {
+        // Interceptor: Show error notification
+        const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra!";
+        enqueueSnackbar(errorMessage, { variant: "error" });
+        // Call original onError if provided
+        options?.onError?.(error, variables, onMutateResult, context);
+      },
     },
-  });
+    queryClient,
+  );
 }
 
-export { getQueryClient, useQuery as useTQuery, useTMutation, useQueries as useTQueries };
+function useTQuery<
+  TQueryFnData = unknown,
+  TError = DefaultError,
+  TData = TQueryFnData,
+  TQueryKey extends QueryKey = QueryKey,
+>(
+  options: UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>,
+  queryClient?: QueryClient,
+): UseQueryResult<NoInfer<TData>, TError> {
+  return useQuery(options, queryClient);
+}
+
+export { getQueryClient, useTQuery, useTMutation, useQueries as useTQueries };

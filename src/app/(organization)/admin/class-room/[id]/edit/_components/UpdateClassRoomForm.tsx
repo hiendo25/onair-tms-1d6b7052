@@ -17,7 +17,7 @@ type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
 type StudentItem = Exclude<ManageClassRoomFormProps["students"], undefined>[number];
-
+import { useUpdateClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 interface UpdateClassRoomFormProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
@@ -27,7 +27,9 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
-  const { isLoading, onUpdate } = useCRUDClassRoom();
+  // const { isLoading, onUpdate } = useCRUDClassRoom();
+
+  const { mutate: onUpdate, isPending: isLoading } = useUpdateClassRoomMutation();
 
   const platform = useMemo(() => {
     return sessions.every((s) => s.session_type === "live")

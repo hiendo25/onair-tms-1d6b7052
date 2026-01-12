@@ -7,7 +7,6 @@ import { LibraryDialog } from "@/modules/library/components/LibraryDialog";
 import { LibraryProvider } from "@/modules/library/store/libraryProvider";
 import NotificationWrapper from "@/modules/notifications/container/NotificationWrapper";
 import OrganizationWrapper from "@/modules/organization/container/OrganizationWrapper";
-
 export default async function RootLayout({
   children,
 }: Readonly<{

@@ -4,9 +4,9 @@ import dayjs from "dayjs";
 import { Control, useWatch } from "react-hook-form";
 
 import RHFDateTimePicker, { RHFDateTimePickerProps } from "@/shared/ui/form/RHFDateTimePicker";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 
-const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) => (
+const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoomFormValues>) => (
   <RHFDateTimePicker
     {...props}
     sx={{
@@ -35,7 +35,7 @@ const StyledDateTimePicker = styled((props: RHFDateTimePickerProps<ClassRoom>) =
 interface FromToDateCourseProps {
   sessionIndex: number;
   courseIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 
 const FromToDateCourse: React.FC<FromToDateCourseProps> = ({ sessionIndex, control, courseIndex }) => {

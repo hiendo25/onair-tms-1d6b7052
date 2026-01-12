@@ -7,7 +7,7 @@ import { MarkerPin01Icon } from "@/shared/assets/icons";
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
-import { type ClassRoom } from "../classroom-form.schema";
+import { type ClassRoomFormValues } from "../classroom-form.schema";
 
 import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
@@ -21,7 +21,7 @@ import SessionFromToDateLearningPath from "./class-room-session-fields/SessionFr
 interface SessionFormItemProps {
   index: number;
   isLearningPath: boolean;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 
 const SessionFormItem: React.FC<SessionFormItemProps> = ({ index, isLearningPath, control }) => {

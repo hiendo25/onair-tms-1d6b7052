@@ -2128,9 +2128,11 @@ export type Database = {
           created_at: string
           data: Json | null
           employee_id: string
+          icon: string | null
           id: string
           is_read: boolean
           organization_id: string
+          thumbnail_url: string | null
           title: string
           type: Database["public"]["Enums"]["notification_type"]
           url: string | null
@@ -2140,9 +2142,11 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          icon?: string | null
           id?: string
           is_read?: boolean
           organization_id?: string
+          thumbnail_url?: string | null
           title: string
           type?: Database["public"]["Enums"]["notification_type"]
           url?: string | null
@@ -2152,9 +2156,11 @@ export type Database = {
           created_at?: string
           data?: Json | null
           employee_id?: string
+          icon?: string | null
           id?: string
           is_read?: boolean
           organization_id?: string
+          thumbnail_url?: string | null
           title?: string
           type?: Database["public"]["Enums"]["notification_type"]
           url?: string | null
@@ -3296,6 +3302,13 @@ export type Database = {
         Returns: {
           employee_id: string
           total_count: number
+        }[]
+      }
+      get_notification_count_by_type: {
+        Args: { employee_id: string; unread_only?: boolean }
+        Returns: {
+          count: number
+          type: Database["public"]["Enums"]["notification_type"]
         }[]
       }
       get_organization_leaderboard: {

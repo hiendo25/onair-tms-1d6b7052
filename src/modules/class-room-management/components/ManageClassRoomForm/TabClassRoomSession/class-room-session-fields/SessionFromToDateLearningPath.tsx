@@ -7,7 +7,7 @@ import { Control, FieldErrors, useController } from "react-hook-form";
 
 import { DAY_OFF_WEEK_OPTIONS } from "@/constants/date-time";
 import DayOfWeekSelect, { DayOfWeekSelectProps } from "../../../DayOfWeekSelect";
-import { type ClassRoom } from "../../classroom-form.schema";
+import { type ClassRoomFormValues } from "../../classroom-form.schema";
 
 type SessionWeeklyError = FieldErrors<{
   from: string;
@@ -15,7 +15,7 @@ type SessionWeeklyError = FieldErrors<{
 }>;
 interface SessionFromToDateLearningPathProps {
   sessionIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const SessionFromToDateLearningPath: React.FC<SessionFromToDateLearningPathProps> = ({ control, sessionIndex }) => {
   const {

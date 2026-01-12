@@ -1,5 +1,4 @@
 "use client";
-import { QueryClient } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 
@@ -11,6 +10,7 @@ import { UpsertCourseFormData } from "../components/ManageCourseForm/upsert-cour
 
 const useUpsertCourse = () => {
   const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+
   const courseService = new UpsertCourseService(currentEmployee.id, currentEmployee.organization.id);
 
   const queryClient = useQueryClient();

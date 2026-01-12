@@ -3,10 +3,10 @@ import { Typography } from "@mui/material";
 import { Control, Controller, useController, useWatch } from "react-hook-form";
 
 import { slugify } from "@/utils/slugify";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 
 interface ClassRoomSlugFieldProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   disableUpdateSlug?: boolean;
   onChange: (...event: any[]) => void;
   value: string;

@@ -10,7 +10,7 @@ import {
   UpsertLessonPayload,
 } from "@/repository/courses-lessons/type";
 import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
-
+import { NotificationService } from "../notifications/notification-classroom.service";
 export class UpsertCourseService {
   private userId: string;
 
@@ -63,7 +63,7 @@ export class UpsertCourseService {
      */
 
     await _this.bulkCreateCourseSections(courseData.id, payload.formData.sections);
-    console.log("Create course success", courseData);
+
     return courseData;
   }
 

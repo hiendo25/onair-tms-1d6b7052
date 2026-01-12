@@ -3,7 +3,7 @@ import { forwardRef, useImperativeHandle, useRef } from "react";
 import { useWatch } from "react-hook-form";
 
 import { ClassType } from "@/model/enum-type.model";
-import { ClassRoom } from "../classroom-form.schema";
+import { ClassRoomFormValues } from "../classroom-form.schema";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
 import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
@@ -12,7 +12,7 @@ import SingleSession, { SingleSessionRef } from "./SingleSession";
 export const initClassSessionFormData = (init?: {
   sessionType?: "online" | "offline" | "live";
   classType: ClassType;
-}): ClassRoom["classRoomSessions"][number] => {
+}): ClassRoomFormValues["classRoomSessions"][number] => {
   return {
     title: "",
     description: "",

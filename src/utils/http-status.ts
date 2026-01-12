@@ -10,7 +10,7 @@ export const unauthorized = () => NextResponse.json({ success: false, message: "
 
 export const forbidden = () => NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
 
-export const serverError = (message = "Internal server error") =>
+export const internalServerError = (message = "Internal server error") =>
   NextResponse.json({ success: false, message }, { status: 500 });
 
 export const http = {
@@ -19,4 +19,5 @@ export const http = {
   badRequest,
   unauthorized,
   forbidden,
+  internalServerError,
 };

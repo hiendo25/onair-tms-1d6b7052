@@ -7,13 +7,13 @@ import DialogAssignmentSelector, {
   DialogAssignmentSelectorRef,
 } from "@/modules/assignment-management/container/DialogAssignmentSelector";
 import { CloseIcon } from "@/shared/assets/icons";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 
 export interface AssessmentFieldProps {
   sessionIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
-type AssignmentSelectItem = ClassRoom["classRoomSessions"][number]["assignments"][number];
+type AssignmentSelectItem = ClassRoomFormValues["classRoomSessions"][number]["assignments"][number];
 const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control }) => {
   const assignmentDialogRef = useRef<DialogAssignmentSelectorRef>(null);
 

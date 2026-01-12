@@ -11,7 +11,7 @@ export * as learningScreenService from "./learning-screen/learning-screen.servic
 export * as branchService from "./branches/branch.service";
 export * as departmentService from "./departments/department.service";
 export * as planService from "./plans/plan.service";
-export * as notificationService from "./notifications/notification.service";
+export * as notificationService from "./notifications/notification-classroom.service";
 export * as surveyService from "./surveys";
 export * as lessonProgressService from "./lesson-progress/lesson-progress.service";
 export * as gamificationRulesService from "./gamifications/rules";
