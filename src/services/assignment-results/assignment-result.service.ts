@@ -422,7 +422,7 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
   const gradeMap = new Map(questionGrades.map((g) => [g.questionId, { score: g.score, feedback: g.feedback }]));
 
   const updatedQuestions = submissionData.questions.map((q) => {
-    if (q.type === "radio" || q.type === "checkbox" || q.type === "true_false") {
+    if (q.type === "radio" || q.type === "checkbox" || q.type === "true_false" || q.type === "matching" || q.type === "order" || q.type === "drag_and_drop" || q.type === "fill") {
       return q;
     }
 
