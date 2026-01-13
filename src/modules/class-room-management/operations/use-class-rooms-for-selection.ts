@@ -2,11 +2,14 @@
 
 import { useMemo } from "react";
 
+import { ClassType } from "@/model/enum-type.model";
 import { ClassSessionModeFilter } from "@/repository/class-room";
 import { ClassRoomSession } from "@/shared/ui/ClassRoomPicker/types";
 import { Database } from "@/types/supabase.types";
 
 import { useGetClassRoomsPriorityQuery } from "./query";
+
+const DEFAULT_CLASS_TYPE: ClassType = "learning_path";
 
 export interface ClassRoomForSelection {
   id: string;
@@ -25,6 +28,7 @@ export interface UseClassRoomsForSelectionParams {
   employeeId?: string;
   search?: string;
   sessionMode?: ClassSessionModeFilter;
+  classType?: ClassType;
 }
 
 export function useClassRoomsForSelection({
@@ -32,6 +36,7 @@ export function useClassRoomsForSelection({
                                             employeeId,
                                             search,
                                             sessionMode,
+                                            classType = DEFAULT_CLASS_TYPE,
                                           }: UseClassRoomsForSelectionParams) {
   const { data, isLoading, error } = useGetClassRoomsPriorityQuery({
     organizationId,
@@ -40,6 +45,7 @@ export function useClassRoomsForSelection({
     limit: 100, // Get more results for selection
     page: 1,
     sessionMode,
+    classType,
   });
 
   const classRooms: ClassRoomForSelection[] = useMemo(() => {
@@ -144,4 +150,3 @@ export function useClassRoomsForSelection({
     total: data?.total || 0,
   };
 }
-

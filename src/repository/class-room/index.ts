@@ -2,7 +2,7 @@ import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
-import { DayOfWeek } from "@/model/enum-type.model";
+import { ClassType, DayOfWeek } from "@/model/enum-type.model";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 import {
   GetClassRoomsQueryInput,
@@ -227,7 +227,7 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
   query: T,
   filters: GetClassRoomsQueryInput = {},
 ): T => {
-  const { status, runtimeStatus, from, to, q, type, sessionMode } = filters;
+  const { status, runtimeStatus, from, to, q, type, sessionMode, classType } = filters;
   let builder = query;
 
   if (status && status !== ClassRoomStatusFilter.All) {
@@ -236,6 +236,10 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
 
   if (type && type !== ClassRoomTypeFilter.All) {
     builder = builder.eq("room_type", type);
+  }
+
+  if (classType) {
+    builder = builder.eq("class_type", classType);
   }
 
   if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatusFilter.All) {
@@ -322,6 +326,7 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     orderField,
     type,
     sessionMode,
+    classType,
   } = input;
 
   const trimmedEmployeeId = employeeId?.trim();
@@ -381,6 +386,7 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     status,
     type,
     sessionMode,
+    classType,
   });
 
   if (orderField && orderBy) {
@@ -613,6 +619,7 @@ const getClassRoomsByEmployeeId = async (
     to,
     type,
     sessionMode,
+    classType,
     orderField,
     orderBy,
   } = input;
@@ -654,6 +661,7 @@ const getClassRoomsByEmployeeId = async (
     to,
     type,
     sessionMode,
+    classType,
   });
 
   if (orderField && orderBy) {

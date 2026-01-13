@@ -27,6 +27,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
@@ -195,7 +199,7 @@ export default function MyAssignmentsList() {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>Tên bài kiểm tra</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Mô tả</TableCell>
+                      <TableCell sx={{ fontWeight: 600, width: 500 }}>Mô tả</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Ngày nộp</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Trạng thái</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Điểm</TableCell>
@@ -224,18 +228,13 @@ export default function MyAssignmentsList() {
                             </Typography>
                           </TableCell>
                           <TableCell>
-                            <Typography
-                              variant="body2"
-                              color="text.secondary"
-                              sx={{
-                                maxWidth: 300,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
+                            <ReactMarkdown
+                              remarkPlugins={[remarkGfm]}
+                              rehypePlugins={[rehypeRaw, rehypeSanitize]}
+                              className="line-clamp-1"
                             >
                               {assignment.assignment_description || "-"}
-                            </Typography>
+                            </ReactMarkdown>
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">{formatDate(assignment.submitted_at)}</Typography>

@@ -2,6 +2,7 @@ import { HEADER_ORGANIZATION_ID } from "@/constants/api-headers.constant";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
 import { useTQuery } from "@/lib/queryClient";
+import { ClassType } from "@/model/enum-type.model";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { classRoomRepository } from "@/repository";
 import {
@@ -25,6 +26,7 @@ export interface GetClassRoomsQueryInput {
   to?: string | null;
   type?: ClassRoomTypeFilter;
   sessionMode?: ClassSessionModeFilter;
+  classType?: ClassType;
   runtimeStatus?: ClassRoomRuntimeStatusFilter;
   status?: ClassRoomStatusFilter;
   page?: number;

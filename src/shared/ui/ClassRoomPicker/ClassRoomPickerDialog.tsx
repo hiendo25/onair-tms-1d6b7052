@@ -85,6 +85,7 @@ export default function ClassRoomPickerDialog({
     employeeId,
     search: searchTerm,
     // sessionMode: ClassSessionModeFilter.Online,
+    classType: "learning_path",
   });
 
   // Update selected class-rooms when initialSelected changes
