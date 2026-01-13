@@ -9,7 +9,7 @@ import {
   GetClassRoomStatusCountsInput,
   GetClassRoomStudentsQueryInput,
 } from "@/modules/class-room-management/operations/query";
-import { supabase } from "@/services";
+import { createClient, supabase } from "@/services";
 import {
   ClassRoomPriorityDto,
   ClassRoomSessionDetailDto,
@@ -39,6 +39,7 @@ import {
   CreatePivotClassRoomAndHashTagPayload,
   CreatePivotClassRoomWithResourcePayload,
   DeletePivotClassRoomAndEmployeePayload,
+  EmployeeClassRoomAttendancePayload,
   UpdateClassRoomPayload,
   UpSertClassRoomPayload,
 } from "./type";
@@ -743,6 +744,59 @@ const deletePivotClassRoomsWithResources = async (ids: number[]) => {
   }
 };
 
+const isEmployeeAssignedToClassRoom = async (employeeId: string, classRoomId: string) => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("class_room_employee")
+    .select()
+    .eq("employee_id", employeeId)
+    .eq("class_room_id", classRoomId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return Boolean(data);
+};
+
+const getEmployeeAttendance = async (qrCodeId: string, employeeId: string) => {
+  const supabase = createClient();
+  return await supabase
+    .from("class_attendances")
+    .select("*")
+    .eq("qr_code_id", qrCodeId)
+    .eq("employee_id", employeeId)
+    .maybeSingle();
+};
+
+const createEmployeeAttendance = async (payload: EmployeeClassRoomAttendancePayload) => {
+  const supabase = createClient();
+  return await supabase
+    .from("class_attendances")
+    .insert(payload)
+    .select(
+      `
+				id, 
+				qr_code_id, 
+				class_room_id, 
+				employee_id, 
+				class_session_id, 
+				attendance_status, 
+				attended_at, 
+				scan_location_lat,
+				scan_location_lng,
+				distance_from_class,
+				attendance_method,
+				attendance_mode,
+				employees(
+					id,
+					employee_code,
+					profiles(full_name)
+				)
+			`,
+    )
+    .maybeSingle();
+};
+
 export {
   createClassRoom,
   updateClassRoom,
@@ -767,4 +821,7 @@ export {
   deleteClassRoomsByEmployeeId,
   deletePivotClassRoomsWithResources,
   markAttendance,
+  isEmployeeAssignedToClassRoom,
+  getEmployeeAttendance,
+  createEmployeeAttendance,
 };
