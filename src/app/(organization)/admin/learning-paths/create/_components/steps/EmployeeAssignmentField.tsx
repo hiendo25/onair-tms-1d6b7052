@@ -168,6 +168,7 @@ export default function EmployeeAssignmentField({ control }: EmployeeAssignmentF
                     label={`${employee.employeeCode} - ${employee.fullName}`}
                     onDelete={() => handleRemoveEmployee(employee.id)}
                     size="small"
+                    color="primary"
                     sx={{ mb: 1 }}
                   />
                 ))}
