@@ -135,7 +135,8 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
             avatar
           )
         )
-      )
+      ),
+      submissions:assignment_results(count)
     `,
     )
     .eq("id", id)
