@@ -88,7 +88,7 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
         email: ae.employees?.profiles?.email || "",
         employeeCode: ae.employees?.employee_code || "",
         avatar: ae.employees?.profiles?.avatar || null,
-        empoyeeType: "student" as const,
+        employeeType: "student" as const,
       })),
     }
     : undefined;
