@@ -31,6 +31,8 @@ const HTML5QR_CONFIG: Html5QRScannerConfig = {
 export type Html5QRScannerRef = {
   stop: () => Promise<void>;
   start: (callbacks?: { onSuccess?: SuccessCallback; onError?: ErrorCallback }) => Promise<void>;
+  reset: () => void;
+  getState: () => Html5QrcodeScannerState | undefined;
 };
 export type Html5QRScannerProps = {
   verbose?: boolean;
@@ -43,7 +45,6 @@ const Html5QRScanner = forwardRef<Html5QRScannerRef, Html5QRScannerProps>(
   ({ verbose = false, config = HTML5QR_CONFIG, onScanSuccess = () => {}, onScanError = () => {} }, ref) => {
     const html5QrCodeRef = useRef<Html5QRCode>(null);
     const [error, setError] = useState<Error>();
-    const [devices, setDevices] = useState<CameraDevice[]>();
     const regionId = useId();
     const [shadeBoxSize, setShadeBoxSize] = useState<{
       width: number;
@@ -64,24 +65,20 @@ const Html5QRScanner = forwardRef<Html5QRScannerRef, Html5QRScannerProps>(
     }, []);
 
     const handleStopScanning = async () => {
-      const html5QRCode = html5QrCodeRef.current;
-      if (!html5QRCode) return;
-      await html5QRCode.stop();
+      await html5QrCodeRef.current?.stop();
+      html5QrCodeRef.current?.clear();
     };
 
     const handleStartScanning: Html5QRScannerRef["start"] = async (options) => {
       try {
+        const devices = await Html5QRCode.getCameras();
         const deviceId = devices?.[0]?.id;
-
-        const html5QRCode = html5QrCodeRef.current;
 
         if (!deviceId) throw new Error("No camera found");
 
-        if (!html5QRCode) throw new Error("No html5QRCode Api");
-
         const callbackSuccess = options?.onSuccess || onScanSuccess;
         const callbackError = options?.onError || onScanError;
-        await html5QRCode.start(
+        await html5QrCodeRef.current?.start(
           deviceId,
           {
             ...config,
@@ -97,6 +94,13 @@ const Html5QRScanner = forwardRef<Html5QRScannerRef, Html5QRScannerProps>(
       }
     };
 
+    const handleReset = () => {
+      html5QrCodeRef.current?.clear();
+    };
+
+    const getState = () => {
+      return html5QrCodeRef.current?.getState();
+    };
     useEffect(() => {
       if (!html5QrCodeRef.current) {
         html5QrCodeRef.current = new Html5QRCode(CAMERA_REGION_ID, {
@@ -107,23 +111,16 @@ const Html5QRScanner = forwardRef<Html5QRScannerRef, Html5QRScannerProps>(
       return () => {
         if (html5QrCodeRef.current && html5QrCodeRef?.current?.getState() === Html5QrcodeScannerState.SCANNING) {
           html5QrCodeRef.current?.stop();
+          html5QrCodeRef.current = null;
         }
       };
     }, [CAMERA_REGION_ID, verbose]);
 
-    useEffect(() => {
-      Html5QRCode.getCameras()
-        .then((devices) => {
-          setDevices(devices);
-        })
-        .catch((err: Error) => {
-          setError(err);
-        });
-    }, []);
-
     useImperativeHandle(ref, () => ({
       stop: handleStopScanning,
       start: handleStartScanning,
+      reset: handleReset,
+      getState,
     }));
 
     return (

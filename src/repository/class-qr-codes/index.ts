@@ -7,9 +7,9 @@ export const getClassQrCodeByCode = async (code: string) => {
 export type GetQrCodeByCodeResponse = Awaited<ReturnType<typeof getClassQrCodeByCode>>;
 
 type getClassQRCodeDetailQueryParams = {
-  classRoomId?: string;
+  classRoomId: string;
   qrCode: string;
-  classSessionId?: string;
+  classSessionId: string;
 };
 
 export const getClassQRCodeDetail = async (queryParams: getClassQRCodeDetailQueryParams) => {
@@ -28,5 +28,5 @@ export const getClassQRCodeDetail = async (queryParams: getClassQRCodeDetailQuer
     query = query.eq("class_session_id", classSessionId);
   }
 
-  return await query.single();
+  return await query.maybeSingle();
 };

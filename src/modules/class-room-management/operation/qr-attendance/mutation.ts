@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useTMutation } from "@/lib/queryClient";
+import { CreateEmployeeAttendanceResponse } from "@/repository/class-room";
 import {
   activateQRCode,
   type AttendanceCheckInPayload,
@@ -13,7 +14,11 @@ import {
   type UpdateQRCodePayload,
 } from "@/repository/qr-attendance";
 import { client } from "@/services/api";
-import { StudentClassRoomCheckInDto } from "@/types/dto/classRooms/student-check-in-classroom.dto";
+import { HttpError } from "@/services/api/HttpError";
+import {
+  StudentClassRoomCheckedInResponse,
+  StudentClassRoomCheckInDto,
+} from "@/types/dto/classRooms/student-check-in-classroom.dto";
 
 import { QR_ATTENDANCE_KEYS } from "./key";
 
@@ -175,8 +180,8 @@ export const useCheckInWithQRMutation = () => {
 export const useStudentClassRoomCheckInWithQRMutation = () => {
   const queryClient = useQueryClient();
 
-  return useTMutation({
-    mutationFn: (input: StudentClassRoomCheckInDto) => client.post("/check-in", input),
+  return useTMutation<StudentClassRoomCheckedInResponse, HttpError, StudentClassRoomCheckInDto>({
+    mutationFn: (input) => client.post("/check-in", input),
     onSuccess: (result) => {
       //  queryClient.invalidateQueries({
       //       queryKey: QR_ATTENDANCE_KEYS.attendances.statsByQRCode(result?.attendance.qr_code_id),

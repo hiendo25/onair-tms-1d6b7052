@@ -1,11 +1,20 @@
 "use client";
-import React, { Activity, forwardRef, memo, useImperativeHandle, useRef, useState } from "react";
-import { Box, Dialog, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import React, { Activity, forwardRef, memo, useImperativeHandle, useMemo, useRef, useState } from "react";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogProps,
+  DialogTitle,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { flushSync } from "react-dom";
 
-import { useCheckInWithQRMutation } from "@/modules/class-room-management/operation";
 import { useStudentClassRoomCheckInWithQRMutation } from "@/modules/class-room-management/operation/qr-attendance";
 import { useUserOrganization } from "@/modules/organization";
-import { AttendanceCheckInPayload } from "@/repository/qr-attendance";
 import { CloseIcon } from "@/shared/assets/icons";
 import Html5QRScanner, { Html5QRScannerProps, Html5QRScannerRef } from "../../components/Html5QRScanner";
 
@@ -17,6 +26,13 @@ type ClassRoomContentDialog = {
   classRoomId: string;
   classSessionId: string;
   content?: React.ReactNode;
+};
+
+type StudentCheckedInResult = {
+  fullName?: string;
+  codeClass?: string;
+  checkedInAt?: string;
+  employeeCode?: string;
 };
 
 export interface QRCodeScannerClassRoomDialogRef {
@@ -31,71 +47,95 @@ export interface QRCodeScannerClassRoomDialogProps {
 }
 const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef, QRCodeScannerClassRoomDialogProps>(
   (props, ref) => {
-    const { mutate: checkInQR, isPending } = useCheckInWithQRMutation();
-    const { mutate: checkInQRV2, isPending: isLoading } = useStudentClassRoomCheckInWithQRMutation();
-
     const employeeId = useUserOrganization((state) => state.currentOrganization.employeeId);
+
     const [classRoomData, setClassRoomData] = useState<ClassRoomContentDialog>();
-    const [result, setResult] = useState();
-    const scanningRef = useRef(false);
-
+    const [checkedInResult, setCheckedInResult] = useState<StudentCheckedInResult>();
+    const [isScanned, setIsScanned] = useState(false);
     const [open, setOpen] = useState(false);
-
+    const [errorMessage, setErrormessage] = useState<string>();
+    const scannerStatusRef = useRef<"starting" | "scanning" | "idle">("idle");
     const scannerRef = useRef<Html5QRScannerRef>(null);
+
+    const { mutate: doCheckIn, isPending: isLoadingScan } = useStudentClassRoomCheckInWithQRMutation();
 
     const handleOpenDialog = () => setOpen(true);
 
     const handleCloseDialog = () => setOpen(false);
 
-    // const getGeoLocation = () => {
-    //   const geoPositionOptions = {
-    //     enableHighAccuracy: true,
-    //     timeout: 5000,
-    //     maximumAge: 0,
-    //   };
-    //   navigator.geolocation.getCurrentPosition(
-    //     (data) => {
-    //       console.log(data);
-    //     },
-    //     (err) => {
-    //       console.log(err);
-    //     },
-    //     geoPositionOptions,
-    //   );
-    // };
+    const handleStartScanQRCode = () => {
+      scannerRef.current?.start({
+        onSuccess: (qrCode, result) => {
+          if (!classRoomData) return;
 
-    const handleScanningSuccessClassroom: Html5QRScannerProps["onScanSuccess"] = (qrCode, result) => {
-      if (scanningRef.current) return;
+          if (scannerStatusRef.current === "scanning") return;
 
-      scanningRef.current = true;
+          scannerStatusRef.current = "scanning";
 
-      if (!classRoomData) return;
-
-      checkInQRV2(
-        {
-          classRoomId: classRoomData.classRoomId,
-          classSessionId: classRoomData.classSessionId,
-          employeeId: employeeId,
-          qrCode,
+          doCheckIn(
+            {
+              classRoomId: classRoomData.classRoomId,
+              classSessionId: classRoomData.classSessionId,
+              employeeId: employeeId,
+              qrCode,
+            },
+            {
+              onSuccess({ data }, variables, onMutateResult, context) {
+                if (data) {
+                  setCheckedInResult({
+                    checkedInAt: data.checkedInAt,
+                    codeClass: data.classSessionId,
+                    fullName: data.fullName,
+                    employeeCode: data.employeeCode,
+                  });
+                }
+              },
+              onError(error, variables, onMutateResult, context) {
+                console.log({ error });
+                if (error.code === "STUDENT_ALREADY_CHECKED_IN") {
+                  setErrormessage("Học viên đã điểm danh, vui lòng trở lại hoặc điểm danh lớp học khác.");
+                } else {
+                  setErrormessage(error?.message);
+                }
+              },
+              onSettled() {
+                scannerRef.current?.stop?.();
+                setIsScanned(true);
+              },
+            },
+          );
         },
-        {
-          onSuccess(data, variables, onMutateResult, context) {
-            console.log(data);
-          },
-          onError(error, variables, onMutateResult, context) {
-            console.log(error);
-          },
-          onSettled: () => {
-            scannerRef.current?.stop();
-            scanningRef.current = false;
-          },
-        },
+      });
+    };
+
+    const handleModalTransitionEnd: DialogProps["onTransitionEnd"] = async () => {
+      if (scannerStatusRef.current !== "idle") return;
+      scannerStatusRef.current = "starting";
+      handleStartScanQRCode();
+    };
+    const handleModalTransitionExited: DialogProps["onTransitionExited"] = () => {
+      scannerStatusRef.current = "idle";
+      setIsScanned(false);
+    };
+
+    const handleReScan = () => {
+      flushSync(() => {
+        scannerStatusRef.current = "starting";
+        setErrormessage(undefined);
+        setCheckedInResult(undefined);
+        setIsScanned(false);
+      });
+      handleStartScanQRCode();
+    };
+
+    const isShowQrScan = useMemo(() => {
+      return (
+        !isScanned &&
+        (scannerStatusRef.current === "idle" ||
+          scannerStatusRef.current === "starting" ||
+          scannerStatusRef.current === "scanning")
       );
-    };
-    const handleScanningErrorClassroom: Html5QRScannerProps["onScanError"] = (errormessage, error) => {
-      console.log(errormessage, error);
-      // getGeoLocation();
-    };
+    }, [isScanned]);
 
     useImperativeHandle(ref, () => ({
       onOpen(content, options) {
@@ -109,16 +149,14 @@ const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef,
         open={open}
         onClose={handleCloseDialog}
         maxWidth="sm"
+        aria-modal
         fullWidth
         disableAutoFocus
         disableEnforceFocus
         scroll="body"
-        onTransitionEnd={() => {
-          scannerRef.current?.start({
-            onSuccess: handleScanningSuccessClassroom,
-            onError: handleScanningErrorClassroom,
-          });
-        }}
+        transitionDuration={100}
+        onTransitionEnd={handleModalTransitionEnd}
+        onTransitionExited={handleModalTransitionExited}
         slotProps={{
           paper: {
             sx: (theme) => ({ borderWidth: "0px !important" }),
@@ -135,41 +173,53 @@ const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef,
             </IconButton>
           </Box>
         </DialogTitle>
-        <Activity mode="visible">
-          <div className="w-full aspect-square">
-            <Html5QRScanner ref={scannerRef} />
+
+        <Activity mode={isShowQrScan ? "visible" : "hidden"}>
+          <div className="w-full aspect-square bg-slate-100 flex items-center justify-center">
+            {isLoadingScan ? <ScanningContentLoader /> : <Html5QRScanner ref={scannerRef} />}
           </div>
         </Activity>
-        <Activity>
-          <DialogContent>
-            {classRoomData?.title ? (
-              <div className="classroom-information mb-4">
-                <Typography sx={{ fontWeight: 500 }}>{classRoomData?.title}</Typography>
-              </div>
+
+        <DialogContent>
+          {classRoomData?.title ? (
+            <div className="classroom-information mb-4">
+              <Typography sx={{ fontWeight: 500 }}>{classRoomData?.title}</Typography>
+            </div>
+          ) : null}
+          <Activity mode={isScanned ? "visible" : "hidden"}>
+            {checkedInResult ? (
+              <ScanningContentSuccess
+                fullName={checkedInResult?.fullName}
+                codeClass={checkedInResult?.codeClass}
+                checkInTime={checkedInResult?.checkedInAt}
+                employeeCode={checkedInResult?.employeeCode}
+              />
             ) : null}
 
-            <Activity mode={"hidden"}>
-              <ScanningContentLoader />
-            </Activity>
+            {errorMessage && <ScanningContentAlert severity="error" message={errorMessage} />}
 
-            <Activity mode={"visible"}>
-              <ScanningContentSuccess
-                fullName="1231233"
-                codeClass="12313"
-                checkInTime="11/11/2025"
-                onClose={() => {}}
-              />
-            </Activity>
-
-            <Activity mode="visible">
-              <ScanningContentAlert severity="error" message="1232132131231" />
-            </Activity>
-
-            <Activity mode="visible">
-              <ScanningContentAlert severity="warning" message="1232132131231" />
-            </Activity>
-          </DialogContent>
-        </Activity>
+            {/* <ScanningContentAlert severity="warning" message="1232132131231" /> */}
+          </Activity>
+          <div className="h-6"></div>
+          <DialogActions sx={{ px: 0, py: 0 }}>
+            <Button variant="outlined" onClick={handleCloseDialog} className="w-24" size="small">
+              Hủy
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleReScan}
+              disableElevation
+              disableRipple
+              disableTouchRipple
+              disableFocusRipple
+              disabled={!isScanned}
+              className="w-24"
+              size="small"
+            >
+              Quét lại
+            </Button>
+          </DialogActions>
+        </DialogContent>
       </Dialog>
     );
   },

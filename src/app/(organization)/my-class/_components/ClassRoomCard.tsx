@@ -141,7 +141,8 @@ const ClassRoomCard = ({
       if (sessionType === "offline") {
         setDialogOpen(false);
         setSelectedSessionId(session.id);
-        setQrScannerOpen(true);
+        // setQrScannerOpen(true);
+        if (classRoomId) handleScanQrCode(session.id, classRoomId);
         return;
       }
       setDialogOpen(false);
@@ -221,7 +222,6 @@ const ClassRoomCard = ({
         actionLabel={sessionType === "offline" ? "Quét mã QR" : undefined}
         onSelectSession={handleSelectSession}
       />
-      {/* <QRCodeScannerV2 ref={qrCodeRef} /> */}
       <QRCodeScannerClassroomDialog ref={qrCodeRef} />
       {/* <QRScannerDialog
         open={qrScannerOpen}

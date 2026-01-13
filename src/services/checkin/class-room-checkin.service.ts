@@ -4,7 +4,11 @@ import { userAgent } from "next/server";
 import { ClassQRCode } from "@/model/qr-attendance.model";
 import { classQRCodeRepository, classRoomRepository } from "@/repository";
 import { EmployeeClassRoomAttendancePayload } from "@/repository/class-room";
-import { StudentClassRoomCheckInDto } from "@/types/dto/classRooms/student-check-in-classroom.dto";
+import {
+  StudentClassRoomCheckedInReturnDto,
+  StudentClassRoomCheckInDto,
+} from "@/types/dto/classRooms/student-check-in-classroom.dto";
+import { DomainError } from "../DomainError";
 
 type UserAgent = ReturnType<typeof userAgent>;
 
@@ -13,7 +17,7 @@ export class ClassRoomCheckInService {
   constructor(userAgent: UserAgent) {
     this.userAgent = userAgent;
   }
-  async execute(input: StudentClassRoomCheckInDto) {
+  async execute(input: StudentClassRoomCheckInDto): Promise<StudentClassRoomCheckedInReturnDto | null> {
     const { qrCode, classRoomId, classSessionId, employeeId } = input;
 
     const { data: dataQrCode, error } = await classQRCodeRepository.getClassQRCodeDetail({
@@ -22,26 +26,26 @@ export class ClassRoomCheckInService {
       qrCode,
     });
 
-    console.log({ error });
+    if (error) {
+      // Infra layer error => donot using Domain Error
+      throw new Error(error.message);
+    }
     if (!dataQrCode) {
-      throw new Error("QrCode Invalid");
+      throw new DomainError("Mã QR không tồn tại hoặc không hợp lệ", "QR_CODE_NOT_FOUND", 404);
     }
 
     if (!dataQrCode.is_enabled) {
-      throw new Error("QrCode đã ngừng sử dụng.");
+      throw new DomainError("QrCode chưa được kích hoạt", "QR_CODE_NOT_ENABLED", 410);
     }
 
     this.checkValidStatusQrCode(dataQrCode.status);
 
     this.checkValidTimeQrCode(dataQrCode.checkin_start_time, dataQrCode.checkin_end_time);
 
-    const isEmployeeExistsInClassRoom = await classRoomRepository.isEmployeeAssignedToClassRoom(
-      employeeId,
-      classRoomId,
-    );
+    const isStudentExistsInClassRoom = await classRoomRepository.isEmployeeAssignedToClassRoom(employeeId, classRoomId);
 
-    if (!isEmployeeExistsInClassRoom) {
-      throw new Error("Học viên không tồn tại trong lớp học.");
+    if (!isStudentExistsInClassRoom) {
+      throw new DomainError("Học viên không tồn tại trong lớp học.", "STUDENT_IS_NOT_EXISTS", 404);
     }
 
     const { data: dataEmployeeAttendance, error: errorAttendance } = await classRoomRepository.getEmployeeAttendance(
@@ -54,7 +58,7 @@ export class ClassRoomCheckInService {
     }
 
     if (dataEmployeeAttendance) {
-      throw new Error("Học viên đã điểm danh.");
+      throw new DomainError("Học viên đã điểm danh.", "STUDENT_ALREADY_CHECKED_IN", 409);
     }
 
     /**
@@ -77,7 +81,16 @@ export class ClassRoomCheckInService {
       throw new Error(errorCheckIn.message);
     }
 
-    return data;
+    return data
+      ? {
+          classRoomId: data.class_room_id || "",
+          employeeCode: data.employees.employee_code,
+          classSessionId: data.class_session_id || "",
+          checkedInAt: data.attended_at || "",
+          fullName: data.employees.profiles?.full_name || "",
+          qrCodeId: data.qr_code_id || "",
+        }
+      : null;
   }
 
   private getCheckInPayload = (params: {
@@ -110,14 +123,14 @@ export class ClassRoomCheckInService {
   };
   private checkValidStatusQrCode = (status: ClassQRCode["status"]) => {
     if (status === "disabled") {
-      throw new Error("QrCode đã bị hủy");
+      throw new DomainError("QrCode đã bị hủy", "QR_CODE_DISABLED", 410);
     }
     if (status === "expired") {
-      throw new Error("QrCode đã đã hết hạn");
+      throw new DomainError("QrCode đã đã hết hạn", "QR_CODE_EXPIRED", 410);
     }
 
     if (status === "inactive") {
-      throw new Error("QrCode đã ngừng kích hoạt");
+      throw new DomainError("QrCode chưa được kích hoạt", "QR_CODE_INACTIVE", 410);
     }
   };
   private checkValidTimeQrCode(startTime: string | null, endTime: string | null) {
@@ -126,15 +139,15 @@ export class ClassRoomCheckInService {
     const now = dayjs();
 
     if (!dayjs(startTime).isValid() || !dayjs(endTime).isValid()) {
-      throw new Error(`Time inValid, startTime: ${startTime}; endTime: ${endTime}`);
+      throw new DomainError(`Invalid date`, "CHECK_IN_DATE_INVALID", 422);
     }
 
     if (now.isBefore(dayjs(startTime))) {
-      throw new Error(`Chưa đến giờ check-in ${startTime}, now: ${now}`);
+      throw new DomainError(`Chưa đến giờ check-in`, "CHECK_IN_INVALID", 409);
     }
 
     if (now.isAfter(dayjs(endTime))) {
-      throw new Error(`Đã hết giờ check-in ${endTime}`);
+      throw new DomainError(`Đã hết giờ check-in ${endTime}`, "CHECK_IN_INVALID", 409);
     }
   }
 }

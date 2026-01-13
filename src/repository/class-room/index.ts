@@ -791,11 +791,13 @@ const createEmployeeAttendance = async (payload: EmployeeClassRoomAttendancePayl
 					id,
 					employee_code,
 					profiles(full_name)
-				)
+				),
+				class_rooms(id, title, slug)
 			`,
     )
     .maybeSingle();
 };
+export type CreateEmployeeAttendanceResponse = Awaited<ReturnType<typeof createEmployeeAttendance>>;
 
 export {
   createClassRoom,
