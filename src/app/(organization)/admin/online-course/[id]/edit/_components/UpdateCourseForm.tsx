@@ -42,11 +42,11 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
             lessonType: lesson_type,
             mainResource: main_resource
               ? {
-                  id: main_resource?.id,
-                  mimeType: main_resource?.mime_type || "",
-                  name: main_resource?.name || "",
-                  url: main_resource?.path || "",
-                }
+                id: main_resource?.id,
+                mimeType: main_resource?.mime_type || "",
+                name: main_resource?.name || "",
+                url: main_resource?.path || "",
+              }
               : undefined,
             resources: lessons_resources.map((lr) => ({
               id: lr.resource.id,
@@ -76,7 +76,8 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
       slug: data.slug || "",
       description: data.description || "",
       categories: categories,
-      status: data.status,
+      // sau này sẽ phải có tính năng lưu nháp riêng
+      status: "published",
       id: data.id,
       sections: courseSections,
     };

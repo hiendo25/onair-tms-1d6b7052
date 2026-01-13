@@ -63,7 +63,8 @@ export const initClassRoomFormData = (): Partial<UpsertCourseFormData> => {
     description: "",
     categories: [],
     slug: "",
-    status: "draft",
+    // sau này sẽ phải có tính năng lưu nháp riêng
+    status: "published",
     sections: [],
   };
 };
@@ -113,6 +114,7 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     };
 
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
+      console.log("data 222", data);
       onSubmit?.(data);
     };
 
