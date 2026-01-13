@@ -63,7 +63,8 @@ export const initClassRoomFormData = (): Partial<UpsertCourseFormData> => {
     description: "",
     categories: [],
     slug: "",
-    status: "draft",
+    // sau này sẽ phải có tính năng lưu nháp riêng
+    status: "published",
     sections: [],
   };
 };
