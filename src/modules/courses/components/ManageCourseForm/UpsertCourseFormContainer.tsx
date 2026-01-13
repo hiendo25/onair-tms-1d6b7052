@@ -114,7 +114,6 @@ const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, Upser
     };
 
     const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
-      console.log("data 222", data);
       onSubmit?.(data);
     };
 
