@@ -81,3 +81,30 @@ export async function getFirstLevel(organizationId: string) {
 
   return data;
 }
+
+/**
+ * Get the appropriate level for a given XP score
+ * Returns the highest level where score_required <= currentXp
+ */
+export async function getLevelByXp(
+  organizationId: string,
+  currentXp: number
+) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("levels")
+    .select("id, title, description, icon, score_required")
+    .eq("organization_id", organizationId)
+    .eq("status", "active")
+    .lte("score_required", currentXp)
+    .order("score_required", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch level by XP: ${error.message}`);
+  }
+
+  return data;
+}
