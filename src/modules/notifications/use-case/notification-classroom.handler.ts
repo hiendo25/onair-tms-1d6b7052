@@ -4,7 +4,6 @@ import { ClassRoomPlatformType, getClassRoomPlatformName } from "@/constants/cla
 import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
-import { client } from "@/services/api";
 import { NotificationBaseService } from "../service/base-notification.service";
 
 class NotificationClassRoomService extends NotificationBaseService {

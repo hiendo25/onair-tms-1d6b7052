@@ -27,8 +27,6 @@ const OrganizationWrapper = async ({ children }: { readonly children: React.Reac
 
   const currentEmployee = employees.find((epl) => epl.organization.id === organizationId);
 
-  console.log({ employees, organizations, roles, permissions, currentEmployee });
-
   if (!currentEmployee) {
     forbidden();
   }
