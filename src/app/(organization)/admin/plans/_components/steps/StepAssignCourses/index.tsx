@@ -33,7 +33,7 @@ export default function StepAssignCourses({ onBack, onContinue, isLoading = fals
   });
 
   const handleCreateCourse = async (course: { title: string; description?: string }) => {
-    if (!currentEmployee.organization.id || !currentEmployee.userId) {
+    if (!currentEmployee.organization.id || !currentEmployee.id) {
       enqueueSnackbar("Thiếu thông tin tổ chức hoặc người dùng để tạo môn học.", { variant: "error" });
       return;
     }
@@ -41,7 +41,7 @@ export default function StepAssignCourses({ onBack, onContinue, isLoading = fals
     try {
       await createDraftCourse({
         organizationId: currentEmployee.organization.id,
-        createdBy: currentEmployee.userId,
+        createdBy: currentEmployee.id,
         title: course.title,
         description: course.description,
       });

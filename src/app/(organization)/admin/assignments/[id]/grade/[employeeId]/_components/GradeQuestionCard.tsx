@@ -33,6 +33,8 @@ interface ScoreAndFeedbackInputProps {
   control: Control<any>;
 }
 
+const SCORE_INTEGER_REGEX = /^\d*$/;
+
 const ScoreAndFeedbackInput: React.FC<ScoreAndFeedbackInputProps> = ({
   questionId,
   maxScore,
@@ -53,6 +55,9 @@ const ScoreAndFeedbackInput: React.FC<ScoreAndFeedbackInputProps> = ({
             if (isNaN(num)) {
               return "Điểm không hợp lệ";
             }
+            if (!Number.isInteger(num)) {
+              return "Điểm phải là số nguyên";
+            }
             if (num < 0) {
               return "Điểm không được nhỏ hơn 0";
             }
@@ -69,13 +74,15 @@ const ScoreAndFeedbackInput: React.FC<ScoreAndFeedbackInputProps> = ({
               value={field.value ?? ""}
               onChange={(e) => {
                 const value = e.target.value;
-                field.onChange(value === "" ? "" : parseFloat(value) || 0);
+                if (value === "" || SCORE_INTEGER_REGEX.test(value)) {
+                  field.onChange(value);
+                }
               }}
               label="Điểm"
               type="number"
               fullWidth
               error={!!error}
-              inputProps={{ min: 0, max: maxScore, step: 0.5 }}
+              inputProps={{ min: 0, max: maxScore, step: 1 }}
             />
             {error?.message && <FormHelperText error>{error.message}</FormHelperText>}
             {!error?.message && (
@@ -196,4 +203,3 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 };
 
 export default React.memo(GradeQuestionCard);
-

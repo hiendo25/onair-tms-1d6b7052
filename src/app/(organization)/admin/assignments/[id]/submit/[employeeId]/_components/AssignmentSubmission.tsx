@@ -6,6 +6,10 @@ import { Alert, Box, Button, Card, CircularProgress, LinearProgress, Stack, Typo
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
+import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
@@ -16,12 +20,17 @@ import {
   useGetAssignmentQuestionsQuery,
 } from "@/modules/assignment-management/operations/query";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
+import { useUserOrganization } from "@/modules/organization";
 import PageContainer from "@/shared/ui/PageContainer";
 import { FileMetadata } from "@/types/dto/assignments";
 import { uploadFileToS3 } from "@/utils/s3-upload";
 
 import QuestionCard from "./QuestionCard";
 import SubmissionActions from "./SubmissionActions";
+
+const FORBIDDEN_PATH = "/403";
+const ASSIGNMENT_DESCRIPTION_TITLE = "Mô tả bài kiểm tra";
+const EMPTY_ASSIGNMENT_DESCRIPTION = "Chưa có mô tả bài kiểm tra.";
 
 interface QuestionAnswer {
   questionId: string;
@@ -67,6 +76,8 @@ export default function AssignmentSubmission({
   const employeeId = employeeIdProp ?? (params?.employeeId as string | undefined);
   const isEmbedded = variant === "embedded";
 
+  const currentEmployeeId = useUserOrganization((state) => state.currentEmployee.id)
+
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId || "");
   const {
     data: questions,
@@ -85,6 +96,11 @@ export default function AssignmentSubmission({
   const [uploadProgress, setUploadProgress] = React.useState(0);
   const isLoading = isLoadingAssignment || isLoadingQuestions || isLoadingEmployee;
   const answers = watch("answers");
+  const isAssigned = assignment?.assignment_employees?.some(
+    (assignmentEmployee) => assignmentEmployee.employee_id === currentEmployeeId,
+  );
+  const shouldRedirectToForbidden =
+    !isEmbedded && !isLoadingAssignment && Boolean(assignment) && !isAssigned;
 
   React.useEffect(() => {
     if (questions && questions.length > 0) {
@@ -119,6 +135,11 @@ export default function AssignmentSubmission({
       setValue("answers", initialAnswers);
     }
   }, [questions, setValue]);
+
+  React.useEffect(() => {
+    if (!shouldRedirectToForbidden) return;
+    router.push(FORBIDDEN_PATH);
+  }, [router, shouldRedirectToForbidden]);
 
   const handleBack = React.useCallback(() => {
     if (onCancel) {
@@ -651,83 +672,124 @@ export default function AssignmentSubmission({
       return <Alert severity="error">Có lỗi xảy ra khi tải danh sách câu hỏi</Alert>;
     }
 
+    const descriptionContent = assignment?.description?.trim();
+    const descriptionSection = (
+      <Stack
+        spacing={1}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.default",
+        }}
+      >
+        <Typography variant="subtitle1" fontWeight={600}>
+          {ASSIGNMENT_DESCRIPTION_TITLE}
+        </Typography>
+        {descriptionContent ? (
+          <Box
+            sx={{
+              "& p": { mb: 1 },
+              "& ul, & ol": { pl: 3, mb: 1 },
+              "& li": { mb: 0.5 },
+            }}
+          >
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
+              {descriptionContent}
+            </ReactMarkdown>
+          </Box>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            {EMPTY_ASSIGNMENT_DESCRIPTION}
+          </Typography>
+        )}
+      </Stack>
+    );
+
     if (!questions || questions.length === 0) {
       return (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: 400,
-          }}
-        >
-          <Typography variant="body2" color="text.secondary">
-            Bài kiểm tra chưa có câu hỏi nào
-          </Typography>
-        </Box>
+        <Stack spacing={3}>
+          {descriptionSection}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 400,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              Bài kiểm tra chưa có câu hỏi nào
+            </Typography>
+          </Box>
+        </Stack>
       );
     }
 
     return (
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing={3}>
-          {/* Upload Progress */}
-          {isSubmitting && uploadProgress > 0 && (
-            <Box>
-              <LinearProgress variant="determinate" value={uploadProgress} />
-              <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                Đang tải lên... {uploadProgress}%
-              </Typography>
-            </Box>
-          )}
+      <Stack spacing={3}>
+        {descriptionSection}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            {/* Upload Progress */}
+            {isSubmitting && uploadProgress > 0 && (
+              <Box>
+                <LinearProgress variant="determinate" value={uploadProgress} />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  Đang tải lên... {uploadProgress}%
+                </Typography>
+              </Box>
+            )}
 
-          {questions.map((question, index) => {
-            const answer = answers?.find((a) => a.questionId === question.id);
+            {questions.map((question, index) => {
+              const answer = answers?.find((a) => a.questionId === question.id);
 
-            return (
-              <QuestionCard
-                key={question.id}
-                question={question}
-                questionNumber={index + 1}
-                // File type props
-                files={answer?.files}
-                onFileSelect={(files) => handleFileSelect(question.id, files)}
-                onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
-                // Text type props
-                textAnswer={answer?.textAnswer}
-                onTextChange={(text) => handleTextChange(question.id, text)}
-                // Radio type props
-                radioAnswer={answer?.radioAnswer}
-                onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
-                // Checkbox type props
-                checkboxAnswers={answer?.checkboxAnswers}
-                onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
-                // Matching type props
-                matchingMappings={answer?.matchingMappings}
-                onMatchingChange={(mappings) => handleMatchingChange(question.id, mappings)}
-                // Order type props
-                orderedItems={answer?.orderedItems}
-                onOrderChange={(orderedItems) => handleOrderChange(question.id, orderedItems)}
-                // True/False type props
-                trueFalseAnswer={answer?.trueFalseAnswer}
-                onTrueFalseChange={(answer) => handleTrueFalseChange(question.id, answer)}
-                // Attachment props
-                attachments={answer?.attachments}
-                onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
-                onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
-              />
-            );
-          })}
+              return (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  questionNumber={index + 1}
+                  // File type props
+                  files={answer?.files}
+                  onFileSelect={(files) => handleFileSelect(question.id, files)}
+                  onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
+                  // Text type props
+                  textAnswer={answer?.textAnswer}
+                  onTextChange={(text) => handleTextChange(question.id, text)}
+                  // Radio type props
+                  radioAnswer={answer?.radioAnswer}
+                  onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
+                  // Checkbox type props
+                  checkboxAnswers={answer?.checkboxAnswers}
+                  onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
+                  // Matching type props
+                  matchingMappings={answer?.matchingMappings}
+                  onMatchingChange={(mappings) => handleMatchingChange(question.id, mappings)}
+                  // Order type props
+                  orderedItems={answer?.orderedItems}
+                  onOrderChange={(orderedItems) => handleOrderChange(question.id, orderedItems)}
+                  // True/False type props
+                  trueFalseAnswer={answer?.trueFalseAnswer}
+                  onTrueFalseChange={(answer) => handleTrueFalseChange(question.id, answer)}
+                  // Attachment props
+                  attachments={answer?.attachments}
+                  onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
+                  onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
+                />
+              );
+            })}
 
-          <SubmissionActions
-            onCancel={handleBack}
-            onSubmit={() => {}}
-            isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
-            isSubmitting={isSubmitting}
-            hideCancelButton={isEmbedded && !onCancel}
-          />
-        </Stack>
-      </form>
+            <SubmissionActions
+              onCancel={handleBack}
+              onSubmit={() => { }}
+              isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
+              isSubmitting={isSubmitting}
+              hideCancelButton={isEmbedded && !onCancel}
+            />
+          </Stack>
+        </form>
+      </Stack>
     );
   };
 

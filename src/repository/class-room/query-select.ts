@@ -211,12 +211,14 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
           channel_info,
           priority,
           session_type,
+          weekly_schedule,
           courses_period:class_sessions_courses_period(
             id,
             start_at,
             end_at,
+            weekly_schedule,
             course:courses(${selectCourseWithLessonSectionCount}),
-            teachers:employees(${selectEmployee})
+            teacher:employees(${selectEmployee})
           ),
           session_assignments:class_session_assignment(
             id,

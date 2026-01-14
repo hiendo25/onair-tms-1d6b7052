@@ -9,6 +9,7 @@ import Link from "next/link";
 
 import { getPhaseLabel } from "@/modules/learning-paths/components/learning-path-detail.utils";
 import { PROGRESS_COMPLETED_PERCENT } from "@/modules/learning-paths/learning-path-user.constants";
+import { buildLearningPathClassRoomHref } from "./learning-path-user.utils";
 import { PhaseDetailData } from "../../types";
 import ExpandableDescription from "../ExpandableDescription";
 
@@ -39,6 +40,7 @@ const DESCRIPTION_MAX_WIDTH = 640;
 
 export interface LearningPathPhaseDetailViewProps {
   learningPathName: string;
+  learningPathId?: string | null;
   detailData: PhaseDetailData;
   onBack?: () => void;
 }
@@ -75,6 +77,7 @@ const PhaseInfoBadge = ({ icon, label }: PhaseInfoBadgeProps) => {
 
 export default function LearningPathPhaseDetailView({
   learningPathName,
+  learningPathId,
   detailData,
   onBack,
 }: LearningPathPhaseDetailViewProps) {
@@ -83,7 +86,10 @@ export default function LearningPathPhaseDetailView({
   const phaseIndex = phaseIndexRaw > 0 ? phaseIndexRaw : DEFAULT_PHASE_INDEX;
   const phaseIndexLabel = String(phaseIndex).padStart(2, "0");
   const progressPercentage = detailData.summary.progressPercentage;
-  const startHref = detailData.classRooms.find((classRoom) => Boolean(classRoom.href))?.href ?? null;
+  const startClassRoom = detailData.classRooms.find(
+    (classRoom) => !classRoom.isLocked && Boolean(classRoom.slug),
+  );
+  const startHref = buildLearningPathClassRoomHref(startClassRoom?.slug, learningPathId);
 
   return (
     <Card
@@ -207,7 +213,11 @@ export default function LearningPathPhaseDetailView({
             ) : (
               <Stack spacing={1.5}>
                 {detailData.classRooms.map((classRoom) => (
-                  <LearningPathPhaseClassRoomCard key={classRoom.id} item={classRoom} />
+                  <LearningPathPhaseClassRoomCard
+                    key={classRoom.id}
+                    item={classRoom}
+                    learningPathId={learningPathId}
+                  />
                 ))}
               </Stack>
             )}

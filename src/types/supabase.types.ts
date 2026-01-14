@@ -9,12 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      antidigital_djf: {
-        Row: {}
-        Insert: {}
-        Update: {}
-        Relationships: []
-      }
       assignment_categories: {
         Row: {
           assignment_id: string
@@ -3353,6 +3347,7 @@ export type Database = {
     Views: {
       class_rooms_priority: {
         Row: {
+          class_type: Database["public"]["Enums"]["class_type"] | null
           computed_end_at: string | null
           computed_start_at: string | null
           created_at: string | null

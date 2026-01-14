@@ -5,6 +5,8 @@ export * from "./supabase/service-role-client";
 export * as employeeService from "./employees/employee.service";
 export * as employeeFileService from "./employees/employee-file.service";
 export * as classRoomService from "./class-room/upsert-class-room.service";
+export * as classRoomProgressService from "./class-room/class-room-progress-with-relations.service";
+export * as classRoomProgressMappingService from "./class-room/class-room-progress-mapping.service";
 export * as libraryService from "./libraries/library.service";
 export * as assignmentService from "./assignments/assignment.service";
 export * as learningScreenService from "./learning-screen/learning-screen.service";

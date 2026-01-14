@@ -41,7 +41,7 @@ export interface PhaseClassRoomCardItem {
   courseCount: number;
   progressPercentage: number;
   status: ClassRoomProgressStatus;
-  href?: string | null;
+  slug?: string | null;
   isLocked?: boolean;
 }
 
