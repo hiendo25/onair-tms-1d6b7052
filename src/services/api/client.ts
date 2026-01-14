@@ -21,7 +21,7 @@ const request = async <T>(url: string, init: RequestInit = {}): Promise<T> => {
   }
 
   if (!response.ok) {
-    throw new HttpError(response.status, data?.message || response.statusText, data);
+    throw new HttpError(response.status, data?.message || response.statusText, data?.code || "HTTP_ERROR", data);
   }
 
   return data as T;

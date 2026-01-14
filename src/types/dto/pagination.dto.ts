@@ -10,3 +10,14 @@ export interface PaginatedResult<T> {
   limit: number;
 }
 
+type ResponseSuccess<T> = {
+  data: T;
+  success: true;
+};
+type ResponseError<T> = {
+  data: null;
+  success: false;
+  errorMessage: string;
+  errorCode: string;
+};
+export type Response<T> = ResponseSuccess<T> | ResponseError<T>;

@@ -1,4 +1,6 @@
 import { ClassRoom } from "@/model/class-room.model";
+import { ClassAttendances } from "@/model/class-room-attendance.model";
+import { ClassAttendance } from "@/model/qr-attendance.model";
 
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
@@ -103,3 +105,20 @@ export type CreatePivotClassRoomWithResourcePayload = {
   class_room_id: string;
   resource_id: string;
 };
+
+export type EmployeeClassRoomAttendancePayload = Pick<
+  ClassAttendance,
+  | "qr_code_id"
+  | "class_room_id"
+  | "class_session_id"
+  | "attended_at"
+  | "attendance_method"
+  | "attendance_status"
+  | "device_info"
+  | "scan_location_lat"
+  | "scan_location_lng"
+  | "distance_from_class"
+  | "employee_id"
+  | "attendance_mode"
+  | "rejection_reason"
+>;
