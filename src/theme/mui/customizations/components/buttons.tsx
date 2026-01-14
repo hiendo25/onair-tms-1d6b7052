@@ -65,7 +65,7 @@ export const buttonsCustomizations: Components<Theme> = {
             },
             style: {
               height: "48px",
-              borderRadius: "8px 12px",
+              borderRadius: "10px",
             },
           },
           {

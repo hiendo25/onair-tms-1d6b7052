@@ -242,6 +242,9 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                 const isOnline =
                   room?.class_sessions?.[0]?.session_type === "online" ||
                   room?.class_sessions?.[0]?.session_type === "live";
+                const isPast = room.runtime_status === "past";
+                const isLearningPath = room.class_type === "learning_path"
+
 
                 return (
                   <TableRow
@@ -347,7 +350,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                               </MenuItem>
                               <MenuItem
                                 onClick={() => handleEditClassRoom(isOnline!, room?.id as string)}
-                                disabled={!isAdmin}
+                                disabled={!isAdmin || (isPast && !isLearningPath)}
                               >
                                 Chỉnh sửa
                               </MenuItem>

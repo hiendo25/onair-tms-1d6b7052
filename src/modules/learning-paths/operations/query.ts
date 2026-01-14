@@ -176,8 +176,6 @@ export interface CurrentLearningPathSummaryResponse {
   success: boolean;
   data: {
     learningPath: LearningPathWithDetails | null;
-    learningPathProgress: ProgressResponse | null;
-    phasesProgress: ProgressResponse[];
     timelineItems: PhaseTimelineItem[];
     progressSummary: LearningPathProgressSummary | null;
   };

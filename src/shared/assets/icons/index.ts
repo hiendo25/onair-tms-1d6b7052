@@ -6,6 +6,7 @@ import BookOpenIcon from "./BookOpenIcon";
 import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
+import CameraOffIcon from "./CameraOffIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
 import ChevronDownIcon from "./ChevronDownIcon";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
@@ -68,6 +69,7 @@ import UsersIcon2 from "./UsersIcon2";
 import UsersPlusIcon from "./UsersPlusIcon";
 import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import VideoIcon from "./VideoIcon";
+import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import ZaloIcon from "./ZaloIcon";
 export {
@@ -142,5 +144,7 @@ export {
   ArrowRightIcon,
   LineChartUp01Icon,
   Copy07Icon,
+  CameraOffIcon,
+  VideoRecorderOffIcon,
   Inbox01Icon,
 };

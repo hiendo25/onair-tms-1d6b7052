@@ -1,4 +1,5 @@
 export const ROUTE_QUERY_KEYS = {
+  LEARNING_PATH_ID: "learningPathId",
   SOURCE: "source",
 } as const;
 

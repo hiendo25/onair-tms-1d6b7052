@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { Constants } from "@/types/supabase.types";
 
+
 const genderValues = Constants.public.Enums.gender;
 const employeeTypeValues = Constants.public.Enums.employee_type;
 

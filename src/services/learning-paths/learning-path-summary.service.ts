@@ -124,8 +124,6 @@ const buildLearningPathProgressSummary = (
 
 export interface CurrentLearningPathSummary {
   learningPath: LearningPathWithDetails | null;
-  learningPathProgress: ProgressResponse | null;
-  phasesProgress: ProgressResponse[];
   timelineItems: PhaseTimelineItem[];
   progressSummary: LearningPathProgressSummary | null;
 }
@@ -138,8 +136,6 @@ export async function getCurrentLearningPathSummaryForEmployee(
   if (!currentLearningPath) {
     return {
       learningPath: null,
-      learningPathProgress: null,
-      phasesProgress: [],
       timelineItems: [],
       progressSummary: null,
     };
@@ -150,8 +146,6 @@ export async function getCurrentLearningPathSummaryForEmployee(
   if (!learningPath) {
     return {
       learningPath: null,
-      learningPathProgress: null,
-      phasesProgress: [],
       timelineItems: [],
       progressSummary: null,
     };
@@ -203,8 +197,6 @@ export async function getCurrentLearningPathSummaryForEmployee(
 
   return {
     learningPath,
-    learningPathProgress,
-    phasesProgress,
     timelineItems,
     progressSummary,
   };

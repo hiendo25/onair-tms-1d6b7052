@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
-import { getLessonProgressData, resolveLearningPathId } from "@/services/progress/progress.service";
+import { getLessonProgress, resolveLearningPathId } from "@/services/progress/progress.service";
 
 export async function GET(
   request: NextRequest,
@@ -38,7 +38,7 @@ export async function GET(
     const learningPathId = await resolveLearningPathId(employee.id, queryLearningPathId);
 
     // Get lesson progress including current position
-    const progressData = await getLessonProgressData(
+    const progressData = await getLessonProgress(
       lessonId,
       employee.id,
       learningPathId,

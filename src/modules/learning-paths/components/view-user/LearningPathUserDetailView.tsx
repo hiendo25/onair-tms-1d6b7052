@@ -1,23 +1,22 @@
 "use client";
+import { Box, Card, Stack, Typography } from "@mui/material";
 
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import { Box, Card, Chip, LinearProgress, Stack, Typography } from "@mui/material";
-
-import {
-  getSettingsItems,
-  SECTION_CARD_SX,
-} from "@/modules/learning-paths/components/learning-path-detail.utils";
+import { SECTION_CARD_SX } from "@/modules/learning-paths/components/learning-path-detail.utils";
 import type { LearningPathProgressSummary, PhaseTimelineItem } from "@/modules/learning-paths/types";
 import type { LearningPathWithDetails } from "@/repository/learning-paths";
-import { parseMetadata } from "@/repository/learning-paths/transformers";
 import ExpandableDescription from "../ExpandableDescription";
 
+import { buildCompletionBannerData } from "./learning-path-user.utils";
+import LearningPathCompletionBanner from "./LearningPathCompletionBanner";
 import LearningPathPhaseTimeline from "./LearningPathPhaseTimeline";
+import LearningPathProgressBarSummary from "./LearningPathProgressBarSummary";
 
-const SUMMARY_ITEM_BG = "rgba(248, 250, 252, 0.9)";
-const SUMMARY_ITEM_BORDER = "1px solid rgba(15, 23, 42, 0.08)";
-const SETTINGS_BULLET_SIZE = 6;
-const SETTINGS_BULLET_COLOR = "primary.main";
+const HERO_IMAGE_HEIGHT = { xs: 180, md: 240 };
+const HERO_IMAGE_RADIUS = 3;
+const HERO_IMAGE_OVERLAY = "rgba(15, 23, 42, 0.18)";
+const HERO_FALLBACK_BG = "linear-gradient(120deg, #1D4ED8 0%, #60A5FA 100%)";
+const HERO_CONTENT_PADDING = { xs: 2.5, md: 3 };
+const TIMELINE_CARD_SHADOW = "shadow-[0_8px_16px_0_rgba(145,158,171,0.16)]";
 
 export interface LearningPathUserDetailViewProps {
   learningPath: LearningPathWithDetails;
@@ -30,137 +29,53 @@ export default function LearningPathUserDetailView({
   timelineItems,
   progressSummary,
 }: LearningPathUserDetailViewProps) {
-  const metadata = parseMetadata(learningPath.metadata);
-  const settingsItems = getSettingsItems(metadata);
-  const remainingPhases = Math.max(0, progressSummary.totalPhases - progressSummary.completedPhases);
-  const summaryItems = [
-    {
-      id: "completed",
-      label: "Đã hoàn thành",
-      value: progressSummary.completedPhases,
-    },
-    {
-      id: "remaining",
-      label: "Còn lại",
-      value: remainingPhases,
-    },
-    {
-      id: "total",
-      label: "Tổng số",
-      value: progressSummary.totalPhases,
-    },
-  ];
+  const completionBanner = buildCompletionBannerData(learningPath, progressSummary);
+
+  const heroBackground = learningPath.thumbnail_url
+    ? `url(${learningPath.thumbnail_url})`
+    : HERO_FALLBACK_BG;
 
   return (
-    <Stack spacing={4}>
-      <Card
-        sx={{
-          ...SECTION_CARD_SX,
-          bgcolor: "background.paper",
-        }}
-      >
+    <Card sx={{ ...SECTION_CARD_SX, p: HERO_CONTENT_PADDING }}>
+      <Stack spacing={4}>
         <Box
           sx={{
-            p: { xs: 2.5, md: 3 },
+            borderRadius: HERO_IMAGE_RADIUS,
+            overflow: "hidden",
+            height: HERO_IMAGE_HEIGHT,
+            mb: 2.5,
+            position: "relative",
+            bgcolor: "primary.main",
+            backgroundImage: heroBackground,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
           }}
         >
-          <Stack spacing={2.5}>
-            <Stack spacing={1}>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-                <Typography variant="overline" color="text.secondary">
-                  Tiến độ lộ trình
-                </Typography>
-                {progressSummary.isCompletionReached ? (
-                  <Chip
-                    size="small"
-                    color="success"
-                    icon={<CheckCircleRoundedIcon />}
-                    label="Đã đạt"
-                    variant="outlined"
-                  />
-                ) : null}
-              </Stack>
-              <Typography variant="h5" fontWeight={700}>
-                Hoàn thành {progressSummary.overallProgress}%
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {progressSummary.completedPhases}/{progressSummary.totalPhases} giai đoạn • Mốc hoàn
-                thành {progressSummary.completionCriteria}%
-              </Typography>
-              <ExpandableDescription text={learningPath.description} />
-            </Stack>
-            <LinearProgress
-              variant="determinate"
-              value={progressSummary.overallProgress}
-              sx={{
-                height: 10,
-                borderRadius: 999,
-                bgcolor: "grey.100",
-                "& .MuiLinearProgress-bar": {
-                  borderRadius: 999,
-                },
-              }}
-            />
-
-            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              {summaryItems.map((item) => (
-                <Box
-                  key={item.id}
-                  sx={{
-                    flex: 1,
-                    p: 1.5,
-                    borderRadius: 2,
-                    bgcolor: SUMMARY_ITEM_BG,
-                    border: SUMMARY_ITEM_BORDER,
-                  }}
-                >
-                  <Typography variant="caption" color="text.secondary">
-                    {item.label}
-                  </Typography>
-                  <Typography variant="h6" fontWeight={700}>
-                    {item.value}
-                  </Typography>
-                </Box>
-              ))}
-            </Stack>
-          </Stack>
+          <Box sx={{ position: "absolute", inset: 0, bgcolor: HERO_IMAGE_OVERLAY }} />
         </Box>
-      </Card>
 
-      <Card
-        sx={{
-          ...SECTION_CARD_SX,
-        }}
-      >
-        <Box sx={{ p: { xs: 2.5, md: 3 } }}>
-          <Stack spacing={2}>
-            <Typography variant="h6" fontWeight={700}>
-              Thiết lập lộ trình
-            </Typography>
-            <Stack spacing={1.5}>
-              {settingsItems.map((item) => (
-                <Stack key={item.label} direction="row" spacing={1.5} alignItems={"center"}>
-                  <Box
-                    sx={{
-                      width: SETTINGS_BULLET_SIZE,
-                      height: SETTINGS_BULLET_SIZE,
-                      borderRadius: "50%",
-                      bgcolor: SETTINGS_BULLET_COLOR,
-                      mt: 0.9,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {item.label}
-                  </Typography>
-                </Stack>
-              ))}
-            </Stack>
-          </Stack>
+        <Stack spacing={2}>
+          <Typography variant="h5" fontWeight={700}>
+            {learningPath.name}
+          </Typography>
+          <ExpandableDescription text={learningPath.description} />
+        </Stack>
+        <Box
+          sx={{
+            backgroundImage: completionBanner
+              ? "linear-gradient(81deg, #FFFFFF 0%, #FFE59F 100%)"
+              : "none",
+            bgcolor: completionBanner ? "transparent" : "common.white",
+            p: completionBanner ? 3 : 0,
+          }}
+        >
+          {!completionBanner && <LearningPathProgressBarSummary progressSummary={progressSummary} />}
+          <LearningPathCompletionBanner banner={completionBanner} />
+          <Card className={completionBanner ? TIMELINE_CARD_SHADOW : undefined}>
+            <LearningPathPhaseTimeline items={timelineItems} />
+          </Card>
         </Box>
-      </Card>
-
-      <LearningPathPhaseTimeline items={timelineItems} />
-    </Stack>
+      </Stack>
+    </Card >
   );
 }

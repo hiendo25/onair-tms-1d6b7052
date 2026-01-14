@@ -68,15 +68,15 @@ const getRoomTypeLabel = (roomType?: string) => {
 };
 
 export default function ClassRoomPickerDialog({
-                                                open,
-                                                onClose,
-                                                onConfirm,
-                                                initialSelected = [],
-                                                organizationId,
-                                                employeeId,
-                                                title = "Chọn lớp học",
-                                                multiple = true,
-                                              }: ClassRoomPickerDialogProps) {
+  open,
+  onClose,
+  onConfirm,
+  initialSelected = [],
+  organizationId,
+  employeeId,
+  title = "Chọn lớp học",
+  multiple = true,
+}: ClassRoomPickerDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedClassRooms, setSelectedClassRooms] = useState<ClassRoomItem[]>(initialSelected);
 
@@ -84,7 +84,8 @@ export default function ClassRoomPickerDialog({
     organizationId,
     employeeId,
     search: searchTerm,
-    sessionMode: ClassSessionModeFilter.Online,
+    // sessionMode: ClassSessionModeFilter.Online,
+    classType: "learning_path",
   });
 
   // Update selected class-rooms when initialSelected changes

@@ -14,7 +14,7 @@ interface CreateAssignmentResult {
 
 async function createAssignmentWithRelations(
   payload: CreateAssignmentDto,
-  createdBy: string
+  createdBy: string,
 ): Promise<CreateAssignmentResult> {
   let assignmentId: string | null = null;
 
@@ -24,6 +24,7 @@ async function createAssignmentWithRelations(
       name: payload.name,
       description: payload.description,
       created_by: createdBy,
+      organization_id: payload.organizationId,
     });
 
     assignmentId = assignmentData.id;
@@ -136,7 +137,17 @@ async function createAssignmentWithRelations(
   }
 }
 
-async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updatedBy: string): Promise<void> {
+interface UpdateAssignmentOptions {
+  allowQuestionsUpdate?: boolean;
+  allowAssignedEmployeesUpdate?: boolean;
+}
+
+async function updateAssignmentWithRelations(
+  payload: UpdateAssignmentDto,
+  updatedBy: string,
+  options: UpdateAssignmentOptions = {},
+): Promise<void> {
+  const { allowQuestionsUpdate = true, allowAssignedEmployeesUpdate = true } = options;
   // Update the assignment
   await assignmentsRepository.updateAssignmentById(payload.id, {
     name: payload.name,
@@ -144,62 +155,64 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
   });
 
   // Delete and recreate questions
-  await assignmentsRepository.deleteQuestionsByAssignmentId(payload.id);
+  if (allowQuestionsUpdate) {
+    await assignmentsRepository.deleteQuestionsByAssignmentId(payload.id);
 
-  if (payload.questions && payload.questions.length > 0) {
-    const questionsToCreate = payload.questions.map((question) => {
-      let options = question.options || null;
+    if (payload.questions && payload.questions.length > 0) {
+      const questionsToCreate = payload.questions.map((question) => {
+        let options = question.options || null;
 
-      // Transform matchingData to options for matching type
-      if (question.type === "matching" && question.matchingData) {
-        const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+        // Transform matchingData to options for matching type
+        if (question.type === "matching" && question.matchingData) {
+          const { columnAItems, columnBItems, correctMappings } = question.matchingData;
 
-        // Store the matching data structure in options
-        options = {
-          columnAItems,
-          columnBItems,
-          correctMappings,
-        } as any;
-      }
-
-      // Transform orderItems to options for order type
-      // Ensure correctOrder and displayOrder are assigned
-      if (question.type === "order" && question.orderItems) {
-        const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
-          ...item,
-          correctOrder: index + 1, // 1-based index represents the correct order
-        }));
-
-        // Generate shuffled displayOrder using Fisher-Yates algorithm
-        const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
-        for (let i = shuffledIndices.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+          // Store the matching data structure in options
+          options = {
+            columnAItems,
+            columnBItems,
+            correctMappings,
+          } as any;
         }
 
-        const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
-          ...item,
-          displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
-        }));
+        // Transform orderItems to options for order type
+        // Ensure correctOrder and displayOrder are assigned
+        if (question.type === "order" && question.orderItems) {
+          const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
+            ...item,
+            correctOrder: index + 1, // 1-based index represents the correct order
+          }));
 
-        // Store the order data structure in options (similar to matching)
-        options = {
-          orderItems: orderItemsWithDisplayOrder,
-        } as any;
-      }
+          // Generate shuffled displayOrder using Fisher-Yates algorithm
+          const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
+          for (let i = shuffledIndices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
+          }
 
-      return {
-        assignment_id: payload.id,
-        type: question.type,
-        label: question.label,
-        score: question.score,
-        options,
-        attachments: question.attachments || null,
-        created_by: updatedBy,
-      };
-    });
+          const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
+            ...item,
+            displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
+          }));
 
-    await assignmentsRepository.createQuestions(questionsToCreate);
+          // Store the order data structure in options (similar to matching)
+          options = {
+            orderItems: orderItemsWithDisplayOrder,
+          } as any;
+        }
+
+        return {
+          assignment_id: payload.id,
+          type: question.type,
+          label: question.label,
+          score: question.score,
+          options,
+          attachments: question.attachments || null,
+          created_by: updatedBy,
+        };
+      });
+
+      await assignmentsRepository.createQuestions(questionsToCreate);
+    }
   }
 
   // Delete and recreate assignment categories
@@ -215,15 +228,17 @@ async function updateAssignmentWithRelations(payload: UpdateAssignmentDto, updat
   }
 
   // Delete and recreate assignment employees
-  await assignmentsRepository.deleteAssignmentEmployeesByAssignmentId(payload.id);
+  if (allowAssignedEmployeesUpdate) {
+    await assignmentsRepository.deleteAssignmentEmployeesByAssignmentId(payload.id);
 
-  if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
-    const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
-      assignment_id: payload.id,
-      employee_id: employeeId,
-    }));
+    if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
+      const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
+        assignment_id: payload.id,
+        employee_id: employeeId,
+      }));
 
-    await assignmentsRepository.createAssignmentEmployees(employeesToCreate);
+      await assignmentsRepository.createAssignmentEmployees(employeesToCreate);
+    }
   }
 }
 
@@ -267,4 +282,3 @@ export {
   getAssignmentQuestions,
   getMyAssignments,
 };
-

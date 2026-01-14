@@ -84,11 +84,11 @@ export default function EmployeeList() {
   const organizationUnits = organizationUnitsResult?.data || [];
 
   const departments = React.useMemo(
-    () => organizationUnits.filter((unit) => unit.type === "department"),
+    () => organizationUnits.filter((unit: any) => unit.type === "department"),
     [organizationUnits],
   );
 
-  const branches = React.useMemo(() => organizationUnits.filter((unit) => unit.type === "branch"), [organizationUnits]);
+  const branches = React.useMemo(() => organizationUnits.filter((unit: any) => unit.type === "branch"), [organizationUnits]);
 
   const {
     data: employeesResult,
@@ -192,6 +192,10 @@ export default function EmployeeList() {
       });
       handleMenuClose();
     }
+  };
+
+  const handleRowClick = (employeeId: string) => {
+    router.push(`/admin/employees/${employeeId}/detail`);
   };
 
   const getDepartmentName = (employee: EmployeeDto) => {
@@ -349,7 +353,12 @@ export default function EmployeeList() {
                   </TableRow>
                 ) : (
                   employees.map((employee) => (
-                    <TableRow key={employee.id} hover sx={{ cursor: "pointer" }}>
+                    <TableRow
+                      key={employee.id}
+                      hover
+                      onClick={() => handleRowClick(employee.id)}
+                      sx={{ cursor: "pointer" }}
+                    >
                       <TableCell>{employee.employee_code}</TableCell>
                       <TableCell>{employee.profiles?.full_name || "-"}</TableCell>
                       <TableCell>{employee.profiles?.email || "-"}</TableCell>

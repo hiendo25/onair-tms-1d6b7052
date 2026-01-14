@@ -241,6 +241,13 @@ const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
     path: PATHS.MY_LEARNING_PATHS.ROOT,
     persCheck: [],
   },
+  {
+    title: "Thưởng",
+    icon: React.createElement(Star01Icon),
+    key: "my-gamification",
+    path: PATHS.MY_GAMIFICATION.ROOT,
+    persCheck: [],
+  },
 ];
 
 export { ADMIN_MENU_LIST, STUDENTS_MENU_LIST };

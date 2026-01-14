@@ -1,23 +1,5 @@
 import { gamificationXpRepository } from "@/repository";
-
-interface LevelInfo {
-  id: string;
-  title: string;
-  description: string | null;
-  icon: string | null;
-  scoreRequired: number;
-}
-
-interface NextLevelInfo extends LevelInfo {
-  xpNeeded: number;
-}
-
-export interface EmployeeGamificationXpResult {
-  currentXp: number;
-  currentLevelId: string | null;
-  currentLevel: LevelInfo | null;
-  nextLevel: NextLevelInfo | null;
-}
+import type { EmployeeGamificationXpResult, LevelInfo, NextLevelInfo } from "@/types/gamification.types";
 
 /**
  * Get employee's gamification XP and level information
@@ -35,7 +17,15 @@ export async function getEmployeeGamificationXp(
 
   const currentXp = xpData?.total_xp || 0;
   const currentLevelId = xpData?.level_id || null;
-  const currentLevelData = xpData?.currentLevel as any;
+  let currentLevelData = xpData?.currentLevel as any;
+
+  // If no level data from balance, find the appropriate level based on XP
+  if (!currentLevelData) {
+    currentLevelData = await gamificationXpRepository.getLevelByXp(
+      organizationId,
+      currentXp
+    );
+  }
 
   // Format current level
   const currentLevel: LevelInfo | null = currentLevelData

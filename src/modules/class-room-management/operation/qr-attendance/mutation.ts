@@ -1,6 +1,7 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useTMutation } from "@/lib/queryClient";
+import { CreateEmployeeAttendanceResponse } from "@/repository/class-room";
 import {
   activateQRCode,
   type AttendanceCheckInPayload,
@@ -12,6 +13,12 @@ import {
   updateQRCode,
   type UpdateQRCodePayload,
 } from "@/repository/qr-attendance";
+import { client } from "@/services/api";
+import { HttpError } from "@/services/api/HttpError";
+import {
+  StudentClassRoomCheckedInResponse,
+  StudentClassRoomCheckInDto,
+} from "@/types/dto/classRooms/student-check-in-classroom.dto";
 
 import { QR_ATTENDANCE_KEYS } from "./key";
 
@@ -137,7 +144,6 @@ export const useDeleteQRCodeMutation = () => {
   });
 };
 
-
 export const useCheckInWithQRMutation = () => {
   const queryClient = useQueryClient();
 
@@ -167,6 +173,39 @@ export const useCheckInWithQRMutation = () => {
           });
         }
       }
+    },
+  });
+};
+
+export const useStudentClassRoomCheckInWithQRMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation<StudentClassRoomCheckedInResponse, HttpError, StudentClassRoomCheckInDto>({
+    mutationFn: (input) => client.post("/check-in", input),
+    onSuccess: (result) => {
+      //  queryClient.invalidateQueries({
+      //       queryKey: QR_ATTENDANCE_KEYS.attendances.statsByQRCode(result?.attendance.qr_code_id),
+      //     });
+      // if (result.success && result.attendance) {
+      //   // Invalidate attendance queries
+      //   if (result.attendance.class_room_id) {
+      //     queryClient.invalidateQueries({
+      //       queryKey: QR_ATTENDANCE_KEYS.attendances.byClassRoom(result.attendance.class_room_id),
+      //     });
+      //   }
+      //   if (result.attendance.class_session_id) {
+      //     queryClient.invalidateQueries({
+      //       queryKey: QR_ATTENDANCE_KEYS.attendances.bySession(result.attendance.class_session_id),
+      //     });
+      //   }
+      //   if (result.attendance.employee_id) {
+      //     queryClient.invalidateQueries({
+      //       queryKey: QR_ATTENDANCE_KEYS.attendances.byEmployee(result.attendance.employee_id),
+      //     });
+      //   }
+      //   if (result.attendance.qr_code_id) {
+      //   }
+      // }
     },
   });
 };

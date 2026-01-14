@@ -98,5 +98,24 @@ const getStudents = async (queryParams?: GetStudentsQueryParams) => {
     .range(from, to)
     .overrideTypes<Array<{ employee_type: "student" }>>();
 };
+
+/**
+ * Get employee's department ID
+ * @param employeeId - The employee's UUID
+ * @returns The department ID or null if not found
+ */
+const getEmployeeDepartmentId = async (employeeId: string): Promise<string | null> => {
+  const { data, error } = await supabase
+    .from("employee_departments")
+    .select("department_id")
+    .eq("employee_id", employeeId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data?.department_id ?? null;
+};
+
 export type GetStudentsResponse = Awaited<ReturnType<typeof getStudents>>;
-export { getStudents };
+export { getStudents, getEmployeeDepartmentId };

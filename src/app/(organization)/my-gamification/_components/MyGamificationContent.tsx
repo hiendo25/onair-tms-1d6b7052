@@ -1,61 +1,45 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Box, Card, CardContent, LinearProgress, Typography, Alert, CircularProgress } from "@mui/material";
-import Image from "next/image";
+import React from "react";
+import { Alert, Box, CircularProgress, Grid, Stack } from "@mui/material";
 
-interface LevelInfo {
-  id: string;
-  title: string;
-  description: string | null;
-  icon: string | null;
-  scoreRequired: number;
-}
+import { useGetEmployeeDepartmentIdQuery } from "@/modules/employees/operations/query";
+import { useGetAllLevelsQuery, useGetMyGamificationXpQuery } from "@/modules/gamification-xp/operations/query";
+import { useUserOrganization } from "@/modules/organization";
 
-interface NextLevelInfo extends LevelInfo {
-  xpNeeded: number;
-}
-
-interface GamificationData {
-  currentXp: number;
-  currentLevelId: string | null;
-  currentLevel: LevelInfo | null;
-  nextLevel: NextLevelInfo | null;
-}
+import DepartmentLeaderboard from "./DepartmentLeaderboard";
+import LevelsSection from "./LevelsSection";
+import XpProgressSection from "./XpProgressSection";
 
 const MyGamificationContent: React.FC = () => {
-  const [data, setData] = useState<GamificationData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { currentEmployee } = useUserOrganization((state) => state);
 
-  useEffect(() => {
-    const fetchGamificationData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch("/api/gamification/my-xp");
+  // Fetch gamification XP data using React Query
+  const {
+    data: xpData,
+    isLoading: isXpLoading,
+    error: xpError,
+  } = useGetMyGamificationXpQuery({
+    enabled: !!currentEmployee?.id,
+  });
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch gamification data");
-        }
+  // Fetch all levels for the organization
+  const {
+    data: allLevels,
+    isLoading: isLevelsLoading,
+  } = useGetAllLevelsQuery(currentEmployee?.organization?.id ?? "", {
+    enabled: !!currentEmployee?.organization?.id,
+  });
 
-        const result = await response.json();
+  // Fetch employee department ID using React Query
+  const {
+    data: departmentId,
+    isLoading: isDepartmentLoading,
+  } = useGetEmployeeDepartmentIdQuery(currentEmployee?.id ?? "", {
+    enabled: !!currentEmployee?.id,
+  });
 
-        if (result.success) {
-          setData(result.data);
-        } else {
-          throw new Error("Invalid response format");
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGamificationData();
-  }, []);
-
-  if (loading) {
+  if (isXpLoading || isDepartmentLoading || isLevelsLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress />
@@ -63,146 +47,47 @@ const MyGamificationContent: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <Box p={3}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
+  if (xpError) {
+    return <Alert severity="error">{xpError.message}</Alert>;
   }
 
-  if (!data) {
-    return (
-      <Box p={3}>
-        <Alert severity="info">No gamification data available</Alert>
-      </Box>
-    );
+  if (!xpData) {
+    return <Alert severity="info">Không có dữ liệu gamification</Alert>;
   }
-
-  const progressPercentage = data.nextLevel
-    ? Math.min(100, (data.currentXp / data.nextLevel.scoreRequired) * 100)
-    : 100;
 
   return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Thành tích của tôi
-      </Typography>
+    <Grid container spacing={3}>
+      {/* Left Column */}
+      <Grid size={{ xs: 12, lg: 7 }}>
+        <Stack spacing={3}>
+          {/* XP Progress Section */}
+          <XpProgressSection currentXp={xpData.currentXp} nextLevel={xpData.nextLevel} />
 
-      {/* Current XP Card */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Điểm kinh nghiệm (XP)
-          </Typography>
-          <Typography variant="h3" color="primary">
-            {data.currentXp.toLocaleString()} XP
-          </Typography>
-        </CardContent>
-      </Card>
+          {/* Levels Section */}
+          <LevelsSection
+            currentLevel={xpData.currentLevel}
+            nextLevel={xpData.nextLevel}
+            allLevels={allLevels}
+            currentXp={xpData.currentXp}
+          />
+        </Stack>
+      </Grid>
 
-      {/* Current Level Card */}
-      {data.currentLevel && (
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Danh hiệu hiện tại
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2}>
-              {data.currentLevel.icon && (
-                <Box sx={{ width: 64, height: 64, position: "relative", flexShrink: 0 }}>
-                  <Image
-                    src={data.currentLevel.icon}
-                    alt={data.currentLevel.title}
-                    fill
-                    style={{ objectFit: "contain", borderRadius: "6px" }}
-                  />
-                </Box>
-              )}
-              <Box>
-                <Typography variant="h5">{data.currentLevel.title}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Yêu cầu: {data.currentLevel.scoreRequired.toLocaleString()} XP
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Next Level Card */}
-      {data.nextLevel && (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Danh hiệu tiếp theo
-            </Typography>
-            <Box display="flex" alignItems="center" gap={2} mb={2}>
-              {data.nextLevel.icon && (
-                <Box sx={{ width: 64, height: 64, position: "relative", flexShrink: 0 }}>
-                  <Image
-                    src={data.nextLevel.icon}
-                    alt={data.nextLevel.title}
-                    fill
-                    style={{ objectFit: "contain", borderRadius: "6px" }}
-                  />
-                </Box>
-              )}
-              <Box flex={1}>
-                <Typography variant="h5">{data.nextLevel.title}</Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Yêu cầu: {data.nextLevel.scoreRequired.toLocaleString()} XP
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Progress Bar */}
-            <Box>
-              <Box display="flex" justifyContent="space-between" mb={1}>
-                <Typography variant="body2">
-                  Tiến độ
-                </Typography>
-                <Typography variant="body2" color="primary" fontWeight="bold">
-                  {data.nextLevel.xpNeeded > 0
-                    ? `Còn ${data.nextLevel.xpNeeded.toLocaleString()} XP`
-                    : `Đã đạt!`}
-                </Typography>
-              </Box>
-              <LinearProgress
-                variant="determinate"
-                value={progressPercentage}
-                sx={{ height: 10, borderRadius: 5 }}
-              />
-              <Typography variant="caption" color="text.secondary" mt={0.5}>
-                {progressPercentage.toFixed(1)}%
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* No Next Level */}
-      {!data.nextLevel && data.currentLevel && (
-        <Card>
-          <CardContent>
-            <Alert severity="success">
-              Chúc mừng! Bạn đã đạt danh hiệu cao nhất!
-            </Alert>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* No Level Yet */}
-      {!data.currentLevel && !data.nextLevel && (
-        <Card>
-          <CardContent>
-            <Alert severity="info">
-              Bạn chưa có danh hiệu. Hãy tích lũy điểm kinh nghiệm để đạt danh hiệu đầu tiên!
-            </Alert>
-          </CardContent>
-        </Card>
-      )}
-    </Box>
+      {/* Right Column - Leaderboard */}
+      <Grid size={{ xs: 12, lg: 5 }}>
+        {departmentId && currentEmployee?.id ? (
+          <DepartmentLeaderboard
+            departmentId={departmentId}
+            currentEmployeeId={currentEmployee.id}
+          />
+        ) : (
+          <Alert severity="info">
+            Bạn chưa được phân vào phòng ban nào. Hãy liên hệ quản trị viên để xem bảng xếp
+            hạng.
+          </Alert>
+        )}
+      </Grid>
+    </Grid>
   );
 };
 

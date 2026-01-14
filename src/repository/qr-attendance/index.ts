@@ -462,10 +462,7 @@ const upsertQRCode = async (upSertPayload: UpSertQrCodePayload) => {
 
 const deleteAttendancesByEmployeeId = async (employeeId: string) => {
   try {
-    const { error } = await supabase
-      .from("class_attendances")
-      .delete()
-      .eq("employee_id", employeeId);
+    const { error } = await supabase.from("class_attendances").delete().eq("employee_id", employeeId);
 
     if (error) throw error;
     return { error: null };
@@ -477,10 +474,7 @@ const deleteAttendancesByEmployeeId = async (employeeId: string) => {
 
 const deleteQRCodesByEmployeeId = async (employeeId: string) => {
   try {
-    const { error } = await supabase
-      .from("class_qr_codes")
-      .delete()
-      .eq("created_by", employeeId);
+    const { error } = await supabase.from("class_qr_codes").delete().eq("created_by", employeeId);
 
     if (error) throw error;
     return { error: null };

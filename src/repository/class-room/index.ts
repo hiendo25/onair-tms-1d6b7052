@@ -2,14 +2,14 @@ import { PostgrestFilterBuilder } from "@supabase/postgrest-js";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 import { ClassRoomMetaKey, ClassRoomMetaValue } from "@/constants/class-room-meta.constant";
-import { DayOfWeek } from "@/model/enum-type.model";
+import { ClassType, DayOfWeek } from "@/model/enum-type.model";
 import { MarkAttendancePayload } from "@/modules/class-room-management/operations/mutation";
 import {
   GetClassRoomsQueryInput,
   GetClassRoomStatusCountsInput,
   GetClassRoomStudentsQueryInput,
 } from "@/modules/class-room-management/operations/query";
-import { supabase } from "@/services";
+import { createClient, supabase } from "@/services";
 import {
   ClassRoomPriorityDto,
   ClassRoomSessionDetailDto,
@@ -39,6 +39,7 @@ import {
   CreatePivotClassRoomAndHashTagPayload,
   CreatePivotClassRoomWithResourcePayload,
   DeletePivotClassRoomAndEmployeePayload,
+  EmployeeClassRoomAttendancePayload,
   UpdateClassRoomPayload,
   UpSertClassRoomPayload,
 } from "./type";
@@ -230,7 +231,7 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
   query: T,
   filters: GetClassRoomsQueryInput = {},
 ): T => {
-  const { status, runtimeStatus, from, to, q, type, sessionMode } = filters;
+  const { status, runtimeStatus, from, to, q, type, sessionMode, classType } = filters;
   let builder = query;
 
   if (status && status !== ClassRoomStatusFilter.All) {
@@ -239,6 +240,10 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
 
   if (type && type !== ClassRoomTypeFilter.All) {
     builder = builder.eq("room_type", type);
+  }
+
+  if (classType) {
+    builder = builder.eq("class_type", classType);
   }
 
   if (runtimeStatus && runtimeStatus !== ClassRoomRuntimeStatusFilter.All) {
@@ -261,7 +266,7 @@ const applyClassRoomFilters = <T extends PostgrestFilterBuilder<any, any, any, a
     const trimmed = q.trim();
     if (trimmed) {
       const escaped = sanitizeSearchTerm(trimmed);
-      builder = builder.or([`title.ilike.%${escaped}%`, `description.ilike.%${escaped}%`].join(","));
+      builder = builder.or([`title.ilike.%${escaped}%`].join(","));
     }
   }
 
@@ -325,6 +330,7 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     orderField,
     type,
     sessionMode,
+    classType,
   } = input;
 
   const trimmedEmployeeId = employeeId?.trim();
@@ -384,6 +390,7 @@ const getClassRooms = async (input: GetClassRoomsQueryInput = {}): Promise<Pagin
     status,
     type,
     sessionMode,
+    classType,
   });
 
   if (orderField && orderBy) {
@@ -616,6 +623,7 @@ const getClassRoomsByEmployeeId = async (
     to,
     type,
     sessionMode,
+    classType,
     orderField,
     orderBy,
   } = input;
@@ -657,6 +665,7 @@ const getClassRoomsByEmployeeId = async (
     to,
     type,
     sessionMode,
+    classType,
   });
 
   if (orderField && orderBy) {
@@ -746,6 +755,61 @@ const deletePivotClassRoomsWithResources = async (ids: number[]) => {
   }
 };
 
+const isEmployeeAssignedToClassRoom = async (employeeId: string, classRoomId: string) => {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("class_room_employee")
+    .select()
+    .eq("employee_id", employeeId)
+    .eq("class_room_id", classRoomId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return Boolean(data);
+};
+
+const getEmployeeAttendance = async (qrCodeId: string, employeeId: string) => {
+  const supabase = createClient();
+  return await supabase
+    .from("class_attendances")
+    .select("*")
+    .eq("qr_code_id", qrCodeId)
+    .eq("employee_id", employeeId)
+    .maybeSingle();
+};
+
+const createEmployeeAttendance = async (payload: EmployeeClassRoomAttendancePayload) => {
+  const supabase = createClient();
+  return await supabase
+    .from("class_attendances")
+    .insert(payload)
+    .select(
+      `
+				id, 
+				qr_code_id, 
+				class_room_id, 
+				employee_id, 
+				class_session_id, 
+				attendance_status, 
+				attended_at, 
+				scan_location_lat,
+				scan_location_lng,
+				distance_from_class,
+				attendance_method,
+				attendance_mode,
+				employees(
+					id,
+					employee_code,
+					profiles(full_name)
+				),
+				class_rooms(id, title, slug)
+			`,
+    )
+    .maybeSingle();
+};
+export type CreateEmployeeAttendanceResponse = Awaited<ReturnType<typeof createEmployeeAttendance>>;
+
 export {
   createClassRoom,
   updateClassRoom,
@@ -770,4 +834,7 @@ export {
   deleteClassRoomsByEmployeeId,
   deletePivotClassRoomsWithResources,
   markAttendance,
+  isEmployeeAssignedToClassRoom,
+  getEmployeeAttendance,
+  createEmployeeAttendance,
 };

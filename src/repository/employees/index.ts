@@ -211,6 +211,21 @@ export async function getLastEmployeeOrder() {
   return lastEmployee?.employee_order ?? 0;
 }
 
+export async function checkEmployeeCodeExists(code: string) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("employees")
+    .select("employee_code")
+    .eq("employee_code", code)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return Boolean(data);
+}
+
 export async function createEmployee(data: {
   user_id: string;
   employee_code: string;
@@ -267,7 +282,6 @@ export async function getCurrentEmployee(userId: string, organizationId: string)
     throw new Error("Employee not found");
   }
 
-  console.log({ employee });
   return employee;
 }
 // export async function getEmployeeByUserId(userId: string) {

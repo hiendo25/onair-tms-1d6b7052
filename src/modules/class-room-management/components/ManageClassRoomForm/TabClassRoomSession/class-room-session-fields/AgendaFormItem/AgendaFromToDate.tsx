@@ -54,6 +54,10 @@ const AgendaFromToDate: React.FC<AgendaFromToDateProps> = ({ sessionIndex, contr
         minDateTime={
           limitationDate?.minDate ? dayjs(limitationDate.minDate) : sessionStartDate ? dayjs(sessionStartDate) : dayjs()
         }
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         maxDateTime={
           currentAgenDa?.endDate
             ? dayjs(currentAgenDa.endDate)
@@ -68,6 +72,10 @@ const AgendaFromToDate: React.FC<AgendaFromToDateProps> = ({ sessionIndex, contr
       <RHFDateTimePicker
         control={control}
         name={`classRoomSessions.${sessionIndex}.agendas.${agendaIndex}.endDate`}
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         minDateTime={
           currentAgenDa?.startDate
             ? dayjs(currentAgenDa.startDate)

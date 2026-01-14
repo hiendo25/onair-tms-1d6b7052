@@ -19,12 +19,12 @@ function TabPanel(props: TabPanelProps) {
   return (
     <div
       role="tabpanel"
-      hidden={value !== index}
       id={`gamification-tabpanel-${index}`}
       aria-labelledby={`gamification-tab-${index}`}
+      style={{ display: value === index ? 'block' : 'none' }}
       {...other}
     >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
+      <Box sx={{ py: 3 }}>{children}</Box>
     </div>
   );
 }
@@ -42,7 +42,7 @@ const GamificationContainer: React.FC = () => {
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="gamification tabs">
           <Tab label="Cấu hình điểm thưởng" id="gamification-tab-0" sx={{ textTransform: "none" }} />
           <Tab label="Bảng xếp hạng" id="gamification-tab-1" sx={{ textTransform: "none" }} />
-          <Tab label="Cấu hình danh hiệu" id="gamification-tab-2" sx={{ textTransform: "none" }} />
+          <Tab label="Danh hiệu" id="gamification-tab-2" sx={{ textTransform: "none" }} />
         </Tabs>
       </Box>
       <TabPanel value={tabValue} index={0}>

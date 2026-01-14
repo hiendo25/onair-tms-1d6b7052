@@ -1,5 +1,9 @@
+import { HEADER_ORGANIZATION_ID } from "@/constants/api-headers.constant";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
 import { useTQuery } from "@/lib/queryClient";
+import { ClassType } from "@/model/enum-type.model";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { classRoomRepository } from "@/repository";
 import {
   ClassRoomRuntimeStatusFilter,
@@ -7,6 +11,7 @@ import {
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
 } from "@/repository/class-room";
+import { type ClassRoomDetailWithProgress } from "@/services/class-room/class-room-progress-mapping.service";
 import {
   ClassRoomPriorityDto,
   ClassRoomSessionDetailDto,
@@ -21,6 +26,7 @@ export interface GetClassRoomsQueryInput {
   to?: string | null;
   type?: ClassRoomTypeFilter;
   sessionMode?: ClassSessionModeFilter;
+  classType?: ClassType;
   runtimeStatus?: ClassRoomRuntimeStatusFilter;
   status?: ClassRoomStatusFilter;
   page?: number;
@@ -55,11 +61,108 @@ export interface GetClassRoomStudentsQueryInput {
   attendanceStatus?: "attended" | "absent" | "pending";
 }
 
-export const useGetClassRoomQuery = (slug: string) => {
-  return useTQuery({
-    queryKey: ["class-room-detail", slug],
-    queryFn: () => classRoomRepository.getClassRoomBySlug(slug),
-    enabled: Boolean(slug),
+export interface GetClassRoomDetailQueryOptions {
+  learningPathId?: string | null;
+  enabled?: boolean;
+}
+
+interface ClassRoomDetailError {
+  message: string;
+  details: string | null;
+  hint: string | null;
+  code: string | null;
+}
+
+type GetClassRoomDetailResponse = {
+  data: ClassRoomDetailWithProgress | null;
+  error: ClassRoomDetailError | null;
+};
+
+const buildClassRoomProgressQuery = (learningPathId?: string | null): string => {
+  if (!learningPathId) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    [ROUTE_QUERY_KEYS.LEARNING_PATH_ID]: learningPathId,
+  });
+
+  return `?${params.toString()}`;
+};
+
+const buildClassRoomDetailError = (message: string): ClassRoomDetailError => ({
+  message,
+  details: null,
+  hint: null,
+  code: null,
+});
+
+const readClassRoomDetailErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const payload = await response.json();
+    if (typeof payload?.error === "string") {
+      return payload.error;
+    }
+    if (typeof payload?.error?.message === "string") {
+      return payload.error.message;
+    }
+    if (typeof payload?.message === "string") {
+      return payload.message;
+    }
+  } catch (error) {
+    console.error("[ClassRoom] Failed to parse detail error response:", error);
+  }
+
+  return "Failed to fetch class room detail with progress";
+};
+
+const fetchClassRoomDetailWithProgress = async (params: {
+  slug: string;
+  learningPathId?: string | null;
+  organizationId: string;
+}): Promise<GetClassRoomDetailResponse> => {
+  const { slug, learningPathId, organizationId } = params;
+  const queryParams = buildClassRoomProgressQuery(learningPathId);
+  const response = await fetch(
+    `/api/class-rooms/by-slug/${slug}/detail-with-progress${queryParams}`,
+    {
+      headers: {
+        [HEADER_ORGANIZATION_ID]: organizationId,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const message = await readClassRoomDetailErrorMessage(response);
+    return {
+      data: null,
+      error: buildClassRoomDetailError(message),
+    };
+  }
+
+  return response.json();
+};
+
+export const useGetClassRoomQuery = (slug: string, options: GetClassRoomDetailQueryOptions = {}) => {
+  const { learningPathId, enabled = true } = options;
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+  const normalizedLearningPathId = learningPathId?.trim() ? learningPathId : null;
+
+  return useTQuery<GetClassRoomDetailResponse>({
+    queryKey: ["class-room-detail", slug, normalizedLearningPathId],
+    queryFn: async () => {
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+
+      return fetchClassRoomDetailWithProgress({
+        slug,
+        learningPathId: normalizedLearningPathId,
+        organizationId,
+      });
+    },
+    enabled: Boolean(slug) && Boolean(organizationId) && enabled,
   });
 };
 

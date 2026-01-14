@@ -232,7 +232,7 @@ export default function AssignmentStudentList() {
                   horizontal: "right",
                 }}
               >
-                <MenuItem
+                {/* <MenuItem
                   onClick={handleSubmitAssignment}
                   disabled={
                     selectedStudentId
@@ -241,7 +241,7 @@ export default function AssignmentStudentList() {
                   }
                 >
                   Nộp bài
-                </MenuItem>
+                </MenuItem> */}
                 <MenuItem
                   onClick={handleGradeAssignment}
                   disabled={
