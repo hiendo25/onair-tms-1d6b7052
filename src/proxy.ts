@@ -11,18 +11,19 @@ export async function proxy(request: NextRequest) {
 
   const isAuthPath = authPaths.includes(pathname);
 
-  if (isAuthPath) {
-    return NextResponse.next();
-  }
-
   const { data, error } = await authRepository.getClaims();
   const userId = data?.claims?.sub;
+
+  if (isAuthPath && !userId) {
+    return NextResponse.next();
+  }
 
   if (!userId) {
     return NextResponse.redirect(new URL(AUTH_PATHS.SIGNIN, request.url));
   }
 
   const organizations = await organizationsRepository.getOrganizationsByUserId(userId);
+  console.log({ organizations });
 
   if (pathname === "/no-organization") {
     return !organizations.length ? NextResponse.next() : NextResponse.redirect(new URL(PATHS.DASHBOARD, request.url));
