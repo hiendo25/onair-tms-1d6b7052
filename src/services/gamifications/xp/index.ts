@@ -17,7 +17,15 @@ export async function getEmployeeGamificationXp(
 
   const currentXp = xpData?.total_xp || 0;
   const currentLevelId = xpData?.level_id || null;
-  const currentLevelData = xpData?.currentLevel as any;
+  let currentLevelData = xpData?.currentLevel as any;
+
+  // If no level data from balance, find the appropriate level based on XP
+  if (!currentLevelData) {
+    currentLevelData = await gamificationXpRepository.getLevelByXp(
+      organizationId,
+      currentXp
+    );
+  }
 
   // Format current level
   const currentLevel: LevelInfo | null = currentLevelData
