@@ -4,7 +4,6 @@ import React, { useCallback, useRef, useState } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
-import dayjs from "dayjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -113,23 +112,13 @@ const ClassRoomCard = ({
   );
 
   const handleScanQrCode = (classSessionId: string, classRoomId: string) => {
-    qrCodeRef.current?.onOpen(
-      {
-        title,
-        classRoomId,
-        classSessionId,
-        startAt: start_at,
-        endAt: end_at,
-      },
-      {
-        onSuccess: (data, result) => {
-          console.log("success", { data, result });
-        },
-        onError: (errorMessage, error) => {
-          console.log("error", { errorMessage, error });
-        },
-      },
-    );
+    qrCodeRef.current?.onOpen({
+      title,
+      classRoomId,
+      classSessionId,
+      startAt: start_at,
+      endAt: end_at,
+    });
   };
 
   const handleCloseDialog = useCallback(() => {

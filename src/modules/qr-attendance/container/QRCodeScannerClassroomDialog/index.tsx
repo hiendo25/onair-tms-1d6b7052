@@ -1,5 +1,5 @@
 "use client";
-import React, { Activity, forwardRef, memo, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, { Activity, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -35,33 +35,37 @@ type StudentCheckedInResult = {
   employeeCode?: string;
 };
 
+type CallbackActions = {
+  onSuccess?: () => void;
+  onError?: () => void;
+};
 export interface QRCodeScannerClassRoomDialogRef {
-  onOpen: (
-    content: ClassRoomContentDialog,
-    options?: { onSuccess?: Html5QRScannerProps["onScanSuccess"]; onError?: Html5QRScannerProps["onScanError"] },
-  ) => void;
+  onOpen: (content: ClassRoomContentDialog, callback?: CallbackActions) => void;
 }
 export interface QRCodeScannerClassRoomDialogProps {
   open?: boolean;
   autoClose?: boolean;
+  onSuccess?: CallbackActions["onSuccess"];
+  onError?: CallbackActions["onError"];
 }
 const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef, QRCodeScannerClassRoomDialogProps>(
-  (props, ref) => {
+  ({ onSuccess, onError, open = false, autoClose }, ref) => {
     const employeeId = useUserOrganization((state) => state.currentOrganization.employeeId);
 
     const [classRoomData, setClassRoomData] = useState<ClassRoomContentDialog>();
+    const [callbackActions, setCallbackActions] = useState<CallbackActions>({ onSuccess, onError });
     const [checkedInResult, setCheckedInResult] = useState<StudentCheckedInResult>();
     const [isScanned, setIsScanned] = useState(false);
-    const [open, setOpen] = useState(false);
+    const [openDialog, setOpenDialog] = useState(open);
     const [errorMessage, setErrormessage] = useState<string>();
     const scannerStatusRef = useRef<"starting" | "scanning" | "idle">("idle");
     const scannerRef = useRef<Html5QRScannerRef>(null);
 
     const { mutate: doCheckIn, isPending: isLoadingScan } = useStudentClassRoomCheckInWithQRMutation();
 
-    const handleOpenDialog = () => setOpen(true);
+    const handleOpenDialog = () => setOpenDialog(true);
 
-    const handleCloseDialog = () => setOpen(false);
+    const handleCloseDialog = () => setOpenDialog(false);
 
     const handleStartScanQRCode = () => {
       scannerRef.current?.start({
@@ -89,6 +93,7 @@ const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef,
                     employeeCode: data.employeeCode,
                   });
                 }
+                callbackActions?.onSuccess?.();
               },
               onError(error, variables, onMutateResult, context) {
                 console.log({ error });
@@ -97,6 +102,7 @@ const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef,
                 } else {
                   setErrormessage(error?.message);
                 }
+                callbackActions?.onError?.();
               },
               onSettled() {
                 scannerRef.current?.stop?.();
@@ -137,16 +143,25 @@ const QRCodeScannerClassRoomDialog = forwardRef<QRCodeScannerClassRoomDialogRef,
       );
     }, [isScanned]);
 
+    useEffect(() => {
+      if (!onSuccess && !onError) return;
+
+      setCallbackActions({ onSuccess, onError });
+    }, [onSuccess, onError]);
+
     useImperativeHandle(ref, () => ({
-      onOpen(content, options) {
+      onOpen(content, callback) {
         handleOpenDialog();
+        if (callback) {
+          setCallbackActions({ onSuccess: callback.onSuccess, onError: callback.onError });
+        }
         if (content) setClassRoomData(content);
       },
     }));
 
     return (
       <Dialog
-        open={open}
+        open={openDialog}
         onClose={handleCloseDialog}
         maxWidth="sm"
         aria-modal
