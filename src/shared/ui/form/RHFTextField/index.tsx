@@ -17,6 +17,7 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
   helpText?: React.ReactNode;
+  type?: "text" | "password";
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   size?: "small" | "medium";
@@ -35,6 +36,7 @@ const RHFTextField = <T extends FieldValues>({
   sx,
   inputProps,
   size,
+  type = "text",
 }: RHFTextFieldProps<T>) => {
   const fieldId = useId();
   return (
@@ -57,7 +59,7 @@ const RHFTextField = <T extends FieldValues>({
             disabled={disabled}
             size={size}
             id={fieldId}
-            type="text"
+            type={type}
             sx={{
               background: "white",
             }}
