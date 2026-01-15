@@ -62,10 +62,18 @@ export const useGetNotificationsUnReadCountQuery = (variables: {
   });
 };
 
-function getNotificationByEmployeeInfiniteQueryOptions(queryParams: GetNotificationsByEmployeeQueryParams) {
+/**
+ * Infinite Notification Queries
+ */
+type RequireOne<T, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
+type GetNotificationInfiniteQueryParams = RequireOne<
+  GetNotificationsByEmployeeQueryParams,
+  "page" | "pageSize" | "organizationId" | "employeeId"
+>;
+function getNotificationByEmployeeInfiniteQueryOptions(queryParams: GetNotificationInfiniteQueryParams) {
   let queryKey = notificationQueryKeys.list(queryParams);
 
-  const pageSize = queryParams.pageSize || 5;
+  const pageSize = queryParams.pageSize;
 
   return infiniteQueryOptions({
     queryKey,
@@ -85,7 +93,7 @@ function getNotificationByEmployeeInfiniteQueryOptions(queryParams: GetNotificat
 }
 
 export const useGetNotificationsByEmployeeInfiniteQuery = (variables: {
-  queryParams: GetNotificationsByEmployeeQueryParams;
+  queryParams: GetNotificationInfiniteQueryParams;
   enabled: boolean;
 }) => {
   const { queryParams, enabled = true } = variables || {};
@@ -94,14 +102,3 @@ export const useGetNotificationsByEmployeeInfiniteQuery = (variables: {
     enabled,
   });
 };
-
-// export const useInfiniteOnlineCourseQuery = ({
-// 	filters,
-// }: {
-// 	filters: OnlineCourseComboQueryFilter;
-// }) => {
-// 	return useInfiniteQuery({
-// 		...courseAndComboInfiniteQueryOptions(filters),
-// 		placeholderData: (previousData, previousQuery) => previousData,
-// 	});
-// };

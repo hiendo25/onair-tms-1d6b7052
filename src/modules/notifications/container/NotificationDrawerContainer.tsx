@@ -18,7 +18,7 @@ interface NotificationDrawerContainerProps {}
 
 type RequireOne<T, K extends keyof T> = Required<Pick<T, K>> & Omit<T, K>;
 
-const DEFAULT_PAGE_SIZE = 5;
+const DEFAULT_PAGE_SIZE = 10;
 const NotificationDrawerContainer: React.FC<NotificationDrawerContainerProps> = (props) => {
   const pathname = usePathname();
   const isOpenDrawer = useNotificationStore((state) => state.isOpenDrawer);
@@ -92,13 +92,10 @@ const NotificationDrawerContainer: React.FC<NotificationDrawerContainerProps> = 
   const handleMarkReadNotify = (recordId: string) => () => {
     markAsRead(recordId);
   };
-  const closeDrawer = useEffectEvent(() => {
-    if (!isOpenDrawer) return;
-    closeNotification();
-  });
 
   useEffect(() => {
-    closeDrawer();
+    if (!isOpenDrawer) return;
+    closeNotification();
   }, [pathname]);
 
   return (
