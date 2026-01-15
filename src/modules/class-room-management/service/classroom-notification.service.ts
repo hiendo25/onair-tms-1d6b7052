@@ -4,9 +4,9 @@ import { ClassRoomPlatformType, getClassRoomPlatformName } from "@/constants/cla
 import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
-import { NotificationBaseService } from "../service/base-notification.service";
+import { NotificationBaseService } from "@/services/notifications/base-notification.service";
 
-class NotificationClassRoomService extends NotificationBaseService {
+export class ClassRoomNotificationService extends NotificationBaseService {
   private organizationId: string;
 
   constructor(organizationId: string) {
@@ -116,4 +116,3 @@ class NotificationClassRoomService extends NotificationBaseService {
     this.bulkCreate(bulkCreatePayload);
   }
 }
-export { NotificationClassRoomService };

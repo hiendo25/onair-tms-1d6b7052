@@ -22,15 +22,12 @@ import {
 } from "@/repository/class-session";
 import { CreateSessionAgendasPayload } from "@/repository/class-session-agenda";
 import { CreateQRCodePayload } from "@/repository/qr-attendance";
-import { NotificationClassRoomService } from "../notifications/notification-classroom.service";
 
 export type CreateClassRoomDto = {
   formData: ClassRoomFormValues;
   students: ClassRoomStore["state"]["selectedStudents"];
 };
 export class CreateClassRoomService {
-  private notificationService: NotificationClassRoomService;
-
   private employeeId: string;
 
   private organizationId: string;
@@ -40,7 +37,6 @@ export class CreateClassRoomService {
     if (!organizationId) throw new Error("organizationId is required");
     this.employeeId = employeeId;
     this.organizationId = organizationId;
-    this.notificationService = new NotificationClassRoomService(organizationId);
   }
 
   async execute(payload: CreateClassRoomDto) {
@@ -160,20 +156,21 @@ export class CreateClassRoomService {
       /**
        * Step 8:  Notifications for students
        */
-      await this.notificationService.createStudentsNotification({
-        classRoomId: classRoomData.id,
-        classRoomSlug: uniqueSlug,
-        classRoomTitle: title,
-        receiverEmployeeIds: students.map((s) => s.id),
-        createdBy: this.employeeId,
-        platform: platform,
-        classRoomType: roomType,
-        startAt: startDate,
-        thumbnailUrl,
-      });
+      // await this.notificationService.createStudentsNotification({
+      //   classRoomId: classRoomData.id,
+      //   classRoomSlug: uniqueSlug,
+      //   classRoomTitle: title,
+      //   receiverEmployeeIds: students.map((s) => s.id),
+      //   createdBy: this.employeeId,
+      //   platform: platform,
+      //   classRoomType: roomType,
+      //   startAt: startDate,
+      //   thumbnailUrl,
+      // });
     }
 
     eventBus.emit("classroom.created", {
+      organizationId,
       classRoomId: classRoomData.id,
       classRoomSlug: uniqueSlug,
       classRoomTitle: title,

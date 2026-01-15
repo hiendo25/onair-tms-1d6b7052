@@ -93,18 +93,12 @@ const getNotificationsByEmployee = async (queryParams: GetNotificationsByEmploye
     if (type) {
       query = query.eq("type", type);
     }
-    const { data, error } = await query.range(from, to).order("created_at", { ascending: false });
-
-    if (error) {
-      throw new Error(error?.message);
-    }
-
-    return data;
+    return await query.range(from, to).order("created_at", { ascending: false });
   } catch (err: any) {
     throw new Error(`Failed to create notification: ${err?.message}`);
   }
 };
-export type GetOwnNotificationResponse = Awaited<ReturnType<typeof getNotificationsByEmployee>>;
+export type GetNotificationByEmployeeResponse = Awaited<ReturnType<typeof getNotificationsByEmployee>>;
 
 const getNotificationsCount = async ({ employeeId, onlyUnRead }: { employeeId: string; onlyUnRead: boolean }) => {
   try {

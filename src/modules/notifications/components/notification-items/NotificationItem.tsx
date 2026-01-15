@@ -1,10 +1,12 @@
 import React, { createContext, useContext } from "react";
 import { Activity } from "react";
+import Link from "next/link";
 import { boolean } from "zod";
 
+import LoadingIndicator from "@/shared/ui/LoadingIndicator";
 import { cn } from "@/utils";
 
-type NotificationContextApi = { isRead?: boolean };
+type NotificationContextApi = { isRead?: boolean; href: string | undefined };
 const NotificationItemContext = createContext<NotificationContextApi | null>(null);
 
 const useNotificationItem = () => {
@@ -13,15 +15,17 @@ const useNotificationItem = () => {
   return context;
 };
 
-const Root: React.FC<{ isRead?: boolean; onClick?: () => void; className?: string; children: React.ReactNode }> = ({
-  isRead,
-  onClick,
-  className,
-  children,
-}) => (
-  <NotificationItemContext.Provider value={{ isRead }}>
-    <div className={cn("notification-item relative", className)} onClick={onClick}>
-      <div className="flex gap-4 items-start cursor-pointer">{children}</div>
+const Root: React.FC<{
+  data: NotificationContextApi;
+  onClick: (() => void) | undefined;
+  className?: string;
+  children: React.ReactNode;
+}> = ({ data, onClick, className, children }) => (
+  <NotificationItemContext.Provider value={data}>
+    <div className={cn("notification-item relative hover:bg-gray-100 p-4 rounded-lg", className)} onClick={onClick}>
+      <NotificationLinkable href={data.href}>
+        <div className="flex gap-4 items-start cursor-pointer">{children}</div>
+      </NotificationLinkable>
     </div>
   </NotificationItemContext.Provider>
 );
@@ -47,6 +51,21 @@ const Content: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="notification-item__content flex-1">{children}</div>
 );
 
+type NotificationLinkableProps = {
+  children: React.ReactElement;
+  href?: string;
+};
+
+export function NotificationLinkable({ children, href }: NotificationLinkableProps): React.ReactElement {
+  if (!href) return children;
+
+  return (
+    <Link href={href} prefetch={false}>
+      {children}
+      <LoadingIndicator className="float-right" />
+    </Link>
+  );
+}
 export const NotificationItem = {
   Root,
   Thumbnail,

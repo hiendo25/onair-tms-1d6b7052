@@ -1,10 +1,19 @@
 import { Typography } from "@mui/material";
 import Image from "next/image";
 
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { ImageIcon } from "@/shared/assets/icons";
 import type { NotificationItemType } from "../notification-item.type";
 import { NotificationItem } from "../NotificationItem";
 
+type ClassRoomNotifyMetadata = {
+  classRoomId: string;
+  classRoomSlug: string;
+  classRoomTitle: string;
+  classRoomType: "single" | "multiple";
+  createdBy: string;
+  platform: ClassRoomPlatformType;
+};
 export const NotificationItemClassRoom = ({
   data,
   className,
@@ -15,10 +24,11 @@ export const NotificationItemClassRoom = ({
   onClick?: () => void;
 }) => {
   const { thumbnailUrl, title, description = "", rawData } = data;
-  console.log({ rawData });
-  const detailUrl = "";
+  const classRoomMetadata = rawData as ClassRoomNotifyMetadata;
+  const detailUrl = classRoomMetadata?.classRoomSlug ? `/class-room/${classRoomMetadata?.classRoomSlug}` : undefined;
+
   return (
-    <NotificationItem.Root isRead={data.isRead} className={className} onClick={onClick}>
+    <NotificationItem.Root data={{ isRead: data.isRead, href: detailUrl }} onClick={onClick} className={className}>
       <NotificationItem.Thumbnail>
         <div className="w-12 h-12 flex items-center justify-around bg-gray-100 rounded-xl overflow-hidden">
           {thumbnailUrl ? (
@@ -28,14 +38,14 @@ export const NotificationItemClassRoom = ({
           )}
         </div>
       </NotificationItem.Thumbnail>
-
       <NotificationItem.Content>
         <Typography
           component="h3"
           sx={{ fontSize: 14, fontWeight: 600 }}
-          className="line-clamp-2 mb-1"
           dangerouslySetInnerHTML={{ __html: title }}
+          className="line-clamp-2 mb-1"
         />
+
         <div dangerouslySetInnerHTML={{ __html: description }} className="text-sm text-gray-600" />
       </NotificationItem.Content>
     </NotificationItem.Root>

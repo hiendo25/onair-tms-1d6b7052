@@ -1,7 +1,6 @@
 "use server";
 import "../theme/palette.css";
 import "../theme/globals.css";
-import "@/modules/class-room-management/listeners/create-classroom";
 
 import React from "react";
 import type { Metadata, ResolvingMetadata } from "next";

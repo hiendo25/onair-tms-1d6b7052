@@ -14,6 +14,7 @@ export type EventMap = {
   };
 
   "classroom.created": {
+    organizationId: string;
     classRoomId: string;
     classRoomTitle: string;
     classRoomSlug: string;

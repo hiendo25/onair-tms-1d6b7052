@@ -2,6 +2,7 @@ import {
   DefaultError,
   QueryClient,
   QueryKey,
+  useInfiniteQuery,
   useMutation,
   UseMutationOptions,
   UseMutationResult,
@@ -62,4 +63,4 @@ function useTQuery<
   return useQuery(options, queryClient);
 }
 
-export { getQueryClient, useTQuery, useTMutation, useQueries as useTQueries };
+export { getQueryClient, useTQuery, useTMutation, useQueries as useTQueries, useInfiniteQuery as useTInfiniteQuery };

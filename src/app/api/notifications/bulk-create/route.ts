@@ -22,6 +22,6 @@ export async function POST(request: Request) {
     return http.created(data);
   } catch (error: any) {
     console.error("Create notification error:", error);
-    return http.internalServerError(error.message);
+    return http.serverError(error.message);
   }
 }

@@ -6,17 +6,18 @@ import React, {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
-import { Badge, Button, Tab, Tabs, Toolbar, Typography } from "@mui/material";
+import { Badge, Button, SwipeableDrawer, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
-import SwipeableDrawer from "@mui/material/SwipeableDrawer";
 import { isUndefined } from "lodash";
 
 import { NotificationType } from "@/model/notification.model";
 import { Inbox01Icon } from "@/shared/assets/icons";
 import EmptyData from "@/shared/ui/EmptyData";
 import { cn } from "@/utils";
+import useInView from "@/utils/useInview";
 
 type FilterOption = { label: string; value: NotificationType | "all"; count?: number };
 export interface DrawerNotificationsRef {
@@ -31,9 +32,11 @@ export interface NotificationDrawerProps<T> {
   items: T[];
   filterOptions: FilterOption[];
   disabledMarkAllRead?: boolean;
+  isFetchingNext?: boolean;
   onFilterChange?: (option: FilterOption) => void;
   onMarkAllRead?: () => void;
   render: (item: T, index: number) => React.ReactNode;
+  onFetchNext?: () => void;
 }
 
 function NotificationDrawer<T>(
@@ -47,6 +50,8 @@ function NotificationDrawer<T>(
     disabledMarkAllRead,
     open,
     onClose,
+    onFetchNext,
+    isFetchingNext,
   }: NotificationDrawerProps<T>,
   ref: React.ForwardedRef<DrawerNotificationsRef>,
 ) {
@@ -67,15 +72,15 @@ function NotificationDrawer<T>(
     if (option) onFilterChange?.(option);
     setActiveKey(value);
   };
-  useImperativeHandle(ref, () => ({
-    onOpen: handleOpen,
-    onClose: handleClose,
-  }));
 
   useEffect(() => {
     if (isUndefined(open)) return;
     setOpenDrawer(open);
   }, [open]);
+  useImperativeHandle(ref, () => ({
+    onOpen: handleOpen,
+    onClose: handleClose,
+  }));
 
   return (
     <SwipeableDrawer anchor="right" open={openDrawer} onClose={handleClose} onOpen={handleOpen}>
@@ -118,23 +123,14 @@ function NotificationDrawer<T>(
           }}
           role="presentation"
         >
-          {loading && <NotificationSkeletons />}
-
-          {!loading && items.length ? (
-            <div className="flex flex-col px-8">
-              {items.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn("border-t border-dashed", {
-                    "border-gray-200 pt-4 mt-4": index !== 0,
-                    "border-transparent": index === 0,
-                  })}
-                >
-                  {render(item, index)}
-                </div>
+          {loading && (
+            <div className="loading-list px-8 flex flex-col gap-8">
+              {Array.from({ length: 5 }, (k, v) => (
+                <NotificationSkeletonItem key={v} />
               ))}
             </div>
-          ) : null}
+          )}
+
           {!loading && !items.length ? (
             <EmptyData
               title="Trống"
@@ -142,6 +138,24 @@ function NotificationDrawer<T>(
               description="Bạn chưa có thông báo nào"
               iconSize="small"
             />
+          ) : null}
+
+          {!loading && items.length ? (
+            <InfiniteScrollList onFetchNext={onFetchNext} isFetchingNext={isFetchingNext}>
+              <div className="flex flex-col px-8 nin-h-[1000px]">
+                {items.map((item, index) => (
+                  <div
+                    key={index}
+                    className={cn("border-t border-dashed", {
+                      "border-gray-200 pt-2 mt-2": index !== 0,
+                      "border-transparent": index === 0,
+                    })}
+                  >
+                    {render(item, index)}
+                  </div>
+                ))}
+              </div>
+            </InfiniteScrollList>
           ) : null}
         </Box>
       </div>
@@ -155,18 +169,14 @@ const DrawerNotifications = forwardRef(NotificationDrawer) as <T>(
 
 export default memo(DrawerNotifications) as typeof DrawerNotifications;
 
-const NotificationSkeletons = ({ count = 5 }: { count?: number }) => {
+const NotificationSkeletonItem = () => {
   return (
-    <div className="loading-list px-8 flex flex-col gap-8">
-      {Array.from({ length: count }, (k, v) => (
-        <div className="item flex gap-6 animate-pulse" key={v}>
-          <div className="w-12 h-12 bg-gray-200/60 rounded-lg"></div>
-          <div className="flex flex-col gap-2 flex-1">
-            <div className="h-3 bg-gray-200/60 rounded-lg"></div>
-            <div className="h-3 bg-gray-200/60 w-[60%] rounded-lg"></div>
-          </div>
-        </div>
-      ))}
+    <div className="item flex gap-6 animate-pulse">
+      <div className="w-12 h-12 bg-gray-200/60 rounded-lg"></div>
+      <div className="flex flex-col gap-2 flex-1">
+        <div className="h-3 bg-gray-200/60 rounded-lg"></div>
+        <div className="h-3 bg-gray-200/60 w-[60%] rounded-lg"></div>
+      </div>
     </div>
   );
 };
@@ -231,5 +241,32 @@ const NotificationSegments = <T extends { value: string }>({
         <Tab key={item.value} id={item.value} value={item.value} label={render(item)} disableRipple />
       ))}
     </Tabs>
+  );
+};
+
+interface InfiniteScrollListProps extends PropsWithChildren {
+  onFetchNext?: () => void;
+  isFetchingNext?: boolean;
+}
+const InfiniteScrollList: React.FC<InfiniteScrollListProps> = ({ onFetchNext, children, isFetchingNext }) => {
+  const loadMoreSentinelRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(loadMoreSentinelRef, { rootMargin: "0px 0px 100px 0px" });
+
+  useEffect(() => {
+    if (isFetchingNext || !isInView) return;
+
+    onFetchNext?.();
+  }, [isInView, isFetchingNext, onFetchNext]);
+
+  return (
+    <div>
+      {children}
+      {isFetchingNext ? (
+        <div className="px-8 py-4">
+          <NotificationSkeletonItem />
+        </div>
+      ) : null}
+      <div ref={loadMoreSentinelRef} style={{ height: "1px" }} />
+    </div>
   );
 };

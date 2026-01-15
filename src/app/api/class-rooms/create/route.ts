@@ -1,3 +1,5 @@
+import "@/modules/class-room-management/listeners/create-classroom";
+
 import { NextRequest } from "next/server";
 
 import { requireAuth } from "@/lib/auth/require-auth";
@@ -16,6 +18,6 @@ export async function POST(request: NextRequest) {
 
     return http.created(classRoomData);
   } catch (err) {
-    return http.internalServerError("Can't create classroom");
+    return http.serverError("Can't create classroom");
   }
 }
