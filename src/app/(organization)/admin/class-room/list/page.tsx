@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
 

@@ -1,8 +1,8 @@
 "use server";
 import React from "react";
-import { redirect } from "next/navigation";
 
 import { CLASS_ROOM_PLATFORM, ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { getClassRoomPlatformName } from "@/constants/class-room.constant";
 import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import { ClassType } from "@/model/enum-type.model";
@@ -33,13 +33,7 @@ const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchP
     ["single", "single"],
   ]);
 
-  const platformTypeName: Record<ClassRoomPlatformType, string> = {
-    offline: "trực tiếp (Offline)",
-    live: "trực tuyến (Live)",
-    online: "E-learning",
-    hybrid: "Hybrid",
-  };
-  const pageTitle = `Tạo lớp học ${platformTypeName[platform] ?? ""}`;
+  const pageTitle = `Tạo lớp học ${getClassRoomPlatformName(platform) ?? ""}`;
 
   return (
     <PageContainer

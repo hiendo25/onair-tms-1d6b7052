@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Image from "next/image";
 import Link from "next/link";
 
+import NotificationBell from "@/modules/notifications/components/NotificationBell";
 import { cn } from "@/utils";
 
 import AccountSetting from "./AccountSetting";
@@ -100,7 +101,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
             ),
             right: (
               <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 2 }}>
-                <NotificationButton />
+                <NotificationBell />
                 <AccountSetting />
               </Stack>
             ),

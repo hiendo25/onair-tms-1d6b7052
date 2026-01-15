@@ -44,6 +44,7 @@ import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
 import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
+import Inbox01Icon from "./Inbox01Icon";
 import InforCircleIcon from "./InforCircleIcon";
 import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
@@ -145,4 +146,5 @@ export {
   Copy07Icon,
   CameraOffIcon,
   VideoRecorderOffIcon,
+  Inbox01Icon,
 };

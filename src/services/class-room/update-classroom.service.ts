@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { isUndefined } from "lodash";
 
-import { ClassRoom } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
+import { ClassRoomFormValues } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
 import {
   classRoomMetaRepository,
@@ -12,171 +12,27 @@ import {
 } from "@/repository";
 import { GetClassRoomByIdResponse } from "@/repository/class-room";
 import {
-  CreatePivotClassRoomAndEmployeePayload,
-  CreatePivotClassRoomAndFieldPayload,
-  CreatePivotClassRoomWithResourcePayload,
-} from "@/repository/class-room/type";
-import {
-  CreateClassRoomSessionPayload,
-  CreatePivotClassSessionWithAssignmentPayload,
-  CreatePivotClassSessionWithCoursePeriodPayload,
   UpSertClassRoomSessionPayload,
   UpsertPivotClassSessionWithCoursePeriodPayload,
 } from "@/repository/class-session";
-import { CreateSessionAgendasPayload, UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
-import { CreateQRCodePayload, UpSertQrCodePayload } from "@/repository/qr-attendance";
-import { notificationService } from "..";
+import { UpSertSessionAgendaPayload } from "@/repository/class-session-agenda";
+import { UpSertQrCodePayload } from "@/repository/qr-attendance";
 
-export class UpsertClassRoomService {
-  private userId: string;
+export type UpdateClassRoomDto = {
+  classRoomId: string;
+  formData: ClassRoomFormValues;
+  students: ClassRoomStore["state"]["selectedStudents"];
+};
+export class UpdateClassRoomService {
+  private employeeId: string;
 
-  private organizationId: string;
-
-  constructor(userId: string, organizationId: string) {
-    if (!userId) throw new Error("userId is required");
-    if (!organizationId) throw new Error("organizationId is required");
-    this.userId = userId;
-    this.organizationId = organizationId;
+  constructor(employeeId: string) {
+    if (!employeeId) throw new Error("employeeId is required");
+    this.employeeId = employeeId;
   }
 
-  async create(payload: { formData: ClassRoom; students: ClassRoomStore["state"]["selectedStudents"] }) {
-    const { formData, students } = payload;
-    const userId = this.userId;
-    const organizationId = this.organizationId;
-
-    const {
-      categories,
-      platform,
-      classRoomSessions,
-      description,
-      thumbnailUrl,
-      roomType,
-      slug,
-      status,
-      title,
-      forWhom,
-      docs,
-      classType,
-    } = formData;
-
-    const uniqueSlug = `${slug}-${new Date().getTime()}`;
-    const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
-    /**
-     * Step 1: Create ClassRoom
-     */
-    const { data: classRoomData, error } = await classRoomRepository.upsertClassRoom({
-      action: "create",
-      payload: {
-        description: description,
-        room_type: roomType,
-        slug: uniqueSlug,
-        status: status,
-        thumbnail_url: thumbnailUrl,
-        title: title,
-        employee_id: userId,
-        start_at: startDate || null,
-        end_at: endDate || null,
-        organization_id: organizationId,
-        class_type: classType,
-      },
-    });
-
-    if (error) {
-      console.error(error);
-      throw new Error(error.message, { cause: "db" });
-    }
-
-    /**
-     * Step 2: Create ClassRoom Meta
-     */
-    if (forWhom.length) {
-      const { data: forWhomData, error: forWhomError } = await classRoomMetaRepository.createClassRoomMeta({
-        class_room_id: classRoomData.id,
-        key: "forWhom",
-        value: forWhom.map((item) => item.description),
-      });
-    }
-
-    /**
-     * Step 3: Sync Class room with Class Field
-     */
-    await classRoomRepository.createPivotClassRoomAndField(
-      categories.map<CreatePivotClassRoomAndFieldPayload>((fieldId) => ({
-        class_field_id: fieldId,
-        class_room_id: classRoomData.id,
-      })),
-    );
-    /**
-     * Step 4: Sync Class room with Resources
-     */
-    if (docs && docs.length) {
-      await classRoomRepository.createPivotClassRoomsWithResources(
-        docs.map<CreatePivotClassRoomWithResourcePayload>((rc) => ({
-          resource_id: rc.id,
-          class_room_id: classRoomData.id,
-        })),
-      );
-    }
-    /**
-     * Step 5: Sync ClassRoom with Students
-     */
-    if (classType !== "learning_path") {
-      const { data: employeeWithClassRoom } = await classRoomRepository.createPivotClassRoomAndEmployee(
-        students.map<CreatePivotClassRoomAndEmployeePayload>((std) => ({
-          class_room_id: classRoomData.id,
-          employee_id: std.id,
-        })),
-      );
-    }
-    /**
-     * Step 6: Create Class room Sessions
-     */
-
-    await this.createSessions(classRoomData.id, {
-      classRoomSessions: classRoomSessions,
-      title,
-      description,
-      roomType,
-      classType,
-    });
-
-    console.log("Create Classroom", classRoomData);
-
-    Promise.allSettled(
-      students.map(async (student) => {
-        return notificationService.sendClassAssignedStudentNotification(student.id, student.email, {
-          userName: student.fullName,
-          className: title,
-          teacherName: "",
-          dateTime: dayjs().format("DD/MM/YYYY HH:mm"),
-          classDetailUrl: "",
-        });
-      }),
-    ).then((results) => {
-      const successCount = results.filter((r) => r.status === "fulfilled" && r.value.success).length;
-      const failCount = results.length - successCount;
-      console.log(`[Notification] Class "${title}" - Sent: ${successCount}, Failed: ${failCount}`);
-    });
-
-    return classRoomData;
-  }
-
-  /**
-   * UPDATE
-   * @param classRoomId
-   * @param payload
-   * @returns
-   */
-
-  async update(
-    classRoomId: string,
-    payload: {
-      formData: ClassRoom;
-      students: ClassRoomStore["state"]["selectedStudents"];
-    },
-  ) {
-    const { formData, students } = payload;
-    const userId = this.userId;
+  async execute(variables: UpdateClassRoomDto) {
+    const { formData, students, classRoomId } = variables;
 
     const { data: classRoomDetail, error: classRoomDetailError } = await classRoomRepository.getClassRoomById(
       classRoomId,
@@ -214,7 +70,7 @@ export class UpsertClassRoomService {
       title: title,
       start_at: startDate || null,
       end_at: endDate || null,
-      employee_id: userId,
+      employee_id: this.employeeId,
     });
 
     if (updateError) {
@@ -271,7 +127,7 @@ export class UpsertClassRoomService {
   private async updateClassRoomMetadata(
     classRoomId: string,
     classRoomDetail: NonNullable<GetClassRoomByIdResponse["data"]>,
-    forWhom: ClassRoom["forWhom"],
+    forWhom: ClassRoomFormValues["forWhom"],
   ) {
     const forWhomMetadata = classRoomDetail.class_room_metadata.find((item) => item.key === "forWhom");
 
@@ -313,7 +169,7 @@ export class UpsertClassRoomService {
   private async updateCategories(
     classRoomId: string,
     classRoomDetail: NonNullable<GetClassRoomByIdResponse["data"]>,
-    categories: ClassRoom["categories"],
+    categories: ClassRoomFormValues["categories"],
   ) {
     const currentClassRoomFields = [...classRoomDetail.class_room_field];
     const currentCategoriesIds = currentClassRoomFields
@@ -343,9 +199,9 @@ export class UpsertClassRoomService {
       title: string;
       description: string;
       oldSessions: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"];
-      newSessions: ClassRoom["classRoomSessions"];
-      roomType: ClassRoom["roomType"];
-      classType: ClassRoom["classType"];
+      newSessions: ClassRoomFormValues["classRoomSessions"];
+      roomType: ClassRoomFormValues["roomType"];
+      classType: ClassRoomFormValues["classType"];
     },
   ) {
     const _this = this;
@@ -447,7 +303,8 @@ export class UpsertClassRoomService {
          * Sync class Session with course Period
          */
 
-        type WeeklyScheduleItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["weeklySchedule"];
+        type WeeklyScheduleItem =
+          ClassRoomFormValues["classRoomSessions"][number]["coursesPeriod"][number]["weeklySchedule"];
         const syncSessionWithCoursePeriodPromise = (async () => {
           const oldCoursePeriods = oldSessionItem?.courses_period || [];
 
@@ -528,7 +385,6 @@ export class UpsertClassRoomService {
             },
           );
 
-          console.log({ coursesPeriodPayload });
           Promise.all(
             coursesPeriodPayload.map(async (payloadCoursePeriod, index) => {
               const { data, error } = await classRoomSessionRepository.upsertPivotClassSessionWithCoursePeriod(
@@ -550,7 +406,7 @@ export class UpsertClassRoomService {
             classRoomId: classRoomId,
             classSessionId: sessionId,
             qrCode: newSession.qrCode,
-            useId: _this.userId,
+            useId: _this.employeeId,
           });
           const { data: qrCodeData, error: qrCodeError } = await qrAttendanceRepository.upsertQRCode(
             createQrCodePayload,
@@ -571,158 +427,9 @@ export class UpsertClassRoomService {
     );
   }
 
-  private async createSessions(
-    classRoomId: string,
-    payload: {
-      classRoomSessions: ClassRoom["classRoomSessions"];
-      roomType: ClassRoom["roomType"];
-      title: string;
-      description: string;
-      classType: ClassRoom["classType"];
-    },
-  ) {
-    const { title, description, roomType, classRoomSessions, classType } = payload;
-    const userId = this.userId;
-
-    await Promise.all(
-      classRoomSessions.map(async (classSession, _sessionIndex) => {
-        try {
-          const { data: sessionData, error: sessionError } = await classRoomSessionRepository.createClassSession(
-            this.mapSessionWithClassRoom(classSession, roomType, title, description, classRoomId, _sessionIndex),
-          );
-
-          if (sessionError) {
-            console.log("Create Session failed", sessionError, _sessionIndex);
-            throw new Error(`Create classroom session ${_sessionIndex} failed`);
-          }
-
-          /**
-           * Agendas
-           */
-          const agendaPromise = (async () => {
-            const { error: agendaError } = await classSessionAgendaRepository.createAgendas(
-              this.mapAgendaWithSessions(classSession.agendas, sessionData.id),
-            );
-          })();
-
-          /**
-           * QRCode
-           * this QRcode only for classroom is offline
-           */
-          const qrCodePromise = (async () => {
-            if (classSession.sessionType !== "offline") return;
-            const { error: qrcodeError } = await qrAttendanceRepository.createClassQRCode(
-              this.mapQrcodeWithSession({
-                qrCode: classSession.qrCode,
-                classRoomId: classRoomId,
-                classSessionId: sessionData.id,
-                useId: userId,
-              }),
-            );
-            if (qrcodeError) throw new Error("Create Qrcode Failed");
-          })();
-
-          /**
-           * Sync class Session to an assignment
-           * Optional
-           */
-
-          const syncSessionWithAssignmentPromise = (async () => {
-            if (!classSession.assignments.length) return;
-            const bulkCreateSessionWithAssignmentPayload =
-              classSession.assignments.map<CreatePivotClassSessionWithAssignmentPayload>((assignment) => ({
-                assignment_id: assignment.assignmentId,
-                end_at: null,
-                start_at: null,
-                session_id: sessionData.id,
-              }));
-
-            const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
-              bulkCreateSessionWithAssignmentPayload,
-            );
-            if (error) {
-              throw new Error(error.message);
-            }
-          })();
-
-          /**
-           * Sync class Session to with course Period
-           */
-          const syncSessionWithCoursePeriodPromise = (async () => {
-            const payloadCourses = classSession.coursesPeriod.reduce<CreatePivotClassSessionWithCoursePeriodPayload[]>(
-              (acc, { teachers, course, startAt, endAt, weeklySchedule }) => {
-                const coursesPayloadByTeachers = teachers
-                  .map((teacher) => {
-                    const teacherId = teacher?.teacherId;
-                    if (teacherId) {
-                      /**
-                       * For class type learning path
-                       */
-                      const weeklyScheduleItem: CreatePivotClassSessionWithCoursePeriodPayload["weekly_schedule"] =
-                        classType === "learning_path"
-                          ? {
-                              duration: weeklySchedule?.duration,
-                              from:
-                                weeklySchedule?.from?.day && weeklySchedule?.from?.time
-                                  ? {
-                                      day: weeklySchedule?.from.day,
-                                      time: weeklySchedule?.from.time,
-                                    }
-                                  : undefined,
-                              to:
-                                weeklySchedule?.to?.day && weeklySchedule?.to?.time
-                                  ? {
-                                      day: weeklySchedule?.to.day,
-                                      time: weeklySchedule?.to.time,
-                                    }
-                                  : undefined,
-                              isDuration: weeklySchedule?.isDuration,
-                            }
-                          : null;
-                      return {
-                        class_session_id: sessionData.id,
-                        course_id: course.id,
-                        teacher_id: teacherId,
-                        start_at: classType === "learning_path" ? null : dayjs(startAt).toISOString(),
-                        end_at: classType === "learning_path" ? null : dayjs(endAt).toISOString(),
-                        weekly_schedule: weeklyScheduleItem,
-                      };
-                    }
-                  })
-                  .filter((pl) => !!pl);
-                return [...acc, ...coursesPayloadByTeachers];
-              },
-              [],
-            );
-
-            const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithCoursePeriod(
-              payloadCourses,
-            );
-            if (error) {
-              throw new Error(error.message);
-            }
-          })();
-
-          /**
-           * Run all promise in parallel
-           */
-          await Promise.all([
-            agendaPromise,
-            qrCodePromise,
-            syncSessionWithAssignmentPromise,
-            syncSessionWithCoursePeriodPromise,
-          ]);
-        } catch (err: any) {
-          console.error(`Session ${_sessionIndex} failed:`, err);
-          throw new Error(err?.message);
-        }
-      }),
-    );
-  }
-
   private async updateClassroomWithResource(payload: {
     oldResources: NonNullable<GetClassRoomByIdResponse["data"]>["resources"];
-    newResources: ClassRoom["docs"];
+    newResources: ClassRoomFormValues["docs"];
     classRoomId: string;
   }) {
     const { classRoomId, oldResources, newResources = [] } = payload;
@@ -754,8 +461,8 @@ export class UpsertClassRoomService {
    *  Get start/end date from sessions
    * -------------------------------------------------------- */
   private getStartDateAndEndDateFromClassSession(
-    roomSessions: ClassRoom["classRoomSessions"],
-    roomType: ClassRoom["roomType"],
+    roomSessions: ClassRoomFormValues["classRoomSessions"],
+    roomType: ClassRoomFormValues["roomType"],
   ) {
     let startDate, endDate;
 
@@ -776,32 +483,11 @@ export class UpsertClassRoomService {
   }
 
   /** --------------------------------------------------------
-   *  Helper: Map qrCode payloads for offline class
-   * -------------------------------------------------------- */
-  private mapQrcodeWithSession(data: {
-    qrCode: ClassRoom["classRoomSessions"][number]["qrCode"];
-    classRoomId: string;
-    classSessionId: string;
-    useId: string;
-  }): CreateQRCodePayload {
-    const { classRoomId, classSessionId, useId, qrCode } = data;
-    return {
-      title: `QrCode`,
-      description: "",
-      checkin_start_time: qrCode.isLimitTimeScanQrCode ? qrCode.startDate : null,
-      checkin_end_time: qrCode.isLimitTimeScanQrCode ? qrCode.endDate : null,
-      created_by: useId,
-      class_room_id: classRoomId,
-      class_session_id: classSessionId,
-    };
-  }
-
-  /** --------------------------------------------------------
    *  Helper: Map Update Qrcode payloads
    * -------------------------------------------------------- */
 
   private mapUpSertQrCodeWithSession(data: {
-    qrCode: ClassRoom["classRoomSessions"][number]["qrCode"];
+    qrCode: ClassRoomFormValues["classRoomSessions"][number]["qrCode"];
     classRoomId: string;
     classSessionId: string;
     useId: string;
@@ -839,8 +525,8 @@ export class UpsertClassRoomService {
    *  Helper: Map Upsert session payloads
    * -------------------------------------------------------- */
   private mapUpSertSessionWithClassRoom(data: {
-    classSession: ClassRoom["classRoomSessions"][number];
-    roomType: ClassRoom["roomType"];
+    classSession: ClassRoomFormValues["classRoomSessions"][number];
+    roomType: ClassRoomFormValues["roomType"];
     classRoomTitle: string;
     classRoomDescription: string;
     classRoomId: string;
@@ -886,45 +572,13 @@ export class UpsertClassRoomService {
   }
 
   /** --------------------------------------------------------
-   *  Helper: Map create session payloads
-   * -------------------------------------------------------- */
-  private mapSessionWithClassRoom(
-    classSession: ClassRoom["classRoomSessions"][number],
-    roomType: ClassRoom["roomType"],
-    classRoomTitle: string,
-    classRoomDescription: string,
-    classRoomId: string,
-    index: number,
-  ): CreateClassRoomSessionPayload {
-    const { weeklySchedule } = classSession;
-    const weeklySchedulePayload: CreateClassRoomSessionPayload["weekly_schedule"] =
-      weeklySchedule?.from && weeklySchedule?.to
-        ? {
-            from: weeklySchedule.from,
-            to: weeklySchedule.to,
-          }
-        : null;
-
-    return {
-      title: roomType === "single" ? classRoomTitle : classSession.title,
-      description: roomType === "single" ? classRoomDescription : classSession.description,
-      location: classSession.location,
-      channel_info: classSession.channelInfo,
-      channel_provider: classSession.channelProvider,
-      end_at: classSession.endDate || null,
-      start_at: classSession.startDate || null,
-      session_type: classSession.sessionType,
-      class_room_id: classRoomId,
-      priority: index + 1,
-      weekly_schedule: weeklySchedulePayload,
-    };
-  }
-
-  /** --------------------------------------------------------
    *  Helper: Map Upsert Agenda with session payloads
    * -------------------------------------------------------- */
 
-  private mapUpsertAgendaWithSessions(agendas: ClassRoom["classRoomSessions"][number]["agendas"], sessionId: string) {
+  private mapUpsertAgendaWithSessions(
+    agendas: ClassRoomFormValues["classRoomSessions"][number]["agendas"],
+    sessionId: string,
+  ) {
     return agendas.map<UpSertSessionAgendaPayload>((agenda) => {
       const agendaId = agenda.id;
       const payload = {
@@ -951,22 +605,5 @@ export class UpsertClassRoomService {
             },
           };
     });
-  }
-
-  /** --------------------------------------------------------
-   *  Helper: Map Agenda with session payloads
-   * -------------------------------------------------------- */
-  private mapAgendaWithSessions(
-    agendas: ClassRoom["classRoomSessions"][number]["agendas"],
-    sessionId: string,
-  ): CreateSessionAgendasPayload[] {
-    return agendas.map<CreateSessionAgendasPayload>((agenda) => ({
-      class_session_id: sessionId,
-      title: agenda.title,
-      description: agenda.description,
-      start_at: agenda.startDate,
-      end_at: agenda.endDate,
-      thumbnail_url: null,
-    }));
   }
 }

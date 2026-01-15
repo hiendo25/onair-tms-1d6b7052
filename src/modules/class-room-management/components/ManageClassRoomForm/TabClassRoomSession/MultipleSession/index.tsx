@@ -4,7 +4,7 @@ import { Button, Divider, Typography } from "@mui/material";
 import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import { initClassSessionFormData } from "..";
 import SessionFormItem from "../SessionFormItem";
@@ -17,7 +17,7 @@ export type MultipleSessionRef = {
 
 interface MultipleSessionProps {
   className?: string;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const MultipleSession = forwardRef<MultipleSessionRef, MultipleSessionProps>(({ className, control }, ref) => {
   const {

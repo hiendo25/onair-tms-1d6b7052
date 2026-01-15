@@ -5,7 +5,7 @@ import { Control } from "react-hook-form";
 import { TrashIcon1 } from "@/shared/assets/icons";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 
 import AgendaFromToDate from "./AgendaFromToDate";
 
@@ -13,7 +13,7 @@ interface AgendaFormItemProps {
   index: number;
   sessionIndex: number;
   remove: (index: number) => void;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const AgendaFormItem: React.FC<AgendaFormItemProps> = ({ sessionIndex, index, remove, control }) => {
   return (

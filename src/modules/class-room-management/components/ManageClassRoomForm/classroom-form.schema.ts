@@ -361,7 +361,7 @@ const classRoomSchema = zod
     }
   });
 
-type ClassRoomSession = zod.infer<typeof classRoomSessionSchema>;
-type ClassRoom = zod.infer<typeof classRoomSchema>;
+type ClassRoomSessionFormValues = zod.infer<typeof classRoomSessionSchema>;
+type ClassRoomFormValues = zod.infer<typeof classRoomSchema>;
 
-export { classRoomSessionSchema, classRoomSchema, type ClassRoomSession, type ClassRoom };
+export { classRoomSessionSchema, classRoomSchema, type ClassRoomSessionFormValues, type ClassRoomFormValues };

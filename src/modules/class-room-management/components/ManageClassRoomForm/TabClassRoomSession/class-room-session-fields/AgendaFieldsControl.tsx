@@ -3,12 +3,12 @@ import { Box, Button, FormLabel, Typography } from "@mui/material";
 import { Control, useFieldArray } from "react-hook-form";
 
 import { cn } from "@/utils";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 
 import AgendaFormItem from "./AgendaFormItem";
 
-export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["agendas"][number] => {
+export const getAgendaInitData = (): ClassRoomFormValues["classRoomSessions"][number]["agendas"][number] => {
   return {
     description: "",
     endDate: "",
@@ -19,7 +19,7 @@ export const getAgendaInitData = (): ClassRoom["classRoomSessions"][number]["age
 interface AgendaFieldsProps {
   sessionIndex: number;
   className?: string;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const AgendaFieldsControl: React.FC<AgendaFieldsProps> = ({ sessionIndex, className, control }) => {
   const { trigger } = useClassRoomFormContext();

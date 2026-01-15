@@ -119,7 +119,7 @@ const createClassRoom = async (payload: CreateClassRoomPayload) => {
     throw new Error(err?.message ?? "Unknown error craete Class Room");
   }
 };
-
+export type CreateClassRoomResponse = Awaited<ReturnType<typeof upsertClassRoom>>;
 const updateClassRoom = async (payload: UpdateClassRoomPayload) => {
   try {
     const { id, ...restPayload } = payload;
@@ -129,6 +129,7 @@ const updateClassRoom = async (payload: UpdateClassRoomPayload) => {
     throw new Error(err?.message ?? "Unknown error update Class Room");
   }
 };
+export type UpdateClassRoomResponse = Awaited<ReturnType<typeof updateClassRoom>>;
 
 const upsertClassRoom = async (upsertPayload: UpSertClassRoomPayload) => {
   try {
@@ -138,6 +139,8 @@ const upsertClassRoom = async (upsertPayload: UpSertClassRoomPayload) => {
     throw new Error(err?.message ?? "Unknown error craete Class Room");
   }
 };
+
+export type UpsertClassRoomResponse = Awaited<ReturnType<typeof upsertClassRoom>>;
 
 const createPivotClassRoomAndHashTag = async (payload: CreatePivotClassRoomAndHashTagPayload[]) => {
   try {

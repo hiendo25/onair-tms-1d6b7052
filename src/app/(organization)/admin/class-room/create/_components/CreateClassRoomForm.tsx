@@ -12,6 +12,7 @@ import ManageClassRoomForm, {
   ManageClassRoomFormRef,
 } from "@/modules/class-room-management/components/ManageClassRoomForm";
 import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
+import { useCreateClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 interface CreateClassRoomFormProps {
   platform: ClassRoomPlatformType;
   roomType: ClassRoomType;
@@ -22,10 +23,15 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
-  const { onCreate, isLoading } = useCRUDClassRoom();
+  // const { onCreate, isLoading } = useCRUDClassRoom();
+  const { mutate: onCreate, isPending: isLoading } = useCreateClassRoomMutation();
   const handleCancel = () => {
     router.push(PATHS.CLASSROOMS.ROOT);
   };
+
+  // const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = () => {
+
+  // }
   const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
     onCreate(
       { formData, students },

@@ -6,11 +6,11 @@ import SimpleDialogCourseSelector, {
   SimpleDialogCourseSelectorProps,
   SimpleDialogCourseSelectorRef,
 } from "@/modules/courses/container/SimpleDialogCourseSelector";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
 interface ButtonAddCourseProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   sessionIndex: number;
 }
 const ButtonAddCourse: React.FC<ButtonAddCourseProps> = ({ control, sessionIndex }) => {
@@ -38,7 +38,7 @@ const ButtonAddCourse: React.FC<ButtonAddCourseProps> = ({ control, sessionIndex
 
   console.log("render button select course");
   const handleConfirmSelectCourse: SimpleDialogCourseSelectorProps["onOk"] = (courseList) => {
-    const courseListAppend = courseList.map<ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]>(
+    const courseListAppend = courseList.map<ClassRoomFormValues["classRoomSessions"][number]["coursesPeriod"][number]>(
       (item) => ({
         startAt: "",
         endAt: "",

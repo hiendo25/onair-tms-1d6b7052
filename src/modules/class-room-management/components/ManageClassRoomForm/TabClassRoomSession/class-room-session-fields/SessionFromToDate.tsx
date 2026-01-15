@@ -4,10 +4,10 @@ import dayjs from "dayjs";
 import { Control, useController, useWatch } from "react-hook-form";
 
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 interface SessionFromToDateProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   index: number;
 }
 const SessionFromToDate: React.FC<SessionFromToDateProps> = ({ control, index }) => {

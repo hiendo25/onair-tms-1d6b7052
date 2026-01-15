@@ -4,7 +4,7 @@ import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import { MarkerPin01Icon } from "@/shared/assets/icons";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { type ClassRoom } from "../classroom-form.schema";
+import { type ClassRoomFormValues } from "../classroom-form.schema";
 
 import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
 import AssessmentField from "./class-room-session-fields/AssessmentField";
@@ -20,7 +20,7 @@ export type SingleSessionRef = {
 };
 interface SingleSessionProps {
   // methods: UseFormReturn<ClassRoom>;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 
 const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ control }, ref) => {

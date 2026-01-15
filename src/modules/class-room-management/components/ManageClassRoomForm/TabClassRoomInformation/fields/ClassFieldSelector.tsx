@@ -4,9 +4,9 @@ import { Control } from "react-hook-form";
 import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
 import { slugify } from "@/utils/slugify";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 interface ClassFieldSelectorProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const ClassFieldSelector: React.FC<ClassFieldSelectorProps> = ({ control }) => {
   const { data: fieldListData, isPending } = useGetCategoriesQuery();
