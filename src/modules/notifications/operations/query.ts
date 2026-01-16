@@ -1,7 +1,7 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
 
 import { useTInfiniteQuery, useTQuery } from "@/lib";
-import { notificationsRepository } from "@/repository";
+import { notificationsRepository, pushSubscriptionsRepository } from "@/repository";
 import { GetNotificationQueryParams, GetNotificationsByEmployeeQueryParams } from "@/repository/notifications";
 
 import { notificationQueryKeys } from "./keys";
@@ -100,5 +100,12 @@ export const useGetNotificationsByEmployeeInfiniteQuery = (variables: {
   return useTInfiniteQuery({
     ...getNotificationByEmployeeInfiniteQueryOptions(queryParams),
     enabled,
+  });
+};
+
+export const useGetSubscribeNotificationQuery = (employeeId: string) => {
+  return useTQuery({
+    queryKey: ["GET_SUBSCRIBE_USER"],
+    queryFn: () => pushSubscriptionsRepository.getSubscribeNotification(employeeId),
   });
 };

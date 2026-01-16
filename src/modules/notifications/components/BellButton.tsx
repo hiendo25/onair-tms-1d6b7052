@@ -18,14 +18,12 @@ const BellButton: React.FC<BellButtonProps> = ({ className, count = 0, ...restPr
     <IconButton
       {...restProps}
       sx={(theme) => ({
-        backgroundColor: paletteMode === "light" ? theme.palette.grey[200] : "white",
+        backgroundColor: paletteMode === "light" ? "white" : theme.palette.grey[800],
         width: 36,
         height: 36,
-        borderRadius: "0.625rem",
-        // border: "1px solid",
-        // borderColor: theme.palette.grey[300],
+        borderRadius: 36,
         "&:hover": {
-          backgroundColor: theme.palette.grey[300],
+          backgroundColor: theme.palette.grey[200],
         },
       })}
       className={className}
