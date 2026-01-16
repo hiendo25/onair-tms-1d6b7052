@@ -54,5 +54,5 @@ async function applyOrganizationMiddleware(request: NextRequest, userId: string)
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|manifest.webmanifest|sw.js|favicon.ico|.*\\.png$).*)"],
 };

@@ -13,8 +13,8 @@ import DashboardSidebar from "./DashboardSidebar";
 import { DashboardSidebarProps } from "./DashboardSidebar";
 import Footer from "./Footer";
 import Header from "./Header";
-import NotificationButton from "./NotificationButton";
 import OrganizationSelector, { OrganizationSelectorProps } from "./OrganizationSelector";
+import SettingButton from "./SettingButton";
 import useToggleSidebar from "./useToggleSidebar";
 const LayoutWrapper = styled(Box)(() => ({
   position: "relative",
@@ -100,9 +100,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               />
             ),
             right: (
-              <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 2 }}>
+              <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 1 }}>
                 <NotificationBell />
-                <AccountSetting />
+                <SettingButton />
+                <AccountSetting avatarOnly />
               </Stack>
             ),
           }}

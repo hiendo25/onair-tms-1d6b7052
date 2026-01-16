@@ -45,3 +45,4 @@ export * as xpTransactionsRepository from "./xp-transactions";
 export * as gamificationXpRepository from "./gamification-xp";
 export * as gamificationRankingRepository from "./gamification-ranking";
 export * as classQRCodeRepository from "./class-qr-codes";
+export * as pushSubscriptionsRepository from "./push-subscriptions";

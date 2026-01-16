@@ -1,20 +1,6 @@
 "use client";
 import React, { Children, memo } from "react";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import {
-  Button,
-  Divider,
-  dividerClasses,
-  listClasses,
-  ListItemIcon,
-  listItemIconClasses,
-  ListItemText,
-  Menu,
-  MenuItem,
-  paperClasses,
-} from "@mui/material";
-
-import useAuthSignOut from "@/modules/auth/hooks/useAuthSignOut";
+import { Button, Divider, MenuItem, MenuList, Popover } from "@mui/material";
 
 type AccountMenuDividerItem = {
   type: "divider";
@@ -28,9 +14,12 @@ type AccountMenuItem = {
 type AccountMenuItems = (AccountMenuItem | AccountMenuDividerItem)[];
 export interface AccountMenuOptionsProps extends React.PropsWithChildren {
   menuItems?: AccountMenuItems;
+  slots?: {
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+  };
 }
-const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuItems = [] }) => {
-  const { signOut, isPending } = useAuthSignOut();
+const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, slots, menuItems = [] }) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const open = Boolean(anchorEl);
@@ -43,6 +32,8 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuI
 
   const Element = Children.only(children);
 
+  const id = open ? "simple-popover" : undefined;
+
   return (
     <React.Fragment>
       <Button
@@ -52,61 +43,36 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuI
         type="button"
         color="inherit"
         variant="fill"
-        className="bg-transparent  text-left p-0 h-auto min-w-auto"
+        className="bg-transparent text-left p-0 h-auto min-w-auto"
         disableRipple
       >
         {Element}
       </Button>
-      <Menu
-        anchorEl={anchorEl}
-        id="account-menu"
+      <Popover
+        id={id}
         open={open}
+        anchorEl={anchorEl}
         onClose={handleClose}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        sx={{
-          [`& .${listClasses.root}`]: {
-            padding: "8px",
-          },
-          [`& .${paperClasses.root}`]: {
-            padding: 0,
-            width: "180px",
-          },
-          [`& .${dividerClasses.root}`]: {
-            margin: "4px -8px",
-          },
-          ".MuiPaper-root": {
-            border: "none",
-          },
-        }}
       >
-        {menuItems.map((item, _index) => {
-          if (item.type === "divider") {
-            return <Divider key={_index} />;
-          }
-          return (
-            <MenuItem key={_index} className="line-clamp-1 my-[0.5] text-sm">
-              {item.title}
-            </MenuItem>
-          );
-        })}
-        {menuItems.length ? <Divider /> : null}
-        <MenuItem
-          sx={{
-            [`& .${listItemIconClasses.root}`]: {
-              ml: "auto",
-              minWidth: 0,
-            },
-          }}
-          onClick={signOut}
-          disabled={isPending}
-        >
-          <ListItemText>Đăng xuất</ListItemText>
-          <ListItemIcon>
-            <LogoutRoundedIcon fontSize="small" />
-          </ListItemIcon>
-        </MenuItem>
-      </Menu>
+        <div className="w-52">
+          {slots?.header ? <div className="menu-options-header">{slots?.header}</div> : null}
+          <MenuList className="px-1" dense sx={{ gap: "4px 0", paddingBlock: "2px" }}>
+            {menuItems.map((item, _index) => {
+              if (item.type === "divider") {
+                return <Divider key={_index} />;
+              }
+              return (
+                <MenuItem key={_index} className="line-clamp-1 text-sm rounded-md py-2">
+                  {item.title}
+                </MenuItem>
+              );
+            })}
+          </MenuList>
+          {slots?.footer ? <div className="menu-options-footer">{slots?.footer}</div> : null}
+        </div>
+      </Popover>
     </React.Fragment>
   );
 };
