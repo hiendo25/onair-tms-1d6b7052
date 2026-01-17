@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import webpush from "web-push";
 
 import { requireAuth } from "@/lib/auth/require-auth";
 import { SubscribePushSubscriptionDto } from "@/modules/notifications/dto/push-subscription.dto";
 import { PushSubscriptionService } from "@/modules/notifications/service/push-subscriptions.service";
 import { http } from "@/utils/http-status";
-
-webpush.setVapidDetails(
-  "mailto:vutruongduy2109@gmail.com",
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
 
 export async function POST(request: NextRequest) {
   try {
