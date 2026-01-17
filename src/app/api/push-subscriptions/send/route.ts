@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     const { organizationId } = await requireAuth();
 
     await new PushSubscriptionService().push(organizationId, {
-      body: "12313123",
+      body: "Noi dung mesage",
       title: "thong bao moi",
       url: "/dashboard",
     });
@@ -18,6 +18,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.log(err);
 
-    return http.serverError("Can't create classroom");
+    return http.serverError("Can't send message");
   }
 }
