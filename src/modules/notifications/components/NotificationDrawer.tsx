@@ -83,8 +83,23 @@ function NotificationDrawer<T>(
   }));
 
   return (
-    <SwipeableDrawer anchor="right" open={openDrawer} onClose={handleClose} onOpen={handleOpen}>
-      <div className="min-h-screen overflow-hidden flex flex-col w-[420px]">
+    <SwipeableDrawer
+      anchor="right"
+      open={openDrawer}
+      onClose={handleClose}
+      onOpen={handleOpen}
+      slotProps={{
+        paper: {
+          sx: (theme) => ({
+            width: 420,
+            "@media (max-width: 600px)": {
+              width: "100%",
+            },
+          }),
+        },
+      }}
+    >
+      <div className="min-h-screen overflow-hidden flex flex-col w-full">
         <Toolbar className="block z-90 bg-white min-h-auto" sx={{ minHeight: "auto" }}>
           <div className="flex items-center justify-between w-full py-4 mb-4">
             <Typography variant="h6">Thông báo</Typography>
