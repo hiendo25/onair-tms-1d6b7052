@@ -13,11 +13,13 @@ import {
   useUpdateCertificateTemplateMutation,
 } from "@/modules/certificates/operations/mutation";
 
+import { CertificateLayoutConfig } from "@/repository/certificate-templates/type";
+
 interface EditCertificateFormProps {
   data: {
     id: string;
     name: string | null;
-    description: string | null;
+    layout_config: CertificateLayoutConfig | null;
     frame: {
       id: string;
       image_url: string | null;
@@ -37,7 +39,13 @@ export default function EditCertificateForm({ data }: EditCertificateFormProps) 
     return {
       id: data.id,
       name: data.name || "",
-      description: data.description || "",
+      layout_config: data.layout_config || {
+        completion_title: "Chứng nhận hoàn thành",
+        awarded_to: "Chứng nhận này được trao cho",
+        program_completion: "Hoàn thành xuất sắc chương trình",
+        issue_date_label: "Ngày phát hành",
+        expiry_date_label: "Ngày hết hạn",
+      },
       frame_id: data.frame?.id || "",
     };
   }, [data]);
@@ -47,7 +55,7 @@ export default function EditCertificateForm({ data }: EditCertificateFormProps) 
       {
         id: data.id,
         name: formData.name,
-        description: formData.description,
+        layout_config: formData.layout_config,
         frame_id: formData.frame_id,
       },
       {

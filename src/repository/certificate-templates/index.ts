@@ -57,7 +57,7 @@ const getCertificateTemplates = async (params?: GetCertificateTemplatesQueryPara
       `
         id,
         name,
-        description,
+        layout_config,
         frame_id,
         created_at,
         created_by,
@@ -102,7 +102,7 @@ const getCertificateTemplateById = async (id: string) => {
         `
           id,
           name,
-          description,
+          layout_config,
           frame_id,
           created_at,
           created_by,

@@ -33,7 +33,7 @@ const CreateCertificateForm: React.FC = () => {
     createTemplate(
       {
         name: data.name,
-        description: data.description,
+        layout_config: data.layout_config,
         frame_id: data.frame_id,
         organization_id: organizationId,
         created_by: currentEmployee.id,

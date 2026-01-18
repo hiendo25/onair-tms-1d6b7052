@@ -56,7 +56,13 @@ const UpsertCertificateForm: React.FC<UpsertCertificateFormProps> = ({
     defaultValues: initialData || {
       name: "",
       frame_id: "",
-      description: "",
+      layout_config: {
+        completion_title: "Chứng nhận hoàn thành",
+        awarded_to: "Chứng nhận này được trao cho",
+        program_completion: "Hoàn thành xuất sắc chương trình",
+        issue_date_label: "Ngày phát hành",
+        expiry_date_label: "Ngày hết hạn",
+      },
     },
   });
 
@@ -238,24 +244,61 @@ const UpsertCertificateForm: React.FC<UpsertCertificateFormProps> = ({
               </Stack>
             </Grid>
 
-            {/* Right Side - Content & Preview */}
+            {/* Right Side - Layout Config & Preview */}
             <Grid size={{ xs: 12, md: 6 }}>
               <Stack spacing={3}>
-                {/* Content */}
+                {/* Layout Configuration */}
                 <Box>
-                  <Typography variant="body1" fontWeight={500} mb={1}>
-                    Nội dung chứng nhận <span style={{ color: "red" }}>*</span>
+                  <Typography variant="body1" fontWeight={500} mb={2}>
+                    Cấu hình nội dung
                   </Typography>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={8}
-                    placeholder="Nhập nội dung chứng nhận"
-                    {...register("description")}
-                    disabled={isSubmitting}
-                    error={!!errors.description}
-                    helperText={errors.description?.message}
-                  />
+                  <Stack spacing={2.5}>
+                    <TextField
+                      fullWidth
+                      label="Chứng nhận hoàn thành"
+                      placeholder="Chứng nhận hoàn thành"
+                      {...register("layout_config.completion_title")}
+                      disabled={isSubmitting}
+                      error={!!errors.layout_config?.completion_title}
+                      helperText={errors.layout_config?.completion_title?.message}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Chứng nhận này được trao cho"
+                      placeholder="Chứng nhận này được trao cho"
+                      {...register("layout_config.awarded_to")}
+                      disabled={isSubmitting}
+                      error={!!errors.layout_config?.awarded_to}
+                      helperText={errors.layout_config?.awarded_to?.message}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Hoàn thành xuất sắc chương trình"
+                      placeholder="Hoàn thành xuất sắc chương trình"
+                      {...register("layout_config.program_completion")}
+                      disabled={isSubmitting}
+                      error={!!errors.layout_config?.program_completion}
+                      helperText={errors.layout_config?.program_completion?.message}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Ngày phát hành"
+                      placeholder="Ngày phát hành"
+                      {...register("layout_config.issue_date_label")}
+                      disabled={isSubmitting}
+                      error={!!errors.layout_config?.issue_date_label}
+                      helperText={errors.layout_config?.issue_date_label?.message}
+                    />
+                    <TextField
+                      fullWidth
+                      label="Ngày hết hạn"
+                      placeholder="Ngày hết hạn"
+                      {...register("layout_config.expiry_date_label")}
+                      disabled={isSubmitting}
+                      error={!!errors.layout_config?.expiry_date_label}
+                      helperText={errors.layout_config?.expiry_date_label?.message}
+                    />
+                  </Stack>
                 </Box>
 
                 {/* Preview */}

@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardMedia,
   CircularProgress,
   Grid,
   IconButton,
@@ -17,6 +16,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
@@ -241,21 +241,47 @@ const CertificatesListContainer: React.FC = () => {
                   </IconButton>
                 </Box>
 
-                {/* Certificate Preview Image */}
-                <CardMedia
-                  component="img"
-                  image={
-                    certificate.frame?.image_url ||
-                    "/assets/images/placeholder-image.png"
-                  }
-                  alt={certificate.name || "Certificate"}
+                {/* Certificate Preview */}
+                <Box
                   sx={{
-                    aspectRatio: "11 / 8.5",
-                    objectFit: "cover",
-                    bgcolor: "grey.100",
                     width: "100%",
+                    aspectRatio: "4 / 3",
+                    position: "relative",
+                    overflow: "hidden",
+                    bgcolor: "grey.100",
                   }}
-                />
+                >
+                  {/* Base certificate image */}
+                  <Image
+                    src="/assets/images/certificate-standard.png"
+                    width={1944}
+                    height={1458}
+                    alt="Certificate"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+
+                  {/* Frame overlay */}
+                  {certificate.frame?.image_url && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        backgroundImage: `url(${certificate.frame.image_url})`,
+                        backgroundSize: "100% 100%",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                      }}
+                    />
+                  )}
+                </Box>
 
                 {/* Certificate Info */}
                 <CardContent
