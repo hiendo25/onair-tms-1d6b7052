@@ -99,6 +99,12 @@ export const PATHS = {
   MY_GAMIFICATION: {
     ROOT: "/my-gamification",
   },
+  CERTIFICATES: {
+    ROOT: "/admin/certificates",
+    CREATE: "/admin/certificates/create",
+    EDIT: (id: string = ":id") => `/admin/certificates/edit/${id}`,
+    DETAIL: (id: string = ":id") => `/admin/certificates/${id}`,
+  },
 } as const;
 
 export const AUTH_PATHS = {

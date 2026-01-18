@@ -1,6 +1,7 @@
 import React from "react";
 import RouteIcon from '@mui/icons-material/Route';
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 import {
   BarChart10Icon,
@@ -201,6 +202,27 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     path: PATHS.GAMIFICATIONS.ROOT,
     persCheck: [],
     type: "item",
+  },
+  {
+    title: "Quản lý chứng nhận",
+    icon: React.createElement(WorkspacePremiumIcon),
+    key: "certificates",
+    path: PATHS.CERTIFICATES.ROOT,
+    persCheck: [],
+    children: [
+      {
+        title: "Danh sách chứng nhận",
+        key: "certificates/list",
+        path: PATHS.CERTIFICATES.ROOT,
+        type: "item",
+      },
+      {
+        title: "Tạo chứng nhận",
+        key: "certificates/create",
+        path: PATHS.CERTIFICATES.CREATE,
+        type: "item",
+      },
+    ],
   },
   // {
   //   title: "Báo cáo",

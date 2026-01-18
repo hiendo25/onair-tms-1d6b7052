@@ -267,6 +267,92 @@ export type Database = {
         }
         Relationships: []
       }
+      certificate_frames: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      certificate_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          frame_id: string
+          id: string
+          layout_config: Json | null
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          frame_id: string
+          id?: string
+          layout_config?: Json | null
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          frame_id?: string
+          id?: string
+          layout_config?: Json | null
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_frames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_attendances: {
         Row: {
           attendance_method:
@@ -3353,6 +3439,7 @@ export type Database = {
     Views: {
       class_rooms_priority: {
         Row: {
+          class_type: Database["public"]["Enums"]["class_type"] | null
           computed_end_at: string | null
           computed_start_at: string | null
           created_at: string | null
