@@ -9,6 +9,7 @@ import {
   classRoomSessionRepository,
   classSessionAgendaRepository,
   qrAttendanceRepository,
+  classRoomCertificateTemplatesRepository,
 } from "@/repository";
 import { GetClassRoomByIdResponse } from "@/repository/class-room";
 import {
@@ -39,8 +40,12 @@ export class UpsertClassRoomService {
     this.organizationId = organizationId;
   }
 
-  async create(payload: { formData: ClassRoom; students: ClassRoomStore["state"]["selectedStudents"] }) {
-    const { formData, students } = payload;
+  async create(payload: {
+    formData: ClassRoom;
+    students: ClassRoomStore["state"]["selectedStudents"];
+    certificate: ClassRoomStore["state"]["selectedCertificate"];
+  }) {
+    const { formData, students, certificate } = payload;
     const userId = this.userId;
     const organizationId = this.organizationId;
 
@@ -140,6 +145,16 @@ export class UpsertClassRoomService {
       classType,
     });
 
+    /**
+     * Step 7: Create Certificate Template Association (if selected)
+     */
+    if (certificate && classType !== "learning_path") {
+      await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
+        class_room_id: classRoomData.id,
+        certificate_template_id: certificate.id,
+      });
+    }
+
     console.log("Create Classroom", classRoomData);
 
     Promise.allSettled(
@@ -173,9 +188,10 @@ export class UpsertClassRoomService {
     payload: {
       formData: ClassRoom;
       students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
     },
   ) {
-    const { formData, students } = payload;
+    const { formData, students, certificate } = payload;
     const userId = this.userId;
 
     const { data: classRoomDetail, error: classRoomDetailError } = await classRoomRepository.getClassRoomById(
@@ -263,6 +279,37 @@ export class UpsertClassRoomService {
       newSessions: classRoomSessions,
       classType: classType,
     });
+
+    /**
+     * Step 7: Update Certificate Template Association
+     */
+    if (classType !== "learning_path") {
+      const existingCertificate = await classRoomCertificateTemplatesRepository.getClassRoomCertificateTemplateByClassRoomId(
+        classRoomData.id
+      );
+
+      if (certificate) {
+        // Certificate is selected
+        if (existingCertificate) {
+          // Update existing certificate
+          await classRoomCertificateTemplatesRepository.updateClassRoomCertificateTemplate({
+            id: existingCertificate.id,
+            certificate_template_id: certificate.id,
+          });
+        } else {
+          // Create new certificate association
+          await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
+            class_room_id: classRoomData.id,
+            certificate_template_id: certificate.id,
+          });
+        }
+      } else if (existingCertificate) {
+        // No certificate selected but one exists, delete it
+        await classRoomCertificateTemplatesRepository.deleteClassRoomCertificateTemplate({
+          class_room_id: classRoomData.id,
+        });
+      }
+    }
 
     console.log("Update Susscess", classRoomData);
     return classRoomData;

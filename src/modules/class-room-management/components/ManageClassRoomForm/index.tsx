@@ -21,6 +21,7 @@ export interface ManageClassRoomFormProps {
   initFormValue?: ClassRoomFormContainerProps["value"];
   students?: ClassRoomStore["state"]["selectedStudents"]; // init students
   teachers?: ClassRoomStore["state"]["selectedTeachers"]; // init teachers
+  certificate?: ClassRoomStore["state"]["selectedCertificate"]; // init certificate
   isLearningPath?: boolean;
 }
 const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFormProps>(
@@ -32,6 +33,7 @@ const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFo
       isLoading = false,
       teachers,
       students,
+      certificate,
       platform,
       roomType,
       onCancel,
@@ -40,7 +42,7 @@ const ManageClassRoomForm = forwardRef<ManageClassRoomFormRef, ManageClassRoomFo
     ref,
   ) => {
     return (
-      <ClassRoomProvider selectedStudents={students} selectedTeachers={teachers}>
+      <ClassRoomProvider selectedStudents={students} selectedTeachers={teachers} selectedCertificate={certificate}>
         <ClassRoomFormContainer
           ref={ref}
           onSubmit={onSubmit}

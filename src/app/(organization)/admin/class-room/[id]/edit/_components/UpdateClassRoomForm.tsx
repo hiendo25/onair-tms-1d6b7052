@@ -167,6 +167,19 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     };
   }, [data, platform, class_type]);
 
+  const certificateData = useMemo(() => {
+    const cert = data.certificate?.[0];
+    if (!cert?.certificate_template) {
+      return null;
+    }
+
+    return {
+      id: cert.certificate_template.id,
+      name: cert.certificate_template.name || "",
+      frameUrl: cert.certificate_template.frame?.image_url || null,
+    };
+  }, [data.certificate]);
+
   const studentList = useMemo(() => {
     return employees.reduce<StudentItem[]>((acc, emp) => {
       return emp.employee && emp.employee.employee_type === "student"
@@ -185,9 +198,9 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     }, []);
   }, [employees]);
 
-  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
+  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, certificate) => {
     onUpdate(
-      { classRoomId: data.id, formData, students },
+      { classRoomId: data.id, formData, students, certificate },
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
@@ -208,6 +221,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       initFormValue={initFormValue}
       action="edit"
       students={studentList}
+      certificate={certificateData}
       isLoading={isLoading || isTransition}
       platform={platform}
       onSubmit={handleUpdateClassRoom}

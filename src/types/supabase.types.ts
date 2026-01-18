@@ -645,6 +645,49 @@ export type Database = {
           },
         ]
       }
+      class_room_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          certificate_template_id?: string
+          class_room_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_room_employee: {
         Row: {
           class_room_id: string | null
@@ -1383,6 +1426,58 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_employee_branches_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          created_at: string
+          data: Json
+          employee_id: string
+          id: string
+          image_url: string
+          layout_config: Json
+        }
+        Insert: {
+          certificate_template_id: string
+          created_at?: string
+          data: Json
+          employee_id: string
+          id?: string
+          image_url: string
+          layout_config: Json
+        }
+        Update: {
+          certificate_template_id?: string
+          created_at?: string
+          data?: Json
+          employee_id?: string
+          id?: string
+          image_url?: string
+          layout_config?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"

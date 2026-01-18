@@ -15,9 +15,13 @@ const useCRUDClassRoom = () => {
 
   const { mutate: doCreateClassRoom, isPending } = useTMutation({
     mutationKey: ["CREATE_CLASS_ROOM"],
-    mutationFn: async (payload: { formData: ClassRoom; students: ClassRoomStore["state"]["selectedStudents"] }) => {
-      const { formData, students } = payload;
-      return await classRoomService.create({ formData, students });
+    mutationFn: async (payload: {
+      formData: ClassRoom;
+      students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
+    }) => {
+      const { formData, students, certificate } = payload;
+      return await classRoomService.create({ formData, students, certificate });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
@@ -30,10 +34,11 @@ const useCRUDClassRoom = () => {
       classRoomId: string;
       formData: ClassRoom;
       students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
     }) => {
-      const { formData, students, classRoomId } = payload;
+      const { formData, students, classRoomId, certificate } = payload;
 
-      return await classRoomService.update(classRoomId, { formData, students });
+      return await classRoomService.update(classRoomId, { formData, students, certificate });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });

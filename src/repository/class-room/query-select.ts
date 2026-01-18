@@ -85,6 +85,16 @@ const selectAgenda = `
   class_session_id
 `;
 
+const selectCertificateTemplate = `
+  id,
+  name,
+  layout_config,
+  frame:certificate_frames(
+    id,
+    image_url
+  )
+`;
+
 const selectCoursePeriod = `
   id,
   start_at,
@@ -159,7 +169,12 @@ export const SELECT_CLASSROOM_DETAIL = `
     id,
     resource:resources(${selectResource})
   ),
-  sessions:class_sessions(${selectSession})
+  sessions:class_sessions(${selectSession}),
+  certificate:class_room_certificate_templates(
+    id,
+    certificate_template_id,
+    certificate_template:certificate_templates(${selectCertificateTemplate})
+  )
 `;
 
 export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `

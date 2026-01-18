@@ -46,3 +46,4 @@ export * as gamificationXpRepository from "./gamification-xp";
 export * as gamificationRankingRepository from "./gamification-ranking";
 export * as certificateTemplatesRepository from "./certificate-templates";
 export * as certificateFramesRepository from "./certificate-frames";
+export * as classRoomCertificateTemplatesRepository from "./class-room-certificate-templates";

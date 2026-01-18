@@ -10,17 +10,19 @@ export interface ClassRoomProviderProps {
   children: ReactNode;
   selectedTeachers?: ClassRoomStore["state"]["selectedTeachers"];
   selectedStudents?: ClassRoomStore["state"]["selectedStudents"];
+  selectedCertificate?: ClassRoomStore["state"]["selectedCertificate"];
 }
 
 export const ClassRoomProvider = ({
   children,
   selectedTeachers = {},
   selectedStudents = [],
+  selectedCertificate = null,
 }: ClassRoomProviderProps) => {
   const storeRef = useRef<StoreApi<ClassRoomStore> | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createClassRoomStore({ selectedTeachers, selectedStudents });
+    storeRef.current = createClassRoomStore({ selectedTeachers, selectedStudents, selectedCertificate });
   }
 
   return <ClassRoomStoreContext.Provider value={storeRef.current}>{children}</ClassRoomStoreContext.Provider>;
