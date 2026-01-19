@@ -7,12 +7,12 @@ import { useWatch } from "react-hook-form";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { CloseIcon } from "@/shared/assets/icons";
 
-import { ClassRoom } from "./classroom-form.schema";
+import { ClassRoomFormValues } from "./classroom-form.schema";
 import { useClassRoomFormContext } from "./ClassRoomFormContainer";
 interface ButtonCancelProps {
   loading?: boolean;
   onOk?: () => void;
-  initialData?: ClassRoom;
+  initialData?: ClassRoomFormValues;
 }
 const ButtonCancel: React.FC<ButtonCancelProps> = ({ loading, initialData, onOk }) => {
   const { control } = useClassRoomFormContext();

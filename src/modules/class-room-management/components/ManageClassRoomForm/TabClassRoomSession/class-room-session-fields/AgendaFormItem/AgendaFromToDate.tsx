@@ -3,11 +3,11 @@ import dayjs from "dayjs";
 import { Control, useWatch } from "react-hook-form";
 
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 
 interface AgendaFromToDateProps {
   sessionIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   agendaIndex: number;
 }
 const AgendaFromToDate: React.FC<AgendaFromToDateProps> = ({ sessionIndex, control, agendaIndex }) => {
@@ -54,6 +54,10 @@ const AgendaFromToDate: React.FC<AgendaFromToDateProps> = ({ sessionIndex, contr
         minDateTime={
           limitationDate?.minDate ? dayjs(limitationDate.minDate) : sessionStartDate ? dayjs(sessionStartDate) : dayjs()
         }
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         maxDateTime={
           currentAgenDa?.endDate
             ? dayjs(currentAgenDa.endDate)
@@ -68,6 +72,10 @@ const AgendaFromToDate: React.FC<AgendaFromToDateProps> = ({ sessionIndex, contr
       <RHFDateTimePicker
         control={control}
         name={`classRoomSessions.${sessionIndex}.agendas.${agendaIndex}.endDate`}
+        closeOnSelect
+        slotProps={{
+          actionBar: undefined,
+        }}
         minDateTime={
           currentAgenDa?.startDate
             ? dayjs(currentAgenDa.startDate)

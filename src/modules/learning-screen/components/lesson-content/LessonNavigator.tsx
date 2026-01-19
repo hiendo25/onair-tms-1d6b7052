@@ -30,7 +30,7 @@ import {
   LessonContentKind,
 } from "@/modules/learning-screen/utils/resource";
 import { Image } from "@/shared/ui/Image";
-import { formatFileSize } from "@/utils";
+import { formatFileSize } from "@/utils/format-file";
 
 interface LessonNavigatorProps {
   sections: LearningSectionOutline[];

@@ -14,7 +14,7 @@ import SimpleDialogTeacherSelector, {
 import { CloseIcon, Edit05Icon, Trash01Icon } from "@/shared/assets/icons";
 import Avatar from "@/shared/ui/Avatar";
 import EmptyData from "@/shared/ui/EmptyData";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
 import ButtonAddCoursePeriod, { ButtonAddCoursePeriodProps } from "./ButtonAddCoursePeriod";
@@ -39,9 +39,9 @@ const CoursePeriodsWrapper = styled(Box)(({ theme }) => ({
 
 interface CoursePeriodLearningPathProps {
   sessionIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
-type CoursePeriodItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number];
+type CoursePeriodItem = ClassRoomFormValues["classRoomSessions"][number]["coursesPeriod"][number];
 type TeacherSelectItem = CoursePeriodItem["teachers"][number];
 
 const CoursePeriodLearningPath: React.FC<CoursePeriodLearningPathProps> = ({ sessionIndex, control }) => {

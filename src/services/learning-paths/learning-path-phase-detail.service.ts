@@ -1,5 +1,3 @@
-import { PATHS } from "@/constants/path.constant";
-import { ROUTE_QUERY_KEYS, ROUTE_QUERY_VALUES } from "@/constants/route-query.constant";
 import {
   CLASSROOM_PROGRESS_STATUS,
   type ClassRoomProgressStatus,
@@ -85,7 +83,6 @@ const applySequentialClassRoomLocking = (
     return {
       ...classRoom,
       isLocked: true,
-      href: null,
     };
   });
 };
@@ -111,11 +108,7 @@ const buildClassRoomCardItem = (
     courseCount,
     progressPercentage,
     status,
-    href: classRoom.slug
-      ? `${PATHS.CLASSROOMS.DETAIL_CLASSROOM(classRoom.slug)}?${new URLSearchParams({
-        [ROUTE_QUERY_KEYS.SOURCE]: ROUTE_QUERY_VALUES.LEARNING_PATH,
-      }).toString()}`
-      : null,
+    slug: classRoom.slug ?? null,
   };
 };
 

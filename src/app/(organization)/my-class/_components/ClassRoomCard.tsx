@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { Box, Button, Chip, Divider, Stack, Typography } from "@mui/material";
@@ -11,7 +11,9 @@ import { PATHS } from "@/constants/path.constant";
 import { fDateTime } from "@/lib";
 import { ClassSessionType } from "@/model/class-session.model";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import QRScannerDialog from "@/modules/qr-attendance/components/QRScannerDialog";
+import QRCodeScannerClassroomDialog, {
+  QRCodeScannerClassRoomDialogRef,
+} from "@/modules/qr-attendance/container/QRCodeScannerClassroomDialog";
 import { ClassRoomTypeFilter } from "@/repository/class-room/type";
 import { Image } from "@/shared/ui/Image";
 import { ClassRoomPriorityDto, ClassRoomSessionDetailDto } from "@/types/dto/classRooms/classRoom.dto";
@@ -60,7 +62,7 @@ const ClassRoomCard = ({
   const [qrScannerOpen, setQrScannerOpen] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<string | undefined>();
   const employeeId = useUserOrganization((state) => state.currentEmployee.id);
-
+  const qrCodeRef = useRef<QRCodeScannerClassRoomDialogRef>(null);
   const navigateToSession = useCallback(
     (sessions: ClassRoomSessionDetailDto, sessionType?: ClassSessionType) => {
       if (!sessions || !slug) {
@@ -97,14 +99,27 @@ const ClassRoomCard = ({
           setDialogOpen(true);
           return;
         }
+        const sessionId = sessions[0]?.id;
         if (roomType === ClassRoomTypeFilter.Single && sessions?.[0]?.id) {
-          setSelectedSessionId(sessions[0].id);
+          setSelectedSessionId(sessionId);
         }
         setQrScannerOpen(true);
+
+        if (sessionId && classRoomId) handleScanQrCode(sessionId, classRoomId);
       }
     },
     [actionDisabled, navigateToSession, roomType, sessionType, sessions],
   );
+
+  const handleScanQrCode = (classSessionId: string, classRoomId: string) => {
+    qrCodeRef.current?.onOpen({
+      title,
+      classRoomId,
+      classSessionId,
+      startAt: start_at,
+      endAt: end_at,
+    });
+  };
 
   const handleCloseDialog = useCallback(() => {
     setDialogOpen(false);
@@ -115,7 +130,8 @@ const ClassRoomCard = ({
       if (sessionType === "offline") {
         setDialogOpen(false);
         setSelectedSessionId(session.id);
-        setQrScannerOpen(true);
+        // setQrScannerOpen(true);
+        if (classRoomId) handleScanQrCode(session.id, classRoomId);
         return;
       }
       setDialogOpen(false);
@@ -195,7 +211,8 @@ const ClassRoomCard = ({
         actionLabel={sessionType === "offline" ? "Quét mã QR" : undefined}
         onSelectSession={handleSelectSession}
       />
-      <QRScannerDialog
+      <QRCodeScannerClassroomDialog ref={qrCodeRef} />
+      {/* <QRScannerDialog
         open={qrScannerOpen}
         onClose={() => {
           setQrScannerOpen(false);
@@ -205,7 +222,7 @@ const ClassRoomCard = ({
         classRoomId={classRoomId}
         sessionId={selectedSessionId}
         classTitle={title}
-      />
+      /> */}
     </>
   );
 };

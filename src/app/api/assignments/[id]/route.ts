@@ -79,7 +79,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const employee = await employeesRepository.getCurrentEmployee(user.id, payload.organizationId);
 
-    await assignmentService.updateAssignmentWithRelations(payload, employee.id);
+    const assignment = await assignmentService.getAssignmentById(assignmentId);
+    const submissionCount = assignment.submissions?.[0]?.count ?? 0;
+    const isAssignmentLocked = submissionCount > 0;
+
+    await assignmentService.updateAssignmentWithRelations(payload, employee.id, {
+      allowQuestionsUpdate: !isAssignmentLocked,
+      allowAssignedEmployeesUpdate: !isAssignmentLocked,
+    });
 
     revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 

@@ -7,14 +7,33 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      antidigital_djf: {
-        Row: {}
-        Insert: {}
-        Update: {}
-        Relationships: []
-      }
       assignment_categories: {
         Row: {
           assignment_id: string
@@ -2459,6 +2478,73 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json | null
+          employee_id: string
+          icon: string | null
+          id: string
+          is_read: boolean
+          organization_id: string
+          thumbnail_url: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          icon?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          thumbnail_url?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          icon?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          thumbnail_url?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_units: {
         Row: {
           address: string
@@ -2665,6 +2751,50 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: true
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          employee_id: string | null
+          endpoint: string
+          id: string
+          meta_data: Json | null
+          organization_id: string
+          p256dh: string
+          user_agent: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          employee_id?: string | null
+          endpoint: string
+          id?: string
+          meta_data?: Json | null
+          organization_id?: string
+          p256dh: string
+          user_agent?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          employee_id?: string | null
+          endpoint?: string
+          id?: string
+          meta_data?: Json | null
+          organization_id?: string
+          p256dh?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -3696,6 +3826,13 @@ export type Database = {
           total_count: number
         }[]
       }
+      get_notification_count_by_type: {
+        Args: { employee_id: string; unread_only?: boolean }
+        Returns: {
+          count: number
+          type: Database["public"]["Enums"]["notification_type"]
+        }[]
+      }
       get_organization_leaderboard: {
         Args: {
           p_limit?: number
@@ -3795,6 +3932,7 @@ export type Database = {
       lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
       level_status: "deleted" | "active" | "inactive"
+      notification_type: "class_room" | "survey" | "system"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -3962,6 +4100,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
@@ -4012,6 +4153,7 @@ export const Constants = {
       lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
       level_status: ["deleted", "active", "inactive"],
+      notification_type: ["class_room", "survey", "system"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],

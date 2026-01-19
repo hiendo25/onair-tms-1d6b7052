@@ -5,11 +5,11 @@ import { Control, Controller, useFieldArray, useWatch } from "react-hook-form";
 
 import { Android12Switch } from "@/shared/ui/form/CustomSwitcher";
 import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 interface QRCodeSettingFieldsProps {
   className?: string;
   sessionIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const QRCodeSettingFields: React.FC<QRCodeSettingFieldsProps> = ({ sessionIndex, className, control }) => {
   const startDate = useWatch({ control, name: `classRoomSessions.${sessionIndex}.qrCode.startDate` });

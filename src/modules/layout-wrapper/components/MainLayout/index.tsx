@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Image from "next/image";
 import Link from "next/link";
 
+import NotificationBell from "@/modules/notifications/components/NotificationBell";
 import { cn } from "@/utils";
 
 import AccountSetting from "./AccountSetting";
@@ -12,8 +13,8 @@ import DashboardSidebar from "./DashboardSidebar";
 import { DashboardSidebarProps } from "./DashboardSidebar";
 import Footer from "./Footer";
 import Header from "./Header";
-import NotificationButton from "./NotificationButton";
 import OrganizationSelector, { OrganizationSelectorProps } from "./OrganizationSelector";
+import SettingButton from "./SettingButton";
 import useToggleSidebar from "./useToggleSidebar";
 const LayoutWrapper = styled(Box)(() => ({
   position: "relative",
@@ -86,7 +87,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           ),
         }}
       />
-      {/* Main content */}
       <MainLayoutContent className="main-layout__content">
         <Header
           menuOpen={isExpanded}
@@ -100,9 +100,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               />
             ),
             right: (
-              <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 2 }}>
-                <NotificationButton />
-                <AccountSetting />
+              <Stack direction="row" alignItems="center" gap={{ xs: 1, md: 1 }}>
+                <NotificationBell />
+                <SettingButton />
+                <AccountSetting avatarOnly />
               </Stack>
             ),
           }}

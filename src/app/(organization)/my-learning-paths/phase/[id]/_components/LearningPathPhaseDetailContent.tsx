@@ -29,6 +29,7 @@ export default function LearningPathPhaseDetailContent({
   const phase = detailData?.phase ?? null;
   const hasDetail = Boolean(detailData && phase);
   const learningPathName = phaseDetail?.learningPath?.name ?? "Lộ trình học tập";
+  const learningPathId = phaseDetail?.learningPath?.id ?? null;
   const phaseBreadcrumbLabel = phase ? getPhaseLabel(phase, 0) : "Chi tiết giai đoạn";
 
   const isLoadingContent = isLoading;
@@ -130,6 +131,7 @@ export default function LearningPathPhaseDetailContent({
     >
       <LearningPathPhaseDetailView
         learningPathName={learningPathName}
+        learningPathId={learningPathId}
         detailData={detailData}
         onBack={() => router.push(PATHS.MY_LEARNING_PATHS.ROOT)}
       />

@@ -19,13 +19,30 @@ const courseResourceSchema = zod.object({
   mimeType: zod.string(),
 });
 
-const classRoomSessionAgendaSchema = zod.object({
-  id: zod.string().optional(),
-  title: zod.string().min(1, { error: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
-  description: zod.string().min(1, { error: "Nội dung không bỏ trống." }),
-  startDate: zod.string(),
-  endDate: zod.string(),
-});
+const classRoomSessionAgendaSchema = zod
+  .object({
+    id: zod.string().optional(),
+    title: zod.string().min(1, { error: "Tiêu đề không bỏ trống." }).max(100, "Tiêu đề tối đa 100 ký tự."),
+    description: zod.string().min(1, { error: "Nội dung không bỏ trống." }),
+    startDate: zod.string(),
+    endDate: zod.string(),
+  })
+  .superRefine(({ startDate, endDate }, ctx) => {
+    if (startDate && endDate) {
+      if (dayjs(startDate).isAfter(endDate)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
+          path: ["startDate"],
+        });
+        ctx.addIssue({
+          code: "custom",
+          message: "Ngày kết thúc phải nhỏ hơn ngày bắt đầu.",
+          path: ["endDate"],
+        });
+      }
+    }
+  });
 
 const coursePeriodWeeklyScheduleSchema = zod.object({
   time: zod.string().optional(),
@@ -172,7 +189,7 @@ const classRoomSessionSchema = zod
             });
           }
 
-          if (item.endAt && item.startAt && dayjs(startDate).isAfter(dayjs(endDate))) {
+          if (item.endAt && item.startAt && dayjs(item.startAt).isAfter(dayjs(item.endAt))) {
             ctx.addIssue({
               code: "custom",
               message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.",
@@ -344,7 +361,7 @@ const classRoomSchema = zod
     }
   });
 
-type ClassRoomSession = zod.infer<typeof classRoomSessionSchema>;
-type ClassRoom = zod.infer<typeof classRoomSchema>;
+type ClassRoomSessionFormValues = zod.infer<typeof classRoomSessionSchema>;
+type ClassRoomFormValues = zod.infer<typeof classRoomSchema>;
 
-export { classRoomSessionSchema, classRoomSchema, type ClassRoomSession, type ClassRoom };
+export { classRoomSessionSchema, classRoomSchema, type ClassRoomSessionFormValues, type ClassRoomFormValues };

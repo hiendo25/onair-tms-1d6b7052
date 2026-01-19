@@ -13,7 +13,7 @@ import { FieldErrors, UseFormTrigger } from "react-hook-form";
 import { CheckCircleIcon, Loading } from "@/shared/assets/icons";
 import { cn } from "@/utils";
 
-import { ClassRoom } from "./classroom-form.schema";
+import { ClassRoomFormValues } from "./classroom-form.schema";
 import { TAB_KEYS_CLASS_ROOM } from "./ClassRoomFormContainer";
 import { getKeyFieldByTab } from "./utils";
 import { getStatusTabClassRoom } from "./utils";
@@ -36,8 +36,8 @@ export interface ClassRoomTabContainerProps {
   items: ClassRoomTabItem[];
   actions: React.ReactNode;
   className?: string;
-  trigger: UseFormTrigger<ClassRoom>;
-  errors: FieldErrors<ClassRoom>;
+  trigger: UseFormTrigger<ClassRoomFormValues>;
+  errors: FieldErrors<ClassRoomFormValues>;
 }
 
 const ClassRoomTabContainer = React.forwardRef<ClassRoomTabContainerRef, ClassRoomTabContainerProps>(

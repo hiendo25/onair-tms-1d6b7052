@@ -1,10 +1,11 @@
+import React from "react";
 import { Control, useController } from "react-hook-form";
 
 import { Image } from "@/shared/ui/Image";
-import { ClassRoom } from "../classroom-form.schema";
+import { ClassRoomFormValues } from "../classroom-form.schema";
 
 export interface WallpaperPreviewProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const WallpaperPreview: React.FC<WallpaperPreviewProps> = ({ control }) => {
   const {

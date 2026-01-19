@@ -6,6 +6,7 @@ import BookOpenIcon from "./BookOpenIcon";
 import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
+import CameraOffIcon from "./CameraOffIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
 import ChevronDownIcon from "./ChevronDownIcon";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
@@ -43,6 +44,7 @@ import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
 import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
+import Inbox01Icon from "./Inbox01Icon";
 import InforCircleIcon from "./InforCircleIcon";
 import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
@@ -58,6 +60,7 @@ import ParagraphIcon from "./ParagraphIcon";
 import SearchIcon from "./SearchIcon";
 import Setting02Icon from "./Setting02Icon";
 import SettingIcon from "./SettingIcon";
+import ShareIcon from "./ShareIcon";
 import SquareFourIcon from "./SquareFourIcon";
 import Star01Icon from "./Star01Icon";
 import TrashIcon1 from "./TrashIcon1";
@@ -67,6 +70,7 @@ import UsersIcon2 from "./UsersIcon2";
 import UsersPlusIcon from "./UsersPlusIcon";
 import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import VideoIcon from "./VideoIcon";
+import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import ZaloIcon from "./ZaloIcon";
 export {
@@ -141,4 +145,8 @@ export {
   ArrowRightIcon,
   LineChartUp01Icon,
   Copy07Icon,
+  CameraOffIcon,
+  VideoRecorderOffIcon,
+  Inbox01Icon,
+  ShareIcon,
 };

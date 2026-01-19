@@ -6,14 +6,14 @@ import { Control, useFieldArray } from "react-hook-form";
 import { MarkerPinIcon, TrashIcon1 } from "@/shared/assets/icons";
 import PlusIcon from "@/shared/assets/icons/PlusIcon";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 import BoxIcon from "../../TabClassRoomResource/BoxIcon";
 
 const MAX_FIELD_COUNT = 4;
 interface ForWhomFieldsProps {
   className?: string;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const ForWhomFields: React.FC<ForWhomFieldsProps> = ({ className }) => {
   const { control, trigger } = useClassRoomFormContext();

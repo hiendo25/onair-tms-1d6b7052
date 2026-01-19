@@ -11,7 +11,7 @@ import { ClassRoomStore } from "../../store/class-room-store";
 
 import ButtonCancel from "./ButtonCancel";
 import ButtonSubmit from "./ButtonSubmit";
-import { ClassRoom, classRoomSchema } from "./classroom-form.schema";
+import { ClassRoomFormValues, classRoomSchema } from "./classroom-form.schema";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
 import TabClassRoomInformation from "./TabClassRoomInformation";
 import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSession";
@@ -26,7 +26,7 @@ export const TAB_KEYS_CLASS_ROOM = {
 export const initClassRoomFormData = (option: {
   platform?: ClassRoomPlatformType;
   roomType?: ClassRoomType;
-}): Partial<ClassRoom> => {
+}): Partial<ClassRoomFormValues> => {
   return {
     title: "",
     description: "",
@@ -49,7 +49,7 @@ export interface ClassRoomFormContainerRef {
 }
 export interface ClassRoomFormContainerProps {
   onSubmit?: (
-    formData: ClassRoom,
+    formData: ClassRoomFormValues,
     selectedStudents: ClassRoomStore["state"]["selectedStudents"],
     selectedCertificate: ClassRoomStore["state"]["selectedCertificate"]
   ) => void;
@@ -57,7 +57,7 @@ export interface ClassRoomFormContainerProps {
   platform: ClassRoomPlatformType;
   roomType?: ClassRoomType;
   isLearningPath?: boolean;
-  value?: ClassRoom;
+  value?: ClassRoomFormValues;
   isLoading?: boolean;
   action?: "create" | "edit";
 }
@@ -72,7 +72,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
     const selectedCertificate = useClassRoomStore(({ state }) => state.selectedCertificate);
 
-    const methods = useForm<ClassRoom>({
+    const methods = useForm<ClassRoomFormValues>({
       resolver: zodResolver(classRoomSchema),
       defaultValues: initClassRoomFormData({
         platform: platform,
@@ -228,4 +228,4 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 );
 export default ClassRoomFormContainer;
 
-export const useClassRoomFormContext = useFormContext<ClassRoom>;
+export const useClassRoomFormContext = useFormContext<ClassRoomFormValues>;
