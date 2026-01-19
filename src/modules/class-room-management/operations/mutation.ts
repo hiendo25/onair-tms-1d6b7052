@@ -132,8 +132,11 @@ export const useExportStudentsMutation = () => {
 
 export const useCreateClassRoomMutation = () => {
   return useTMutation({
-    mutationFn: (input: { formData: ClassRoomFormValues; students: ClassRoomStore["state"]["selectedStudents"] }) =>
-      client.post<NonNullable<CreateClassRoomResponse["data"]>>("/class-rooms/create", input),
+    mutationFn: (input: {
+      formData: ClassRoomFormValues;
+      students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
+    }) => client.post<NonNullable<CreateClassRoomResponse["data"]>>("/class-rooms/create", input),
   });
 };
 
