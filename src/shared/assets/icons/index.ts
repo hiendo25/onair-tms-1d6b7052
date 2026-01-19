@@ -60,6 +60,7 @@ import ParagraphIcon from "./ParagraphIcon";
 import SearchIcon from "./SearchIcon";
 import Setting02Icon from "./Setting02Icon";
 import SettingIcon from "./SettingIcon";
+import ShareIcon from "./ShareIcon";
 import SquareFourIcon from "./SquareFourIcon";
 import Star01Icon from "./Star01Icon";
 import TrashIcon1 from "./TrashIcon1";
@@ -147,4 +148,5 @@ export {
   CameraOffIcon,
   VideoRecorderOffIcon,
   Inbox01Icon,
+  ShareIcon,
 };
