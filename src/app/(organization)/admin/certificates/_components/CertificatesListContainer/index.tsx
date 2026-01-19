@@ -249,38 +249,35 @@ const CertificatesListContainer: React.FC = () => {
                     position: "relative",
                     overflow: "hidden",
                     bgcolor: "grey.100",
+                    backgroundImage: certificate.frame?.image_url
+                      ? `url(${certificate.frame.image_url})`
+                      : "none",
+                    backgroundSize: "100% 100%",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
                   }}
                 >
-                  {/* Base certificate image */}
-                  <Image
-                    src="/assets/images/certificate-standard.png"
-                    width={1944}
-                    height={1458}
-                    alt="Certificate"
-                    style={{
+                  {/* Certificate image floating on top */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
                       width: "100%",
                       height: "100%",
-                      objectFit: "cover",
-                      display: "block",
                     }}
-                  />
-
-                  {/* Frame overlay */}
-                  {certificate.frame?.image_url && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
+                  >
+                    <img
+                      src="/assets/images/certificate-standard.png"
+                      alt="Certificate"
+                      style={{
                         width: "100%",
                         height: "100%",
-                        backgroundImage: `url(${certificate.frame.image_url})`,
-                        backgroundSize: "100% 100%",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
+                        objectFit: "cover",
+                        display: "block",
                       }}
                     />
-                  )}
+                  </Box>
                 </Box>
 
                 {/* Certificate Info */}
