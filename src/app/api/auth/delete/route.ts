@@ -1,20 +1,18 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { COOKIE_ORGANIZATION_ID } from "@/constants/api-headers.constant";
-import { SignupService } from "@/services/auth/signup.service";
-import { SignUpDto } from "@/types/dto/auth/signup.dto";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DeleteUserService } from "@/services/auth/delete-user.service";
 import { http } from "@/utils/http-status";
+
 export async function POST(request: NextRequest) {
   try {
-    const payload: SignUpDto = await request.json();
+    const user = await requireAuth();
+    const data = await new DeleteUserService().execute({
+      employeeId: user.employeeId,
+      userId: user.userId,
+    });
 
-    const data = await new SignupService().execute(payload);
-
-    const cookieStore = await cookies();
-    cookieStore.set(COOKIE_ORGANIZATION_ID, data.organizationId);
-
-    return http.created(data);
+    return http.ok(data);
   } catch (error) {
     console.error(error);
 
