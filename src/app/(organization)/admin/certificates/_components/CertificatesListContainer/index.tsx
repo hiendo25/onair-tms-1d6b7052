@@ -16,7 +16,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
@@ -27,6 +26,7 @@ import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { useDeleteCertificateTemplateMutation } from "@/modules/certificates/operations/mutation";
 import { useGetCertificateTemplatesQuery } from "@/modules/certificates/operations/query";
 import { Edit02Icon, EyeIcon,SearchIcon, Trash01Icon } from "@/shared/assets/icons";
+import CertificatePreview from "@/shared/ui/CertificatePreview";
 
 const CertificatesListContainer: React.FC = () => {
   const router = useRouter();
@@ -242,43 +242,7 @@ const CertificatesListContainer: React.FC = () => {
                 </Box>
 
                 {/* Certificate Preview */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    aspectRatio: "4 / 3",
-                    position: "relative",
-                    overflow: "hidden",
-                    bgcolor: "grey.100",
-                    backgroundImage: certificate.frame?.image_url
-                      ? `url(${certificate.frame.image_url})`
-                      : "none",
-                    backgroundSize: "100% 100%",
-                    backgroundPosition: "center",
-                    backgroundRepeat: "no-repeat",
-                  }}
-                >
-                  {/* Certificate image floating on top */}
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    <img
-                      src="/assets/images/certificate-standard.png"
-                      alt="Certificate"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                  </Box>
-                </Box>
+                <CertificatePreview frameUrl={certificate.frame?.image_url} />
 
                 {/* Certificate Info */}
                 <CardContent
