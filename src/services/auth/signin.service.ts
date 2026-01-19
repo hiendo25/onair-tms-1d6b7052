@@ -1,11 +1,9 @@
-"use server";
 import dayjs from "dayjs";
 import { cookies } from "next/headers";
 
 import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignInDto, SignInDtoResponse } from "@/types/dto/auth/sign-in.dto";
-import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 import { DomainError } from "../DomainError";
 import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignInService {

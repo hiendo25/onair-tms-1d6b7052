@@ -1,5 +1,3 @@
-"use server";
-
 import { employeesRepository } from "@/repository";
 import { DeleteUserDto, DeleteUserDtoResponse } from "@/types/dto/auth/delete-user.dto";
 import { DomainError } from "../DomainError";
