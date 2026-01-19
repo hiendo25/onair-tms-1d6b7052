@@ -17,6 +17,22 @@ export async function getFirstOrganization(): Promise<OrganizationDto> {
   return data as OrganizationDto;
 }
 
+export async function getOrganizationById(id: string): Promise<OrganizationDto> {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase.from("organizations").select("*").eq("id", id).single();
+
+  if (error) {
+    throw new Error(`Failed to fetch organization: ${error.message}`);
+  }
+
+  if (!data) {
+    throw new Error(`Organization with id ${id} not found`);
+  }
+
+  return data as OrganizationDto;
+}
+
 const getOrganizationsByUserId = async (userId: string) => {
   const supabase = await createSVClient();
 

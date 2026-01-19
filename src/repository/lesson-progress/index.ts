@@ -134,3 +134,28 @@ export async function upsertLessonProgress(data: {
     return mapToResponse(result);
   }
 }
+
+/**
+ * Get completed lessons for an employee in a specific course (non-learning-path context)
+ */
+export async function getCompletedLessonsForEmployee(
+  employeeId: string,
+  lessonIds: string[]
+) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id")
+    .in("lesson_id", lessonIds)
+    .eq("employee_id", employeeId)
+    .is("learning_path_id", null)
+    .eq("status", "completed");
+
+  if (error) {
+    console.error("[LessonProgress] Error fetching completed lessons:", error);
+    throw new Error(`Failed to fetch completed lessons: ${error.message}`);
+  }
+
+  return data || [];
+}

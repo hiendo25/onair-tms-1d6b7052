@@ -1,4 +1,4 @@
-import { supabase } from "@/services";
+import { createSVClient, supabase } from "@/services";
 
 import {
   CreateLessonPayload,
@@ -85,6 +85,45 @@ const bulkDeletePivotLessonsWithResources = async (ids: number[]) => {
   }
 };
 
+/**
+ * Get the course that contains a specific lesson
+ */
+const getCourseByLessonId = async (lessonId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("section_id, sections(course_id)")
+    .eq("id", lessonId)
+    .single();
+
+  if (error) {
+    console.error("[Lessons] Error fetching course by lesson:", error);
+    throw new Error(`Failed to fetch course by lesson: ${error.message}`);
+  }
+
+  return data;
+};
+
+/**
+ * Get all lessons in a specific course
+ */
+const getLessonsByCourseId = async (courseId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("lessons")
+    .select("id, section_id, sections!inner(course_id)")
+    .eq("sections.course_id", courseId);
+
+  if (error) {
+    console.error("[Lessons] Error fetching lessons by course:", error);
+    throw new Error(`Failed to fetch lessons by course: ${error.message}`);
+  }
+
+  return data || [];
+};
+
 export {
   createLessons,
   updateSection,
@@ -93,4 +132,6 @@ export {
   bulkDeleteLessons,
   upsertLesson,
   bulkUpsertLesson,
+  getCourseByLessonId,
+  getLessonsByCourseId,
 };
