@@ -48,7 +48,11 @@ export interface ClassRoomFormContainerRef {
   resetForm: () => void;
 }
 export interface ClassRoomFormContainerProps {
-  onSubmit?: (formData: ClassRoomFormValues, selectedStudents: ClassRoomStore["state"]["selectedStudents"]) => void;
+  onSubmit?: (
+    formData: ClassRoomFormValues,
+    selectedStudents: ClassRoomStore["state"]["selectedStudents"],
+    selectedCertificate: ClassRoomStore["state"]["selectedCertificate"]
+  ) => void;
   onCancel?: () => void;
   platform: ClassRoomPlatformType;
   roomType?: ClassRoomType;
@@ -66,6 +70,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
+    const selectedCertificate = useClassRoomStore(({ state }) => state.selectedCertificate);
 
     const methods = useForm<ClassRoomFormValues>({
       resolver: zodResolver(classRoomSchema),
@@ -115,7 +120,7 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
     const handleSubmitForm = () => {
       buttonActionRef.current = "submit";
-      handleSubmit((data) => onSubmit?.({ ...data, status: "publish" }, selectedStudents))();
+      handleSubmit((data) => onSubmit?.({ ...data, status: "publish" }, selectedStudents, selectedCertificate))();
     };
 
     const handleCancel = () => {

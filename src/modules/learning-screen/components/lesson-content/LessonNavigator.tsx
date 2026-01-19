@@ -221,6 +221,7 @@ const LessonNavigator = ({
                   <LinearProgress
                     variant="determinate"
                     value={clampedProgressValue}
+                    color={clampedProgressValue >= 100 ? "success" : "primary"}
                     sx={{ flex: 1 }}
                   />
                   <Typography variant="caption" color="text.secondary">

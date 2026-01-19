@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     const classRoomData = await new CreateClassRoomService(employeeId, organizationId).execute({
       formData: payload.formData,
       students: payload.students,
+      certificate: payload.certificate,
     });
 
     return http.created(classRoomData);

@@ -18,10 +18,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       classRoomId: classRoomId,
       formData: payload.formData,
       students: payload.students,
+      certificate: payload.certificate,
     });
 
     return http.created(classRoomData);
   } catch (err: any) {
-    return http.internalServerError(`Can't update classroom ${err?.message}`);
+    return http.serverError(`Can't update classroom ${err?.message}`);
   }
 }

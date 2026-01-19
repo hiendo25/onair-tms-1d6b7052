@@ -4,6 +4,7 @@ import { eventBus } from "@/infrastructure/events";
 import { ClassRoomFormValues } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
 import {
+  classRoomCertificateTemplatesRepository,
   classRoomMetaRepository,
   classRoomRepository,
   classRoomSessionRepository,
@@ -26,6 +27,7 @@ import { CreateQRCodePayload } from "@/repository/qr-attendance";
 export type CreateClassRoomDto = {
   formData: ClassRoomFormValues;
   students: ClassRoomStore["state"]["selectedStudents"];
+  certificate: ClassRoomStore["state"]["selectedCertificate"];
 };
 export class CreateClassRoomService {
   private employeeId: string;
@@ -40,7 +42,7 @@ export class CreateClassRoomService {
   }
 
   async execute(payload: CreateClassRoomDto) {
-    const { formData, students } = payload;
+    const { formData, students, certificate } = payload;
     const employeeId = this.employeeId;
     const organizationId = this.organizationId;
 
@@ -167,6 +169,16 @@ export class CreateClassRoomService {
       //   startAt: startDate,
       //   thumbnailUrl,
       // });
+    }
+
+    /**
+     * Step 9: Sync Certificate Template
+     */
+    if (classType !== "learning_path" && certificate) {
+      await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
+        class_room_id: classRoomData.id,
+        certificate_template_id: certificate.id,
+      });
     }
 
     eventBus.emit("classroom.created", {

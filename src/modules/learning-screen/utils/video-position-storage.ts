@@ -1,9 +1,9 @@
 /**
  * Utility for managing video playback positions in localStorage
- * Only used for learning paths to track user progress
+ * Used for both learning paths and regular classes to track user progress
  */
 
-const STORAGE_KEY = 'learning_path_video_positions';
+const STORAGE_KEY = 'video_lesson_positions';
 
 interface VideoPosition {
   lessonId: string;
