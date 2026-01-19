@@ -6,6 +6,7 @@ import { Control, Controller, useFormContext } from "react-hook-form";
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 import RHFThumbnailUpload from "@/shared/ui/form/RHFThumbnailUpload";
+import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
 import { type ClassRoomFormValues } from "../classroom-form.schema";
 import { useClassRoomFormContext } from "../ClassRoomFormContainer";
 
@@ -67,7 +68,7 @@ const TabClassRoomInformation: React.FC<TabClassRoomInformationProps> = ({ actio
       />
 
       <ClassFieldSelector control={control} />
-      <TextEditor label="Nội dung khóa học" control={control} name="description" required />
+      <RHFTinyEditor label="Nội dung khóa học" control={control} name="description" required />
       <DocumentFields control={control} />
       <ForWhomFields control={control} />
     </div>

@@ -1,24 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAuth } from "@/lib/auth/require-auth";
-import { createSVClient } from "@/services";
 import { DeleteUserService } from "@/services/auth/delete-user.service";
 import { http } from "@/utils/http-status";
-export async function POST(request: NextRequest) {
-  try {
-    const user = await requireAuth(request);
-    const payload = (await request.json()) as { employeeId: string };
 
+export async function GET(request: NextRequest) {
+  try {
+    // const payload = (await request.json()) as { employeeId: string };
+    console.log({ request });
+    const user = await requireAuth(request);
     console.log({ user });
 
-    console.log({ user, employeeId: payload.employeeId });
-
-    const data = await new DeleteUserService().execute({
-      employeeId: payload.employeeId,
-      userId: user.userId,
-    });
-
-    return http.ok(data);
+    return http.ok(user);
   } catch (error) {
     console.error({ error });
 

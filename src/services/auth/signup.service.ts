@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 
-import { setCookieStore } from "@/lib/cookies";
 import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
@@ -9,9 +8,12 @@ import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignupService {
   async execute(dto: SignUpDto): Promise<SignUpDtoResponse> {
     const supabaseAdmin = await createServiceRoleClient();
+
     const { email, fullName, employeeType, password } = dto;
 
-    let { data: userId } = await supabaseAdmin.rpc("get_user_id_by_email");
+    let { data: userId } = await supabaseAdmin.rpc("get_user_id_by_email", {
+      user_email: email,
+    });
 
     const organizationId = await this.getRootOrganizationId();
 
@@ -25,7 +27,7 @@ export class SignupService {
         password,
         email_confirm: true,
         app_metadata: {
-          organizationId,
+          active_organization_id: organizationId,
         },
       });
 
@@ -43,11 +45,12 @@ export class SignupService {
      * Check Employee exists on current organization
      */
 
-    const isEmployeeExist = Boolean(await employeesRepository.getCurrentEmployee(userId, organizationId));
+    const isExistEmployee = await employeesRepository.isExistEmployee(userId, organizationId);
 
-    if (isEmployeeExist) {
+    if (isExistEmployee) {
       throw new DomainError("Tài khoản đã tồn tại", "EMPLOYEE_EXISTS", 409);
     }
+
     /**
      * Create Employee
      */
