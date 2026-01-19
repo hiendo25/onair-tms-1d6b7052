@@ -226,6 +226,18 @@ export async function checkEmployeeCodeExists(code: string) {
   return Boolean(data);
 }
 
+export async function isExistEmployee(userId: string, organizationId: string) {
+  const supabase = await createSVClient();
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("organization_id", organizationId)
+    .single();
+
+  return Boolean(employee);
+}
+
 export async function createEmployee(data: {
   user_id: string;
   employee_code: string;
@@ -460,4 +472,43 @@ const getOneEmployee = async (variables: { userId: string; organizationId: strin
   }
 };
 export type getOneEmployee = Awaited<ReturnType<typeof getOneEmployee>>;
-export { getEmployees, getEmployeeById, getOneEmployee };
+
+const updateStatus = async (employeeId: string, status: "active" | "inactive") => {
+  const supabase = createClient();
+  return await supabase
+    .from("employees")
+    .update({ status })
+    .select(
+      `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+    )
+    .eq("id", employeeId)
+    .single();
+};
+export type UpdateStatusResponse = Awaited<ReturnType<typeof updateStatus>>;
+
+export { getEmployees, getEmployeeById, getOneEmployee, updateStatus };

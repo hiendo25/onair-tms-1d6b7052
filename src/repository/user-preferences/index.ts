@@ -5,11 +5,7 @@ import { CreateUserPreferencePayload, UpdateUserPreferencePayload, UpsertUserPre
 const getUserPreferencesByUserId = async (userId: string) => {
   const supabaseClient = await createSVClient();
 
-  try {
-    return await supabaseClient.from("user_references").select("*").eq("user_id", userId).maybeSingle();
-  } catch (err) {
-    throw new Error("Fail to get user preferences");
-  }
+  return await supabaseClient.from("user_references").select("*").eq("user_id", userId).maybeSingle();
 };
 
 const createUserPreference = async (payload: CreateUserPreferencePayload) => {

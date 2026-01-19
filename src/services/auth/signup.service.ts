@@ -1,50 +1,63 @@
 import dayjs from "dayjs";
 
-import { authRepository, profilesRepository } from "@/repository";
+import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 import { DomainError } from "../DomainError";
 import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignupService {
   async execute(dto: SignUpDto): Promise<SignUpDtoResponse> {
-    // const supabaseClient = await createSVClient();
     const supabaseAdmin = await createServiceRoleClient();
+
     const { email, fullName, employeeType, password } = dto;
 
-    const emailExists = await authRepository.checkEmailExists({ email });
-
-    if (emailExists) {
-      throw new DomainError("Email đã có trên hệ thông", "AUTH_EMAIL_EXISTS", 409);
-    }
+    let { data: userId } = await supabaseAdmin.rpc("get_user_id_by_email", {
+      user_email: email,
+    });
 
     const organizationId = await this.getRootOrganizationId();
 
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      app_metadata: {
-        organizationId,
-      },
-    });
+    if (!userId) {
+      // throw new DomainError("Email đã có trên hệ thông", "AUTH_EMAIL_EXISTS", 409);
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        app_metadata: {
+          active_organization_id: organizationId,
+        },
+      });
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!user) {
+        throw new DomainError("Create user fail", "CREATE_USER_FAILED", 500);
+      }
+      userId = user.id;
     }
 
-    if (!user) {
-      throw new DomainError("Create user fail", "CREATE_USER_FAILED", 300);
+    /**
+     * Check Employee exists on current organization
+     */
+
+    const isExistEmployee = await employeesRepository.isExistEmployee(userId, organizationId);
+
+    if (isExistEmployee) {
+      throw new DomainError("Tài khoản đã tồn tại", "EMPLOYEE_EXISTS", 409);
     }
 
+    /**
+     * Create Employee
+     */
     const lastEmployeeOrder = await employeesRepository.getLastEmployeeOrder();
-
     const employeeNextOrder = lastEmployeeOrder + 1;
     const employeeCode = await this.generateEmployeeCode(employeeType);
 
-    const userId = user.id;
     const employee = await employeesRepository.createEmployee({
       employee_code: employeeCode,
       employee_order: employeeNextOrder,
@@ -56,6 +69,24 @@ export class SignupService {
       start_date: dayjs().toISOString(),
     });
 
+    /**
+     * Link Default org for Employee
+     */
+    const { data: dataReference } = await userPreferenceRepository.getUserPreferencesByUserId(userId);
+
+    if (!dataReference) {
+      const { error: errorReference } = await userPreferenceRepository.createUserPreference({
+        default_organization_id: organizationId,
+        user_id: userId,
+      });
+
+      if (errorReference) {
+        console.error("Create reference failed", errorReference?.message);
+      }
+    }
+    /**
+     * Create role default for employee
+     */
     const roleId = await this.getDefaultRole(employeeType);
 
     const { error: errorRoles } = await supabaseAdmin.from("user_roles").insert({ role_id: roleId, user_id: userId });
@@ -63,6 +94,10 @@ export class SignupService {
     if (errorRoles) {
       throw new Error(errorRoles.message);
     }
+
+    /**
+     * Create profile for employee
+     */
     const profile = await profilesRepository.createProfile({
       employee_id: employee.id,
       email: email,
@@ -71,7 +106,7 @@ export class SignupService {
     });
 
     return {
-      userId: user.id,
+      userId: userId,
       organizationId,
       employeeId: employee.id,
       employeeCode: employee.employee_code,
