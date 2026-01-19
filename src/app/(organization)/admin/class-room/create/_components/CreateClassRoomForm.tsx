@@ -29,12 +29,9 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
     router.push(PATHS.CLASSROOMS.ROOT);
   };
 
-  // const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = () => {
-
-  // }
-  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, certificate) => {
     onCreate(
-      { formData, students },
+      { formData, students, certificate },
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {

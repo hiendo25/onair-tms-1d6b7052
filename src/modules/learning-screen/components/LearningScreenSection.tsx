@@ -34,7 +34,6 @@ const LearningScreenSection = ({
     refetchLessonDetail,
     handleSelectLesson,
     studentId,
-    isLearningPathSource,
     sectionProgressById,
   } = useLearningScreenState({
     courseId,
@@ -120,7 +119,7 @@ const LearningScreenSection = ({
             sections={sections}
             selectedLessonId={selectedLessonId}
             onSelectLesson={handleSelectLesson}
-            showSectionProgress={isLearningPathSource}
+            showSectionProgress={true}
             sectionProgressById={sectionProgressById}
           />
         </Box>

@@ -31,8 +31,7 @@ const MarkLessonCompleteButton = ({
   });
 
   const isCompleted = selectedLessonSummary?.progressStatus === "completed";
-  const isLearningPathSource = Boolean(learningPathId);
-  const showCompleteButton = isLearningPathSource && !isCompleted;
+  const showCompleteButton = !isCompleted;
 
   const handleMarkComplete = useCallback(() => {
     console.log("[MarkLessonCompleteButton] Marking lesson as complete:", {
@@ -42,19 +41,8 @@ const MarkLessonCompleteButton = ({
       studentId,
     });
 
-    if (!learningPathId) {
-      console.error("[MarkLessonCompleteButton] learningPathId is missing!");
-      alert("Không thể đánh dấu hoàn thành. Thiếu thông tin lộ trình học tập.");
-      return;
-    }
-
     markComplete(lessonId);
   }, [lessonId, learningPathId, courseId, studentId, markComplete]);
-
-  // Don't render anything if not in learning path mode
-  if (!isLearningPathSource) {
-    return null;
-  }
 
   // Show completion status if already completed
   if (isCompleted) {

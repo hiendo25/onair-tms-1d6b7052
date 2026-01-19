@@ -286,6 +286,92 @@ export type Database = {
         }
         Relationships: []
       }
+      certificate_frames: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      certificate_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          frame_id: string
+          id: string
+          layout_config: Json | null
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          frame_id: string
+          id?: string
+          layout_config?: Json | null
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          frame_id?: string
+          id?: string
+          layout_config?: Json | null
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_frames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_attendances: {
         Row: {
           attendance_method:
@@ -574,6 +660,49 @@ export type Database = {
             columns: ["class_room_employee_id"]
             isOneToOne: false
             referencedRelation: "class_room_employee"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_room_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          certificate_template_id?: string
+          class_room_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
         ]
@@ -1316,6 +1445,58 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_employee_branches_employee_id"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          created_at: string
+          data: Json
+          employee_id: string
+          id: string
+          image_url: string
+          layout_config: Json
+        }
+        Insert: {
+          certificate_template_id: string
+          created_at?: string
+          data: Json
+          employee_id: string
+          id?: string
+          image_url: string
+          layout_config: Json
+        }
+        Update: {
+          certificate_template_id?: string
+          created_at?: string
+          data?: Json
+          employee_id?: string
+          id?: string
+          image_url?: string
+          layout_config?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"

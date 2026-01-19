@@ -27,15 +27,12 @@ const calculateSectionProgress = (lessons: LearningLessonSummary[]) => {
 
 export const useSectionProgress = (
   sections: LearningSectionOutline[],
-  isLearningPathSource: boolean,
 ): Record<string, number> => {
   return useMemo(() => {
-    if (!isLearningPathSource) return {};
-
     const progressLookup: Record<string, number> = {};
     for (const section of sections) {
       progressLookup[section.id] = calculateSectionProgress(section.lessons);
     }
     return progressLookup;
-  }, [isLearningPathSource, sections]);
+  }, [sections]);
 };

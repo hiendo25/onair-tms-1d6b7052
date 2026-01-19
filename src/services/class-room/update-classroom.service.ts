@@ -4,6 +4,7 @@ import { isUndefined } from "lodash";
 import { ClassRoomFormValues } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
 import {
+  classRoomCertificateTemplatesRepository,
   classRoomMetaRepository,
   classRoomRepository,
   classRoomSessionRepository,
@@ -22,6 +23,7 @@ export type UpdateClassRoomDto = {
   classRoomId: string;
   formData: ClassRoomFormValues;
   students: ClassRoomStore["state"]["selectedStudents"];
+  certificate: ClassRoomStore["state"]["selectedCertificate"];
 };
 export class UpdateClassRoomService {
   private employeeId: string;
@@ -32,7 +34,7 @@ export class UpdateClassRoomService {
   }
 
   async execute(variables: UpdateClassRoomDto) {
-    const { formData, students, classRoomId } = variables;
+    const { formData, students, classRoomId, certificate } = variables;
 
     const { data: classRoomDetail, error: classRoomDetailError } = await classRoomRepository.getClassRoomById(
       classRoomId,
@@ -120,6 +122,13 @@ export class UpdateClassRoomService {
       classType: classType,
     });
 
+    /**
+     * Step 7: Sync Certificate Template
+     */
+    if (classType !== "learning_path") {
+      await this.updateCertificate(classRoomData.id, classRoomDetail, certificate);
+    }
+
     console.log("Update Susscess", classRoomData);
     return classRoomData;
   }
@@ -191,6 +200,45 @@ export class UpdateClassRoomService {
         })),
       );
     }
+  }
+
+  private async updateCertificate(
+    classRoomId: string,
+    classRoomDetail: NonNullable<GetClassRoomByIdResponse["data"]>,
+    certificate: ClassRoomStore["state"]["selectedCertificate"],
+  ) {
+    const currentCertificate = classRoomDetail.certificate?.[0];
+
+    // Case 1: No new certificate selected
+    if (!certificate) {
+      // Delete existing certificate if any
+      if (currentCertificate) {
+        await classRoomCertificateTemplatesRepository.deleteClassRoomCertificateTemplate({
+          class_room_id: classRoomId,
+        });
+      }
+      return;
+    }
+
+    // Case 2: New certificate selected
+    // If there's an existing certificate with different ID, update it
+    if (currentCertificate && currentCertificate.certificate_template_id !== certificate.id) {
+      await classRoomCertificateTemplatesRepository.updateClassRoomCertificateTemplate({
+        id: currentCertificate.id,
+        certificate_template_id: certificate.id,
+      });
+      return;
+    }
+
+    // Case 3: No existing certificate, create new one
+    if (!currentCertificate) {
+      await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
+        class_room_id: classRoomId,
+        certificate_template_id: certificate.id,
+      });
+    }
+
+    // Case 4: Existing certificate with same ID - no action needed
   }
 
   private async updateSessions(
