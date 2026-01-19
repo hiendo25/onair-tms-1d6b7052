@@ -116,11 +116,11 @@ const getCourseLearningOutline = async (
 
   const { sections: rawSections = [], ...courseInfo } = rawCourse;
   const { normalizedSections, lessonIds } = normalizeOutlineSections(rawSections);
-  const learningPathId = options?.learningPathId?.trim();
+  const learningPathId = options?.learningPathId?.trim() || null;
   const employeeId = options?.employeeId?.trim();
   const shouldIncludeProgress = Boolean(options?.includeProgress);
   const progressRows =
-    shouldIncludeProgress && learningPathId && employeeId
+    shouldIncludeProgress && employeeId
       ? await learningScreenServerRepository.getLessonProgressRows(
         Array.from(lessonIds),
         learningPathId,

@@ -134,15 +134,10 @@ const getResourcesByIds = async (resourceIds: string[]): Promise<ResourceRow[]> 
 
 const getLessonProgressRows = async (
   lessonIds: string[],
-  learningPathId: string,
+  learningPathId: string | null,
   employeeId: string,
 ): Promise<LessonProgressRow[]> => {
   if (!lessonIds.length) {
-    return [];
-  }
-
-  const trimmedLearningPathId = learningPathId?.trim();
-  if (!trimmedLearningPathId) {
     return [];
   }
 
@@ -152,12 +147,22 @@ const getLessonProgressRows = async (
   }
 
   const supabase = await createSVClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("lesson_progress")
     .select("lesson_id,status")
     .in("lesson_id", lessonIds)
-    .eq("learning_path_id", trimmedLearningPathId)
     .eq("employee_id", trimmedEmployeeId);
+
+  // For learning paths, filter by learning_path_id
+  // For regular classes, filter by learning_path_id IS NULL
+  if (learningPathId) {
+    const trimmedLearningPathId = learningPathId.trim();
+    query = query.eq("learning_path_id", trimmedLearningPathId);
+  } else {
+    query = query.is("learning_path_id", null);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;

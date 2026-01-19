@@ -45,8 +45,8 @@ const getCourseLearningOutline = async (
   }
 
   const params = new URLSearchParams({ courseId: trimmedCourseId });
-  const trimmedLearningPathId = options?.learningPathId?.trim();
-  const trimmedEmployeeId = options?.employeeId?.trim();
+  const trimmedLearningPathId = options?.learningPathId ? options.learningPathId.trim() : null;
+  const trimmedEmployeeId = options?.employeeId ? options.employeeId.trim() : null;
   if (options?.includeProgress) {
     params.set("includeProgress", "true");
   }
