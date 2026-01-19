@@ -2,24 +2,32 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { COOKIE_ORGANIZATION_ID } from "@/constants/api-headers.constant";
+import { getCookieStore, setCookieStore } from "@/lib/cookies";
 import { SignInService } from "@/services/auth/signin.service";
 import { SignInDto } from "@/types/dto/auth/sign-in.dto";
 import { http } from "@/utils/http-status";
+
 export async function POST(request: NextRequest) {
   try {
     const payload = (await request.json()) as SignInDto;
 
     const user = await new SignInService().execute(payload);
 
+    const organizationId = await getCookieStore("organization_id");
     const cookieStore = await cookies();
-    if (!cookieStore.get(COOKIE_ORGANIZATION_ID) && user.app_metadata.active_organization_id) {
-      cookieStore.set({
-        name: "organization_id",
-        value: user.app_metadata.active_organization_id,
+    if (!organizationId && user.app_metadata.active_organization_id) {
+      setCookieStore("organization_id", user.app_metadata.active_organization_id, {
         path: "/",
         httpOnly: true,
         secure: true,
       });
+      // cookieStore.set({
+      //   name: "organization_id",
+      //   value: user.app_metadata.active_organization_id,
+      //   path: "/",
+      //   httpOnly: true,
+      //   secure: true,
+      // });
     }
 
     console.log({ user });

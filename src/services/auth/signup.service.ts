@@ -1,5 +1,7 @@
+"use server";
 import dayjs from "dayjs";
 
+import { setCookieStore } from "@/lib/cookies";
 import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
@@ -7,38 +9,46 @@ import { DomainError } from "../DomainError";
 import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignupService {
   async execute(dto: SignUpDto): Promise<SignUpDtoResponse> {
-    // const supabaseClient = await createSVClient();
     const supabaseAdmin = await createServiceRoleClient();
     const { email, fullName, employeeType, password } = dto;
 
-    const emailExists = await authRepository.checkEmailExists({ email });
-
-    if (emailExists) {
-      throw new DomainError("Email đã có trên hệ thông", "AUTH_EMAIL_EXISTS", 409);
-    }
+    let { data: userId } = await supabaseAdmin.rpc("get_user_id_by_email");
 
     const organizationId = await this.getRootOrganizationId();
 
-    const {
-      data: { user },
-      error,
-    } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      app_metadata: {
-        organizationId,
-      },
-    });
+    if (!userId) {
+      // throw new DomainError("Email đã có trên hệ thông", "AUTH_EMAIL_EXISTS", 409);
+      const {
+        data: { user },
+        error,
+      } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        app_metadata: {
+          organizationId,
+        },
+      });
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!user) {
+        throw new DomainError("Create user fail", "CREATE_USER_FAILED", 500);
+      }
+      userId = user.id;
     }
 
-    if (!user) {
-      throw new DomainError("Create user fail", "CREATE_USER_FAILED", 300);
-    }
+    /**
+     * Check Employee exists on current organization
+     */
 
+    const isEmployeeExist = Boolean(await employeesRepository.getCurrentEmployee(userId, organizationId));
+
+    if (isEmployeeExist) {
+      throw new DomainError("Tài khoản đã tồn tại", "EMPLOYEE_EXISTS", 409);
+    }
     /**
      * Create Employee
      */
@@ -46,7 +56,6 @@ export class SignupService {
     const employeeNextOrder = lastEmployeeOrder + 1;
     const employeeCode = await this.generateEmployeeCode(employeeType);
 
-    const userId = user.id;
     const employee = await employeesRepository.createEmployee({
       employee_code: employeeCode,
       employee_order: employeeNextOrder,
@@ -61,15 +70,10 @@ export class SignupService {
     /**
      * Link Default org for Employee
      */
-    const { data: dataReference, error: errorReference } =
-      await userPreferenceRepository.getUserPreferencesByUserId(userId);
-
-    if (errorReference) {
-      throw new Error(errorReference.message);
-    }
+    const { data: dataReference } = await userPreferenceRepository.getUserPreferencesByUserId(userId);
 
     if (!dataReference) {
-      const { data, error: errorReference } = await userPreferenceRepository.createUserPreference({
+      const { error: errorReference } = await userPreferenceRepository.createUserPreference({
         default_organization_id: organizationId,
         user_id: userId,
       });
@@ -100,7 +104,7 @@ export class SignupService {
     });
 
     return {
-      userId: user.id,
+      userId: userId,
       organizationId,
       employeeId: employee.id,
       employeeCode: employee.employee_code,

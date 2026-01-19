@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
-import { COOKIE_ORGANIZATION_ID } from "@/constants/api-headers.constant";
+import { setCookieStore } from "@/lib/cookies";
 import { SignupService } from "@/services/auth/signup.service";
 import { SignUpDto } from "@/types/dto/auth/signup.dto";
 import { http } from "@/utils/http-status";
@@ -11,8 +10,10 @@ export async function POST(request: NextRequest) {
 
     const data = await new SignupService().execute(payload);
 
-    const cookieStore = await cookies();
-    cookieStore.set(COOKIE_ORGANIZATION_ID, data.organizationId);
+    await setCookieStore("organization_id", data.organizationId, {
+      path: "/",
+      secure: true,
+    });
 
     return http.created(data);
   } catch (error) {
