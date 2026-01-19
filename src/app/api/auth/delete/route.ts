@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { setCookieStore } from "@/lib/cookies";
-import { SignupService } from "@/services/auth/signup.service";
-import { SignUpDto } from "@/types/dto/auth/signup.dto";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DeleteUserService } from "@/services/auth/delete-user.service";
 import { http } from "@/utils/http-status";
+
 export async function POST(request: NextRequest) {
   try {
-    const payload: SignUpDto = await request.json();
-
-    const data = await new SignupService().execute(payload);
-
-    await setCookieStore("organization_id", data.organizationId, {
-      path: "/",
-      secure: true,
+    const user = await requireAuth();
+    const payload = (await request.json()) as { employeeId: string };
+    const data = await new DeleteUserService().execute({
+      employeeId: payload.employeeId,
+      userId: user.userId,
     });
 
-    return http.created(data);
+    return http.ok(user);
   } catch (error) {
     console.error(error);
 

@@ -460,4 +460,43 @@ const getOneEmployee = async (variables: { userId: string; organizationId: strin
   }
 };
 export type getOneEmployee = Awaited<ReturnType<typeof getOneEmployee>>;
-export { getEmployees, getEmployeeById, getOneEmployee };
+
+const updateStatus = async (employeeId: string, status: "active" | "inactive") => {
+  const supabase = createClient();
+  return await supabase
+    .from("employees")
+    .update({ status })
+    .select(
+      `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+    )
+    .eq("id", employeeId)
+    .single();
+};
+export type UpdateStatusResponse = Awaited<ReturnType<typeof updateStatus>>;
+
+export { getEmployees, getEmployeeById, getOneEmployee, updateStatus };

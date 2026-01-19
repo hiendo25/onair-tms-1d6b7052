@@ -8,16 +8,12 @@ import AuthCard from "../AuthCard";
 import GoogleSignInButton from "../GoogleSignInButton";
 
 import SignInFormClient, { SignInFormClientProps } from "./SignInFormClient";
-
 interface SignInProps {
   className?: string;
 }
 export default function SignIn({ className }: SignInProps) {
   const { signInWithPassword, isPending, error } = useAuthSignInWithPassword();
-  const handleLogin: SignInFormClientProps["onSubmit"] = async ({
-    email,
-    password,
-  }) => {
+  const handleLogin: SignInFormClientProps["onSubmit"] = async ({ email, password }) => {
     signInWithPassword({ email, password });
   };
   return (
@@ -32,16 +28,8 @@ export default function SignIn({ className }: SignInProps) {
         </Alert>
       )}
       <SignInFormClient onSubmit={handleLogin} isSubmitting={isPending} />
-      <Typography
-        sx={{ fontWeight: "bold", fontSize: "0.875rem", margin: "auto" }}
-      >
-        Hoặc
-      </Typography>
-      <GoogleSignInButton
-        size="large"
-        buttonText="Đăng nhập với Google"
-        disabled={isPending}
-      />
+      <Typography sx={{ fontWeight: "bold", fontSize: "0.875rem", margin: "auto" }}>Hoặc</Typography>
+      <GoogleSignInButton size="large" buttonText="Đăng nhập với Google" disabled={isPending} />
     </AuthCard>
   );
 }
