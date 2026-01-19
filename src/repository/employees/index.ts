@@ -226,6 +226,18 @@ export async function checkEmployeeCodeExists(code: string) {
   return Boolean(data);
 }
 
+export async function isExistEmployee(userId: string, organizationId: string) {
+  const supabase = await createSVClient();
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("organization_id", organizationId)
+    .single();
+
+  return Boolean(employee);
+}
+
 export async function createEmployee(data: {
   user_id: string;
   employee_code: string;
