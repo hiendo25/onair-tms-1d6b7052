@@ -3,7 +3,7 @@ import { createClient, createSVClient } from "@/services";
 import { SupabaseUser } from "@/types/supabase-user.type";
 
 const authSignOut = async () => {
-  const supabase = await createClient();
+  const supabase = createClient();
   return await supabase.auth.signOut();
 };
 
@@ -12,7 +12,7 @@ export interface AuthSignInWithPasswordPayload {
   password: string;
 }
 const authSignInWithPassword = async (payload: AuthSignInWithPasswordPayload) => {
-  const supabase = await createClient();
+  const supabase = createClient();
   return await supabase.auth.signInWithPassword(payload);
 };
 
@@ -21,7 +21,7 @@ export interface AuthSignInWithGoogleOptions {
   scopes?: string;
 }
 const authSignInWithGoogle = async (options: AuthSignInWithGoogleOptions) => {
-  const supabase = await createClient();
+  const supabase = createClient();
   return await supabase.auth.signInWithOAuth({
     provider: "google",
     options,

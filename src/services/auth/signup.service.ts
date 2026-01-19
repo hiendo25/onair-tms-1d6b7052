@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import { authRepository, profilesRepository } from "@/repository";
+import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 import { DomainError } from "../DomainError";
@@ -39,8 +39,10 @@ export class SignupService {
       throw new DomainError("Create user fail", "CREATE_USER_FAILED", 300);
     }
 
+    /**
+     * Create Employee
+     */
     const lastEmployeeOrder = await employeesRepository.getLastEmployeeOrder();
-
     const employeeNextOrder = lastEmployeeOrder + 1;
     const employeeCode = await this.generateEmployeeCode(employeeType);
 
@@ -56,6 +58,29 @@ export class SignupService {
       start_date: dayjs().toISOString(),
     });
 
+    /**
+     * Link Default org for Employee
+     */
+    const { data: dataReference, error: errorReference } =
+      await userPreferenceRepository.getUserPreferencesByUserId(userId);
+
+    if (errorReference) {
+      throw new Error(errorReference.message);
+    }
+
+    if (!dataReference) {
+      const { data, error: errorReference } = await userPreferenceRepository.createUserPreference({
+        default_organization_id: organizationId,
+        user_id: userId,
+      });
+
+      if (errorReference) {
+        console.error("Create reference failed", errorReference?.message);
+      }
+    }
+    /**
+     * Create role default for employee
+     */
     const roleId = await this.getDefaultRole(employeeType);
 
     const { error: errorRoles } = await supabaseAdmin.from("user_roles").insert({ role_id: roleId, user_id: userId });
@@ -63,6 +88,10 @@ export class SignupService {
     if (errorRoles) {
       throw new Error(errorRoles.message);
     }
+
+    /**
+     * Create profile for employee
+     */
     const profile = await profilesRepository.createProfile({
       employee_id: employee.id,
       email: email,

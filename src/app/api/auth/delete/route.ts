@@ -7,12 +7,13 @@ import { http } from "@/utils/http-status";
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth();
+    const payload = (await request.json()) as { employeeId: string };
     const data = await new DeleteUserService().execute({
-      employeeId: user.employeeId,
+      employeeId: payload.employeeId,
       userId: user.userId,
     });
 
-    return http.ok(data);
+    return http.ok(user);
   } catch (error) {
     console.error(error);
 
