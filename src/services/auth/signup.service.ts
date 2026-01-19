@@ -1,4 +1,3 @@
-"use server";
 import dayjs from "dayjs";
 
 import { setCookieStore } from "@/lib/cookies";
