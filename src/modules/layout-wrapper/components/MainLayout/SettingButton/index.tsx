@@ -37,11 +37,11 @@ const SettingButton = () => {
             backgroundColor: theme.palette.grey[200],
           },
         })}
-        onClick={handleOpenPopOver}
+        // onClick={handleOpenPopOver}
       >
         <Setting02Icon className="w-5 h-5" />
       </IconButton>
-      <Popover
+      {/* <Popover
         id={id}
         open={open}
         anchorEl={anchorEl}
@@ -54,7 +54,7 @@ const SettingButton = () => {
           <Divider className="my-3" />
           <InstallNotificationPrompt />
         </div>
-      </Popover>
+      </Popover> */}
     </div>
   );
 };

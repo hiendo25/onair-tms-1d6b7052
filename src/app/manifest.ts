@@ -9,7 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     background_color: "#ffffff",
-    theme_color: "#000000",
+    theme_color: "#ffffff",
+    lang: "vi-VN",
+    categories: ["education", "utilities"],
     icons: [
       {
         src: "/assets/icons/brand/icon-192x192.png",
@@ -20,6 +22,20 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/assets/icons/brand/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
+      },
+    ],
+    shortcuts: [
+      {
+        name: "OnAir TMS",
+        short_name: "OnAir TMS",
+        description: "Platform training management",
+        url: "/media",
+        icons: [
+          {
+            src: "/assets/icons/brand/icon-192x192.png",
+            sizes: "192x192",
+          },
+        ],
       },
     ],
   };
