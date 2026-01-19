@@ -1,14 +1,16 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useTMutation } from "@/lib/queryClient";
+import * as questionBankService from "@/services/assignments/question-bank.service";
 import type {
   CreateAssignmentDto,
   SaveGradeDto,
   SaveGradeResponse,
   UpdateAssignmentDto,
 } from "@/types/dto/assignments";
+import type { CreateQuestionBankDto, UpdateQuestionBankDto } from "@/types/dto/question-bank";
 
-import { GET_ASSIGNMENTS } from "./key";
+import { GET_ASSIGNMENTS, GET_QUESTION_BANK } from "./key";
 
 export const useCreateAssignmentMutation = () => {
   const queryClient = useQueryClient();
@@ -109,6 +111,47 @@ export const useSaveGradeMutation = () => {
       queryClient.invalidateQueries({
         queryKey: [GET_ASSIGNMENTS, variables.assignmentId, "grade", variables.employeeId],
       });
+    },
+  });
+};
+
+export const useCreateQuestionBankMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation({
+    mutationFn: async (payload: CreateQuestionBankDto & { createdBy: string }) => {
+      const { createdBy, ...request } = payload;
+      return questionBankService.createQuestionBankQuestions(request, createdBy);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_QUESTION_BANK] });
+    },
+  });
+};
+
+export const useUpdateQuestionBankMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation({
+    mutationFn: async (payload: UpdateQuestionBankDto) => {
+      return questionBankService.updateQuestionBankQuestion(payload.id, payload.question);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [GET_QUESTION_BANK] });
+      queryClient.invalidateQueries({ queryKey: [GET_QUESTION_BANK, variables.id] });
+    },
+  });
+};
+
+export const useDeleteQuestionBankMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useTMutation({
+    mutationFn: async (questionId: string) => {
+      return questionBankService.deleteQuestionBankQuestion(questionId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [GET_QUESTION_BANK] });
     },
   });
 };

@@ -17,6 +17,7 @@ export * as classFieldRepository from "./class-room-field";
 export * as hashTagRepository from "./hash-tag";
 export * as assignmentsRepository from "./assignments";
 export * as assignmentResultsRepository from "./assignment-results";
+export * as questionBankRepository from "./question-bank";
 export * as classRoomSessionRepository from "./class-session";
 export * as classRoomMetaRepository from "./class-room-meta";
 export * as qrAttendanceRepository from "./qr-attendance";

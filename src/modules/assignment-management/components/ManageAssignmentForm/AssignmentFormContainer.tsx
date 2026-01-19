@@ -7,6 +7,7 @@ import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 
 import { PATHS } from "@/constants/path.constant";
 import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
+import { createDefaultQuestion } from "@/modules/assignment-management/utils/question.utils";
 import { Assignment, assignmentSchema } from "../assignment-form.schema";
 
 import AssignmentTabContainer from "./AssignmentTabContainer";
@@ -40,7 +41,7 @@ export const initAssignmentFormData = (): Partial<Assignment> => {
     name: "",
     description: "",
     assignmentCategories: [],
-    questions: [{ type: "file", label: "", score: 1 }],
+    questions: [createDefaultQuestion()],
     assignedEmployees: [],
   };
 };

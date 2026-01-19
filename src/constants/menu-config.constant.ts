@@ -124,6 +124,20 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         key: "assignments/list",
         path: PATHS.ASSIGNMENTS.ROOT,
       },
+      {
+        title: "Ngân hàng câu hỏi",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/question-bank",
+        path: PATHS.ASSIGNMENTS.QUESTION_BANK,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank"],
+      },
+      {
+        title: "Tạo câu hỏi",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/question-bank/create",
+        path: PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank/create"],
+      },
     ],
   },
   {

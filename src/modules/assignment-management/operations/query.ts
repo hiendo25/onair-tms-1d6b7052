@@ -1,8 +1,9 @@
 import { useTQuery } from "@/lib/queryClient";
-import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
+import { GET_ASSIGNMENTS, GET_QUESTION_BANK } from "@/modules/assignment-management/operations/key";
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import { GetAssignmentsQueryParams } from "@/repository/assignments/type";
 import * as assignmentService from "@/services/assignments/assignment.service";
+import * as questionBankService from "@/services/assignments/question-bank.service";
 import type {
   AssignmentDto,
   AssignmentQuestionDto,
@@ -13,6 +14,7 @@ import type {
   SubmissionDetailDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import type { GetQuestionBankParams, QuestionBankDto, QuestionBankSummaryDto } from "@/types/dto/question-bank";
 
 export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
   return useTQuery<PaginatedResult<AssignmentDto>>({
@@ -141,5 +143,57 @@ export const useGetAssignmentsV2Query = (variables?: { queryParams: GetAssignmen
       return await assignmentsRepository.getAssignmentsV2(queryParams);
     },
     enabled,
+  });
+};
+
+export const useGetQuestionBankQuery = (params?: GetQuestionBankParams) => {
+  return useTQuery<PaginatedResult<QuestionBankDto>>({
+    queryKey: [GET_QUESTION_BANK, params],
+    queryFn: async () => {
+      return questionBankService.getQuestionBank(params);
+    },
+    enabled: !!params?.organizationId,
+  });
+};
+
+export const useGetQuestionBankByIdQuery = (questionId: string, organizationId?: string) => {
+  return useTQuery<QuestionBankDto | null>({
+    queryKey: [GET_QUESTION_BANK, questionId, organizationId],
+    queryFn: async () => {
+      if (!organizationId) {
+        return null;
+      }
+
+      const question = await questionBankService.getQuestionBankById(questionId, organizationId);
+
+      if (!question) {
+        throw new Error("Question not found");
+      }
+
+      return question;
+    },
+    enabled: !!questionId && !!organizationId,
+  });
+};
+
+export const useGetQuestionBankSummaryQuery = (organizationId?: string) => {
+  return useTQuery<QuestionBankSummaryDto>({
+    queryKey: [GET_QUESTION_BANK, "summary", organizationId],
+    queryFn: async () => {
+      if (!organizationId) {
+        return {
+          total: 0,
+          multipleChoice: 0,
+          trueFalse: 0,
+          essay: 0,
+          file: 0,
+          order: 0,
+          matching: 0,
+        };
+      }
+
+      return questionBankService.getQuestionBankSummary(organizationId);
+    },
+    enabled: !!organizationId,
   });
 };
