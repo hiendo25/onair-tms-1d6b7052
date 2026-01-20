@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
+import DownloadIcon from "@mui/icons-material/Download";
 import {
   Box,
   Button,
@@ -12,15 +14,16 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
 import Image from "next/image";
 
 interface CertificateViewModalProps {
   open: boolean;
   onClose: () => void;
   certificateName: string;
-  certificateImageUrl: string;
+  // Mode 1: Image URL (for employee certificates)
+  certificateImageUrl?: string;
+  // Mode 2: Preview Component (for template preview)
+  previewComponent?: React.ReactNode;
 }
 
 export default function CertificateViewModal({
@@ -28,11 +31,17 @@ export default function CertificateViewModal({
   onClose,
   certificateName,
   certificateImageUrl,
+  previewComponent,
 }: CertificateViewModalProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  const isImageMode = !!certificateImageUrl;
+  const isPreviewMode = !!previewComponent;
+
   const handleDownload = async () => {
+    if (!certificateImageUrl) return;
+
     try {
       setIsDownloading(true);
 
@@ -106,45 +115,66 @@ export default function CertificateViewModal({
             overflow: "hidden",
           }}
         >
-          {isImageLoading && (
-            <Typography color="text.secondary">Đang tải chứng nhận...</Typography>
+          {/* Image Mode */}
+          {isImageMode && (
+            <>
+              {isImageLoading && (
+                <Typography color="text.secondary">Đang tải chứng nhận...</Typography>
+              )}
+              <Image
+                src={certificateImageUrl}
+                alt={certificateName}
+                width={1200}
+                height={900}
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  objectFit: "contain",
+                  display: isImageLoading ? "none" : "block",
+                }}
+                onLoad={() => setIsImageLoading(false)}
+                priority
+              />
+            </>
           )}
-          <Image
-            src={certificateImageUrl}
-            alt={certificateName}
-            width={1200}
-            height={900}
-            style={{
-              width: "100%",
-              height: "auto",
-              objectFit: "contain",
-              display: isImageLoading ? "none" : "block",
-            }}
-            onLoad={() => setIsImageLoading(false)}
-            priority
-          />
+
+          {/* Preview Mode */}
+          {isPreviewMode && (
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: 800,
+              }}
+            >
+              {previewComponent}
+            </Box>
+          )}
         </Box>
 
         <Box sx={{ mt: 3, textAlign: "center" }}>
           <Typography variant="body1" fontWeight={600}>
-            Bạn đã nhận được chứng nhận "{certificateName}"
+            {isImageMode
+              ? `Bạn đã nhận được chứng nhận "${certificateName}"`
+              : `Xem trước chứng nhận "${certificateName}"`}
           </Typography>
         </Box>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
         <Button onClick={onClose} variant="outlined" size="small" disabled={isDownloading}>
-          Hủy
+          {isPreviewMode ? "Đóng" : "Hủy"}
         </Button>
-        <Button
-          onClick={handleDownload}
-          variant="contained"
-          size="small"
-          startIcon={<DownloadIcon />}
-          disabled={isDownloading}
-        >
-          {isDownloading ? "Đang tải..." : "Tải xuống"}
-        </Button>
+        {isImageMode && (
+          <Button
+            onClick={handleDownload}
+            variant="contained"
+            size="small"
+            startIcon={<DownloadIcon />}
+            disabled={isDownloading}
+          >
+            {isDownloading ? "Đang tải..." : "Tải xuống"}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

@@ -25,8 +25,9 @@ import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { useDeleteCertificateTemplateMutation } from "@/modules/certificates/operations/mutation";
 import { useGetCertificateTemplatesQuery } from "@/modules/certificates/operations/query";
-import { Edit02Icon, EyeIcon,SearchIcon, Trash01Icon } from "@/shared/assets/icons";
+import { Edit02Icon, EyeIcon, SearchIcon, Trash01Icon } from "@/shared/assets/icons";
 import CertificatePreview from "@/shared/ui/CertificatePreview";
+import CertificateViewModal from "@/shared/ui/CertificateViewModal";
 
 const CertificatesListContainer: React.FC = () => {
   const router = useRouter();
@@ -39,6 +40,10 @@ const CertificatesListContainer: React.FC = () => {
   const [isTransition, startTransition] = useTransition();
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
+  const [previewCertificate, setPreviewCertificate] = useState<{
+    name: string;
+    frameUrl?: string | null;
+  } | null>(null);
 
   // Debounce search query
   useEffect(() => {
@@ -72,6 +77,14 @@ const CertificatesListContainer: React.FC = () => {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+  };
+
+  const handleViewCertificate = (name: string, frameUrl?: string | null) => () => {
+    setPreviewCertificate({ name, frameUrl });
+  };
+
+  const handleClosePreview = () => {
+    setPreviewCertificate(null);
   };
 
   const handleDeleteCertificate = (id: string, templateName: string) => async () => {
@@ -171,40 +184,29 @@ const CertificatesListContainer: React.FC = () => {
                   },
                 }}
               >
-                {/* Card Actions Overlay - Centered */}
-                <Box
-                  className="card-actions"
-                  sx={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 2,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 1,
-                    opacity: 0,
-                    transition: "opacity 0.2s",
-                    bgcolor: "rgba(0, 0, 0, 0.3)",
-                  }}
-                >
-                  <IconButton
+                {/* Certificate Preview with Actions Overlay */}
+                <Box sx={{ position: "relative" }}>
+                  <CertificatePreview frameUrl={certificate.frame?.image_url} />
+
+                  {/* Card Actions Overlay - Centered on preview only */}
+                  <Box
+                    className="card-actions"
                     sx={{
-                      bgcolor: "white",
-                      width: 36,
-                      height: 36,
-                      borderRadius: 1,
-                      "&:hover": {
-                        bgcolor: "grey.100",
-                      },
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      zIndex: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 1,
+                      opacity: 0,
+                      transition: "opacity 0.2s",
+                      bgcolor: "rgba(0, 0, 0, 0.3)",
                     }}
-                    title="Xem"
                   >
-                    <EyeIcon className="w-5 h-5" />
-                  </IconButton>
-                  <Link href={PATHS.CERTIFICATES.EDIT(certificate.id)}>
                     <IconButton
                       sx={{
                         bgcolor: "white",
@@ -215,34 +217,51 @@ const CertificatesListContainer: React.FC = () => {
                           bgcolor: "grey.100",
                         },
                       }}
-                      title="Chỉnh sửa"
+                      title="Xem"
+                      onClick={handleViewCertificate(
+                        certificate.name || "Mẫu chứng nhận",
+                        certificate.frame?.image_url
+                      )}
                     >
-                      <Edit02Icon className="w-5 h-5" />
+                      <EyeIcon className="w-5 h-5" />
                     </IconButton>
-                  </Link>
-                  <IconButton
-                    sx={{
-                      bgcolor: "white",
-                      width: 36,
-                      height: 36,
-                      borderRadius: 1,
-                      color: "error.main",
-                      "&:hover": {
-                        bgcolor: "grey.100",
-                      },
-                    }}
-                    title="Xóa"
-                    onClick={handleDeleteCertificate(
-                      certificate.id,
-                      certificate.name || "mẫu chứng nhận"
-                    )}
-                  >
-                    <Trash01Icon className="w-5 h-5" />
-                  </IconButton>
+                    <Link href={PATHS.CERTIFICATES.EDIT(certificate.id)}>
+                      <IconButton
+                        sx={{
+                          bgcolor: "white",
+                          width: 36,
+                          height: 36,
+                          borderRadius: 1,
+                          "&:hover": {
+                            bgcolor: "grey.100",
+                          },
+                        }}
+                        title="Chỉnh sửa"
+                      >
+                        <Edit02Icon className="w-5 h-5" />
+                      </IconButton>
+                    </Link>
+                    <IconButton
+                      sx={{
+                        bgcolor: "white",
+                        width: 36,
+                        height: 36,
+                        borderRadius: 1,
+                        color: "error.main",
+                        "&:hover": {
+                          bgcolor: "grey.100",
+                        },
+                      }}
+                      title="Xóa"
+                      onClick={handleDeleteCertificate(
+                        certificate.id,
+                        certificate.name || "mẫu chứng nhận"
+                      )}
+                    >
+                      <Trash01Icon className="w-5 h-5" />
+                    </IconButton>
+                  </Box>
                 </Box>
-
-                {/* Certificate Preview */}
-                <CertificatePreview frameUrl={certificate.frame?.image_url} />
 
                 {/* Certificate Info */}
                 <CardContent
@@ -300,6 +319,21 @@ const CertificatesListContainer: React.FC = () => {
             </Button>
           </Stack>
         </Box>
+      )}
+
+      {/* Certificate Preview Modal */}
+      {previewCertificate && (
+        <CertificateViewModal
+          open={!!previewCertificate}
+          onClose={handleClosePreview}
+          certificateName={previewCertificate.name}
+          previewComponent={
+            <CertificatePreview
+              frameUrl={previewCertificate.frameUrl}
+              aspectRatio="4 / 3"
+            />
+          }
+        />
       )}
     </Box>
   );

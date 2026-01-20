@@ -11,9 +11,9 @@ import DiplomaIcon from "@/shared/assets/icons/DiplomaIcon";
 import MicrophoneIcon from "@/shared/assets/icons/MicrophoneIcon";
 import { CLASS_SESSION_TYPE, CLASSROOM_DETAIL_TEXT, ROOM_PROVIDERS } from "../_constants";
 
-import CertificateViewModal from "./CertificateViewModal";
 import ClassRoomDetailDateInfo from "./ClassRoomDetailDateInfo";
 import ClassRoomMiniBox from "./ClassRoomMiniBox";
+import CertificateViewModal from "@/shared/ui/CertificateViewModal";
 
 interface ClassRoomDetailBoxProps {
   data: GetClassRoomBySlugResponse["data"];
