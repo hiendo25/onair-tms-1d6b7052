@@ -1,10 +1,7 @@
-import { useEffect, useEffectEvent } from "react";
+import { useEffect } from "react";
 
 import { supabase } from "@/services";
-
 export function useSubscribeNotifications(employeeId: string, onNew: (n: any) => void) {
-  const handleNew = useEffectEvent(onNew);
-
   useEffect(() => {
     const channel = supabase
       .channel(`notifications:${employeeId}`)
@@ -17,10 +14,16 @@ export function useSubscribeNotifications(employeeId: string, onNew: (n: any) =>
           filter: `employee_id=eq.${employeeId}`,
         },
         (payload) => {
-          handleNew(payload.new);
+          onNew(payload.new);
         },
       )
-      .subscribe();
+      .subscribe((status, error) => {
+        console.log("Realtime status:", status);
+
+        if (error) {
+          console.error("Realtime error:", error);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
