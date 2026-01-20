@@ -14,6 +14,7 @@ const MyClassLearningScreenPage = async ({ params }: MyClassLearningScreenPagePr
   const { couresId } = await params;
   const courseHeader = await learningScreenService.getLearningCourseHeader(couresId);
 
+  console.log({ courseHeader });
   if (!courseHeader) {
     notFound();
   }
