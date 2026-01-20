@@ -132,6 +132,9 @@ const ClassRoomSeriesSessionDetail = ({
   const weeklySessionLabel = formatWeeklyScheduleLabel(session.weekly_schedule);
   const sessionScheduleLabel = weeklySessionLabel || getSessionScheduleLabel(scheduleDisplay);
 
+  // Check if session has ended (is in the past)
+  const isSessionEnded = session.end_at ? dayjs(session.end_at).isBefore(dayjs()) : false;
+
   const getCourseDetailHref = (courseId: string) => {
     return isFromLearningPath
       ? PATHS.MY_LEARNING_PATHS.LEARNING_SCREEN(courseId)
@@ -254,7 +257,7 @@ const ClassRoomSeriesSessionDetail = ({
                 {coursePeriods.map((coursePeriod) => {
                   const courseId = coursePeriod.course?.id;
                   const courseHref = courseId ? getCourseDetailHref(courseId) : undefined;
-                  const isClickable = Boolean(courseHref);
+                  const isClickable = Boolean(courseHref) && !isSessionEnded;
                   const teacherName = getTeacherName(coursePeriod);
                   const courseCountLabel = getCourseCountLabel(coursePeriod);
                   const courseScheduleLabel = getCourseScheduleLabel(coursePeriod);
@@ -273,9 +276,11 @@ const ClassRoomSeriesSessionDetail = ({
                         bgcolor: "common.white",
                         textDecoration: "none",
                         color: "inherit",
-                        cursor: isClickable ? "pointer" : "default",
+                        cursor: isClickable ? "pointer" : isSessionEnded ? "not-allowed" : "default",
                         boxShadow: "0px 10px 24px rgba(15, 23, 42, 0.06)",
                         transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+                        opacity: isSessionEnded ? 0.6 : 1,
+                        pointerEvents: isSessionEnded ? "none" : "auto",
                         "&:hover": isClickable
                           ? {
                             borderColor: "primary.light",
@@ -285,7 +290,7 @@ const ClassRoomSeriesSessionDetail = ({
                           : undefined,
                       }}
                       component={isClickable ? "a" : "div"}
-                      href={courseHref}
+                      href={isClickable ? courseHref : undefined}
                     >
                       <Box
                         sx={{
