@@ -3,7 +3,7 @@
  * Database operations for employee certificates
  */
 
-import { createSVClient } from "@/services";
+import { createClient, createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
 
 type EmployeeCertificateTemplateRow = Database["public"]["Tables"]["employee_certificate_templates"]["Row"];
@@ -82,6 +82,30 @@ export async function getEmployeeCertificatesByEmployeeId(
   }
 
   return data || [];
+}
+
+/**
+ * Get employee certificate for a specific classroom
+ */
+export async function getEmployeeCertificateByClassRoom(
+  employeeId: string,
+  classRoomId: string
+): Promise<EmployeeCertificateTemplateRow | null> {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("employee_certificate_templates")
+    .select("*")
+    .eq("employee_id", employeeId)
+    .eq("class_room_id", classRoomId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[EmployeeCertificateTemplates] Error fetching certificate:", error);
+    return null;
+  }
+
+  return data;
 }
 
 /**

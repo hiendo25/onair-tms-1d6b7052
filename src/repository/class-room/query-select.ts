@@ -241,6 +241,11 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
           ),
           agendas:class_sessions_agendas(${selectAgenda}),
           metadata:class_session_metadata(${selectMetadata}),
-          class_qr_codes(${selectQRCode})	
+          class_qr_codes(${selectQRCode})
+      ),
+      certificate:class_room_certificate_templates(
+        id,
+        certificate_template_id,
+        certificate_template:certificate_templates(${selectCertificateTemplate})
       )
     `;
