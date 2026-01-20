@@ -24,6 +24,7 @@ import {
 import { useLibraryStore } from "@/modules/library/store/libraryProvider";
 import { useUserOrganization } from "@/modules/organization";
 import { certificateFramesRepository } from "@/repository";
+import CertificatePreview from "@/shared/ui/CertificatePreview";
 
 import FrameSelectionGrid from "./FrameSelectionGrid";
 
@@ -316,45 +317,7 @@ const UpsertCertificateForm: React.FC<UpsertCertificateFormProps> = ({
                       position: "relative",
                     }}
                   >
-                    <Box
-                      sx={{
-                        width: "100%",
-                        aspectRatio: "4 / 3",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {/* Base certificate image */}
-                      <Image
-                        src="/assets/images/certificate-standard.png"
-                        width={1944}
-                        height={1458}
-                        alt="Certificate"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                          display: "block",
-                        }}
-                      />
-
-                      {/* Frame overlay */}
-                      {selectedFrameUrl && (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            backgroundImage: `url(${selectedFrameUrl})`,
-                            backgroundSize: "100% 100%",
-                            backgroundPosition: "center",
-                            backgroundRepeat: "no-repeat",
-                          }}
-                        />
-                      )}
-                    </Box>
+                    <CertificatePreview frameUrl={selectedFrameUrl} />
                   </Paper>
                 </Box>
               </Stack>
