@@ -10,11 +10,11 @@ import {
   FormControl,
   Paper,
 } from "@mui/material";
-import Image from "next/image";
 
 import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { useGetCertificateTemplatesQuery } from "@/modules/certificates/operations/query";
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import CertificatePreview from "@/shared/ui/CertificatePreview";
 
 const CertificateSelection: React.FC = () => {
   const { organizationId } = useOrganizationId();
@@ -94,45 +94,7 @@ const CertificateSelection: React.FC = () => {
                   borderColor: "divider",
                 }}
               >
-                <Box
-                  sx={{
-                    width: "100%",
-                    aspectRatio: "4 / 3",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* Base certificate image */}
-                  <Image
-                    src="/assets/images/certificate-standard.png"
-                    width={1944}
-                    height={1458}
-                    alt="Certificate"
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      display: "block",
-                    }}
-                  />
-
-                  {/* Frame overlay */}
-                  {selectedCertificate.frameUrl && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        backgroundImage: `url(${selectedCertificate.frameUrl})`,
-                        backgroundSize: "100% 100%",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                      }}
-                    />
-                  )}
-                </Box>
+                <CertificatePreview frameUrl={selectedCertificate.frameUrl} />
 
                 {/* Certificate Info */}
                 <Box sx={{ mt: 2, textAlign: "center" }}>

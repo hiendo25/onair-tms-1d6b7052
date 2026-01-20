@@ -39,6 +39,7 @@ interface ClassRoomSeriesSessionDetailProps {
   session: ClassRoomSessionWithIndex | null;
   thumbnail?: string;
   classRoomTitle?: string;
+  classRoomSlug?: string;
   isAdminView?: boolean;
   open: boolean;
   onClose: () => void;
@@ -105,6 +106,7 @@ const ClassRoomSeriesSessionDetail = ({
   session,
   thumbnail,
   classRoomTitle,
+  classRoomSlug,
   open,
   isAdminView,
   onClose,
@@ -133,7 +135,7 @@ const ClassRoomSeriesSessionDetail = ({
   const getCourseDetailHref = (courseId: string) => {
     return isFromLearningPath
       ? PATHS.MY_LEARNING_PATHS.LEARNING_SCREEN(courseId)
-      : PATHS.STUDENTS.LEARNINNG(courseId);
+      : PATHS.CLASSROOMS.LEARNING_SCREEN(classRoomSlug!, courseId);
   };
 
   return (

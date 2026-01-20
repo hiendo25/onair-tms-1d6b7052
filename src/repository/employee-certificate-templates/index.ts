@@ -12,6 +12,7 @@ type EmployeeCertificateTemplateInsert = Database["public"]["Tables"]["employee_
 export type CreateEmployeeCertificateTemplatePayload = {
   employee_id: string;
   certificate_template_id: string;
+  class_room_id: string;
   image_url: string;
   layout_config: any;
   data: any;
@@ -88,7 +89,8 @@ export async function getEmployeeCertificatesByEmployeeId(
  */
 export async function hasEmployeeCertificate(
   employeeId: string,
-  certificateTemplateId: string
+  certificateTemplateId: string,
+  classRoomId: string
 ): Promise<boolean> {
   const supabase = await createSVClient();
 
@@ -97,6 +99,7 @@ export async function hasEmployeeCertificate(
     .select("id")
     .eq("employee_id", employeeId)
     .eq("certificate_template_id", certificateTemplateId)
+    .eq("class_room_id", classRoomId)
     .maybeSingle();
 
   if (error) {

@@ -34,6 +34,7 @@ interface LessonContentPanelProps {
   lessonError: string | null;
   onRetryLesson?: () => void;
   learningPathId?: string | null;
+  classRoomId?: string | null;
 }
 
 const LessonContentPanel = ({
@@ -47,6 +48,7 @@ const LessonContentPanel = ({
   lessonError,
   onRetryLesson,
   learningPathId,
+  classRoomId,
 }: LessonContentPanelProps) => {
   const descriptionRef = useRef<HTMLDivElement | null>(null);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
@@ -149,6 +151,7 @@ const LessonContentPanel = ({
           onRequestNextLesson={nextLesson ? () => onSelectLesson(nextLesson.id) : undefined}
           nextLessonTitle={nextLesson?.title ?? null}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           studentId={studentId}
         />
@@ -164,6 +167,7 @@ const LessonContentPanel = ({
           resource={lesson.mainResource ?? null}
           contentKind={documentKind}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           studentId={studentId}
           selectedLessonSummary={selectedLessonSummary}
@@ -177,6 +181,7 @@ const LessonContentPanel = ({
           resource={lesson.mainResource ?? null}
           lesson={lesson}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           studentId={studentId}
           selectedLessonSummary={selectedLessonSummary}
@@ -192,6 +197,7 @@ const LessonContentPanel = ({
           studentId={studentId}
           lesson={lesson}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           selectedLessonSummary={selectedLessonSummary}
         />

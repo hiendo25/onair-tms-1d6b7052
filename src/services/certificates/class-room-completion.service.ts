@@ -3,9 +3,11 @@
  * Handles business logic for checking class room completion and certificate eligibility
  */
 
-import * as classRoomSessionRepository from "@/repository/class-session";
-import * as coursesLessonsRepository from "@/repository/courses-lessons";
-import * as lessonProgressRepository from "@/repository/lesson-progress";
+import {
+  classRoomSessionRepository,
+  coursesLessonsRepository,
+  lessonProgressRepository,
+} from "@/repository";
 
 export type CertificateEligibilityResult = {
   isEligible: boolean;
@@ -15,9 +17,13 @@ export type CertificateEligibilityResult = {
 };
 
 /**
- * Check if a specific course is completed by the employee
+ * Check if a specific course is completed by the employee in a given class room context
  */
-async function isCourseCompleted(employeeId: string, courseId: string): Promise<boolean> {
+async function isCourseCompleted(
+  employeeId: string,
+  courseId: string,
+  classRoomId?: string | null
+): Promise<boolean> {
   // Get all lessons for this course
   const courseLessons = await coursesLessonsRepository.getLessonsByCourseId(courseId);
 
@@ -27,10 +33,11 @@ async function isCourseCompleted(employeeId: string, courseId: string): Promise<
 
   const courseLessonIds = courseLessons.map((l) => l.id);
 
-  // Check completion for this course
+  // Check completion for this course in the specific context (class room or standalone)
   const courseCompletedLessons = await lessonProgressRepository.getCompletedLessonsForEmployee(
     employeeId,
-    courseLessonIds
+    courseLessonIds,
+    classRoomId
   );
 
   return courseCompletedLessons.length === courseLessons.length;
@@ -47,11 +54,11 @@ async function isClassRoomFullyCompleted(employeeId: string, classRoomId: string
     return false;
   }
 
-  const classRoomCourseIds = [...new Set(allClassRoomCourses.map((c: any) => c.course_id))];
+  const classRoomCourseIds = Array.from(new Set(allClassRoomCourses.map((c: any) => c.course_id))) as string[];
 
-  // Check completion for all courses in class room
+  // Check completion for all courses in class room, filtered by classRoomId
   for (const courseId of classRoomCourseIds) {
-    const isComplete = await isCourseCompleted(employeeId, courseId);
+    const isComplete = await isCourseCompleted(employeeId, courseId, classRoomId);
 
     if (!isComplete) {
       return false;
@@ -59,6 +66,58 @@ async function isClassRoomFullyCompleted(employeeId: string, classRoomId: string
   }
 
   return true;
+}
+
+/**
+ * Check if a specific class room is eligible for certificate generation
+ * Simplified version that checks only the provided class room
+ *
+ * @param employeeId - The employee ID
+ * @param classRoomId - The class room ID to check
+ * @returns Certificate eligibility information for this class room
+ */
+async function checkClassRoomCertificateEligibility(
+  employeeId: string,
+  classRoomId: string
+): Promise<CertificateEligibilityResult | null> {
+  try {
+    // Get class room details including certificate template
+    const classRoomSessions = await classRoomSessionRepository.getClassRoomSessionsByClassRoomId(classRoomId);
+
+    if (classRoomSessions.length === 0) {
+      return null;
+    }
+
+    // Extract class room info
+    const classRooms = classRoomSessionRepository.extractClassRoomsFromSessions(classRoomSessions);
+
+    if (classRooms.length === 0) {
+      return null;
+    }
+
+    const classRoom = classRooms[0];
+
+    if (!classRoom || !classRoom.certificateTemplateId) {
+      return null;
+    }
+
+    // Check if all courses in this class room are completed
+    const isComplete = await isClassRoomFullyCompleted(employeeId, classRoomId);
+
+    if (!isComplete) {
+      return null;
+    }
+
+    return {
+      isEligible: true,
+      classRoomId: classRoom.classRoomId,
+      classRoomTitle: classRoom.classRoomTitle,
+      certificateTemplateId: classRoom.certificateTemplateId,
+    };
+  } catch (error) {
+    console.error("[ClassRoomCompletionService] Error checking class room certificate eligibility:", error);
+    throw error;
+  }
 }
 
 /**
@@ -144,4 +203,4 @@ async function checkCertificateEligibility(
   }
 }
 
-export { checkCertificateEligibility };
+export { checkCertificateEligibility, checkClassRoomCertificateEligibility };

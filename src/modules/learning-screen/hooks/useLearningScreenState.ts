@@ -17,11 +17,13 @@ import { learningScreenRepository } from "@/repository";
 interface UseLearningScreenStateParams {
   courseId: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
 }
 
 export const useLearningScreenState = ({
   courseId,
-  learningPathId
+  learningPathId,
+  classRoomId
 }: UseLearningScreenStateParams) => {
   const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
   const pathname = usePathname();
@@ -37,6 +39,7 @@ export const useLearningScreenState = ({
     enabled: Boolean(courseId),
     includeProgress: true,
     learningPathId: learningPathId ?? null,
+    classRoomId: classRoomId ?? null,
     employeeId: studentId,
   });
 

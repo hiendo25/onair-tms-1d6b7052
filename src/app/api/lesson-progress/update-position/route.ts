@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     const {
       lessonId,
       learningPathId,
+      classRoomId,
       currentPositionSeconds,
       progressPercentage,
     } = body as UpdatePositionRequest;
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
     const result = await updatePosition(employee.id, {
       lessonId,
       learningPathId: learningPathId || null,
+      classRoomId: classRoomId || null,
       currentPositionSeconds,
       progressPercentage,
     });

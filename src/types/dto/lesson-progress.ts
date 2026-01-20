@@ -14,6 +14,7 @@ export type LessonProgressStatus = Database["public"]["Enums"]["lesson_progress_
 export interface UpdatePositionRequest {
   lessonId: string;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   currentPositionSeconds: number;
   progressPercentage: number;
 }
@@ -24,6 +25,7 @@ export interface UpdatePositionRequest {
 export interface MarkCompletedRequest {
   lessonId: string;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   currentPositionSeconds?: number;
 }
 
@@ -35,6 +37,7 @@ export interface LessonProgress {
   employeeId: string;
   lessonId: string;
   learningPathId: string | null;
+  classRoomId: string | null;
   currentPositionSeconds: number | null;
   progressPercentage: number | null;
   status: LessonProgressStatus;

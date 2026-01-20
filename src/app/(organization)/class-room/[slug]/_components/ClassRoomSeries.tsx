@@ -90,6 +90,7 @@ const ClassRoomSeries = ({ data, isAdminView, isFromLearningPath }: ClassRoomSer
         session={selectedSession}
         thumbnail={data?.thumbnail_url || undefined}
         classRoomTitle={data?.title || ""}
+        classRoomSlug={data?.slug ?? undefined}
         isAdminView={isAdminView}
         open={Boolean(selectedSession)}
         onClose={() => setSelectedSession(null)}

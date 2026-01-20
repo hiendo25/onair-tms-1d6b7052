@@ -22,6 +22,7 @@ interface VideoLessonPlayerProps {
   onRequestNextLesson?: () => void;
   nextLessonTitle?: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   studentId?: string | null;
 }
@@ -32,6 +33,7 @@ const VideoLessonPlayer = ({
   onRequestNextLesson,
   nextLessonTitle,
   learningPathId,
+  classRoomId,
   courseId,
   studentId,
 }: VideoLessonPlayerProps) => {
@@ -39,6 +41,7 @@ const VideoLessonPlayer = ({
   const { markComplete } = useMarkLessonComplete({
     courseId: courseId ?? null,
     learningPathId,
+    classRoomId,
     employeeId: studentId ?? null,
   });
 

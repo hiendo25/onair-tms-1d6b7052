@@ -19,6 +19,7 @@ function mapToResponse(row: LessonProgressRow): LessonProgress {
     employeeId: row.employee_id,
     lessonId: row.lesson_id,
     learningPathId: row.learning_path_id,
+    classRoomId: row.class_room_id,
     currentPositionSeconds: row.current_position_seconds,
     progressPercentage: row.progress_percentage,
     status: row.status,
@@ -29,17 +30,19 @@ function mapToResponse(row: LessonProgressRow): LessonProgress {
 }
 
 /**
- * Get lesson progress for a specific employee/lesson/learning path combination
+ * Get lesson progress for a specific employee/lesson/learning path/class room combination
  */
 export async function getLessonProgress(
   employeeId: string,
   lessonId: string,
-  learningPathId?: string | null
+  learningPathId?: string | null,
+  classRoomId?: string | null
 ): Promise<LessonProgress | null> {
   const supabase = await createSVClient();
 
-  // Normalize learning path ID: undefined or empty string becomes null
+  // Normalize IDs: undefined or empty string becomes null
   const normalizedLearningPathId: string | null = learningPathId || null;
+  const normalizedClassRoomId: string | null = classRoomId || null;
 
   let query = supabase
     .from("lesson_progress")
@@ -47,11 +50,17 @@ export async function getLessonProgress(
     .eq("employee_id", employeeId)
     .eq("lesson_id", lessonId);
 
-  // Use .is() for null values, .eq() for non-null values
-  if (normalizedLearningPathId === null) {
+  // Apply filters based on context
+  // Learning path takes precedence, then class room, then standalone
+  if (normalizedLearningPathId) {
+    query = query.eq("learning_path_id", normalizedLearningPathId);
+    query = query.is("class_room_id", null);
+  } else if (normalizedClassRoomId) {
+    query = query.eq("class_room_id", normalizedClassRoomId);
     query = query.is("learning_path_id", null);
   } else {
-    query = query.eq("learning_path_id", normalizedLearningPathId);
+    query = query.is("learning_path_id", null);
+    query = query.is("class_room_id", null);
   }
 
   const { data, error } = await query.maybeSingle();
@@ -71,6 +80,7 @@ export async function upsertLessonProgress(data: {
   employee_id: string;
   lesson_id: string;
   learning_path_id?: string | null;
+  class_room_id?: string | null;
   current_position_seconds?: number | null;
   progress_percentage?: number | null;
   status?: LessonProgressStatus;
@@ -83,6 +93,7 @@ export async function upsertLessonProgress(data: {
     employee_id: data.employee_id,
     lesson_id: data.lesson_id,
     learning_path_id: data.learning_path_id || null,
+    class_room_id: data.class_room_id || null,
     current_position_seconds: data.current_position_seconds || null,
     progress_percentage: data.progress_percentage || null,
     status: data.status || "in_progress",
@@ -94,7 +105,8 @@ export async function upsertLessonProgress(data: {
   const existing = await getLessonProgress(
     data.employee_id,
     data.lesson_id,
-    data.learning_path_id || null
+    data.learning_path_id || null,
+    data.class_room_id || null
   );
 
   if (existing) {
@@ -136,21 +148,31 @@ export async function upsertLessonProgress(data: {
 }
 
 /**
- * Get completed lessons for an employee in a specific course (non-learning-path context)
+ * Get completed lessons for an employee in a specific context (class-room or standalone)
  */
 export async function getCompletedLessonsForEmployee(
   employeeId: string,
-  lessonIds: string[]
+  lessonIds: string[],
+  classRoomId?: string | null
 ) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("lesson_progress")
     .select("lesson_id")
     .in("lesson_id", lessonIds)
     .eq("employee_id", employeeId)
     .is("learning_path_id", null)
     .eq("status", "completed");
+
+  // Filter by class_room_id if provided
+  if (classRoomId) {
+    query = query.eq("class_room_id", classRoomId);
+  } else {
+    query = query.is("class_room_id", null);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("[LessonProgress] Error fetching completed lessons:", error);

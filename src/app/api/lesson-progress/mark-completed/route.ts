@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { employeesRepository, organizationsRepository } from "@/repository";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import { generateCertificate } from "@/services/certificates/certificate-generator.service";
-import { checkCertificateEligibility } from "@/services/certificates/class-room-completion.service";
+import { checkClassRoomCertificateEligibility } from "@/services/certificates/class-room-completion.service";
 import { handleLessonCompletion } from "@/services/gamifications/event-handler";
 import { markCompleted } from "@/services/lesson-progress/lesson-progress.service";
 import type { MarkCompletedRequest } from "@/types/dto/lesson-progress";
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body
     const body = await request.json();
-    const { lessonId, learningPathId, currentPositionSeconds } =
+    const { lessonId, learningPathId, classRoomId, currentPositionSeconds } =
       body as MarkCompletedRequest;
 
     // Validate required fields
@@ -53,16 +53,18 @@ export async function POST(request: NextRequest) {
     const result = await markCompleted(employee.id, {
       lessonId,
       learningPathId: learningPathId || null,
+      classRoomId: classRoomId || null,
       currentPositionSeconds,
     });
 
-    // Check for class room completion and certificate generation (only for non-learning-path context)
-    if (!learningPathId) {
+    // Check for class room completion and certificate generation
+    // Only for class-room context (not learning path, and classRoomId provided)
+    if (!learningPathId && classRoomId) {
       try {
-        const eligibleClassRooms = await checkCertificateEligibility(employee.id, lessonId);
+        const eligibleClassRoom = await checkClassRoomCertificateEligibility(employee.id, classRoomId);
 
-        // Process each eligible class room
-        if (eligibleClassRooms.length > 0) {
+        // Generate certificate if class room is fully completed
+        if (eligibleClassRoom?.isEligible) {
           // Fetch employee details with profile information
           const employeeDetails = await employeesRepository.getEmployeeById(employee.id);
 
@@ -75,32 +77,28 @@ export async function POST(request: NextRequest) {
             // Fetch organization details
             const organization = await organizationsRepository.getOrganizationById(employee.organization_id);
 
-            for (const classRoom of eligibleClassRooms) {
-              if (classRoom.isEligible) {
-                try {
-                  // Generate certificate
-                  const certificateId = await generateCertificate({
-                    employeeId: employee.id,
-                    employeeName: employeeName,
-                    classRoomId: classRoom.classRoomId!,
-                    classRoomTitle: classRoom.classRoomTitle!,
-                    certificateTemplateId: classRoom.certificateTemplateId!,
-                    completionDate: new Date(),
-                    organizationName: organization.name,
-                  });
+            try {
+              // Generate certificate
+              const certificateId = await generateCertificate({
+                employeeId: employee.id,
+                employeeName: employeeName,
+                classRoomId: eligibleClassRoom.classRoomId!,
+                classRoomTitle: eligibleClassRoom.classRoomTitle!,
+                certificateTemplateId: eligibleClassRoom.certificateTemplateId!,
+                completionDate: new Date(),
+                organizationName: organization.name,
+              });
 
-                  console.log(
-                    `[Certificate] Successfully generated certificate ${certificateId} for employee ${employee.id} - class room ${classRoom.classRoomId}`
-                  );
+              console.log(
+                `[Certificate] Successfully generated certificate ${certificateId} for employee ${employee.id} - class room ${eligibleClassRoom.classRoomId}`
+              );
 
-                  // TODO: Send notification to employee about certificate
-                } catch (certError) {
-                  console.error(
-                    `[Certificate] Failed to generate certificate for employee ${employee.id}:`,
-                    certError
-                  );
-                }
-              }
+              // TODO: Send notification to employee about certificate
+            } catch (certError) {
+              console.error(
+                `[Certificate] Failed to generate certificate for employee ${employee.id}:`,
+                certError
+              );
             }
           }
         }
