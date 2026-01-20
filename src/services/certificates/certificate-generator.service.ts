@@ -105,7 +105,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       issueDateLabel: layoutConfig?.issue_date_label || "Issue Date",
       issueDate: completionDate.toISOString().split("T")[0] as string,
       expiryDateLabel: layoutConfig?.expiry_date_label || "Expiry Date",
-      expiryDate: "No expiry",
+      expiryDate: "--",
       frameUrl,
     };
 
@@ -132,11 +132,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       class_room_id: classRoomId,
       image_url: imageUrl,
       layout_config: layoutConfig,
-      data: {
-        className: classRoomTitle,
-        completionDate: completionDate.toISOString(),
-        generatedAt: new Date().toISOString(),
-      },
+      data: apiRequest
     };
 
     await employeeCertificateTemplatesRepository.createEmployeeCertificateTemplate(certificateData);

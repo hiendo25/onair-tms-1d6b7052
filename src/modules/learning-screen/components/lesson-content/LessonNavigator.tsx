@@ -192,7 +192,6 @@ const LessonNavigator = ({
                   label={`Học phần ${index + 1}`}
                   size="small"
                   color="primary"
-                  className="bg-[#000000]"
                 />
                 <Typography variant="caption" color="text.secondary">
                   {lessonCountText}
