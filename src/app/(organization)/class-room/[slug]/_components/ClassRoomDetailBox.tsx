@@ -1,11 +1,17 @@
-import React, { useMemo } from "react";
-import { Avatar, AvatarGroup, Stack, Tooltip, Typography } from "@mui/material";
+"use client";
 
+import React, { useMemo, useState } from "react";
+import { Avatar, AvatarGroup, Box, Link, Stack, Tooltip, Typography } from "@mui/material";
+
+import { useGetEmployeeCertificateByClassRoomQuery } from "@/modules/certificates/operations/query";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { GetClassRoomBySlugResponse } from "@/repository/class-room";
 import { VideoCameraRecordFillIcon } from "@/shared/assets/icons";
+import DiplomaIcon from "@/shared/assets/icons/DiplomaIcon";
 import MicrophoneIcon from "@/shared/assets/icons/MicrophoneIcon";
 import { CLASS_SESSION_TYPE, CLASSROOM_DETAIL_TEXT, ROOM_PROVIDERS } from "../_constants";
 
+import CertificateViewModal from "./CertificateViewModal";
 import ClassRoomDetailDateInfo from "./ClassRoomDetailDateInfo";
 import ClassRoomMiniBox from "./ClassRoomMiniBox";
 
@@ -17,6 +23,8 @@ interface ClassRoomDetailBoxProps {
 export const ClassRoomDetailBox: React.FC<ClassRoomDetailBoxProps> = ({ data, isFromLearningPath }) => {
   const isSingle = data?.room_type === "single";
   const primarySession = data?.sessions?.[0];
+  const [showCertModal, setShowCertModal] = useState(false);
+  const employeeId = useUserOrganization((state) => state.currentEmployee?.id);
 
   const location = useMemo(() => {
     if (!isSingle) return null;
@@ -43,6 +51,19 @@ export const ClassRoomDetailBox: React.FC<ClassRoomDetailBoxProps> = ({ data, is
         })) || []
     ).filter((lecture, index, self) => index === self.findIndex((t) => t.id === lecture.id));
   }, [data?.sessions]);
+
+  const certificate = data?.certificate?.[0];
+  const certificateTemplate = certificate?.certificate_template;
+
+  // Fetch employee certificate if exists
+  const classRoomId = data?.id;
+  const { data: employeeCertificate } = useGetEmployeeCertificateByClassRoomQuery(
+    employeeId || "",
+    classRoomId || "",
+    {
+      enabled: !!classRoomId && !!certificateTemplate && !!employeeId,
+    }
+  );
 
   return (
     <Stack spacing={1.5}>
@@ -103,6 +124,68 @@ export const ClassRoomDetailBox: React.FC<ClassRoomDetailBoxProps> = ({ data, is
           </AvatarGroup>
         </Stack>
       </Stack>
+
+      {certificateTemplate && (
+        <Stack spacing={2} direction="row" alignItems="center">
+          <ClassRoomMiniBox>
+            <DiplomaIcon />
+          </ClassRoomMiniBox>
+          <Stack spacing={0.4}>
+            <Typography variant="subtitle2" fontWeight={600}>
+              Chứng nhận
+            </Typography>
+            <Typography color="text.secondary" variant="body2" fontWeight={500}>
+              {employeeCertificate ? (
+                <>
+                  <Box component="span">Bạn đã nhận được chứng nhận</Box>{" "}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "text.primary",
+                    }}
+                    fontWeight={600}
+                  >
+                    &#34;{certificateTemplate.name}&#34;
+                  </Box>{" "}
+                  <Link
+                    onClick={() => setShowCertModal(true)}
+                    sx={{
+                      color: "primary.main",
+                      ml: 0.5,
+                      cursor: "pointer",
+                    }}
+                    underline="none"
+                  >
+                    Xem chứng nhận
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Box component="span">Hoàn thành lớp học để nhận chứng nhận</Box>{" "}
+                  <Box
+                    component="span"
+                    sx={{
+                      color: "text.primary",
+                    }}
+                    fontWeight={600}
+                  >
+                    &#34;{certificateTemplate.name}&#34;
+                  </Box>
+                </>
+              )}
+            </Typography>
+          </Stack>
+        </Stack>
+      )}
+
+      {employeeCertificate && certificateTemplate && (
+        <CertificateViewModal
+          open={showCertModal}
+          onClose={() => setShowCertModal(false)}
+          certificateName={certificateTemplate.name}
+          certificateImageUrl={employeeCertificate.image_url}
+        />
+      )}
     </Stack>
   );
 };

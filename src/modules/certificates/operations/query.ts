@@ -1,5 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
-import { certificateTemplatesRepository } from "@/repository";
+import { certificateTemplatesRepository, employeeCertificateTemplatesRepository } from "@/repository";
 import { GetCertificateTemplatesQueryParams } from "@/repository/certificate-templates/type";
 
 /**
@@ -37,5 +37,25 @@ export const useGetCertificateTemplateByIdQuery = (
     queryKey: ["certificate-template", id],
     queryFn: () => certificateTemplatesRepository.getCertificateTemplateById(id),
     enabled: options?.enabled !== false && !!id,
+  });
+};
+
+/**
+ * Fetch employee certificate for a specific classroom
+ *
+ * @param employeeId - Employee ID
+ * @param classRoomId - Classroom ID
+ * @param options - Query options
+ * @returns Query result with employee certificate data
+ */
+export const useGetEmployeeCertificateByClassRoomQuery = (
+  employeeId: string,
+  classRoomId: string,
+  options?: { enabled?: boolean }
+) => {
+  return useTQuery({
+    queryKey: ["employee-certificate", employeeId, classRoomId],
+    queryFn: () => employeeCertificateTemplatesRepository.getEmployeeCertificateByClassRoom(employeeId, classRoomId),
+    enabled: options?.enabled !== false && !!employeeId && !!classRoomId,
   });
 };
