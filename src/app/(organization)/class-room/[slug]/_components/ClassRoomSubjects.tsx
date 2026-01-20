@@ -42,6 +42,7 @@ export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoo
               coursePeriod={coursePeriod}
               classRoomSlug={classRoomSlug}
               isFromLearningPath={isFromLearningPath}
+              classRoomEndAt={data.end_at}
             />
           ))}
         </Stack>
