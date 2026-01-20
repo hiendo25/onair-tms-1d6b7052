@@ -10,6 +10,7 @@ interface AssessmentLessonFrameProps {
   studentId: string | null;
   lesson: LearningLesson;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   selectedLessonSummary?: LearningLessonSummary | null;
 }
@@ -19,12 +20,14 @@ const AssessmentLessonFrame = ({
   studentId,
   lesson,
   learningPathId,
+  classRoomId,
   courseId,
   selectedLessonSummary,
 }: AssessmentLessonFrameProps) => {
   const { markComplete } = useMarkLessonComplete({
     courseId: courseId ?? null,
     learningPathId,
+    classRoomId,
     employeeId: studentId ?? null,
   });
 
@@ -37,8 +40,7 @@ const AssessmentLessonFrame = ({
   }
 
   const handleAssignmentSubmitted = () => {
-    // Automatically mark the lesson as complete when assignment is submitted
-    if (learningPathId) {
+    if (learningPathId || classRoomId) {
       markComplete(lesson.id);
     }
   };

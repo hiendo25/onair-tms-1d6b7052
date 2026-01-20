@@ -8,6 +8,8 @@ export async function GET(request: NextRequest) {
     const includeProgress = request.nextUrl.searchParams.get("includeProgress") === "true";
     const learningPathId = request.nextUrl.searchParams.get("learningPathId");
     const trimmedLearningPathId = learningPathId?.trim() ? learningPathId : null;
+    const classRoomId = request.nextUrl.searchParams.get("classRoomId");
+    const trimmedClassRoomId = classRoomId?.trim() ? classRoomId : null;
     const employeeId = request.nextUrl.searchParams.get("employeeId");
     const trimmedEmployeeId = employeeId?.trim() ? employeeId.trim() : null;
 
@@ -21,6 +23,7 @@ export async function GET(request: NextRequest) {
     const result = await learningScreenService.getCourseLearningOutline(courseId, {
       includeProgress,
       learningPathId: trimmedLearningPathId,
+      classRoomId: trimmedClassRoomId,
       employeeId: trimmedEmployeeId,
     });
 

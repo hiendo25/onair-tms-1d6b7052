@@ -151,6 +151,7 @@ const LessonContentPanel = ({
           onRequestNextLesson={nextLesson ? () => onSelectLesson(nextLesson.id) : undefined}
           nextLessonTitle={nextLesson?.title ?? null}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           studentId={studentId}
         />
@@ -196,6 +197,7 @@ const LessonContentPanel = ({
           studentId={studentId}
           lesson={lesson}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={course.id}
           selectedLessonSummary={selectedLessonSummary}
         />
