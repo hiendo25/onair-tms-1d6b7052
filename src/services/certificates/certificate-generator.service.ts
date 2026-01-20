@@ -56,18 +56,19 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       throw new Error("S3_BASE_URL is not configured");
     }
 
-    const { employeeId, employeeName, classRoomTitle, certificateTemplateId, completionDate, organizationName } =
+    const { employeeId, employeeName, classRoomId, classRoomTitle, certificateTemplateId, completionDate, organizationName } =
       payload;
 
     // Check if certificate already exists
     const hasExisting = await employeeCertificateTemplatesRepository.hasEmployeeCertificate(
       employeeId,
-      certificateTemplateId
+      certificateTemplateId,
+      classRoomId
     );
 
     if (hasExisting) {
       console.log(
-        `[CertificateGenerator] Employee ${employeeId} already has certificate for template ${certificateTemplateId}`
+        `[CertificateGenerator] Employee ${employeeId} already has certificate for template ${certificateTemplateId} in classroom ${classRoomId}`
       );
       return "Certificate already exists";
     }
@@ -128,6 +129,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       id: certificateId,
       employee_id: employeeId,
       certificate_template_id: certificateTemplateId,
+      class_room_id: classRoomId,
       image_url: imageUrl,
       layout_config: layoutConfig,
       data: {

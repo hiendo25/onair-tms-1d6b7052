@@ -230,6 +230,39 @@ const getCoursesByClassRoomId = async (classRoomId: string) => {
   return data || [];
 };
 
+/**
+ * Get class room sessions by class room ID with certificate template info
+ */
+const getClassRoomSessionsByClassRoomId = async (classRoomId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("class_sessions")
+    .select(
+      `
+      id,
+      class_room_id,
+      class_rooms!inner(
+        id,
+        title,
+        class_room_certificate_templates(
+          id,
+          certificate_template_id,
+          certificate_templates(id, name)
+        )
+      )
+    `
+    )
+    .eq("class_room_id", classRoomId);
+
+  if (error) {
+    console.error("[ClassSession] Error fetching class room sessions:", error);
+    throw new Error(`Failed to fetch class room sessions: ${error.message}`);
+  }
+
+  return data || [];
+};
+
 export type ClassRoomWithCertificate = {
   classRoomId: string;
   classRoomTitle: string;
@@ -238,14 +271,16 @@ export type ClassRoomWithCertificate = {
 
 /**
  * Extract unique class rooms from query results
+ * Works with both getClassRoomsWithCourseAndEmployee and getClassRoomSessionsByClassRoomId results
  */
 const extractClassRoomsFromSessions = (
-  classRoomSessions: Awaited<ReturnType<typeof getClassRoomsWithCourseAndEmployee>>
+  classRoomSessions: Awaited<ReturnType<typeof getClassRoomsWithCourseAndEmployee>> | Awaited<ReturnType<typeof getClassRoomSessionsByClassRoomId>>
 ): ClassRoomWithCertificate[] => {
   const classRoomMap = new Map<string, ClassRoomWithCertificate>();
 
   classRoomSessions.forEach((session: any) => {
-    const classRoom = session.class_sessions?.class_rooms;
+    // Handle both data structures
+    const classRoom = session.class_sessions?.class_rooms || session.class_rooms;
     const certificate = classRoom?.class_room_certificate_templates?.[0];
 
     if (classRoom?.id && certificate?.certificate_template_id) {
@@ -278,5 +313,6 @@ export {
   bulkCreatePivotClassSessionWithAssignment,
   getClassRoomsWithCourseAndEmployee,
   getCoursesByClassRoomId,
+  getClassRoomSessionsByClassRoomId,
   extractClassRoomsFromSessions,
 };

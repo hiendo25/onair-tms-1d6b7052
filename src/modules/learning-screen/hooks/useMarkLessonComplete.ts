@@ -7,6 +7,7 @@ import type { MarkCompletedRequest, MarkCompletedResponse } from "@/types/dto/le
 interface UseMarkLessonCompleteParams {
   courseId: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   employeeId: string | null;
 }
 
@@ -32,6 +33,7 @@ const markLessonComplete = async (
 export const useMarkLessonComplete = ({
   courseId,
   learningPathId,
+  classRoomId,
   employeeId,
 }: UseMarkLessonCompleteParams) => {
   const queryClient = useQueryClient();
@@ -49,6 +51,7 @@ export const useMarkLessonComplete = ({
             courseId,
             includeProgress: true,
             learningPathId: learningPathId ?? null,
+            classRoomId: classRoomId ?? null,
             employeeId,
           },
         ];
@@ -83,10 +86,11 @@ export const useMarkLessonComplete = ({
       mutation.mutate({
         lessonId,
         learningPathId: learningPathId ?? null,
+        classRoomId: classRoomId ?? null,
         currentPositionSeconds,
       });
     },
-    [learningPathId, mutation]
+    [learningPathId, classRoomId, mutation]
   );
 
   return {

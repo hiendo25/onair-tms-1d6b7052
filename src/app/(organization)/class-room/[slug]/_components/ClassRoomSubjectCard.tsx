@@ -16,6 +16,7 @@ type CoursePeriod = NonNullable<
 
 interface ClassRoomSubjectCardProps {
   coursePeriod: CoursePeriod;
+  classRoomSlug?: string;
   isFromLearningPath?: boolean;
 }
 
@@ -26,7 +27,7 @@ const getTeacherName = (teacher: CoursePeriod["teacher"]): string => {
 const CARD_MIN_WIDTH = { xs: 260, sm: 280, md: 320 };
 const CARD_RADIUS = 16;
 
-export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: ClassRoomSubjectCardProps) => {
+export const ClassRoomSubjectCard = ({ coursePeriod, classRoomSlug, isFromLearningPath }: ClassRoomSubjectCardProps) => {
   const weeklyScheduleLabel = isFromLearningPath ? formatWeeklyScheduleLabel(coursePeriod.weekly_schedule) : null;
   const scheduleLabel = weeklyScheduleLabel
     ? weeklyScheduleLabel
@@ -37,7 +38,7 @@ export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: Class
   const courseId = coursePeriod.course.id || "";
   const detailHref = isFromLearningPath
     ? PATHS.MY_LEARNING_PATHS.LEARNING_SCREEN(courseId)
-    : PATHS.STUDENTS.LEARNINNG(courseId);
+    : PATHS.CLASSROOMS.LEARNING_SCREEN(classRoomSlug!, courseId);
 
   const sectionCount = coursePeriod.course?.sections_count?.[0]?.count ?? 0;
   const lessonCount =

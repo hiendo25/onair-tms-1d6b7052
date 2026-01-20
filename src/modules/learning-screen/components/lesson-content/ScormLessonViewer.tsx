@@ -14,6 +14,7 @@ interface ScormLessonViewerProps {
   resource: ResourceRow | null;
   lesson: LearningLesson;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   studentId?: string | null;
   selectedLessonSummary?: LearningLessonSummary | null;
@@ -23,6 +24,7 @@ const ScormLessonViewer = ({
   resource,
   lesson,
   learningPathId,
+  classRoomId,
   courseId,
   studentId,
   selectedLessonSummary,
@@ -69,6 +71,7 @@ const ScormLessonViewer = ({
         <MarkLessonCompleteButton
           lessonId={lesson.id}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
           courseId={courseId}
           studentId={studentId}
           selectedLessonSummary={selectedLessonSummary}

@@ -19,6 +19,8 @@ export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoo
 
   if (coursePeriods.length === 0) return null;
 
+  const classRoomSlug = data.slug ?? undefined;
+
   return (
     <Stack spacing={3}>
       <Stack direction="row" spacing={1} alignItems="center">
@@ -38,6 +40,7 @@ export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoo
             <ClassRoomSubjectCard
               key={coursePeriod.id}
               coursePeriod={coursePeriod}
+              classRoomSlug={classRoomSlug}
               isFromLearningPath={isFromLearningPath}
             />
           ))}

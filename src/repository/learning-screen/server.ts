@@ -135,6 +135,7 @@ const getResourcesByIds = async (resourceIds: string[]): Promise<ResourceRow[]> 
 const getLessonProgressRows = async (
   lessonIds: string[],
   learningPathId: string | null,
+  classRoomId: string | null,
   employeeId: string,
 ): Promise<LessonProgressRow[]> => {
   if (!lessonIds.length) {
@@ -153,13 +154,19 @@ const getLessonProgressRows = async (
     .in("lesson_id", lessonIds)
     .eq("employee_id", trimmedEmployeeId);
 
-  // For learning paths, filter by learning_path_id
-  // For regular classes, filter by learning_path_id IS NULL
+  // Apply filters based on context (mutually exclusive)
+  // Learning path takes precedence, then class room, then standalone
   if (learningPathId) {
     const trimmedLearningPathId = learningPathId.trim();
     query = query.eq("learning_path_id", trimmedLearningPathId);
+    query = query.is("class_room_id", null);
+  } else if (classRoomId) {
+    const trimmedClassRoomId = classRoomId.trim();
+    query = query.eq("class_room_id", trimmedClassRoomId);
+    query = query.is("learning_path_id", null);
   } else {
     query = query.is("learning_path_id", null);
+    query = query.is("class_room_id", null);
   }
 
   const { data, error } = await query;

@@ -25,7 +25,7 @@ async function updatePosition(
   employeeId: string,
   request: UpdatePositionRequest
 ): Promise<UpdatePositionResponse> {
-  const { lessonId, learningPathId, currentPositionSeconds, progressPercentage } = request;
+  const { lessonId, learningPathId, classRoomId, currentPositionSeconds, progressPercentage } = request;
 
   try {
     const now = new Date().toISOString();
@@ -34,7 +34,8 @@ async function updatePosition(
     const existingProgress = await getLessonProgress(
       employeeId,
       lessonId,
-      learningPathId || null
+      learningPathId || null,
+      classRoomId || null
     );
 
     // If already completed, don't change status back to in_progress
@@ -45,6 +46,7 @@ async function updatePosition(
       employee_id: employeeId,
       lesson_id: lessonId,
       learning_path_id: learningPathId || null,
+      class_room_id: classRoomId || null,
       current_position_seconds: currentPositionSeconds,
       progress_percentage: progressPercentage,
       status,
@@ -74,7 +76,7 @@ async function markCompleted(
   employeeId: string,
   request: MarkCompletedRequest
 ): Promise<MarkCompletedResponse> {
-  const { lessonId, learningPathId, currentPositionSeconds = 0 } = request;
+  const { lessonId, learningPathId, classRoomId, currentPositionSeconds = 0 } = request;
 
   try {
     const now = new Date().toISOString();
@@ -83,13 +85,15 @@ async function markCompleted(
     const existingProgress = await getLessonProgress(
       employeeId,
       lessonId,
-      learningPathId || null
+      learningPathId || null,
+      classRoomId || null
     );
 
     const progress = await upsertLessonProgress({
       employee_id: employeeId,
       lesson_id: lessonId,
       learning_path_id: learningPathId || null,
+      class_room_id: classRoomId || null,
       current_position_seconds: currentPositionSeconds,
       progress_percentage: 100,
       status: "completed",

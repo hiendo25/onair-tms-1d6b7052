@@ -10,6 +10,7 @@ import type { LearningLessonSummary } from "@/modules/learning-screen/types";
 interface MarkLessonCompleteButtonProps {
   lessonId: string;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   studentId?: string | null;
   selectedLessonSummary?: LearningLessonSummary | null;
@@ -19,6 +20,7 @@ interface MarkLessonCompleteButtonProps {
 const MarkLessonCompleteButton = ({
   lessonId,
   learningPathId,
+  classRoomId,
   courseId,
   studentId,
   selectedLessonSummary,
@@ -27,6 +29,7 @@ const MarkLessonCompleteButton = ({
   const { markComplete, isLoading: isMarkingComplete } = useMarkLessonComplete({
     courseId: courseId ?? null,
     learningPathId,
+    classRoomId,
     employeeId: studentId ?? null,
   });
 

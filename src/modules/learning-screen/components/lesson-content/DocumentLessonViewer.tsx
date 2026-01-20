@@ -51,6 +51,7 @@ interface DocumentLessonViewerProps {
   resource: ResourceRow | null;
   contentKind: "pdf" | "document" | "text";
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   studentId?: string | null;
   selectedLessonSummary?: LearningLessonSummary | null;
@@ -66,6 +67,7 @@ const DocumentLessonViewer = ({
   resource,
   contentKind,
   learningPathId,
+  classRoomId,
   courseId,
   studentId,
   selectedLessonSummary,
@@ -246,6 +248,7 @@ const DocumentLessonViewer = ({
       <MarkLessonCompleteButton
         lessonId={lesson.id}
         learningPathId={learningPathId}
+        classRoomId={classRoomId}
         courseId={courseId}
         studentId={studentId}
         selectedLessonSummary={selectedLessonSummary}
