@@ -18,7 +18,7 @@ const HEADER_DETAIL_MAX_WIDTH = 760;
 const JOIN_PANEL_WIDTH = 320;
 
 const ClassRoomHeader = ({ data, isAdminView, isFromLearningPath }: ClassRoomHeaderProps) => {
-  const shouldShowProgress = Boolean(isFromLearningPath);
+  const shouldShowProgress = Boolean(data.progress);
 
   return (
     <Box>

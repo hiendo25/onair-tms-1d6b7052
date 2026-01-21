@@ -107,24 +107,6 @@ export const ClassRoomDetailBox: React.FC<ClassRoomDetailBoxProps> = ({ data, is
         </Stack>
       )}
 
-      <Stack spacing={2} direction="row" alignItems="center">
-        <ClassRoomMiniBox>
-          <MicrophoneIcon width={20} height={20} />
-        </ClassRoomMiniBox>
-        <Stack direction="column" alignItems="start">
-          <Typography variant="subtitle2" fontWeight={600}>
-            Giảng viên
-          </Typography>
-          <AvatarGroup max={4}>
-            {lectures.map((lecture) => (
-              <Tooltip key={lecture.id} title={lecture.fullName}>
-                <Avatar alt={lecture.fullName} src={lecture.avatar!} className="w-4 h-4" />
-              </Tooltip>
-            ))}
-          </AvatarGroup>
-        </Stack>
-      </Stack>
-
       {certificateTemplate && (
         <Stack spacing={2} direction="row" alignItems="center">
           <ClassRoomMiniBox>

@@ -116,7 +116,7 @@ const ClassRoomSeriesSessionDetail = ({
   if (!session) return null;
 
   const coursePeriods = session.courses_period ?? [];
-  const shouldShowProgress = Boolean(isFromLearningPath);
+  const shouldShowProgress = coursePeriods.some((cp) => Boolean(cp.course?.progress));
 
   const scheduleDisplay = buildScheduleDisplay({
     startAt: session.start_at,

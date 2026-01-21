@@ -247,6 +247,7 @@ const getClassRoomSessionsByClassRoomId = async (classRoomId: string) => {
         title,
         class_room_certificate_templates(
           id,
+          days_to_expire,
           certificate_template_id,
           certificate_templates(id, name)
         )
