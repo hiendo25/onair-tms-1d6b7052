@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
                 certificateTemplateId: eligibleClassRoom.certificateTemplateId!,
                 completionDate: new Date(),
                 organizationName: organization.name,
+                daysToExpire: eligibleClassRoom.daysToExpire,
               });
 
               console.log(

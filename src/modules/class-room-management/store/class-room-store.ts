@@ -26,6 +26,7 @@ export type CertificateSelectedItem = {
   id: string;
   name: string;
   frameUrl: string | null;
+  daysToExpire: number | null;
 };
 
 type ClassRoomState = {

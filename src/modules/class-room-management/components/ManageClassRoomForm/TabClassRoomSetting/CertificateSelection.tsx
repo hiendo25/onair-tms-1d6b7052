@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Grid,
@@ -9,6 +9,10 @@ import {
   Typography,
   FormControl,
   Paper,
+  Checkbox,
+  FormControlLabel,
+  TextField,
+  Stack,
 } from "@mui/material";
 
 import { useOrganizationId } from "@/hooks/useOrganizationId";
@@ -29,9 +33,33 @@ const CertificateSelection: React.FC = () => {
 
   const certificates = certificatesData?.data || [];
 
+  // Local state for expiry settings
+  const [hasExpiry, setHasExpiry] = useState<boolean>(false);
+  const [daysToExpire, setDaysToExpire] = useState<number>(30);
+
+  // Sync local state when selectedCertificate changes from the store
+  useEffect(() => {
+    if (selectedCertificate) {
+      const hasDaysToExpire =
+        selectedCertificate.daysToExpire !== null &&
+        selectedCertificate.daysToExpire !== undefined;
+      setHasExpiry(hasDaysToExpire);
+      setDaysToExpire(
+        hasDaysToExpire && selectedCertificate.daysToExpire !== null
+          ? selectedCertificate.daysToExpire
+          : 30
+      );
+    } else {
+      setHasExpiry(false);
+      setDaysToExpire(30);
+    }
+  }, [selectedCertificate]);
+
   const handleCertificateChange = (certificateId: string) => {
     if (!certificateId) {
       setSelectedCertificate(null);
+      setHasExpiry(false);
+      setDaysToExpire(30);
       return;
     }
 
@@ -41,6 +69,28 @@ const CertificateSelection: React.FC = () => {
         id: certificate.id,
         name: certificate.name || "",
         frameUrl: certificate.frame?.image_url || null,
+        daysToExpire: hasExpiry ? daysToExpire : null,
+      });
+    }
+  };
+
+  const handleExpiryCheckChange = (checked: boolean) => {
+    setHasExpiry(checked);
+    if (selectedCertificate) {
+      setSelectedCertificate({
+        ...selectedCertificate,
+        daysToExpire: checked ? daysToExpire : null,
+      });
+    }
+  };
+
+  const handleDaysChange = (value: number) => {
+    const validValue = Math.max(1, value); // Minimum 1 day
+    setDaysToExpire(validValue);
+    if (selectedCertificate && hasExpiry) {
+      setSelectedCertificate({
+        ...selectedCertificate,
+        daysToExpire: validValue,
       });
     }
   };
@@ -54,28 +104,67 @@ const CertificateSelection: React.FC = () => {
       <Grid container spacing={3}>
         {/* Left Side - Selection */}
         <Grid size={{ xs: 12, md: 6 }}>
-          <Box>
-            <FormControl fullWidth>
-              <Typography variant="subtitle2" fontWeight={600} mb={1}>
-                Chọn mẫu chứng nhận
-              </Typography>
-              <Select
-                labelId="certificate-select-label"
-                id="certificate-select"
-                value={selectedCertificate?.id || ""}
-                onChange={(e) => handleCertificateChange(e.target.value)}
-              >
-                <MenuItem value="">
-                  <em>Không chọn</em>
-                </MenuItem>
-                {certificates.map((cert) => (
-                  <MenuItem key={cert.id} value={cert.id}>
-                    {cert.name}
+          <Stack spacing={3}>
+            <Box>
+              <FormControl fullWidth>
+                <Typography variant="subtitle2" fontWeight={600} mb={1}>
+                  Chọn mẫu chứng nhận
+                </Typography>
+                <Select
+                  labelId="certificate-select-label"
+                  id="certificate-select"
+                  value={selectedCertificate?.id || ""}
+                  onChange={(e) => handleCertificateChange(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>Không chọn</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
+                  {certificates.map((cert) => (
+                    <MenuItem key={cert.id} value={cert.id}>
+                      {cert.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            {/* Certificate Expiry Settings */}
+            <Box>
+              <Typography variant="subtitle2" fontWeight={600} mb={1.5}>
+                Thời hạn chứng nhận
+              </Typography>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={hasExpiry}
+                    onChange={(e) => handleExpiryCheckChange(e.target.checked)}
+                    disabled={!selectedCertificate}
+                  />
+                }
+                label="Chứng nhận có thời hạn"
+              />
+
+              {hasExpiry && (
+                <Stack direction="row" alignItems="center" spacing={1.5} mt={2}>
+                  <Typography variant="body2" color="text.secondary">
+                    Hiệu lực trong
+                  </Typography>
+                  <TextField
+                    type="number"
+                    value={daysToExpire}
+                    onChange={(e) => handleDaysChange(parseInt(e.target.value) || 1)}
+                    inputProps={{ min: 1 }}
+                    sx={{ width: 120 }}
+                    size="small"
+                    disabled={!selectedCertificate}
+                  />
+                  <Typography variant="body2" color="text.secondary">
+                    ngày
+                  </Typography>
+                </Stack>
+              )}
+            </Box>
+          </Stack>
         </Grid>
 
         {/* Right Side - Preview */}

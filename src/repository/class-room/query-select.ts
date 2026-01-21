@@ -173,6 +173,7 @@ export const SELECT_CLASSROOM_DETAIL = `
   certificate:class_room_certificate_templates(
     id,
     certificate_template_id,
+    days_to_expire,
     certificate_template:certificate_templates(${selectCertificateTemplate})
   )
 `;
@@ -246,6 +247,7 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
       certificate:class_room_certificate_templates(
         id,
         certificate_template_id,
+        days_to_expire,
         certificate_template:certificate_templates(${selectCertificateTemplate})
       )
     `;

@@ -267,6 +267,7 @@ export type ClassRoomWithCertificate = {
   classRoomId: string;
   classRoomTitle: string;
   certificateTemplateId: string;
+  daysToExpire?: number | null;
 };
 
 /**
@@ -288,6 +289,7 @@ const extractClassRoomsFromSessions = (
         classRoomId: classRoom.id,
         classRoomTitle: classRoom.title,
         certificateTemplateId: certificate.certificate_template_id,
+        daysToExpire: certificate.days_to_expire,
       });
     }
   });

@@ -3,6 +3,7 @@
  * Handles certificate image generation via external API
  */
 
+import dayjs from "dayjs";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -23,6 +24,7 @@ export type CertificateGenerationPayload = {
   certificateTemplateId: string;
   completionDate: Date;
   organizationName: string;
+  daysToExpire?: number | null;
 };
 
 type CertificateAPIRequest = {
@@ -56,7 +58,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       throw new Error("S3_BASE_URL is not configured");
     }
 
-    const { employeeId, employeeName, classRoomId, classRoomTitle, certificateTemplateId, completionDate, organizationName } =
+    const { employeeId, employeeName, classRoomId, classRoomTitle, certificateTemplateId, completionDate, organizationName, daysToExpire } =
       payload;
 
     // Check if certificate already exists
@@ -93,6 +95,9 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
     // Build image URL
     const imageUrl = `${S3_BASE_URL}/certificates/${certificateId}.png`;
 
+    // Calculate expiry date if days_to_expire is provided
+    const expiryDate = daysToExpire ? dayjs(completionDate).add(daysToExpire, "day").format("YYYY-MM-DD") : "--";
+
     // Build API request based on layout_config
     const apiRequest: CertificateAPIRequest = {
       id: certificateId,
@@ -105,7 +110,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       issueDateLabel: layoutConfig?.issue_date_label || "Issue Date",
       issueDate: completionDate.toISOString().split("T")[0] as string,
       expiryDateLabel: layoutConfig?.expiry_date_label || "Expiry Date",
-      expiryDate: "--",
+      expiryDate,
       frameUrl,
     };
 
