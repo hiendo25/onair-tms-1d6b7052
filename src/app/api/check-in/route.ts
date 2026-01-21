@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse, userAgent } from "next/server";
 
+import { DomainError } from "@/lib/errors/DomainError";
 import { authRepository } from "@/repository";
 import { ClassRoomCheckInService } from "@/services/checkin/class-room-checkin.service";
-import { DomainError } from "@/services/DomainError";
 import { StudentClassRoomCheckInDto } from "@/types/dto/classRooms/student-check-in-classroom.dto";
 import { http } from "@/utils/http-status";
 
