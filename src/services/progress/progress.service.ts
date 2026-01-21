@@ -4,7 +4,12 @@
  */
 
 import { createSVClient } from "@/services/supabase/server";
-import type { BuildProgressParams, LessonProgressResponse, LessonProgressStatus, ProgressResponse } from "@/types/progress.types";
+import type {
+  BuildProgressParams,
+  LessonProgressResponse,
+  LessonProgressStatus,
+  ProgressResponse,
+} from "@/types/progress.types";
 
 /**
  * Calculate progress percentage based on completed vs total lessons
@@ -68,6 +73,7 @@ export async function getSectionProgress(
   sectionId: string,
   employeeId: string,
   learningPathId: string | null,
+  classRoomId?: string | null,
 ): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
 
@@ -98,8 +104,11 @@ export async function getSectionProgress(
     .eq("status", "completed")
     .in("lesson_id", lessonIds);
 
+  // Filter by context: explicitly provided learning_path_id takes priority, fallback to class_room_id
   if (learningPathId) {
     progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  } else if (classRoomId) {
+    progressQuery = progressQuery.eq("class_room_id", classRoomId).is("learning_path_id", null);
   }
 
   const { count, error: progressError } = await progressQuery;
@@ -119,6 +128,7 @@ export async function getCourseProgress(
   courseId: string,
   employeeId: string,
   learningPathId: string | null,
+  classRoomId?: string | null,
 ): Promise<{ totalLessons: number; completedLessons: number }> {
   const supabase = await createSVClient();
 
@@ -139,7 +149,7 @@ export async function getCourseProgress(
 
   // Flatten lesson IDs
   const lessonIds = lessons.flatMap((section: any) =>
-    section.lessons?.map((l: { id: string }) => l.id) || []
+    section.lessons?.map((l: { id: string }) => l.id) || [],
   );
 
   // Remove duplicates
@@ -158,8 +168,11 @@ export async function getCourseProgress(
     .eq("status", "completed")
     .in("lesson_id", uniqueLessonIds);
 
+  // Filter by context: explicitly provided learning_path_id takes priority, fallback to class_room_id
   if (learningPathId) {
     progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  } else if (classRoomId) {
+    progressQuery = progressQuery.eq("class_room_id", classRoomId).is("learning_path_id", null);
   }
 
   const { count, error: progressError } = await progressQuery;
@@ -202,9 +215,9 @@ export async function getClassRoomProgress(
   const courseIds = Array.from(
     new Set(
       sessionCourses.flatMap((session: any) =>
-        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
-      )
-    )
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || [],
+      ),
+    ),
   );
 
   if (courseIds.length === 0) {
@@ -228,7 +241,7 @@ export async function getClassRoomProgress(
 
   // Flatten and deduplicate lesson IDs
   const lessonIds = sections.flatMap((section: any) =>
-    section.lessons?.map((l: { id: string }) => l.id) || []
+    section.lessons?.map((l: { id: string }) => l.id) || [],
   );
   const uniqueLessonIds = Array.from(new Set(lessonIds));
   const totalLessons = uniqueLessonIds.length;
@@ -245,8 +258,11 @@ export async function getClassRoomProgress(
     .eq("status", "completed")
     .in("lesson_id", uniqueLessonIds);
 
+  // Filter by context: explicitly provided learning_path_id takes priority, fallback to class_room_id
   if (learningPathId) {
     progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  } else {
+    progressQuery = progressQuery.eq("class_room_id", classRoomId).is("learning_path_id", null);
   }
 
   const { count, error: progressError } = await progressQuery;
@@ -301,9 +317,9 @@ export async function getPhaseProgress(
   const courseIds = Array.from(
     new Set(
       sessionCourses.flatMap((session: any) =>
-        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
-      )
-    )
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || [],
+      ),
+    ),
   );
 
   if (courseIds.length === 0) {
@@ -327,7 +343,7 @@ export async function getPhaseProgress(
 
   // Flatten and deduplicate lesson IDs
   const lessonIds = sections.flatMap((section: any) =>
-    section.lessons?.map((l: { id: string }) => l.id) || []
+    section.lessons?.map((l: { id: string }) => l.id) || [],
   );
   const uniqueLessonIds = Array.from(new Set(lessonIds));
   const totalLessons = uniqueLessonIds.length;
@@ -407,9 +423,9 @@ export async function getLearningPathLessonIds(
   const courseIds = Array.from(
     new Set(
       sessionCourses.flatMap((session: any) =>
-        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
-      )
-    )
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || [],
+      ),
+    ),
   );
 
   if (courseIds.length === 0) {
@@ -433,7 +449,7 @@ export async function getLearningPathLessonIds(
 
   // Flatten and deduplicate lesson IDs
   const lessonIds = sections.flatMap((section: any) =>
-    section.lessons?.map((l: { id: string }) => l.id) || []
+    section.lessons?.map((l: { id: string }) => l.id) || [],
   );
   const uniqueLessonIds = Array.from(new Set(lessonIds));
 
@@ -494,9 +510,9 @@ export async function getLearningPathProgress(
   const courseIds = Array.from(
     new Set(
       sessionCourses.flatMap((session: any) =>
-        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || []
-      )
-    )
+        session.class_sessions_courses_period?.map((scp: any) => scp.course_id) || [],
+      ),
+    ),
   );
 
   if (courseIds.length === 0) {
@@ -520,7 +536,7 @@ export async function getLearningPathProgress(
 
   // Flatten and deduplicate lesson IDs
   const lessonIds = sections.flatMap((section: any) =>
-    section.lessons?.map((l: { id: string }) => l.id) || []
+    section.lessons?.map((l: { id: string }) => l.id) || [],
   );
   const uniqueLessonIds = Array.from(new Set(lessonIds));
   const totalLessons = uniqueLessonIds.length;
@@ -553,6 +569,7 @@ export async function getMultipleCoursesProgress(
   courseIds: string[],
   employeeId: string,
   learningPathId: string | null,
+  classRoomId?: string | null,
 ): Promise<Map<string, { totalLessons: number; completedLessons: number }>> {
   const supabase = await createSVClient();
   const progressMap = new Map<string, { totalLessons: number; completedLessons: number }>();
@@ -604,8 +621,8 @@ export async function getMultipleCoursesProgress(
   // Get all unique lesson IDs across all courses
   const allLessonIds = Array.from(
     new Set(
-      Array.from(courseToLessons.values()).flatMap((lessons) => Array.from(lessons))
-    )
+      Array.from(courseToLessons.values()).flatMap((lessons) => Array.from(lessons)),
+    ),
   );
 
   if (allLessonIds.length === 0) {
@@ -620,8 +637,11 @@ export async function getMultipleCoursesProgress(
     .eq("status", "completed")
     .in("lesson_id", allLessonIds);
 
+  // Filter by context: explicitly provided learning_path_id takes priority, fallback to class_room_id
   if (learningPathId) {
     progressQuery = progressQuery.eq("learning_path_id", learningPathId);
+  } else if (classRoomId) {
+    progressQuery = progressQuery.eq("class_room_id", classRoomId).is("learning_path_id", null);
   }
 
   const { data: progressRecords, error: progressError } = await progressQuery;
@@ -633,7 +653,7 @@ export async function getMultipleCoursesProgress(
 
   // Create a set of completed lesson IDs for quick lookup
   const completedLessonIds = new Set(
-    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || []
+    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || [],
   );
 
   // Update completed counts for each course
@@ -644,7 +664,7 @@ export async function getMultipleCoursesProgress(
     }
 
     const completedCount = Array.from(courseLessonIds).filter((lessonId) =>
-      completedLessonIds.has(lessonId)
+      completedLessonIds.has(lessonId),
     ).length;
 
     const existing = progressMap.get(courseId)!;
@@ -733,8 +753,8 @@ export async function getMultiplePhasesProgress(
   // Get all unique course IDs
   const allCourseIds = Array.from(
     new Set(
-      Array.from(classRoomToCourses.values()).flatMap((courses) => Array.from(courses))
-    )
+      Array.from(classRoomToCourses.values()).flatMap((courses) => Array.from(courses)),
+    ),
   );
 
   if (allCourseIds.length === 0) {
@@ -814,8 +834,8 @@ export async function getMultiplePhasesProgress(
           });
         });
         return Array.from(lessonIds);
-      })
-    )
+      }),
+    ),
   );
 
   if (allLessonIds.length === 0) {
@@ -838,7 +858,7 @@ export async function getMultiplePhasesProgress(
 
   // Create a set of completed lesson IDs for quick lookup
   const completedLessonIds = new Set(
-    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || []
+    progressRecords?.map((p: { lesson_id: string }) => p.lesson_id) || [],
   );
 
   // Update completed counts for each phase
@@ -859,7 +879,7 @@ export async function getMultiplePhasesProgress(
     });
 
     const completedCount = Array.from(phaseLessonIds).filter((lessonId) =>
-      completedLessonIds.has(lessonId)
+      completedLessonIds.has(lessonId),
     ).length;
 
     const existing = progressMap.get(phaseId)!;

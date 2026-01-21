@@ -159,7 +159,7 @@ const ClassRoomSeriesCard = ({
             {session.title}
           </Typography>
 
-          {isFromLearningPath && <ClassRoomProgressBar value={progressValue} size="xs" />}
+          {session.progress && <ClassRoomProgressBar value={progressValue} size="xs" />}
 
           <Stack direction="row" gap={1} alignItems="center">
             <ClockIcon sx={{ width: 20, height: 20, color: "text.secondary" }} />

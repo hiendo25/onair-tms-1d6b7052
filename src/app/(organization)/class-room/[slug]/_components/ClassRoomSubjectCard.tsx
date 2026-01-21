@@ -48,7 +48,7 @@ export const ClassRoomSubjectCard = ({ coursePeriod, classRoomSlug, isFromLearni
       0,
     ) ?? 0;
   const progressValue = coursePeriod.course?.progress?.progressPercentage ?? 0;
-  const shouldShowProgress = Boolean(isFromLearningPath);
+  const shouldShowProgress = Boolean(coursePeriod.course?.progress);
 
   // Check if classroom has ended (is in the past)
   const isClassRoomEnded = classRoomEndAt ? dayjs(classRoomEndAt).isBefore(dayjs()) : false;
