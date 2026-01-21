@@ -13,6 +13,8 @@ import {
 } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 
+import { DomainError } from "./errors/DomainError";
+
 const getQueryClient = () => {
   return new QueryClient({
     defaultOptions: {
@@ -41,7 +43,11 @@ function useTMutation<TData = unknown, TError = DefaultError, TVariables = void,
       ...options,
       onError: (error, variables, onMutateResult, context) => {
         // Interceptor: Show error notification
-        const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra!";
+        let errorMessage = "";
+        if (error instanceof DomainError) {
+          errorMessage = error.message;
+        }
+
         enqueueSnackbar(errorMessage, { variant: "error" });
         // Call original onError if provided
         options?.onError?.(error, variables, onMutateResult, context);

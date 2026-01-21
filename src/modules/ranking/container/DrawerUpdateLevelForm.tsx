@@ -3,14 +3,13 @@ import React, { memo, useCallback, useImperativeHandle, useState, useTransition 
 import { useRef } from "react";
 import { Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
-import { UpdateLevelPayload } from "@/repository/level/type";
 import { CloseIcon } from "@/shared/assets/icons";
 import UpsertLevelForm, { UpsertLevelFormProps, UpsertLevelFormRef } from "../components/UpsertLevelForm";
 import { useUpdateLevelMutation } from "../operations/mutations";
+import { UpdateLevelPayload } from "../type";
 
 export interface DrawerUpdateLevelFormRef {
   open: (data: UpsertLevelFormProps["initialValues"]) => void;
@@ -37,7 +36,7 @@ const DrawerUpdateLevelForm = React.forwardRef<DrawerUpdateLevelFormRef, DrawerU
         id: formData.id,
         description: formData.description,
         icon: formData.icon,
-        score_required: formData.scoreRequired,
+        scoreRequired: formData.scoreRequired,
         title: formData.title,
       };
 

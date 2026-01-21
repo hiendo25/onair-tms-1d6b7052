@@ -1,6 +1,22 @@
 type RequestInit = globalThis.RequestInit;
 
-import { HttpError } from "./HttpError";
+import { HttpError } from "../errors/HttpError";
+
+type QueryParams = Record<string, string | number | boolean | null | undefined>;
+
+const buildObjectToQueryString = (params?: QueryParams) => {
+  if (!params) return "";
+
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    searchParams.append(key, String(value));
+  });
+
+  const qs = searchParams.toString();
+  return qs ? `?${qs}` : "";
+};
 
 const request = async <T>(url: string, init: RequestInit = {}): Promise<T> => {
   const finalUrl = url.startsWith("/") ? `/api${url}` : `/api/${url}`;
@@ -27,8 +43,8 @@ const request = async <T>(url: string, init: RequestInit = {}): Promise<T> => {
   return data as T;
 };
 
-const get = <T>(url: string, init?: RequestInit) =>
-  request<T>(url, {
+const get = <T>(url: string, queryParams?: QueryParams, init?: RequestInit) =>
+  request<T>(`${url}${buildObjectToQueryString(queryParams)}`, {
     ...init,
     method: "GET",
   });

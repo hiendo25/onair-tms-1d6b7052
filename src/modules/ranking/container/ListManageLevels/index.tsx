@@ -8,40 +8,56 @@ import { useSnackbar } from "notistack";
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useUserOrganization } from "@/modules/organization";
-import { GetLevelQueryParams, GetLevelsResponse } from "@/repository/level";
 import { Edit02Icon, Trash01Icon } from "@/shared/assets/icons";
 import { IOSSwitch } from "@/shared/ui/form/CustomSwitcher";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import { useDeleteLevelMutation, useToggleActiveStatusLevelMutation } from "../../operations/mutations";
 import { useGetLevelsQuery } from "../../operations/query";
+import { GetLevelsResponse } from "../../type";
 import DrawerUpdateLevelForm, { DrawerUpdateLevelFormRef } from "../DrawerUpdateLevelForm";
 
-import { getLevelColumns } from "./level-colums";
-type LevelItem = NonNullable<GetLevelsResponse["data"]>[number];
+import { getLevelColumns, type LevelColumnItem } from "./level-columns";
+type LevelItem = any;
+
+type GetLevelQueryParams = {
+  page: number;
+  pageSize: number;
+};
 interface ListManageLevelsProps {}
+
 const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
-  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
   const dialog = useDialogs();
   const { enqueueSnackbar } = useSnackbar();
-  const actionRecordRef = useRef<LevelItem>(null);
-
+  const actionRecordRef = useRef<LevelColumnItem>(null);
+  const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
   const drawerUpdateRef = useRef<DrawerUpdateLevelFormRef>(null);
-  const [queryParams, setQueryParams] = useState<GetLevelQueryParams>({ organizationId, page: 1, pageSize: 10 });
+  const [queryParams, setQueryParams] = useState<GetLevelQueryParams>({ page: 1, pageSize: 10 });
 
-  const { data, isPending } = useGetLevelsQuery({ queryParams });
+  const { data, isPending } = useGetLevelsQuery({
+    queryParams: {
+      ...queryParams,
+      organizationId,
+    },
+  });
+
   const { mutate: deleteLevel, isPending: isPendingDelete } = useDeleteLevelMutation();
   const { mutate: toggleActive, isPending: isPendingUpdateStatus } = useToggleActiveStatusLevelMutation();
   const queryClient = useQueryClient();
 
-  const rows = useMemo(() => data?.data ?? [], [data]);
-  const rowCount = useMemo(() => data?.count ?? 0, [data]);
+  const rows = data ? data.data : [];
 
-  const handleUpdateLevel = (record: LevelItem) => () => {
+  const rowCount = useMemo(() => data?.total || 0, [data]);
+
+  const page = data?.page || queryParams.page;
+
+  const pageSize = data?.pageSize || queryParams.pageSize;
+
+  const handleUpdateLevel = (record: LevelColumnItem) => () => {
     drawerUpdateRef.current?.open({
       id: record.id,
       description: record.description ?? "",
       icon: record.icon ?? "",
-      scoreRequired: record.score_required,
+      scoreRequired: record.scoreRequired,
       title: record.title,
     });
   };
@@ -56,26 +72,23 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
     );
     if (!isConfirmed) return;
 
-    deleteLevel(
-      { recordId: record.id },
-      {
-        onSuccess(data, variables, onMutateResult, context) {
-          queryClient.invalidateQueries({
-            queryKey: [QUERY_KEYS.GET_LEVELS],
-          });
-          enqueueSnackbar("Xóa thành công", { variant: "success" });
-          actionRecordRef.current = null;
-        },
+    deleteLevel(record.id, {
+      onSuccess(data, variables, onMutateResult, context) {
+        queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.GET_LEVELS],
+        });
+        enqueueSnackbar("Xóa thành công", { variant: "success" });
+        actionRecordRef.current = null;
       },
-    );
+    });
   };
 
   const handleToggleActiveItem = (row: LevelItem, status: "active" | "inactive") => () => {
     toggleActive(
-      { recordId: row.id, status },
+      { id: row.id, status },
       {
         onSuccess(data, variables, onMutateResult, context) {
-          const message = data.status === "active" ? "Kích hoạt thành công." : "Ngừng kích hoạt thành công";
+          const message = variables.status === "active" ? "Kích hoạt thành công." : "Ngừng kích hoạt thành công";
           queryClient.invalidateQueries({
             queryKey: [QUERY_KEYS.GET_LEVELS],
           });
@@ -96,7 +109,7 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
     return getLevelColumns();
   }, []);
 
-  const levelColumns: TableDataProps<NonNullable<GetLevelsResponse["data"]>[number]>["columns"] = [
+  const levelColumns: TableDataProps<NonNullable<GetLevelsResponse["data"]>["data"][number]>["columns"] = [
     ...baseColumns,
     {
       id: "actions",
@@ -138,18 +151,23 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
         showRowCount
         pagination={{
           total: rowCount,
+          page,
+          pageSize,
           onChangePage,
           onChangePageSize,
         }}
       />
 
       <Alert className="mt-4" severity="info">
-        <Typography variant="body2" sx={{
-          color: "info.dark"
-        }}>
-          Lưu ý: <br/>
-          Mỗi học viên chỉ có 1 danh hiệu tại 1 thời điểm <br/>
-          Danh hiệu được tự động cập nhật theo thành tích <br/>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "info.dark",
+          }}
+        >
+          Lưu ý: <br />
+          Mỗi học viên chỉ có 1 danh hiệu tại 1 thời điểm <br />
+          Danh hiệu được tự động cập nhật theo thành tích <br />
           Thứ tự ưu tiên quyết định danh hiệu nào được hiển thị khi đáp ứng nhiều điều kiện
         </Typography>
       </Alert>

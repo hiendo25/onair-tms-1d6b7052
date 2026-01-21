@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useTMutation } from "@/lib";
+import { client } from "@/lib/api";
 import { notificationsRepository } from "@/repository";
 import { MarkNotificationAsReadPayload } from "@/repository/notifications/type";
-import { client } from "@/services/api";
 export const useMarkReadNotificationMutation = () => {
   return useTMutation({
     mutationFn: (payload: MarkNotificationAsReadPayload) => notificationsRepository.markNotificationAsRead(payload),

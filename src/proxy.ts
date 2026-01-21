@@ -12,12 +12,9 @@ export async function proxy(request: NextRequest) {
   const isAuthPath = authPaths.includes(pathname);
 
   const { data, error } = await authRepository.getClaims();
-  const {
-    data: { session },
-  } = await authRepository.getServerSession();
+
   const userId = data?.claims?.sub;
 
-  console.log({ session });
   if (isAuthPath && !userId) {
     return NextResponse.next();
   }
@@ -27,7 +24,6 @@ export async function proxy(request: NextRequest) {
   }
 
   const organizations = await organizationsRepository.getOrganizationsByUserId(userId);
-  console.log({ organizations });
 
   if (pathname === "/no-organization") {
     return !organizations.length ? NextResponse.next() : NextResponse.redirect(new URL(PATHS.DASHBOARD, request.url));
