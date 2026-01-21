@@ -178,6 +178,7 @@ export class CreateClassRoomService {
       await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
         class_room_id: classRoomData.id,
         certificate_template_id: certificate.id,
+        days_to_expire: certificate.daysToExpire,
       });
     }
 

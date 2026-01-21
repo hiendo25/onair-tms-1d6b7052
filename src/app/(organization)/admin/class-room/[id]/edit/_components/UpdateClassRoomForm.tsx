@@ -179,6 +179,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       id: cert.certificate_template.id,
       name: cert.certificate_template.name || "",
       frameUrl: cert.certificate_template.frame?.image_url || null,
+      daysToExpire: cert.days_to_expire,
     };
   }, [data.certificate]);
 

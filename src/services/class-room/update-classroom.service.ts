@@ -221,11 +221,16 @@ export class UpdateClassRoomService {
     }
 
     // Case 2: New certificate selected
-    // If there's an existing certificate with different ID, update it
-    if (currentCertificate && currentCertificate.certificate_template_id !== certificate.id) {
+    // If there's an existing certificate with different ID or days_to_expire, update it
+    if (
+      currentCertificate &&
+      (currentCertificate.certificate_template_id !== certificate.id ||
+        currentCertificate.days_to_expire !== certificate.daysToExpire)
+    ) {
       await classRoomCertificateTemplatesRepository.updateClassRoomCertificateTemplate({
         id: currentCertificate.id,
         certificate_template_id: certificate.id,
+        days_to_expire: certificate.daysToExpire,
       });
       return;
     }
@@ -235,10 +240,11 @@ export class UpdateClassRoomService {
       await classRoomCertificateTemplatesRepository.createClassRoomCertificateTemplate({
         class_room_id: classRoomId,
         certificate_template_id: certificate.id,
+        days_to_expire: certificate.daysToExpire,
       });
     }
 
-    // Case 4: Existing certificate with same ID - no action needed
+    // Case 4: Existing certificate with same ID and days_to_expire - no action needed
   }
 
   private async updateSessions(

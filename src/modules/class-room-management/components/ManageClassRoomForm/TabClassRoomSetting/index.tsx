@@ -1,14 +1,14 @@
 "use client";
 import React, { useState } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Button,
   Typography,
-  Box,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
 import { StudentSelectedItem } from "@/modules/class-room-management/store/class-room-store";
@@ -20,12 +20,6 @@ import CertificateSelection from "./CertificateSelection";
 const TabClassRoomSetting = () => {
   const setStudents = useClassRoomStore((state) => state.actions.setSelectedStudents);
   const selectedStudents = useClassRoomStore((state) => state.state.selectedStudents);
-
-  const [expandedAccordion, setExpandedAccordion] = useState<string | false>("students");
-
-  const handleAccordionChange = (panel: string) => (_event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpandedAccordion(isExpanded ? panel : false);
-  };
 
   const handleSelect: StudentDataTransferProps["onChange"] = (employees) => {
     const students = employees.map<StudentSelectedItem>((item) => ({
@@ -43,11 +37,10 @@ const TabClassRoomSetting = () => {
     <div className="setting-container">
       {/* Students Accordion */}
       <Accordion
-        expanded={expandedAccordion === "students"}
-        onChange={handleAccordionChange("students")}
         sx={{
           mb: 2,
           borderRadius: "8px !important",
+          borderBottom: "1px solid var(--template-palette-divider) !important",
           "&:before": {
             display: "none",
           },
@@ -84,8 +77,6 @@ const TabClassRoomSetting = () => {
 
       {/* Certificate Accordion */}
       <Accordion
-        expanded={expandedAccordion === "certificate"}
-        onChange={handleAccordionChange("certificate")}
         sx={{
           borderRadius: "8px !important",
           "&:before": {

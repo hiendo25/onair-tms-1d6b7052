@@ -650,18 +650,21 @@ export type Database = {
           certificate_template_id: string
           class_room_id: string
           created_at: string
+          days_to_expire: number | null
           id: string
         }
         Insert: {
           certificate_template_id: string
           class_room_id: string
           created_at?: string
+          days_to_expire?: number | null
           id?: string
         }
         Update: {
           certificate_template_id?: string
           class_room_id?: string
           created_at?: string
+          days_to_expire?: number | null
           id?: string
         }
         Relationships: [

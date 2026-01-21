@@ -14,6 +14,7 @@ export type CertificateEligibilityResult = {
   classRoomId?: string;
   classRoomTitle?: string;
   certificateTemplateId?: string;
+  daysToExpire?: number | null;
 };
 
 /**
@@ -113,6 +114,7 @@ async function checkClassRoomCertificateEligibility(
       classRoomId: classRoom.classRoomId,
       classRoomTitle: classRoom.classRoomTitle,
       certificateTemplateId: classRoom.certificateTemplateId,
+      daysToExpire: classRoom.daysToExpire,
     };
   } catch (error) {
     console.error("[ClassRoomCompletionService] Error checking class room certificate eligibility:", error);
@@ -192,6 +194,7 @@ async function checkCertificateEligibility(
           classRoomId: classRoom.classRoomId,
           classRoomTitle: classRoom.classRoomTitle,
           certificateTemplateId: classRoom.certificateTemplateId,
+          daysToExpire: classRoom.daysToExpire,
         });
       }
     }
