@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import Image from "next/image";
 
+import PDFViewer from "./PDFViewer";
+
 interface CertificateViewModalProps {
   open: boolean;
   onClose: () => void;
@@ -39,13 +41,19 @@ export default function CertificateViewModal({
   const isImageMode = !!certificateImageUrl;
   const isPreviewMode = !!previewComponent;
 
+  // Check if the certificate is a PDF
+  const isPDF = certificateImageUrl?.endsWith('.pdf') || false;
+
   const handleDownload = async () => {
     if (!certificateImageUrl) return;
 
     try {
       setIsDownloading(true);
 
-      // Fetch the image as a blob to handle CORS and external URLs
+      // Determine file extension
+      const fileExtension = isPDF ? 'pdf' : 'png';
+
+      // Fetch the file as a blob to handle CORS and external URLs
       const response = await fetch(certificateImageUrl);
       const blob = await response.blob();
 
@@ -55,7 +63,7 @@ export default function CertificateViewModal({
       // Create a temporary anchor element to trigger download
       const link = document.createElement("a");
       link.href = blobUrl;
-      link.download = `${certificateName}.png`;
+      link.download = `${certificateName}.${fileExtension}`;
       document.body.appendChild(link);
       link.click();
 
@@ -65,9 +73,10 @@ export default function CertificateViewModal({
     } catch (error) {
       console.error("Failed to download certificate:", error);
       // Fallback to direct link if fetch fails
+      const fileExtension = isPDF ? 'pdf' : 'png';
       const link = document.createElement("a");
       link.href = certificateImageUrl;
-      link.download = `${certificateName}.png`;
+      link.download = `${certificateName}.${fileExtension}`;
       link.target = "_blank";
       document.body.appendChild(link);
       link.click();
@@ -110,7 +119,6 @@ export default function CertificateViewModal({
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "grey.100",
             borderRadius: 2,
             overflow: "hidden",
           }}
@@ -118,23 +126,36 @@ export default function CertificateViewModal({
           {/* Image Mode */}
           {isImageMode && (
             <>
-              {isImageLoading && (
-                <Typography color="text.secondary">Đang tải chứng nhận...</Typography>
+              {isPDF ? (
+                // Display PDF using PDFViewer component
+                <PDFViewer
+                  pdfUrl={certificateImageUrl}
+                  onLoadComplete={() => setIsImageLoading(false)}
+                  maxWidth={800}
+                  loadingText="Đang tải chứng nhận..."
+                />
+              ) : (
+                // Display image using Next.js Image component
+                <>
+                  {isImageLoading && (
+                    <Typography color="text.secondary">Đang tải chứng nhận...</Typography>
+                  )}
+                  <Image
+                    src={certificateImageUrl}
+                    alt={certificateName}
+                    width={1200}
+                    height={900}
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      objectFit: "contain",
+                      display: isImageLoading ? "none" : "block",
+                    }}
+                    onLoad={() => setIsImageLoading(false)}
+                    priority
+                  />
+                </>
               )}
-              <Image
-                src={certificateImageUrl}
-                alt={certificateName}
-                width={1200}
-                height={900}
-                style={{
-                  width: "100%",
-                  height: "auto",
-                  objectFit: "contain",
-                  display: isImageLoading ? "none" : "block",
-                }}
-                onLoad={() => setIsImageLoading(false)}
-                priority
-              />
             </>
           )}
 

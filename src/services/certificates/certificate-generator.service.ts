@@ -92,8 +92,8 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
     // Generate unique ID for the employee certificate
     const certificateId = uuidv4();
 
-    // Build image URL
-    const imageUrl = `${S3_BASE_URL}/certificates/${certificateId}.png`;
+    // Build image URL (BFF generates PDF certificates)
+    const imageUrl = `${S3_BASE_URL}/certificates/${certificateId}.pdf`;
 
     // Calculate expiry date if days_to_expire is provided
     const expiryDate = daysToExpire ? dayjs(completionDate).add(daysToExpire, "day").format("YYYY-MM-DD") : "--";
