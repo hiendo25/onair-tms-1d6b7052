@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { client } from "@/lib/api";
+import { HttpError } from "@/lib/errors/HttpError";
 import { useTMutation } from "@/lib/queryClient";
 import { CreateEmployeeAttendanceResponse } from "@/repository/class-room";
 import {
@@ -13,8 +15,6 @@ import {
   updateQRCode,
   type UpdateQRCodePayload,
 } from "@/repository/qr-attendance";
-import { client } from "@/services/api";
-import { HttpError } from "@/services/api/HttpError";
 import {
   StudentClassRoomCheckedInResponse,
   StudentClassRoomCheckInDto,

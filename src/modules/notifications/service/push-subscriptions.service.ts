@@ -1,7 +1,7 @@
+import { DomainError } from "@/lib/errors/DomainError";
 import { webpush } from "@/lib/webpush";
 import { pushSubscriptionsRepository } from "@/repository";
 import { SubscribePushSubscriptionPayload } from "@/repository/push-subscriptions/type";
-import { DomainError } from "@/services/DomainError";
 import { SendPushNotificationPayloadDto, SubscribePushSubscriptionDto } from "../dto/push-subscription.dto";
 
 export class PushSubscriptionService {
@@ -25,9 +25,8 @@ export class PushSubscriptionService {
   }
 
   async push(organizationId: string, payload: SendPushNotificationPayloadDto) {
-    const { data: subscriptions, error } = await pushSubscriptionsRepository.getSubscriptionsByOrganizationId(
-      organizationId,
-    );
+    const { data: subscriptions, error } =
+      await pushSubscriptionsRepository.getSubscriptionsByOrganizationId(organizationId);
 
     if (error) {
       throw new Error(error.message);

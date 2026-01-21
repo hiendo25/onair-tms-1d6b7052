@@ -1,9 +1,9 @@
 import chunk from "lodash/chunk";
 
 import { useTMutation } from "@/lib";
+import { client } from "@/lib/api";
 import { classRoomRepository } from "@/repository";
 import { CreateClassRoomResponse, UpdateClassRoomResponse } from "@/repository/class-room";
-import { client } from "@/services/api";
 import { UpdateClassRoomDto } from "@/services/class-room/update-classroom.service";
 import { ClassRoomFormValues } from "../components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "../store/class-room-store";
