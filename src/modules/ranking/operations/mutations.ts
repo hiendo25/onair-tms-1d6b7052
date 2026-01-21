@@ -1,33 +1,34 @@
 import { useTMutation } from "@/lib";
-import { levelRepository } from "@/repository";
+import { client } from "@/lib/api";
+import {
+  CreateLevelPayload,
+  DeleteLevelResponse,
+  UpdateLevelPayload,
+  UpdateLevelStatusPayload,
+  UpdateLevelStatusResponse,
+} from "../type";
 
 const useCreateLevelMutation = () => {
   return useTMutation({
-    mutationFn: levelRepository.createLevel,
-    mutationKey: ["create_level"],
+    mutationFn: (payload: CreateLevelPayload) => client.post("/gamification/level", payload),
   });
 };
 
 const useUpdateLevelMutation = () => {
   return useTMutation({
-    mutationFn: levelRepository.updateLevel,
-    mutationKey: ["update_level"],
+    mutationFn: (payload: UpdateLevelPayload) => client.put(`/gamification/level/${payload.id}`, payload),
   });
 };
 
 const useDeleteLevelMutation = () => {
-  return useTMutation({
-    mutationFn: (payload: { recordId: string }) =>
-      levelRepository.updateStatusLevel({ status: "deleted", id: payload.recordId }),
-    mutationKey: ["delete_level"],
+  return useTMutation<DeleteLevelResponse, Error, string>({
+    mutationFn: (recordId) => client.put(`/gamification/level/${recordId}/delete`),
   });
 };
 
 const useToggleActiveStatusLevelMutation = () => {
-  return useTMutation({
-    mutationFn: (payload: { recordId: string; status: "active" | "inactive" }) =>
-      levelRepository.updateStatusLevel({ status: payload.status, id: payload.recordId }),
-    mutationKey: ["delete_level"],
+  return useTMutation<UpdateLevelStatusResponse, Error, UpdateLevelStatusPayload>({
+    mutationFn: (payload) => client.put(`/gamification/level/${payload.id}/status`, payload),
   });
 };
 export { useCreateLevelMutation, useUpdateLevelMutation, useDeleteLevelMutation, useToggleActiveStatusLevelMutation };

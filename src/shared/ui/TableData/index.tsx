@@ -29,6 +29,7 @@ export type TableDataProps<T> = {
   stickyHeader?: boolean;
   showRowCount?: boolean;
   bordered?: boolean;
+  ssr?: boolean;
   pagination?: {
     page?: number;
     pageSize?: number;
@@ -64,6 +65,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   showRowCount,
   onRowClick,
   onCellClick,
+  ssr = true,
 }: TableDataProps<T>) => {
   const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
@@ -78,9 +80,15 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   const { page, pageSize, total, perPageOptions } = tablePagination;
 
   const rowsList = useMemo(() => {
+    if (!rows) return [];
+
+    if (ssr) return rows;
+
     const from = (page - 1) * pageSize;
-    return rows?.slice(from, from + pageSize) || [];
-  }, [pageSize, rows, page]);
+    const to = from + pageSize;
+
+    return rows.slice(from, to);
+  }, [pageSize, rows, page, ssr]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
     if (pagination?.onChangePage) {
@@ -136,7 +144,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   return (
     <TableRowDataProvider<T>
       initState={{
-        data: rows ?? [],
+        data: rows || [],
         pagination: {
           page: pagination?.page ?? initPagination.page,
           pageSize: pagination?.pageSize ?? initPagination.pageSize,

@@ -1,56 +1,56 @@
 "use server";
-import { User } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-import { authRepository, employeesRepository } from "@/repository";
 import { createSVClient } from "@/services";
 import { http } from "@/utils/http-status";
 
 export async function requireAuth(request?: NextRequest) {
   const supabaseSV = await createSVClient();
 
-  let currentUser: User | null = null;
+  const { data } = request ? await supabaseSV.auth.getUser(getBearerToken(request)) : await supabaseSV.auth.getUser();
 
-  if (request) {
-    const token = await getBearerToken(request);
-    const { data, error } = await supabaseSV.auth.getUser(token);
-    currentUser = data.user;
-  } else {
-    const { data, error } = await supabaseSV.auth.getUser();
-    currentUser = data.user;
+  const user = data.user;
+
+  if (!user) {
+    throw http.unauthorized("Unauthorized");
   }
 
   const cookieStore = await cookies();
 
   const organizationId = cookieStore.get("organization_id")?.value;
 
-  console.log({ currentUser, organizationId });
-
-  const userId = currentUser?.id;
-
-  if (!userId) {
-    throw http.unauthorized("Unauthorized");
-  }
-
   if (!organizationId) {
     throw http.badRequest("Invalid organizationId");
   }
+  const employee = await getEmployee(supabaseSV)(user.id, organizationId);
 
-  const userOrganization = await employeesRepository.getCurrentEmployee(userId, organizationId);
-
-  if (!userOrganization) {
+  if (!employee) {
     throw http.unauthorized();
   }
 
   return {
-    userId: userId,
-    employeeId: userOrganization.id,
-    organizationId: userOrganization.organization_id,
+    userId: employee.user_id,
+    employeeId: employee.id,
+    organizationId: employee.organization_id,
   };
 }
 
-const getBearerToken = async (request: NextRequest) => {
+const getEmployee =
+  (supabaseSV: Awaited<ReturnType<typeof createSVClient>>) => async (userId: string, organizationId: string) => {
+    const { data: employee, error } = await supabaseSV
+      .from("employees")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (error) {
+      throw new Error(error.details);
+    }
+    return employee;
+  };
+
+const getBearerToken = (request: NextRequest) => {
   const authHeader = request.headers.get("authorization");
   const token = authHeader?.replace("Bearer ", "");
   return token;

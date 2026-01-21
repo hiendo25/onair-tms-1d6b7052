@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useCallback, useImperativeHandle, useState, useTransition } from "react";
+import React, { memo, useImperativeHandle, useState, useTransition } from "react";
 import { useRef } from "react";
 import { Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,10 +8,10 @@ import { enqueueSnackbar } from "notistack";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useUserOrganization } from "@/modules/organization";
-import { CreateLevelPayload } from "@/repository/level/type";
 import { CloseIcon } from "@/shared/assets/icons";
 import UpsertLevelForm, { UpsertLevelFormProps, UpsertLevelFormRef } from "../components/UpsertLevelForm";
 import { useCreateLevelMutation } from "../operations/mutations";
+import { CreateLevelPayload } from "../type";
 
 export interface DrawerCreateLevelFormRef {
   open: () => void;
@@ -38,9 +38,8 @@ const DrawerCreateLevelForm = React.forwardRef<DrawerCreateLevelFormRef, DrawerC
       const createLevelPayload: CreateLevelPayload = {
         description: formData.description,
         icon: formData.icon,
-        organization_id: organizationId,
-        score_required: formData.scoreRequired,
-        created_by: employeeId,
+        scoreRequired: formData.scoreRequired,
+        authorId: employeeId,
         title: formData.title,
       };
 

@@ -12,11 +12,13 @@ const RankingsTab: React.FC = () => {
 
   return (
     <>
-      <Box sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between"
-      }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
         <div>
           <Typography component="p" variant="subtitle1">
             Quản lý danh hiệu
@@ -30,11 +32,7 @@ const RankingsTab: React.FC = () => {
           <Button
             onClick={() => drawerRef.current?.open()}
             className="ml-auto"
-            startIcon={
-              <InputAdornment position="start">
-                <PlusIcon className="fill-white stroke-white" />
-              </InputAdornment>
-            }
+            startIcon={<PlusIcon className="fill-white stroke-white" />}
           >
             Tạo danh hiệu mới
           </Button>
