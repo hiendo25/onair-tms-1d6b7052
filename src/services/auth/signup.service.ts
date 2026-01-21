@@ -1,9 +1,9 @@
 import dayjs from "dayjs";
 
+import { DomainError } from "@/lib/errors/DomainError";
 import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
-import { DomainError } from "../DomainError";
 import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignupService {
   async execute(dto: SignUpDto): Promise<SignUpDtoResponse> {
