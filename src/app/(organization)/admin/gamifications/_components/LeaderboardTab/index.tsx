@@ -233,7 +233,7 @@ const LeaderboardTab: React.FC = () => {
                                 sx={{
                                   position: "absolute",
                                   top: -4,
-                                  left: employee.rank === 1 ? 8 : 18,
+                                  left: employee.rank === 1 ? 8 : 19,
                                   zIndex: 1,
                                 }}
                               >
