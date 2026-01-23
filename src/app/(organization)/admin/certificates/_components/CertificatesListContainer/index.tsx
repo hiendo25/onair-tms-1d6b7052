@@ -13,6 +13,7 @@ import {
   InputAdornment,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
@@ -66,7 +67,12 @@ const CertificatesListContainer: React.FC = () => {
   // Delete mutation
   const { mutate: deleteCertificate } = useDeleteCertificateTemplateMutation();
 
-  const certificates = data?.data || [];
+  // Transform data to include link counts
+  const certificates = (data?.data || []).map((cert: any) => ({
+    ...cert,
+    classRoomLinksCount: cert.class_room_certificate_templates?.[0]?.count || 0,
+    employeeLinksCount: cert.employee_certificate_templates?.[0]?.count || 0,
+  }));
   const totalCount = data?.count || 0;
 
   const handleCreateCertificate = () => {
@@ -207,25 +213,7 @@ const CertificatesListContainer: React.FC = () => {
                       bgcolor: "rgba(0, 0, 0, 0.3)",
                     }}
                   >
-                    <IconButton
-                      sx={{
-                        bgcolor: "white",
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1,
-                        "&:hover": {
-                          bgcolor: "grey.100",
-                        },
-                      }}
-                      title="Xem"
-                      onClick={handleViewCertificate(
-                        certificate.name || "Mẫu chứng nhận",
-                        certificate.frame?.image_url
-                      )}
-                    >
-                      <EyeIcon className="w-5 h-5" />
-                    </IconButton>
-                    <Link href={PATHS.CERTIFICATES.EDIT(certificate.id)}>
+                    <Tooltip title="Xem" placement="top">
                       <IconButton
                         sx={{
                           bgcolor: "white",
@@ -236,30 +224,65 @@ const CertificatesListContainer: React.FC = () => {
                             bgcolor: "grey.100",
                           },
                         }}
-                        title="Chỉnh sửa"
+                        onClick={handleViewCertificate(
+                          certificate.name || "Mẫu chứng nhận",
+                          certificate.frame?.image_url
+                        )}
                       >
-                        <Edit02Icon className="w-5 h-5" />
+                        <EyeIcon className="w-5 h-5" />
                       </IconButton>
-                    </Link>
-                    <IconButton
-                      sx={{
-                        bgcolor: "white",
-                        width: 36,
-                        height: 36,
-                        borderRadius: 1,
-                        color: "error.main",
-                        "&:hover": {
-                          bgcolor: "grey.100",
-                        },
-                      }}
-                      title="Xóa"
-                      onClick={handleDeleteCertificate(
-                        certificate.id,
-                        certificate.name || "mẫu chứng nhận"
-                      )}
+                    </Tooltip>
+                    <Tooltip title="Chỉnh sửa" placement="top">
+                      <Link href={PATHS.CERTIFICATES.EDIT(certificate.id)}>
+                        <IconButton
+                          sx={{
+                            bgcolor: "white",
+                            width: 36,
+                            height: 36,
+                            borderRadius: 1,
+                            "&:hover": {
+                              bgcolor: "grey.100",
+                            },
+                          }}
+                        >
+                          <Edit02Icon className="w-5 h-5" />
+                        </IconButton>
+                      </Link>
+                    </Tooltip>
+                    <Tooltip
+                      title={
+                        certificate.classRoomLinksCount > 0 || certificate.employeeLinksCount > 0
+                          ? `Không thể xóa vì đã được sử dụng trong ${certificate.classRoomLinksCount} lớp học và ${certificate.employeeLinksCount} chứng nhận`
+                          : "Xóa"
+                      }
+                      placement="top"
                     >
-                      <Trash01Icon className="w-5 h-5" />
-                    </IconButton>
+                      <span>
+                        <IconButton
+                          sx={{
+                            bgcolor: "white",
+                            width: 36,
+                            height: 36,
+                            borderRadius: 1,
+                            color: certificate.classRoomLinksCount > 0 || certificate.employeeLinksCount > 0 ? "text.disabled" : "error.main",
+                            "&:hover": {
+                              bgcolor: certificate.classRoomLinksCount > 0 || certificate.employeeLinksCount > 0 ? "white" : "grey.100",
+                            },
+                            "&.Mui-disabled": {
+                              bgcolor: "white",
+                              color: "text.disabled",
+                            },
+                          }}
+                          disabled={certificate.classRoomLinksCount > 0 || certificate.employeeLinksCount > 0}
+                          onClick={handleDeleteCertificate(
+                            certificate.id,
+                            certificate.name || "mẫu chứng nhận"
+                          )}
+                        >
+                          <Trash01Icon className="w-5 h-5" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
                   </Box>
                 </Box>
 
