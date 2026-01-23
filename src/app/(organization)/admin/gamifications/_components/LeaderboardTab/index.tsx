@@ -27,7 +27,24 @@ import {
 import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
 import { useGetDepartmentRankingQuery } from "@/modules/gamification-ranking/operations/query";
+import CrownBubbleIcon from "@/shared/assets/icons/CrownBubbleIcon";
+import GreenStarBubbleIcon from "@/shared/assets/icons/GreenStarBubbleIcon";
+import TrophyBubbleIcon from "@/shared/assets/icons/TrophyBubbleIcon";
 import ProgressBar from "@/shared/ui/ProgressBar";
+
+// Helper function to get rank icon
+const getRankIcon = (rank: number) => {
+  switch (rank) {
+    case 1:
+      return <CrownBubbleIcon />;
+    case 2:
+      return <TrophyBubbleIcon />;
+    case 3:
+      return <GreenStarBubbleIcon />;
+    default:
+      return null;
+  }
+};
 
 const LeaderboardTab: React.FC = () => {
   const { organizationId } = useOrganizationId();
@@ -207,10 +224,22 @@ const LeaderboardTab: React.FC = () => {
                       >
                         {/* Rank */}
                         <TableCell>
-                          <Box display="flex" alignItems="center">
+                          <Box display="flex" alignItems="center" position="relative">
                             <Typography align="center" variant="body2" fontWeight="medium">
                               #{employee.rank}
                             </Typography>
+                            {getRankIcon(employee.rank) && (
+                              <Box
+                                sx={{
+                                  position: "absolute",
+                                  top: -4,
+                                  left: employee.rank === 1 ? 8 : 18,
+                                  zIndex: 1,
+                                }}
+                              >
+                                {getRankIcon(employee.rank)}
+                              </Box>
+                            )}
                           </Box>
                         </TableCell>
 
