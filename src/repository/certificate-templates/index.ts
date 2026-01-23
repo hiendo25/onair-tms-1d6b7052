@@ -2,8 +2,8 @@ import { createClient } from "@/services/supabase/client";
 
 import {
   CreateCertificateTemplatePayload,
-  UpdateCertificateTemplatePayload,
   GetCertificateTemplatesQueryParams,
+  UpdateCertificateTemplatePayload,
 } from "./type";
 
 const createCertificateTemplate = async (payload: CreateCertificateTemplatePayload) => {
@@ -73,7 +73,9 @@ const getCertificateTemplates = async (params?: GetCertificateTemplatesQueryPara
             full_name,
             email
           )
-        )
+        ),
+        class_room_certificate_templates(count),
+        employee_certificate_templates(count)
       `,
       { count: "exact" }
     );
@@ -81,6 +83,9 @@ const getCertificateTemplates = async (params?: GetCertificateTemplatesQueryPara
     if (organizationId) {
       query = query.eq("organization_id", organizationId);
     }
+
+    // Only fetch non-deleted templates
+    query = query.is("deleted_at", null);
 
     if (search) {
       query = query.or(`name.ilike.%${search}%`);
@@ -93,6 +98,10 @@ const getCertificateTemplates = async (params?: GetCertificateTemplatesQueryPara
 };
 export type GetCertificateTemplatesResponse = Awaited<ReturnType<typeof getCertificateTemplates>>;
 
+/**
+ * Get certificate template by ID
+ * Only returns non-deleted templates
+ */
 const getCertificateTemplateById = async (id: string) => {
   const supabase = createClient();
   try {
@@ -122,6 +131,7 @@ const getCertificateTemplateById = async (id: string) => {
         `
       )
       .eq("id", id)
+      .is("deleted_at", null) // Only fetch non-deleted templates
       .single();
 
     if (!data || error) {
@@ -134,13 +144,18 @@ const getCertificateTemplateById = async (id: string) => {
 };
 export type GetCertificateTemplateByIdResponse = Awaited<ReturnType<typeof getCertificateTemplateById>>;
 
+/**
+ * Soft delete a certificate template by setting deleted_at timestamp
+ * This preserves templates that are linked to classrooms or employees
+ */
 const deleteCertificateTemplate = async (id: string) => {
   const supabase = createClient();
   try {
     const { error } = await supabase
       .from("certificate_templates")
-      .delete()
-      .eq("id", id);
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("deleted_at", null); // Only soft delete if not already deleted
 
     if (error) {
       throw new Error(error.message);
