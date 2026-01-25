@@ -22,11 +22,19 @@ export type StudentSelectedItem = {
   employeeType: Exclude<EmployeeType, "admin" | "teacher">;
 };
 
+export type CertificateSelectedItem = {
+  id: string;
+  name: string;
+  frameUrl: string | null;
+  daysToExpire: number | null;
+};
+
 type ClassRoomState = {
   selectedTeachers: {
     [sessionIndex: number | string]: TeacherSelectedItem[];
   };
   selectedStudents: StudentSelectedItem[];
+  selectedCertificate: CertificateSelectedItem | null;
 };
 
 type ClassRoomStore = {

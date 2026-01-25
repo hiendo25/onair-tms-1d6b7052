@@ -22,7 +22,7 @@ export const useAuthSignInWithPassword = () => {
           return;
         }
         setError(null);
-        router.push("/dashboard");
+        router.refresh();
       },
       onError: (error) => {
         console.error("Error signing in:", error);

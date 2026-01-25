@@ -6,25 +6,23 @@ import { enqueueSnackbar } from "notistack";
 
 import { PATHS } from "@/constants/path.constant";
 import { useUserOrganization } from "@/modules/organization";
-import { CreateLevelPayload } from "@/repository/level/type";
 import UpsertLevelForm, { UpsertLevelFormProps } from "../components/UpsertLevelForm";
 import { useCreateLevelMutation } from "../operations/mutations";
+import { CreateLevelPayload } from "../type";
+
 function CreateLevelForm() {
   const router = useRouter();
   const [isTransition, startTransition] = useTransition();
-  const {
-    id: employeeId,
-    organization: { id: organizationId },
-  } = useUserOrganization((state) => state.currentEmployee);
+
+  const { id: employeeId } = useUserOrganization((state) => state.currentEmployee);
   const { mutate: createLevel, isPending } = useCreateLevelMutation();
 
   const handleCreateLevel: UpsertLevelFormProps["onSubmit"] = (formData) => {
     const createLevelPayload: CreateLevelPayload = {
       description: formData.description,
       icon: formData.icon,
-      organization_id: organizationId,
-      score_required: formData.scoreRequired,
-      created_by: employeeId,
+      scoreRequired: formData.scoreRequired,
+      authorId: employeeId,
       title: formData.title,
     };
 

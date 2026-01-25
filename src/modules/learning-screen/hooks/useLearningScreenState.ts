@@ -17,11 +17,13 @@ import { learningScreenRepository } from "@/repository";
 interface UseLearningScreenStateParams {
   courseId: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
 }
 
 export const useLearningScreenState = ({
   courseId,
-  learningPathId
+  learningPathId,
+  classRoomId
 }: UseLearningScreenStateParams) => {
   const { id: studentId } = useUserOrganization((state) => state.currentEmployee);
   const pathname = usePathname();
@@ -35,8 +37,9 @@ export const useLearningScreenState = ({
 
   const { data, isLoading, isError, refetch } = useLearningCourseOutlineQuery(courseId, {
     enabled: Boolean(courseId),
-    includeProgress: isLearningPathSource,
-    learningPathId: learningPathId,
+    includeProgress: true,
+    learningPathId: learningPathId ?? null,
+    classRoomId: classRoomId ?? null,
     employeeId: studentId,
   });
 
@@ -67,7 +70,7 @@ export const useLearningScreenState = ({
     onReplaceSearchParams: handleReplaceSearchParams,
   });
 
-  const sectionProgressById = useSectionProgress(sections, isLearningPathSource);
+  const sectionProgressById = useSectionProgress(sections);
   const lessonIndexById = useMemo(() => {
     const map = new Map<string, number>();
     flatLessons.forEach((lesson, idx) => map.set(lesson.id, idx));

@@ -7,14 +7,14 @@ import SimpleDialogTeacherSelector, {
 } from "@/modules/teacher/container/SimpleDialogTeacherSelector";
 import { CloseIcon } from "@/shared/assets/icons";
 import Avatar from "@/shared/ui/Avatar";
-import { ClassRoom } from "../../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../../classroom-form.schema";
 import { useClassRoomFormContext } from "../../../ClassRoomFormContainer";
 
-type TeacherSelectItem = ClassRoom["classRoomSessions"][number]["coursesPeriod"][number]["teachers"][number];
+type TeacherSelectItem = ClassRoomFormValues["classRoomSessions"][number]["coursesPeriod"][number]["teachers"][number];
 interface ButtonSelectTeacherProps {
   sessionIndex: number;
   coursePeriodIndex: number;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const ButtonSelectTeacher: React.FC<ButtonSelectTeacherProps> = ({ coursePeriodIndex, control, sessionIndex }) => {
   const dialogTeacherRef = useRef<SimpleDialogTeacherSelectorRef>(null);

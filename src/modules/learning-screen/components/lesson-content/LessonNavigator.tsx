@@ -192,7 +192,6 @@ const LessonNavigator = ({
                   label={`Học phần ${index + 1}`}
                   size="small"
                   color="primary"
-                  className="bg-[#000000]"
                 />
                 <Typography variant="caption" color="text.secondary">
                   {lessonCountText}
@@ -221,6 +220,7 @@ const LessonNavigator = ({
                   <LinearProgress
                     variant="determinate"
                     value={clampedProgressValue}
+                    color={clampedProgressValue >= 100 ? "success" : "primary"}
                     sx={{ flex: 1 }}
                   />
                   <Typography variant="caption" color="text.secondary">

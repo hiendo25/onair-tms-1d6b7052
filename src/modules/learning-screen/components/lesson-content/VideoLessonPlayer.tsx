@@ -22,6 +22,7 @@ interface VideoLessonPlayerProps {
   onRequestNextLesson?: () => void;
   nextLessonTitle?: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   courseId?: string | null;
   studentId?: string | null;
 }
@@ -32,6 +33,7 @@ const VideoLessonPlayer = ({
   onRequestNextLesson,
   nextLessonTitle,
   learningPathId,
+  classRoomId,
   courseId,
   studentId,
 }: VideoLessonPlayerProps) => {
@@ -39,16 +41,24 @@ const VideoLessonPlayer = ({
   const { markComplete } = useMarkLessonComplete({
     courseId: courseId ?? null,
     learningPathId,
+    classRoomId,
     employeeId: studentId ?? null,
   });
 
-  // State to manage initial video position (only for learning paths)
+  console.log("[VideoLessonPlayer] Setup with:", {
+    courseId,
+    learningPathId,
+    studentId,
+    lessonId: lesson.id,
+  });
+
+  // State to manage initial video position
   const [initialTime, setInitialTime] = useState<number>(0);
   const lastSavedTimeRef = useRef<number>(0);
 
-  // Load saved video position when lesson changes (only for learning paths)
+  // Load saved video position when lesson changes
   useEffect(() => {
-    if (learningPathId && lesson.id) {
+    if (lesson.id) {
       const savedPosition = getVideoPosition(lesson.id);
       if (savedPosition && savedPosition.currentTime > 0) {
         // Only resume if saved position is meaningful (at least 5 seconds in)
@@ -74,12 +84,12 @@ const VideoLessonPlayer = ({
       setInitialTime(0);
       lastSavedTimeRef.current = 0;
     }
-  }, [lesson.id, learningPathId]);
+  }, [lesson.id]);
 
-  // Handle video time updates - save position periodically (only for learning paths)
+  // Handle video time updates - save position periodically
   const handleTimeUpdate = useCallback(
     (currentTime: number, isPlaying: boolean, duration: number) => {
-      if (!learningPathId || !lesson.id) return;
+      if (!lesson.id) return;
 
       // Save position every 5 seconds to avoid too many localStorage writes
       const timeSinceLastSave = Math.abs(currentTime - lastSavedTimeRef.current);
@@ -88,16 +98,18 @@ const VideoLessonPlayer = ({
         lastSavedTimeRef.current = currentTime;
       }
     },
-    [learningPathId, lesson.id],
+    [lesson.id],
   );
 
   const handleVideoEnded = useCallback(() => {
-    if (learningPathId && lesson.id) {
+    console.log("[VideoLessonPlayer] Video ended for lesson:", lesson.id);
+    if (lesson.id) {
       // Clear saved position when video completes
       clearVideoPosition(lesson.id);
+      console.log("[VideoLessonPlayer] Calling markComplete for lesson:", lesson.id);
       markComplete(lesson.id);
     }
-  }, [learningPathId, lesson.id, markComplete]);
+  }, [lesson.id, markComplete]);
 
   const handleStartNextLesson = useCallback(() => {
     onRequestNextLesson?.();

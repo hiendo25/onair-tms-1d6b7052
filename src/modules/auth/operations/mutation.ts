@@ -1,8 +1,8 @@
 import { useTMutation } from "@/lib";
+import { client } from "@/lib/api";
+import { DomainError } from "@/lib/errors/DomainError";
 import { authRepository } from "@/repository";
 import { AuthSignInWithGoogleOptions, AuthSignInWithPasswordPayload } from "@/repository/auth";
-import { client } from "@/services/api";
-import { DomainError } from "@/services/DomainError";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 export const useSignOutMutation = () => {
   return useTMutation({

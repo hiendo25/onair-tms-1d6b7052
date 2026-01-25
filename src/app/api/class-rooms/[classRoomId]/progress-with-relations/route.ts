@@ -21,6 +21,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
 import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 import { getClassRoomProgressWithRelations } from "@/services/class-room/class-room-progress-with-relations.service";
+import { resolveLearningPathId } from "@/services/progress/progress.service";
 
 export async function GET(
   request: NextRequest,
@@ -48,10 +49,12 @@ export async function GET(
       ROUTE_QUERY_KEYS.LEARNING_PATH_ID,
     );
 
+    const learningPathId = await resolveLearningPathId(employee.id, providedLearningPathId ?? null);
+
     const classRoomProgress = await getClassRoomProgressWithRelations({
       classRoomId,
       employeeId: employee.id,
-      learningPathId: providedLearningPathId,
+      learningPathId,
     });
 
     return NextResponse.json(classRoomProgress, { status: 200 });

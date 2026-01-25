@@ -16,7 +16,9 @@ type CoursePeriod = NonNullable<
 
 interface ClassRoomSubjectCardProps {
   coursePeriod: CoursePeriod;
+  classRoomSlug?: string;
   isFromLearningPath?: boolean;
+  classRoomEndAt?: string | null;
 }
 
 const getTeacherName = (teacher: CoursePeriod["teacher"]): string => {
@@ -26,7 +28,7 @@ const getTeacherName = (teacher: CoursePeriod["teacher"]): string => {
 const CARD_MIN_WIDTH = { xs: 260, sm: 280, md: 320 };
 const CARD_RADIUS = 16;
 
-export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: ClassRoomSubjectCardProps) => {
+export const ClassRoomSubjectCard = ({ coursePeriod, classRoomSlug, isFromLearningPath, classRoomEndAt }: ClassRoomSubjectCardProps) => {
   const weeklyScheduleLabel = isFromLearningPath ? formatWeeklyScheduleLabel(coursePeriod.weekly_schedule) : null;
   const scheduleLabel = weeklyScheduleLabel
     ? weeklyScheduleLabel
@@ -37,7 +39,7 @@ export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: Class
   const courseId = coursePeriod.course.id || "";
   const detailHref = isFromLearningPath
     ? PATHS.MY_LEARNING_PATHS.LEARNING_SCREEN(courseId)
-    : PATHS.STUDENTS.LEARNINNG(courseId);
+    : PATHS.CLASSROOMS.LEARNING_SCREEN(classRoomSlug!, courseId);
 
   const sectionCount = coursePeriod.course?.sections_count?.[0]?.count ?? 0;
   const lessonCount =
@@ -46,7 +48,10 @@ export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: Class
       0,
     ) ?? 0;
   const progressValue = coursePeriod.course?.progress?.progressPercentage ?? 0;
-  const shouldShowProgress = Boolean(isFromLearningPath);
+  const shouldShowProgress = Boolean(coursePeriod.course?.progress);
+
+  // Check if classroom has ended (is in the past)
+  const isClassRoomEnded = classRoomEndAt ? dayjs(classRoomEndAt).isBefore(dayjs()) : false;
 
   return (
     <Card
@@ -59,12 +64,15 @@ export const ClassRoomSubjectCard = ({ coursePeriod, isFromLearningPath }: Class
         color: "inherit",
         flexShrink: 0,
         transition: "border-color 0.2s, box-shadow 0.2s, transform 0.2s",
+        opacity: isClassRoomEnded ? 0.6 : 1,
+        cursor: isClassRoomEnded ? "not-allowed" : "pointer",
+        pointerEvents: isClassRoomEnded ? "none" : "auto",
         "&:hover": {
-          borderColor: "primary.light",
+          borderColor: isClassRoomEnded ? "divider" : "primary.light",
         },
       }}
-      component={"a"}
-      href={detailHref}
+      component={isClassRoomEnded ? "div" : "a"}
+      href={isClassRoomEnded ? undefined : detailHref}
     >
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
         <Stack spacing={1.25}>

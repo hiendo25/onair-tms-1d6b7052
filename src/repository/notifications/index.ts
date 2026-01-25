@@ -1,108 +1,129 @@
-import axios from "axios";
+import { NotificationType } from "@/model/notification.model";
+import { createClient } from "@/services";
+import { createServiceRoleClient } from "@/services";
 
-import type {
-  SendBulkNotificationsResponse,
-  SendNotificationRequest,
-  SendNotificationResponse,
-} from "./type";
+import { CreateNotificationPayload, MarkNotificationAsReadPayload } from "./type";
 
+type BaseNotificationQueryParams = {
+  organizationId?: string;
+  page?: number;
+  pageSize?: number;
+  type?: NotificationType;
+};
+const createNotification = async (payload: CreateNotificationPayload) => {
+  try {
+    const adminSupabase = await createServiceRoleClient();
+    const { data, error } = await adminSupabase.from("notifications").insert(payload).select("*").single();
 
-const NOTIFICATION_API_URL =
-  process.env.NEXT_PUBLIC_NOTIFICATION_API_URL ||
-  "http://localhost:8003/api/v1/lms-notifications";
-
-
-const notificationAxios = axios.create({
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-
-notificationAxios.interceptors.response.use(
-  (response) => response.data,
-  (error) => {
-    console.error("Notification API error:", error);
-    
-    if (error.response) {
-      console.error("Error response:", {
-        status: error.response.status,
-        data: error.response.data,
-      });
+    if (error) {
+      throw new Error(error.message);
     }
-    
-    return Promise.reject(error);
+    return data;
+  } catch (err: any) {
+    throw new Error(`Failed to create notification: ${err?.message}`);
   }
-);
+};
+export type CreateNotificationResponse = Awaited<ReturnType<typeof createNotification>>;
 
-
-export async function sendNotification(
-  request: SendNotificationRequest
-): Promise<SendNotificationResponse> {
+const bulkCreateNotification = async (payload: CreateNotificationPayload[]) => {
   try {
-    const response = await notificationAxios.post<SendNotificationResponse>(
-      NOTIFICATION_API_URL,
-      request
-    );
-    
-    return response as any as SendNotificationResponse;
-  } catch (error: any) {
-    console.error("Failed to send notification:", error.message);
-    
-    return {
-      success: false,
-      message: error.message || "Failed to send notification",
-    };
+    const adminSupabase = await createServiceRoleClient();
+    const { data, error } = await adminSupabase.from("notifications").insert(payload).select("*");
+
+    if (error) {
+      throw new Error(error?.message);
+    }
+    return data;
+  } catch (err: any) {
+    throw new Error(`Failed to create notification: ${err?.message}`);
   }
-}
+};
+export type BulkCreateNotification = Awaited<ReturnType<typeof bulkCreateNotification>>;
 
+export type GetNotificationQueryParams = BaseNotificationQueryParams;
 
-export async function sendBulkNotifications(
-  requests: SendNotificationRequest[]
-): Promise<SendBulkNotificationsResponse> {
+const getNotifications = async (queryParams?: GetNotificationQueryParams) => {
+  const { page = 1, pageSize = 20, organizationId, type } = queryParams || {};
+  const from = page > 0 ? (page - 1) * pageSize : page;
+  const to = from + pageSize - 1;
+
   try {
-    const results = await Promise.allSettled(
-      requests.map((request) => sendNotification(request))
-    );
-    
-    let totalSent = 0;
-    let totalFailed = 0;
-    const errors: Array<{ userId: string; error: string }> = [];
-    
-    results.forEach((result, index) => {
-      if (result.status === "fulfilled" && result.value.success) {
-        totalSent++;
-      } else {
-        totalFailed++;
-        const userId = requests[index]?.userId || "unknown";
-        const error =
-          result.status === "rejected"
-            ? result.reason.message
-            : result.value.message || "Unknown error";
-        errors.push({ userId, error });
-      }
-    });
-    
-    return {
-      success: totalFailed === 0,
-      totalSent,
-      totalFailed,
-      errors: errors.length > 0 ? errors : undefined,
-    };
-  } catch (error: any) {
-    console.error("Failed to send bulk notifications:", error.message);
-    
-    return {
-      success: false,
-      totalSent: 0,
-      totalFailed: requests.length,
-      errors: requests.map((req) => ({
-        userId: req.userId,
-        error: error.message || "Failed to send notification",
-      })),
-    };
+    const supabase = createClient();
+    let query = supabase.from("notifications").select("*", { count: "exact" });
+
+    if (organizationId) {
+      query = query.eq("organization_id", organizationId);
+    }
+
+    if (type) {
+      query = query.eq("type", type);
+    }
+    const { data, error } = await query.range(from, to).order("created_at", { ascending: false });
+
+    if (error) {
+      throw new Error(error?.message);
+    }
+
+    return data;
+  } catch (err: any) {
+    throw new Error(`Failed to create notification: ${err?.message}`);
   }
-}
+};
+export type GetNotificationsResponse = Awaited<ReturnType<typeof getNotifications>>;
 
+export type GetNotificationsByEmployeeQueryParams = BaseNotificationQueryParams & {
+  employeeId: string;
+  type?: NotificationType;
+};
+const getNotificationsByEmployee = async (queryParams: GetNotificationsByEmployeeQueryParams) => {
+  const { page = 1, pageSize = 20, organizationId, employeeId, type } = queryParams || {};
+  const from = page > 0 ? (page - 1) * pageSize : page;
+  const to = from + pageSize - 1;
 
+  try {
+    const supabase = createClient();
+    let query = supabase.from("notifications").select("*", { count: "exact" });
+
+    if (organizationId) {
+      query = query.eq("organization_id", organizationId);
+    }
+
+    query = query.eq("employee_id", employeeId);
+
+    if (type) {
+      query = query.eq("type", type);
+    }
+    return await query.range(from, to).order("created_at", { ascending: false });
+  } catch (err: any) {
+    throw new Error(`Failed to create notification: ${err?.message}`);
+  }
+};
+export type GetNotificationByEmployeeResponse = Awaited<ReturnType<typeof getNotificationsByEmployee>>;
+
+const getNotificationsCount = async ({ employeeId, onlyUnRead }: { employeeId: string; onlyUnRead: boolean }) => {
+  try {
+    const supabase = createClient();
+    return await supabase.rpc("get_notification_count_by_type", { employee_id: employeeId, unread_only: onlyUnRead });
+  } catch (err: any) {
+    throw new Error(`Failed to create notification: ${err?.message}`);
+  }
+};
+
+const markNotificationAsRead = async (payload: MarkNotificationAsReadPayload) => {
+  try {
+    const supabase = createClient();
+    return await supabase.from("notifications").update({ is_read: true }).eq("id", payload.id).select("*").single();
+  } catch (err: any) {
+    throw new Error(`Failed to markNotificationAsRead: ${err?.message}`);
+  }
+};
+export type MarkNotificationAsReadResponse = Awaited<ReturnType<typeof markNotificationAsRead>>;
+
+export {
+  getNotifications,
+  getNotificationsByEmployee,
+  createNotification,
+  bulkCreateNotification,
+  getNotificationsCount,
+  markNotificationAsRead,
+};

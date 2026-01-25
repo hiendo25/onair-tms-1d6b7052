@@ -9,7 +9,7 @@ export async function getEmployeeGamificationXp(
   employeeId: string,
   organizationId: string
 ): Promise<EmployeeGamificationXpResult> {
-  // Get employee's XP balance and current level
+  // Get employee's XP balance
   const xpData = await gamificationXpRepository.getEmployeeXpAndLevel(
     employeeId,
     organizationId
@@ -17,15 +17,13 @@ export async function getEmployeeGamificationXp(
 
   const currentXp = xpData?.total_xp || 0;
   const currentLevelId = xpData?.level_id || null;
-  let currentLevelData = xpData?.currentLevel as any;
 
-  // If no level data from balance, find the appropriate level based on XP
-  if (!currentLevelData) {
-    currentLevelData = await gamificationXpRepository.getLevelByXp(
-      organizationId,
-      currentXp
-    );
-  }
+  // Always recalculate the correct level based on current XP
+  // This ensures accuracy even when admin creates/updates/deletes levels
+  const currentLevelData = await gamificationXpRepository.getLevelByXp(
+    organizationId,
+    currentXp
+  );
 
   // Format current level
   const currentLevel: LevelInfo | null = currentLevelData

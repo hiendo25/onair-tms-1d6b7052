@@ -1,5 +1,5 @@
 import { useTMutation } from "@/lib";
-import { client } from "@/services/api";
+import { client } from "@/lib/api";
 const useUpdateOrganizationMutation = () => {
   return useTMutation({
     mutationFn: async (organizationId: string) => {

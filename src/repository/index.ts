@@ -47,3 +47,8 @@ export * as xpTransactionsRepository from "./xp-transactions";
 export * as gamificationXpRepository from "./gamification-xp";
 export * as gamificationRankingRepository from "./gamification-ranking";
 export * as classQRCodeRepository from "./class-qr-codes";
+export * as pushSubscriptionsRepository from "./push-subscriptions";
+export * as certificateTemplatesRepository from "./certificate-templates";
+export * as certificateFramesRepository from "./certificate-frames";
+export * as classRoomCertificateTemplatesRepository from "./class-room-certificate-templates";
+export * as employeeCertificateTemplatesRepository from "./employee-certificate-templates";

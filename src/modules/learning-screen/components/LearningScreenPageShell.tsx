@@ -17,6 +17,7 @@ interface LearningScreenPageShellProps {
   }[];
   learningPathData?: LearningPathWithDetails | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
 }
 
 const LearningScreenPageShell = ({
@@ -26,6 +27,7 @@ const LearningScreenPageShell = ({
   breadcrumbs,
   learningPathData,
   learningPathId,
+  classRoomId,
 }: LearningScreenPageShellProps) => {
   return (
     <PageContainer
@@ -45,6 +47,7 @@ const LearningScreenPageShell = ({
         courseId={courseId}
         learningPathData={learningPathData}
         learningPathId={learningPathId}
+        classRoomId={classRoomId}
       />
     </PageContainer>
   );

@@ -34,72 +34,11 @@ export type Database = {
   }
   public: {
     Tables: {
-      assignment_bank: {
-        Row: {
-          created_at: string
-          created_by: string
-          description: string
-          duration_minutes: number | null
-          id: string
-          name: string
-          organization_id: string | null
-          pass_score: number | null
-          shuffle_answers: boolean | null
-          shuffle_questions: boolean | null
-          status: Database["public"]["Enums"]["assignment_status"] | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by: string
-          description: string
-          duration_minutes?: number | null
-          id?: string
-          name: string
-          organization_id?: string | null
-          pass_score?: number | null
-          shuffle_answers?: boolean | null
-          shuffle_questions?: boolean | null
-          status?: Database["public"]["Enums"]["assignment_status"] | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string
-          description?: string
-          duration_minutes?: number | null
-          id?: string
-          name?: string
-          organization_id?: string | null
-          pass_score?: number | null
-          shuffle_answers?: boolean | null
-          shuffle_questions?: boolean | null
-          status?: Database["public"]["Enums"]["assignment_status"] | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "department_gamification_ranking"
-            referencedColumns: ["employee_id"]
-          },
-          {
-            foreignKeyName: "assignments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignments_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+      antidigital_djf: {
+        Row: {}
+        Insert: {}
+        Update: {}
+        Relationships: []
       }
       assignment_categories: {
         Row: {
@@ -547,6 +486,95 @@ export type Database = {
         }
         Relationships: []
       }
+      certificate_frames: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          image_url: string | null
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          image_url?: string | null
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          image_url?: string | null
+          organization_id?: string
+        }
+        Relationships: []
+      }
+      certificate_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          description: string | null
+          frame_id: string
+          id: string
+          layout_config: Json | null
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          description?: string | null
+          frame_id: string
+          id?: string
+          layout_config?: Json | null
+          name: string
+          organization_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          description?: string | null
+          frame_id?: string
+          id?: string
+          layout_config?: Json | null
+          name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_frames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "certificate_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_attendances: {
         Row: {
           attendance_method:
@@ -835,6 +863,52 @@ export type Database = {
             columns: ["class_room_employee_id"]
             isOneToOne: false
             referencedRelation: "class_room_employee"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_room_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at: string
+          days_to_expire: number | null
+          id: string
+        }
+        Insert: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at?: string
+          days_to_expire?: number | null
+          id?: string
+        }
+        Update: {
+          certificate_template_id?: string
+          class_room_id?: string
+          created_at?: string
+          days_to_expire?: number | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
         ]
@@ -1584,6 +1658,75 @@ export type Database = {
           },
         ]
       }
+      employee_certificate_templates: {
+        Row: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at: string
+          data: Json
+          employee_id: string
+          id: string
+          image_url: string
+          layout_config: Json
+        }
+        Insert: {
+          certificate_template_id: string
+          class_room_id: string
+          created_at?: string
+          data: Json
+          employee_id: string
+          id?: string
+          image_url: string
+          layout_config: Json
+        }
+        Update: {
+          certificate_template_id?: string
+          class_room_id?: string
+          created_at?: string
+          data?: Json
+          employee_id?: string
+          id?: string
+          image_url?: string
+          layout_config?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_certificate_templates_certificate_template_id_fkey"
+            columns: ["certificate_template_id"]
+            isOneToOne: false
+            referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_departments: {
         Row: {
           created_at: string | null
@@ -2188,6 +2331,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          deleted_at: string | null
           description: string | null
           id: string
           metadata: Json | null
@@ -2199,6 +2343,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           metadata?: Json | null
@@ -2210,6 +2355,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          deleted_at?: string | null
           description?: string | null
           id?: string
           metadata?: Json | null
@@ -2244,6 +2390,7 @@ export type Database = {
       }
       lesson_progress: {
         Row: {
+          class_room_id: string | null
           completed_at: string | null
           created_at: string
           current_position_seconds: number | null
@@ -2256,6 +2403,7 @@ export type Database = {
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Insert: {
+          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2268,6 +2416,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Update: {
+          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2280,6 +2429,20 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "lesson_progress_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lesson_progress_employee_id_fkey"
             columns: ["employee_id"]
@@ -2558,6 +2721,73 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json | null
+          employee_id: string
+          icon: string | null
+          id: string
+          is_read: boolean
+          organization_id: string
+          thumbnail_url: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          icon?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          thumbnail_url?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          employee_id?: string
+          icon?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          thumbnail_url?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "notifications_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_units: {
         Row: {
           address: string
@@ -2768,7 +2998,51 @@ export type Database = {
           },
         ]
       }
-      question_bank: {
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          employee_id: string | null
+          endpoint: string
+          id: string
+          meta_data: Json | null
+          organization_id: string
+          p256dh: string
+          user_agent: string | null
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          employee_id?: string | null
+          endpoint: string
+          id?: string
+          meta_data?: Json | null
+          organization_id?: string
+          p256dh: string
+          user_agent?: string | null
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          employee_id?: string | null
+          endpoint?: string
+          id?: string
+          meta_data?: Json | null
+          organization_id?: string
+          p256dh?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      questions: {
         Row: {
           attachments: string[] | null
           created_at: string
@@ -3799,17 +4073,9 @@ export type Database = {
           total_xp: number
         }[]
       }
-      get_filtered_employees: {
-        Args:
-        | {
-          p_branch_id?: string
-          p_department_id?: string
-          p_employee_type?: Database["public"]["Enums"]["employee_type"]
-          p_limit?: number
-          p_page?: number
-          p_search?: string
-        }
-        | {
+      get_filtered_employees:
+      | {
+        Args: {
           p_branch_id?: string
           p_department_id?: string
           p_limit?: number
@@ -3819,6 +4085,27 @@ export type Database = {
         Returns: {
           employee_id: string
           total_count: number
+        }[]
+      }
+      | {
+        Args: {
+          p_branch_id?: string
+          p_department_id?: string
+          p_employee_type?: Database["public"]["Enums"]["employee_type"]
+          p_limit?: number
+          p_page?: number
+          p_search?: string
+        }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
+      get_notification_count_by_type: {
+        Args: { employee_id: string; unread_only?: boolean }
+        Returns: {
+          count: number
+          type: Database["public"]["Enums"]["notification_type"]
         }[]
       }
       get_organization_leaderboard: {
@@ -3854,18 +4141,12 @@ export type Database = {
           total: number
         }[]
       }
-      get_user_id_by_email: {
-        Args: { user_email: string }
-        Returns: string
-      }
+      get_user_id_by_email: { Args: { user_email: string }; Returns: string }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -3921,6 +4202,7 @@ export type Database = {
       lesson_progress_status: "not_started" | "in_progress" | "completed"
       lesson_type: "video" | "file" | "assessment"
       level_status: "deleted" | "active" | "inactive"
+      notification_type: "class_room" | "survey" | "system"
       organization_unit_type: "branch" | "department"
       plan_survey_target: "all" | "department" | "branch"
       qr_code_status: "inactive" | "active" | "expired" | "disabled"
@@ -4145,6 +4427,7 @@ export const Constants = {
       lesson_progress_status: ["not_started", "in_progress", "completed"],
       lesson_type: ["video", "file", "assessment"],
       level_status: ["deleted", "active", "inactive"],
+      notification_type: ["class_room", "survey", "system"],
       organization_unit_type: ["branch", "department"],
       plan_survey_target: ["all", "department", "branch"],
       qr_code_status: ["inactive", "active", "expired", "disabled"],

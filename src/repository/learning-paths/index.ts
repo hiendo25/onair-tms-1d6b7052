@@ -68,6 +68,7 @@ export const getLearningPaths = async (
       { count: "exact" }
     )
     .eq("organization_id", organizationId)
+    .is("deleted_at", null) // Only fetch non-deleted learning paths
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -101,6 +102,7 @@ export const getLearningPaths = async (
 
 /**
  * Get a single learning path by ID
+ * Only returns non-deleted learning paths
  */
 export const getLearningPathById = async (id: string): Promise<LearningPath | null> => {
   const supabase = createClient();
@@ -109,6 +111,7 @@ export const getLearningPathById = async (id: string): Promise<LearningPath | nu
     .from("learning_paths")
     .select("*")
     .eq("id", id)
+    .is("deleted_at", null)
     .single();
 
   if (error) {
@@ -206,6 +209,7 @@ export const getLearningPathWithDetails = async (id: string): Promise<LearningPa
       employee_learning_paths_count:employee_learning_paths(count)
     `)
     .eq("id", id)
+    .is("deleted_at", null) // Only fetch non-deleted learning paths
     .order("order_index", { foreignTable: "learning_path_phases", ascending: true })
     .order("order_index", { foreignTable: "learning_path_phases.phase_class_rooms", ascending: true })
     .single();
@@ -367,13 +371,18 @@ export const getLearningPathPhaseDetail = async (
 /**
  * Delete a learning path by ID
  */
+/**
+ * Soft delete a learning path by setting deleted_at timestamp
+ * This preserves all employee progress and historical data
+ */
 export const deleteLearningPath = async (id: string): Promise<void> => {
   const supabase = createClient();
 
   const { error } = await supabase
     .from("learning_paths")
-    .delete()
-    .eq("id", id);
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .is("deleted_at", null); // Only soft delete if not already deleted
 
   if (error) {
     throw new Error(`Failed to delete learning path: ${error.message}`);

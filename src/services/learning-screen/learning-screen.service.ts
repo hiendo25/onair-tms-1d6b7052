@@ -20,6 +20,7 @@ import type { Tables } from "@/types/supabase.types";
 interface CourseOutlineOptions {
   includeProgress?: boolean;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   employeeId?: string | null;
 }
 
@@ -116,14 +117,16 @@ const getCourseLearningOutline = async (
 
   const { sections: rawSections = [], ...courseInfo } = rawCourse;
   const { normalizedSections, lessonIds } = normalizeOutlineSections(rawSections);
-  const learningPathId = options?.learningPathId?.trim();
+  const learningPathId = options?.learningPathId?.trim() || null;
+  const classRoomId = options?.classRoomId?.trim() || null;
   const employeeId = options?.employeeId?.trim();
   const shouldIncludeProgress = Boolean(options?.includeProgress);
   const progressRows =
-    shouldIncludeProgress && learningPathId && employeeId
+    shouldIncludeProgress && employeeId
       ? await learningScreenServerRepository.getLessonProgressRows(
         Array.from(lessonIds),
         learningPathId,
+        classRoomId,
         employeeId,
       )
       : [];

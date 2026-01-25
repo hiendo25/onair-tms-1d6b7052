@@ -31,6 +31,7 @@ export const PATHS = {
     CREATE_CLASSROOM: "/admin/class-room/create",
     EDIT_CLASSROOM: (id: string = ":id") => `/admin/class-room/${id}/edit`,
     DETAIL_CLASSROOM: (slug: string) => `/class-room/${slug}`,
+    LEARNING_SCREEN: (slug: string, courseId: string) => `/class-room/${slug}/learning-screen/${courseId}`,
     COUNTDOWN_CLASSROOM: (slug: string, sessionId: string) => `/class-room/cd/${slug}/${sessionId}`,
     LIST_CLASSROOM: "/admin/class-room/list",
   },
@@ -104,6 +105,12 @@ export const PATHS = {
   },
   MY_GAMIFICATION: {
     ROOT: "/my-gamification",
+  },
+  CERTIFICATES: {
+    ROOT: "/admin/certificates",
+    CREATE: "/admin/certificates/create",
+    EDIT: (id: string = ":id") => `/admin/certificates/edit/${id}`,
+    DETAIL: (id: string = ":id") => `/admin/certificates/${id}`,
   },
 } as const;
 

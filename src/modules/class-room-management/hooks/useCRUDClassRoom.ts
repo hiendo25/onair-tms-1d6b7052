@@ -5,19 +5,27 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import { UpsertClassRoomService } from "@/services/class-room/upsert-class-room.service";
-import { ClassRoom } from "../components/ManageClassRoomForm/classroom-form.schema";
+import { ClassRoomFormValues } from "../components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "../store/class-room-store";
 
 const useCRUDClassRoom = () => {
-  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const {
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
   const queryClient = new QueryClient();
-  const classRoomService = new UpsertClassRoomService(currentEmployee.id, currentEmployee.organization.id);
+
+  const classRoomService = new UpsertClassRoomService(employeeId, organizationId);
 
   const { mutate: doCreateClassRoom, isPending } = useTMutation({
     mutationKey: ["CREATE_CLASS_ROOM"],
-    mutationFn: async (payload: { formData: ClassRoom; students: ClassRoomStore["state"]["selectedStudents"] }) => {
-      const { formData, students } = payload;
-      return await classRoomService.create({ formData, students });
+    mutationFn: async (payload: {
+      formData: ClassRoomFormValues;
+      students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
+    }) => {
+      const { formData, students, certificate } = payload;
+      return await classRoomService.create({ formData, students, certificate });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
@@ -28,12 +36,13 @@ const useCRUDClassRoom = () => {
     mutationKey: ["UPDATE_CLASS_ROOM"],
     mutationFn: async (payload: {
       classRoomId: string;
-      formData: ClassRoom;
+      formData: ClassRoomFormValues;
       students: ClassRoomStore["state"]["selectedStudents"];
+      certificate: ClassRoomStore["state"]["selectedCertificate"];
     }) => {
-      const { formData, students, classRoomId } = payload;
+      const { formData, students, classRoomId, certificate } = payload;
 
-      return await classRoomService.update(classRoomId, { formData, students });
+      return await classRoomService.update(classRoomId, { formData, students, certificate });
     },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });

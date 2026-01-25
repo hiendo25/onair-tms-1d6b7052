@@ -17,9 +17,9 @@ const SettingButton = () => {
     <IconButton
       sx={(theme) => ({
         backgroundColor: paletteMode === "dark" ? "white" : "white",
-        borderRadius: "0.625rem",
+        borderRadius: "36px",
         "&:hover": {
-          backgroundColor: "white",
+          backgroundColor: theme.palette.grey[200],
         },
       })}
     >

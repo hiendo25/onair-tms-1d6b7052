@@ -134,15 +134,11 @@ const getResourcesByIds = async (resourceIds: string[]): Promise<ResourceRow[]> 
 
 const getLessonProgressRows = async (
   lessonIds: string[],
-  learningPathId: string,
+  learningPathId: string | null,
+  classRoomId: string | null,
   employeeId: string,
 ): Promise<LessonProgressRow[]> => {
   if (!lessonIds.length) {
-    return [];
-  }
-
-  const trimmedLearningPathId = learningPathId?.trim();
-  if (!trimmedLearningPathId) {
     return [];
   }
 
@@ -152,12 +148,28 @@ const getLessonProgressRows = async (
   }
 
   const supabase = await createSVClient();
-  const { data, error } = await supabase
+  let query = supabase
     .from("lesson_progress")
     .select("lesson_id,status")
     .in("lesson_id", lessonIds)
-    .eq("learning_path_id", trimmedLearningPathId)
     .eq("employee_id", trimmedEmployeeId);
+
+  // Apply filters based on context (mutually exclusive)
+  // Learning path takes precedence, then class room, then standalone
+  if (learningPathId) {
+    const trimmedLearningPathId = learningPathId.trim();
+    query = query.eq("learning_path_id", trimmedLearningPathId);
+    query = query.is("class_room_id", null);
+  } else if (classRoomId) {
+    const trimmedClassRoomId = classRoomId.trim();
+    query = query.eq("class_room_id", trimmedClassRoomId);
+    query = query.is("learning_path_id", null);
+  } else {
+    query = query.is("learning_path_id", null);
+    query = query.is("class_room_id", null);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     throw error;

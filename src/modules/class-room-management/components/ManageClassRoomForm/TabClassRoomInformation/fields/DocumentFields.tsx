@@ -14,10 +14,10 @@ import {
   FileVideoIcon,
 } from "@/shared/assets/icons";
 import FileUnknownIcon from "@/shared/assets/icons/FileUnknownIcon";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 interface DocumentFieldsProps {
   className?: string;
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const DocumentFields: React.FC<DocumentFieldsProps> = ({ className, control }) => {
   const openLibrary = useLibraryStore((state) => state.openLibrary);
@@ -38,7 +38,7 @@ const DocumentFields: React.FC<DocumentFieldsProps> = ({ className, control }) =
 
     const resourcesItemsMap = new Map(selectingItems.map((item) => [item.id, item]));
 
-    let resourceAppendItems: Exclude<ClassRoom["docs"], undefined> = [];
+    let resourceAppendItems: Exclude<ClassRoomFormValues["docs"], undefined> = [];
     resourcesItemsMap.forEach((it) => {
       resourceAppendItems = [
         ...resourceAppendItems,

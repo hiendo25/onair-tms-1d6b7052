@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import { userAgent } from "next/server";
 
+import { DomainError } from "@/lib/errors/DomainError";
 import { ClassQRCode } from "@/model/qr-attendance.model";
 import { classQRCodeRepository, classRoomRepository } from "@/repository";
 import { EmployeeClassRoomAttendancePayload } from "@/repository/class-room";
@@ -8,7 +9,6 @@ import {
   StudentClassRoomCheckedInReturnDto,
   StudentClassRoomCheckInDto,
 } from "@/types/dto/classRooms/student-check-in-classroom.dto";
-import { DomainError } from "../DomainError";
 
 type UserAgent = ReturnType<typeof userAgent>;
 

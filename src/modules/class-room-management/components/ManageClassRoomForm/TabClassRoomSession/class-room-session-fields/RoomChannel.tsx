@@ -8,14 +8,14 @@ import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
 import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
 import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
 import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
-import { ClassRoom } from "../../classroom-form.schema";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 
 interface RoomChannelProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   index: number;
 }
 
-const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoom>["options"] = [
+const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoomFormValues>["options"] = [
   {
     id: "1",
     value: "zoom",
@@ -47,7 +47,7 @@ const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoom>["options"] = [
   },
 ] as const;
 
-const CustomRHFRadioGroupField = styled((props: RHFRadioGroupFieldProps<ClassRoom>) => (
+const CustomRHFRadioGroupField = styled((props: RHFRadioGroupFieldProps<ClassRoomFormValues>) => (
   <RHFRadioGroupField {...props} />
 ))(({ theme }) => ({
   "& .MuiFormGroup-root": {
@@ -120,7 +120,7 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
 export default RoomChannel;
 
 interface RoomChannelSelectProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   index: number;
 }
 

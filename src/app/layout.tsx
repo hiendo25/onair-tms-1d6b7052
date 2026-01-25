@@ -1,8 +1,9 @@
+"use server";
 import "../theme/palette.css";
 import "../theme/globals.css";
 
 import React from "react";
-import type { Metadata } from "next";
+import type { Metadata, ResolvingMetadata } from "next";
 import { Inter } from "next/font/google";
 
 import DialogsProvider from "@/hooks/useDialogs/DialogsProvider";
@@ -11,7 +12,6 @@ import MUILocalizationProvider from "@/shared/providers/MUILocationProvider";
 import MUIThemeProvider from "@/shared/providers/MUIThemeProvider";
 import ReactQueryClientProvider from "@/shared/providers/ReactQueryClientProvider";
 import SnackbarProvider from "@/shared/providers/SnackbarProvider";
-
 const inter = Inter({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
   subsets: ["latin"],
@@ -19,23 +19,32 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-export const metadata: Metadata = {
-  title: {
-    template: "%s | ONAIR",
-    default: "ONAIR", // a default is required when creating a template
-  },
-};
+interface RootLayooutProps {
+  params: Promise<Record<string, any>>;
+  searchParams: Promise<Record<string, any>>;
+}
+export async function generateMetadata(
+  { params, searchParams }: RootLayooutProps,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  return {
+    title: {
+      template: "%s | ONAIR",
+      default: "ONAIR", // a default is required when creating a template
+    },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ReactQueryClientProvider>
-      <html lang="vi" suppressHydrationWarning className={inter.variable}>
-        <body>
-          <div className="main-app">
+    <html lang="vi" suppressHydrationWarning className={inter.variable}>
+      <body>
+        <div className="main-app">
+          <ReactQueryClientProvider>
             <MUIThemeProvider>
               <MUILocalizationProvider>
                 <NotificationsProvider>
@@ -45,9 +54,9 @@ export default function RootLayout({
                 </NotificationsProvider>
               </MUILocalizationProvider>
             </MUIThemeProvider>
-          </div>
-        </body>
-      </html>
-    </ReactQueryClientProvider>
+          </ReactQueryClientProvider>
+        </div>
+      </body>
+    </html>
   );
 }

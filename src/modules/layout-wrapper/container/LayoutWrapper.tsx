@@ -5,6 +5,7 @@ import { Portal, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 
 import { ADMIN_MENU_LIST, MenuItemTypeWithPer, STUDENTS_MENU_LIST } from "@/constants/menu-config.constant";
+import { PATHS } from "@/constants/path.constant";
 import { PermissionsCheck } from "@/constants/permission.constant";
 import { useUpdateOrganizationMutation } from "@/modules/organization/operations/mutation";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
@@ -72,7 +73,6 @@ const LayoutWrapper: React.FC<LayoutWrapperProps> = ({ children }) => {
           </Portal>
         ) : null}
       </>
-
       {children}
     </MainLayout>
   );
@@ -93,20 +93,20 @@ const mappingPathWithRolePermissions = (
       const correctMenuItem: MenuItemType =
         menuItem.type === "group"
           ? {
-            key: menuItem.key,
-            title: menuItem.title,
-            type: "group",
-            children: childItems.filter((item) => item.type !== "group"),
-          }
+              key: menuItem.key,
+              title: menuItem.title,
+              type: "group",
+              children: childItems.filter((item) => item.type !== "group"),
+            }
           : {
-            icon: menuItem.icon,
-            key: menuItem.key,
-            subTitle: menuItem.subTitle,
-            title: menuItem.title,
-            path: menuItem.path,
-            type: "item",
-            children: childItems || [],
-          };
+              icon: menuItem.icon,
+              key: menuItem.key,
+              subTitle: menuItem.subTitle,
+              title: menuItem.title,
+              path: menuItem.path,
+              type: "item",
+              children: childItems || [],
+            };
 
       allMenuItems = [...allMenuItems, correctMenuItem];
     }

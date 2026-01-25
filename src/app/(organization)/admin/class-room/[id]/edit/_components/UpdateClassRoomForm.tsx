@@ -17,7 +17,7 @@ type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
 type StudentItem = Exclude<ManageClassRoomFormProps["students"], undefined>[number];
-
+import { useUpdateClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 interface UpdateClassRoomFormProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
@@ -27,7 +27,9 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
-  const { isLoading, onUpdate } = useCRUDClassRoom();
+  // const { isLoading, onUpdate } = useCRUDClassRoom();
+
+  const { mutate: onUpdate, isPending: isLoading } = useUpdateClassRoomMutation();
 
   const platform = useMemo(() => {
     return sessions.every((s) => s.session_type === "live")
@@ -167,6 +169,20 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     };
   }, [data, platform, class_type]);
 
+  const certificateData = useMemo(() => {
+    const cert = data.certificate?.[0];
+    if (!cert?.certificate_template) {
+      return null;
+    }
+
+    return {
+      id: cert.certificate_template.id,
+      name: cert.certificate_template.name || "",
+      frameUrl: cert.certificate_template.frame?.image_url || null,
+      daysToExpire: cert.days_to_expire,
+    };
+  }, [data.certificate]);
+
   const studentList = useMemo(() => {
     return employees.reduce<StudentItem[]>((acc, emp) => {
       return emp.employee && emp.employee.employee_type === "student"
@@ -185,9 +201,9 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     }, []);
   }, [employees]);
 
-  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students) => {
+  const handleUpdateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, certificate) => {
     onUpdate(
-      { classRoomId: data.id, formData, students },
+      { classRoomId: data.id, formData, students, certificate },
       {
         onSuccess(data, variables, onMutateResult, context) {
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
@@ -208,6 +224,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       initFormValue={initFormValue}
       action="edit"
       students={studentList}
+      certificate={certificateData}
       isLoading={isLoading || isTransition}
       platform={platform}
       onSubmit={handleUpdateClassRoom}

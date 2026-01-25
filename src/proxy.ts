@@ -12,6 +12,7 @@ export async function proxy(request: NextRequest) {
   const isAuthPath = authPaths.includes(pathname);
 
   const { data, error } = await authRepository.getClaims();
+
   const userId = data?.claims?.sub;
 
   if (isAuthPath && !userId) {
@@ -23,7 +24,6 @@ export async function proxy(request: NextRequest) {
   }
 
   const organizations = await organizationsRepository.getOrganizationsByUserId(userId);
-  console.log({ organizations });
 
   if (pathname === "/no-organization") {
     return !organizations.length ? NextResponse.next() : NextResponse.redirect(new URL(PATHS.DASHBOARD, request.url));
@@ -54,5 +54,5 @@ async function applyOrganizationMiddleware(request: NextRequest, userId: string)
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|manifest.webmanifest|sw.js|favicon.ico|.*\\.png$).*)"],
 };

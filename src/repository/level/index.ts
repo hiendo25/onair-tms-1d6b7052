@@ -1,69 +1,111 @@
+import { mapPostgrestError } from "@/lib/errors/map-postgrest-error";
 import { supabase } from "@/services";
 
-import { CreateLevelPayload, UpdateLevelPayload, UpdateStatusLevelPayload } from "./type";
-const createLevel = async (payload: CreateLevelPayload) => {
-  try {
-    const { data, error } = await supabase.from("levels").insert(payload).select("*").single();
-    if (!data || error) {
-      throw new Error(error.message);
-    }
-    return data;
-  } catch (err: any) {
-    throw new Error(`Failed to create: ${err?.message}`);
+import { LevelInsert, LevelStatusUpdate, LevelUpdate } from "./level.type";
+const createLevel = async (insert: LevelInsert) => {
+  const { data, error } = await supabase
+    .from("levels")
+    .insert(insert)
+    .select(
+      `	*,
+				organizations(
+					id, 
+					name
+				),
+				createdBy:employees!levels_created_by_fkey(
+					id,
+					employee_code,
+					profiles(
+						id,
+						full_name,
+						email
+					)
+				)`,
+    )
+    .single();
+  if (error) {
+    throw mapPostgrestError(error);
   }
+  return data;
 };
-export type CreateLevelResponse = Awaited<ReturnType<typeof createLevel>>;
+export type CreateLevelRecord = Awaited<ReturnType<typeof createLevel>>;
 
-const updateLevel = async (payload: UpdateLevelPayload) => {
-  try {
-    const { id: recordId, ...restPayload } = payload;
-    const { data, error } = await supabase.from("levels").update(restPayload).eq("id", recordId).select("*").single();
+const updateLevel = async (update: LevelUpdate) => {
+  const { id: recordId, ...restUpdate } = update;
+  const { data, error } = await supabase
+    .from("levels")
+    .update(restUpdate)
+    .eq("id", recordId)
+    .select(
+      `*,
+				organizations(
+					id, 
+					name
+				),
+				createdBy:employees!levels_created_by_fkey(
+					id,
+					employee_code,
+					profiles(
+						id,
+						full_name,
+						email
+					)
+				)`,
+    )
+    .single();
 
-    if (!data || error) {
-      throw new Error(error.message);
-    }
-    return data;
-  } catch (err: any) {
-    throw new Error(`Failed to create: ${err?.message}`);
+  if (error) {
+    throw mapPostgrestError(error);
   }
+  return data;
 };
-export type UpdateLevelResponse = Awaited<ReturnType<typeof updateLevel>>;
+export type UpdateLevelRecord = Awaited<ReturnType<typeof updateLevel>>;
 
-const updateStatusLevel = async (payload: UpdateStatusLevelPayload) => {
-  try {
-    const { id: recordId, status } = payload;
-    const { data, error } = await supabase.from("levels").update({ status }).eq("id", recordId).select("*").single();
+const updateStatusLevel = async (statusUpdate: LevelStatusUpdate) => {
+  const { id: recordId, status } = statusUpdate;
+  const { data, error } = await supabase
+    .from("levels")
+    .update({ status })
+    .eq("id", recordId)
+    .select(
+      `*,
+				organizations(
+					id, 
+					name
+				),
+				createdBy:employees!levels_created_by_fkey(
+					id,
+					employee_code,
+					profiles(
+						id,
+						full_name,
+						email
+					)
+				)`,
+    )
+    .single();
 
-    if (!data || error) {
-      throw new Error(error.message);
-    }
-    return data;
-  } catch (err: any) {
-    throw new Error(`Failed to create: ${err?.message}`);
+  if (error) {
+    throw mapPostgrestError(error);
   }
+  return data;
 };
-export type UpdateStatusLevelResponse = Awaited<ReturnType<typeof updateStatusLevel>>;
+export type UpdateStatusLevelRecord = Awaited<ReturnType<typeof updateStatusLevel>>;
 
-export type GetLevelQueryParams = {
-  page?: number;
-  pageSize?: number;
+export type GetLevelsFilter = {
   organizationId?: string;
+  from: number;
+  to: number;
 };
-const getLevels = async (params?: GetLevelQueryParams) => {
-  const { page = 1, pageSize = 10, organizationId } = params || {};
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-  try {
-    let query = supabase.from("levels").select(
-      `
-				id,
-				title,
-				description,
-				score_required,
-				created_by,
-				created_at,
-				icon,
-				status,
+const getLevels = async (filter: GetLevelsFilter) => {
+  const { from, to, organizationId } = filter;
+
+  let query = supabase.from("levels").select(
+    `	*,
+				organizations(
+					id, 
+					name
+				),
 				createdBy:employees!levels_created_by_fkey(
 					id,
 					employee_code,
@@ -74,21 +116,25 @@ const getLevels = async (params?: GetLevelQueryParams) => {
 				)
 				)
 			`,
-    );
+    { count: "exact" },
+  );
 
-    query = query.filter("status", "not.eq", "deleted");
-    if (organizationId) {
-      query = query.eq("organization_id", organizationId);
-    }
+  query = query.filter("status", "not.eq", "deleted");
 
-    return query
-      .order("score_required", { ascending: false })
-      .range(from, to)
-      .overrideTypes<Array<{ status: "active" | "inactive" }>>();
-  } catch (err) {
-    throw new Error("Failed to create Level");
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
   }
+
+  const { data, error, count } = await query
+    .order("score_required", { ascending: false })
+    .range(from, to)
+    .overrideTypes<Array<{ status: "active" | "inactive" }>>();
+
+  if (error) {
+    throw mapPostgrestError(error);
+  }
+  return { data, count };
 };
-export type GetLevelsResponse = Awaited<ReturnType<typeof getLevels>>;
+export type GetLevelsRecord = Awaited<ReturnType<typeof getLevels>>;
 
 export { createLevel, updateLevel, updateStatusLevel, getLevels };

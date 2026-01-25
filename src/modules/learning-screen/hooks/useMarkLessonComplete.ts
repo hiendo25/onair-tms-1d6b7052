@@ -7,6 +7,7 @@ import type { MarkCompletedRequest, MarkCompletedResponse } from "@/types/dto/le
 interface UseMarkLessonCompleteParams {
   courseId: string | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
   employeeId: string | null;
 }
 
@@ -32,25 +33,46 @@ const markLessonComplete = async (
 export const useMarkLessonComplete = ({
   courseId,
   learningPathId,
+  classRoomId,
   employeeId,
 }: UseMarkLessonCompleteParams) => {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
     mutationFn: markLessonComplete,
-    onSuccess: () => {
-      // Invalidate course outline query to refresh progress
-      if (courseId && employeeId && learningPathId) {
+    onSuccess: (data) => {
+      console.log("[useMarkLessonComplete] Mark complete successful:", data);
+
+      // Invalidate and refetch course outline query to refresh progress
+      if (courseId && employeeId) {
+        const queryKey = [
+          LEARNING_COURSE_OUTLINE_QUERY_KEY,
+          {
+            courseId,
+            includeProgress: true,
+            learningPathId: learningPathId ?? null,
+            classRoomId: classRoomId ?? null,
+            employeeId,
+          },
+        ];
+
+        console.log("[useMarkLessonComplete] Invalidating query with key:", queryKey);
+        console.log("[useMarkLessonComplete] Current queries in cache:",
+          queryClient.getQueryCache().getAll().map(q => ({
+            queryKey: q.queryKey,
+            state: q.state.status
+          }))
+        );
+
+        // Invalidate all course outline queries
         queryClient.invalidateQueries({
-          queryKey: [
-            LEARNING_COURSE_OUTLINE_QUERY_KEY,
-            {
-              courseId,
-              includeProgress: true,
-              learningPathId,
-              employeeId,
-            },
-          ],
+          queryKey: [LEARNING_COURSE_OUTLINE_QUERY_KEY],
+        });
+
+        // Also force refetch all active course outline queries
+        queryClient.refetchQueries({
+          queryKey: [LEARNING_COURSE_OUTLINE_QUERY_KEY],
+          type: 'active',
         });
       }
     },
@@ -61,18 +83,14 @@ export const useMarkLessonComplete = ({
 
   const markComplete = useCallback(
     (lessonId: string, currentPositionSeconds?: number) => {
-      if (!learningPathId) {
-        console.warn("[useMarkLessonComplete] Not in learning path mode, skipping mark complete");
-        return;
-      }
-
       mutation.mutate({
         lessonId,
-        learningPathId,
+        learningPathId: learningPathId ?? null,
+        classRoomId: classRoomId ?? null,
         currentPositionSeconds,
       });
     },
-    [learningPathId, mutation]
+    [learningPathId, classRoomId, mutation]
   );
 
   return {

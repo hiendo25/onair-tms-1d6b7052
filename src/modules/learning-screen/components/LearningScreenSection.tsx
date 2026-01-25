@@ -12,12 +12,14 @@ interface LearningScreenSectionProps {
   courseId: string | null;
   learningPathData?: LearningPathWithDetails | null;
   learningPathId?: string | null;
+  classRoomId?: string | null;
 }
 
 const LearningScreenSection = ({
   courseId,
   learningPathData,
   learningPathId,
+  classRoomId,
 }: LearningScreenSectionProps) => {
   const {
     course,
@@ -34,11 +36,11 @@ const LearningScreenSection = ({
     refetchLessonDetail,
     handleSelectLesson,
     studentId,
-    isLearningPathSource,
     sectionProgressById,
   } = useLearningScreenState({
     courseId,
     learningPathId,
+    classRoomId,
   });
 
   if (isLoading) {
@@ -108,6 +110,7 @@ const LearningScreenSection = ({
           onSelectLesson={handleSelectLesson}
           studentId={studentId}
           learningPathId={learningPathId}
+          classRoomId={classRoomId}
         />
 
         <Box
@@ -120,7 +123,7 @@ const LearningScreenSection = ({
             sections={sections}
             selectedLessonId={selectedLessonId}
             onSelectLesson={handleSelectLesson}
-            showSectionProgress={isLearningPathSource}
+            showSectionProgress={true}
             sectionProgressById={sectionProgressById}
           />
         </Box>
