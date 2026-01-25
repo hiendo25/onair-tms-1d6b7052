@@ -10,7 +10,6 @@ WORKDIR /app
 
 # Copy Yarn configuration
 COPY .yarnrc.yml ./
-COPY .yarn ./.yarn
 
 # Copy package files
 COPY package.json yarn.lock ./
