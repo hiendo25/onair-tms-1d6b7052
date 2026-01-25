@@ -26,7 +26,7 @@ jobs:
         env:
             NODE_OPTIONS: "--max_old_space_size=4096"
         run: |
-          IMAGE_NAME="onairtoday/onair"
+          IMAGE_NAME="histay/lms"
           TAG="lms-${{ github.run_number }}-$(date -u +%Y-%m-%dT%H-%M-%SZ)"
           LATEST_TAG="lms-latest"
           docker build --tag $IMAGE_NAME:$TAG --tag $IMAGE_NAME:$LATEST_TAG \
@@ -35,10 +35,9 @@ jobs:
             --build-arg SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }} \
             --build-arg NEXT_PUBLIC_APP_ENV=production \
             --build-arg NEXT_PUBLIC_REQUEST_ENCRYPTION=true \
-            --build-arg NEXT_PUBLIC_SITE_URL=lms.onair.today \
+            --build-arg NEXT_PUBLIC_SITE_URL=onairlms.com \
             --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY }} \
             --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
-            --build-arg NEXT_PUBLIC_STORAGE_URL=${{ secrets.NEXT_PUBLIC_STORAGE_URL }} \
             --build-arg PROJECT_REF=${{ secrets.PROJECT_REF }} 
             -f ci/Dockerfile.web .
           docker push $IMAGE_NAME:$TAG
