@@ -213,8 +213,6 @@ export default function QuestionBankList() {
     [handleDeleteQuestion, handleEditQuestion, handleViewQuestion],
   );
 
-  console.log("questions 123", questions);
-
   return (
     <PageContainer
       title="Ngân hàng câu hỏi"

@@ -137,6 +137,7 @@ export default function MyAssignmentsList() {
   const selectedAssignment = React.useMemo(() => {
     return assignments?.find((a) => a.assignment_id === selectedAssignmentId);
   }, [assignments, selectedAssignmentId]);
+  const submitLabel = selectedAssignment?.has_submitted ? "Làm lại" : "Nộp bài";
 
   return (
     <PageContainer title="Bài kiểm tra của tôi" breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}>
@@ -291,8 +292,8 @@ export default function MyAssignmentsList() {
             horizontal: "right",
           }}
         >
-          <MenuItem onClick={handleSubmitAssignment} disabled={selectedAssignment?.status === "graded"}>
-            Nộp bài
+          <MenuItem onClick={handleSubmitAssignment} disabled={!selectedAssignment?.can_retry}>
+            {submitLabel}
           </MenuItem>
           <MenuItem onClick={handleViewResult} disabled={selectedAssignment?.status !== "graded"}>
             Xem kết quả

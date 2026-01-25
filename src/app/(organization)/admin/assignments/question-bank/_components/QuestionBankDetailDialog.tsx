@@ -5,12 +5,12 @@ import { Dialog, IconButton, Typography } from "@mui/material";
 
 import { QuestionDifficulty, QuestionType } from "@/modules/assignment-management/constants/question.constants";
 import {
+  buildQuestionOptionList,
   getCategoryNames,
   getDifficultyLabel,
   getQuestionTypeBadgeLabel,
+  type QuestionOptionListItem,
 } from "@/modules/assignment-management/utils/question-bank.utils";
-import type { MatchingQuestionData, OrderItem } from "@/types/dto/assignments/create-assignment.dto";
-import type { QuestionOption } from "@/types/dto/assignments/question-option.dto";
 import type { QuestionBankDto } from "@/types/dto/question-bank";
 
 import QuestionBankTag from "./QuestionBankTag";
@@ -21,70 +21,10 @@ interface QuestionBankDetailDialogProps {
   onClose: () => void;
 }
 
-type OptionListItem = {
-  id: string;
-  label: string;
-  isCorrect?: boolean;
-  prefix?: string;
-};
-
 const difficultyToneMap: Record<QuestionDifficulty, "green" | "orange" | "pink"> = {
   easy: "green",
   medium: "orange",
   hard: "pink",
-};
-
-const isOptionArray = (value: unknown): value is QuestionOption[] => Array.isArray(value);
-
-const isMatchingOptions = (value: unknown): value is MatchingQuestionData => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  return "columnAItems" in value && "columnBItems" in value && "correctMappings" in value;
-};
-
-const isOrderOptions = (value: unknown): value is { orderItems: OrderItem[] } => {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  return "orderItems" in value;
-};
-
-const buildOptionList = (question: QuestionBankDto): OptionListItem[] => {
-  const options = question.options;
-
-  if (isOptionArray(options)) {
-    return options.map((option, index) => ({
-      id: option.id || `${index}`,
-      label: option.label,
-      isCorrect: option.correct,
-      prefix: String.fromCharCode(65 + index),
-    }));
-  }
-
-  if (isMatchingOptions(options)) {
-    const columnA = new Map(options.columnAItems.map((item) => [item.id, item.content]));
-    const columnB = new Map(options.columnBItems.map((item) => [item.id, item.content]));
-
-    return options.correctMappings.map((mapping, index) => ({
-      id: `${mapping.columnAId}-${mapping.columnBId}-${index}`,
-      label: `${columnA.get(mapping.columnAId) || ""} - ${columnB.get(mapping.columnBId) || ""}`.trim(),
-      prefix: `${index + 1}`,
-    }));
-  }
-
-  if (isOrderOptions(options)) {
-    const sortedItems = [...options.orderItems].sort((a, b) => a.correctOrder - b.correctOrder);
-    return sortedItems.map((item, index) => ({
-      id: item.id || `${index}`,
-      label: item.content,
-      prefix: `${index + 1}`,
-    }));
-  }
-
-  return [];
 };
 
 const QuestionBankDetailDialog = ({ open, question, onClose }: QuestionBankDetailDialogProps) => {
@@ -95,7 +35,10 @@ const QuestionBankDetailDialog = ({ open, question, onClose }: QuestionBankDetai
   const difficultyLabel = detailQuestion ? getDifficultyLabel(detailQuestion.difficulty) : "";
   const difficultyTone = detailQuestion?.difficulty ? difficultyToneMap[detailQuestion.difficulty] : "gray";
 
-  const options = useMemo(() => (detailQuestion ? buildOptionList(detailQuestion) : []), [detailQuestion]);
+  const options = useMemo<QuestionOptionListItem[]>(
+    () => (detailQuestion ? buildQuestionOptionList(detailQuestion.options) : []),
+    [detailQuestion],
+  );
   const showOptions = options.length > 0;
 
   const typeNeedsOptionSection: QuestionType[] = [

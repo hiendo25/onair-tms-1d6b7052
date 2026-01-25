@@ -119,10 +119,17 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
       },
       {
-        title: "Danh sách bài kiểm tra",
+        title: "Ngân hàng bài kiểm tra",
         icon: React.createElement(ClipboardIcon),
         key: "assignments/list",
         path: PATHS.ASSIGNMENTS.ROOT,
+      },
+      {
+        title: "Danh sách bài gán",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/assigned",
+        path: PATHS.ASSIGNMENTS.ASSIGNED_LIST,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/assigned"],
       },
       {
         title: "Ngân hàng câu hỏi",

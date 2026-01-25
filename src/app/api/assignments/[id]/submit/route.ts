@@ -10,9 +10,17 @@ type QuestionType = Database["public"]["Enums"]["question_type"];
 
 interface SubmitAssignmentRequest {
   employeeId: string;
+  autoSubmit?: boolean;
   answers: Array<{
     questionId: string;
-    answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>;
+    answer:
+      | string
+      | string[]
+      | boolean
+      | FileMetadata[]
+      | Array<{ columnAId: string; columnBId: string }>
+      | Array<{ id: string; position: number }>
+      | null;
     attachments?: FileMetadata[];
   }>;
 }
@@ -26,7 +34,7 @@ export async function POST(
     const assignmentId = params.id;
 
     const body: SubmitAssignmentRequest = await request.json();
-    const { employeeId, answers } = body;
+    const { employeeId, answers, autoSubmit } = body;
 
     if (!employeeId) {
       return NextResponse.json(
@@ -35,7 +43,7 @@ export async function POST(
       );
     }
 
-    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+    if (!answers || !Array.isArray(answers) || (!autoSubmit && answers.length === 0)) {
       return NextResponse.json(
         { error: "Thiếu thông tin bắt buộc: answers" },
         { status: 400 }
@@ -43,8 +51,8 @@ export async function POST(
     }
 
     // Validate that all answers have questionId
-    for (const answer of answers) {
-      if (!answer.questionId) {
+    for (const answer of answers || []) {
+      if (!answer?.questionId) {
         return NextResponse.json(
           { error: "Thiếu thông tin câu hỏi" },
           { status: 400 }
@@ -53,10 +61,12 @@ export async function POST(
     }
 
     // Fetch question details from database
-    const questionIds = answers.map(a => a.questionId);
-    const questions = await assignmentsRepository.getQuestionsByIds(questionIds);
+    const questionIds = (answers || []).map(a => a.questionId);
+    const questions = questionIds.length > 0
+      ? await assignmentsRepository.getQuestionsByIds(questionIds)
+      : [];
 
-    if (questions.length !== answers.length) {
+    if (!autoSubmit && questions.length !== answers.length) {
       return NextResponse.json(
         { error: "Một số câu hỏi không tồn tại" },
         { status: 400 }
@@ -67,7 +77,7 @@ export async function POST(
     const questionMap = new Map(questions.map(q => [q.id, q]));
 
     // Populate answer objects with question details from database
-    const enrichedAnswers = answers.map(answer => {
+    const enrichedAnswers = (answers || []).map(answer => {
       const question = questionMap.get(answer.questionId);
       if (!question) {
         throw new Error(`Question not found: ${answer.questionId}`);
@@ -83,8 +93,38 @@ export async function POST(
       };
     });
 
+    const isAnswerEmpty = (
+      questionType: QuestionType,
+      answer: SubmitAssignmentRequest["answers"][number]["answer"],
+    ) => {
+      if (answer === undefined || answer === null) {
+        return true;
+      }
+
+      switch (questionType) {
+        case "file":
+          return !Array.isArray(answer) || answer.length === 0;
+        case "text":
+        case "radio":
+          return typeof answer !== "string" || answer.trim() === "";
+        case "checkbox":
+          return !Array.isArray(answer) || answer.length === 0;
+        case "matching":
+        case "order":
+          return !Array.isArray(answer) || answer.length === 0;
+        case "true_false":
+          return typeof answer !== "boolean";
+        default:
+          return false;
+      }
+    };
+
     // Validate enriched answers
     for (const answer of enrichedAnswers) {
+      if (autoSubmit && isAnswerEmpty(answer.questionType, answer.answer)) {
+        continue;
+      }
+
       if (answer.attachments && Array.isArray(answer.attachments)) {
         for (const attachment of answer.attachments) {
           if (typeof attachment !== "object" || !attachment.url || !attachment.originalName || attachment.fileSize === undefined || !attachment.mimeType) {
@@ -268,6 +308,7 @@ export async function POST(
       assignmentId,
       employeeId,
       answers: enrichedAnswers,
+      allowIncomplete: Boolean(autoSubmit),
     });
 
     let message = "Nộp bài thành công!";
@@ -320,22 +361,19 @@ export async function GET(
       );
     }
 
-    const status = await assignmentResultService.getSubmissionStatus(
+    const summary = await assignmentResultService.getSubmissionStatus(
       assignmentId,
       employeeId
     );
 
-    if (!status) {
-      return NextResponse.json(
-        { submitted: false },
-        { status: 200 }
-      );
-    }
+    const submitted = Boolean(summary.latestAttempt) &&
+      ["submitted", "graded"].includes(summary.latestAttempt.status);
 
     return NextResponse.json(
       {
-        submitted: true,
-        data: status,
+        submitted,
+        data: summary.latestAttempt,
+        summary,
       },
       { status: 200 }
     );
@@ -352,4 +390,3 @@ export async function GET(
     );
   }
 }
-

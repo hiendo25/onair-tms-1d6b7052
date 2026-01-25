@@ -81,6 +81,20 @@ export const PATHS_WITH_PERMISSIONS = {
       $or: "assignment:update",
     },
   ],
+  [PATHS.ASSIGNMENTS.ASSIGNED_LIST]: [
+    {
+      $or: "assignment:create",
+    },
+    {
+      $or: "assignment:read",
+    },
+    {
+      $or: "assignment:delete",
+    },
+    {
+      $or: "assignment:update",
+    },
+  ],
   [PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT]: ["assignment:create"],
   [PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT()]: ["assignment:update"],
   [PATHS.ASSIGNMENTS.QUESTION_BANK]: [

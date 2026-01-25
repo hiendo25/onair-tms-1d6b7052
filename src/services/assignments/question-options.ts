@@ -32,7 +32,7 @@ const buildQuestionOptions = (
       columnAItems,
       columnBItems,
       correctMappings,
-    } as Json;
+    } as unknown as Json;
   }
 
   if (question.type === "order" && question.orderItems) {
@@ -47,7 +47,7 @@ const buildQuestionOptions = (
 
     const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
       ...item,
-      displayOrder: displayOrder[index] + 1,
+      displayOrder: displayOrder?.[index]! + 1,
     }));
 
     return {
@@ -55,7 +55,7 @@ const buildQuestionOptions = (
     } as Json;
   }
 
-  return question.options ?? null;
+  return question.options as Json ?? null;
 };
 
 export { buildQuestionOptions };

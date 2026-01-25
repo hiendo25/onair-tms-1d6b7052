@@ -48,6 +48,9 @@ export const PATHS = {
   ASSIGNMENTS: {
     ROOT: "/admin/assignments",
     CREATE_ASSIGNMENT: "/admin/assignments/create",
+    ASSIGNED_LIST: "/admin/assignments/assigned",
+    DETAIL_ASSIGNMENT: (id: string = ":id") => `/admin/assignments/${id}`,
+    ASSIGN_EMPLOYEES: (id: string = ":id") => `/admin/assignments/${id}/assign`,
     EDIT_ASSIGNMENT: (id: string = ":id") => `/admin/assignments/edit/${id}`,
     STUDENTS: (id: string = ":id") => `/admin/assignments/${id}/students`,
     SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/submit/${employeeId}`,
