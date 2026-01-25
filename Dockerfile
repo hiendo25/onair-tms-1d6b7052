@@ -8,6 +8,10 @@ RUN corepack enable && corepack prepare yarn@4.5.3 --activate
 FROM base AS deps
 WORKDIR /app
 
+# Copy Yarn configuration
+COPY .yarnrc.yml ./
+COPY .yarn ./.yarn
+
 # Copy package files
 COPY package.json yarn.lock ./
 
@@ -41,7 +45,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+  adduser --system --uid 1001 nextjs
 
 # Copy necessary files from builder
 COPY --from=builder /app/public ./public
