@@ -1,19 +1,25 @@
-import type {
-  CreateEmployeeDto,
-  UpdateEmployeeDto,
-  GetEmployeesParams,
-  EmployeeDto,
-} from "@/types/dto/employees";
-import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import {
+  assignmentResultsRepository,
+  assignmentsRepository,
+  classRoomRepository,
+  classRoomSessionRepository,
+  coursesRepository,
+  employeeBranchesRepository,
+  employeeDepartmentsRepository,
+  employeeRepository,
   employeesRepository,
-  profilesRepository,
-  employmentsRepository,
+  libraryRepository,
   managersEmployeesRepository,
   organizationsRepository,
+  profilesRepository,
+  qrAttendanceRepository,
+  userPreferenceRepository,
 } from "@/repository";
-import { createServiceRoleClient } from "@/services/supabase/service-role-client";
 import { createSVClient } from "@/services/supabase/server";
+import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import type { CreateEmployeeDto, EmployeeDto, GetEmployeesParams, UpdateEmployeeDto } from "@/types/dto/employees";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import { createClient } from "../supabase/client";
 
 interface CreateEmployeeResult {
   userId: string;
@@ -22,41 +28,34 @@ interface CreateEmployeeResult {
   profileId: string;
 }
 
-async function createEmployeeWithRelations(
-  payload: CreateEmployeeDto,
-): Promise<CreateEmployeeResult> {
+async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: string): Promise<CreateEmployeeResult> {
   let userId: string | null = null;
   let employeeId: string | null = null;
   let profileId: string | null = null;
 
   try {
-    // Get the current authenticated user's organization_id
-    const supabase = await createSVClient();
-    const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
-
-    if (userError || !currentUser) {
-      throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
-    }
-
-    const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
-    console.log(`Creating employee in organization: ${organizationId}`);
-
-    const adminSupabase = createServiceRoleClient();
-
+    const adminSupabase = await createServiceRoleClient();
     const temporaryPassword = "123456";
 
-    const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
-      email: payload.email,
-      password: temporaryPassword,
-      email_confirm: true,
-    });
+    const { data, error } = await adminSupabase.rpc("get_user_id_by_email", { user_email: payload.email });
 
-    if (authError || !authData.user) {
-      throw new Error(`Failed to create auth user: ${authError?.message || "Unknown error"}`);
+    if (!data) {
+      const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+        email: payload.email,
+        password: temporaryPassword,
+        email_confirm: true,
+        app_metadata: {
+          active_organization_id: organizationId,
+        },
+      });
+      if (authError || !authData.user) {
+        throw new Error(`Failed to create auth user: ${authError?.message || "Unknown error"}`);
+      }
+      userId = authData.user.id;
+      console.log(`Auth user created: ${userId}`);
+    } else {
+      userId = data;
     }
-
-    userId = authData.user.id;
-    console.log(`Auth user created: ${userId}`);
 
     let employeeCode = payload.employee_code;
     let employeeOrder: number;
@@ -70,18 +69,15 @@ async function createEmployeeWithRelations(
       employeeOrder = lastOrder + 1;
     }
 
-    const organization = await organizationsRepository.getFirstOrganization();
-
     const employeeData = await employeesRepository.createEmployee({
       user_id: userId,
       employee_code: employeeCode,
       employee_order: employeeOrder,
       start_date: payload.start_date,
       position_id: payload.position_id || null,
-      employee_type: payload.employee_type || null,
+      employee_type: payload.employee_type,
       organization_id: organizationId,
       status: "active",
-      organization_id: organization.id,
     });
 
     employeeId = employeeData.id;
@@ -99,25 +95,26 @@ async function createEmployeeWithRelations(
     profileId = profileData.id;
     console.log(`Profile record created: ${profileId}`);
 
-    const employmentsToCreate = [];
-
+    // Create employee-department relationship
     if (payload.department) {
-      employmentsToCreate.push({
-        employee_id: employeeId,
-        organization_unit_id: payload.department,
-      });
+      await employeeDepartmentsRepository.create([
+        {
+          employee_id: employeeId,
+          department_id: payload.department,
+        },
+      ]);
+      console.log("Created employee-department relationship");
     }
 
-    if (payload.branch && payload.branch !== payload.department) {
-      employmentsToCreate.push({
-        employee_id: employeeId,
-        organization_unit_id: payload.branch,
-      });
-    }
-
-    if (employmentsToCreate.length > 0) {
-      await employmentsRepository.createEmployments(employmentsToCreate);
-      console.log(`Created ${employmentsToCreate.length} employment record(s)`);
+    // Create employee-branch relationship
+    if (payload.branch) {
+      await employeeBranchesRepository.create([
+        {
+          employee_id: employeeId,
+          branch_id: payload.branch,
+        },
+      ]);
+      console.log("Created employee-branch relationship");
     }
 
     if (payload.manager_id) {
@@ -126,6 +123,36 @@ async function createEmployeeWithRelations(
         manager_id: payload.manager_id,
       });
       console.log("Manager relationship created");
+    }
+    if (payload.role_id) {
+      await adminSupabase.from("user_roles").delete().eq("user_id", userId);
+
+      const { error: roleError } = await adminSupabase.from("user_roles").insert([
+        {
+          user_id: userId,
+          role_id: payload.role_id,
+        },
+      ]);
+
+      if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
+    }
+
+    const { data: currentReferenceData, error: currentReferenceError } =
+      await userPreferenceRepository.getUserPreferencesByUserId(userId);
+
+    if (currentReferenceError) {
+      throw new Error(currentReferenceError.message);
+    }
+
+    if (!currentReferenceData) {
+      const { error: referenceError } = await userPreferenceRepository.createUserPreference({
+        user_id: userId,
+        default_organization_id: organizationId,
+      });
+
+      if (referenceError) {
+        throw new Error(referenceError.message);
+      }
     }
 
     return {
@@ -144,8 +171,11 @@ async function createEmployeeWithRelations(
     }
 
     if (employeeId) {
-      console.log(`Rolling back: Deleting employments for employee ${employeeId}`);
-      await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
+      console.log(`Rolling back: Deleting employee-branch relations for employee ${employeeId}`);
+      await employeeBranchesRepository.deleteByEmployeeId(employeeId);
+
+      console.log(`Rolling back: Deleting employee-department relations for employee ${employeeId}`);
+      await employeeDepartmentsRepository.deleteByEmployeeId(employeeId);
 
       console.log(`Rolling back: Deleting manager relationships for employee ${employeeId}`);
       await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(employeeId);
@@ -156,7 +186,7 @@ async function createEmployeeWithRelations(
 
     if (userId) {
       console.log(`Rolling back: Deleting auth user ${userId}`);
-      const adminSupabase = createServiceRoleClient();
+      const adminSupabase = await createServiceRoleClient();
       await adminSupabase.auth.admin.deleteUser(userId);
     }
 
@@ -166,14 +196,29 @@ async function createEmployeeWithRelations(
   }
 }
 
-async function updateEmployeeWithRelations(
-  payload: UpdateEmployeeDto,
-): Promise<void> {
+// async function createEmployeeWithRelations(payload: CreateEmployeeDto): Promise<CreateEmployeeResult> {
+//   // const supabase = await createSVClient();
+//   // const {
+//   //   data: { user: currentUser },
+//   //   error: userError,
+//   // } = await supabase.auth.getUser();
+
+//   // if (userError || !currentUser) {
+//   //   throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+//   // }
+
+//   // const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+//   // console.log(`Creating employee in organization: ${organizationId}`);
+
+//   return createEmployeeCore(payload, payload.organizationId);
+// }
+
+async function updateEmployeeWithRelations(payload: UpdateEmployeeDto): Promise<void> {
   await employeesRepository.updateEmployeeById(payload.id, {
     employee_code: payload.employee_code,
-    start_date: payload.start_date,
+    start_date: payload.start_date ?? undefined,
     position_id: payload.position_id || null,
-    employee_type: payload.employee_type || null,
+    employee_type: payload.employee_type,
   });
 
   await profilesRepository.updateProfileByEmployeeId(payload.id, {
@@ -184,26 +229,28 @@ async function updateEmployeeWithRelations(
     birthday: payload.birthday || null,
   });
 
-  await employmentsRepository.deleteEmploymentsByEmployeeId(payload.id);
+  // Delete existing relationships
+  await employeeBranchesRepository.deleteByEmployeeId(payload.id);
+  await employeeDepartmentsRepository.deleteByEmployeeId(payload.id);
 
-  const employmentsToCreate = [];
-
+  // Create new employee-department relationship
   if (payload.department) {
-    employmentsToCreate.push({
-      employee_id: payload.id,
-      organization_unit_id: payload.department,
-    });
+    await employeeDepartmentsRepository.create([
+      {
+        employee_id: payload.id,
+        department_id: payload.department,
+      },
+    ]);
   }
 
-  if (payload.branch && payload.branch !== payload.department) {
-    employmentsToCreate.push({
-      employee_id: payload.id,
-      organization_unit_id: payload.branch,
-    });
-  }
-
-  if (employmentsToCreate.length > 0) {
-    await employmentsRepository.createEmployments(employmentsToCreate);
+  // Create new employee-branch relationship
+  if (payload.branch) {
+    await employeeBranchesRepository.create([
+      {
+        employee_id: payload.id,
+        branch_id: payload.branch,
+      },
+    ]);
   }
 
   await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(payload.id);
@@ -214,19 +261,55 @@ async function updateEmployeeWithRelations(
       manager_id: payload.manager_id,
     });
   }
+
+  if (payload.role_id) {
+    const adminSupabase = await createServiceRoleClient();
+    const employee = await employeesRepository.getEmployeeById(payload.id);
+    await adminSupabase.from("user_roles").delete().eq("user_id", employee.user_id);
+
+    const { error: roleError } = await adminSupabase.from("user_roles").insert([
+      {
+        user_id: employee.user_id,
+        role_id: payload.role_id,
+      },
+    ]);
+    if (roleError) throw new Error(`Failed to assign role to user: ${roleError.message}`);
+  }
 }
 
-async function deleteEmployeeWithRelations(
-  employeeId: string,
-): Promise<void> {
+async function deleteEmployeeWithRelations(employeeId: string): Promise<void> {
   const userId = await employeesRepository.getEmployeeUserId(employeeId);
 
+  // Delete assignment-related relationships (child records first, then parent)
+  await assignmentResultsRepository.deleteAssignmentResultsByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentEmployeesByEmployeeId(employeeId);
+  await assignmentsRepository.deleteQuestionsByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentCategoriesByEmployeeId(employeeId);
+  await assignmentsRepository.deleteAssignmentsByEmployeeId(employeeId);
+
+  // Delete class-related relationships
+  await qrAttendanceRepository.deleteAttendancesByEmployeeId(employeeId);
+  await qrAttendanceRepository.deleteQRCodesByEmployeeId(employeeId);
+  await classRoomRepository.deleteAllClassRoomEmployeesByEmployeeId(employeeId);
+  await classRoomSessionRepository.deleteClassSessionTeachersByEmployeeId(employeeId);
+  await classRoomRepository.deleteClassRoomsByEmployeeId(employeeId);
+
+  // Delete course-related relationships
+  await coursesRepository.deleteCoursesByEmployeeId(employeeId);
+
+  // Delete library-related relationships
+  await libraryRepository.softDeleteResourcesByEmployeeId(employeeId);
+  await libraryRepository.deleteLibraryByEmployeeId(employeeId);
+
+  // Delete core employee relationships
   await managersEmployeesRepository.deleteAllManagerRelationshipsForEmployee(employeeId);
-  await employmentsRepository.deleteEmploymentsByEmployeeId(employeeId);
+  await employeeBranchesRepository.deleteByEmployeeId(employeeId);
+  await employeeDepartmentsRepository.deleteByEmployeeId(employeeId);
   await profilesRepository.deleteProfileByEmployeeId(employeeId);
   await employeesRepository.deleteEmployeeById(employeeId);
 
-  const adminSupabase = createServiceRoleClient();
+  // Delete auth user
+  const adminSupabase = await createServiceRoleClient();
   const { error: authError } = await adminSupabase.auth.admin.deleteUser(userId);
 
   if (authError) {
@@ -242,10 +325,21 @@ async function getEmployeeById(id: string): Promise<EmployeeDto> {
   return employeesRepository.getEmployeeById(id);
 }
 
+/**
+ * Get employee's department ID
+ * @param employeeId - The employee's UUID
+ * @returns The department ID or null if not found
+ */
+async function getEmployeeDepartmentId(employeeId: string): Promise<string | null> {
+  return employeeRepository.getEmployeeDepartmentId(employeeId);
+}
+
 export {
-  createEmployeeWithRelations,
+  createEmployeeCore,
+  // createEmployeeWithRelations,
   updateEmployeeWithRelations,
   deleteEmployeeWithRelations,
   getEmployees,
   getEmployeeById,
+  getEmployeeDepartmentId,
 };

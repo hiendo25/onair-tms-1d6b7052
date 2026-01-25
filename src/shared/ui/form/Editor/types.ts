@@ -1,5 +1,6 @@
-import type { Theme, SxProps } from "@mui/material/styles";
-import type { Editor, Extension, EditorOptions } from "@tiptap/react";
+import React from "react";
+import type { SxProps, Theme } from "@mui/material/styles";
+import type { Editor, EditorOptions, Extension } from "@tiptap/react";
 
 export type EditorProps = Partial<EditorOptions> & {
   value?: string;

@@ -1,19 +1,21 @@
-import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
-import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
+import React from "react";
+import { alpha, FormControl, FormLabel, InputAdornment, MenuItem, MenuList, Select, styled } from "@mui/material";
 import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../../classroom-form.schema";
-import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
+
+import { LinkIcon } from "@/shared/assets/icons";
 import GoogleMeetIcon from "@/shared/assets/icons/GoogleMeetIcon";
 import MicrosoftTeamIcon from "@/shared/assets/icons/MicrosoftTeamIcon";
-import RHFSelectField from "@/shared/ui/form/RHFSelectField";
-import { alpha, FormControl, FormLabel, MenuItem, MenuList, Select, styled } from "@mui/material";
+import ZoomIcon from "@/shared/assets/icons/ZoomIcon";
+import RHFRadioGroupField, { RHFRadioGroupFieldProps } from "@/shared/ui/form/RHFRadioGroupField";
+import RHFTextField, { RHFTextFieldProps } from "@/shared/ui/form/RHFTextField";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
 
 interface RoomChannelProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   index: number;
 }
 
-const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoom>["options"] = [
+const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoomFormValues>["options"] = [
   {
     id: "1",
     value: "zoom",
@@ -45,7 +47,7 @@ const CHANNEL_OPTIONS: RHFRadioGroupFieldProps<ClassRoom>["options"] = [
   },
 ] as const;
 
-const CustomRHFRadioGroupField = styled((props: RHFRadioGroupFieldProps<ClassRoom>) => (
+const CustomRHFRadioGroupField = styled((props: RHFRadioGroupFieldProps<ClassRoomFormValues>) => (
   <RHFRadioGroupField {...props} />
 ))(({ theme }) => ({
   "& .MuiFormGroup-root": {
@@ -75,7 +77,7 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
     name: `classRoomSessions.${index}.channelProvider`,
   });
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <CustomRHFRadioGroupField
         label="Nền tảng tổ chức lớp học"
         required
@@ -89,6 +91,11 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
         control={control}
         required
         label="Link tham dự"
+        startAdornment={
+          <InputAdornment position="start">
+            <LinkIcon className="w-5 h-5 text-blue-600" />
+          </InputAdornment>
+        }
         placeholder="https://..."
       />
       {value !== "google_meet" ? (
@@ -113,9 +120,10 @@ const RoomChannel: React.FC<RoomChannelProps> = ({ control, index }) => {
 export default RoomChannel;
 
 interface RoomChannelSelectProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   index: number;
 }
+
 const RoomChannelSelect: React.FC<RoomChannelSelectProps> = ({ control, index }) => {
   return (
     <div>

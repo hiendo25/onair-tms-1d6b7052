@@ -1,12 +1,13 @@
-import { Control, Controller, useFieldArray } from "react-hook-form";
-import { ClassRoom } from "../../../classroom-form.schema";
-import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
-import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
-import { Android12Switch } from "@/shared/ui/form/CustomSwithcher";
-import { IconButton, styled, Typography, TypographyProps } from "@mui/material";
 import React from "react";
-import { ChevronDownIcon } from "@/shared/assets/icons";
+import { IconButton, styled, Typography, TypographyProps } from "@mui/material";
 import dayjs from "dayjs";
+import { Control, Controller, useFieldArray } from "react-hook-form";
+
+import { ChevronDownIcon } from "@/shared/assets/icons";
+import { Android12Switch } from "@/shared/ui/form/CustomSwitcher";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
+import { ClassRoomFormValues } from "../../classroom-form.schema";
+import { useClassRoomFormContext } from "../../ClassRoomFormContainer";
 interface QrSettingProps {
   className?: string;
 }
@@ -34,9 +35,9 @@ const QrSetting: React.FC<QrSettingProps> = () => {
         </IconButton>
       </div>
       <div className="flex flex-col gap-3">
-        {fieldSessions.map(({ _sessionId, title, isOnline, startDate, endDate, qrCode }, _index) => (
+        {fieldSessions.map(({ _sessionId, title, sessionType, startDate, endDate, qrCode }, _index) => (
           <React.Fragment key={_sessionId}>
-            {!isOnline ? (
+            {sessionType !== "online" ? (
               <SessionQrCodeConfigItem
                 control={control}
                 sessionIndex={_index}
@@ -77,7 +78,7 @@ const QrSetting: React.FC<QrSettingProps> = () => {
 export default QrSetting;
 
 interface SessionQrCodeConfigItemProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
   sessionIndex: number;
   title: string;
   startDate?: string;

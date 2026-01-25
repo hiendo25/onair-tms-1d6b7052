@@ -1,41 +1,44 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  Typography,
-  Grid,
-  CircularProgress,
-  IconButton,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
-} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { useLibraryStore } from "../store/libraryProvider";
-import { Resource } from "../types";
-import { LibraryBreadcrumbs } from "./LibraryBreadcrumbs";
-import { ResourceCard } from "./ResourceCard";
-import { CreateFolderDialog } from "./CreateFolderDialog";
-import { RenameResourceDialog } from "./RenameResourceDialog";
-import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import {
-  getLibraryResources,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  IconButton,
+  LinearProgress,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+
+import { useUserOrganization } from "@/modules/organization";
+import {
+  createFileResource,
   createFolder,
-  renameResource,
   deleteResource,
+  getLibraryResources,
+  renameResource,
 } from "@/services/libraries/library.service";
 import { uploadFileToS3 } from "@/utils/s3-upload";
+import { useLibraryStore } from "../store/libraryProvider";
+import { Resource } from "../types";
 
+import { CreateFolderDialog } from "./CreateFolderDialog";
+import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { LibraryBreadcrumbs } from "./LibraryBreadcrumbs";
+import { RenameResourceDialog } from "./RenameResourceDialog";
+import { ResourceCard } from "./ResourceCard";
 export function LibraryDialog() {
   const open = useLibraryStore((state) => state.open);
   const config = useLibraryStore((state) => state.config);
@@ -63,6 +66,11 @@ export function LibraryDialog() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const prevOpenRef = useRef<boolean>(false);
   const hasRestoredSelectionRef = useRef<boolean>(false);
+
+  const {
+    id: employeeId,
+    organization: { id: organizationId },
+  } = useUserOrganization((state) => state.currentEmployee);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -108,17 +116,15 @@ export function LibraryDialog() {
 
   useEffect(() => {
     if (open && config && resources.length > 0 && !hasRestoredSelectionRef.current) {
-      const preSelected = resources.filter((resource: Resource) =>
-        config.selectedIds.includes(resource.id) && resource.kind === "file",
+      const preSelected = resources.filter(
+        (resource: Resource) => config.selectedIds.includes(resource.id) && resource.kind === "file",
       );
       setSelectedResources(preSelected);
       hasRestoredSelectionRef.current = true;
     }
   }, [open, config, resources]);
 
-  const displayedResources = resources.filter(
-    (resource: Resource) => resource.parent_id === currentFolderId,
-  );
+  const displayedResources = resources.filter((resource: Resource) => resource.parent_id === currentFolderId);
 
   const handleResourceClick = (resource: Resource) => {
     if (resource.kind === "folder") {
@@ -206,7 +212,7 @@ export function LibraryDialog() {
 
     setActionLoading(true);
     try {
-      await createFolder(folderName, config.libraryId, currentFolderId);
+      await createFolder(folderName, config.libraryId, currentFolderId, organizationId);
       setCreateFolderOpen(false);
       await refreshResources();
     } catch (err) {
@@ -276,28 +282,19 @@ export function LibraryDialog() {
         },
       });
 
-      const fileExtension = file.name.split('.').pop() || '';
-      const createResourceResponse = await fetch("/api/libraries/resources", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: uploadResult.fileName,
-          libraryId: config.libraryId,
-          parentId: currentFolderId,
-          path: uploadResult.url,
-          size: uploadResult.fileSize,
-          mimeType: uploadResult.fileType,
-          extension: fileExtension,
-          thumbnailUrl: uploadResult.thumbnailUrl,
-        }),
-      });
-
-      if (!createResourceResponse.ok) {
-        const errorData = await createResourceResponse.json();
-        throw new Error(errorData.error || "Failed to create resource record");
-      }
+      const fileExtension = file.name.split(".").pop() || "";
+      await createFileResource(
+        uploadResult.fileName,
+        config.libraryId,
+        currentFolderId,
+        uploadResult.url,
+        uploadResult.fileSize,
+        uploadResult.fileType,
+        fileExtension,
+        uploadResult.thumbnailUrl || null,
+        organizationId,
+        employeeId,
+      );
 
       await refreshResources();
     } catch (err) {
@@ -318,14 +315,8 @@ export function LibraryDialog() {
       <Dialog open={open} onClose={handleCancel} maxWidth="lg" fullWidth>
         <DialogTitle>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography variant="h6">
-              Thư viện tài liệu
-            </Typography>
-            <IconButton
-              color="primary"
-              onClick={handleActionMenuOpen}
-              size="small"
-            >
+            <Typography variant="h6">Thư viện tài liệu</Typography>
+            <IconButton color="primary" onClick={handleActionMenuOpen} size="small">
               <AddIcon />
             </IconButton>
           </Box>
@@ -345,68 +336,62 @@ export function LibraryDialog() {
             </Box>
           )}
 
-        {loading ? (
-          <Box sx={{ py: 8, textAlign: "center" }}>
-            <CircularProgress />
-            <Typography color="text.secondary" sx={{ mt: 2 }}>
-              Loading resources...
-            </Typography>
-          </Box>
-        ) : error ? (
-          <Box sx={{ py: 8, textAlign: "center" }}>
-            <Typography color="error">
-              {error}
-            </Typography>
-          </Box>
-        ) : displayedResources.length === 0 ? (
-          <Box sx={{ py: 8, textAlign: "center" }}>
-            <Typography color="text.secondary">
-              Không có tài liệu
-            </Typography>
-          </Box>
-        ) : (
-          <Grid container spacing={2}>
-            {displayedResources.map((resource: Resource) => {
-              const selected = isResourceSelected(resource.id);
+          {loading ? (
+            <Box sx={{ py: 8, textAlign: "center" }}>
+              <CircularProgress />
+              <Typography color="text.secondary" sx={{ mt: 2 }}>
+                Loading resources...
+              </Typography>
+            </Box>
+          ) : error ? (
+            <Box sx={{ py: 8, textAlign: "center" }}>
+              <Typography color="error">{error}</Typography>
+            </Box>
+          ) : displayedResources.length === 0 ? (
+            <Box sx={{ py: 8, textAlign: "center" }}>
+              <Typography color="text.secondary">Không có tài liệu</Typography>
+            </Box>
+          ) : (
+            <Grid container spacing={2}>
+              {displayedResources.map((resource: Resource) => {
+                const selected = isResourceSelected(resource.id);
 
-              return (
-                <Grid size={{
-                  xs: 12,
-                  sm: 6,
-                  md: 3,
-                  lg: 2,
-                }} key={resource.id}>
-                  <ResourceCard
-                    resource={resource}
-                    selected={selected}
-                    onClick={() => handleResourceClick(resource)}
-                    onDoubleClick={() => handleFolderDoubleClick(resource)}
-                    onRename={handleRenameClick}
-                    onDelete={handleDeleteClick}
-                  />
-                </Grid>
-              );
-            })}
-          </Grid>
-        )}
-      </DialogContent>
+                return (
+                  <Grid
+                    size={{
+                      xs: 12,
+                      sm: 6,
+                      md: 3,
+                      lg: 2,
+                    }}
+                    key={resource.id}
+                  >
+                    <ResourceCard
+                      resource={resource}
+                      selected={selected}
+                      onClick={() => handleResourceClick(resource)}
+                      onDoubleClick={() => handleFolderDoubleClick(resource)}
+                      onRename={handleRenameClick}
+                      onDelete={handleDeleteClick}
+                    />
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
+        </DialogContent>
 
         <DialogActions>
-          <Button variant="outlined" color="inherit" onClick={handleCancel}>Đóng</Button>
-          <Button
-            onClick={handleConfirm}
-            variant="contained"
-          >
+          <Button variant="outlined" color="inherit" onClick={handleCancel}>
+            Đóng
+          </Button>
+          <Button onClick={handleConfirm} variant="contained">
             Xác nhận ({selectedResources.length})
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Menu
-        anchorEl={actionMenuAnchor}
-        open={Boolean(actionMenuAnchor)}
-        onClose={handleActionMenuClose}
-      >
+      <Menu anchorEl={actionMenuAnchor} open={Boolean(actionMenuAnchor)} onClose={handleActionMenuClose}>
         <MenuItem onClick={handleCreateFolderClick}>
           <ListItemIcon>
             <CreateNewFolderIcon fontSize="small" />
@@ -421,12 +406,7 @@ export function LibraryDialog() {
         </MenuItem>
       </Menu>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        style={{ display: "none" }}
-        onChange={handleFileSelect}
-      />
+      <input ref={fileInputRef} type="file" style={{ display: "none" }} onChange={handleFileSelect} />
 
       <CreateFolderDialog
         open={createFolderOpen}
@@ -459,4 +439,3 @@ export function LibraryDialog() {
     </>
   );
 }
-

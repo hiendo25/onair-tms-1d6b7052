@@ -1,0 +1,204 @@
+"use client";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button, IconButton } from "@mui/material";
+import { useSnackbar } from "notistack";
+import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
+
+import { BookOpenIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
+import { useUpsertCourseStore } from "../../store/upsert-course-context";
+import { UpsertCourseStore } from "../../store/upsert-course-store";
+
+import TabCourseInformation from "./TabCourseInformation";
+import TabCourseSections, { initSectionFormData } from "./TabCourseSections";
+import TabCourseSetting from "./TabCourseSetting";
+import { UpsertCourseFormData, upsertCourseSchema } from "./upsert-course.schema";
+import UpsertCourseTabContainer, { UpsertCourseTabContainerRef } from "./UpsertCourseTabContainer";
+import { getKeyFieldByTab } from "./utils";
+
+export const TAB_KEYS_MANAGE_COURSE = {
+  "clsTab-information": "clsTab-information",
+  "clsTab-section": "clsTab-section",
+  // "clsTab-setting": "clsTab-setting",
+} as const;
+
+export const TAB_NODES_MANAGE_COURSE = new Map([
+  [
+    TAB_KEYS_MANAGE_COURSE["clsTab-information"],
+    {
+      prev: null,
+      next: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+    },
+  ],
+  [
+    TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+    {
+      prev: TAB_KEYS_MANAGE_COURSE["clsTab-information"],
+      next: null,
+    },
+  ],
+  // [
+  //   TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
+  //   {
+  //     prev: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+  //     next: null,
+  //   },
+  // ],
+]);
+
+export interface UpsertCourseFormContainerRef {
+  resetForm: () => void;
+}
+export interface UpsertCourseFormContainerProps {
+  onSubmit?: (formData: UpsertCourseFormData) => void;
+  onCancel?: () => void;
+  value?: UpsertCourseFormData;
+  isLoading?: boolean;
+  action?: "create" | "edit";
+}
+
+export const initClassRoomFormData = (): Partial<UpsertCourseFormData> => {
+  return {
+    title: "",
+    description: "",
+    categories: [],
+    slug: "",
+    // sau này sẽ phải có tính năng lưu nháp riêng
+    status: "published",
+    sections: [],
+  };
+};
+
+const UpsertCourseFormContainer = forwardRef<UpsertCourseFormContainerRef, UpsertCourseFormContainerProps>(
+  ({ onSubmit, isLoading, action, value: initFormValue, onCancel }, ref) => {
+    const classRoomTabContainerRef = useRef<UpsertCourseTabContainerRef>(null);
+    const resetStore = useUpsertCourseStore(({ actions }) => actions.reset);
+
+    const methods = useForm<UpsertCourseFormData>({
+      resolver: zodResolver(upsertCourseSchema),
+      defaultValues: initClassRoomFormData(),
+      reValidateMode: "onChange",
+      mode: "onChange",
+    });
+
+    const {
+      getValues,
+      setValue,
+      handleSubmit,
+      formState: { errors },
+      trigger,
+      reset,
+    } = methods;
+
+    console.log({ errors, value: getValues() });
+
+    const triggerBeforeSubmitForm = (submitAction: () => void) => async () => {
+      try {
+        const TAB_LIST = [TAB_KEYS_MANAGE_COURSE["clsTab-information"], TAB_KEYS_MANAGE_COURSE["clsTab-section"]];
+        const allTabsTriggers = await Promise.allSettled(
+          TAB_LIST.map(async (tabKey) => {
+            const isValid = await trigger(getKeyFieldByTab(tabKey));
+            classRoomTabContainerRef.current?.setTabStatus(tabKey, isValid ? "valid" : "invalid");
+            return isValid;
+          }),
+        );
+
+        const isSomeTabFailed = allTabsTriggers.some((tab) => tab.status === "rejected" || !tab.value);
+
+        if (isSomeTabFailed) return;
+
+        submitAction();
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    const submitForm: SubmitHandler<UpsertCourseFormData> = (data) => {
+      onSubmit?.(data);
+    };
+
+    const cancelCreateClassRoom = () => {
+      resetStore(); // Reset all selected value in classRoom store
+      reset(); //Reset Form
+      onCancel?.();
+    };
+
+    useImperativeHandle(ref, () => ({
+      resetForm: () => {
+        resetStore(); // Reset all selected value in classRoom store
+        reset(); //Reset Form
+      },
+    }));
+
+    /**
+     * Init form value
+     */
+    useLayoutEffect(() => {
+      if (!initFormValue) return;
+      reset(initFormValue);
+    }, [initFormValue, reset]);
+
+    return (
+      <FormProvider {...methods}>
+        <UpsertCourseTabContainer
+          ref={classRoomTabContainerRef}
+          trigger={trigger}
+          items={[
+            {
+              tabName: "Thông môn học",
+              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-information"],
+              icon: <GlobeIcon className="w-5 h-5" />,
+              content: <TabCourseInformation />,
+            },
+            {
+              tabName: "Nội dung môn học",
+              tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-section"],
+              icon: <BookOpenIcon className="w-5 h-5" />,
+              content: <TabCourseSections />,
+            },
+            // {
+            //   tabName: "Thiết lập",
+            //   tabKey: TAB_KEYS_MANAGE_COURSE["clsTab-setting"],
+            //   icon: <UsersPlusIcon className="w-5 h-5" />,
+            //   content: <TabCourseSetting />,
+            // },
+          ]}
+          actions={
+            <div className="flex items-center gap-2">
+              <IconButton
+                className="border rounded-lg border-gray-300 bg-white"
+                onClick={cancelCreateClassRoom}
+                disabled={isLoading}
+              >
+                <CloseIcon />
+              </IconButton>
+              {/* <IconButton className="border rounded-lg border-gray-300 bg-white" disabled={isLoading}>
+                <EyeIcon />
+              </IconButton> */}
+              {/* <Button
+                size="large"
+                color="inherit"
+                variant="outlined"
+                className="border-gray-300"
+                disabled={isLoading}
+                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "draft")}
+              >
+                Lưu nháp
+              </Button> */}
+              <Button
+                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm))}
+                disabled={isLoading}
+                loading={isLoading}
+              >
+                {action === "create" ? "Đăng tải" : "Cập nhật"}
+              </Button>
+            </div>
+          }
+        />
+      </FormProvider>
+    );
+  },
+);
+export default UpsertCourseFormContainer;
+
+export const useUpsertCourseFormContext = useFormContext<UpsertCourseFormData>;

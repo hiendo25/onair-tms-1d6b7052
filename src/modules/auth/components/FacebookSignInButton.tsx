@@ -1,5 +1,7 @@
-import { FacebookIcon } from "@/shared/assets/icons";
+import React from "react";
 import Button from "@mui/material/Button";
+
+import { FacebookIcon } from "@/shared/assets/icons";
 
 interface FacebookSignInButtonProps {
   buttonName?: React.ReactNode;
@@ -10,12 +12,7 @@ const FacebookSignInButton: React.FC<FacebookSignInButtonProps> = ({
   disabled,
 }) => {
   return (
-    <Button
-      fullWidth
-      variant="outlined"
-      startIcon={<FacebookIcon />}
-      disabled={disabled}
-    >
+    <Button fullWidth variant="outlined" startIcon={<FacebookIcon />} disabled={disabled}>
       {buttonName}
     </Button>
   );

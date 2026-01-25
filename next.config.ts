@@ -1,63 +1,40 @@
 import type { NextConfig } from "next";
-import { fa } from "zod/v4/locales";
 
 const nextConfig: NextConfig = {
   devIndicators: false,
   output: "standalone", // Enable standalone output for Docker
-  reactStrictMode: false,
+  reactStrictMode: true,
+  // Add empty turbopack config to silence the warning
+  turbopack: {},
   // typedRoutes: true,
-  // compiler: {
-  //   styledComponents: true, // Enable SWC transform for styled-components
-  // },
-  // experimental: {
-  //   optimizePackageImports: ["@mui/material", "@mui/icons-material"],
-  // },
+  experimental: {
+    authInterrupts: true,
+    optimizePackageImports: ["@mui/material", "@mui/icons-material"],
+  },
   images: {
     // loader: "custom",
     remotePatterns: [
-      {
-        protocol: "https", // or 'http' if needed
-        hostname: "avatars.githubusercontent.com",
-        port: "", // leave empty unless using custom port
-        pathname: "/**", // match all paths
-      },
-      {
-        protocol: "https", // or 'http' if needed
-        hostname: "cloudflare-ipfs.com",
-        port: "", // leave empty unless using custom port
-        pathname: "/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "127.0.0.1",
-        port: "54321", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
-      {
-        protocol: "http", // or 'http' if needed
-        hostname: "localhost",
-        port: "3000", // leave empty unless using custom port
-        pathname: "/storage/v1/object/public/**", // match all paths
-      },
       {
         protocol: "https",
         hostname: "lms-api.onairdev.com",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
-      // {
-      //   protocol: 'https',
-      //   hostname: 'xyzsupabase.co',
-      //   pathname: '/storage/v1/object/public/**',
-      // },
+      {
+        protocol: "https",
+        hostname: "dev-event-files-bucket.s3.ap-southeast-1.amazonaws.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: true,
-  },
-  webpack: (config) => {
+  // eslint: {
+  //   // Warning: This allows production builds to successfully complete even if
+  //   // your project has ESLint errors.
+  //   ignoreDuringBuilds: true,
+  //   // dirs: ['pages', 'utils']
+  // },
+  webpack: (config, options) => {
     config.resolve.alias = {
       ...config.resolve.alias,
     };
@@ -66,6 +43,42 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  headers: async () => [
+    {
+      source: "/(.*)",
+      headers: [
+        {
+          key: "X-Content-Type-Options",
+          value: "nosniff",
+        },
+        {
+          key: "X-Frame-Options",
+          value: "DENY",
+        },
+        {
+          key: "Referrer-Policy",
+          value: "strict-origin-when-cross-origin",
+        },
+      ],
+    },
+    {
+      source: "/sw.js",
+      headers: [
+        {
+          key: "Content-Type",
+          value: "application/javascript; charset=utf-8",
+        },
+        {
+          key: "Cache-Control",
+          value: "no-cache, no-store, must-revalidate",
+        },
+        {
+          key: "Content-Security-Policy",
+          value: "default-src 'self'; script-src 'self'",
+        },
+      ],
+    },
+  ],
 };
 
 export default nextConfig;

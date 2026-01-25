@@ -1,16 +1,17 @@
-import { createServiceRoleClient } from "@/services/supabase/service-role-client";
-import type { Database } from "@/types/supabase.types";
-import type {
-  ValidateEmployeeFileResultDto,
-  ImportEmployeesResultDto,
-  EmployeeImportData,
-} from "@/types/dto/employees";
 import { EmployeeFormSchema } from "@/modules/employees/components/EmployeeForm/schema";
-import {
-  employeesRepository,
-  profilesRepository,
-  organizationUnitsRepository,
-} from "@/repository";
+import { employeesRepository, organizationUnitsRepository, profilesRepository } from "@/repository";
+import { getOrganizationUnitsByOrganizationId } from "@/repository/organization-units";
+import { createSVClient } from "@/services/supabase/server";
+import { createServiceRoleClient } from "@/services/supabase/service-role-client";
+import type {
+  CreateEmployeeDto,
+  EmployeeImportData,
+  ImportEmployeesResultDto,
+  ValidateEmployeeFileResultDto,
+} from "@/types/dto/employees";
+import type { Database } from "@/types/supabase.types";
+
+import { createEmployeeCore } from "./employee.service";
 
 interface ValidationResult {
   totalCount: number;
@@ -34,7 +35,7 @@ function mapHeaderToFieldKey(headerName: string): string {
     "Mã nhân viên": "employee_code",
     "Họ và tên": "full_name",
     "Họ tên": "full_name",
-    "Email": "email",
+    Email: "email",
     "Số điện thoại": "phone_number",
     "Giới tính": "gender",
     "Ngày sinh": "birthday",
@@ -43,7 +44,9 @@ function mapHeaderToFieldKey(headerName: string): string {
     "Ngày bắt đầu": "start_date",
     "Chức vụ": "position",
     "Người quản lý": "manager",
-    "Vai trò": "role",
+    "Loại nhân viên": "employee_type",
+    "Vai trò": "employee_type",
+    "Mã vai trò": "role_code",
   };
 
   return mapping[headerName] || headerName.toLowerCase().replace(/\s+/g, "_");
@@ -52,7 +55,7 @@ function mapHeaderToFieldKey(headerName: string): string {
 function isRowEmpty(row: any): boolean {
   const values = Object.values(row);
 
-  return values.every(value => {
+  return values.every((value) => {
     if (value === null || value === undefined) {
       return true;
     }
@@ -62,12 +65,12 @@ function isRowEmpty(row: any): boolean {
 }
 
 function parseCSVOnServer(text: string): any[] {
-  const lines = text.split("\n").filter(line => line.trim());
+  const lines = text.split("\n").filter((line) => line.trim());
   if (lines.length === 0) {
     throw new Error("File CSV rỗng");
   }
 
-  const rawHeaders = lines[0].split(",").map(h => h.trim());
+  const rawHeaders = lines[0].split(",").map((h) => h.trim());
   const normalizedHeaders = rawHeaders.map(normalizeHeader);
   const fieldKeys = normalizedHeaders.map(mapHeaderToFieldKey);
 
@@ -155,19 +158,24 @@ async function parseXLSXOnServer(buffer: ArrayBuffer): Promise<any[]> {
 
 const EmployeeImportSchema = EmployeeFormSchema.partial({
   manager_id: true,
-  role: true,
   position_id: true,
   employee_code: true,
   branch: true,
   phone_number: true,
   birthday: true,
   start_date: true,
-}).required({
-  email: true,
-  full_name: true,
-  gender: true,
-  department: true,
-});
+  role_id: true,
+})
+  .extend({
+    role_code: EmployeeFormSchema.shape.role_id.optional(),
+  })
+  .required({
+    email: true,
+    full_name: true,
+    gender: true,
+    department: true,
+    employee_type: true,
+  });
 
 function validateParsedData(data: any[]): ValidationResult {
   const validRecords: EmployeeImportData[] = [];
@@ -198,7 +206,7 @@ function validateParsedData(data: any[]): ValidationResult {
       employee_code: row.employee_code,
       start_date: row.start_date,
       manager_id: undefined,
-      role: undefined,
+      employee_type: row.employee_type,
       position_id: undefined,
     };
 
@@ -249,6 +257,8 @@ function validateParsedData(data: any[]): ValidationResult {
         department: String(row.department).trim(),
         branch: row.branch ? String(row.branch).trim() : undefined,
         start_date: row.start_date ? String(row.start_date).trim() : undefined,
+        employee_type: String(row.employee_type).toLowerCase() as Database["public"]["Enums"]["employee_type"],
+        role_code: row.role_code ? String(row.role_code).trim() : undefined,
       };
       validRecords.push(validRecord);
       if (index < 3) {
@@ -274,51 +284,94 @@ function validateParsedData(data: any[]): ValidationResult {
 
 async function validateAgainstDatabase(
   validRecords: EmployeeImportData[],
+  organizationId: string,
 ): Promise<{
-  invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>
+  invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>;
+  departmentNameToIdMap: Map<string, string>;
+  branchNameToIdMap: Map<string, string>;
+  roleCodeToIdMap: Map<string, string>;
 }> {
   const invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }> = [];
+  const departmentNameToIdMap = new Map<string, string>();
+  const branchNameToIdMap = new Map<string, string>();
+  const roleCodeToIdMap = new Map<string, string>();
 
   if (validRecords.length === 0) {
-    return { invalidRecords };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap, roleCodeToIdMap };
   }
 
   try {
-    const employeeCodes = validRecords.map(r => r.employee_code);
-    const emails = validRecords.map(r => r.email);
-    const departments = [...new Set(validRecords.map(r => r.department).filter(Boolean))];
-    const branches = [...new Set(validRecords.map(r => r.branch).filter(Boolean))];
+    const employeeCodes = validRecords.map((r) => r.employee_code);
+    const emails = validRecords.map((r) => r.email);
+    const departmentNames = [...new Set(validRecords.map((r) => r.department).filter(Boolean))];
+    const branchNames = [...new Set(validRecords.map((r) => r.branch).filter(Boolean))];
+    const roleCodes = [...new Set(validRecords.map((r) => r.role_code).filter(Boolean))];
 
     console.log("Checking database for:", {
       employeeCodes: employeeCodes.length,
       emails: emails.length,
-      departments: departments.length,
-      branches: branches.length,
+      departmentNames: departmentNames.length,
+      branchNames: branchNames.length,
+      roleCodes: roleCodes.length,
     });
 
     const existingEmployees = await employeesRepository.findEmployeesByEmployeeCodes(employeeCodes);
-    const existingEmployeeCodes = new Set(
-      existingEmployees.map(e => e.employee_code),
-    );
+    const existingEmployeeCodes = new Set(existingEmployees.map((e) => e.employee_code));
     console.log("Existing employee codes found:", existingEmployeeCodes.size);
 
     const existingProfiles = await profilesRepository.findProfilesByEmails(emails);
-    const existingEmails = new Set(
-      existingProfiles.map(p => p.email),
-    );
+    const existingEmails = new Set(existingProfiles.map((p) => p.email));
     console.log("Existing emails found:", existingEmails.size);
 
-    const allOrgUnits = [...departments, ...branches];
-    let existingOrgUnits = new Set<string>();
-
-    if (allOrgUnits.length > 0) {
+    if (departmentNames.length > 0 || branchNames.length > 0) {
       try {
-        const orgUnits = await organizationUnitsRepository.getAllOrganizationUnitsWithDetails();
-        existingOrgUnits = new Set(orgUnits.map(u => u.id));
-        console.log("Existing organization units found:", existingOrgUnits.size);
+        const orgUnits = await getOrganizationUnitsByOrganizationId(organizationId);
+
+        orgUnits.forEach((unit) => {
+          if (unit.type === "department") {
+            departmentNameToIdMap.set(unit.name, unit.id);
+          } else if (unit.type === "branch") {
+            branchNameToIdMap.set(unit.name, unit.id);
+          }
+        });
+
+        console.log("Organization units loaded:", {
+          departments: departmentNameToIdMap.size,
+          branches: branchNameToIdMap.size,
+        });
       } catch (error) {
         console.error("Error checking organization units:", error);
-        console.warn("Skipping organization unit validation due to error");
+        throw new Error("Không thể tải danh sách phòng ban và chi nhánh");
+      }
+    }
+
+    // Fetch and validate role codes
+    if (roleCodes.length > 0) {
+      try {
+        const supabase = await createSVClient();
+        const { data: roles, error: rolesError } = await supabase
+          .from("roles")
+          .select("id, code")
+          .eq("organization_id", organizationId)
+          .in("code", roleCodes);
+
+        if (rolesError) {
+          console.error("Error fetching roles:", rolesError);
+          throw new Error("Không thể tải danh sách vai trò");
+        }
+
+        if (roles) {
+          roles.forEach((role) => {
+            roleCodeToIdMap.set(role.code, role.id);
+          });
+        }
+
+        console.log("Roles loaded:", {
+          roles: roleCodeToIdMap.size,
+        });
+      } catch (error) {
+        console.error("Error checking roles:", error);
+        throw new Error("Không thể tải danh sách vai trò");
       }
     }
 
@@ -339,19 +392,27 @@ async function validateAgainstDatabase(
         fieldErrors["email"] = errorMsg;
       }
 
-      if (existingOrgUnits.size > 0 && record.department) {
-        if (!existingOrgUnits.has(record.department)) {
-          const errorMsg = `Phòng ban không tồn tại: ${record.department}`;
+      if (record.department) {
+        if (!departmentNameToIdMap.has(record.department)) {
+          const errorMsg = `Phòng ban không tồn tại trong tổ chức: ${record.department}`;
           errors.push(errorMsg);
           fieldErrors["department"] = errorMsg;
         }
       }
 
-      if (existingOrgUnits.size > 0 && record.branch) {
-        if (!existingOrgUnits.has(record.branch)) {
-          const errorMsg = `Chi nhánh không tồn tại: ${record.branch}`;
+      if (record.branch) {
+        if (!branchNameToIdMap.has(record.branch)) {
+          const errorMsg = `Chi nhánh không tồn tại trong tổ chức: ${record.branch}`;
           errors.push(errorMsg);
           fieldErrors["branch"] = errorMsg;
+        }
+      }
+
+      if (record.role_code) {
+        if (!roleCodeToIdMap.has(record.role_code)) {
+          const errorMsg = `Mã vai trò không tồn tại trong tổ chức: ${record.role_code}`;
+          errors.push(errorMsg);
+          fieldErrors["role_code"] = errorMsg;
         }
       }
 
@@ -369,29 +430,26 @@ async function validateAgainstDatabase(
       invalid: invalidRecords.length,
     });
 
-    return { invalidRecords };
+    return { invalidRecords, departmentNameToIdMap, branchNameToIdMap, roleCodeToIdMap };
   } catch (error) {
     console.error("Database validation error:", error);
-    console.warn("Skipping database validation due to error");
-    return { invalidRecords: [] };
+    throw error;
   }
 }
 
 function mergeValidationResults(
   formatValidation: ValidationResult,
   databaseValidation: {
-    invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>
+    invalidRecords: Array<{ row: number; data: any; errors: string[]; fieldErrors: Record<string, string> }>;
   },
 ): ValidationResult {
   const allInvalidRecords = [...formatValidation.invalidRecords];
 
-  databaseValidation.invalidRecords.forEach(dbInvalid => {
+  databaseValidation.invalidRecords.forEach((dbInvalid) => {
     allInvalidRecords.push(dbInvalid);
   });
 
-  const dbInvalidRowNumbers = new Set(
-    databaseValidation.invalidRecords.map(r => r.row),
-  );
+  const dbInvalidRowNumbers = new Set(databaseValidation.invalidRecords.map((r) => r.row));
 
   const finalValidRecords = formatValidation.validRecords.filter((_, index) => {
     const rowNumber = index + 2;
@@ -435,15 +493,68 @@ async function validateEmployeeFile(file: File): Promise<ValidateEmployeeFileRes
     throw new Error("File không chứa dữ liệu hoặc định dạng không đúng");
   }
 
+  const supabase = await createSVClient();
+  const {
+    data: { user: currentUser },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+
   const formatValidation = validateParsedData(parsedData);
-  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords);
+  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords, organizationId);
   const validationResult = mergeValidationResults(formatValidation, databaseValidation);
 
   return validationResult;
 }
 
 async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
-  const validationResult = await validateEmployeeFile(file);
+  const fileName = file.name.toLowerCase();
+  const isCSV = fileName.endsWith(".csv");
+  const isXLSX = fileName.endsWith(".xlsx") || fileName.endsWith(".xls");
+
+  if (!isCSV && !isXLSX) {
+    throw new Error("Định dạng file không được hỗ trợ. Vui lòng tải lên file CSV hoặc XLSX");
+  }
+
+  const maxSize = 4 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error("File quá lớn. Kích thước tối đa là 4MB");
+  }
+
+  let parsedData: any[];
+
+  if (isCSV) {
+    const text = await file.text();
+    parsedData = parseCSVOnServer(text);
+  } else {
+    const buffer = await file.arrayBuffer();
+    parsedData = await parseXLSXOnServer(buffer);
+  }
+
+  if (!parsedData || parsedData.length === 0) {
+    throw new Error("File không chứa dữ liệu hoặc định dạng không đúng");
+  }
+
+  const supabase = await createSVClient();
+  const {
+    data: { user: currentUser },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !currentUser) {
+    throw new Error(`Failed to get current user: ${userError?.message || "User not authenticated"}`);
+  }
+
+  const organizationId = await employeesRepository.getEmployeeOrganizationIdByUserId(currentUser.id);
+
+  const formatValidation = validateParsedData(parsedData);
+  const databaseValidation = await validateAgainstDatabase(formatValidation.validRecords, organizationId);
+  const validationResult = mergeValidationResults(formatValidation, databaseValidation);
 
   console.log("Validation result:", {
     totalCount: validationResult.totalCount,
@@ -461,10 +572,13 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
   }
 
   if (validationResult.invalidCount > 0) {
-    throw new Error(`File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`);
+    throw new Error(
+      `File chứa ${validationResult.invalidCount} bản ghi không hợp lệ. Vui lòng sửa lỗi trước khi import.`,
+    );
   }
 
-  const adminSupabase = createServiceRoleClient();
+  console.log(`Importing employees to organization: ${organizationId}`);
+
   const records = validationResult.validRecords;
   let successCount = 0;
   let failedCount = 0;
@@ -482,33 +596,40 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
     }
 
     try {
-      const { data: authData, error: authError } = await adminSupabase.auth.admin.createUser({
+      const departmentId = record.department
+        ? databaseValidation.departmentNameToIdMap.get(record.department)
+        : undefined;
+      const branchId = record.branch ? databaseValidation.branchNameToIdMap.get(record.branch) : undefined;
+      const roleId = record.role_code ? databaseValidation.roleCodeToIdMap.get(record.role_code) : undefined;
+
+      if (record.department && !departmentId) {
+        throw new Error(`Phòng ban không tồn tại: ${record.department}`);
+      }
+
+      if (record.role_code && !roleId) {
+        throw new Error(`Mã vai trò không tồn tại: ${record.role_code}`);
+      }
+
+      const employeePayload: CreateEmployeeDto = {
         email: record.email,
-        password: "123456",
-        email_confirm: true,
-        user_metadata: {
-          full_name: record.full_name,
-          phone_number: record.phone_number || "",
-          gender: record.gender,
-          birthday: record.birthday || null,
-          employee_code: record.employee_code || "",
-          start_date: record.start_date || null,
-          department_id: record.department,
-          branch_id: record.branch || null,
-          manager_id: null,
-        },
-      });
+        full_name: record.full_name,
+        phone_number: record.phone_number,
+        gender: record.gender,
+        birthday: record.birthday || null,
+        department: departmentId || "",
+        branch: branchId,
+        employee_code: record.employee_code,
+        start_date: record.start_date || new Date().toISOString().split("T")[0],
+        manager_id: "",
+        position_id: undefined,
+        employee_type: record.employee_type,
+        role_id: roleId || "",
+      };
 
-      if (authError) {
-        throw new Error(authError.message);
-      }
-
-      if (!authData.user) {
-        throw new Error("Failed to create user");
-      }
+      const result = await createEmployeeCore(employeePayload, organizationId);
 
       successCount++;
-      console.log(`Successfully imported employee ${record.employee_code} (${successCount}/${records.length})`);
+      console.log(`Successfully imported employee ${result.employeeCode} (${successCount}/${records.length})`);
     } catch (error) {
       failedCount++;
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -534,7 +655,4 @@ async function importEmployees(file: File): Promise<ImportEmployeesResultDto> {
   };
 }
 
-export {
-  validateEmployeeFile,
-  importEmployees,
-};
+export { validateEmployeeFile, importEmployees };

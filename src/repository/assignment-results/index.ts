@@ -1,18 +1,25 @@
 import { createSVClient } from "@/services";
+import { FileMetadata, QuestionOption } from "@/types/dto/assignments";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption } from "@/types/dto/assignments";
 
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
-export type FileAnswer = { fileUrl: string };
+export type FileAnswer = { files: FileMetadata[] };
 export type TextAnswer = { text: string };
 export type RadioAnswer = { selectedOptionId: string };
 export type CheckboxAnswer = { selectedOptionIds: string[] };
+export type MatchingAnswer = {
+  mappings: Array<{ columnAId: string; columnBId: string }>
+};
+export type OrderAnswer = {
+  orderedItems: Array<{ id: string; position: number }>
+};
+export type TrueFalseAnswer = { answer: boolean };
 
-export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer;
+export type QuestionAnswer = FileAnswer | TextAnswer | RadioAnswer | CheckboxAnswer | MatchingAnswer | OrderAnswer | TrueFalseAnswer;
 
 export interface QuestionWithAnswer {
   id: string;
@@ -24,8 +31,9 @@ export interface QuestionWithAnswer {
   created_at: string;
   updated_at: string;
   answer: QuestionAnswer;
-  answerAttachments?: string[];
+  answerAttachments?: FileMetadata[];
   earnedScore: number | null;
+  feedback?: string;
 }
 
 export interface SubmissionData {
@@ -45,7 +53,7 @@ export interface AnswerData {
   questionLabel: string;
   questionType: QuestionType;
   options?: QuestionOption[];
-  answer: string | string[];
+  answer: string | string[] | FileMetadata[];
 }
 
 export async function createAssignmentResult(data: {
@@ -107,6 +115,7 @@ export async function updateAssignmentResult(
     score?: number | null;
     max_score?: number;
     status?: AssignmentResultStatus;
+    feedback?: string | null;
   }
 ): Promise<void> {
   const supabase = await createSVClient();
@@ -127,6 +136,10 @@ export async function updateAssignmentResult(
 
   if (data.status !== undefined) {
     updateData.status = data.status;
+  }
+
+  if (data.feedback !== undefined) {
+    updateData.feedback = data.feedback;
   }
 
   const { error } = await supabase
@@ -152,6 +165,32 @@ export async function deleteAssignmentResult(id: string): Promise<void> {
   }
 }
 
+export async function deleteAssignmentResultsByAssignmentId(assignmentId: string): Promise<void> {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("assignment_results")
+    .delete()
+    .eq("assignment_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment results: ${error.message}`);
+  }
+}
+
+export async function deleteAssignmentResultsByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase
+    .from("assignment_results")
+    .delete()
+    .eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment results by employee: ${error.message}`);
+  }
+}
+
 export interface AssignmentResultWithEmployee {
   id: string;
   assignment_id: string;
@@ -161,6 +200,7 @@ export interface AssignmentResultWithEmployee {
   max_score: number | null;
   status: AssignmentResultStatus;
   created_at: string;
+  feedback: string | null;
   employee: {
     employee_code: string;
     profiles: {
@@ -188,6 +228,7 @@ export async function getAssignmentResultWithEmployee(
       max_score,
       status,
       created_at,
+      feedback,
       employees!assignment_results_employee_id_fkey (
         employee_code,
         profiles!profiles_employee_id_fkey (
@@ -218,6 +259,7 @@ export async function getAssignmentResultWithEmployee(
     max_score: data.max_score,
     status: data.status,
     created_at: data.created_at,
+    feedback: data.feedback,
     employee: data.employees as any,
   };
 }

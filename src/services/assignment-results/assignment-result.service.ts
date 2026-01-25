@@ -1,26 +1,26 @@
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type {
-  SubmissionData,
-  QuestionWithAnswer,
-  FileAnswer,
-  TextAnswer,
-  RadioAnswer,
   CheckboxAnswer,
+  FileAnswer,
+  MatchingAnswer,
+  OrderAnswer,
   QuestionAnswer,
+  QuestionWithAnswer,
+  RadioAnswer,
+  SubmissionData,
+  TextAnswer,
+  TrueFalseAnswer,
 } from "@/repository/assignment-results";
+import { AssignmentDto, FileMetadata, QuestionGradeDetail, QuestionOption, SaveGradeDto, SubmissionDetailDto } from "@/types/dto/assignments";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption, AssignmentDto, SubmissionDetailDto, QuestionGradeDetail, SaveGradeDto } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
 
 export interface QuestionAnswerInput {
   questionId: string;
-  questionLabel: string;
-  questionType: QuestionType;
-  options?: QuestionOption[];
-  answer: string | string[];
-  attachments?: string[];
+  answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>;
+  attachments?: FileMetadata[];
 }
 
 export interface SubmitAssignmentPayload {
@@ -64,14 +64,67 @@ function gradeCheckboxQuestion(
   return (allCorrectSelected && noIncorrectSelected) ? questionScore : 0;
 }
 
+function gradeMatchingQuestion(
+  answer: MatchingAnswer,
+  correctMappings: Array<{ columnAId: string; columnBId: string }>,
+  questionScore: number
+): number {
+  const studentMappings = answer.mappings;
+
+  // Check if all mappings are correct
+  if (studentMappings.length !== correctMappings.length) {
+    return 0;
+  }
+
+  const allCorrect = correctMappings.every(correctMapping => {
+    return studentMappings.some(
+      studentMapping =>
+        studentMapping.columnAId === correctMapping.columnAId &&
+        studentMapping.columnBId === correctMapping.columnBId
+    );
+  });
+
+  return allCorrect ? questionScore : 0;
+}
+
+function gradeOrderQuestion(
+  answer: OrderAnswer,
+  correctItems: Array<{ id: string; correctOrder: number }>,
+  questionScore: number
+): number {
+  const studentItems = answer.orderedItems;
+
+  // Check if all items are in correct positions
+  if (studentItems.length !== correctItems.length) {
+    return 0;
+  }
+
+  const allCorrect = correctItems.every(correctItem => {
+    const studentItem = studentItems.find(si => si.id === correctItem.id);
+    return studentItem && studentItem.position === correctItem.correctOrder;
+  });
+
+  return allCorrect ? questionScore : 0;
+}
+
+function gradeTrueFalseQuestion(
+  answer: TrueFalseAnswer,
+  correctAnswer: boolean,
+  questionScore: number
+): number {
+  return answer.answer === correctAnswer ? questionScore : 0;
+}
+
 function convertAnswerToTypedFormat(
   questionType: QuestionType,
-  answer: string | string[]
+  answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
-      const fileUrl = Array.isArray(answer) ? answer[0] : answer;
-      return { fileUrl } as FileAnswer;
+      if (Array.isArray(answer) && answer.length > 0 && typeof answer[0] === "object") {
+        return { files: answer as FileMetadata[] } as FileAnswer;
+      }
+      throw new Error("Invalid file answer format");
 
     case "text":
       return { text: answer as string } as TextAnswer;
@@ -81,6 +134,15 @@ function convertAnswerToTypedFormat(
 
     case "checkbox":
       return { selectedOptionIds: answer as string[] } as CheckboxAnswer;
+
+    case "matching":
+      return { mappings: answer as Array<{ columnAId: string; columnBId: string }> } as MatchingAnswer;
+
+    case "order":
+      return { orderedItems: answer as Array<{ id: string; position: number }> } as OrderAnswer;
+
+    case "true_false":
+      return { answer: answer as boolean } as TrueFalseAnswer;
 
     default:
       throw new Error(`Unsupported question type: ${questionType}`);
@@ -135,6 +197,30 @@ export async function submitAssignment(
           question.options,
           question.score
         );
+      } else if (question.type === "matching" && question.options) {
+        // Extract correctMappings from options field
+        const correctMappings = (question.options as any).correctMappings || [];
+        earnedScore = gradeMatchingQuestion(
+          typedAnswer as MatchingAnswer,
+          correctMappings,
+          question.score
+        );
+      } else if (question.type === "order" && question.options) {
+        // Extract orderItems from options field
+        const orderItems = (question.options as any).orderItems || [];
+        earnedScore = gradeOrderQuestion(
+          typedAnswer as OrderAnswer,
+          orderItems,
+          question.score
+        );
+      } else if (question.type === "true_false" && question.options) {
+        // Extract correctAnswer from options field
+        const correctAnswer = (question.options as any).correctAnswer === true;
+        earnedScore = gradeTrueFalseQuestion(
+          typedAnswer as TrueFalseAnswer,
+          correctAnswer,
+          question.score
+        );
       }
 
       return {
@@ -155,7 +241,7 @@ export async function submitAssignment(
     const maxScore = questionsWithAnswers.reduce((sum, q) => sum + q.score, 0);
 
     const allAutoGradable = questionsWithAnswers.every(
-      q => q.type === "radio" || q.type === "checkbox"
+      q => q.type === "radio" || q.type === "checkbox" || q.type === "matching" || q.type === "order" || q.type === "true_false"
     );
 
     let totalScore: number | null = null;
@@ -265,18 +351,24 @@ export async function getSubmissionDetail(
   const submissionData = resultWithEmployee.data as SubmissionData;
 
   const questions: QuestionGradeDetail[] = submissionData.questions.map((q) => {
-    const isAutoGraded = q.type === "radio" || q.type === "checkbox";
+    const isAutoGraded = q.type === "radio" || q.type === "checkbox" || q.type === "matching" || q.type === "order" || q.type === "true_false";
 
     const answer: QuestionGradeDetail["answer"] = {};
 
     if (q.type === "file") {
-      answer.fileUrl = (q.answer as FileAnswer).fileUrl;
+      answer.files = (q.answer as FileAnswer).files;
     } else if (q.type === "text") {
       answer.text = (q.answer as TextAnswer).text;
     } else if (q.type === "radio") {
       answer.selectedOptionId = (q.answer as RadioAnswer).selectedOptionId;
     } else if (q.type === "checkbox") {
       answer.selectedOptionIds = (q.answer as CheckboxAnswer).selectedOptionIds;
+    } else if (q.type === "matching") {
+      answer.mappings = (q.answer as MatchingAnswer).mappings;
+    } else if (q.type === "order") {
+      answer.orderedItems = (q.answer as OrderAnswer).orderedItems;
+    } else if (q.type === "true_false") {
+      answer.trueFalseAnswer = (q.answer as TrueFalseAnswer).answer;
     }
 
     return {
@@ -290,6 +382,7 @@ export async function getSubmissionDetail(
       answerAttachments: q.answerAttachments,
       earnedScore: q.earnedScore,
       isAutoGraded,
+      feedback: q.feedback,
     };
   });
 
@@ -308,11 +401,12 @@ export async function getSubmissionDetail(
     totalScore: resultWithEmployee.score,
     maxScore: resultWithEmployee.max_score || 0,
     questions,
+    feedback: resultWithEmployee.feedback,
   };
 }
 
 export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: number; maxScore: number }> {
-  const { assignmentId, employeeId, questionGrades } = payload;
+  const { assignmentId, employeeId, questionGrades, overallFeedback } = payload;
 
   const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
     assignmentId,
@@ -325,25 +419,26 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
 
   const submissionData = resultWithEmployee.data as SubmissionData;
 
-  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, g.score]));
+  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, { score: g.score, feedback: g.feedback }]));
 
   const updatedQuestions = submissionData.questions.map((q) => {
-    if (q.type === "radio" || q.type === "checkbox") {
+    if (q.type === "radio" || q.type === "checkbox" || q.type === "true_false" || q.type === "matching" || q.type === "order" || q.type === "drag_and_drop" || q.type === "fill") {
       return q;
     }
 
-    const manualScore = gradeMap.get(q.id);
-    if (manualScore === undefined) {
+    const gradeData = gradeMap.get(q.id);
+    if (!gradeData || gradeData.score === undefined) {
       throw new Error(`Thiếu điểm cho câu hỏi: ${q.label}`);
     }
 
-    if (manualScore < 0 || manualScore > q.score) {
+    if (gradeData.score < 0 || gradeData.score > q.score) {
       throw new Error(`Điểm không hợp lệ cho câu hỏi "${q.label}". Điểm phải từ 0 đến ${q.score}`);
     }
 
     return {
       ...q,
-      earnedScore: manualScore,
+      earnedScore: gradeData.score,
+      feedback: gradeData.feedback,
     };
   });
 
@@ -359,6 +454,7 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
     submissionData: updatedSubmissionData,
     score: totalScore,
     status: "graded",
+    feedback: overallFeedback || null,
   });
 
   return { totalScore, maxScore };

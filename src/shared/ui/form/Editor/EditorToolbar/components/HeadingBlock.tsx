@@ -1,20 +1,14 @@
-import { useCallback, useState } from "react";
-import Menu from "@mui/material/Menu";
-import ButtonBase from "@mui/material/ButtonBase";
+import React, { useCallback, useState } from "react";
 import { alpha, MenuItem } from "@mui/material";
-import type { EditorToolbarProps } from "../../types";
+import ButtonBase from "@mui/material/ButtonBase";
+import Menu from "@mui/material/Menu";
+
 import { ParagraphIcon } from "@/shared/assets/icons";
+import type { EditorToolbarProps } from "../../types";
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
-const HEADING_OPTIONS = [
-  "Heading 1",
-  "Heading 2",
-  "Heading 3",
-  "Heading 4",
-  "Heading 5",
-  "Heading 6",
-];
+const HEADING_OPTIONS = ["Heading 1", "Heading 2", "Heading 3", "Heading 4", "Heading 5", "Heading 6"];
 
 interface HeadingBlockProps {
   editor: Exclude<EditorToolbarProps["editor"], null>;
@@ -77,12 +71,7 @@ const HeadingBlock: React.FC<HeadingBlockProps> = ({ editor }) => {
           "Paragraph"}
         <ParagraphIcon width={16} height={16} className="w-4 h-4 ml-2" />
       </ButtonBase>
-      <Menu
-        id="heading-menu"
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={handleClose}
-      >
+      <Menu id="heading-menu" anchorEl={anchorEl} open={!!anchorEl} onClose={handleClose}>
         <MenuItem onClick={handleClickParagraph} sx={{ fontSize: 14 }}>
           Paragraph
         </MenuItem>

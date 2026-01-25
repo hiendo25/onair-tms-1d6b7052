@@ -1,4 +1,6 @@
 import { Database } from "@/types/supabase.types";
+
+import { FileMetadata } from "./file-metadata.dto";
 import { QuestionOption } from "./question-option.dto";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
@@ -12,14 +14,18 @@ export interface QuestionGradeDetail {
   options?: QuestionOption[];
   attachments?: string[];
   answer: {
-    fileUrl?: string;
+    files?: FileMetadata[];
     text?: string;
     selectedOptionId?: string;
     selectedOptionIds?: string[];
+    mappings?: Array<{ columnAId: string; columnBId: string }>;
+    orderedItems?: Array<{ id: string; position: number }>;
+    trueFalseAnswer?: boolean;
   };
-  answerAttachments?: string[];
+  answerAttachments?: FileMetadata[];
   earnedScore: number | null;
   isAutoGraded: boolean;
+  feedback?: string;
 }
 
 export interface SubmissionDetailDto {
@@ -37,5 +43,5 @@ export interface SubmissionDetailDto {
   totalScore: number | null;
   maxScore: number;
   questions: QuestionGradeDetail[];
+  feedback: string | null;
 }
-

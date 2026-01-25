@@ -1,0 +1,26 @@
+import { tabClasses, tabsClasses } from "@mui/material";
+import { Components, Theme } from "@mui/material/styles";
+
+import { grey } from "../../theme-color";
+ 
+export const cardsCustomizations: Components<Theme> = {
+  MuiCard: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        background: "white",
+        ...theme.applyStyles("dark", {}),
+      }),
+    },
+  },
+  MuiCardContent: {
+    styleOverrides: {
+      root: ({ theme }) => ({
+        // [".MuiTabs-list"]: {
+        //   position: "relative",
+        //   zIndex: 10,
+        // },
+        ...theme.applyStyles("dark", {}),
+      }),
+    },
+  },
+};

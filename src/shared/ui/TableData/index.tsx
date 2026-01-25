@@ -1,7 +1,6 @@
-import { createContext, memo, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import {
   Box,
-  Paper,
   Table,
   TableBody,
   TableContainer,
@@ -10,10 +9,15 @@ import {
   TablePaginationOwnProps,
   Typography,
 } from "@mui/material";
-import TableDataRow, { TableRowDataProps } from "./TableDataRow";
+
+import { EmptyBoxIcon } from "@/shared/assets/icons";
+
 import TableDataHeader from "./TableDataHeader";
+import TableDataPagination from "./TableDataPagination";
+import { CustomTablePagination } from "./TableDataPagination/CustomTablePagination";
+import TableRowDataProvider from "./TableDataProvider";
+import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowFixedWidth from "./TableRowFixedWith";
-import TableRowDataProvider from "./TableRowDataProvider";
 
 export type TableDataProps<T> = {
   rowKey?: string;
@@ -24,20 +28,23 @@ export type TableDataProps<T> = {
   hoverRow?: boolean;
   stickyHeader?: boolean;
   showRowCount?: boolean;
+  bordered?: boolean;
+  ssr?: boolean;
   pagination?: {
     page?: number;
     pageSize?: number;
     total?: number;
     totalPages?: number;
     perPageOptions?: number[];
-    onPagination?: (page: number, pageSize: number) => void;
+    onChangePage?: (page: number) => void;
+    onChangePageSize?: (pageSize: number) => void;
   };
   onRowClick?: TableRowDataProps<T>["onRowClick"];
   onCellClick?: TableRowDataProps<T>["onCellClick"];
 };
 
 const initPagination = {
-  page: 0,
+  page: 1,
   pageSize: 10,
   total: 0,
   totalPages: 0,
@@ -52,54 +59,67 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
   minWidth,
   loading,
   hoverRow,
-  pagination = initPagination,
+  bordered = true,
+  pagination,
   stickyHeader,
   showRowCount,
   onRowClick,
   onCellClick,
+  ssr = true,
 }: TableDataProps<T>) => {
-  const [tablePagination, setTablePaginations] = useState<PaginationTable>(() => {
+  const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
-      ...initPagination,
-      page: pagination?.page ? pagination?.page : initPagination.page,
-      pageSize: pagination?.pageSize || initPagination.pageSize,
-      total: pagination?.total || rows?.length || initPagination.total,
-      totalPages: pagination?.totalPages || initPagination.totalPages,
-      perPageOptions: pagination?.perPageOptions || initPagination.perPageOptions,
+      page: pagination?.page ?? initPagination.page,
+      pageSize: pagination?.pageSize ?? initPagination.pageSize,
+      total: pagination?.total ?? rows?.length ?? initPagination.total,
+      totalPages: pagination?.totalPages ?? initPagination.totalPages,
+      perPageOptions: pagination?.perPageOptions ?? initPagination.perPageOptions,
     };
   });
-  const { page, pageSize, total, totalPages, perPageOptions } = tablePagination;
 
-  const items = useMemo(() => {
-    // const start = page > 0 ? (page - 1) * pageSize : 0;
-    // const end = page > 0 ? page * pageSize : pageSize;
-    return rows?.slice(0, pageSize) || [];
-  }, [pageSize, page, rows]);
+  const { page, pageSize, total, perPageOptions } = tablePagination;
+
+  const rowsList = useMemo(() => {
+    if (!rows) return [];
+
+    if (ssr) return rows;
+
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize;
+
+    return rows.slice(from, to);
+  }, [pageSize, rows, page, ssr]);
 
   const onChangePage: TablePaginationOwnProps["onPageChange"] = (event, newPage) => {
-    if (pagination?.onPagination) {
-      pagination.onPagination(newPage + 1, pageSize);
-    } else {
-      setTablePaginations((prev) => ({
-        ...prev,
-        page: newPage,
-      }));
+    if (pagination?.onChangePage) {
+      pagination?.onChangePage?.(newPage + 1);
+      return;
     }
+    setTablePagination((prev) => {
+      return {
+        ...prev,
+        page: newPage + 1,
+      };
+    });
   };
+
   const onChangePageSize: TablePaginationOwnProps["onRowsPerPageChange"] = (evt) => {
     const newPageSize = parseInt(evt.target.value);
-    if (pagination?.onPagination) {
-      pagination.onPagination(page, newPageSize);
-    } else {
-      setTablePaginations((prev) => ({
+
+    if (pagination?.onChangePageSize) {
+      pagination.onChangePageSize(newPageSize);
+      return;
+    }
+    setTablePagination((prev) => {
+      return {
         ...prev,
         pageSize: newPageSize,
-      }));
-    }
+      };
+    });
   };
-  const genRowkey = useCallback(
+  const genRowKey = useCallback(
     (row: T) => {
-      const currentRowKey = row[rowKey || "id"];
+      const currentRowKey = row[rowKey ?? "id"];
       if (!currentRowKey) {
         console.error("Row key is not defined for row:", row);
       }
@@ -110,29 +130,45 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     },
     [rowKey],
   );
-  useLayoutEffect(() => {
+
+  const columnCount = useMemo(() => {
+    return showRowCount ? columns.length + 1 : columns.length;
+  }, [showRowCount, columns]);
+
+  useEffect(() => {
     if (!pagination) return;
 
-    setTablePaginations((prev) => {
-      let newPaginations = { ...prev };
-      const { page, ...restPaginationUpdate } = pagination;
-      if (page) {
-        newPaginations = { ...newPaginations, page: page - 1 };
-      }
-      return { ...newPaginations, ...restPaginationUpdate };
-    });
-  }, [pagination?.page, pagination?.pageSize, pagination?.perPageOptions, pagination?.total, pagination?.totalPages]);
+    setTablePagination((prev) => ({ ...prev, ...pagination, page: pagination.page ?? prev.page }));
+  }, [pagination]);
 
   return (
-    <TableRowDataProvider>
-      <TableContainer component={Paper} className="table-container shadow-none">
+    <TableRowDataProvider<T>
+      initState={{
+        data: rows || [],
+        pagination: {
+          page: pagination?.page ?? initPagination.page,
+          pageSize: pagination?.pageSize ?? initPagination.pageSize,
+          total: pagination?.total ?? rows?.length ?? initPagination.total,
+          totalPages: pagination?.totalPages ?? initPagination.totalPages,
+          perPageOptions: pagination?.perPageOptions ?? initPagination.perPageOptions,
+        },
+      }}
+    >
+      <TableContainer
+        component="div"
+        sx={(theme) => ({
+          marginTop: "0px !important",
+          ...(bordered ? { border: "1px solid", borderColor: theme.palette.grey[300], borderRadius: "12px" } : {}),
+        })}
+        className="table-container shadow-none bg-transparent"
+      >
         <Box
           component="div"
           className="container-wraper w-full overflow-x-auto"
           sx={{
             scrollbarWidth: "thin",
             scrollbarColor: "#eaeaea transparent",
-            scrollbarGutter: "stable",
+            // scrollbarGutter: "stable",
           }}
         >
           <Table stickyHeader={stickyHeader} sx={{ minWidth: minWidth }} aria-label="sticky table">
@@ -140,55 +176,56 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
               <TableDataHeader showRowCount={showRowCount} columns={columns} />
             </TableHead>
             <TableBody>
-              {loading ? (
-                <TableRowFixedWidth columnCount={columns.length}>
+              {loading && (
+                <TableRowFixedWidth columnCount={columnCount}>
                   <Box component="div" className="flex items-center justify-center py-20">
-                    <Typography component="p" className="opacity-60 text-sm">
-                      Loading...
+                    <Typography component="p" className="text-sm">
+                      Đang tải...
                     </Typography>
                   </Box>
                 </TableRowFixedWidth>
-              ) : !items?.length ? (
-                <TableRowFixedWidth columnCount={columns.length}>
+              )}
+
+              {!loading && !rowsList?.length && (
+                <TableRowFixedWidth columnCount={columnCount}>
                   <Box component="div" className="flex items-center justify-center py-20">
                     <Box component="div" className="flex flex-col gap-3 items-center">
-                      {/* <Iconify
-											icon="hugeicons:inbox"
-											className="w-12 h-12 opacity-60"
-										/> */}
+                      <EmptyBoxIcon className="w-20 h-20" />
                       <Typography component="p" className="opacity-60 text-sm">
                         Đang trống.
                       </Typography>
                     </Box>
                   </Box>
                 </TableRowFixedWidth>
-              ) : (
-                items.map((row, _index) => (
+              )}
+
+              {!loading &&
+                rowsList.length > 0 &&
+                rowsList.map((row, _index) => (
                   <TableDataRow
-                    key={genRowkey(row)}
+                    key={genRowKey(row)}
                     showRowCount={showRowCount}
                     hoverRow={hoverRow}
                     indexRow={_index}
-                    page={page + 1}
+                    page={page}
                     pageSize={pageSize}
                     row={row}
                     columns={columns}
                     onRowClick={onRowClick}
                     onCellClick={onCellClick}
                   />
-                ))
-              )}
+                ))}
             </TableBody>
           </Table>
         </Box>
-        <TablePagination
-          component="div"
+        {/* <TableDataPagination /> */}
+        <CustomTablePagination
           count={total}
           rowsPerPageOptions={perPageOptions}
           rowsPerPage={pageSize}
           onPageChange={onChangePage}
           onRowsPerPageChange={onChangePageSize}
-          page={page}
+          page={page - 1}
         />
       </TableContainer>
     </TableRowDataProvider>

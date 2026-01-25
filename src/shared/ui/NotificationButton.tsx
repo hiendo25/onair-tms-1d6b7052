@@ -1,9 +1,14 @@
 "use client";
+import React from "react";
 import { Badge, IconButton } from "@mui/material";
-import { Bell01Icon } from "../assets/icons";
-import { useTheme, useMediaQuery, useColorScheme } from "@mui/material";
+import { useColorScheme, useMediaQuery, useTheme } from "@mui/material";
 
-const NotifycationButton = () => {
+import { Bell01Icon } from "../assets/icons";
+
+interface NotificationButtonProps {
+  className?: string;
+}
+const NotificationButton: React.FC<NotificationButtonProps> = () => {
   const theme = useTheme();
 
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
@@ -16,7 +21,7 @@ const NotifycationButton = () => {
   return (
     <IconButton
       sx={{
-        backgroundColor: paletteMode === "light" ? "white" : "white",
+        backgroundColor: paletteMode === "light" ? theme.palette.grey[200] : "white",
         borderRadius: "0.625rem",
         "&:hover": {
           backgroundColor: "white",
@@ -40,4 +45,4 @@ const NotifycationButton = () => {
     </IconButton>
   );
 };
-export default NotifycationButton;
+export default NotificationButton;

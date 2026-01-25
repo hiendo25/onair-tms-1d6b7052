@@ -1,6 +1,6 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetBranchesParams } from "@/types/dto/branches";
 import * as branchService from "@/services/branches/branch.service";
+import type { GetBranchesParams } from "@/types/dto/branches";
 
 export const useGetBranchesQuery = (params?: GetBranchesParams, options?: { enabled?: boolean }) => {
   return useTQuery({

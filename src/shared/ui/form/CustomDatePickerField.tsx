@@ -1,6 +1,7 @@
-import { DatePickerProps, DatePicker } from "@mui/x-date-pickers";
-import { FormControl, FormLabel, FormHelperText, alpha } from "@mui/material";
-import { useId } from "react";
+import React, { useId } from "react";
+import { alpha, FormControl, FormHelperText, FormLabel } from "@mui/material";
+import { DatePicker, DatePickerProps } from "@mui/x-date-pickers";
+
 import { cn } from "@/utils";
 export interface CustomDatePickerFieldProps extends DatePickerProps {
   helperText?: string;
@@ -47,9 +48,7 @@ const CustomDatePickerField: React.FC<CustomDatePickerFieldProps> = ({
         </FormLabel>
       ) : null}
       <DatePicker {...restProps} />
-      {helperText ? (
-        <FormHelperText error={!!error}>{helperText}</FormHelperText>
-      ) : null}
+      {helperText ? <FormHelperText error={!!error}>{helperText}</FormHelperText> : null}
     </FormControl>
   );
 };

@@ -1,19 +1,21 @@
 "use client";
-import React, { useEffect, useRef, useImperativeHandle, useCallback, forwardRef, useLayoutEffect } from "react";
-import { FormProvider, SubmitHandler, useForm, useFormContext } from "react-hook-form";
-import { classRoomSchema, ClassRoom } from "../classroom-form.schema";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button, IconButton } from "@mui/material";
-import { CalendarDateIcon, CloseIcon, EyeIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
+
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { ClassRoomType } from "@/model/class-room.model";
+import { CalendarDateIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
+
+import ButtonCancel from "./ButtonCancel";
+import ButtonSubmit from "./ButtonSubmit";
+import { ClassRoomFormValues, classRoomSchema } from "./classroom-form.schema";
 import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabContainer";
 import TabClassRoomInformation from "./TabClassRoomInformation";
 import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSession";
 import TabClassRoomSetting from "./TabClassRoomSetting";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
-import { ClassRoomType } from "@/model/class-room.model";
-import { useSnackbar } from "notistack";
 import { getKeyFieldByTab } from "./utils";
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
@@ -21,51 +23,10 @@ export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-setting": "clsTab-setting",
 } as const;
 
-export const TAB_NODES_CLASS_ROOM = new Map([
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-information"],
-    {
-      prev: null,
-      next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-session"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-      next: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    },
-  ],
-  [
-    TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-    {
-      prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-      next: null,
-    },
-  ],
-]);
-
-export interface ClassRoomFormContainerRef {
-  resetForm: () => void;
-}
-export interface ClassRoomFormContainerProps {
-  onSubmit?: (
-    formData: ClassRoom,
-    selectedStudents: ClassRoomStore["state"]["selectedStudents"],
-    selectedTeachers: ClassRoomStore["state"]["selectedTeachers"],
-  ) => void;
-  onCancel?: () => void;
-  platform: ClassRoomPlatformType;
-  roomType?: ClassRoomType;
-  value?: ClassRoom;
-  isLoading?: boolean;
-  action?: "create" | "edit";
-}
-
-export const initClassRoomFormData = (oprions: {
+export const initClassRoomFormData = (option: {
   platform?: ClassRoomPlatformType;
   roomType?: ClassRoomType;
-}): Partial<ClassRoom> => {
+}): Partial<ClassRoomFormValues> => {
   return {
     title: "",
     description: "",
@@ -74,50 +35,72 @@ export const initClassRoomFormData = (oprions: {
     classRoomId: "",
     slug: "",
     status: "draft",
-    roomType: oprions?.roomType || "single",
+    roomType: option?.roomType,
     forWhom: [],
     docs: [],
-    platform: oprions?.platform,
+    platform: option?.platform,
     classRoomSessions: [],
+    classType: "room",
   };
 };
 
+export interface ClassRoomFormContainerRef {
+  resetForm: () => void;
+}
+export interface ClassRoomFormContainerProps {
+  onSubmit?: (
+    formData: ClassRoomFormValues,
+    selectedStudents: ClassRoomStore["state"]["selectedStudents"],
+    selectedCertificate: ClassRoomStore["state"]["selectedCertificate"]
+  ) => void;
+  onCancel?: () => void;
+  platform: ClassRoomPlatformType;
+  roomType?: ClassRoomType;
+  isLearningPath?: boolean;
+  value?: ClassRoomFormValues;
+  isLoading?: boolean;
+  action?: "create" | "edit";
+}
 const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFormContainerProps>(
-  ({ onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel }, ref) => {
-    const { enqueueSnackbar } = useSnackbar();
+  (
+    { onSubmit, isLoading, action, value: initFormValue, platform, roomType, onCancel, isLearningPath = false },
+    ref,
+  ) => {
+    const buttonActionRef = useRef<"submit" | "cancel">(null);
     const classRoomTabContainerRef = useRef<ClassRoomTabContainerRef>(null);
     const resetStore = useClassRoomStore(({ actions }) => actions.reset);
     const selectedStudents = useClassRoomStore(({ state }) => state.selectedStudents);
-    const selectedTeachers = useClassRoomStore(({ state }) => state.selectedTeachers);
+    const selectedCertificate = useClassRoomStore(({ state }) => state.selectedCertificate);
 
-    const methods = useForm<ClassRoom>({
+    const methods = useForm<ClassRoomFormValues>({
       resolver: zodResolver(classRoomSchema),
       defaultValues: initClassRoomFormData({
         platform: platform,
         roomType: roomType,
       }),
+      reValidateMode: "onChange",
+      mode: "onChange",
     });
 
     const {
-      getValues,
-      setValue,
+      control,
       handleSubmit,
       formState: { errors },
-      control,
       trigger,
-      watch,
       reset,
     } = methods;
 
-    console.log({ errors, value: getValues(), selectedStudents, selectedTeachers });
+    console.log({ errors, selectedStudents, isLearningPath });
 
-    const triggerBeforeSubmitForm = (submitAction: () => void, status: "draft" | "publish") => async () => {
+    const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void) => async () => {
       try {
-        const TAB_LIST = [
-          TAB_KEYS_CLASS_ROOM["clsTab-information"],
-          TAB_KEYS_CLASS_ROOM["clsTab-session"],
-          TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-        ];
+        const TAB_LIST = isLearningPath
+          ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
+          : [
+              TAB_KEYS_CLASS_ROOM["clsTab-information"],
+              TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+            ];
         const allTabsTriggers = await Promise.allSettled(
           TAB_LIST.map(async (key) => {
             const isValid = await trigger(getKeyFieldByTab(key));
@@ -129,46 +112,84 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 
         if (isSomeTabFailed) return;
 
-        setValue("status", status);
-
         submitAction();
       } catch (error) {
         console.log(error);
       }
     };
 
-    const submitForm: SubmitHandler<ClassRoom> = (data) => {
-      console.log({ errors, data, selectedTeachers, selectedStudents });
+    const handleSubmitForm = () => {
+      buttonActionRef.current = "submit";
+      handleSubmit((data) => onSubmit?.({ ...data, status: "publish" }, selectedStudents, selectedCertificate))();
+    };
 
-      const sessionList = getValues("classRoomSessions");
+    const handleCancel = () => {
+      buttonActionRef.current = "cancel";
+      resetStore();
+      reset();
+      onCancel?.();
+    };
 
-      const isEverySessionHasTeacher = sessionList.every((session, _index) => {
-        const hasTeacher = !!selectedTeachers[_index]?.length;
-        if (!hasTeacher) {
-          enqueueSnackbar(`"${session.title}" chưa chọn giáo viên.`, { variant: "error" });
-          classRoomTabContainerRef.current?.setTabStatus("clsTab-session", "invalid");
-        }
-        return hasTeacher;
-      });
+    const TAB_ITEMS = useMemo(() => {
+      const BASE_ITEMS = [
+        {
+          tabName: "Thông tin chung",
+          tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          prev: null,
+          next: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+          icon: <GlobeIcon className="w-5 h-5" />,
+          content: <TabClassRoomInformation action={action} />,
+        },
+        {
+          tabName: "Thời gian",
+          tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+          prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
+          next: isLearningPath ? null : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+          icon: <CalendarDateIcon className="w-5 h-5" />,
+          content: <TabClassRoomSession />,
+        },
+      ];
+      return isLearningPath
+        ? BASE_ITEMS
+        : [
+            ...BASE_ITEMS,
+            {
+              tabName: "Thiết lập",
+              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+              prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              next: null,
+              icon: <UsersPlusIcon className="w-5 h-5" />,
+              content: <TabClassRoomSetting />,
+            },
+          ];
+    }, [action, isLearningPath]);
+    /**
+     * Init form value
+     */
 
-      if (!isEverySessionHasTeacher) {
+    useEffect(() => {
+      const base = initClassRoomFormData({ platform, roomType });
+
+      if (initFormValue) {
+        reset(initFormValue);
         return;
       }
 
-      // if (!selectedStudents.length) {
-      //   enqueueSnackbar(`Chưa chọn học viên.`, { variant: "error" });
-      //   classRoomTabContainerRef.current?.setTabStatus("clsTab-setting", "invalid");
-      //   return;
-      // }
+      const initSessions = initClassSessionFormData(
+        platform !== "hybrid"
+          ? { sessionType: platform, classType: isLearningPath ? "learning_path" : "room" }
+          : undefined,
+      );
 
-      onSubmit?.(data, selectedStudents, selectedTeachers);
-    };
-
-    const cancelCreateClassRoom = () => {
-      resetStore(); // Reset all selected value in classRoom store
-      reset(); //Reset Form
-      onCancel?.();
-    };
+      reset({
+        ...base,
+        classRoomSessions: roomType === "multiple" ? [initSessions, initSessions] : [initSessions],
+        classType: isLearningPath ? "learning_path" : "room",
+      });
+      return () => {
+        buttonActionRef.current = null;
+      };
+    }, [initFormValue, platform, roomType, isLearningPath, reset]);
 
     useImperativeHandle(ref, () => ({
       resetForm: () => {
@@ -177,86 +198,27 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
       },
     }));
 
-    /**
-     * Init form value
-     */
-    useLayoutEffect(() => {
-      if (!initFormValue) return;
-      reset(initFormValue);
-    }, [initFormValue]);
-
-    useLayoutEffect(() => {
-      if (!roomType) return;
-
-      const initSessionsFormData = initClassSessionFormData({ isOnline: platform === "online" });
-      setValue(
-        "classRoomSessions",
-        roomType === "multiple" ? [initSessionsFormData, initSessionsFormData] : [initSessionsFormData],
-      );
-    }, [roomType, platform]);
-
     return (
       <FormProvider {...methods}>
         <ClassRoomTabContainer
           ref={classRoomTabContainerRef}
           trigger={trigger}
           errors={errors}
-          items={[
-            {
-              tabName: "Thông tin chung",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-              icon: <GlobeIcon className="w-5 h-5" />,
-              content: <TabClassRoomInformation />,
-            },
-            {
-              tabName: "Thời gian",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-              icon: <CalendarDateIcon className="w-5 h-5" />,
-              content: <TabClassRoomSession />,
-            },
-            // {
-            //   tabName: "Tài nguyên",
-            //   tabKey: TAB_KEYS_CLASS_ROOM["clsTab-resource"],
-            //   icon: <ClipboardIcon className="w-5 h-5" />,
-            //   content: <TabClassRoomResource />,
-            // },
-            {
-              tabName: "Thiết lập",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-              icon: <UsersPlusIcon className="w-5 h-5" />,
-              content: <TabClassRoomSetting />,
-            },
-          ]}
+          items={TAB_ITEMS}
           actions={
             <div className="flex items-center gap-2">
-              <IconButton
-                className="border rounded-lg border-gray-300 bg-white"
-                onClick={cancelCreateClassRoom}
+              <ButtonCancel
+                onOk={handleCancel}
+                loading={isLoading && buttonActionRef.current === "cancel"}
+                initialData={initFormValue}
+              />
+              <ButtonSubmit
+                onClick={checkAllFieldsValueTabBeforeSubmit(handleSubmitForm)}
                 disabled={isLoading}
-              >
-                <CloseIcon />
-              </IconButton>
-              {/* <IconButton className="border rounded-lg border-gray-300 bg-white" disabled={isLoading}>
-                <EyeIcon />
-              </IconButton> */}
-              {/* <Button
-                size="large"
-                color="inherit"
-                variant="outlined"
-                className="border-gray-300"
-                disabled={isLoading}
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "draft")}
-              >
-                Lưu nháp
-              </Button> */}
-              <Button
-                size="large"
-                onClick={triggerBeforeSubmitForm(handleSubmit(submitForm), "publish")}
-                disabled={isLoading}
-                loading={isLoading}
+                loading={isLoading && buttonActionRef.current === "submit"}
               >
                 {action === "create" ? "Đăng tải" : "Cập nhật"}
-              </Button>
+              </ButtonSubmit>
             </div>
           }
         />
@@ -266,4 +228,4 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
 );
 export default ClassRoomFormContainer;
 
-export const useClassRoomFormContext = useFormContext<ClassRoom>;
+export const useClassRoomFormContext = useFormContext<ClassRoomFormValues>;

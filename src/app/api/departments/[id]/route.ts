@@ -1,22 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { UpdateDepartmentDto } from "@/types/dto/departments";
-import { departmentService } from "@/services";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+import { PATHS } from "@/constants/path.constant";
+import { departmentService } from "@/services";
+import type { UpdateDepartmentDto } from "@/types/dto/departments";
+
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const payload: UpdateDepartmentDto = {
-      id: params.id,
+      id,
       ...body,
     };
 
     const result = await departmentService.updateDepartment(payload);
 
-    revalidatePath("/department/departments");
+    revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
     return NextResponse.json(
       {
@@ -24,48 +24,36 @@ export async function PUT(
         message: "Cập nhật phòng ban thành công",
         data: result,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating department:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi cập nhật phòng ban";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật phòng ban";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await departmentService.deleteDepartment(params.id);
+    const { id } = await params;
+    await departmentService.deleteDepartment(id);
 
-    revalidatePath("/department/departments");
+    revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
     return NextResponse.json(
       {
         success: true,
         message: "Xóa phòng ban thành công",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting department:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi xóa phòng ban";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa phòng ban";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

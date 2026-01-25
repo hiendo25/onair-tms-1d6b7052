@@ -1,12 +1,21 @@
 "use client";
 
 import * as React from "react";
+import AddIcon from "@mui/icons-material/Add";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
+  Alert,
   Box,
   Button,
   Card,
+  CircularProgress,
   IconButton,
   InputAdornment,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -17,28 +26,23 @@ import {
   TableRow,
   TextField,
   Typography,
-  CircularProgress,
-  Alert,
-  Menu,
-  MenuItem,
-  ListItemText,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import AddIcon from "@mui/icons-material/Add";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
-import PageContainer from "@/shared/ui/PageContainer";
-import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
-import { useDeleteDepartmentMutation } from "@/modules/department/operations/mutation";
-import type { DepartmentDto } from "@/types/dto/departments";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
+import { PATHS } from "@/constants/path.constant";
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { useQueryClient } from "@tanstack/react-query";
+import { useOrganizationId } from "@/hooks/useOrganizationId";
 import { DepartmentDialog } from "@/modules/department/components/DepartmentDialog";
 import { ImportDepartmentDialog } from "@/modules/department/components/ImportDepartmentDialog";
-import { useOrganizationId } from "@/hooks/useOrganizationId";
+import { useDeleteDepartmentMutation } from "@/modules/department/operations/mutation";
+import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
+import PageContainer from "@/shared/ui/PageContainer";
+import type { DepartmentDto } from "@/types/dto/departments";
 
 export default function DepartmentList() {
+  const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
@@ -121,6 +125,16 @@ export default function DepartmentList() {
     handleMenuClose();
   };
 
+  const handleDetail = () => {
+    if (!selectedDepartmentId) return;
+    router.push(PATHS.DEPARTMENTS.DETAIL(selectedDepartmentId));
+    handleMenuClose();
+  };
+
+  const handleRowClick = (departmentId: string) => {
+    router.push(PATHS.DEPARTMENTS.DETAIL(departmentId));
+  };
+
   const handleDelete = async () => {
     if (!selectedDepartmentId) return;
 
@@ -178,7 +192,7 @@ export default function DepartmentList() {
   return (
     <PageContainer
       title="Quản lý Phòng ban"
-      breadcrumbs={[{ title: "Phòng ban", path: "/department/departments" }]}
+      breadcrumbs={[{ title: "Phòng ban", path: PATHS.DEPARTMENTS.ROOT }]}
     >
       <Box sx={{ py: 3 }}>
         <Card sx={{ p: 3 }}>
@@ -261,7 +275,12 @@ export default function DepartmentList() {
                       </TableRow>
                     ) : (
                       departments.map((department) => (
-                        <TableRow key={department.id} hover sx={{ cursor: "pointer" }}>
+                        <TableRow
+                          key={department.id}
+                          hover
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => handleRowClick(department.id)}
+                        >
                           <TableCell>{department.name}</TableCell>
                           <TableCell>
                             {new Date(department.created_at).toLocaleString("vi-VN")}
@@ -308,6 +327,9 @@ export default function DepartmentList() {
               horizontal: "right",
             }}
           >
+            <MenuItem onClick={handleDetail}>
+              <ListItemText>Chi tiết</ListItemText>
+            </MenuItem>
             <MenuItem onClick={handleEdit}>
               <ListItemText>Chỉnh sửa</ListItemText>
             </MenuItem>

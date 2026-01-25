@@ -1,10 +1,13 @@
-import PageContainer from "@/shared/ui/PageContainer";
-import UpdateClassRoom from "./_components/UpdateClassRoom";
-import { getClassRoomById } from "@/repository/class-room";
+import dayjs, { Dayjs } from "dayjs";
+import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { redirect } from "next/navigation";
-import { Metadata, ResolvingMetadata } from "next";
-import dayjs, { Dayjs } from "dayjs";
+
+import { PATHS } from "@/constants/path.constant";
+import { getClassRoomById, GetClassRoomByIdResponse } from "@/repository/class-room";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import UpdateClassRoomForm from "./_components/UpdateClassRoomForm";
 interface EditClassRoomPageProps {
   params: Promise<{
     id: string;
@@ -23,15 +26,13 @@ export async function generateMetadata(
   };
 }
 
-export type GetClassRoomByIdData = Awaited<ReturnType<typeof getClassRoomById>>["data"];
+export type GetClassRoomByIdData = NonNullable<GetClassRoomByIdResponse["data"]>;
 const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
   const { id: classRoomId } = await params;
   const { data, error } = await getClassRoomById(classRoomId);
 
-  console.log(data, error);
-
   if (!data || error) {
-    return notFound();
+    notFound();
   }
 
   /**
@@ -54,6 +55,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
     (session) => getSessionStatus(dayjs(session.start_at), dayjs(session.end_at)) === "ongoing",
   );
 
+  console.log({ data });
   if (isClassRoomEnded) {
     redirect("/admin/class-room");
   }
@@ -64,7 +66,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
       breadcrumbs={[
         {
           title: "Quản lý lớp học",
-          path: "/admin/class-room",
+          path: PATHS.CLASSROOMS.ROOT,
         },
         {
           title: "Chỉnh sửa",
@@ -76,7 +78,7 @@ const EditClassRoomPage = async ({ params }: EditClassRoomPageProps) => {
       ]}
     >
       <div className="max-w-[1200px]">
-        <UpdateClassRoom data={data} />
+        <UpdateClassRoomForm data={data} />
       </div>
     </PageContainer>
   );

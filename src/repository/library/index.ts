@@ -1,11 +1,11 @@
-import { createSVClient } from "@/services";
+import { createClient } from "@/services";
 import { Database } from "@/types/supabase.types";
 
 type Library = Database["public"]["Tables"]["libraries"]["Row"];
 type Resource = Database["public"]["Tables"]["resources"]["Row"];
 
 export async function getLibraryByEmployeeId(employeeId: string): Promise<Library | null> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("libraries")
@@ -21,7 +21,7 @@ export async function getLibraryByEmployeeId(employeeId: string): Promise<Librar
 }
 
 export async function getResourcesByLibrary(libraryId: string): Promise<Resource[]> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("resources")
@@ -42,7 +42,7 @@ export async function getResourcesByLibraryAndFolder(
   libraryId: string,
   folderId: string | null
 ): Promise<Resource[]> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   let query = supabase
     .from("resources")
@@ -68,7 +68,7 @@ export async function getResourcesByLibraryAndFolder(
 }
 
 export async function deleteResource(resourceId: string): Promise<void> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("resources")
@@ -87,7 +87,7 @@ export async function createFolder(data: {
   organization_id: string;
   created_by: string;
 }): Promise<Resource> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data: folder, error } = await supabase
     .from("resources")
@@ -110,7 +110,7 @@ export async function createFolder(data: {
 }
 
 export async function renameResource(resourceId: string, newName: string): Promise<void> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { error } = await supabase
     .from("resources")
@@ -137,7 +137,7 @@ export async function createFileResource(data: {
   extension: string;
   thumbnail_url: string | null;
 }): Promise<Resource> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data: file, error } = await supabase
     .from("resources")
@@ -165,7 +165,7 @@ export async function createFileResource(data: {
 }
 
 export async function getResourceById(resourceId: string): Promise<Resource> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("resources")
@@ -186,7 +186,7 @@ export async function getResourceById(resourceId: string): Promise<Resource> {
 }
 
 export async function getResourcesByIds(resourceIds: string[]): Promise<Resource[]> {
-  const supabase = await createSVClient();
+  const supabase = createClient();
 
   if (resourceIds.length === 0) {
     return [];
@@ -203,4 +203,30 @@ export async function getResourcesByIds(resourceIds: string[]): Promise<Resource
   }
 
   return data || [];
+}
+
+export async function deleteLibraryByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("libraries")
+    .delete()
+    .eq("owner_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete library by employee: ${error.message}`);
+  }
+}
+
+export async function softDeleteResourcesByEmployeeId(employeeId: string): Promise<void> {
+  const supabase = createClient();
+
+  const { error } = await supabase
+    .from("resources")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to soft delete resources by employee: ${error.message}`);
+  }
 }

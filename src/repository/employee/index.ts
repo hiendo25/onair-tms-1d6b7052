@@ -1,39 +1,63 @@
 import { supabase } from "@/services";
-import { EmployeeStudentWithProfileItem } from "@/model/employee.model";
 export type EmployeeQueryParams = {
   page?: number;
   pageSize?: number;
   excludes?: string[];
   search?: string;
-  organizationUnitIds?: string[];
+  departmentIds?: string[];
+  branchIds?: string[];
+  organizationId: string;
 };
 
-const getStudents = async (queryParams?: EmployeeQueryParams) => {
-  const { page = 1, pageSize = 20, excludes, search, organizationUnitIds } = queryParams || {};
+export type GetStudentsQueryParams = {
+  page?: number;
+  pageSize?: number;
+  excludes?: string[];
+  search?: {
+    key: "full_name" | "code" | "email";
+    search: string;
+  };
+  departmentIds?: string[];
+  branchIds?: string[];
+  organizationId?: string;
+};
+
+const getStudents = async (queryParams?: GetStudentsQueryParams) => {
+  const { page = 1, pageSize = 20, excludes, search, departmentIds, branchIds, organizationId } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
   let studentQuery = supabase
     .from("employees")
     .select(
-      `id, 
-      employee_code, 
-      status, 
-      created_at, 
+      `id,
+      employee_code,
+      status,
+      created_at,
       employee_type,
       profiles!inner(
-        id, 
-        full_name, 
-        gender, 
-        avatar, 
-        email
+        id,
+        full_name,
+        gender,
+        avatar,
+        email,
+				employee_id
       ),
-      employments!inner(
-      organization_unit_id,
-        organization_units!inner(
+      employee_departments!inner(
+        id,
+        department_id,
+        departments(
           id,
-          name, 
-          type
+          name,
+          branch_id
+        )
+      ),
+      employee_branches!inner(
+        id,
+        branch_id,
+        branches(
+          id,
+          name
         )
       )
     `,
@@ -43,28 +67,55 @@ const getStudents = async (queryParams?: EmployeeQueryParams) => {
     )
     .eq("employee_type", "student");
 
-  if (organizationUnitIds?.length) {
-    studentQuery.in("employments.organization_units.id", organizationUnitIds);
+  if (organizationId) {
+    studentQuery = studentQuery.eq("organization_id", organizationId);
+  }
+
+  if (departmentIds?.length) {
+    studentQuery = studentQuery.filter("employee_departments.department_id", "in", `(${departmentIds.join(",")})`);
+  }
+
+  if (branchIds?.length) {
+    studentQuery = studentQuery.filter("employee_branches.branch_id", "in", `(${branchIds.join(",")})`);
   }
 
   if (excludes?.length) {
     studentQuery = studentQuery.not("id", "in", `(${excludes.join(",")})`);
   }
-  if (search) {
-    studentQuery = studentQuery.ilike("profiles.full_name", `%${search}%`);
+  if (search && search.search) {
+    const keysMap = {
+      full_name: "profiles.full_name ",
+      code: "employee_code",
+      email: "profiles.email",
+    };
+    const keyName = keysMap[search.key];
+    const keyword = `%${search.search}%`;
+    studentQuery = studentQuery.ilike(keyName, `${keyword}`);
   }
 
-  const { data, error, count, status, statusText } = await studentQuery
+  return await studentQuery
     .order("created_at", { ascending: false })
-    .range(from, to);
-
-  return {
-    data: data as EmployeeStudentWithProfileItem[],
-    count,
-    error,
-    status,
-    statusText,
-  };
+    .range(from, to)
+    .overrideTypes<Array<{ employee_type: "student" }>>();
 };
 
-export { getStudents };
+/**
+ * Get employee's department ID
+ * @param employeeId - The employee's UUID
+ * @returns The department ID or null if not found
+ */
+const getEmployeeDepartmentId = async (employeeId: string): Promise<string | null> => {
+  const { data, error } = await supabase
+    .from("employee_departments")
+    .select("department_id")
+    .eq("employee_id", employeeId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return data?.department_id ?? null;
+};
+
+export type GetStudentsResponse = Awaited<ReturnType<typeof getStudents>>;
+export { getStudents, getEmployeeDepartmentId };

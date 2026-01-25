@@ -1,0 +1,41 @@
+import React from "react";
+import { Control, useController } from "react-hook-form";
+
+import { useCreateCategoriesMutation, useGetCategoriesQuery } from "@/modules/categories/operations";
+import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
+import { slugify } from "@/utils/slugify";
+import { UpsertCourseFormData } from "../../upsert-course.schema";
+interface CategorySelectorProps {
+  control: Control<UpsertCourseFormData>;
+}
+const CategorySelector: React.FC<CategorySelectorProps> = ({ control }) => {
+  const { data: fieldListData, isPending } = useGetCategoriesQuery();
+  const { mutate: createClassField, isPending: isCreateLoading } = useCreateCategoriesMutation();
+
+  const handleEnter = (value: string) => {
+    createClassField({
+      description: "",
+      name: value,
+      slug: `${slugify(value)}-${new Date().getTime()}`,
+      thumbnail_url: "",
+    });
+  };
+  const fieldList = fieldListData?.data || [];
+
+  return (
+    <RHFMultipleSelectField
+      label="Chủ đề"
+      control={control}
+      name="categories"
+      required
+      placeholder="Chọn chủ đề"
+      onInputEnter={handleEnter}
+      isLoading={isCreateLoading}
+      options={fieldList.map((it) => ({
+        label: it.name || "",
+        value: it.id,
+      }))}
+    />
+  );
+};
+export default CategorySelector;

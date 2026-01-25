@@ -1,11 +1,12 @@
 import * as React from "react";
-import { Theme, alpha, Components } from "@mui/material/styles";
 import { buttonBaseClasses } from "@mui/material/ButtonBase";
 import { dividerClasses } from "@mui/material/Divider";
 import { menuItemClasses } from "@mui/material/MenuItem";
+import { alpha,Components, Theme } from "@mui/material/styles";
 import { tabClasses } from "@mui/material/Tab";
+
 import { grey, primary } from "../../theme-color";
-/* eslint-disable import/prefer-default-export */
+ 
 export const navigationCustomizations: Components<Theme> = {
   MuiMenuItem: {
     styleOverrides: {

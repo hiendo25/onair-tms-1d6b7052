@@ -1,15 +1,19 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
+import MenuIcon from "@mui/icons-material/Menu";
+import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import MuiAppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import { styled, useTheme } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import MenuIcon from "@mui/icons-material/Menu";
-import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import Stack from "@mui/material/Stack";
 import Link from "next/link";
+
+import NotificationButton from "../../NotificationButton";
+
+import AccountSetting from "./AccountSetting";
 import ThemeSwitcher from "./ThemeSwitcher";
 
 const AppBar = styled(MuiAppBar)(({ theme }) => ({
@@ -38,12 +42,7 @@ export interface HeaderProps {
   onToggleMenu: (open: boolean) => void;
 }
 
-export default function Header({
-  logo,
-  title,
-  menuOpen,
-  onToggleMenu,
-}: HeaderProps) {
+export default function Header({ logo, title, menuOpen, onToggleMenu }: HeaderProps) {
   const theme = useTheme();
 
   const handleMenuOpen = React.useCallback(() => {
@@ -56,16 +55,11 @@ export default function Header({
       const collapseMenuActionText = "Collapse";
 
       return (
-        <Tooltip
-          title={`${isExpanded ? collapseMenuActionText : expandMenuActionText
-            } menu`}
-          enterDelay={1000}
-        >
+        <Tooltip title={`${isExpanded ? collapseMenuActionText : expandMenuActionText} menu`} enterDelay={1000}>
           <div>
             <IconButton
               size="small"
-              aria-label={`${isExpanded ? collapseMenuActionText : expandMenuActionText
-                } navigation menu`}
+              aria-label={`${isExpanded ? collapseMenuActionText : expandMenuActionText} navigation menu`}
               onClick={handleMenuOpen}
             >
               {isExpanded ? <MenuOpenIcon /> : <MenuIcon />}
@@ -78,7 +72,7 @@ export default function Header({
   );
 
   return (
-    <AppBar color="inherit" position="absolute" sx={{ displayPrint: "none" }}>
+    <AppBar color="inherit" position="sticky" sx={{ displayPrint: "none", bgcolor: "white" }}>
       <Toolbar sx={{ backgroundColor: "inherit", mx: { xs: -0.75, sm: -1 } }}>
         <Stack
           direction="row"
@@ -89,7 +83,7 @@ export default function Header({
             width: "100%",
           }}
         >
-          <Stack direction="row" alignItems="center">
+          <Stack direction="row" alignItems="center" className="relative">
             <Box sx={{ mr: 1 }}>{getMenuIcon(menuOpen)}</Box>
             <Link href="/" style={{ textDecoration: "none" }}>
               <Stack direction="row" alignItems="center">
@@ -99,7 +93,7 @@ export default function Header({
                     variant="h6"
                     sx={{
                       color: (theme.vars ?? theme).palette.primary.main,
-                      fontWeight: "700",
+                      fontWeight: "600",
                       ml: 1,
                       whiteSpace: "nowrap",
                       lineHeight: 1,
@@ -111,14 +105,10 @@ export default function Header({
               </Stack>
             </Link>
           </Stack>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={1}
-            sx={{ marginLeft: "auto" }}
-          >
-            <Stack direction="row" alignItems="center">
-              <ThemeSwitcher />
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
+            <Stack direction="row" alignItems="center" gap={2}>
+              <NotificationButton />
+              <AccountSetting />
             </Stack>
           </Stack>
         </Stack>

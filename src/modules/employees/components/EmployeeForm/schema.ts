@@ -1,13 +1,13 @@
 import { z } from "zod";
+
 import { Constants } from "@/types/supabase.types";
+
 
 const genderValues = Constants.public.Enums.gender;
 const employeeTypeValues = Constants.public.Enums.employee_type;
 
 export const EmployeeFormSchema = z.object({
-  email: z
-    .email()
-    .min(1, { message: "Vui lòng nhập email" }),
+  email: z.email().min(1, { message: "Vui lòng nhập email" }),
   full_name: z
     .string()
     .trim()
@@ -23,7 +23,7 @@ export const EmployeeFormSchema = z.object({
       },
       {
         message: "Số điện thoại phải có 10-11 chữ số",
-      }
+      },
     ),
   gender: z.enum(genderValues, {
     message: "Vui lòng chọn giới tính",
@@ -36,9 +36,11 @@ export const EmployeeFormSchema = z.object({
   employee_code: z.string().optional(),
   manager_id: z.string().min(1, { message: "Vui lòng chọn người quản lý" }),
   position_id: z.string().optional(),
-  employee_type: z.enum(employeeTypeValues).optional(),
+  employee_type: z.enum(employeeTypeValues, {
+    message: "Vui lòng chọn vai trò",
+  }),
   start_date: z.string().min(1, { message: "Vui lòng chọn ngày bắt đầu" }),
+  role_id: z.string().min(1, { message: "Vui lòng chọn vai trò" }),
 });
 
 export type EmployeeFormData = z.infer<typeof EmployeeFormSchema>;
-

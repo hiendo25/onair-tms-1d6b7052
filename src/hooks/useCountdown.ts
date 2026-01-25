@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export type UseCountdownDateReturn = {
   days: string;
@@ -44,17 +44,11 @@ export function useCountdownDate(date: Date): UseCountdownDateReturn {
 
     const getDays = Math.floor(distanceToNow / (1000 * 60 * 60 * 24));
 
-    const getHours = `0${Math.floor(
-      (distanceToNow % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-    )}`.slice(-2);
+    const getHours = `0${Math.floor((distanceToNow % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))}`.slice(-2);
 
-    const getMinutes = `0${Math.floor(
-      (distanceToNow % (1000 * 60 * 60)) / (1000 * 60),
-    )}`.slice(-2);
+    const getMinutes = `0${Math.floor((distanceToNow % (1000 * 60 * 60)) / (1000 * 60))}`.slice(-2);
 
-    const getSeconds = `0${Math.floor(
-      (distanceToNow % (1000 * 60)) / 1000,
-    )}`.slice(-2);
+    const getSeconds = `0${Math.floor((distanceToNow % (1000 * 60)) / 1000)}`.slice(-2);
 
     setCountdown({
       days: getDays < 10 ? `0${getDays}` : `${getDays}`,
@@ -80,9 +74,7 @@ export type UseCountdownSecondsReturn = {
   setCountdown: React.Dispatch<React.SetStateAction<number>>;
 };
 
-export function useCountdownSeconds(
-  initCountdown: number,
-): UseCountdownSecondsReturn {
+export function useCountdownSeconds(initCountdown: number): UseCountdownSecondsReturn {
   const [countdown, setCountdown] = useState(initCountdown);
 
   const remainingSecondsRef = useRef(countdown);
@@ -121,7 +113,7 @@ interface UseCountdownDateReturnReturn {
   seconds: string;
 }
 export function useCountdownV2(endDate: Date): UseCountdownDateReturnReturn {
-  const intervalRef = useRef<NodeJS.Timeout>(null);
+  const intervalRef = useRef<ReturnType<typeof setTimeout>>(null);
   const [countdown, setCountdown] = useState({
     days: 0,
     hours: 0,
@@ -143,13 +135,9 @@ export function useCountdownV2(endDate: Date): UseCountdownDateReturnReturn {
 
       const days = Math.floor(remainDateTime / (1000 * 60 * 60 * 24));
 
-      const hours = Math.floor(
-        (remainDateTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-      );
+      const hours = Math.floor((remainDateTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-      const minutes = Math.floor(
-        (remainDateTime % (1000 * 60 * 60)) / (1000 * 60),
-      );
+      const minutes = Math.floor((remainDateTime % (1000 * 60 * 60)) / (1000 * 60));
 
       const seconds = Math.floor((remainDateTime % (1000 * 60)) / 1000);
 

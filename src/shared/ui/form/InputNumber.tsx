@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
-
 import { styled } from "@mui/material";
+
 import { cn } from "@/utils";
 
 type BaseInputNumberType = React.ComponentProps<"input">;

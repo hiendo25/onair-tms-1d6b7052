@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+
 import { getAssignmentStudents } from "@/services/assignments/assignment.service";
 
 export async function GET(

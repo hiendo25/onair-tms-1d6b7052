@@ -1,9 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { UpdateAssignmentDto } from "@/types/dto/assignments";
+import { NextRequest, NextResponse } from "next/server";
+
+import { PATHS } from "@/constants/path.constant";
+import { employeesRepository } from "@/repository";
 import { assignmentService } from "@/services";
 import { createSVClient } from "@/services";
-import { employeesRepository } from "@/repository";
+import type { UpdateAssignmentDto } from "@/types/dto/assignments";
 
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -13,16 +15,30 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ success: false, message: "Invalid assignment ID" }, { status: 400 });
     }
 
+    // Check if assignment has assigned students
+    const assignment = await assignmentService.getAssignmentById(assignmentId);
+
+    if (assignment.assignment_employees && assignment.assignment_employees.length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Không thể xóa bài kiểm tra đã có học viên được giao. Vui lòng xóa tất cả học viên trước khi xóa bài kiểm tra.",
+        },
+        { status: 400 },
+      );
+    }
+
     await assignmentService.deleteAssignmentWithRelations(assignmentId);
 
-    revalidatePath("/assignments");
+    revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 
     return NextResponse.json(
       {
         success: true,
         message: "Assignment deleted successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error deleting assignment:", error);
@@ -57,18 +73,29 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await employeesRepository.getEmployeeByUserId(user.id);
+    if (!payload.organizationId) {
+      return NextResponse.json({ success: false, message: "Organization Id required" }, { status: 400 });
+    }
 
-    await assignmentService.updateAssignmentWithRelations(payload, employee.id);
+    const employee = await employeesRepository.getCurrentEmployee(user.id, payload.organizationId);
 
-    revalidatePath("/assignments");
+    const assignment = await assignmentService.getAssignmentById(assignmentId);
+    const submissionCount = assignment.submissions?.[0]?.count ?? 0;
+    const isAssignmentLocked = submissionCount > 0;
+
+    await assignmentService.updateAssignmentWithRelations(payload, employee.id, {
+      allowQuestionsUpdate: !isAssignmentLocked,
+      allowAssignedEmployeesUpdate: !isAssignmentLocked,
+    });
+
+    revalidatePath(PATHS.ASSIGNMENTS.ROOT);
 
     return NextResponse.json(
       {
         success: true,
         message: "Assignment updated successfully",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error updating assignment:", error);
@@ -94,7 +121,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         success: true,
         data: assignment,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error fetching assignment:", error);
@@ -104,4 +131,3 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }
-

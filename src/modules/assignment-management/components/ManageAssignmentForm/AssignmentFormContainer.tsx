@@ -1,21 +1,27 @@
 "use client";
 import * as React from "react";
-import TabAssignmentInformation from "./TabAssignmentInformation";
-import TabAssignmentContent from "./TabAssignmentContent";
-import TabAssignmentSettings from "./TabAssignmentSettings";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { assignmentSchema, Assignment } from "../assignment-form.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, IconButton } from "@mui/material";
-import AssignmentTabContainer from "./AssignmentTabContainer";
-import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
+import { useRouter } from "next/navigation";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+
+import { PATHS } from "@/constants/path.constant";
 import { ClipboardIcon, CloseIcon, InforCircleIcon, UsersIcon2 } from "@/shared/assets/icons";
+import { Assignment, assignmentSchema } from "../assignment-form.schema";
+
+import AssignmentTabContainer from "./AssignmentTabContainer";
+import TabAssignmentContent from "./TabAssignmentContent";
+import TabAssignmentInformation from "./TabAssignmentInformation";
+import TabAssignmentSettings from "./TabAssignmentSettings";
+import { getKeyFieldByTab, getStatusTabAssignment } from "./utils";
 
 export const TAB_KEYS_ASSIGNMENT = {
   "assignTab-information": "assignTab-information",
   "assignTab-content": "assignTab-content",
   "assignTab-settings": "assignTab-settings",
 } as const;
+
+export type AssignmentTabKey = keyof typeof TAB_KEYS_ASSIGNMENT;
 
 export interface AssignmentFormContainerRef {
   resetForm: () => void;
@@ -26,6 +32,7 @@ export interface AssignmentFormContainerProps {
   isLoading?: boolean;
   action?: "create" | "edit";
   value?: Partial<Assignment>;
+  disabledTabs?: AssignmentTabKey[];
 }
 
 export const initAssignmentFormData = (): Partial<Assignment> => {
@@ -39,8 +46,10 @@ export const initAssignmentFormData = (): Partial<Assignment> => {
 };
 
 const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, AssignmentFormContainerProps>(
-  ({ onSubmit, isLoading, action, value }, ref) => {
+  ({ onSubmit, isLoading, action, value, disabledTabs }, ref) => {
+    const router = useRouter();
     const formSubmitStateRef = React.useRef<boolean>(false);
+    const disabledTabSet = React.useMemo(() => new Set(disabledTabs ?? []), [disabledTabs]);
 
     const methods = useForm<Assignment>({
       resolver: zodResolver(assignmentSchema),
@@ -74,6 +83,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
     const cancelCreateAssignment = () => {
       formSubmitStateRef.current = false;
       reset();
+      router.push(PATHS.ASSIGNMENTS.ROOT);
     };
 
     const handleClickSubmit = () => {
@@ -91,6 +101,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               tabKey: TAB_KEYS_ASSIGNMENT["assignTab-information"],
               icon: <InforCircleIcon />,
               content: <TabAssignmentInformation />,
+              disabled: disabledTabSet.has(TAB_KEYS_ASSIGNMENT["assignTab-information"]),
               status: formSubmitStateRef.current
                 ? getStatusTabAssignment(errors, TAB_KEYS_ASSIGNMENT["assignTab-information"])
                 : "idle",
@@ -100,6 +111,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               tabKey: TAB_KEYS_ASSIGNMENT["assignTab-content"],
               icon: <ClipboardIcon />,
               content: <TabAssignmentContent />,
+              disabled: disabledTabSet.has(TAB_KEYS_ASSIGNMENT["assignTab-content"]),
               status: formSubmitStateRef.current
                 ? getStatusTabAssignment(errors, TAB_KEYS_ASSIGNMENT["assignTab-content"])
                 : "idle",
@@ -109,6 +121,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               tabKey: TAB_KEYS_ASSIGNMENT["assignTab-settings"],
               icon: <UsersIcon2 />,
               content: <TabAssignmentSettings />,
+              disabled: disabledTabSet.has(TAB_KEYS_ASSIGNMENT["assignTab-settings"]),
               status: formSubmitStateRef.current
                 ? getStatusTabAssignment(errors, TAB_KEYS_ASSIGNMENT["assignTab-settings"])
                 : "idle",
@@ -123,12 +136,7 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
               >
                 <CloseIcon />
               </IconButton>
-              <Button
-                size="large"
-                onClick={handleClickSubmit}
-                disabled={isLoading}
-                loading={isLoading}
-              >
+              <Button onClick={handleClickSubmit} disabled={isLoading} loading={isLoading}>
                 {action === "edit" ? "Cập nhật" : "Tạo bài kiểm tra"}
               </Button>
             </div>
@@ -142,4 +150,3 @@ const AssignmentFormContainer = React.forwardRef<AssignmentFormContainerRef, Ass
 AssignmentFormContainer.displayName = "AssignmentFormContainer";
 
 export default AssignmentFormContainer;
-

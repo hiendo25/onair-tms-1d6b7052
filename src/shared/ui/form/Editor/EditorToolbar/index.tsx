@@ -1,21 +1,21 @@
 // import { varAlpha } from "@onair/config-mui/styles";
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 // import { uploadToS3 } from "@onair/utils/upload-to-s3";
-import { useState, useEffect, useCallback } from "react";
-
-import Stack from "@mui/material/Stack";
-import Divider from "@mui/material/Divider";
-
-import { editorClasses } from "../classes";
-import { LinkBlock } from "./components/link-block";
-import { ImageBlock } from "./components/image-block";
-import { ToolbarItem } from "./components/toolbar-item";
-import HeadingBlock from "./components/HeadingBlock";
-import type { EditorToolbarProps } from "../types";
-import LibraryResourceBlock from "./components/library-resource-block";
+import React, { useCallback, useEffect, useState } from "react";
 import { alpha } from "@mui/material";
+import Divider from "@mui/material/Divider";
+import Stack from "@mui/material/Stack";
+
 import { YoutubeIcon } from "@/shared/assets/icons";
 import UploadBox from "@/shared/ui/UploadBox";
+import { editorClasses } from "../classes";
+import type { EditorToolbarProps } from "../types";
+
+import HeadingBlock from "./components/HeadingBlock";
+import { ImageBlock } from "./components/image-block";
+import LibraryResourceBlock from "./components/library-resource-block";
+import { LinkBlock } from "./components/link-block";
+import { ToolbarItem } from "./components/toolbar-item";
 /**
  * https://remixicon.com
  */
@@ -77,21 +77,14 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
       direction="row"
       flexWrap="wrap"
       alignItems="center"
-      divider={
-        <Divider
-          orientation="vertical"
-          flexItem
-          sx={{ height: 16, my: "auto !important" }}
-        />
-      }
+      divider={<Divider orientation="vertical" flexItem sx={{ height: 16, my: "auto !important" }} />}
       sx={{
         p: 1.25,
         bgcolor: "white",
         borderTopRightRadius: "inherit",
         borderTopLeftRadius: "inherit",
         rowGap: "12px",
-        borderBottom: (theme) =>
-          `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
+        borderBottom: (theme) => `solid 1px ${alpha(theme.palette.grey[500], 0.2)}`,
       }}
       className={editorClasses.toolbar.root}
     >
@@ -112,9 +105,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
           active={editor.isActive("italic")}
           className={editorClasses.toolbar.italic}
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          icon={
-            <path d="M15 20H7V18H9.92661L12.0425 6H9V4H17V6H14.0734L11.9575 18H15V20Z" />
-          }
+          icon={<path d="M15 20H7V18H9.92661L12.0425 6H9V4H17V6H14.0734L11.9575 18H15V20Z" />}
         />
         <ToolbarItem
           aria-label="Strike"
@@ -156,36 +147,28 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             active={editor.isActive({ textAlign: "left" })}
             className={editorClasses.toolbar.alignLeft}
             onClick={() => editor.chain().focus().setTextAlign("left").run()}
-            icon={
-              <path d="M3 4H21V6H3V4ZM3 19H17V21H3V19ZM3 14H21V16H3V14ZM3 9H17V11H3V9Z" />
-            }
+            icon={<path d="M3 4H21V6H3V4ZM3 19H17V21H3V19ZM3 14H21V16H3V14ZM3 9H17V11H3V9Z" />}
           />
           <ToolbarItem
             aria-label="Align center"
             active={editor.isActive({ textAlign: "center" })}
             className={editorClasses.toolbar.alignCenter}
             onClick={() => editor.chain().focus().setTextAlign("center").run()}
-            icon={
-              <path d="M3 4H21V6H3V4ZM5 19H19V21H5V19ZM3 14H21V16H3V14ZM5 9H19V11H5V9Z" />
-            }
+            icon={<path d="M3 4H21V6H3V4ZM5 19H19V21H5V19ZM3 14H21V16H3V14ZM5 9H19V11H5V9Z" />}
           />
           <ToolbarItem
             aria-label="Align right"
             active={editor.isActive({ textAlign: "right" })}
             className={editorClasses.toolbar.alignRight}
             onClick={() => editor.chain().focus().setTextAlign("right").run()}
-            icon={
-              <path d="M3 4H21V6H3V4ZM7 19H21V21H7V19ZM3 14H21V16H3V14ZM7 9H21V11H7V9Z" />
-            }
+            icon={<path d="M3 4H21V6H3V4ZM7 19H21V21H7V19ZM3 14H21V16H3V14ZM7 9H21V11H7V9Z" />}
           />
           <ToolbarItem
             aria-label="Align justify"
             active={editor.isActive({ textAlign: "justify" })}
             className={editorClasses.toolbar.alignJustify}
             onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-            icon={
-              <path d="M3 4H21V6H3V4ZM3 19H21V21H3V19ZM3 14H21V16H3V14ZM3 9H21V11H3V9Z" />
-            }
+            icon={<path d="M3 4H21V6H3V4ZM3 19H21V21H3V19ZM3 14H21V16H3V14ZM3 9H21V11H3V9Z" />}
           />
         </Stack>
       )}
@@ -228,9 +211,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             aria-label="Horizontal"
             className={editorClasses.toolbar.hr}
             onClick={() => editor.chain().focus().setHorizontalRule().run()}
-            icon={
-              <path d="M2 11H4V13H2V11ZM6 11H18V13H6V11ZM20 11H22V13H20V11Z" />
-            }
+            icon={<path d="M2 11H4V13H2V11ZM6 11H18V13H6V11ZM20 11H22V13H20V11Z" />}
           />
         </Stack>
       )}
@@ -271,9 +252,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             <ToolbarItem
               aria-label="Clear"
               className={editorClasses.toolbar.clear}
-              onClick={() =>
-                editor.chain().focus().clearNodes().unsetAllMarks().run()
-              }
+              onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()}
               icon={
                 <path d="M12.6512 14.0654L11.6047 20H9.57389L10.9247 12.339L3.51465 4.92892L4.92886 3.51471L20.4852 19.0711L19.071 20.4853L12.6512 14.0654ZM11.7727 7.53009L12.0425 5.99999H10.2426L8.24257 3.99999H19.9999V5.99999H14.0733L13.4991 9.25652L11.7727 7.53009Z" />
               }

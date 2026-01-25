@@ -1,48 +1,21 @@
+import React from "react";
 import { Box, Typography } from "@mui/material";
-import Copyright from "../Copyright";
 import Link from "next/link";
+
+import Copyright from "./Copyright";
 interface FooterProps {
   className?: string;
 }
 const Footer: React.FC<FooterProps> = ({ className }) => {
-  const MENU_ITEMS = [
-    {
-      title: "Privacy policy",
-    },
-    {
-      title: "Term & condition",
-    },
-    {
-      title: "Contact",
-    },
-  ];
   return (
-    <Box
-      component="div"
-      className="footer-wraper"
-      sx={{ px: { xs: 6, md: 8, lg: 12 }, py: 4 }}
-    >
-      <div className="flex justify-between">
-        <div className="flex items-center gap-12">
-          <Copyright />
-          <div className="flex items-center gap-6">
-            {MENU_ITEMS.map((item, _index) => (
-              <div key={_index}>
-                <Link href={"/"}>
-                  <Typography
-                    sx={{
-                      fontSize: "0.875rem",
-                      opacity: 0.8,
-                    }}
-                  >
-                    {item.title}
-                  </Typography>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>social</div>
+    <Box component="footer" className="footer-wraper" sx={{ px: { xs: 6, md: 6, xl: 8 }, py: 3 }}>
+      <div className="flex items-center justify-center">
+        <Typography className="text-center text-xs">
+          Powered by{" "}
+          <Link href="/">
+            <strong>Onair TMS</strong>
+          </Link>
+        </Typography>
       </div>
     </Box>
   );

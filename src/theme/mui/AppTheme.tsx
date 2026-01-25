@@ -1,30 +1,32 @@
 "use client";
 import * as React from "react";
-import { createTheme } from "@mui/material/styles";
-import type { ThemeOptions } from "@mui/material/styles";
-import { colorSchemes, typography, shadows, shape } from "./themePrimitives";
 import { viVN as coreViVN } from "@mui/material/locale";
-import { viVN as dateViVN } from "@mui/x-date-pickers/locales";
 import { viVN as textLocal } from "@mui/material/locale";
+import type { ThemeOptions } from "@mui/material/styles";
+import { createTheme } from "@mui/material/styles";
 import { viVN as dataGridViVN } from "@mui/x-data-grid/locales";
+import { viVN as dateViVN } from "@mui/x-date-pickers/locales";
+
 import {
+  buttonsCustomizations,
+  cardsCustomizations,
   chartsCustomizations,
+  checkboxCustomizations,
+  dataDisplayCustomizations,
   dataGridCustomizations,
   datePickersCustomizations,
-  treeViewCustomizations,
-  selectsCustomizations,
-  typographyCustomizations,
-  inputsCustomizations,
-  dataDisplayCustomizations,
   feedbackCustomizations,
+  inputsCustomizations,
   navigationCustomizations,
-  surfacesCustomizations,
-  buttonsCustomizations,
-  toggleButtonsCustomizations,
-  checkboxCustomizations,
   popoverCustomizations,
+  selectsCustomizations,
+  surfacesCustomizations,
   tabsCustomization,
+  toggleButtonsCustomizations,
+  treeViewCustomizations,
+  typographyCustomizations,
 } from "./customizations";
+import { colorSchemes, shadows, shape, typography } from "./themePrimitives";
 
 interface AppThemeProps {
   children: React.ReactNode;
@@ -58,6 +60,7 @@ const theme = createTheme(
       ...tabsCustomization,
       ...checkboxCustomizations,
       ...popoverCustomizations,
+      ...cardsCustomizations,
     },
   },
   dateViVN,

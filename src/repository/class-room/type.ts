@@ -1,10 +1,10 @@
 import { ClassRoom } from "@/model/class-room.model";
-import { ClassSessionAgenda } from "@/model/class-session-agenda.model";
+import { ClassAttendances } from "@/model/class-room-attendance.model";
+import { ClassAttendance } from "@/model/qr-attendance.model";
 
 export type CreateClassRoomPayload = Pick<
   ClassRoom,
   | "description"
-  // | "comunity_info"
   | "room_type"
   | "slug"
   | "start_at"
@@ -13,26 +13,21 @@ export type CreateClassRoomPayload = Pick<
   | "thumbnail_url"
   | "title"
   | "organization_id"
-  | "resource_id"
   | "employee_id"
-  | "documents"
+  | "class_type"
 >;
 export type UpdateClassRoomPayload = Pick<
   ClassRoom,
-  | "description"
-  // | "comunity_info"
-  | "room_type"
+  | "id"
+  | "title"
   | "slug"
+  | "description"
+  | "room_type"
   | "start_at"
   | "end_at"
   | "status"
   | "thumbnail_url"
-  | "title"
-  | "organization_id"
-  | "resource_id"
   | "employee_id"
-  | "id"
-  | "documents"
 >;
 export type UpSertClassRoomPayload =
   | {
@@ -57,3 +52,73 @@ export type CreatePivotClassRoomAndEmployeePayload = {
   class_room_id: string;
   employee_id: string;
 };
+
+export enum ClassRoomRuntimeStatusFilter {
+  All = "all",
+  Ongoing = "ongoing",
+  Today = "today",
+  Upcoming = "upcoming",
+  Past = "past",
+  Draft = "draft",
+}
+
+export enum ClassRoomTypeFilter {
+  All = "all",
+  Single = "single",
+  Multiple = "multiple",
+}
+
+export enum ClassSessionModeFilter {
+  All = "all",
+  Online = "online",
+  Offline = "offline",
+  Live = "live",
+}
+
+export enum ClassRoomStatusFilter {
+  All = "all",
+  Daft = "draft",
+  Publish = "publish",
+  Active = "active",
+  Pending = "pending",
+  Deactive = "deactive",
+  Deleted = "deleted",
+}
+
+export type AttendanceStatus = "attended" | "absent" | "pending";
+export interface ClassRoomFilters {
+  type: ClassRoomTypeFilter;
+  sessionMode: ClassSessionModeFilter;
+  search: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  runtimeStatus: ClassRoomRuntimeStatusFilter;
+  status: ClassRoomStatusFilter;
+}
+
+export type DeletePivotClassRoomAndEmployeePayload = {
+  class_room_id: string;
+  employeeIds: string[];
+};
+
+export type CreatePivotClassRoomWithResourcePayload = {
+  class_room_id: string;
+  resource_id: string;
+};
+
+export type EmployeeClassRoomAttendancePayload = Pick<
+  ClassAttendance,
+  | "qr_code_id"
+  | "class_room_id"
+  | "class_session_id"
+  | "attended_at"
+  | "attendance_method"
+  | "attendance_status"
+  | "device_info"
+  | "scan_location_lat"
+  | "scan_location_lng"
+  | "distance_from_class"
+  | "employee_id"
+  | "attendance_mode"
+  | "rejection_reason"
+>;

@@ -1,13 +1,44 @@
 import { useTQuery } from "@/lib/queryClient";
-import type { GetAssignmentsParams, AssignmentStudentDto, AssignmentQuestionDto, SubmissionDetailDto, MyAssignmentDto } from "@/types/dto/assignments";
-import type { PaginatedResult } from "@/types/dto/pagination.dto";
-import * as assignmentService from "@/services/assignments/assignment.service";
 import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
+import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
+import { GetAssignmentsQueryParams } from "@/repository/assignments/type";
+import * as assignmentService from "@/services/assignments/assignment.service";
+import type {
+  AssignmentDto,
+  AssignmentQuestionDto,
+  AssignmentStudentDto,
+  GetAssignmentsParams,
+  GetMyAssignmentsParams,
+  MyAssignmentDto,
+  SubmissionDetailDto,
+} from "@/types/dto/assignments";
+import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
-  return useTQuery({
+  return useTQuery<PaginatedResult<AssignmentDto>>({
     queryKey: [GET_ASSIGNMENTS, params],
-    queryFn: () => assignmentService.getAssignments(params),
+    queryFn: async () => {
+      const searchParams = new URLSearchParams();
+
+      if (params?.page !== undefined) {
+        searchParams.set("page", params.page.toString());
+      }
+      if (params?.limit !== undefined) {
+        searchParams.set("limit", params.limit.toString());
+      }
+      if (params?.search) {
+        searchParams.set("search", params.search);
+      }
+      if (params?.organizationId) {
+        searchParams.set("organizationId", params?.organizationId);
+      }
+      const response = await fetch(`/api/assignments?${searchParams.toString()}`);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch assignments");
+      }
+      return response.json();
+    },
   });
 };
 
@@ -23,7 +54,7 @@ export const useGetAssignmentStudentsQuery = (
   assignmentId: string,
   page: number = 0,
   limit: number = 25,
-  enabled: boolean = true
+  enabled: boolean = true,
 ) => {
   return useTQuery<PaginatedResult<AssignmentStudentDto>>({
     queryKey: [GET_ASSIGNMENTS, assignmentId, "students", page, limit],
@@ -71,19 +102,44 @@ export const useGetSubmissionDetailQuery = (assignmentId: string, employeeId: st
   });
 };
 
-export const useGetMyAssignmentsQuery = (page: number = 0, limit: number = 25) => {
+export const useGetMyAssignmentsQuery = (params?: GetMyAssignmentsParams) => {
   return useTQuery<PaginatedResult<MyAssignmentDto>>({
-    queryKey: [GET_ASSIGNMENTS, "my-assignments", page, limit],
+    queryKey: [GET_ASSIGNMENTS, "my-assignments", params],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-      });
-      const response = await fetch(`/api/my-assignments?${params.toString()}`);
+      const searchParams = new URLSearchParams();
+
+      if (params?.page !== undefined) {
+        searchParams.set("page", params.page.toString());
+      }
+      if (params?.limit !== undefined) {
+        searchParams.set("limit", params.limit.toString());
+      }
+      if (params?.search) {
+        searchParams.set("search", params.search);
+      }
+      if (params?.status) {
+        searchParams.set("status", params.status);
+      }
+      if (params?.organizationId) {
+        searchParams.set("organizationId", params.organizationId);
+      }
+
+      const response = await fetch(`/api/my-assignments?${searchParams.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch my assignments");
       }
       return response.json();
     },
+  });
+};
+
+export const useGetAssignmentsV2Query = (variables?: { queryParams: GetAssignmentsQueryParams; enabled?: boolean }) => {
+  const { queryParams, enabled = true } = variables || {};
+  return useTQuery({
+    queryKey: [GET_ASSIGNMENTS, queryParams],
+    queryFn: async () => {
+      return await assignmentsRepository.getAssignmentsV2(queryParams);
+    },
+    enabled,
   });
 };

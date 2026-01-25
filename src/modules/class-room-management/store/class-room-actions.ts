@@ -1,5 +1,6 @@
 import { StoreApi } from "zustand";
-import { ClassRoomStore, StudentSelectedItem, TeacherSelectedItem } from "./class-room-store";
+
+import { ClassRoomStore, StudentSelectedItem, TeacherSelectedItem, CertificateSelectedItem } from "./class-room-store";
 
 export type ClassRoomActions = {
   reset: () => void;
@@ -8,6 +9,7 @@ export type ClassRoomActions = {
   removeTeacher: (id: string, sessionIndex: number) => void;
   removeTeachers: (sessionIndex: number) => void;
   setSelectedStudents: (students: StudentSelectedItem[]) => void;
+  setSelectedCertificate: (certificate: CertificateSelectedItem | null) => void;
 };
 
 const attachActions =
@@ -82,6 +84,15 @@ const attachActions =
         state: {
           ...prevState.state,
           selectedStudents: students,
+        },
+      }));
+    },
+    setSelectedCertificate: (certificate) => {
+      set((prevState) => ({
+        ...prevState,
+        state: {
+          ...prevState.state,
+          selectedCertificate: certificate,
         },
       }));
     },

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { IconButton, Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import EditIcon from "@mui/icons-material/Edit";
+import React, { useState } from "react";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { IconButton, ListItemIcon, ListItemText, Menu, MenuItem } from "@mui/material";
+
 import { Resource } from "../types";
 
 interface ResourceActionMenuProps {
@@ -56,12 +57,7 @@ export function ResourceActionMenu({ resource, onRename, onDelete }: ResourceAct
       >
         <MoreVertIcon fontSize="small" />
       </IconButton>
-      <Menu
-        anchorEl={anchorEl}
-        open={open}
-        onClose={handleClose}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <Menu anchorEl={anchorEl} open={open} onClose={handleClose} onClick={(e) => e.stopPropagation()}>
         <MenuItem onClick={handleRename}>
           <ListItemIcon>
             <EditIcon fontSize="small" />
@@ -78,4 +74,3 @@ export function ResourceActionMenu({ resource, onRename, onDelete }: ResourceAct
     </>
   );
 }
-

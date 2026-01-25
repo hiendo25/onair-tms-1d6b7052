@@ -1,84 +1,84 @@
 import { StoreApi } from "zustand";
-import { LibraryStoreActions, LibraryStore, LibraryStoreState, LibraryConfig } from "./libraryStore";
-import { Resource } from "../types";
+
 import { getCurrentUserLibrary } from "@/services/libraries/library.service";
+import { Resource } from "../types";
+
+import { LibraryConfig, LibraryStore, LibraryStoreActions, LibraryStoreState } from "./libraryStore";
 
 const attachActions =
   (initState: LibraryStoreState) =>
-    (
-      set: StoreApi<LibraryStore>["setState"],
-      get: StoreApi<LibraryStore>["getState"],
-    ): LibraryStoreActions => ({
-      openLibrary: async (config?: Partial<LibraryConfig>) => {
-        return new Promise<Resource[]>(async (resolve, reject) => {
-          try {
-            let libraryId = config?.libraryId;
+  (set: StoreApi<LibraryStore>["setState"], get: StoreApi<LibraryStore>["getState"]): LibraryStoreActions => ({
+    openLibrary: async (config?: Partial<LibraryConfig>) => {
+      const { employeeId } = get();
+      return new Promise<Resource[]>(async (resolve, reject) => {
+        try {
+          let libraryId = config?.libraryId;
 
-            if (!libraryId) {
-              const library = await getCurrentUserLibrary();
-              if (!library) {
-                reject(new Error("No library found for current user"));
-                return;
-              }
-              libraryId = library.id;
+          if (!libraryId) {
+            const library = await getCurrentUserLibrary(employeeId);
+            if (!library) {
+              reject(new Error("No library found for current user"));
+              return;
             }
-
-            const finalConfig: LibraryConfig = {
-              mode: config?.mode ?? "single",
-              selectedIds: config?.selectedIds ?? [],
-              libraryId,
-            };
-
-            set({
-              open: true,
-              config: finalConfig,
-              resolve,
-              reject,
-            });
-          } catch (error) {
-            reject(error instanceof Error ? error : new Error("Failed to open library"));
+            libraryId = library.id;
           }
-        });
-      },
 
-      closeLibrary: (resources?: Resource[]) => {
-        const { resolve } = get();
+          const finalConfig: LibraryConfig = {
+            mode: config?.mode ?? "single",
+            selectedIds: config?.selectedIds ?? [],
+            libraryId,
+          };
 
-        if (resolve) {
-          resolve(resources ?? []);
+          set({
+            open: true,
+            config: finalConfig,
+            resolve,
+            reject,
+          });
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error("Failed to open library"));
         }
+      });
+    },
 
-        set({
-          open: false,
-          config: null,
-          resolve: null,
-          reject: null,
-        });
-      },
+    closeLibrary: (resources?: Resource[]) => {
+      const { resolve } = get();
 
-      cancelLibrary: () => {
-        const { resolve, config, resources } = get();
+      if (resolve) {
+        resolve(resources ?? []);
+      }
 
-        if (resolve && config) {
-          const previouslySelected = resources.filter((resource: Resource) =>
-            config.selectedIds.includes(resource.id) && resource.kind === "file",
-          );
-          resolve(previouslySelected);
-        }
+      set({
+        open: false,
+        config: null,
+        resolve: null,
+        reject: null,
+      });
+    },
 
-        set({
-          open: false,
-          config: null,
-          resolve: null,
-          reject: null,
-        });
-      },
+    cancelLibrary: () => {
+      const { resolve, config, resources } = get();
 
-      setResources: (resources) => {
-        set({
-          resources,
-        });
-      },
-    });
+      if (resolve && config) {
+        const previouslySelected = resources.filter(
+          (resource: Resource) => config.selectedIds.includes(resource.id) && resource.kind === "file",
+        );
+        resolve(previouslySelected);
+      }
+
+      set({
+        open: false,
+        config: null,
+        resolve: null,
+        reject: null,
+      });
+    },
+
+    setResources: (resources) => {
+      set({
+        resources,
+      });
+    },
+  });
 
 export default attachActions;

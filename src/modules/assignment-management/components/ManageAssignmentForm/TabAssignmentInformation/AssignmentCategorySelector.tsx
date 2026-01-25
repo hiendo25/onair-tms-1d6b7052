@@ -1,9 +1,11 @@
-import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
+import React from "react";
 import { Control, useController } from "react-hook-form";
-import { Assignment } from "../../assignment-form.schema";
+
 import { useCreateClassFieldMutation } from "@/modules/class-room-management/operation/mutation";
-import { slugify } from "@/utils/slugify";
+import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
 import RHFMultipleSelectField from "@/shared/ui/form/RHFMultipleSelectField";
+import { slugify } from "@/utils/slugify";
+import { Assignment } from "../../assignment-form.schema";
 
 interface AssignmentCategorySelectorProps {
   control: Control<Assignment>;
@@ -11,7 +13,7 @@ interface AssignmentCategorySelectorProps {
 
 const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({ control }) => {
   const {
-    field: { onChange, value: categoryList },
+    field: { onChange, value: categoryList = [] },
   } = useController({ control, name: "assignmentCategories" });
 
   const { data: categoryListData, isPending } = useGetClassFieldQuery();
@@ -38,7 +40,6 @@ const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({
       label="Lĩnh vực"
       control={control}
       name="assignmentCategories"
-      required
       placeholder="Chọn lĩnh vực"
       onInputEnter={handleEnter}
       onRemove={handleRemoveItem}
@@ -52,4 +53,3 @@ const AssignmentCategorySelector: React.FC<AssignmentCategorySelectorProps> = ({
 };
 
 export default AssignmentCategorySelector;
-

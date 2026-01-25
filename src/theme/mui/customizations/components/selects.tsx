@@ -1,41 +1,45 @@
 import React from "react";
-import { alpha, Theme, Components } from "@mui/material/styles";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { inputBaseClasses, selectClasses, SvgIconProps } from "@mui/material";
+import { alpha, Components, Theme } from "@mui/material/styles";
+
 import { grey } from "../../theme-color";
 export const selectsCustomizations: Components<Theme> = {
   MuiSelect: {
     defaultProps: {
+      size: "medium",
       IconComponent: React.forwardRef<SVGSVGElement, SvgIconProps>((props, ref) => (
         <KeyboardArrowDownIcon fontSize="small" {...props} ref={ref} />
       )),
+      MenuProps: {
+        PopoverClasses: {
+          paper: "paper-select",
+        },
+      },
     },
     styleOverrides: {
       root: ({ theme }) => ({
-        [`& .${inputBaseClasses.root}`]: {
-          borderBottom: "1px solid",
-        },
-
         "&.MuiFilledInput-root": {
           backgroundColor: theme.palette.grey[200],
         },
-        // borderRadius: (theme.vars || theme).shape.borderRadius,
-        // // border: "1px solid",
+        borderRadius: (theme.vars || theme).shape.borderRadius,
+        // border: "1px solid",
         // borderColor: theme.palette.grey[400],
         // backgroundColor: (theme.vars || theme).palette.background.paper,
-        // // boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
+        // boxShadow: `inset 0 1px 0 1px hsla(220, 0%, 100%, 0.6), inset 0 -1px 0 1px hsla(220, 35%, 90%, 0.5)`,
         // "&:hover": {
         //   borderColor: grey[400],
         //   backgroundColor: (theme.vars || theme).palette.background.paper,
         //   boxShadow: "none",
         // },
-        // [`&.${selectClasses.focused}`]: {
-        //   outlineOffset: 0,
-        //   borderColor: theme.palette.primary["main"],
-        // },
-        // "&:before, &:after": {
-        //   display: "none",
-        // },
+        [`&.${selectClasses.focused}`]: {
+          outlineOffset: 0,
+          borderColor: theme.palette.primary["main"],
+        },
+
+        "&:before, &:after": {
+          display: "none",
+        },
         // ...theme.applyStyles("dark", {
         //   borderColor: grey[700],
         //   backgroundColor: (theme.vars || theme).palette.background.paper,
@@ -56,25 +60,20 @@ export const selectsCustomizations: Components<Theme> = {
         //     display: "none",
         //   },
         // }),
-        // variants: [
-        //   {
-        //     props: {
-        //       size: "small",
-        //     },
-        //     style: {
-        //       height: "2.25rem",
-        //     },
-        //   },
-        //   {
-        //     props: {
-        //       size: "medium",
-        //     },
-        //     style: {
-        //       height: "2.5rem",
-        //     },
-        //   },
-        // ],
+        variants: [
+          {
+            props: {
+              size: "medium",
+            },
+            style: () => ({
+              ".MuiSelect-select": {
+                padding: "10px 12px",
+              },
+            }),
+          },
+        ],
       }),
+
       select: ({ theme }) => ({
         display: "flex",
         alignItems: "center",
@@ -85,6 +84,26 @@ export const selectsCustomizations: Components<Theme> = {
             backgroundColor: grey[900],
           },
         }),
+      }),
+      outlined: () => ({
+        minHeight: "20px",
+        lineHeight: 1,
+      }),
+    },
+  },
+  MuiMenu: {
+    styleOverrides: {
+      root: (theme) => ({}),
+      paper: {
+        border: "none",
+      },
+      list: () => ({
+        ".MuiMenuItem-root": {
+          "&:focus-visible": {
+            outline: "none",
+            outlineOffset: 0,
+          },
+        },
       }),
     },
   },

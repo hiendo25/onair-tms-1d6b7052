@@ -1,15 +1,16 @@
-/* eslint-disable import/no-extraneous-dependencies */
+ 
 import "dayjs/locale/vi";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import duration from "dayjs/plugin/duration";
+
 import type { Dayjs, OpUnitType } from "dayjs";
-import timezonePlugin from "dayjs/plugin/timezone";
-import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import advancedFormat from "dayjs/plugin/advancedFormat";
+import duration from "dayjs/plugin/duration";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import advancedFormat from "dayjs/plugin/advancedFormat";
 import localizedFormat from "dayjs/plugin/localizedFormat";
+import relativeTime from "dayjs/plugin/relativeTime";
+import timezonePlugin from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 
 import round from "./plugin/round";
 

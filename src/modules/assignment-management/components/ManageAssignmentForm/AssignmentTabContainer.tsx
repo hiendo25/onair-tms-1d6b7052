@@ -1,16 +1,18 @@
 "use client";
 import * as React from "react";
-import Tab, { TabProps } from "@mui/material/Tab";
+import { useTransition } from "react";
 import TabContext from "@mui/lab/TabContext";
-import TabPanel from "@mui/lab/TabPanel";
 import TabList, { TabListProps } from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
 import { Button, styled, SxProps, Theme } from "@mui/material";
 import { useTheme } from "@mui/material";
 import { tabClasses } from "@mui/material";
-import { cn } from "@/utils";
+import Tab, { TabProps } from "@mui/material/Tab";
+
 import { CheckCircleIcon } from "@/shared/assets/icons";
+import { cn } from "@/utils";
+
 import { TAB_KEYS_ASSIGNMENT } from "./AssignmentFormContainer";
-import { useTransition } from "react";
 
 type AssignmentTabStatus = "idle" | "invalid" | "valid";
 type TabKeyType = keyof typeof TAB_KEYS_ASSIGNMENT;
@@ -21,6 +23,7 @@ type AssignmentTabItem = {
   content?: React.ReactNode;
   status?: AssignmentTabStatus;
   icon?: React.ReactNode;
+  disabled?: boolean;
 };
 
 export interface AssignmentTabContainerProps {
@@ -39,9 +42,46 @@ const AssignmentTabContainer: React.FC<AssignmentTabContainerProps> = ({
   const [currentTab, setCurrentTab] = React.useState<TabKeyType | undefined>(() => items?.[0]?.tabKey);
   const [isGotoNextTab, startGotoNextTab] = useTransition();
 
+  const disabledTabs = React.useMemo(
+    () => new Set(items.filter((item) => item.disabled).map((item) => item.tabKey)),
+    [items],
+  );
+
+  const getFirstEnabledTab = React.useCallback(() => {
+    return items.find((item) => !item.disabled)?.tabKey ?? items?.[0]?.tabKey;
+  }, [items]);
+
+  React.useEffect(() => {
+    const fallbackTab = getFirstEnabledTab();
+    if (!currentTab || disabledTabs.has(currentTab)) {
+      setCurrentTab(fallbackTab);
+    }
+  }, [currentTab, disabledTabs, getFirstEnabledTab]);
+
+  const getAdjacentTab = React.useCallback(
+    (current: TabKeyType, direction: "next" | "back") => {
+      const currentIndex = items.findIndex((item) => item.tabKey === current);
+      if (currentIndex < 0) return undefined;
+
+      const step = direction === "next" ? 1 : -1;
+      for (let index = currentIndex + step; index >= 0 && index < items.length; index += step) {
+        const candidate = items[index];
+        if (!candidate?.disabled) {
+          return candidate?.tabKey;
+        }
+      }
+
+      return undefined;
+    },
+    [items],
+  );
+
   const handleChange = React.useCallback((event: React.SyntheticEvent, newValue: TabKeyType) => {
+    if (disabledTabs.has(newValue)) {
+      return;
+    }
     setCurrentTab(newValue);
-  }, []);
+  }, [disabledTabs]);
 
   const goNextOrBackStep = (action: "next" | "back") => () => {
     if (!currentTab) {
@@ -49,30 +89,30 @@ const AssignmentTabContainer: React.FC<AssignmentTabContainerProps> = ({
       return;
     }
     startGotoNextTab(async () => {
+      const nextTab = getAdjacentTab(currentTab, action === "next" ? "next" : "back");
+      if (!nextTab) {
+        return;
+      }
       const isCurrentTabValid = await checkStatusTab(currentTab);
 
       if (!isCurrentTabValid) return;
-      if (currentTab === "assignTab-information") {
-        setCurrentTab(action === "next" ? "assignTab-content" : "assignTab-information");
-      }
-      if (currentTab === "assignTab-content") {
-        setCurrentTab(action === "next" ? "assignTab-settings" : "assignTab-information");
-      }
-      if (currentTab === "assignTab-settings") {
-        setCurrentTab(action === "next" ? "assignTab-settings" : "assignTab-content");
-      }
+      setCurrentTab(nextTab);
     });
   };
+
+  const nextTab = currentTab ? getAdjacentTab(currentTab, "next") : undefined;
+  const prevTab = currentTab ? getAdjacentTab(currentTab, "back") : undefined;
 
   return (
     <div className={cn("assignment-tabs", className)}>
       <TabContext value={currentTab ?? ""}>
-        <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
+        <div className="flex items-center justify-between mb-6">
           <AssignmentTabList onChange={handleChange}>
-            {items.map(({ tabKey, tabName, status = "idle", icon }) => (
+            {items.map(({ tabKey, tabName, status = "idle", icon, disabled }) => (
               <Tab
                 key={tabKey}
                 value={tabKey}
+                disabled={disabled}
                 label={
                   <div className="flex items-center gap-1">
                     {status === "valid" ? <CheckCircleIcon /> : icon ? icon : null}
@@ -97,10 +137,15 @@ const AssignmentTabContainer: React.FC<AssignmentTabContainerProps> = ({
             ))}
             <div className={cn({ hidden: currentTab === "assignTab-settings" })}>
               <div className={cn("py-6 flex justify-between")}>
-                <Button variant="outlined" color="inherit" onClick={goNextOrBackStep("back")} disabled={isGotoNextTab}>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  onClick={goNextOrBackStep("back")}
+                  disabled={isGotoNextTab || !prevTab}
+                >
                   Quay lại
                 </Button>
-                <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab}>
+                <Button variant="fill" onClick={goNextOrBackStep("next")} disabled={isGotoNextTab || !nextTab}>
                   Tiếp tục
                 </Button>
               </div>
@@ -147,4 +192,3 @@ const AssignmentTabList = styled((props: TabListProps) => <TabList {...props} />
     },
   };
 });
-

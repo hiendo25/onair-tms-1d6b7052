@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const HelpIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
+const HelpIcon: FC<SVGProps<SVGSVGElement>> = ({
   className,
   ...rest
 }) => {

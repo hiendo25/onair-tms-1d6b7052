@@ -1,18 +1,19 @@
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { alpha,Components, Theme } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
-import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
 import { toggleButtonClasses } from "@mui/material/ToggleButton";
+import { toggleButtonGroupClasses } from "@mui/material/ToggleButtonGroup";
+
 import {
-  primary,
+  error,
   grey,
+  info,
+  primary,
   secondary,
   success,
   warning,
-  error,
-  info,
 } from "../../theme-color";
 
-/* eslint-disable import/prefer-default-export */
+ 
 
 export const toggleButtonsCustomizations: Components<Theme> = {
   MuiToggleButtonGroup: {

@@ -1,5 +1,5 @@
 export interface UpdateDepartmentDto {
   id: string;
   name?: string;
-  parent_id?: string | null;
+  branch_id?: string | null;
 }

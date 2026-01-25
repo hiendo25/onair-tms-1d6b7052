@@ -11,7 +11,8 @@ export class CreateEmployeeDto {
   employee_code?: string;
   manager_id!: string;
   position_id?: string;
-  employee_type?: Database["public"]["Enums"]["employee_type"];
+  employee_type!: Database["public"]["Enums"]["employee_type"];
   start_date!: string;
+  role_id!: string;
+  organizationId!: string;
 }
-

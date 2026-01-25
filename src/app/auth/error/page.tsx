@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardContent, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader, Typography } from "@mui/material";
 
 export default async function Page({
   searchParams,

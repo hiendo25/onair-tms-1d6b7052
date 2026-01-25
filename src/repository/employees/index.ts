@@ -1,4 +1,4 @@
-import { supabase } from "@/services";
+import { createClient, supabase } from "@/services";
 import { createSVClient } from "@/services";
 import type { EmployeeDto, GetEmployeesParams } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
@@ -11,104 +11,121 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const departmentId = params?.departmentId;
   const branchId = params?.branchId;
   const status = params?.status;
+  const employeeType = params?.employeeType;
+  const organizationId = params?.organizationId;
 
-  // Check if we have organization unit filters
+  // Determine if we need INNER joins for filtering
   const hasDepartmentFilter = departmentId && departmentId !== "all";
   const hasBranchFilter = branchId && branchId !== "all";
-  const hasAnyFilter = hasDepartmentFilter || hasBranchFilter || (search && search.length > 0);
 
-  // Use RPC function for efficient server-side filtering
-  if (hasAnyFilter) {
-    // Call the PostgreSQL RPC function to get filtered employee IDs
-    const { data: rpcResult, error: rpcError } = await supabase.rpc("get_filtered_employees", {
-      p_page: page,
-      p_limit: limit,
-      p_search: search || undefined,
-      p_department_id: hasDepartmentFilter ? departmentId : undefined,
-      p_branch_id: hasBranchFilter ? branchId : undefined,
-    });
+  // Use INNER join for junction tables when filtering to exclude employees without those relationships
+  const departmentJoinType = hasDepartmentFilter ? "!inner" : "";
+  const branchJoinType = hasBranchFilter ? "!inner" : "";
 
-    if (rpcError) {
-      throw new Error(`Failed to filter employees: ${rpcError.message}`);
-    }
-
-    // Extract employee IDs and total count from RPC result
-    const employeeIds = rpcResult?.map((row: any) => row.employee_id) || [];
-    const totalCount = rpcResult?.[0]?.total_count || 0;
-
-    if (employeeIds.length === 0) {
-      return {
-        data: [],
-        total: totalCount,
-        page,
-        limit,
-      };
-    }
-
-    // Fetch full employee data for the filtered IDs
-    // Use LEFT JOIN for employments to get ALL employment records
-    let employeeQuery = supabase
-      .from("employees")
-      .select(`
+  // Build query using Supabase ORM with new junction tables
+  // Use !inner for profiles to ensure we only get employees with valid profile data
+  let query = supabase.from("employees").select(
+    `
+      id,
+      employee_code,
+      start_date,
+      position_id,
+      employee_type,
+      user_id,
+      created_at,
+      status,
+      profiles!inner (
         id,
-        employee_code,
-        start_date,
-        position_id,
-        employee_type,
-        user_id,
+        full_name,
+        email,
+        phone_number,
+        gender,
+        birthday,
+        avatar
+      ),
+      positions (
+        id,
+        title
+      ),
+      employee_branches${branchJoinType} (
+        id,
+        branch_id,
         created_at,
-        status,
-        profiles!profiles_employee_id_fkey (
+        branches (
           id,
-          full_name,
-          email,
-          phone_number,
-          gender,
-          birthday,
-          avatar
-        ),
-        positions (
-          id,
-          title
-        ),
-        employments (
-          id,
-          organization_unit_id,
-          organization_units!employments_organization_unit_id_fkey (
-            id,
-            name,
-            type
-          )
-        ),
-        managers_employees!managers_employees_employee_id_fkey (
-          manager_id
+          name,
+          code,
+          address
         )
-      `)
-      .in("id", employeeIds);
+      ),
+      employee_departments${departmentJoinType} (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
+        )
+      ),
+      managers_employees!managers_employees_employee_id_fkey (
+        manager_id
+      )
+    `,
+    { count: "exact" },
+  );
 
-    if (status) {
-      employeeQuery = employeeQuery.eq("status", status);
-    }
-
-    const { data: fullEmployeeData, error: dataError } = await employeeQuery
-      .order("created_at", { ascending: false });
-
-    if (dataError) {
-      throw new Error(`Failed to fetch employee data: ${dataError.message}`);
-    }
-
-    return {
-      data: (fullEmployeeData as unknown as EmployeeDto[]) || [],
-      total: totalCount,
-      page,
-      limit,
-    };
+  // Apply filters
+  if (status) {
+    query = query.eq("status", status);
   }
 
-  // No filters - use simple query with LEFT JOIN
-  let query = supabase
+  if (employeeType) {
+    query = query.eq("employee_type", employeeType);
+  }
+
+  // Filter by department using junction table
+  if (hasDepartmentFilter) {
+    query = query.eq("employee_departments.department_id", departmentId);
+  }
+
+  // Filter by branch using junction table
+  if (hasBranchFilter) {
+    query = query.eq("employee_branches.branch_id", branchId);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  // Search by full name in profiles
+  if (search && search.length > 0) {
+    query = query.ilike("profiles.full_name", `%${search}%`);
+  }
+
+  // Apply pagination
+  const from = page * limit;
+  const to = from + limit - 1;
+
+  const { data, error, count } = await query.order("created_at", { ascending: false }).range(from, to);
+
+  if (error) {
+    throw new Error(`Failed to fetch employees: ${error.message}`);
+  }
+
+  return {
+    data: (data as unknown as EmployeeDto[]) || [],
+    total: count ?? 0,
+    page,
+    limit,
+  };
+};
+
+const getEmployeeById = async (id: string) => {
+  const { data, error } = await supabase
     .from("employees")
-    .select(`
+    .select(
+      `
       id,
       employee_code,
       start_date,
@@ -130,89 +147,51 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
         id,
         title
       ),
-      employments (
+      employee_branches (
         id,
-        organization_unit_id,
-        organization_units!employments_organization_unit_id_fkey (
+        branch_id,
+        created_at,
+        branches (
           id,
           name,
-          type
+          code,
+          address
+        )
+      ),
+      employee_departments (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
         )
       ),
       managers_employees!managers_employees_employee_id_fkey (
         manager_id
       )
-    `, { count: "exact" });
-
-  // Apply status filter if present
-  if (status) {
-    query = query.eq("status", status);
-  }
-
-  const from = page * limit;
-  const to = from + limit - 1;
-
-  const { data, error, count } = await query
-    .order("created_at", { ascending: false })
-    .range(from, to);
-
-  if (error) {
-    throw new Error(`Failed to fetch employees: ${error.message}`);
-  }
-
-  return {
-    data: (data as unknown as EmployeeDto[]) || [],
-    total: count ?? 0,
-    page,
-    limit,
-  };
-};
-
-const getEmployeeById = async (id: string) => {
-  const { data, error } = await supabase
-    .from("employees")
-    .select(`
-      id,
-      employee_code,
-      start_date,
-      position_id,
-      employee_type,
-      user_id,
-      created_at,
-      profiles!profiles_employee_id_fkey (
-        id,
-        full_name,
-        email,
-        phone_number,
-        gender,
-        birthday,
-        avatar
-      ),
-      positions (
-        id,
-        title
-      ),
-      employments (
-        id,
-        organization_unit_id,
-        organization_units!employments_organization_unit_id_fkey (
-          id,
-          name,
-          type
-        )
-      ),
-      managers_employees!managers_employees_employee_id_fkey (
-        manager_id
-      )
-    `)
+    `,
+    )
     .eq("id", id)
     .single();
 
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
   }
+  const { data: userRolesData, error: userRolesError } = await supabase
+    .from("user_roles")
+    .select("role_id")
+    .eq("user_id", data?.user_id);
 
-  return data as unknown as EmployeeDto;
+  if (userRolesError) {
+    throw new Error(`Failed to fetch user roles: ${userRolesError.message}`);
+  }
+
+  return {
+    ...data,
+    role_ids: userRolesData?.map((ur) => ur.role_id) || [],
+  } as unknown as EmployeeDto;
 };
 
 export async function getLastEmployeeOrder() {
@@ -232,24 +211,46 @@ export async function getLastEmployeeOrder() {
   return lastEmployee?.employee_order ?? 0;
 }
 
+export async function checkEmployeeCodeExists(code: string) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("employees")
+    .select("employee_code")
+    .eq("employee_code", code)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+  return Boolean(data);
+}
+
+export async function isExistEmployee(userId: string, organizationId: string) {
+  const supabase = await createSVClient();
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("organization_id", organizationId)
+    .single();
+
+  return Boolean(employee);
+}
+
 export async function createEmployee(data: {
   user_id: string;
   employee_code: string;
   employee_order: number;
   start_date: string;
   position_id?: string | null;
-  employee_type?: Database["public"]["Enums"]["employee_type"] | null;
+  employee_type: Database["public"]["Enums"]["employee_type"];
   organization_id: string;
   status: Database["public"]["Enums"]["employee_status"];
-  organization_id: string;
 }) {
   const supabase = await createSVClient();
 
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .insert(data)
-    .select()
-    .single();
+  const { data: employee, error } = await supabase.from("employees").insert(data).select().single();
 
   if (error) {
     throw new Error(`Failed to create employee: ${error.message}`);
@@ -264,28 +265,25 @@ export async function updateEmployeeById(
     employee_code?: string;
     start_date?: string;
     position_id?: string | null;
-    employee_type?: Database["public"]["Enums"]["employee_type"] | null;
+    employee_type?: Database["public"]["Enums"]["employee_type"];
   },
 ) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employees")
-    .update(data)
-    .eq("id", id);
+  const { error } = await supabase.from("employees").update(data).eq("id", id);
 
   if (error) {
     throw new Error(`Failed to update employee: ${error.message}`);
   }
 }
-
-export async function getEmployeeByUserId(userId: string) {
+export async function getCurrentEmployee(userId: string, organizationId: string) {
   const supabase = await createSVClient();
 
   const { data: employee, error } = await supabase
     .from("employees")
     .select("id, organization_id")
     .eq("user_id", userId)
+    .eq("organization_id", organizationId)
     .single();
 
   if (error) {
@@ -298,15 +296,30 @@ export async function getEmployeeByUserId(userId: string) {
 
   return employee;
 }
+// export async function getEmployeeByUserId(userId: string) {
+//   const supabase = await createSVClient();
+
+//   const { data: employee, error } = await supabase
+//     .from("employees")
+//     .select("id, organization_id")
+//     .eq("user_id", userId)
+//     .single();
+
+//   if (error) {
+//     throw new Error(`Failed to fetch employee: ${error.message}`);
+//   }
+
+//   if (!employee) {
+//     throw new Error("Employee not found");
+//   }
+
+//   return employee;
+// }
 
 export async function getEmployeeUserId(employeeId: string) {
   const supabase = await createSVClient();
 
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .select("user_id")
-    .eq("id", employeeId)
-    .single();
+  const { data: employee, error } = await supabase.from("employees").select("user_id").eq("id", employeeId).single();
 
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
@@ -322,10 +335,7 @@ export async function getEmployeeUserId(employeeId: string) {
 export async function deleteEmployeeById(employeeId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employees")
-    .delete()
-    .eq("id", employeeId);
+  const { error } = await supabase.from("employees").delete().eq("id", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete employee: ${error.message}`);
@@ -335,10 +345,7 @@ export async function deleteEmployeeById(employeeId: string) {
 export async function findEmployeesByEmployeeCodes(employeeCodes: string[]) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("employees")
-    .select("employee_code")
-    .in("employee_code", employeeCodes);
+  const { data, error } = await supabase.from("employees").select("employee_code").in("employee_code", employeeCodes);
 
   if (error) {
     throw new Error(`Failed to check employee codes: ${error.message}`);
@@ -367,7 +374,141 @@ export async function getEmployeeOrganizationIdByUserId(userId: string): Promise
   return employee.organization_id;
 }
 
-export {
-  getEmployees,
-  getEmployeeById,
+export const getEmployeesByUserId = async (userId: string) => {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("employees")
+      .select(
+        `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				positions(
+					id,
+					title, 
+					organization_id
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+      )
+      .eq("user_id", userId);
+
+    if (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    console.error(err);
+    throw new Error("Can't get employees Info");
+  }
 };
+export type GetEmployeesByUserIdResponse = Awaited<ReturnType<typeof getEmployeesByUserId>>;
+
+const getOneEmployee = async (variables: { userId: string; organizationId: string }) => {
+  const { userId, organizationId } = variables;
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("employees")
+      .select(
+        `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+      )
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (error) {
+      throw new Error(error?.message);
+    }
+    return data;
+  } catch (err) {
+    console.log(err);
+    throw new Error("Can't getOneEmployee");
+  }
+};
+export type getOneEmployee = Awaited<ReturnType<typeof getOneEmployee>>;
+
+const updateStatus = async (employeeId: string, status: "active" | "inactive") => {
+  const supabase = createClient();
+  return await supabase
+    .from("employees")
+    .update({ status })
+    .select(
+      `
+				id, 
+				status, 
+				employee_code, 
+				employee_type,
+				user_id,
+				organization_id,
+				organization:organizations!inner(
+					id, 
+					name, 
+					subdomain, 
+					employee_limit, 
+					subdomain,
+					logo,
+					is_active,
+					favicon,
+					shortname
+				),
+				profiles(
+					id,
+					full_name,
+					gender,
+					avatar,
+					email
+				)
+			`,
+    )
+    .eq("id", employeeId)
+    .single();
+};
+export type UpdateStatusResponse = Awaited<ReturnType<typeof updateStatus>>;
+
+export { getEmployees, getEmployeeById, getOneEmployee, updateStatus };

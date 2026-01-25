@@ -1,16 +1,46 @@
-import { TPermissionActions } from "@/constants/permission.constant";
+import { RESOURCE_OPTIONS } from "@/constants/permission.constant";
+import { PermissionActions } from "@/model/permission.model";
 import { ACTION_OPTIONS, PermissionModule, RoleFormData } from "@/modules/roles/types";
 import { supabase } from "@/services";
 import { slugify } from "@/utils/slugify";
 
-export interface GetRoleListParams {
+export interface AdminGetRoleListParams {
   page?: number;
   pageSize?: number;
+  ids?: string[];
 }
+const DEFAULT_PAGE = 1;
+const DEFAULT_LIMIT = 10;
 
-export const getRoleList = async (params?: GetRoleListParams) => {
-  const { page = 0, pageSize = 10 } = params || {};
-  const from = page * pageSize;
+export const getRoleList = async (params?: AdminGetRoleListParams) => {
+  const ids = params?.ids;
+
+  if (ids && ids.length === 0) {
+    return [];
+  }
+
+  let query = supabase
+    .from("roles")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (ids && ids.length > 0) {
+    query = query.in("id", ids);
+  }
+
+  return query.then(({ data, error }) => {
+    if (error) return Promise.reject(error);
+    return data || [];
+  });
+};
+
+export const adminGetRoleList = async (params?: AdminGetRoleListParams) => {
+  const { page = DEFAULT_PAGE, pageSize = DEFAULT_LIMIT } = params || {};
+
+  const safePage = Number.isFinite(page) ? Math.floor(page) : DEFAULT_PAGE;
+  const safeLimit = Number.isFinite(pageSize) ? Math.floor(pageSize) : DEFAULT_LIMIT;
+
+  const from = (safePage - 1) * pageSize;
   const to = from + pageSize - 1;
 
   const { count } = await supabase.from("roles").select("*", { count: "exact", head: true });
@@ -33,18 +63,14 @@ export const getRoleList = async (params?: GetRoleListParams) => {
       };
     });
 };
-
+export type AdminGetRoleListResponse = Awaited<ReturnType<typeof adminGetRoleList>>;
 export const getGroupPermissionList = async () => {
-  return supabase
-    .from("group_permission")
-    .select("id, title")
-    .then(({ data, error }) => {
-      if (error) return Promise.reject(error);
-
-      return Object.fromEntries(
-        data.map((gp) => [gp.id, { id: gp.id, name: gp.title || "", actions: Object.values(ACTION_OPTIONS) }]),
-      );
-    });
+  return Object.fromEntries(
+    RESOURCE_OPTIONS.map((res) => [
+      res.code,
+      { id: res.code, name: res.label, actions: Object.values(ACTION_OPTIONS) },
+    ]),
+  );
 };
 
 export async function getRolePermissions(roleCode: string): Promise<RoleFormData> {
@@ -58,51 +84,40 @@ export async function getRolePermissions(roleCode: string): Promise<RoleFormData
   if (roleError) return Promise.reject(roleError);
   if (!role) return Promise.reject("Role not found");
 
-  const { data: groupPerms, error: groupPermsError } = await supabase
-    .from("group_permission")
-    .select(
-      `
-    id,
-    title,
-    resource_code,
-    role_permissions!left(
-      action_code
-    )
-  `,
-    )
-    .eq("role_permissions.role_id", role.id)
-    .order("title");
+  const { data: rolePerms, error: rolePermsError } = await supabase
+    .from("role_permissions")
+    .select(`*`)
+    .eq("role_id", role.id);
 
-  if (groupPermsError) return Promise.reject(groupPermsError);
-  if (!groupPerms) return Promise.reject("No group permissions found");
+  if (rolePermsError) return Promise.reject(rolePermsError);
 
-  const selectedPermissions = new Map<string, Set<TPermissionActions>>();
+  const selectedPermissions = new Map<string, Set<PermissionActions>>();
+  const originalSelectedPermissions = new Map<string, Set<PermissionActions>>();
 
-  const grouped = groupPerms.reduce((acc, gp) => {
-    (gp.role_permissions || []).forEach((rp) => {
-      const exist = selectedPermissions.get(gp.id);
-      if (exist) {
-        exist.add(rp.action_code as TPermissionActions);
-      } else {
-        selectedPermissions.set(gp.id, new Set([rp.action_code as TPermissionActions]));
-      }
-    });
+  RESOURCE_OPTIONS.forEach((res) => {
+    selectedPermissions.set(res.code, new Set<PermissionActions>());
+    originalSelectedPermissions.set(res.code, new Set<PermissionActions>());
+  });
 
-    acc[gp.id] = {
-      id: gp.id,
-      name: gp.title || "",
-      actions: ACTION_OPTIONS,
-    };
-    return acc;
-  }, {} as Record<string, PermissionModule>);
+  rolePerms.forEach((perm) => {
+    if (selectedPermissions.has(perm.resource_code)) {
+      selectedPermissions.get(perm.resource_code)?.add(perm.action_code as PermissionActions);
+      originalSelectedPermissions.get(perm.resource_code)?.add(perm.action_code as PermissionActions);
+    }
+  });
 
   return {
     id: role.id,
-    name: role.title || "",
+    name: role.title,
     description: role.description || "",
-    originalSelectedPermissions: selectedPermissions,
     selectedPermissions,
-    modules: grouped,
+    originalSelectedPermissions,
+    modules: Object.fromEntries(
+      RESOURCE_OPTIONS.map((res) => [
+        res.code,
+        { id: res.code, name: res.label, actions: Object.values(ACTION_OPTIONS) },
+      ]),
+    ),
   };
 }
 
@@ -114,8 +129,8 @@ export interface RoleParams {
 }
 
 export interface PermissionParams {
-  group_permission_id: string;
-  action_code: TPermissionActions;
+  resource_code: string;
+  action_code: PermissionActions;
 }
 export interface RolePermissionsParams {
   roleId?: string;
@@ -129,12 +144,12 @@ export const updateRolePermissions = async (params: RolePermissionsParams) => {
   if (!roleId) return Promise.reject("Role ID is required");
 
   if (permissionsToRemove.length > 0) {
-    const deletePromises = permissionsToRemove.map(({ group_permission_id, action_code }) =>
+    const deletePromises = permissionsToRemove.map(({ resource_code, action_code }) =>
       supabase
         .from("role_permissions")
         .delete()
         .eq("role_id", roleId)
-        .eq("group_permission_id", group_permission_id)
+        .eq("resource_code", resource_code)
         .eq("action_code", action_code),
     );
     await Promise.all(deletePromises);
@@ -165,7 +180,7 @@ const generateCode = async (title: string) => {
 };
 
 export const createRole = async (data: RoleParams & { permissions: PermissionParams[] }) => {
-  let code = await generateCode(data.title);
+  const code = await generateCode(data.title);
 
   if (!code) return Promise.reject("Failed to generate role code");
   if (!data.organization_id) return Promise.reject("Organization ID is required");

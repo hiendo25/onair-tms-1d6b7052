@@ -2,27 +2,28 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
   Alert,
-  CircularProgress,
   Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   FormControl,
   InputLabel,
-  Select,
   MenuItem,
+  Select,
+  TextField,
 } from "@mui/material";
+
+import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { departmentRepository } from "@/repository";
+import type { DepartmentDto } from "@/types/dto/departments";
 import {
   useCreateDepartmentMutation,
   useUpdateDepartmentMutation,
 } from "../operations/mutation";
-import type { DepartmentDto } from "@/types/dto/departments";
-import { departmentRepository } from "@/repository";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
 
 interface DepartmentFormData {
   name: string;
@@ -92,7 +93,8 @@ export function DepartmentDialog({
       newErrors.name = "Tên phòng ban không được vượt quá 100 ký tự";
     } else {
       try {
-        const nameExists = await departmentRepository.checkNameExists(
+				
+        const nameExists = await departmentRepository.departmentRepository.checkNameExists(
           formData.name,
           formData.organization_id,
           department?.id

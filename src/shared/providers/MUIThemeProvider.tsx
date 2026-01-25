@@ -1,9 +1,11 @@
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
-import GlobalStyles from "@mui/material/GlobalStyles";
-import CssBaseline from "@mui/material/CssBaseline";
-import { theme } from "@/theme/mui/AppTheme";
-import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+import React from "react";
 import { ThemeProvider } from "@mui/material";
+import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+
+import { theme } from "@/theme/mui/AppTheme";
 
 const MUIThemeProvider = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -11,17 +13,13 @@ const MUIThemeProvider = ({ children }: { children: React.ReactNode }) => {
       options={{
         enableCssLayer: true,
         key: "onair",
-        // nonce: "668868",
+        nonce: "668868",
         prepend: true,
+        speedy: true,
       }}
     >
       <InitColorSchemeScript attribute="class" />
-      <ThemeProvider
-        theme={theme}
-        disableTransitionOnChange
-        disableNestedContext
-        defaultMode="light"
-      >
+      <ThemeProvider theme={theme} disableTransitionOnChange disableNestedContext defaultMode="light">
         <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
         <CssBaseline enableColorScheme />
         {children}

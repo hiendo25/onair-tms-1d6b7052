@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useTMutation } from "@/lib";
 import { createRole, PermissionParams, RoleParams, RolePermissionsParams, updateRole } from "@/repository/roles";
-import { useQueryClient } from "@tanstack/react-query";
-import { GET_ROLE_PERMISSIONS, GET_ROLES } from "./key";
+
+import { GET_ROLE_PERMISSIONS,GET_ROLES } from "./key";
 
 export const useCreateRole = () => {
   const queryClient = useQueryClient();

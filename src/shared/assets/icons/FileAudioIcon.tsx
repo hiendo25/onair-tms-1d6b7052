@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const FileAdioIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const FileAdioIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg
@@ -22,7 +23,7 @@ const FileAdioIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...r
               d="M35.1548 12.1381C35.4678 12.4537 35.2443 12.9902 34.7998 12.9902H29C26.4227 12.9902 24.0976 10.7233 24.0976 8.21031V2.20435C24.0976 1.75791 24.6382 1.53528 24.9526 1.85224L35.1548 12.1381Z"
               fill="white"
               fill-opacity="0.24"
-              shape-rendering="crispEdges"
+              shapeRendering="crispEdges"
             />
           </g>
           <path

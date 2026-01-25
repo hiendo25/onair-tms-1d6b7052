@@ -1,8 +1,10 @@
-import { ToolbarItem } from "./toolbar-item";
-import { editorClasses } from "../../classes";
+import React, { useCallback, useState } from "react";
 import { Button, Popover, Stack, TextField, Typography } from "@mui/material";
+
+import { editorClasses } from "../../classes";
 import { EditorToolbarProps } from "../../types";
-import { useCallback, useState } from "react";
+
+import { ToolbarItem } from "./toolbar-item";
 // import { useStoreLibrary } from "@onair/store/library";
 
 const FILE_TYPES = ["video/mp4", "application/pdf", "image/png", "image/jpeg"];

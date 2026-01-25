@@ -1,13 +1,14 @@
 "use client";
 
 import {
+  Button,
   Dialog,
-  DialogTitle,
+  DialogActions,
   DialogContent,
   DialogContentText,
-  DialogActions,
-  Button,
+  DialogTitle,
 } from "@mui/material";
+
 import { Resource } from "../types";
 
 interface DeleteConfirmDialogProps {

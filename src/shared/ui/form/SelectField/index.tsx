@@ -1,5 +1,6 @@
 "use client";
 import React, { memo, useCallback, useId } from "react";
+import type { SelectProps } from "@mui/material";
 import {
   alpha,
   Box,
@@ -12,10 +13,9 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import type { SelectProps } from "@mui/material";
 import { isArray, isNull, isUndefined } from "lodash";
 
-type OptionType = { id: string | number; label?: string; [key: string]: any };
+type OptionType = { id?: string | number; label?: string; [key: string]: any };
 type ValueType = number | string | string[] | number[];
 
 export type SelectFieldProps = SelectProps<ValueType> & {

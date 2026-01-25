@@ -1,0 +1,127 @@
+import * as React from "react";
+import MenuIcon from "@mui/icons-material/Menu";
+import MuiAppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import { styled, useTheme } from "@mui/material/styles";
+import Toolbar from "@mui/material/Toolbar";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
+import Link from "next/link";
+
+const AppBar = styled(MuiAppBar)(({ theme }) => ({
+  borderWidth: 0,
+  borderBottomWidth: 1,
+  borderStyle: "solid",
+  borderColor: (theme.vars ?? theme).palette.divider,
+  boxShadow: "none",
+  zIndex: theme.zIndex.drawer + 1,
+  displayPrint: "none",
+  backgroundColor: "white",
+  ...theme.applyStyles("dark", {
+    background: "#141a21",
+  }),
+  border: "none",
+}));
+
+const LogoContainer = styled("div")({
+  position: "relative",
+  height: 40,
+  display: "flex",
+  alignItems: "center",
+  "& img": {
+    maxHeight: 40,
+  },
+});
+
+export interface HeaderProps {
+  logo?: React.ReactNode;
+  title?: string;
+  menuOpen: boolean;
+  onToggleMenu: (open: boolean) => void;
+  actions?: React.ReactNode;
+  slots?: {
+    right?: React.ReactNode;
+    left?: React.ReactNode;
+  };
+}
+
+export default function Header({ logo, title, menuOpen, onToggleMenu, actions, slots }: HeaderProps) {
+  const theme = useTheme();
+
+  const handleMenuOpen = React.useCallback(() => {
+    onToggleMenu(!menuOpen);
+  }, [menuOpen, onToggleMenu]);
+
+  const getMenuIcon = React.useCallback(
+    (isExpanded: boolean) => {
+      const expandMenuActionText = "Expand";
+      const collapseMenuActionText = "Collapse";
+      return (
+        <Tooltip title={`${isExpanded ? collapseMenuActionText : expandMenuActionText} menu`} enterDelay={1000}>
+          <div>
+            <IconButton
+              size="small"
+              aria-label={`${isExpanded ? collapseMenuActionText : expandMenuActionText} navigation menu`}
+              onClick={handleMenuOpen}
+              className="bg-transparent"
+            >
+              {isExpanded ? <MenuIcon /> : <MenuIcon />}
+            </IconButton>
+          </div>
+        </Tooltip>
+      );
+    },
+    [handleMenuOpen],
+  );
+
+  return (
+    <AppBar color="inherit" position="sticky" className="header-bar z-20">
+      <Toolbar sx={{ px: 2 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{
+            flexWrap: "wrap",
+            width: "100%",
+          }}
+        >
+          <Stack direction="row" alignItems="center" className="relative">
+            <Box sx={{ mr: 1 }}>{getMenuIcon(menuOpen)}</Box>
+            <Link href="/" style={{ textDecoration: "none" }}>
+              <Stack direction="row" alignItems="center">
+                {logo ? <LogoContainer>{logo}</LogoContainer> : null}
+                {title ? (
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: (theme.vars ?? theme).palette.primary.main,
+                      fontWeight: "600",
+                      ml: 1,
+                      whiteSpace: "nowrap",
+                      lineHeight: 1,
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                ) : null}
+              </Stack>
+            </Link>
+            {slots?.left ? (
+              <Box component="div" className="header-slot-left">
+                {slots.left}
+              </Box>
+            ) : null}
+          </Stack>
+          {slots?.right ? (
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
+              {slots?.right}
+            </Stack>
+          ) : null}
+        </Stack>
+      </Toolbar>
+    </AppBar>
+  );
+}

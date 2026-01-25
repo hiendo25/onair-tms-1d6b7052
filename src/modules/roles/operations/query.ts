@@ -1,10 +1,24 @@
 import { useTQuery } from "@/lib";
-import { getGroupPermissionList, getRoleList, GetRoleListParams, getRolePermissions } from "@/repository/roles";
+import {
+  adminGetRoleList,
+  AdminGetRoleListParams,
+  getGroupPermissionList,
+  getRoleList,
+  getRolePermissions,
+} from "@/repository/roles";
+
 import { GET_PERMISSIONS, GET_ROLE_PERMISSIONS, GET_ROLES } from "./key";
 
-export const useGetRoleList = (params?: GetRoleListParams) => {
+export const useAdminGetRoleList = (params?: AdminGetRoleListParams) => {
   return useTQuery({
     queryKey: [GET_ROLES, params?.page, params?.pageSize],
+    queryFn: async () => await adminGetRoleList(params),
+  });
+};
+
+export const useGetRoleList = (params?: AdminGetRoleListParams) => {
+  return useTQuery({
+    queryKey: [GET_ROLES, params?.page, params?.pageSize, params?.ids?.join(",")],
     queryFn: async () => await getRoleList(params),
   });
 };
@@ -14,7 +28,7 @@ export const useGetGroupPermissionList = () => {
     queryKey: [GET_PERMISSIONS],
     queryFn: async () => await getGroupPermissionList(),
   });
-}
+};
 
 export const useGetRolePermissions = (roleCode: string) => {
   return useTQuery({
@@ -22,4 +36,4 @@ export const useGetRolePermissions = (roleCode: string) => {
     queryFn: async () => await getRolePermissions(roleCode),
     enabled: !!roleCode,
   });
-}
+};

@@ -1,4 +1,4 @@
-import { Tables } from "@/types/supabase.types";
+import { Enums, Tables } from "@/types/supabase.types";
 
 export type ClassRoom = Tables<"class_rooms">;
 

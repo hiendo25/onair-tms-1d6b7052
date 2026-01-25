@@ -1,10 +1,12 @@
 "use client";
-import { memo } from "react";
+import React, { memo } from "react";
+import { Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
+
 import TextEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
-import { Typography } from "@mui/material";
 import { type Assignment } from "../../assignment-form.schema";
-import { useFormContext } from "react-hook-form";
+
 import AssignmentCategorySelector from "./AssignmentCategorySelector";
 
 interface TabAssignmentInformationProps {}
@@ -17,7 +19,7 @@ const TabAssignmentInformation: React.FC<TabAssignmentInformationProps> = () => 
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="bg-white rounded-xl p-6 flex flex-col gap-6">
+      <div className="bg-white rounded-xl p-3 md:p-6 flex flex-col gap-6 border border-gray-200">
         <div>
           <RHFTextField
             control={control}
@@ -38,4 +40,3 @@ const TabAssignmentInformation: React.FC<TabAssignmentInformationProps> = () => 
 };
 
 export default memo(TabAssignmentInformation);
-

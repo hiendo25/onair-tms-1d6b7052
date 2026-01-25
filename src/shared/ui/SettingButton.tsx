@@ -1,7 +1,8 @@
 "use client";
 import { IconButton } from "@mui/material";
+import { useColorScheme, useMediaQuery, useTheme } from "@mui/material";
+
 import { Setting02Icon } from "../assets/icons";
-import { useTheme, useMediaQuery, useColorScheme } from "@mui/material";
 const SettingButton = () => {
   const theme = useTheme();
 
@@ -16,9 +17,9 @@ const SettingButton = () => {
     <IconButton
       sx={(theme) => ({
         backgroundColor: paletteMode === "dark" ? "white" : "white",
-        borderRadius: "0.625rem",
+        borderRadius: "36px",
         "&:hover": {
-          backgroundColor: "white",
+          backgroundColor: theme.palette.grey[200],
         },
       })}
     >

@@ -1,11 +1,11 @@
 "use client";
 import * as React from "react";
-import { useTheme, useColorScheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import IconButton from "@mui/material/IconButton";
+import { useColorScheme, useTheme } from "@mui/material/styles";
+import Tooltip from "@mui/material/Tooltip";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 export default function ThemeSwitcher() {
   const theme = useTheme();
@@ -22,17 +22,12 @@ export default function ThemeSwitcher() {
   }, [setMode, paletteMode]);
 
   return (
-    <Tooltip
-      title={`${paletteMode === "dark" ? "Light" : "Dark"} mode`}
-      enterDelay={1000}
-    >
+    <Tooltip title={`${paletteMode === "dark" ? "Light" : "Dark"} mode`} enterDelay={1000}>
       <div>
         <IconButton
-          aria-label={`Switch to ${
-            paletteMode === "dark" ? "light" : "dark"
-          } mode`}
+          aria-label={`Switch to ${paletteMode === "dark" ? "light" : "dark"} mode`}
           sx={{
-            backgroundColor: paletteMode === "dark" ? "white" : "white",
+            bgcolor: paletteMode === "dark" ? "white" : "white",
           }}
           onClick={toggleMode}
         >

@@ -1,60 +1,69 @@
 "use client";
-import { type ClassRoom } from "../../classroom-form.schema";
-import { useFieldArray, UseFormReturn } from "react-hook-form";
-import ClassRoomSessionFromToDate from "./class-room-session-fields/ClassRoomSessionFromToDate";
-import TeacherSelector from "./class-room-session-fields/TeacherSelector";
-import RoomChannel from "./class-room-session-fields/RoomChannel";
-import AgendarFields from "./class-room-session-fields/AgendarFields";
-import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { forwardRef } from "react";
+import { Control, useFieldArray, useWatch } from "react-hook-form";
+
 import { MarkerPin01Icon } from "@/shared/assets/icons";
-import { forwardRef, useImperativeHandle } from "react";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
+import { type ClassRoomFormValues } from "../classroom-form.schema";
+
+import AgendaFieldsControl from "./class-room-session-fields/AgendaFieldsControl";
+import AssessmentField from "./class-room-session-fields/AssessmentField";
+import CoursePeriodLearningPath from "./class-room-session-fields/CoursePeriodLearningPath";
+import CoursePeriodSelector from "./class-room-session-fields/CoursePeriodSelector";
 import QRCodeSettingFields from "./class-room-session-fields/QRCodeSettingFields";
+import RoomChannel from "./class-room-session-fields/RoomChannel";
+import ClassRoomSessionFromToDate from "./class-room-session-fields/SessionFromToDate";
+import SessionFromToDateLearningPath from "./class-room-session-fields/SessionFromToDateLearningPath";
 
 export type SingleSessionRef = {
   checkAllSessionField: () => Promise<boolean>;
 };
 interface SingleSessionProps {
-  methods: UseFormReturn<ClassRoom>;
+  // methods: UseFormReturn<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
-const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ methods }, ref) => {
-  const { control, getValues, trigger } = methods;
 
+const SingleSession = forwardRef<SingleSessionRef, SingleSessionProps>(({ control }, ref) => {
   const { fields: classSessionsFields } = useFieldArray({
     control,
     name: "classRoomSessions",
     keyName: "_sessionId",
   });
 
-  useImperativeHandle(ref, () => ({
-    checkAllSessionField: async () => {
-      return await trigger("classRoomSessions");
-    },
-  }));
+  const isLearningPath = useWatch({ control, name: "classType" }) === "learning_path";
 
+  console.log("render session");
   return (
     <div className="class-single-session">
-      {classSessionsFields.map(({ _sessionId, isOnline }, _index) => (
-        <div key={_sessionId}>
-          <div className="flex flex-col gap-6 bg-white rounded-xl p-6 mb-6">
-            <ClassRoomSessionFromToDate index={_index} control={control} />
-            <TeacherSelector sessionIndex={_index} />
-            {isOnline ? (
-              <RoomChannel control={control} index={_index} />
-            ) : (
-              <>
-                <RHFTextField
-                  name={`classRoomSessions.${_index}.location`}
-                  control={control}
-                  label="Địa điểm tổ chức"
-                  required
-                  startAdornment={<MarkerPin01Icon />}
-                  placeholder="Nhập địa điểm tổ chức lớp học"
-                />
-                <QRCodeSettingFields sessionIndex={_index} control={control} />
-              </>
-            )}
-            <AgendarFields sessionIndex={_index} />
-          </div>
+      {classSessionsFields.map(({ _sessionId, sessionType }, _index) => (
+        <div key={_sessionId} className="flex flex-col gap-6 rounded-xl p-3 md:p-6 mb-6 border border-gray-200">
+          {isLearningPath ? (
+            <>
+              <SessionFromToDateLearningPath sessionIndex={_index} control={control} />
+              <CoursePeriodLearningPath sessionIndex={_index} control={control} />
+            </>
+          ) : (
+            <>
+              <ClassRoomSessionFromToDate index={_index} control={control} />
+              <CoursePeriodSelector sessionIndex={_index} />
+            </>
+          )}
+          <AssessmentField sessionIndex={_index} control={control} />
+          {sessionType === "live" && <RoomChannel control={control} index={_index} />}
+          {sessionType === "offline" && (
+            <>
+              <RHFTextField
+                name={`classRoomSessions.${_index}.location`}
+                control={control}
+                label="Địa điểm tổ chức"
+                required
+                startAdornment={<MarkerPin01Icon />}
+                placeholder="Nhập địa điểm tổ chức lớp học"
+              />
+              <QRCodeSettingFields sessionIndex={_index} control={control} />
+            </>
+          )}
+          {isLearningPath ? null : <AgendaFieldsControl sessionIndex={_index} control={control} />}
         </div>
       ))}
     </div>

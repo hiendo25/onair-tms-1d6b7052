@@ -5,6 +5,7 @@ interface UserOrganization {
   status: "active" | "inactive";
   employeeCode: string;
   employeeType: EmployeeType;
+  employeeId: string;
   userId: string;
   organization: {
     id: string;
@@ -18,4 +19,34 @@ interface UserOrganization {
     gender: Gender;
   } | null;
 }
-export type { UserOrganization };
+
+type EmployeeOrganization = {
+  employeeId: string;
+  orgId: string;
+  orgName: string;
+  orgLogo: string;
+  orgDomain: string;
+  orgFavicon: string;
+  orgShortName: string;
+  userId: string;
+};
+
+type Employee = {
+  id: string;
+  status: "active" | "inactive";
+  code: string;
+  type: EmployeeType;
+  userId: string;
+  organization: {
+    id: string;
+    name: string;
+  };
+  profile: {
+    fullName?: string;
+    avatarUrl?: string;
+    email?: string;
+    gender: Gender;
+  } | null;
+};
+
+export type { UserOrganization, EmployeeOrganization, Employee };

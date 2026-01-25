@@ -9,6 +9,8 @@ import React, {
   useRef,
   useState,
 } from "react";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import type { BoxProps, ChipProps } from "@mui/material";
 import {
   alpha,
   Box,
@@ -21,11 +23,11 @@ import {
   styled,
   Typography,
 } from "@mui/material";
-import type { BoxProps, ChipProps } from "@mui/material";
-import { isArray } from "lodash";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import useClickOutSide from "./useClickOutside";
+import { isArray, isUndefined } from "lodash";
+
 import { CloseIcon } from "@/shared/assets/icons";
+
+import useClickOutSide from "./useClickOutside";
 
 type Option<T> = { value: T; label: string } & Record<string, any>;
 
@@ -106,13 +108,17 @@ const MultipleSelectField = <T,>({
 
   const handleSelectOptionItem = (option: Option<T>) => {
     const value = getOptionValueWithOptionField(option);
-    setSelectedItem((prev) => {
-      const prevArr = isArray(prev) ? prev : [];
-      const exists = prevArr.includes(value);
-      const newValue = exists ? prevArr.filter((v) => v !== value) : [...prevArr, value];
-      onChange?.(newValue);
-      return newValue;
-    });
+
+    const existsItem = selectedItem.find((it) => it === value);
+
+    const newValues = existsItem ? selectedItem.filter((item) => item !== value) : [...selectedItem, value];
+
+    onChange?.(newValues);
+
+    if (!onChange) {
+      setSelectedItem(newValues);
+    }
+
     inputRef.current?.focus();
   };
 
@@ -132,15 +138,17 @@ const MultipleSelectField = <T,>({
 
   const handleDeleteItem = (value: T) => (evt: any) => {
     onRemoveOptionItem?.(value);
-    setSelectedItem((prevSelectedItem) => {
-      const indexValue = prevSelectedItem.findIndex((item) => value === value);
-      if (indexValue !== -1) {
-        const newItem = [...prevSelectedItem];
-        newItem.splice(indexValue, 1);
-        return newItem;
-      }
-      return prevSelectedItem;
-    });
+    if (!onRemoveOptionItem) {
+      setSelectedItem((prevSelectedItem) => {
+        const indexValue = prevSelectedItem.findIndex((item) => value === value);
+        if (indexValue !== -1) {
+          const newItem = [...prevSelectedItem];
+          newItem.splice(indexValue, 1);
+          return newItem;
+        }
+        return prevSelectedItem;
+      });
+    }
   };
 
   const renderSelectedValues = (selectedValue: Exclude<MultipleSelectFieldProps<T>["value"], undefined>) => {
@@ -178,9 +186,9 @@ const MultipleSelectField = <T,>({
   };
 
   useEffect(() => {
-    if (value) {
-      setSelectedItem(value);
-    }
+    if (isUndefined(value)) return;
+
+    setSelectedItem(value);
   }, [value]);
   return (
     <FormControl disabled={disabled} error={!!error} className={className} sx={{ position: "relative" }}>
@@ -214,6 +222,7 @@ const MultipleSelectField = <T,>({
               <MenuItem
                 disabled
                 sx={{
+                  fontSize: "14px",
                   "&.Mui-disabled": {
                     opacity: 0.6,
                   },
@@ -229,6 +238,7 @@ const MultipleSelectField = <T,>({
                 onClick={() => handleSelectOptionItem(option)}
                 sx={(theme) => ({
                   backgroundColor: hasSelectedItem(option) ? theme.palette.grey[200] : undefined,
+                  fontSize: "14px",
                 })}
               >
                 {option.label}
@@ -309,6 +319,6 @@ const Dropdown = styled(({ isOpen, ...props }: BoxProps & { isOpen: boolean }) =
   borderColor: theme.palette.grey[300],
   overflowY: "auto",
   zIndex: "10",
-  boxShadow: "0px 6px 12px -6px rgb(0 0 0 / 10%), 0px 12px 18px -12px rgb(0 0 0 / 30%)",
+  boxShadow: "0px 4px 12px -6px rgb(0 0 0 / 10%), 0px 8px 16px -24px rgb(0 0 0 / 30%)",
   borderRadius: "8px",
 }));

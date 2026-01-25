@@ -1,17 +1,17 @@
-interface MenuContentItemType {
+import React from "react";
+
+export interface MenuContentItemType {
   title: string;
   subTitle?: string;
   icon?: React.ReactNode;
   path: string;
-  key: string;
+  key: string; // for handle active menu item
   children?: (MenuContentItemType | MenuGroupItemType)[];
   type?: "item";
 }
-interface MenuGroupItemType {
+export interface MenuGroupItemType {
   title: string;
-  subTitle?: string;
-  icon?: React.ReactNode;
-  key: string;
+  key: string; // for handle active menu item
   children: MenuContentItemType[];
   type: "group";
 }

@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import type { CreateDepartmentDto } from "@/types/dto/departments";
+import { NextRequest, NextResponse } from "next/server";
+
+import { PATHS } from "@/constants/path.constant";
 import { departmentService } from "@/services";
+import type { CreateDepartmentDto } from "@/types/dto/departments";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     const result = await departmentService.createDepartment(payload);
 
-    revalidatePath("/department/departments");
+    revalidatePath(PATHS.DEPARTMENTS.ROOT);
 
     return NextResponse.json(
       {
@@ -17,18 +19,13 @@ export async function POST(request: NextRequest) {
         message: "Tạo phòng ban thành công",
         data: result,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating department:", error);
 
-    const errorMessage = error instanceof Error
-      ? error.message
-      : "Có lỗi xảy ra khi tạo phòng ban";
+    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo phòng ban";
 
-    return NextResponse.json(
-      { success: false, message: errorMessage },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
   }
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { TPermissionActions } from "@/constants/permission.constant";
-import { Box, Checkbox, CircularProgress, FormControlLabel, Typography } from "@mui/material";
 import React from "react";
+import { Box, Checkbox, CircularProgress, FormControlLabel, Typography } from "@mui/material";
+
+import { PermissionActions } from "@/model/permission.model";
 import { UseRolePermissionsReturn } from "../../hooks/useRolePermissionForm";
+
 import PermissionModuleItem from "./PermissionModuleItem";
 
 interface PermissionSelectorProps
@@ -18,8 +20,8 @@ interface PermissionSelectorProps
     | "setSelectedPermissions"
     | "isPendingToggleAll"
   > {
-    disabled?: boolean;
-  }
+  disabled?: boolean;
+}
 
 const PermissionSelector: React.FC<PermissionSelectorProps> = ({
   isFullySelected,
@@ -61,7 +63,7 @@ const PermissionSelector: React.FC<PermissionSelectorProps> = ({
               moduleId={module.id}
               moduleName={module.name}
               availableActions={module.actions}
-              selectedActions={new Set<TPermissionActions>(selectedPermissions.get(module.id) || [])}
+              selectedActions={new Set<PermissionActions>(selectedPermissions.get(module.id) || [])}
               toggleAction={toggleAction}
               setSelectedPermissions={setSelectedPermissions}
             />

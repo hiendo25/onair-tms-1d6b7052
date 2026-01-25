@@ -1,22 +1,27 @@
 "use client";
+import { forwardRef, memo } from "react";
+
 import AssignmentFormContainer, {
   AssignmentFormContainerProps,
   AssignmentFormContainerRef,
+  AssignmentTabKey,
+  TAB_KEYS_ASSIGNMENT,
 } from "./AssignmentFormContainer";
-import { forwardRef, memo } from "react";
 
-export interface ManageAssignmentFormRef extends AssignmentFormContainerRef {}
+export interface ManageAssignmentFormRef extends AssignmentFormContainerRef { }
 export interface ManageAssignmentFormProps {
   onSubmit?: AssignmentFormContainerProps["onSubmit"];
   isLoading?: boolean;
   action?: "create" | "edit";
   value?: AssignmentFormContainerProps["value"];
+  disabledTabs?: AssignmentTabKey[];
 }
 
 const ManageAssignmentForm = forwardRef<ManageAssignmentFormRef, ManageAssignmentFormProps>(
-  ({ onSubmit, value, action = "create", isLoading = false }, ref) => {
+  ({ onSubmit, value, action = "create", isLoading = false, disabledTabs }, ref) => {
     return (
-      <AssignmentFormContainer onSubmit={onSubmit} ref={ref} isLoading={isLoading} action={action} value={value} />
+      <AssignmentFormContainer onSubmit={onSubmit} ref={ref} isLoading={isLoading} action={action} value={value} disabledTabs={disabledTabs}
+      />
     );
   },
 );
@@ -25,3 +30,5 @@ ManageAssignmentForm.displayName = "ManageAssignmentForm";
 
 export default memo(ManageAssignmentForm);
 
+export { TAB_KEYS_ASSIGNMENT };
+export type { AssignmentTabKey };

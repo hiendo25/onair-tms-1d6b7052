@@ -1,11 +1,18 @@
 "use client";
-import { useClassRoomFormContext } from "../ClassRoomFormContainer";
-import SingleSession, { SingleSessionRef } from "./SingleSession";
-import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
-import { ClassRoom } from "../../classroom-form.schema";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { useWatch } from "react-hook-form";
 
-export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRoom["classRoomSessions"][number] => {
+import { ClassType } from "@/model/enum-type.model";
+import { ClassRoomFormValues } from "../classroom-form.schema";
+import { useClassRoomFormContext } from "../ClassRoomFormContainer";
+
+import MultipleSession, { MultipleSessionRef } from "./MultipleSession";
+import SingleSession, { SingleSessionRef } from "./SingleSession";
+
+export const initClassSessionFormData = (init?: {
+  sessionType?: "online" | "offline" | "live";
+  classType: ClassType;
+}): ClassRoomFormValues["classRoomSessions"][number] => {
   return {
     title: "",
     description: "",
@@ -15,10 +22,13 @@ export const initClassSessionFormData = (init?: { isOnline?: boolean }): ClassRo
     channelProvider: "zoom",
     thumbnailUrl: "",
     location: "",
-    isOnline: init?.isOnline || false,
+    sessionType: init?.sessionType ?? "live",
     agendas: [],
-    resources: [],
+    coursesPeriod: [],
+    assignments: [],
     qrCode: { startDate: "", endDate: "", isLimitTimeScanQrCode: false },
+    weeklySchedule: undefined,
+    classType: init?.classType,
   };
 };
 
@@ -28,25 +38,17 @@ type TabClassRoomSessionRef = {
 interface TabClassRoomSessionProps {}
 const TabClassRoomSession = forwardRef<TabClassRoomSessionRef, TabClassRoomSessionProps>((props, ref) => {
   const methods = useClassRoomFormContext();
+  const { control, trigger } = methods;
+
   const singleSessionRef = useRef<SingleSessionRef>(null);
   const multipleSessionRef = useRef<MultipleSessionRef>(null);
-  const { getValues } = methods;
-  const classRoomType = getValues("roomType");
 
-  useImperativeHandle(ref, () => ({
-    checkAllFields: async () => {
-      if (multipleSessionRef.current && singleSessionRef.current) {
-        return classRoomType === "multiple"
-          ? await multipleSessionRef.current.checkAllSessionFields()
-          : await singleSessionRef.current.checkAllSessionField();
-      }
-      return false;
-    },
-  }));
+  const classRoomType = useWatch({ control, name: "roomType" });
+
   return (
     <div>
-      {classRoomType === "single" ? <SingleSession methods={methods} ref={singleSessionRef} /> : null}
-      {classRoomType === "multiple" ? <MultipleSession methods={methods} ref={multipleSessionRef} /> : null}
+      {classRoomType === "single" ? <SingleSession ref={singleSessionRef} control={control} /> : null}
+      {classRoomType === "multiple" ? <MultipleSession ref={multipleSessionRef} control={control} /> : null}
     </div>
   );
 });

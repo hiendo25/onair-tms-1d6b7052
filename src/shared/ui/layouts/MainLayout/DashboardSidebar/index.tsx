@@ -1,17 +1,15 @@
 "use client";
 import * as React from "react";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Button } from "@mui/material";
+import Drawer from "@mui/material/Drawer";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Drawer from "@mui/material/Drawer";
-import type {} from "@mui/material/themeCssVarsAugmentation";
+
+import MenuList, { MenuListProps } from "../MenuList";
+
 import { DRAWER_WIDTH, MINI_DRAWER_WIDTH } from "./constants";
 import { getDrawerWidthTransitionMixin } from "./mixins";
-import MenuList, { MenuListProps } from "../MenuList";
-import { LogoOnairIcon, LogoOnairShortIcon } from "@/shared/assets/icons";
-import Link from "next/link";
-import SignOutButton from "@/modules/auth/components/SignOutButton";
-import CardAlert from "@/shared/ui/CardAlert";
-import { cn } from "@/utils";
 export interface DashboardSidebarProps {
   expanded?: boolean;
   setExpanded?: (expanded: boolean) => void;
@@ -19,18 +17,21 @@ export interface DashboardSidebarProps {
   container?: Element;
   className?: string;
   menuItems: MenuListProps["items"];
+  slots?: { top?: React.ReactNode; bottom?: React.ReactNode };
 }
 
 const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
-  expanded = true,
+  expanded = false,
   setExpanded,
   disableCollapsibleSidebar = false,
   container,
   className,
   menuItems,
+  slots = {},
 }) => {
-  console.log(menuItems);
+  // console.log(menuItems);
   const theme = useTheme();
+  const { top: topSlot, bottom: bottomSlot } = slots;
 
   const isOverSmViewport = useMediaQuery(theme.breakpoints.up("sm"));
   const isOverMdViewport = useMediaQuery(theme.breakpoints.up("md"));
@@ -68,12 +69,19 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
 
   const mini = !disableCollapsibleSidebar && !expanded;
 
+  const canToggleSidebar = !!setExpanded && !disableCollapsibleSidebar;
+
   const handleSetSidebarExpanded = React.useCallback(
     (newExpanded: boolean) => () => {
       setExpanded?.(newExpanded);
     },
     [setExpanded],
   );
+
+  const handleToggleSidebarExpanded = React.useCallback(() => {
+    if (!setExpanded) return;
+    setExpanded(!expanded);
+  }, [expanded, setExpanded]);
 
   const hasDrawerTransitions = isOverSmViewport && (!disableCollapsibleSidebar || isOverMdViewport);
 
@@ -102,36 +110,26 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     (type: "mobile" | "desktop") => {
       return (
         <>
-          <div
-            className={cn({
-              "py-6 px-6": !mini,
-              "py-4 px-3": mini,
-            })}
-          >
-            <Link href="/">
-              {mini ? (
-                <LogoOnairShortIcon className="mx-auto block w-8 h-8" />
-              ) : (
-                <LogoOnairIcon className="h-10 w-auto" />
-              )}
-            </Link>
-          </div>
-          <MenuList items={menuItems} mini={mini} isFullyExpanded={isFullyExpanded} />
+          {topSlot && <div className="top-menu">{topSlot}</div>}
+          <MenuList
+            items={menuItems}
+            mini={mini}
+            isFullyExpanded={isFullyExpanded}
+            hasDrawerTransitions={hasDrawerTransitions}
+          />
           {/* {!mini ? <CardAlert /> : null} */}
-          <div className="p-3">
-            <SignOutButton className="w-full" type={mini ? "icon" : undefined} />
-          </div>
+          {bottomSlot}
         </>
       );
     },
-    [mini, isFullyExpanded, menuItems],
+    [mini, isFullyExpanded, menuItems, handleToggleSidebarExpanded, hasDrawerTransitions, topSlot],
   );
   return (
     <React.Fragment>
       <Drawer
         container={container}
         variant="temporary"
-        open={false}
+        open={!isOverMdViewport && expanded}
         onClose={handleSetSidebarExpanded(false)}
         ModalProps={{
           keepMounted: true, // Better open performance on mobile.
@@ -149,6 +147,7 @@ const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       </Drawer>
       <Drawer
         variant="permanent"
+        container={container}
         sx={{
           display: { xs: "none", sm: "block" },
           ...getDrawerSharedSx(false),

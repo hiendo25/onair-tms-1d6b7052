@@ -1,43 +1,59 @@
-import { redirect } from "next/navigation";
-import PageContainer from "@/shared/ui/PageContainer";
-import CreateClassRoomForm from "./_components/CreateClassRoomForm";
-import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+"use server";
+import React from "react";
+
+import { CLASS_ROOM_PLATFORM, ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { getClassRoomPlatformName } from "@/constants/class-room.constant";
+import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
-import { PATHS } from "@/constants/path.contstants";
+import { ClassType } from "@/model/enum-type.model";
+import ClassRoomTypeBoxMenu from "@/modules/class-room-management/components/ClassRoomTypeBoxMenu";
+import PageContainer from "@/shared/ui/PageContainer";
+
+import CreateClassRoomForm from "./_components/CreateClassRoomForm";
 interface CreateClassRoomPageProps {
   searchParams: Promise<
     {
       platform: ClassRoomPlatformType;
-      roomtype: ClassRoomType;
+      roomType: ClassRoomType;
+      classType: ClassType;
     } & Record<string, any>
   >;
 }
 const CreateClassRoomPage: React.FC<CreateClassRoomPageProps> = async ({ searchParams }) => {
-  const { platform, roomtype } = await searchParams;
+  const { platform, roomType, classType } = await searchParams;
 
-  if (
-    (roomtype !== "multiple" && roomtype !== "single") ||
-    (platform !== "hybrid" && platform !== "offline" && platform !== "online")
-  ) {
-    redirect("/admin/class-room");
-  }
+  const PLATFORMS = new Map<ClassRoomPlatformType, ClassRoomPlatformType>([
+    [CLASS_ROOM_PLATFORM.HYBRID, CLASS_ROOM_PLATFORM.HYBRID],
+    [CLASS_ROOM_PLATFORM.LIVE, CLASS_ROOM_PLATFORM.LIVE],
+    [CLASS_ROOM_PLATFORM.OFFLINE, CLASS_ROOM_PLATFORM.OFFLINE],
+    [CLASS_ROOM_PLATFORM.ONLINE, CLASS_ROOM_PLATFORM.ONLINE],
+  ]);
+  const ROOMS = new Map<ClassRoomType, ClassRoomType>([
+    ["multiple", "multiple"],
+    ["single", "single"],
+  ]);
+
+  const pageTitle = `Tạo lớp học ${getClassRoomPlatformName(platform) ?? ""}`;
 
   return (
     <PageContainer
-      title={`Tạo lớp học ${platform === "online" ? "trực tuyến" : "trực tiếp"}`}
+      title={pageTitle}
+      contained
       breadcrumbs={[
         {
           title: "Quản lý lớp học",
           path: PATHS.CLASSROOMS.ROOT,
         },
         {
-          title: "Tạo lớp học trực tuyến",
+          title: pageTitle,
         },
       ]}
     >
-      <div className="max-w-[1200px]">
-        <CreateClassRoomForm platform={platform} roomType={roomtype} />
-      </div>
+      {!platform || !roomType || !PLATFORMS.has(platform) || !ROOMS.has(roomType) ? (
+        <ClassRoomTypeBoxMenu />
+      ) : (
+        <CreateClassRoomForm platform={platform} roomType={roomType} isLearningPath={classType === "learning_path"} />
+      )}
     </PageContainer>
   );
 };

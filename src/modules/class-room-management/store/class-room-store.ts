@@ -1,7 +1,9 @@
-import attachActions from "./class-room-actions";
 import { createStore } from "zustand/vanilla";
-import { ClassRoomActions } from "./class-room-actions";
+
 import { EmployeeType } from "@/model/employee.model";
+
+import attachActions from "./class-room-actions";
+import { ClassRoomActions } from "./class-room-actions";
 
 export type TeacherSelectedItem = {
   id: string;
@@ -9,7 +11,7 @@ export type TeacherSelectedItem = {
   email: string;
   employeeCode: string;
   avatar: string | null;
-  empoyeeType: Exclude<EmployeeType, "admin" | "student">;
+  employeeType: Exclude<EmployeeType, "admin" | "student">;
 };
 export type StudentSelectedItem = {
   id: string;
@@ -17,7 +19,14 @@ export type StudentSelectedItem = {
   email: string;
   employeeCode: string;
   avatar: string | null;
-  empoyeeType: Exclude<EmployeeType, "admin" | "teacher">;
+  employeeType: Exclude<EmployeeType, "admin" | "teacher">;
+};
+
+export type CertificateSelectedItem = {
+  id: string;
+  name: string;
+  frameUrl: string | null;
+  daysToExpire: number | null;
 };
 
 type ClassRoomState = {
@@ -25,6 +34,7 @@ type ClassRoomState = {
     [sessionIndex: number | string]: TeacherSelectedItem[];
   };
   selectedStudents: StudentSelectedItem[];
+  selectedCertificate: CertificateSelectedItem | null;
 };
 
 type ClassRoomStore = {

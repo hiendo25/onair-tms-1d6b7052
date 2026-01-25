@@ -1,14 +1,15 @@
 "use client";
+import React, { forwardRef, memo, useCallback, useImperativeHandle, useState } from "react";
+import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
+
+import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
 import DialogTeacherContainer, {
   DialogTeacherContainerProps,
 } from "@/modules/teacher/container/DialogTeacherContainer";
-import { Button, Chip, FormLabel, IconButton, Typography } from "@mui/material";
-import { memo, useCallback, useState, forwardRef, useImperativeHandle } from "react";
 import { CloseIcon } from "@/shared/assets/icons";
-import { cn } from "@/utils";
 import Avatar from "@/shared/ui/Avatar";
-import { TeacherSelectedItem } from "@/modules/class-room-management/store/class-room-store";
-import { useClassRoomStore } from "@/modules/class-room-management/store/class-room-context";
+import { cn } from "@/utils";
 
 export interface TeacherSelectorRef {
   removeTeachersBySessionIndex: (index: number) => void;
@@ -34,7 +35,7 @@ const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(
         avatar: item.profiles.avatar,
         id: item.id,
         fullName: item.profiles.full_name,
-        empoyeeType: item.employee_type,
+        employeeType: item.employee_type,
         employeeCode: item.employee_code,
         email: item.profiles.email,
       }));
@@ -56,7 +57,7 @@ const TeacherSelector = forwardRef<TeacherSelectorRef, TeacherSelectorProps>(
           <div className="flex items-center">
             <div className="pr-6 flex-1">
               <FormLabel component="div">
-                Giảng viên phụ trách <span className="text-red-600">*</span>
+                Giảng viên phụ trách lớp học <span className="text-red-600">*</span>
               </FormLabel>
               <Typography className="text-xs text-gray-600">
                 Chỉ định giảng viên phụ trách nội dung, quản lý lớp học và hỗ trợ người học trong buổi học.

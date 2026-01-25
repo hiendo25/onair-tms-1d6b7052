@@ -1,6 +1,7 @@
-import { useAuthStore } from "../store/AuthProvider";
-import { useSignOutMutation } from "../operations/mutation";
 import { useRouter } from "next/navigation";
+
+import { useSignOutMutation } from "../operations/mutation";
+import { useAuthStore } from "../store/AuthProvider";
 
 const useAuthSignOut = () => {
   const resetAuth = useAuthStore((state) => state.reset);

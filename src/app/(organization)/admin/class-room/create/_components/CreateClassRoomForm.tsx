@@ -1,38 +1,42 @@
 "use client";
+import React, { useRef } from "react";
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useSnackbar } from "notistack";
+
 import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { PATHS } from "@/constants/path.constant";
 import { ClassRoomType } from "@/model/class-room.model";
 import ManageClassRoomForm, {
   ManageClassRoomFormProps,
   ManageClassRoomFormRef,
 } from "@/modules/class-room-management/components/ManageClassRoomForm";
 import { useCRUDClassRoom } from "@/modules/class-room-management/hooks/useCRUDClassRoom";
-import { useSnackbar } from "notistack";
-import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import { useTransition } from "react";
+import { useCreateClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 interface CreateClassRoomFormProps {
   platform: ClassRoomPlatformType;
   roomType: ClassRoomType;
+  isLearningPath?: boolean;
 }
-const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roomType }) => {
+const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roomType, isLearningPath }) => {
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
-  const { onCreate, isLoading } = useCRUDClassRoom();
+  // const { onCreate, isLoading } = useCRUDClassRoom();
+  const { mutate: onCreate, isPending: isLoading } = useCreateClassRoomMutation();
   const handleCancel = () => {
-    router.push("/admin/class-room");
+    router.push(PATHS.CLASSROOMS.ROOT);
   };
 
-  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, teachers) => {
+  const handleCreateClassRoom: ManageClassRoomFormProps["onSubmit"] = (formData, students, certificate) => {
     onCreate(
-      { formData, students, teachers },
+      { formData, students, certificate },
       {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
             enqueueSnackbar("Tạo lớp học thành công", { variant: "success" });
-            router.push("/admin/class-room");
-            formClassRoomRef.current?.resetForm();
+            router.push(PATHS.CLASSROOMS.LIST_CLASSROOM);
           });
         },
       },
@@ -44,6 +48,7 @@ const CreateClassRoomForm: React.FC<CreateClassRoomFormProps> = ({ platform, roo
       onCancel={handleCancel}
       platform={platform}
       roomType={roomType}
+      isLearningPath={isLearningPath}
       ref={formClassRoomRef}
       isLoading={isLoading || isTransition}
     />

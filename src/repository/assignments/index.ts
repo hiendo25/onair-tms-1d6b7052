@@ -1,20 +1,36 @@
 import { createClient, createSVClient } from "@/services";
-import type { Database } from "@/types/supabase.types";
-import type { AssignmentDto, GetAssignmentsParams, QuestionOption } from "@/types/dto/assignments";
+import type {
+  AssignmentDto,
+  GetAssignmentsParams,
+  GetMyAssignmentsParams,
+  QuestionOption,
+} from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+import type { Database } from "@/types/supabase.types";
+
+import { GetAssignmentsQueryParams } from "./type";
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
   const supabase = createClient();
-  const { page = 0, limit = 20, search, createdBy } = params || {};
+  const { page = 0, limit = 20, search, organizationId, createdBy } = params || {};
 
-  let query = supabase
-    .from("assignments")
-    .select(
-      `
+  let query = supabase.from("assignments").select(
+    `
       id,
       name,
       description,
       created_by,
+			organization_id,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
       created_at,
       updated_at,
       questions (
@@ -33,22 +49,11 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
           name
         )
       ),
-      assignment_employees (
-        employee_id,
-        employees (
-          id,
-          employee_code,
-          profiles (
-            id,
-            full_name,
-            email,
-            avatar
-          )
-        )
-      )
+      assignmentEmployees:assignment_employees(count),
+      submissions:assignment_results(count)
     `,
-      { count: "exact" }
-    );
+    { count: "exact" },
+  );
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
@@ -56,6 +61,9 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
 
   if (createdBy) {
     query = query.eq("created_by", createdBy);
+  }
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
   }
 
   const from = page * limit;
@@ -86,6 +94,16 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
       name,
       description,
       created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
       created_at,
       updated_at,
       questions (
@@ -117,8 +135,9 @@ const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
             avatar
           )
         )
-      )
-    `
+      ),
+      submissions:assignment_results(count)
+    `,
     )
     .eq("id", id)
     .single();
@@ -134,6 +153,7 @@ export async function createAssignment(data: {
   name: string;
   description: string;
   created_by: string;
+  organization_id: string;
 }) {
   const supabase = await createSVClient();
 
@@ -151,7 +171,7 @@ export async function updateAssignmentById(
   data: {
     name?: string;
     description?: string;
-  }
+  },
 ) {
   const supabase = await createSVClient();
 
@@ -172,6 +192,16 @@ export async function deleteAssignmentById(assignmentId: string) {
   }
 }
 
+export async function deleteAssignmentsByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("assignments").delete().eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignments by employee: ${error.message}`);
+  }
+}
+
 // Questions repository methods
 export async function createQuestions(
   questions: Array<{
@@ -182,12 +212,12 @@ export async function createQuestions(
     options?: QuestionOption[] | null;
     attachments?: string[] | null;
     created_by: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
   // Convert options to Json type for database
-  const questionsToInsert = questions.map(q => ({
+  const questionsToInsert = questions.map((q) => ({
     ...q,
     options: q.options as any, // Cast to Json type
   }));
@@ -209,12 +239,22 @@ export async function deleteQuestionsByAssignmentId(assignmentId: string) {
   }
 }
 
+export async function deleteQuestionsByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("questions").delete().eq("created_by", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete questions by employee: ${error.message}`);
+  }
+}
+
 // Assignment categories repository methods
 export async function createAssignmentCategories(
   categories: Array<{
     assignment_id: string;
     category_id: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
@@ -235,12 +275,39 @@ export async function deleteAssignmentCategoriesByAssignmentId(assignmentId: str
   }
 }
 
+export async function deleteAssignmentCategoriesByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  // First, get all assignment IDs created by this employee
+  const { data: assignments, error: fetchError } = await supabase
+    .from("assignments")
+    .select("id")
+    .eq("created_by", employeeId);
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch assignments by employee: ${fetchError.message}`);
+  }
+
+  if (!assignments || assignments.length === 0) {
+    return; // No assignments to delete categories for
+  }
+
+  const assignmentIds = assignments.map((a) => a.id);
+
+  // Delete all assignment_categories for these assignments
+  const { error } = await supabase.from("assignment_categories").delete().in("assignment_id", assignmentIds);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment categories by employee: ${error.message}`);
+  }
+}
+
 // Assignment employees repository methods
 export async function createAssignmentEmployees(
   employees: Array<{
     assignment_id: string;
     employee_id: string;
-  }>
+  }>,
 ) {
   const supabase = await createSVClient();
 
@@ -261,10 +328,30 @@ export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: stri
   }
 }
 
+export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("assignment_employees").delete().eq("employee_id", employeeId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment employees by employee: ${error.message}`);
+  }
+}
+
+export async function nullifyLessonsAssignmentId(assignmentId: string) {
+  const supabase = await createSVClient();
+
+  const { error } = await supabase.from("lessons").update({ assignment_id: null }).eq("assignment_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to nullify lessons assignment_id: ${error.message}`);
+  }
+}
+
 const getAssignmentStudents = async (
   assignmentId: string,
   page: number = 0,
-  limit: number = 25
+  limit: number = 25,
 ): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
 
@@ -289,7 +376,7 @@ const getAssignmentStudents = async (
         )
       )
     `,
-      { count: "exact" }
+      { count: "exact" },
     )
     .eq("assignment_id", assignmentId)
     .order("employee_id", { ascending: true })
@@ -332,7 +419,7 @@ const getAssignmentStudents = async (
         max_score: result.max_score,
         status: result.status,
       },
-    ])
+    ]),
   );
 
   // Combine the data
@@ -379,35 +466,122 @@ const getAssignmentQuestions = async (assignmentId: string) => {
   return data;
 };
 
-const getMyAssignments = async (
-  employeeId: string,
-  page: number = 0,
-  limit: number = 25
-): Promise<PaginatedResult<any>> => {
+async function getQuestionsByIds(questionIds: string[]) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase.from("questions").select("*").in("id", questionIds);
+
+  if (error) {
+    throw new Error(`Failed to fetch questions: ${error.message}`);
+  }
+
+  return data;
+}
+
+const getMyAssignments = async (employeeId: string, params?: GetMyAssignmentsParams): Promise<PaginatedResult<any>> => {
   const supabase = createClient();
+  const { page = 0, limit = 25, search, status } = params || {};
 
   // Calculate range for pagination
   const from = page * limit;
   const to = from + limit - 1;
 
-  // Get assignments assigned to this employee with pagination
-  const { data, error, count } = await supabase
-    .from("assignment_employees")
-    .select(
-      `
-      assignment_id,
-      assignments (
+  let data: any[] | null;
+  let error: any;
+  let count: number | null;
+
+  if (status === "submitted" || status === "graded") {
+    let queryWithInnerJoin = supabase
+      .from("assignments")
+      .select(
+        `
         id,
         name,
         description,
-        created_at
+        created_at,
+        assignment_employees!inner (
+          employee_id
+        ),
+        assignment_results!inner (
+          assignment_id,
+          employee_id,
+          status
+        )
+      `,
+        { count: "exact" },
       )
-    `,
-      { count: "exact" }
-    )
-    .eq("employee_id", employeeId)
-    .order("assignment_id", { ascending: false })
-    .range(from, to);
+      .eq("assignment_employees.employee_id", employeeId)
+      .eq("assignment_results.employee_id", employeeId)
+      .eq("assignment_results.status", status);
+
+    if (search) {
+      queryWithInnerJoin = queryWithInnerJoin.ilike("name", `%${search}%`);
+    }
+
+    const result = await queryWithInnerJoin.order("id", { ascending: false }).range(from, to);
+
+    data = result.data;
+    error = result.error;
+    count = result.count;
+  } else if (status === "not_submitted") {
+    let queryWithLeftJoin = supabase
+      .from("assignments")
+      .select(
+        `
+        id,
+        name,
+        description,
+        created_at,
+        assignment_employees!inner (
+          employee_id
+        ),
+        assignment_results!left (
+          id,
+          employee_id
+        )
+      `,
+        { count: "exact" },
+      )
+      .eq("assignment_employees.employee_id", employeeId)
+      .eq("assignment_results.employee_id", employeeId)
+      .is("assignment_results", null);
+
+    if (search) {
+      queryWithLeftJoin = queryWithLeftJoin.ilike("name", `%${search}%`);
+    }
+
+    const result = await queryWithLeftJoin.order("id", { ascending: false }).range(from, to);
+
+    data = result.data;
+    error = result.error;
+    count = result.count;
+  } else {
+    let queryWithoutFilter = supabase
+      .from("assignments")
+      .select(
+        `
+        id,
+        name,
+        description,
+        created_at,
+        assignment_employees!inner (
+          employee_id
+        )
+      `,
+        { count: "exact" },
+      )
+      .eq("assignment_employees.employee_id", employeeId);
+
+    if (search) {
+      queryWithoutFilter = queryWithoutFilter.ilike("name", `%${search}%`);
+    }
+
+    const result = await queryWithoutFilter.order("id", { ascending: false }).range(from, to);
+
+    data = result.data;
+    error = result.error;
+    count = result.count;
+  }
 
   if (error) {
     throw new Error(`Failed to fetch my assignments: ${error.message}`);
@@ -422,8 +596,7 @@ const getMyAssignments = async (
     };
   }
 
-  // Get submission results for the assignments on this page
-  const assignmentIds = data.map((item) => item.assignment_id);
+  const assignmentIds = data.map((item) => item.id);
 
   const { data: results, error: resultsError } = await supabase
     .from("assignment_results")
@@ -435,7 +608,6 @@ const getMyAssignments = async (
     throw new Error(`Failed to fetch assignment results: ${resultsError.message}`);
   }
 
-  // Create a map of assignment results
   const submissionMap = new Map(
     results?.map((result) => [
       result.assignment_id,
@@ -445,19 +617,17 @@ const getMyAssignments = async (
         max_score: result.max_score,
         status: result.status,
       },
-    ]) || []
+    ]) || [],
   );
 
-  // Combine the data
   const myAssignments = data.map((item) => {
-    const assignment = item.assignments;
-    const submission = submissionMap.get(item.assignment_id);
+    const submission = submissionMap.get(item.id);
 
     return {
-      assignment_id: item.assignment_id,
-      assignment_name: assignment?.name || "",
-      assignment_description: assignment?.description || "",
-      created_at: assignment?.created_at || "",
+      assignment_id: item.id,
+      assignment_name: item.name,
+      assignment_description: item.description || "",
+      created_at: item.created_at,
       has_submitted: !!submission,
       submitted_at: submission?.submitted_at || null,
       score: submission?.score ?? null,
@@ -474,5 +644,72 @@ const getMyAssignments = async (
   };
 };
 
-export { getAssignments, getAssignmentById, getAssignmentStudents, getAssignmentQuestions, getMyAssignments };
+export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) => {
+  const supabase = createClient();
+  const { page = 0, pageSize = 20, search, createdBy, organizationId } = queryParams || {};
 
+  const from = page * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabase.from("assignments").select(
+    `
+      id,
+      name,
+      description,
+      created_by,
+      createdBy:employees!assignments_created_by_fkey (
+        id,
+        employee_code,
+        profiles (
+          id,
+          full_name,
+          email,
+          avatar
+        )
+      ),
+      created_at,
+      updated_at,
+      questions (
+        id,
+        label,
+        type,
+        score,
+        options,
+        created_at,
+        updated_at
+      ),
+      assignment_categories (
+        category_id,
+        categories (
+          id,
+          name
+        )
+      ),
+      assignmentEmployees:assignment_employees(count),
+      submissions:assignment_results(count)
+    `,
+    { count: "exact" },
+  );
+
+  if (search) {
+    query = query.ilike("name", `%${search}%`);
+  }
+
+  if (createdBy) {
+    query = query.eq("created_by", createdBy);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+  return await query.order("created_at", { ascending: false }).range(from, to);
+};
+export type GetAssignmentsV2Response = Awaited<ReturnType<typeof getAssignmentsV2>>;
+export {
+  getAssignments,
+  getAssignmentById,
+  getAssignmentStudents,
+  getAssignmentQuestions,
+  getMyAssignments,
+  getQuestionsByIds,
+};

@@ -1,4 +1,5 @@
-import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
+import React, { memo, useState } from "react";
+import { useId } from "react";
 import {
   FormControl,
   FormHelperText,
@@ -8,8 +9,8 @@ import {
   OutlinedInput,
   OutlinedInputProps,
 } from "@mui/material";
-import React, { memo, useState } from "react";
-import { useId } from "react";
+
+import { EyeIcon, EyeOffIcon } from "@/shared/assets/icons";
 interface PasswordFieldProps extends OutlinedInputProps {
   className?: string;
   helperText?: string;

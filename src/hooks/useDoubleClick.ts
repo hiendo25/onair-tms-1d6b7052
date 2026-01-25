@@ -1,11 +1,6 @@
-// @ts-nocheck
-import { useRef, useMemo, useCallback } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 
-// ----------------------------------------------------------------------
-
-export type UseDoubleClickReturn = (
-  event: React.MouseEvent<HTMLElement>,
-) => void;
+export type UseDoubleClickReturn = (event: React.MouseEvent<HTMLElement>) => void;
 
 type UseDoubleClickProps = {
   timeout?: number;
@@ -13,12 +8,8 @@ type UseDoubleClickProps = {
   doubleClick: (e: React.SyntheticEvent) => void;
 };
 
-export function useDoubleClick({
-  click,
-  doubleClick,
-  timeout = 250,
-}: UseDoubleClickProps): UseDoubleClickReturn {
-  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+export function useDoubleClick({ click, doubleClick, timeout = 250 }: UseDoubleClickProps): UseDoubleClickReturn {
+  const clickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearClickTimeout = useCallback(() => {
     if (clickTimeout.current) {

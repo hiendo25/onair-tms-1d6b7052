@@ -1,9 +1,15 @@
-import { supabase } from "@/services";
+import { createSVClient, supabase } from "@/services";
+
+import { SELECT_SESSION_DETAIL } from "./query-select.constant";
 import {
   BulkCreateClassRoomSessionsPayload,
   CreateClassRoomSessionPayload,
   CreatePivotClassRoomSessionAndTeacherPayload,
+  CreatePivotClassSessionWithAssignmentPayload,
+  CreatePivotClassSessionWithCoursePeriodPayload,
+  UpdatePivotClassSessionWithCoursePeriodPayload,
   UpSertClassRoomSessionPayload,
+  UpsertPivotClassSessionWithCoursePeriodPayload,
 } from "./type";
 export * from "./type";
 
@@ -52,61 +58,7 @@ const bulkUpsertClassSession = async (upsertPayload: UpSertClassRoomSessionPaylo
 
 const upsertClassSession = async (upsertPayload: UpSertClassRoomSessionPayload) => {
   try {
-    return await supabase
-      .from("class_sessions")
-      .upsert(upsertPayload.payload)
-      .select(
-        `
-          id,
-          title,
-          description,
-          start_at,
-          end_at,
-          class_room_id,
-          is_online,
-          channel_provider,
-          channel_info,
-          limit_person,
-          teachers:class_session_teacher(
-            id,
-            employee:employees!class_session_teacher_teacher_id_fkey(
-              id,
-              employee_type,
-              employee_code,
-              profile:profiles(
-                id,
-                full_name,
-                email,
-                employee_id,
-                avatar
-              )
-            )
-          ),
-          agendas:class_sessions_agendas(
-            id,
-            title,
-            description,
-            thumbnail_url,
-            start_at,
-            end_at,
-            class_session_id
-          ),
-          metadata:class_session_metadata(
-            id,
-            class_session_id,
-            key,
-            value
-          ),
-          class_qr_codes(
-            id,
-            class_room_id, 
-            class_session_id, 
-            checkin_start_time, 
-            checkin_end_time
-          )
-        `,
-      )
-      .single();
+    return await supabase.from("class_sessions").upsert(upsertPayload.payload).select(SELECT_SESSION_DETAIL).single();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error Delete Sessions");
@@ -134,12 +86,236 @@ const deletePivotClassSessionAndTeacher = async (ids: string[]) => {
   }
 };
 
+const deleteClassSessionTeachersByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase.from("class_session_teacher").delete().eq("teacher_id", employeeId);
+
+    if (error) throw error;
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error deleting class session teachers");
+  }
+};
+const bulkCreatePivotClassSessionWithCoursePeriod = async (
+  payload: CreatePivotClassSessionWithCoursePeriodPayload[],
+) => {
+  try {
+    return await supabase.from("class_sessions_courses_period").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const bulkDeletePivotClassSessionWithCoursePeriod = async (ids: number[]) => {
+  try {
+    return await supabase.from("class_sessions_courses_period").delete().in("id", ids).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const updatePivotClassSessionWithCoursePeriod = async (payload: UpdatePivotClassSessionWithCoursePeriodPayload) => {
+  const { id, ...restPayload } = payload;
+  try {
+    return await supabase
+      .from("class_sessions_courses_period")
+      .update(restPayload)
+      .eq("id", payload.id)
+      .select()
+      .single();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const upsertPivotClassSessionWithCoursePeriod = async (payload: UpsertPivotClassSessionWithCoursePeriodPayload) => {
+  try {
+    return await supabase.from("class_sessions_courses_period").upsert(payload.payload).select().single();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithCoursePeriod");
+  }
+};
+
+const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload) => {
+  try {
+    return await supabase.from("class_session_assignment").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
+
+const bulkCreatePivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload[]) => {
+  try {
+    return await supabase.from("class_session_assignment").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
+
+const bulkDeletePivotClassSessionWithAssignment = async (ids: number[]) => {
+  try {
+    return await supabase.from("class_session_assignment").delete().in("id", ids).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
+
+/**
+ * Get class rooms that contain a specific course and where the employee is assigned
+ */
+const getClassRoomsWithCourseAndEmployee = async (courseId: string, employeeId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("class_sessions_courses_period")
+    .select(
+      `
+      course_id,
+      class_session_id,
+      class_sessions!inner(
+        class_room_id,
+        class_rooms!inner(
+          id,
+          title,
+          class_room_employee!inner(employee_id),
+          class_room_certificate_templates(
+            id,
+            certificate_template_id,
+            certificate_templates(id, name)
+          )
+        )
+      )
+    `
+    )
+    .eq("course_id", courseId)
+    .eq("class_sessions.class_rooms.class_room_employee.employee_id", employeeId);
+
+  if (error) {
+    console.error("[ClassSession] Error fetching class rooms:", error);
+    throw new Error(`Failed to fetch class rooms: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+/**
+ * Get all courses in a specific class room
+ */
+const getCoursesByClassRoomId = async (classRoomId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("class_sessions_courses_period")
+    .select(
+      `
+      course_id,
+      class_session_id,
+      class_sessions!inner(class_room_id)
+    `
+    )
+    .eq("class_sessions.class_room_id", classRoomId);
+
+  if (error) {
+    console.error("[ClassSession] Error fetching courses by class room:", error);
+    throw new Error(`Failed to fetch courses by class room: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+/**
+ * Get class room sessions by class room ID with certificate template info
+ */
+const getClassRoomSessionsByClassRoomId = async (classRoomId: string) => {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase
+    .from("class_sessions")
+    .select(
+      `
+      id,
+      class_room_id,
+      class_rooms!inner(
+        id,
+        title,
+        class_room_certificate_templates(
+          id,
+          days_to_expire,
+          certificate_template_id,
+          certificate_templates(id, name)
+        )
+      )
+    `
+    )
+    .eq("class_room_id", classRoomId);
+
+  if (error) {
+    console.error("[ClassSession] Error fetching class room sessions:", error);
+    throw new Error(`Failed to fetch class room sessions: ${error.message}`);
+  }
+
+  return data || [];
+};
+
+export type ClassRoomWithCertificate = {
+  classRoomId: string;
+  classRoomTitle: string;
+  certificateTemplateId: string;
+  daysToExpire?: number | null;
+};
+
+/**
+ * Extract unique class rooms from query results
+ * Works with both getClassRoomsWithCourseAndEmployee and getClassRoomSessionsByClassRoomId results
+ */
+const extractClassRoomsFromSessions = (
+  classRoomSessions: Awaited<ReturnType<typeof getClassRoomsWithCourseAndEmployee>> | Awaited<ReturnType<typeof getClassRoomSessionsByClassRoomId>>
+): ClassRoomWithCertificate[] => {
+  const classRoomMap = new Map<string, ClassRoomWithCertificate>();
+
+  classRoomSessions.forEach((session: any) => {
+    // Handle both data structures
+    const classRoom = session.class_sessions?.class_rooms || session.class_rooms;
+    const certificate = classRoom?.class_room_certificate_templates?.[0];
+
+    if (classRoom?.id && certificate?.certificate_template_id) {
+      classRoomMap.set(classRoom.id, {
+        classRoomId: classRoom.id,
+        classRoomTitle: classRoom.title,
+        certificateTemplateId: certificate.certificate_template_id,
+        daysToExpire: certificate.days_to_expire,
+      });
+    }
+  });
+
+  return Array.from(classRoomMap.values());
+};
+
 export {
+  bulkCreatePivotClassSessionWithCoursePeriod,
+  createPivotClassSessionWithAssignment,
   createClassSession,
-  deleteClassSession,
   createPivotClassSessionAndTeacher,
   deletePivotClassSessionAndTeacher,
+  deleteClassSessionTeachersByEmployeeId,
+  deleteClassSession,
   upsertClassSession,
   bulkUpsertClassSession,
   bulkCreateClassSession,
+  bulkDeletePivotClassSessionWithAssignment,
+  bulkDeletePivotClassSessionWithCoursePeriod,
+  updatePivotClassSessionWithCoursePeriod,
+  upsertPivotClassSessionWithCoursePeriod,
+  bulkCreatePivotClassSessionWithAssignment,
+  getClassRoomsWithCourseAndEmployee,
+  getCoursesByClassRoomId,
+  getClassRoomSessionsByClassRoomId,
+  extractClassRoomsFromSessions,
 };

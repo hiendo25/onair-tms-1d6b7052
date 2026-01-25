@@ -1,23 +1,24 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import CameraswitchIcon from "@mui/icons-material/Cameraswitch";
+import CloseIcon from "@mui/icons-material/Close";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Box,
-  Typography,
   Alert,
   AlertTitle,
+  Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Typography,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import CameraswitchIcon from "@mui/icons-material/Cameraswitch";
 import { Html5Qrcode } from "html5-qrcode";
-import { useCheckInWithQRMutation } from "@/modules/class-room-management/operation/qr-attendance";
+
 import { fDateTime } from "@/lib";
+import { useCheckInWithQRMutation } from "@/modules/class-room-management/operation/qr-attendance";
 
 interface QRScannerDialogProps {
   open: boolean;
@@ -41,6 +42,13 @@ interface CheckinResult {
   };
 }
 
+const HTML5_QRCODE_STATE = {
+  UNKNOWN: 0,
+  NOT_STARTED: 1,
+  SCANNING: 2,
+  PAUSED: 3,
+} as const;
+
 const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
   open,
   onClose,
@@ -56,233 +64,387 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
   const [isScanning, setIsScanning] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const startPromiseRef = useRef<Promise<void> | null>(null);
+  const stopPromiseRef = useRef<Promise<boolean> | null>(null);
   const { mutateAsync: checkInWithQR, isPending } = useCheckInWithQRMutation();
 
-  const stopScanner = useCallback(async () => {
-    if (scannerRef.current && isScanning) {
-      try {
-        await scannerRef.current.stop();
-        setIsScanning(false);
-      } catch (error) {
-        console.error("Failed to stop scanner:", error);
-      }
-    }
-  }, [isScanning]);
-
-  const onScanSuccess = useCallback(async (decodedText: string) => {
-    // Prevent multiple scans while processing
-    if (isProcessing) {
-      return;
-    }
-
-    // Set processing flag immediately
-    setIsProcessing(true);
-
+  // Force stop all camera streams
+  const forceStopCameraStreams = useCallback(() => {
     try {
-      // Validate QR code format BEFORE calling API
-      // Expected format: QR-{timestamp}-{random} (e.g., "QR-123456789-abc123")
-      if (!decodedText.startsWith("QR-")) {
-        // Stop scanner for invalid QR
-        await stopScanner();
-        setCheckinResult({
-          status: "warning",
-          message: "Mã QR không đúng định dạng lớp học. Vui lòng quét mã QR của lớp học.",
-        });
-        setScannerStatus("warning");
-        setIsProcessing(false);
-        return;
+      const qrReaderElement = document.getElementById("qr-reader");
+      if (!qrReaderElement) {
+        return false;
       }
 
-      // Stop scanning after valid QR detected
-      await stopScanner();
+      const video = qrReaderElement.querySelector("video");
+      if (!video || !video.srcObject) {
+        return false;
+      }
 
-      // Get current location
-      const deviceInfo: any = {
-        userAgent: navigator.userAgent,
-        timestamp: new Date().toISOString(),
-      };
-
-      if (navigator.geolocation) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: true,
-              timeout: 5000,
-              maximumAge: 0,
-            });
-          });
-
-          deviceInfo.location = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            accuracy: position.coords.accuracy,
-          };
-        } catch (geoError) {
-          console.warn("Could not get location:", geoError);
+      try {
+        // Pause the video before detaching to avoid abort errors
+        if (typeof (video as HTMLVideoElement).pause === "function") {
+          (video as HTMLVideoElement).pause();
         }
+      } catch (pauseError) {
+        console.log("Error pausing video before force stop:", pauseError);
       }
 
-      // Call check-in API
-      const result = await checkInWithQR({
-        qr_code: decodedText,
-        employee_id: employeeId,
-        device_info: deviceInfo,
+      const stream = video.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => {
+        track.stop();
       });
 
-      if (result.success && result.attendance) {
-        // Validate that scanned QR matches expected classroom/session
-        const qrClassRoomId = result.attendance.class_room_id;
-        const qrSessionId = result.attendance.class_session_id;
-        
-        // If we expect a specific classroom or session, validate it matches
-        if (classRoomId && qrClassRoomId !== classRoomId) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR này không thuộc lớp học bạn đang chọn",
-          });
-          setScannerStatus("warning");
-          return;
-        }
-        
-        if (sessionId && qrSessionId !== sessionId) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR này không thuộc buổi học bạn đang chọn",
-          });
-          setScannerStatus("warning");
-          return;
-        }
-
-        setCheckinResult({
-          status: "success",
-          message: result.message,
-          data: {
-            fullName: result.attendance.employee_id || "N/A",
-            classCode: classTitle || "N/A",
-            checkinTime: result.attendance.attended_at || new Date().toISOString(),
-          },
-        });
-        setScannerStatus("success");
-      } else {
-        // Handle different error types
-        const errorMessage = result.message || result.rejection_reason || "Điểm danh thất bại";
-        
-        if (errorMessage.includes("hết hạn") || errorMessage.includes("hết giờ")) {
-          setCheckinResult({
-            status: "error",
-            message: "Mã QR đã hết hiệu lực",
-          });
-        } else if (errorMessage.includes("không hợp lệ") || errorMessage.includes("không tồn tại")) {
-          setCheckinResult({
-            status: "warning",
-            message: "Mã QR không hợp lệ",
-          });
-        } else {
-          setCheckinResult({
-            status: "error",
-            message: errorMessage,
-          });
-        }
-        setScannerStatus("error");
-      }
-    } catch (error: any) {
-      console.error("Check-in error:", error);
-      setCheckinResult({
-        status: "error",
-        message: "Checkin thất bại. Vui lòng thử lại.",
-      });
-      setScannerStatus("error");
-    }
-  }, [checkInWithQR, employeeId, isProcessing, stopScanner, classRoomId, sessionId, classTitle]);
-
-  const onScanFailure = useCallback((error: string) => {
-    // Ignore scanning errors (they happen frequently during normal scanning)
-    // Only log critical errors
-    if (!error.includes("NotFoundException")) {
-      console.debug("Scan error:", error);
+      video.srcObject = null;
+      return true;
+    } catch (error) {
+      console.log("Error forcing camera stop:", error);
+      return false;
     }
   }, []);
 
+  const stopScanner = useCallback(async () => {
+    if (!scannerRef.current) {
+      setIsScanning(false);
+      return true;
+    }
+
+    if (startPromiseRef.current) {
+      try {
+        await startPromiseRef.current;
+      } catch {
+        // Ignore start errors when stopping
+      }
+    }
+
+    if (stopPromiseRef.current) {
+      try {
+        return await stopPromiseRef.current;
+      } catch {
+        return false;
+      }
+    }
+
+    const stopPromise = (async () => {
+      if (!scannerRef.current) {
+        setIsScanning(false);
+        return true;
+      }
+
+      try {
+        const state = scannerRef.current.getState();
+        if (state === HTML5_QRCODE_STATE.SCANNING || state === HTML5_QRCODE_STATE.PAUSED) {
+          await scannerRef.current.stop();
+        }
+        setIsScanning(false);
+        return true;
+      } catch (error) {
+        console.log("Scanner stop (already stopped or error):", error);
+        setIsScanning(false);
+        forceStopCameraStreams();
+        return false;
+      } finally {
+        stopPromiseRef.current = null;
+      }
+    })();
+
+    stopPromiseRef.current = stopPromise;
+    return stopPromise;
+  }, [forceStopCameraStreams]);
+
+  const onScanSuccess = useCallback(
+    async (decodedText: string) => {
+      // Prevent multiple scans while processing
+      if (isProcessing) {
+        return;
+      }
+
+      // Set processing flag immediately
+      setIsProcessing(true);
+
+      try {
+        // Validate QR code format BEFORE calling API
+        // Expected format: QR-{timestamp}-{random} (e.g., "QR-123456789-abc123")
+        if (!decodedText.startsWith("QR-")) {
+          // Stop scanner for invalid QR
+          await stopScanner();
+          setCheckinResult({
+            status: "warning",
+            message: "Mã QR không đúng định dạng lớp học. Vui lòng quét mã QR của lớp học.",
+          });
+          setScannerStatus("warning");
+          setIsProcessing(false);
+          return;
+        }
+
+        // Stop scanning after valid QR detected
+        await stopScanner();
+
+        // Get current location
+        const deviceInfo: any = {
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+        };
+
+        if (navigator.geolocation) {
+          try {
+            const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+              navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+              });
+            });
+
+            deviceInfo.location = {
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+            };
+          } catch (geoError) {
+            console.warn("Could not get location:", geoError);
+          }
+        }
+
+        // Call check-in API
+        const result = await checkInWithQR({
+          qr_code: decodedText,
+          employee_id: employeeId,
+          device_info: deviceInfo,
+        });
+
+        if (result.success && result.attendance) {
+          // Validate that scanned QR matches expected classroom/session
+          const qrClassRoomId = result.attendance.class_room_id;
+          const qrSessionId = result.attendance.class_session_id;
+
+          // If we expect a specific classroom or session, validate it matches
+          if (classRoomId && qrClassRoomId !== classRoomId) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR này không thuộc lớp học bạn đang chọn",
+            });
+            setScannerStatus("warning");
+            setIsProcessing(false);
+            return;
+          }
+
+          if (sessionId && qrSessionId !== sessionId) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR này không thuộc buổi học bạn đang chọn",
+            });
+            setScannerStatus("warning");
+            setIsProcessing(false);
+            return;
+          }
+
+          setCheckinResult({
+            status: "success",
+            message: result.message,
+            data: {
+              fullName: result.attendance.employee_id || "N/A",
+              classCode: classTitle || "N/A",
+              checkinTime: result.attendance.attended_at || new Date().toISOString(),
+            },
+          });
+          setScannerStatus("success");
+          setIsProcessing(false);
+        } else {
+          // Handle different error types
+          const errorMessage = result.message || result.rejection_reason || "Điểm danh thất bại";
+
+          if (errorMessage.includes("hết hạn") || errorMessage.includes("hết giờ")) {
+            setCheckinResult({
+              status: "error",
+              message: "Mã QR đã hết hiệu lực",
+            });
+          } else if (errorMessage.includes("không hợp lệ") || errorMessage.includes("không tồn tại")) {
+            setCheckinResult({
+              status: "warning",
+              message: "Mã QR không hợp lệ",
+            });
+          } else {
+            setCheckinResult({
+              status: "error",
+              message: errorMessage,
+            });
+          }
+          setScannerStatus("error");
+          setIsProcessing(false);
+        }
+      } catch (error: any) {
+        console.error("Check-in error:", error);
+        setCheckinResult({
+          status: "error",
+          message: "Checkin thất bại. Vui lòng thử lại.",
+        });
+        setScannerStatus("error");
+        setIsProcessing(false);
+      }
+    },
+    [checkInWithQR, employeeId, isProcessing, stopScanner, classRoomId, sessionId, classTitle],
+  );
+
+  const onScanFailure = useCallback((error: string) => {
+    if (
+      error.includes("NotFoundException") ||
+      error.includes("InvalidStateError") ||
+      error.includes("IndexSizeError") ||
+      error.includes("No barcode or QR code detected")
+    ) {
+      return;
+    }
+
+    console.debug("Scan error:", error);
+  }, []);
+
   const startScanning = useCallback(async () => {
-    if (!scannerRef.current || isScanning) return;
+    if (!scannerRef.current || isScanning) {
+      return;
+    }
+
+    if (stopPromiseRef.current) {
+      try {
+        await stopPromiseRef.current;
+      } catch {
+        // Ignore stop errors before starting
+      }
+    }
+
+    if (startPromiseRef.current) {
+      return startPromiseRef.current;
+    }
 
     try {
-      setIsScanning(true);
-      setScannerStatus("scanning");
-
-      await scannerRef.current.start(
-        { facingMode: facingMode },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-        },
-        onScanSuccess,
-        onScanFailure
-      );
-    } catch (error) {
-      console.error("Failed to start scanning:", error);
-      setIsScanning(false);
-      setCheckinResult({
-        status: "error",
-        message: "Không thể bật camera. Vui lòng kiểm tra quyền truy cập.",
-      });
+      const state = scannerRef.current.getState();
+      if (state === HTML5_QRCODE_STATE.SCANNING) {
+        setIsScanning(true);
+        return;
+      }
+    } catch {
+      // getState can throw if scanner is mid-transition; continue with start
     }
+
+    const startPromise = (async () => {
+      try {
+        await scannerRef.current!.start(
+          { facingMode: facingMode },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+          },
+          onScanSuccess,
+          onScanFailure,
+        );
+        setIsScanning(true);
+      } catch (error) {
+        console.error("Failed to start scanning:", error);
+        setIsScanning(false);
+        setCheckinResult({
+          status: "error",
+          message: "Không thể bật camera. Vui lòng kiểm tra quyền truy cập.",
+        });
+        setScannerStatus("error");
+        throw error;
+      } finally {
+        startPromiseRef.current = null;
+      }
+    })();
+
+    startPromiseRef.current = startPromise;
+    return startPromise;
   }, [facingMode, isScanning, onScanFailure, onScanSuccess]);
 
   const initializeScanner = useCallback(async () => {
-    try {
-      const scanner = new Html5Qrcode("qr-reader");
-      scannerRef.current = scanner;
-      await startScanning();
-    } catch (error) {
-      console.error("Failed to initialize scanner:", error);
-      setCheckinResult({
-        status: "error",
-        message: "Không thể khởi tạo camera. Vui lòng kiểm tra quyền truy cập camera.",
-      });
-      setScannerStatus("error");
+    const container = document.getElementById("qr-reader");
+    if (!container) {
+      return;
     }
+
+    if (!scannerRef.current) {
+      try {
+        scannerRef.current = new Html5Qrcode("qr-reader");
+      } catch (error) {
+        console.error("Failed to initialize scanner:", error);
+        setCheckinResult({
+          status: "error",
+          message: "Không thể khởi tạo camera. Vui lòng kiểm tra quyền truy cập camera.",
+        });
+        setScannerStatus("error");
+        return;
+      }
+    }
+
+    await startScanning().catch(() => undefined);
   }, [startScanning]);
 
   // Initialize scanner when dialog opens
   useEffect(() => {
-    if (open) {
-      // Set status to scanning first to render the DOM element
-      setScannerStatus("scanning");
-      
-      // Initialize scanner after DOM is rendered
-      const timer = setTimeout(() => {
-        initializeScanner();
-      }, 100);
-
-      return () => {
-        clearTimeout(timer);
-        if (scannerRef.current && isScanning) {
-          stopScanner();
-        }
-      };
-    } else {
-      // Reset state when dialog closes
+    if (!open) {
       setScannerStatus("idle");
       setCheckinResult({ status: "idle" });
       setIsProcessing(false);
+      return;
     }
-  }, [open, initializeScanner, isScanning, stopScanner]);
+
+    let mounted = true;
+    setScannerStatus("scanning");
+
+    const timer = setTimeout(() => {
+      if (mounted) {
+        initializeScanner();
+      }
+    }, 100);
+
+    return () => {
+      mounted = false;
+      clearTimeout(timer);
+      if (scannerRef.current) {
+        stopScanner().then((stopped) => {
+          if (!stopped) {
+            forceStopCameraStreams();
+          }
+        });
+      }
+    };
+  }, [open, initializeScanner, stopScanner, forceStopCameraStreams]);
 
   const handleSwitchCamera = async () => {
     await stopScanner();
     setFacingMode((prev) => (prev === "user" ? "environment" : "user"));
     setTimeout(() => {
-      startScanning();
+      startScanning().catch(() => undefined);
     }, 100);
   };
 
   const handleClose = async () => {
-    await stopScanner();
+    const stopped = await stopScanner();
+
     if (scannerRef.current) {
-      scannerRef.current.clear();
+      try {
+        if (stopped) {
+          await scannerRef.current.clear();
+        } else {
+          try {
+            const state = scannerRef.current.getState();
+            if (state === HTML5_QRCODE_STATE.NOT_STARTED || state === HTML5_QRCODE_STATE.UNKNOWN) {
+              await scannerRef.current.clear();
+            }
+          } catch {
+            // If state retrieval fails, skip clear to avoid transition errors
+          }
+        }
+      } catch (error) {
+        console.log("Error clearing scanner on close:", error);
+      }
       scannerRef.current = null;
     }
+
+    if (!stopped) {
+      forceStopCameraStreams();
+    }
+
     setCheckinResult({ status: "idle" });
     setScannerStatus("idle");
     setIsScanning(false);
@@ -293,20 +455,13 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
   const handleRescan = async () => {
     setCheckinResult({ status: "idle" });
     setIsProcessing(false);
-    
-    // Ensure scanner is fully stopped before restarting
-    if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop();
-        setIsScanning(false);
-      } catch (error) {
-        // Scanner might already be stopped, ignore error
-        console.log("Scanner already stopped:", error);
-      }
-    }
+
+    await stopScanner();
+
     setScannerStatus("scanning");
+
     setTimeout(() => {
-      startScanning();
+      startScanning().catch(() => undefined);
     }, 100);
   };
 
@@ -390,7 +545,7 @@ const QRScannerDialog: React.FC<QRScannerDialogProps> = ({
         )}
 
         {/* Loading State */}
-        {isPending && (
+        {isPending && !checkinResult.status && (
           <Box display="flex" flexDirection="column" alignItems="center" gap={2} py={4}>
             <CircularProgress />
             <Typography variant="body2" color="text.secondary">

@@ -1,8 +1,9 @@
 "use client";
-import { Tabs, Tab, Stack, Box } from "@mui/material";
-import { CLASSROOM_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../../class-room/list/utils/status";
-import { ClassRoomRuntimeStatusFilter } from "../../class-room/list/types/types";
+import { Box, Stack, Tab, Tabs } from "@mui/material";
+
+import { ClassRoomRuntimeStatusFilter } from "@/repository/class-room";
 import { ClassRoomStatusCountDto } from "@/types/dto/classRooms/classRoom.dto";
+import { CLASSROOM_RUNTIME_STATUS_LABEL, STATUS_ORDER } from "../../admin/class-room/list/utils/status";
 
 interface ClassRoomStatusTabsProps {
   value: ClassRoomRuntimeStatusFilter;
@@ -64,17 +65,9 @@ const VISIBLE_STATUS: ClassRoomRuntimeStatusFilter[] = STATUS_ORDER.filter(
   (status) => status !== ClassRoomRuntimeStatusFilter.Draft,
 );
 
-export default function ClassRoomStatusTabs({
-  value,
-  counts,
-  onChange,
-}: ClassRoomStatusTabsProps) {
-
+export default function ClassRoomStatusTabs({ value, counts, onChange }: ClassRoomStatusTabsProps) {
   const getCount = (status: string) => {
-    const matched = counts?.find((c) =>
-      c.runtime_status === status ||
-      (c.runtime_status === null && status === "all")
-    );
+    const matched = counts?.find((c) => c.runtime_status === status || (c.runtime_status === null && status === "all"));
     return matched?.total ?? 0;
   };
 
@@ -93,7 +86,7 @@ export default function ClassRoomStatusTabs({
             height: 2,
             borderRadius: 99,
           },
-        }
+        },
       }}
       sx={{
         "& .MuiTabs-flexContainer": {
@@ -101,67 +94,60 @@ export default function ClassRoomStatusTabs({
         },
       }}
     >
-      {
-        VISIBLE_STATUS.map((status) => {
-          const count = getCount(status);
-          const isActive = value === status;
-          const presentation = RUNTIME_STATUS_PRESENTATION[status];
-          const chipBg = isActive && presentation.activeChipBg
-            ? presentation.activeChipBg
-            : presentation.chipBg;
-          const chipColor = isActive && presentation.activeChipColor
-            ? presentation.activeChipColor
-            : presentation.chipColor;
+      {VISIBLE_STATUS.map((status) => {
+        const count = getCount(status);
+        const isActive = value === status;
+        const presentation = RUNTIME_STATUS_PRESENTATION[status];
+        const chipBg = isActive && presentation.activeChipBg ? presentation.activeChipBg : presentation.chipBg;
+        const chipColor =
+          isActive && presentation.activeChipColor ? presentation.activeChipColor : presentation.chipColor;
 
-          return (
-            <Tab
-              key={status}
-              value={status}
-              disableRipple
-              sx={{
-                minWidth: "auto",
-                padding: 0,
-                paddingBottom: 1,
-                textTransform: "none",
-                alignItems: "flex-start",
-                fontSize: 14,
-                fontWeight: 500,
-                color: "#637381",
-                opacity: 1,
-                "&.Mui-selected": {
-                  color: "#1D2433",
-                  fontWeight: 600,
-                },
-              }}
-              label={
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <Box component="span">
-                    {STATUS_LABEL_OVERRIDE[status] ?? CLASSROOM_RUNTIME_STATUS_LABEL[status]}
-                  </Box>
-                  <Box
-                    component="span"
-                    sx={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      minWidth: 32,
-                      padding: "4px 10px",
-                      borderRadius: "8px",
-                      backgroundColor: chipBg,
-                      color: chipColor,
-                      fontSize: 13,
-                      fontWeight: 600,
-                      lineHeight: "20px",
-                    }}
-                  >
-                    {count}
-                  </Box>
-                </Stack>
-              }
-            />
-          );
-        })
-      }
+        return (
+          <Tab
+            key={status}
+            value={status}
+            disableRipple
+            sx={{
+              minWidth: "auto",
+              padding: 0,
+              paddingBottom: 1,
+              textTransform: "none",
+              alignItems: "flex-start",
+              fontSize: 14,
+              fontWeight: 500,
+              color: "#637381",
+              opacity: 1,
+              "&.Mui-selected": {
+                color: "#1D2433",
+                fontWeight: 600,
+              },
+            }}
+            label={
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Box component="span">{STATUS_LABEL_OVERRIDE[status] ?? CLASSROOM_RUNTIME_STATUS_LABEL[status]}</Box>
+                <Box
+                  component="span"
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    minWidth: 32,
+                    padding: "4px 10px",
+                    borderRadius: "8px",
+                    backgroundColor: chipBg,
+                    color: chipColor,
+                    fontSize: 13,
+                    fontWeight: 600,
+                    lineHeight: "20px",
+                  }}
+                >
+                  {count}
+                </Box>
+              </Stack>
+            }
+          />
+        );
+      })}
     </Tabs>
   );
 }

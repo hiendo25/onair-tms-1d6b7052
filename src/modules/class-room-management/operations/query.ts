@@ -1,14 +1,23 @@
+import { HEADER_ORGANIZATION_ID } from "@/constants/api-headers.constant";
+import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { ROUTE_QUERY_KEYS } from "@/constants/route-query.constant";
+import { useTQuery } from "@/lib/queryClient";
+import { ClassType } from "@/model/enum-type.model";
+import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
+import { classRoomRepository } from "@/repository";
 import {
   ClassRoomRuntimeStatusFilter,
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
-} from "@/app/(organization)/class-room/list/types/types";
-import { useTQuery } from "@/lib/queryClient";
+} from "@/repository/class-room";
+import { type ClassRoomDetailWithProgress } from "@/services/class-room/class-room-progress-mapping.service";
 import {
-  classRoomRepository,
-} from "@/repository";
-import { ClassRoomPriorityDto, ClassRoomSessionDetailDto, ClassRoomStatusCountDto, ClassRoomStudentDto } from "@/types/dto/classRooms/classRoom.dto";
+  ClassRoomPriorityDto,
+  ClassRoomSessionDetailDto,
+  ClassRoomStatusCountDto,
+  ClassRoomStudentDto,
+} from "@/types/dto/classRooms/classRoom.dto";
 import { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export interface GetClassRoomsQueryInput {
@@ -17,6 +26,7 @@ export interface GetClassRoomsQueryInput {
   to?: string | null;
   type?: ClassRoomTypeFilter;
   sessionMode?: ClassSessionModeFilter;
+  classType?: ClassType;
   runtimeStatus?: ClassRoomRuntimeStatusFilter;
   status?: ClassRoomStatusFilter;
   page?: number;
@@ -27,8 +37,7 @@ export interface GetClassRoomsQueryInput {
   orderBy?: "asc" | "desc";
 }
 
-export interface GetAssignedClassRoomsQueryInput
-  extends GetClassRoomsQueryInput {
+export interface GetAssignedClassRoomsQueryInput extends GetClassRoomsQueryInput {
   userId: string;
 }
 
@@ -52,20 +61,120 @@ export interface GetClassRoomStudentsQueryInput {
   attendanceStatus?: "attended" | "absent" | "pending";
 }
 
-export const useGetClassRoomsPriorityQuery = (
-  input: GetClassRoomsQueryInput = {},
-) => {
+export interface GetClassRoomDetailQueryOptions {
+  learningPathId?: string | null;
+  enabled?: boolean;
+}
+
+interface ClassRoomDetailError {
+  message: string;
+  details: string | null;
+  hint: string | null;
+  code: string | null;
+}
+
+type GetClassRoomDetailResponse = {
+  data: ClassRoomDetailWithProgress | null;
+  error: ClassRoomDetailError | null;
+};
+
+const buildClassRoomProgressQuery = (learningPathId?: string | null): string => {
+  if (!learningPathId) {
+    return "";
+  }
+
+  const params = new URLSearchParams({
+    [ROUTE_QUERY_KEYS.LEARNING_PATH_ID]: learningPathId,
+  });
+
+  return `?${params.toString()}`;
+};
+
+const buildClassRoomDetailError = (message: string): ClassRoomDetailError => ({
+  message,
+  details: null,
+  hint: null,
+  code: null,
+});
+
+const readClassRoomDetailErrorMessage = async (response: Response): Promise<string> => {
+  try {
+    const payload = await response.json();
+    if (typeof payload?.error === "string") {
+      return payload.error;
+    }
+    if (typeof payload?.error?.message === "string") {
+      return payload.error.message;
+    }
+    if (typeof payload?.message === "string") {
+      return payload.message;
+    }
+  } catch (error) {
+    console.error("[ClassRoom] Failed to parse detail error response:", error);
+  }
+
+  return "Failed to fetch class room detail with progress";
+};
+
+const fetchClassRoomDetailWithProgress = async (params: {
+  slug: string;
+  learningPathId?: string | null;
+  organizationId: string;
+}): Promise<GetClassRoomDetailResponse> => {
+  const { slug, learningPathId, organizationId } = params;
+  const queryParams = buildClassRoomProgressQuery(learningPathId);
+  const response = await fetch(
+    `/api/class-rooms/by-slug/${slug}/detail-with-progress${queryParams}`,
+    {
+      headers: {
+        [HEADER_ORGANIZATION_ID]: organizationId,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const message = await readClassRoomDetailErrorMessage(response);
+    return {
+      data: null,
+      error: buildClassRoomDetailError(message),
+    };
+  }
+
+  return response.json();
+};
+
+export const useGetClassRoomQuery = (slug: string, options: GetClassRoomDetailQueryOptions = {}) => {
+  const { learningPathId, enabled = true } = options;
+  const currentEmployee = useUserOrganization((state) => state.currentEmployee);
+  const organizationId = currentEmployee.organization.id;
+  const normalizedLearningPathId = learningPathId?.trim() ? learningPathId : null;
+
+  return useTQuery<GetClassRoomDetailResponse>({
+    queryKey: ["class-room-detail", slug, normalizedLearningPathId],
+    queryFn: async () => {
+      if (!organizationId) {
+        throw new Error("Organization ID not found");
+      }
+
+      return fetchClassRoomDetailWithProgress({
+        slug,
+        learningPathId: normalizedLearningPathId,
+        organizationId,
+      });
+    },
+    enabled: Boolean(slug) && Boolean(organizationId) && enabled,
+  });
+};
+
+export const useGetClassRoomsPriorityQuery = (input: GetClassRoomsQueryInput = {}) => {
   return useTQuery<PaginatedResult<ClassRoomPriorityDto>>({
-    queryKey: ["class-rooms-priority", input],
+    queryKey: [QUERY_KEYS.GET_CLASS_ROOMS, input],
     queryFn: () => classRoomRepository.getClassRooms(input),
     enabled: Boolean(input.organizationId ?? input.employeeId),
   });
 };
 
-
-export const useCountStatusClassRoomsQuery = (
-  input: GetClassRoomStatusCountsInput,
-) => {
+export const useCountStatusClassRoomsQuery = (input: GetClassRoomStatusCountsInput) => {
   return useTQuery<ClassRoomStatusCountDto[]>({
     queryKey: ["class_room_status_counts", input],
     queryFn: () => classRoomRepository.getClassRoomStatusCounts(input),
@@ -73,13 +182,11 @@ export const useCountStatusClassRoomsQuery = (
   });
 };
 
-export const useGetClassRoomStudentsQuery = (
-  input: GetClassRoomStudentsQueryInput,
-) => {
+export const useGetClassRoomStudentsQuery = (input: GetClassRoomStudentsQueryInput) => {
   return useTQuery<PaginatedResult<ClassRoomStudentDto>>({
     queryKey: ["class-room-students", input],
     queryFn: () => classRoomRepository.getClassRoomStudents(input),
-    enabled: Boolean(input?.classRoomId)
+    enabled: Boolean(input?.classRoomId),
   });
 };
 
@@ -87,9 +194,7 @@ type GetClassRoomsByEmployeeIdQueryInput = Omit<GetClassRoomsQueryInput, "organi
   employeeId?: string;
 };
 
-export const useGetClassRoomsByEmployeeId = (
-  input: GetClassRoomsByEmployeeIdQueryInput,
-) => {
+export const useGetClassRoomsByEmployeeId = (input: GetClassRoomsByEmployeeIdQueryInput) => {
   return useTQuery<PaginatedResult<ClassRoomPriorityDto>>({
     queryKey: ["class-room-assign", input],
     queryFn: () =>
@@ -101,9 +206,7 @@ export const useGetClassRoomsByEmployeeId = (
   });
 };
 
-export const useGetClassRoomSessionDetailQuery = (
-  input: { sessionId?: string },
-) => {
+export const useGetClassRoomSessionDetailQuery = (input: { sessionId?: string }) => {
   const { sessionId } = input;
 
   return useTQuery<ClassRoomSessionDetailDto | null>({

@@ -6,6 +6,27 @@ export const CLASS_ROOMS_SELECT = `
   *,
   class_sessions!inner (
     *,
+    courses_period:class_sessions_courses_period (
+      id,
+      start_at,
+      end_at,
+      course:courses (
+        id,
+        title
+      ),
+      teacher:employees (
+        id,
+        employee_code,
+        employee_type,
+        profile:profiles (
+          id,
+          full_name,
+          email,
+          phone_number,
+          avatar
+        )
+      )
+    ),
     teacherAssignments:class_session_teacher (
       id,
       teacher_id,
@@ -32,7 +53,7 @@ export const CLASS_ROOMS_SELECT = `
       employee_type
     )
   ),
-  creator:employees!class_rooms_employee_id_fkey (
+  creator:employees!class_rooms_created_by_fkey (
     id,
     employee_code,
     employee_type,
@@ -53,9 +74,6 @@ export const CLASS_SESSION_WITH_CLASS_ROOM_SELECT = `
   channel_info,
   channel_provider,
   class_room_id,
-  is_online,
-  limit_person,
-  resource_ids,
   class_room:class_rooms!inner (
     id,
     title,
@@ -101,13 +119,14 @@ export const CLASS_ROOM_STUDENTS_SELECT = `
       class_rooms_priority!class_room_employee_class_room_id_fkey (
         runtime_status
       ),
-      class_room_attendance (
-        id,
-        class_room_employee_id,
-        check_in_at,
-        check_out_at,
-        created_at,
-        updated_at
+      class_rooms!inner (
+        sessions:class_sessions!inner (
+          id,
+          title,
+          start_at,
+          end_at,
+          session_type
+        )
       ),
       employee:employees!inner (
         id,
@@ -121,16 +140,32 @@ export const CLASS_ROOM_STUDENTS_SELECT = `
           phone_number,
           avatar
         ),
-        employments (
+        employee_departments (
           id,
-          organization_unit_id,
-          organizationUnit:organization_units!employments_organization_unit_id_fkey (
+          department_id,
+          departments (
             id,
             name,
-            type
+            branch_id
           )
         ),
-        branchEmployments:employments!inner (organization_unit_id),
-        departmentEmployments:employments!inner (organization_unit_id)
+        employee_branches (
+          id,
+          branch_id,
+          branches (
+            id,
+            name
+          )
+        ),
+        attendances:class_attendances!class_attendances_employee_id_fkey (
+          id,
+          employee_id,
+          class_room_id,
+          class_session_id,
+          attendance_status,
+          attended_at,
+          attendance_mode,
+          attendance_method
+        )
       )
 `;

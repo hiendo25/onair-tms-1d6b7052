@@ -1,9 +1,10 @@
 import React, { memo, useCallback } from "react";
-import type { Control, PathValue, FieldValues, Path } from "react-hook-form";
-import { Controller } from "react-hook-form";
-import dayjs, { Dayjs } from "dayjs";
-import CustomDateTimePickerField, { CustomDateTimePickerFieldProps } from "../CustomDateTimePickerField";
 import { PickerValue } from "@mui/x-date-pickers/internals";
+import dayjs, { Dayjs } from "dayjs";
+import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
+import { Controller } from "react-hook-form";
+
+import CustomDateTimePickerField, { CustomDateTimePickerFieldProps } from "../CustomDateTimePickerField";
 
 export const DATE_TIME_PICKER_FORMAT = {
   "HH:mm DD/MM/YYYY": "HH:mm DD/MM/YYYY",
@@ -11,7 +12,7 @@ export const DATE_TIME_PICKER_FORMAT = {
 
 export type DateTimePickerFormat = keyof typeof DATE_TIME_PICKER_FORMAT;
 
-interface RHFDateTimePickerProps<T extends FieldValues> extends CustomDateTimePickerFieldProps {
+export interface RHFDateTimePickerProps<T extends FieldValues> extends CustomDateTimePickerFieldProps {
   className?: string;
   label?: React.ReactNode;
   control: Control<T>;
@@ -40,7 +41,6 @@ const RHFDateTimePicker = <T extends FieldValues>({
       control={control}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDateTimePickerField
-          {...restProps}
           value={getValueDatePicker(value)}
           ampm={false}
           format={format}
@@ -54,6 +54,7 @@ const RHFDateTimePicker = <T extends FieldValues>({
             actionBar: { actions: ["clear", "nextOrAccept"] }, // only show "OK"
           }}
           helperText={error?.message}
+          {...restProps}
         />
       )}
     />

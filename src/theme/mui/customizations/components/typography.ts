@@ -1,7 +1,7 @@
 import * as React from "react";
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { alpha,Components, Theme } from "@mui/material/styles";
 
-/* eslint-disable import/prefer-default-export */
+ 
 export const typographyCustomizations: Components<Theme> = {
   MuiTypography: {
     defaultProps: {

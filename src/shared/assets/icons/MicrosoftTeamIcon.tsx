@@ -1,6 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const MicrosoftTeamIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
+const MicrosoftTeamIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

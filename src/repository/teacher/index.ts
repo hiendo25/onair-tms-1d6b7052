@@ -1,14 +1,14 @@
 import { supabase } from "@/services";
-import { EmployeeTeacherTypeItem } from "@/model/employee.model";
 export interface GetTeacherQueryParams {
   page?: number;
   pageSize?: number;
   search?: string;
   exclude?: string[];
+  organizationId?: string;
 }
 
 const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
-  const { page = 1, pageSize = 20, search = "", exclude } = queryParams || {};
+  const { page = 1, pageSize = 20, search = "", exclude, organizationId } = queryParams || {};
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
@@ -18,54 +18,68 @@ const getTeacherList = async (queryParams?: GetTeacherQueryParams) => {
     .from("employees")
     .select(
       `
-      id, 
-      employee_code, 
-      status, 
+      id,
+      employee_code,
+      status,
       employee_type,
+			organization_id,
       profiles!inner(
-        id, 
-        full_name, 
-        phone_number, 
-        birthday, 
+        id,
+        full_name,
+        phone_number,
+        birthday,
         email,
         avatar,
         gender
       ),
-       employments(
-        organization_units(
+      employee_departments(
+        id,
+        department_id,
+        departments(
           id,
-          name, 
-          type,
-          parent_id,
-          branch:parent_id(
+          name,
+          branch_id,
+          branches(
             id,
-            name,
-            type
+            name
           )
+        )
+      ),
+      employee_branches(
+        id,
+        branch_id,
+        branches(
+          id,
+          name
         )
       )
     `,
       { count: "exact" },
     )
-    .eq("employee_type", "teacher")
-    .eq("employments.organization_units.type", "department")
-    .eq("employments.organization_units.branch.type", "branch");
-
+    .eq("employee_type", "teacher");
   if (exclude?.length) {
     teacherQuery = teacherQuery.not("id", "in", `(${excludeStr})`);
   }
   if (search) {
     teacherQuery = teacherQuery.ilike("profiles.full_name", `%${search}%`);
   }
+  if (organizationId) {
+    teacherQuery = teacherQuery.eq("organization_id", organizationId);
+  }
 
   const { data, error, count, status, statusText } = await teacherQuery
     .order("created_at", { ascending: false })
-    .range(from, to);
+    .range(from, to)
+    .overrideTypes<
+      Array<{
+        employee_type: "teacher";
+      }>
+    >();
 
   if (error) throw error;
 
   return {
-    data: data as EmployeeTeacherTypeItem[],
+    data,
     count,
     status,
     statusText,

@@ -1,8 +1,9 @@
-import { useAuthStore } from "@/modules/auth/store/AuthProvider";
-import { slugify } from "@/utils/slugify";
-import { supabase } from "@/services";
 import { useState } from "react";
+
 import { getTypeOfFile } from "@/constants/file.constant";
+import { useAuthStore } from "@/modules/auth/store/AuthProvider";
+import { supabase } from "@/services";
+import { slugify } from "@/utils/slugify";
 
 type FileUploadSuccess = {
   data: {

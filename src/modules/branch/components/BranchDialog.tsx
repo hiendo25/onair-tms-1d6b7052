@@ -2,21 +2,22 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  CircularProgress,
   Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   SvgIcon,
+  TextField,
 } from "@mui/material";
-import { useCreateBranchMutation, useUpdateBranchMutation, useGenerateBranchCodeMutation } from "../operations/mutation";
+
+import useNotifications from "@/hooks/useNotifications/useNotifications";
 import { branchRepository } from "@/repository/branch";
 import type { BranchDto } from "@/types/dto/branches";
-import useNotifications from "@/hooks/useNotifications/useNotifications";
+import { useCreateBranchMutation, useGenerateBranchCodeMutation, useUpdateBranchMutation } from "../operations/mutation";
 
 interface BranchFormData {
   name: string;

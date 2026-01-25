@@ -1,6 +1,7 @@
 "use server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+
 import { Database } from "@/types/supabase.types";
 /**
  * Especially important if using Fluid compute: Don't put this client in a
@@ -8,6 +9,36 @@ import { Database } from "@/types/supabase.types";
  * it.
  */
 export async function createSVClient() {
+  const cookieStore = await cookies();
+
+  // console.log({ cookieStore });
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    },
+  );
+}
+
+/**
+ * Create a Supabase client with token from Authorization header
+ * Used for mobile/API clients that use Bearer tokens
+ */
+export async function createSVClientWithToken(token: string) {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -20,14 +51,15 @@ export async function createSVClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
-            );
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
           } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+            // Ignore cookie setting errors for token-based auth
           }
+        },
+      },
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
       },
     },

@@ -1,8 +1,9 @@
-import { DateTimePickerProps, DateTimePicker } from "@mui/x-date-pickers";
-import { FormControl, FormLabel, FormHelperText, alpha, styled } from "@mui/material";
-import { useId } from "react";
-import { cn } from "@/utils";
+import React, { useId } from "react";
+import { alpha, FormControl, FormHelperText, FormLabel, styled } from "@mui/material";
+import { DateTimePicker, DateTimePickerProps } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
+
+import { cn } from "@/utils";
 export interface CustomDateTimePickerFieldProps extends DateTimePickerProps {
   helperText?: string;
   error?: boolean;
@@ -10,7 +11,7 @@ export interface CustomDateTimePickerFieldProps extends DateTimePickerProps {
 }
 const CustomDateTimePickerField: React.FC<CustomDateTimePickerFieldProps> = ({
   label,
-  className,
+  className = "",
   helperText,
   error,
   required,

@@ -1,17 +1,17 @@
-import { paperClasses } from "@mui/material/Paper";
-import { Theme, alpha, Components } from "@mui/material/styles";
-
-import { menuItemClasses } from "@mui/material/MenuItem";
-import { listItemIconClasses } from "@mui/material/ListItemIcon";
-import { iconButtonClasses } from "@mui/material/IconButton";
 import { checkboxClasses } from "@mui/material/Checkbox";
+import { iconButtonClasses } from "@mui/material/IconButton";
 import { listClasses } from "@mui/material/List";
-import { gridClasses } from "@mui/x-data-grid";
+import { listItemIconClasses } from "@mui/material/ListItemIcon";
+import { menuItemClasses } from "@mui/material/MenuItem";
+import { paperClasses } from "@mui/material/Paper";
+import { alpha,Components, Theme } from "@mui/material/styles";
 import { tablePaginationClasses } from "@mui/material/TablePagination";
-import { grey } from "../../theme-color";
+import { gridClasses } from "@mui/x-data-grid";
 import type {} from "@mui/x-data-grid/themeAugmentation";
 
-/* eslint-disable import/prefer-default-export */
+import { grey } from "../../theme-color";
+
+ 
 export const dataGridCustomizations: Components<Theme> = {
   MuiDataGrid: {
     styleOverrides: {

@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { memo } from "react";
 import type { Control, FieldValues, Path } from "react-hook-form";
 import { Controller } from "react-hook-form";
+
 import MultipleSelectField, { MultipleSelectFieldProps } from "../MultipleSelectField";
 
 export interface RHFMultipleSelectFieldProps<T extends FieldValues, O> {
@@ -15,7 +16,6 @@ export interface RHFMultipleSelectFieldProps<T extends FieldValues, O> {
   required?: boolean;
   onInputEnter?: MultipleSelectFieldProps<O>["onInputEnter"];
   isLoading?: boolean;
-  onRemove?: MultipleSelectFieldProps<O>["onRemoveOptionItem"];
 }
 const RHFMultipleSelectField = <T extends FieldValues, O>({
   className,
@@ -28,7 +28,6 @@ const RHFMultipleSelectField = <T extends FieldValues, O>({
   optionField,
   onInputEnter,
   isLoading,
-  onRemove,
 }: RHFMultipleSelectFieldProps<T, O>) => {
   return (
     <Controller
@@ -46,11 +45,14 @@ const RHFMultipleSelectField = <T extends FieldValues, O>({
           label={label}
           required={required}
           onInputEnter={onInputEnter}
-          onRemoveOptionItem={onRemove}
+          onRemoveOptionItem={(val) => {
+            const values = field.value as string[];
+            field.onChange(values.filter((it) => it !== val));
+          }}
           isLoading={isLoading}
         />
       )}
     />
   );
 };
-export default RHFMultipleSelectField;
+export default memo(RHFMultipleSelectField) as typeof RHFMultipleSelectField;

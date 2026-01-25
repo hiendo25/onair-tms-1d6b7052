@@ -1,5 +1,7 @@
-import { Toolbar, Stack, Box, Typography, Avatar } from "@mui/material";
+import React from "react";
+import { Box, Stack, Toolbar, Typography } from "@mui/material";
 import Link from "next/link";
+
 import PageContentHeader from "./PageContentHeader";
 import PageHeaderBreadcrumbs from "./PageHeaderBreadCrumb";
 
@@ -14,23 +16,14 @@ export interface PageHeaderProps {
   rightColumn?: React.ReactNode;
   className?: string;
 }
-const PageHeader: React.FC<PageHeaderProps> = ({
-  pageTitle,
-  actions,
-  breadcrumbs,
-  rightColumn,
-  className,
-}) => {
+const PageHeader: React.FC<PageHeaderProps> = ({ pageTitle, actions, breadcrumbs, rightColumn, className }) => {
   return (
     <Toolbar sx={{ px: "0 !important" }} className={className}>
       <Stack
         direction="row"
         justifyContent="space-between"
         alignItems="center"
-        sx={{
-          flexWrap: "wrap",
-          width: "100%",
-        }}
+        sx={{ flexWrap: "wrap", width: "100%" }}
       >
         <Stack direction="row" alignItems="center">
           <Stack>
@@ -40,25 +33,12 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                   {pageTitle}
                 </Typography>
               ) : null}
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 1,
-                  marginLeft: "auto",
-                }}
-              >
-                {actions}
-              </Box>
+              <Box sx={{ display: "flex", flexDirection: "row", gap: 1 }}>{actions}</Box>
             </PageContentHeader>
             {breadcrumbs ? (
               <PageHeaderBreadcrumbs
                 aria-label="breadcrumb"
-                separator={
-                  <span className="text-sm mx-1 mt-[1px] inline-block text-gray-600">
-                    /
-                  </span>
-                }
+                separator={<span className="text-sm mx-1 mt-px inline-block text-gray-600">/</span>}
                 className="mt-1"
               >
                 {breadcrumbs?.map((breadcrumb, index) => (
@@ -66,19 +46,14 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     key={index}
                     title={breadcrumb.title}
                     path={breadcrumb.path}
-                    className="text-xs"
+                    className="text-xs inline-block"
                   />
                 ))}
               </PageHeaderBreadcrumbs>
             ) : null}
           </Stack>
         </Stack>
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          sx={{ marginLeft: "auto" }}
-        >
+        <Stack direction="row" alignItems="center" spacing={1} sx={{ marginLeft: "auto" }}>
           {rightColumn}
         </Stack>
       </Stack>
@@ -92,11 +67,7 @@ interface BreadcrumbItemProps {
   title?: string;
   className?: string;
 }
-const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({
-  path,
-  title,
-  className,
-}) => {
+const BreadcrumbItem: React.FC<BreadcrumbItemProps> = ({ path, title, className }) => {
   if (path)
     return (
       <Link color="inherit" href={path} className={className}>

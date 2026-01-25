@@ -1,9 +1,9 @@
 "use client";
-import React, { useId } from "react";
-
+import React, { memo, useId } from "react";
 import { FormControl, FormHelperText, FormLabel, OutlinedInput, SxProps, Theme } from "@mui/material";
 import type { Control, FieldValues, Path, RegisterOptions } from "react-hook-form";
 import { Controller } from "react-hook-form";
+
 import InputNumber from "../InputNumber";
 
 export interface RHFTextFieldProps<T extends FieldValues> {
@@ -16,10 +16,11 @@ export interface RHFTextFieldProps<T extends FieldValues> {
   disabled?: boolean;
   startAdornment?: React.ReactNode;
   endAdornment?: React.ReactNode;
-  type?: "number" | "text";
   helpText?: React.ReactNode;
+  type?: "text" | "password";
   sx?: SxProps<Theme>;
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
+  size?: "small" | "medium";
 }
 const RHFTextField = <T extends FieldValues>({
   className,
@@ -29,12 +30,13 @@ const RHFTextField = <T extends FieldValues>({
   placeholder,
   required,
   disabled,
-  type = "text",
   endAdornment,
   startAdornment,
   helpText,
   sx,
   inputProps,
+  size,
+  type = "text",
 }: RHFTextFieldProps<T>) => {
   const fieldId = useId();
   return (
@@ -51,14 +53,11 @@ const RHFTextField = <T extends FieldValues>({
           ) : null}
           <OutlinedInput
             {...field}
-            value={field.value ?? (type === "number" ? "" : "")}
-            onChange={(evt) => {
-              const value = type === "number" ? Number.parseInt(evt.target.value) : evt.target.value;
-              field.onChange(value);
-            }}
+            value={field.value ?? ""}
+            onChange={field.onChange}
             placeholder={placeholder}
             disabled={disabled}
-            size="small"
+            size={size}
             id={fieldId}
             type={type}
             sx={{
@@ -75,4 +74,4 @@ const RHFTextField = <T extends FieldValues>({
     />
   );
 };
-export default RHFTextField;
+export default memo(RHFTextField) as typeof RHFTextField;

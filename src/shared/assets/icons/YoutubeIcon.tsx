@@ -1,9 +1,7 @@
 import SvgIcon from "@mui/material/SvgIcon";
+import type { FC, SVGProps } from "react";
 
-const YouTubeIcon: React.FC<React.SVGProps<SVGSVGElement>> = ({
-  className,
-  ...rest
-}) => {
+const YouTubeIcon: FC<SVGProps<SVGSVGElement>> = ({ className, ...rest }) => {
   return (
     <SvgIcon>
       <svg

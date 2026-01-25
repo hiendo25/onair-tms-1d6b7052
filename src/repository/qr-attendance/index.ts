@@ -1,13 +1,14 @@
+import type { AttendanceWithRelations, QRCodeStatus, QRCodeWithRelations } from "@/model/qr-attendance.model";
 import { supabase } from "@/services";
+
 import {
-  CreateQRCodePayload,
-  QRCodeValidationResult,
   AttendanceCheckInPayload,
   AttendanceCheckInResult,
+  CreateQRCodePayload,
+  QRCodeValidationResult,
   UpdateQRCodePayload,
   UpSertQrCodePayload,
 } from "./type";
-import type { QRCodeStatus, QRCodeWithRelations, AttendanceWithRelations } from "@/model/qr-attendance.model";
 
 export * from "./type";
 
@@ -459,6 +460,30 @@ const upsertQRCode = async (upSertPayload: UpSertQrCodePayload) => {
   }
 };
 
+const deleteAttendancesByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase.from("class_attendances").delete().eq("employee_id", employeeId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (err: any) {
+    console.error("Error deleting attendances by employee:", err);
+    return { error: err.message };
+  }
+};
+
+const deleteQRCodesByEmployeeId = async (employeeId: string) => {
+  try {
+    const { error } = await supabase.from("class_qr_codes").delete().eq("created_by", employeeId);
+
+    if (error) throw error;
+    return { error: null };
+  } catch (err: any) {
+    console.error("Error deleting QR codes by employee:", err);
+    return { error: err.message };
+  }
+};
+
 export {
   generateQRCode,
   createClassQRCode,
@@ -476,4 +501,6 @@ export {
   deleteQRCode,
   getAttendanceStatsByQRCode,
   upsertQRCode,
+  deleteAttendancesByEmployeeId,
+  deleteQRCodesByEmployeeId,
 };

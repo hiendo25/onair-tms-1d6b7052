@@ -1,56 +1,78 @@
-import FacebookIcon from "./FacebookIcon";
-import GoogleIcon from "./GoogleIcon";
-import GlobeIcon from "./GlobeIcon";
-import SquareFourIcon from "./SquareFourIcon";
-import GitIcon from "./GitIcon";
-import UsersIcon from "./UsersIcon";
-import UsersPlusIcon from "./UsersPlusIcon";
-import HelpIcon from "./HelpIcon";
-import LogoOnairIcon from "./LogoOnairIcon";
-import LogoOnairShortIcon from "./LogoOnairShortIcon";
-import SettingIcon from "./SettingIcon";
-import Setting02Icon from "./Setting02Icon";
-import BellIcon from "./BellIcon";
-import Bell01Icon from "./Bell01Icon";
-import BookOpenIcon from "./BookOpenIcon";
+import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
-import EyeIcon from "./EyeIcon";
-import EyeOffIcon from "./EyeOffIcon";
-import Loading from "./LoadingIcon";
-import ClassIcon from "./ClassIcon";
-import YoutubeIcon from "./YoutubeIcon";
-import ParagraphIcon from "./ParagraphIcon";
-import ImageIcon from "./ImageIcon";
-import InforCircleIcon from "./InforCircleIcon";
+import Bell01Icon from "./Bell01Icon";
+import BellIcon from "./BellIcon";
+import BookOpenIcon from "./BookOpenIcon";
+import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
-import CalendarIcon2 from "./CalendaIcon2";
-import UsersIcon2 from "./UsersIcon2";
-import ClipboardIcon from "./ClipboardIcon";
-import TrashIcon1 from "./TrashIcon1";
-import CloseIcon from "./CloseIcon";
-import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
-import ChevronDownIcon from "./ChevronDownIcon";
-import ChevronUpIcon from "./ChevronUpIcon";
+import CameraOffIcon from "./CameraOffIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
-import ZaloIcon from "./ZaloIcon";
-import LinkIcon from "./LinkIcon";
-import SearchIcon from "./SearchIcon";
-import FileIcon from "./FileIcon";
-import FilterFunnelIcon from "./FilterFunnelIcon";
-import MarkerPinIcon from "./MarkerPinIcon";
-import MarkerPin01Icon from "./MarkerPin01Icon";
+import ChevronDownIcon from "./ChevronDownIcon";
+import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
+import ChevronUpIcon from "./ChevronUpIcon";
+import ClassIcon from "./ClassIcon";
+import ClipboardIcon from "./ClipboardIcon";
+import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
+import Copy07Icon from "./Copy07Icon";
+import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
+import Download01Icon from "./Download01Icon";
+import Edit02Icon from "./Edit02Icon";
+import Edit05Icon from "./Edit05Icon";
 import EmptyBoxIcon from "./EmptyBoxIcon";
-import MonitorIcon from "./MonitorIcon";
-import FileExcelIcon from "./FileExcelIcon";
-import FileWordIcon from "./FileWordIcon";
-import FilePdfIcon from "./FilePdfIcon";
-import FileZipIcon from "./FileZipIcon";
-import FileImageIcon from "./FileImageIcon";
-import FileVideoIcon from "./FileVideoIcon";
+import EyeIcon from "./EyeIcon";
+import EyeOffIcon from "./EyeOffIcon";
+import FacebookIcon from "./FacebookIcon";
+import FaceSadIcon from "./FaceSadIcon";
+import FaceSmileIcon from "./FaceSmileIcon";
+import FileAttachmentIcon from "./FileAttachmentIcon";
 import FileAdioIcon from "./FileAudioIcon";
-
+import FileExcelIcon from "./FileExcelIcon";
+import FileIcon from "./FileIcon";
+import FileImageIcon from "./FileImageIcon";
+import FilePdf02Icon from "./FilePdf02Icon";
+import FilePdfIcon from "./FilePdfIcon";
+import FileVideoIcon from "./FileVideoIcon";
+import FileWord02Icon from "./FileWord02Icon";
+import FileWordIcon from "./FileWordIcon";
+import FileZipIcon from "./FileZipIcon";
+import FilterFunnelIcon from "./FilterFunnelIcon";
+import FolderShieldIcon from "./FolderShieldIcon";
+import GitIcon from "./GitIcon";
+import GlobeIcon from "./GlobeIcon";
+import GoogleIcon from "./GoogleIcon";
+import HelpIcon from "./HelpIcon";
+import ImageIcon from "./ImageIcon";
+import Inbox01Icon from "./Inbox01Icon";
+import InforCircleIcon from "./InforCircleIcon";
+import LineChartUp01Icon from "./LineChartUp01Icon";
+import LinkIcon from "./LinkIcon";
+import Loading from "./LoadingIcon";
+import LogoOnairIcon from "./LogoOnairIcon";
+import LogoOnairShortIcon from "./LogoOnairShortIcon";
+import LogoutIcon from "./LogoutIcon";
+import MarkerPin01Icon from "./MarkerPin01Icon";
+import MarkerPinIcon from "./MarkerPinIcon";
+import Menu05Icon from "./Menu05Icon";
+import MonitorIcon from "./MonitorIcon";
+import ParagraphIcon from "./ParagraphIcon";
+import SearchIcon from "./SearchIcon";
+import Setting02Icon from "./Setting02Icon";
+import SettingIcon from "./SettingIcon";
+import ShareIcon from "./ShareIcon";
+import SquareFourIcon from "./SquareFourIcon";
+import Star01Icon from "./Star01Icon";
+import TrashIcon1 from "./TrashIcon1";
+import Trash01Icon from "./TrashIcon1";
+import UsersIcon from "./UsersIcon";
+import UsersIcon2 from "./UsersIcon2";
+import UsersPlusIcon from "./UsersPlusIcon";
+import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
+import VideoIcon from "./VideoIcon";
+import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
+import YoutubeIcon from "./YoutubeIcon";
+import ZaloIcon from "./ZaloIcon";
 export {
   BarChart10Icon,
   BellIcon,
@@ -67,6 +89,10 @@ export {
   CloseIcon,
   ClipboardIcon,
   ClassIcon,
+  Dot2RowVerticalIcon,
+  Download01Icon,
+  Edit05Icon,
+  Edit02Icon,
   EmptyBoxIcon,
   EyeIcon,
   EyeOffIcon,
@@ -76,10 +102,16 @@ export {
   FileExcelIcon,
   FileImageIcon,
   FilePdfIcon,
+  FilePdf02Icon,
   FileVideoIcon,
   FileWordIcon,
+  FileWord02Icon,
   FileZipIcon,
   FilterFunnelIcon,
+  FileAttachmentIcon,
+  FolderShieldIcon,
+  FaceSadIcon,
+  FaceSmileIcon,
   GoogleIcon,
   GlobeIcon,
   GitIcon,
@@ -93,15 +125,28 @@ export {
   MarkerPinIcon,
   MarkerPin01Icon,
   MonitorIcon,
+  ParagraphIcon,
   SearchIcon,
   SquareFourIcon,
   SettingIcon,
   Setting02Icon,
-  YoutubeIcon,
-  ParagraphIcon,
+  Star01Icon,
   UsersIcon2,
   UsersIcon,
   UsersPlusIcon,
+  YoutubeIcon,
+  VideoIcon,
   TrashIcon1,
+  Trash01Icon,
   ZaloIcon,
+  VideoCameraRecordFillIcon,
+  LogoutIcon,
+  Menu05Icon,
+  ArrowRightIcon,
+  LineChartUp01Icon,
+  Copy07Icon,
+  CameraOffIcon,
+  VideoRecorderOffIcon,
+  Inbox01Icon,
+  ShareIcon,
 };

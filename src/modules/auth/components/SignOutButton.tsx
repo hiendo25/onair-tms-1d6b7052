@@ -1,29 +1,21 @@
-import IconButton from "@mui/material/IconButton";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import useAuthSignOut from "../hooks/useAuthSignOut";
 import { Button, Typography } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+
 import { cn } from "@/utils";
+import useAuthSignOut from "../hooks/useAuthSignOut";
 
 interface SignOutButtonProps {
   type?: "icon";
   btnText?: string;
   className?: string;
 }
-const SignOutButton: React.FC<SignOutButtonProps> = ({
-  type,
-  btnText = "Đăng xuất",
-  className,
-}) => {
+const SignOutButton: React.FC<SignOutButtonProps> = ({ type, btnText = "Đăng xuất", className }) => {
   const { signOut, isPending } = useAuthSignOut();
 
   if (type === "icon") {
     return (
-      <IconButton
-        size="small"
-        onClick={signOut}
-        loading={isPending}
-        className={cn("", className)}
-      >
+      <IconButton size="small" onClick={signOut} loading={isPending} className={cn("rounded-lg", className)}>
         <LogoutRoundedIcon fontSize="small" />
       </IconButton>
     );
@@ -35,7 +27,7 @@ const SignOutButton: React.FC<SignOutButtonProps> = ({
       variant="fill"
       color="inherit"
       startIcon={<LogoutRoundedIcon fontSize="small" />}
-      className={cn("h-12 justify-self-start", className)}
+      className={cn("h-10 justify-self-start", className)}
     >
       {btnText}
     </Button>

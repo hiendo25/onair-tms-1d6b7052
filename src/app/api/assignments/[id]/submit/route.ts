@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+
+import { assignmentsRepository } from "@/repository";
 import { createSVClient } from "@/services";
 import * as assignmentResultService from "@/services/assignment-results/assignment-result.service";
+import { FileMetadata, QuestionOption } from "@/types/dto/assignments";
 import { Database } from "@/types/supabase.types";
-import { QuestionOption } from "@/types/dto/assignments";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 
@@ -10,11 +12,8 @@ interface SubmitAssignmentRequest {
   employeeId: string;
   answers: Array<{
     questionId: string;
-    questionLabel: string;
-    questionType: QuestionType;
-    options?: QuestionOption[];
-    answer: string | string[];
-    attachments?: string[];
+    answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>;
+    attachments?: FileMetadata[];
   }>;
 }
 
@@ -23,16 +22,6 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const assignmentId = params.id;
 
@@ -53,23 +42,76 @@ export async function POST(
       );
     }
 
+    // Validate that all answers have questionId
     for (const answer of answers) {
-      if (!answer.questionId || !answer.questionType) {
+      if (!answer.questionId) {
         return NextResponse.json(
           { error: "Thiếu thông tin câu hỏi" },
           { status: 400 }
         );
       }
+    }
 
+    // Fetch question details from database
+    const questionIds = answers.map(a => a.questionId);
+    const questions = await assignmentsRepository.getQuestionsByIds(questionIds);
+
+    if (questions.length !== answers.length) {
+      return NextResponse.json(
+        { error: "Một số câu hỏi không tồn tại" },
+        { status: 400 }
+      );
+    }
+
+    // Create a map of questions for easy lookup
+    const questionMap = new Map(questions.map(q => [q.id, q]));
+
+    // Populate answer objects with question details from database
+    const enrichedAnswers = answers.map(answer => {
+      const question = questionMap.get(answer.questionId);
+      if (!question) {
+        throw new Error(`Question not found: ${answer.questionId}`);
+      }
+
+      return {
+        questionId: answer.questionId,
+        questionLabel: question.label,
+        questionType: question.type,
+        options: question.options as QuestionOption[] | undefined,
+        answer: answer.answer,
+        attachments: answer.attachments,
+      };
+    });
+
+    // Validate enriched answers
+    for (const answer of enrichedAnswers) {
       if (answer.attachments && Array.isArray(answer.attachments)) {
-        for (const url of answer.attachments) {
-          if (typeof url !== "string") {
+        for (const attachment of answer.attachments) {
+          if (typeof attachment !== "object" || !attachment.url || !attachment.originalName || attachment.fileSize === undefined || !attachment.mimeType) {
             return NextResponse.json(
-              { error: "Định dạng URL tệp đính kèm không hợp lệ" },
+              { error: "Định dạng tệp đính kèm không hợp lệ" },
               { status: 400 }
             );
           }
-          const isValidS3Url = url.includes('.s3.') && url.includes('amazonaws.com');
+          if (typeof attachment.url !== "string" || typeof attachment.originalName !== "string" || typeof attachment.fileSize !== "number" || typeof attachment.mimeType !== "string") {
+            return NextResponse.json(
+              { error: "Định dạng URL, tên file, kích thước hoặc loại tệp đính kèm không hợp lệ" },
+              { status: 400 }
+            );
+          }
+          if (attachment.fileSize <= 0) {
+            return NextResponse.json(
+              { error: "Kích thước tệp đính kèm phải là số dương" },
+              { status: 400 }
+            );
+          }
+          if (attachment.mimeType.trim() === "") {
+            return NextResponse.json(
+              { error: "Loại tệp đính kèm không được để trống" },
+              { status: 400 }
+            );
+          }
+          const isValidS3Url = attachment.url.includes('.s3.') && attachment.url.includes('amazonaws.com');
           if (!isValidS3Url) {
             return NextResponse.json(
               { error: "URL tệp đính kèm không hợp lệ" },
@@ -87,14 +129,32 @@ export async function POST(
               { status: 400 }
             );
           }
-          for (const url of answer.answer) {
-            if (typeof url !== "string") {
+          for (const file of answer.answer) {
+            if (typeof file !== "object" || !file.url || !file.originalName || file.fileSize === undefined || !file.mimeType) {
               return NextResponse.json(
-                { error: "Định dạng URL file không hợp lệ" },
+                { error: "Định dạng file không hợp lệ" },
                 { status: 400 }
               );
             }
-            const isValidS3Url = url.includes('.s3.') && url.includes('amazonaws.com');
+            if (typeof file.url !== "string" || typeof file.originalName !== "string" || typeof file.fileSize !== "number" || typeof file.mimeType !== "string") {
+              return NextResponse.json(
+                { error: "Định dạng URL, tên file, kích thước hoặc loại file không hợp lệ" },
+                { status: 400 }
+              );
+            }
+            if (file.fileSize <= 0) {
+              return NextResponse.json(
+                { error: "Kích thước file phải là số dương" },
+                { status: 400 }
+              );
+            }
+            if (file.mimeType.trim() === "") {
+              return NextResponse.json(
+                { error: "Loại file không được để trống" },
+                { status: 400 }
+              );
+            }
+            const isValidS3Url = file.url.includes('.s3.') && file.url.includes('amazonaws.com');
             if (!isValidS3Url) {
               return NextResponse.json(
                 { error: "URL file không hợp lệ" },
@@ -122,7 +182,7 @@ export async function POST(
           }
           if (answer.options) {
             const validOptionIds = answer.options.map(opt => opt.id);
-            for (const optionId of answer.answer) {
+            for (const optionId of answer.answer as string[]) {
               if (!validOptionIds.includes(optionId)) {
                 return NextResponse.json(
                   { error: "Đáp án được chọn không hợp lệ" },
@@ -151,6 +211,51 @@ export async function POST(
           }
           break;
 
+        case "matching":
+          if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
+            return NextResponse.json(
+              { error: `Vui lòng hoàn thành ghép đôi cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
+          }
+          // Validate mapping structure
+          for (const mapping of answer.answer as Array<{ columnAId: string; columnBId: string }>) {
+            if (!mapping.columnAId || !mapping.columnBId) {
+              return NextResponse.json(
+                { error: "Dữ liệu ghép đôi không hợp lệ" },
+                { status: 400 }
+              );
+            }
+          }
+          break;
+
+        case "order":
+          if (!Array.isArray(answer.answer) || answer.answer.length === 0) {
+            return NextResponse.json(
+              { error: `Vui lòng sắp xếp các mục cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
+          }
+          // Validate order structure
+          for (const item of answer.answer as Array<{ id: string; position: number }>) {
+            if (!item.id || typeof item.position !== "number") {
+              return NextResponse.json(
+                { error: "Dữ liệu sắp xếp không hợp lệ" },
+                { status: 400 }
+              );
+            }
+          }
+          break;
+
+        case "true_false":
+          if (typeof answer.answer !== "boolean") {
+            return NextResponse.json(
+              { error: `Vui lòng chọn Đúng hoặc Sai cho câu hỏi: ${answer.questionLabel}` },
+              { status: 400 }
+            );
+          }
+          break;
+
         default:
           return NextResponse.json(
             { error: `Loại câu hỏi không hợp lệ: ${answer.questionType}` },
@@ -162,7 +267,7 @@ export async function POST(
     const result = await assignmentResultService.submitAssignment({
       assignmentId,
       employeeId,
-      answers,
+      answers: enrichedAnswers,
     });
 
     let message = "Nộp bài thành công!";
@@ -202,16 +307,6 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const supabase = await createSVClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "User not authenticated" },
-        { status: 401 }
-      );
-    }
-
     const params = await context.params;
     const assignmentId = params.id;
 

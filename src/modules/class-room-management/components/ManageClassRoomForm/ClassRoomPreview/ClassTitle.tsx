@@ -1,10 +1,12 @@
-import { Control, useController } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
-import Image from "next/image";
+import React from "react";
 import { alpha, Box, Typography } from "@mui/material";
+import Image from "next/image";
+import { Control, useController } from "react-hook-form";
+
+import { ClassRoomFormValues } from "../classroom-form.schema";
 
 export interface ClassTitleProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const ClassTitle: React.FC<ClassTitleProps> = ({ control }) => {
   const {

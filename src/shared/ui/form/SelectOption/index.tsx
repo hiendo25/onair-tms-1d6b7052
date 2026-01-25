@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
-
-import { Select, MenuItem, InputLabel, FormControl, FormHelperText, SelectChangeEvent } from '@mui/material';
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 
 interface OPTION {
     value: string,
@@ -9,7 +8,7 @@ interface OPTION {
 }
 
 interface PropTypes {
-    inputLabel: string;
+    inputLabel?: string;
     name?: string,
     value: string;
     onChange: (v) => void,
@@ -46,7 +45,7 @@ export const SelectOption: React.FC<PropTypes> = (props) => {
             fullWidth
             error={!!error}
         >
-            <InputLabel id={labelId}>{inputLabel}</InputLabel>
+            {inputLabel && <InputLabel id={labelId}>{inputLabel}</InputLabel>}
             <Select
                 label={inputLabel}
                 labelId={labelId}

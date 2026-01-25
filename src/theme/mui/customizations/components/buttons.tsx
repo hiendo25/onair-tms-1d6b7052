@@ -1,9 +1,7 @@
-import { alpha, Theme, Components } from "@mui/material/styles";
+import { alpha, Components, Theme } from "@mui/material/styles";
 import { svgIconClasses } from "@mui/material/SvgIcon";
 
-import { primary, grey, secondary, success, warning, error, info } from "../../theme-color";
-
-/* eslint-disable import/prefer-default-export */
+import { error, grey, info, primary, secondary, success, warning } from "../../theme-color";
 
 const getBoxShadowShapeButton = (color: string) => {
   return `0px 6px 9px -6px ${alpha(color, 0.4)}, 0px 6px 12px -4px ${alpha(color, 0.3)}`;
@@ -35,7 +33,8 @@ export const buttonsCustomizations: Components<Theme> = {
         boxShadow: "none",
         borderRadius: (theme.vars || theme).shape.borderRadius,
         textTransform: "none",
-        fontWeight: "600",
+        fontWeight: 500,
+        lineHeight: 1,
         ["&:hover"]: {
           boxShadow: "none",
         },
@@ -45,9 +44,9 @@ export const buttonsCustomizations: Components<Theme> = {
               size: "small",
             },
             style: {
-              height: "1.875rem", //36px
-              padding: "0.5rem 0.75rem", //8px 12px
-              borderRadius: "0.5rem", // 8px
+              height: "36px",
+              padding: "8px 12px",
+              borderRadius: "6px",
             },
           },
           {
@@ -55,8 +54,9 @@ export const buttonsCustomizations: Components<Theme> = {
               size: "medium",
             },
             style: {
-              height: "2.25rem", // 40px
-              borderRadius: "0.625rem", //10px
+              height: "40px",
+              padding: "6px 18px",
+              borderRadius: "8px",
             },
           },
           {
@@ -64,8 +64,8 @@ export const buttonsCustomizations: Components<Theme> = {
               size: "large",
             },
             style: {
-              height: "2.5rem", // 44px
-              borderRadius: "0.625rem", //10px
+              height: "48px",
+              borderRadius: "10px",
             },
           },
           {

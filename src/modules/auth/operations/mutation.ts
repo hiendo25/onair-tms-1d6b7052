@@ -1,10 +1,9 @@
 import { useTMutation } from "@/lib";
+import { client } from "@/lib/api";
+import { DomainError } from "@/lib/errors/DomainError";
 import { authRepository } from "@/repository";
-import {
-  AuthSignInWithGoogleOptions,
-  AuthSignInWithPasswordPayload,
-} from "@/repository/auth";
-import { tryCatch } from "@/utils/try-catch";
+import { AuthSignInWithGoogleOptions, AuthSignInWithPasswordPayload } from "@/repository/auth";
+import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 export const useSignOutMutation = () => {
   return useTMutation({
     mutationFn: () => authRepository.authSignOut(),
@@ -19,13 +18,18 @@ export const useSignInWithPasswordMutation = () => {
 
 export const useSignInWithGoogleMutation = () => {
   return useTMutation({
-    mutationFn: (options: AuthSignInWithGoogleOptions) =>
-      authRepository.authSignInWithGoogle(options),
+    mutationFn: (options: AuthSignInWithGoogleOptions) => authRepository.authSignInWithGoogle(options),
   });
 };
 
+// export const useSignUpMutation = () => {
+//   return useTMutation({
+//     mutationFn: authRepository.authSignUp,
+//   });
+// };
+
 export const useSignUpMutation = () => {
-  return useTMutation({
-    mutationFn: authRepository.authSignUp,
+  return useTMutation<SignUpDtoResponse, DomainError, SignUpDto>({
+    mutationFn: (dto) => client.post("/auth/signup", dto),
   });
 };

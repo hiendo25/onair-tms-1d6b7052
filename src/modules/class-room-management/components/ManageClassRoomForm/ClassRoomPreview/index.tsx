@@ -1,11 +1,13 @@
+import React, { memo } from "react";
 import { Control, useFormContext, UseFormReturn, useWatch } from "react-hook-form";
-import { ClassRoom } from "../../classroom-form.schema";
-import { memo } from "react";
-import WallpaperPreview from "./WallpaperPreview";
+
+import { ClassRoomFormValues } from "../classroom-form.schema";
+
 import ClassTitle from "./ClassTitle";
+import WallpaperPreview from "./WallpaperPreview";
 
 interface ClassRoomPreviewProps {
-  control: Control<ClassRoom>;
+  control: Control<ClassRoomFormValues>;
 }
 const ClassRoomPreview: React.FC<ClassRoomPreviewProps> = ({ control }) => {
   // const data = useWatch({ control: control });

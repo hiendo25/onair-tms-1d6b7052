@@ -1,18 +1,19 @@
 "use client";
 import React, { Children, memo } from "react";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import {
   Button,
-  Menu,
-  MenuItem,
   Divider,
-  ListItemText,
+  dividerClasses,
+  listClasses,
   ListItemIcon,
   listItemIconClasses,
+  ListItemText,
+  Menu,
+  MenuItem,
   paperClasses,
-  listClasses,
-  dividerClasses,
 } from "@mui/material";
-import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+
 import useAuthSignOut from "@/modules/auth/hooks/useAuthSignOut";
 
 type AccountMenuDividerItem = {
@@ -74,6 +75,9 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuI
           [`& .${dividerClasses.root}`]: {
             margin: "4px -8px",
           },
+          ".MuiPaper-root": {
+            border: "none",
+          },
         }}
       >
         {menuItems.map((item, _index) => {
@@ -81,7 +85,7 @@ const AccountMenuOptions: React.FC<AccountMenuOptionsProps> = ({ children, menuI
             return <Divider key={_index} />;
           }
           return (
-            <MenuItem key={_index} className="line-clamp-1 my-[0.5]">
+            <MenuItem key={_index} className="line-clamp-1 my-[0.5] text-sm">
               {item.title}
             </MenuItem>
           );

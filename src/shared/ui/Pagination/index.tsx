@@ -1,12 +1,11 @@
 "use client";
 
 import React from "react";
-
 import {
-	Stack,
-	Typography,
-	StackProps,
 	Pagination as PaginationMui,
+	Stack,
+	StackProps,
+	Typography,
 } from "@mui/material";
 
 interface PropTypes {

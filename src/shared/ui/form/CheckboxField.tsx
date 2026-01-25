@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import {
   Checkbox,
   FormControl,
@@ -5,7 +6,6 @@ import {
   FormControlLabelProps,
   FormHelperText,
 } from "@mui/material";
-import React, { memo } from "react";
 
 interface CheckboxFieldProps extends Omit<FormControlLabelProps, "control"> {
   error?: boolean;
