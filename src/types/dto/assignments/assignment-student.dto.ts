@@ -1,6 +1,6 @@
 import { Database } from "@/types/supabase.types";
 
-type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
+type AssignmentAttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
 
 export interface AssignmentStudentDto {
   employee_id: string;
@@ -8,10 +8,10 @@ export interface AssignmentStudentDto {
   full_name: string;
   email: string;
   avatar: string | null;
+  department_name: string | null;
   has_submitted: boolean;
   submitted_at: string | null;
   score: number | null;
   max_score: number | null;
-  status: AssignmentResultStatus | null;
+  status: AssignmentAttemptStatus | null;
 }
-

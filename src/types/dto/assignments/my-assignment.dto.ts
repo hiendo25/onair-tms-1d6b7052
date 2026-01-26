@@ -1,16 +1,19 @@
 import { Database } from "@/types/supabase.types";
 
-type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
+type AssignmentAttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
 
 export interface MyAssignmentDto {
   assignment_id: string;
   assignment_name: string;
   assignment_description: string;
   created_at: string;
+  attempt_limit: number | null;
+  attempts_used: number;
+  attempts_remaining: number | null;
+  can_retry: boolean;
   has_submitted: boolean;
   submitted_at: string | null;
   score: number | null;
   max_score: number | null;
-  status: AssignmentResultStatus | null;
+  status: AssignmentAttemptStatus | null;
 }
-

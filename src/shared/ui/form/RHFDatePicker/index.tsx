@@ -1,11 +1,11 @@
-import React, { memo, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { DateFieldProps } from "@mui/x-date-pickers";
-import { DateField as XDateField } from "@mui/x-date-pickers";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs, { type Dayjs } from "dayjs";
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 import { cn } from "@/utils";
+import { parseDateInput } from "@/utils/date";
 import CustomDatePickerField from "../CustomDatePickerField";
 export const DATE_PICKER_FORMAT = {
   "DD/MM/YYYY": "DD/MM/YYYY",
@@ -43,11 +43,38 @@ const DatePicker = <T extends FieldValues>({
   }, [format, label, required, placeholder]);
 
   const getValueDatePicker = useCallback((value: PathValue<T, Path<T>>) => {
-    if (value && typeof value === "string") {
-      console.log(dayjs(value).isValid());
-      return dayjs(value).isValid() ? dayjs(value) : null;
+    if (!value) {
+      return null;
     }
+
+    if (dayjs.isDayjs(value)) {
+      return value;
+    }
+
+    if (value instanceof Date) {
+      return dayjs(value);
+    }
+
+    if (typeof value === "string" || typeof value === "number") {
+      const parsed = typeof value === "string" ? parseDateInput(value) : new Date(value);
+      return parsed ? dayjs(parsed) : null;
+    }
+
+    return null;
   }, []);
+
+  const handleChange = useCallback(
+    (nextValue: Dayjs | null, onChange: (value: string) => void) => {
+      if (!nextValue || !nextValue.isValid()) {
+        onChange("");
+        return;
+      }
+
+      onChange(nextValue.format(format));
+    },
+    [format],
+  );
+
   return (
     <Controller
       name={name}
@@ -55,9 +82,9 @@ const DatePicker = <T extends FieldValues>({
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDatePickerField
           {...datePickerProps}
-          value={getValueDatePicker(value)?? null}
-          onChange={onChange}
-          helperText={error?.message} 
+          value={getValueDatePicker(value)}
+          onChange={(nextValue) => handleChange(nextValue, onChange)}
+          helperText={error?.message}
           error={!!error}
         />
       )}

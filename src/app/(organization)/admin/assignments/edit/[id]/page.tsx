@@ -22,7 +22,7 @@ export default async function EditAssignmentPage({ params }: EditAssignmentPageP
         },
       ]}
     >
-      <div className="max-w-[1200px]">
+      <div>
         <UpdateAssignment assignmentId={id} />
       </div>
     </PageContainer>

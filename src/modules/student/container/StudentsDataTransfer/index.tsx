@@ -85,6 +85,10 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
   });
   const [selectedStudents, setSelectedStudents] = React.useState<StudentSelectedItem[]>(selectedItems);
 
+  React.useEffect(() => {
+    setSelectedStudents(selectedItems);
+  }, [selectedItems]);
+
   const { data: employeeData, isPending } = useGetStudentsQuery({
     enabled: true,
     queryParams: {

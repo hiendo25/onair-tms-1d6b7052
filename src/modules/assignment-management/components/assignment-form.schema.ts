@@ -197,6 +197,7 @@ type EmployeeItem = zod.infer<typeof employeeItemSchema>;
 
 export {
   assignmentSchema,
+  questionSchema,
   type Assignment,
   type Question,
   type QuestionOption,

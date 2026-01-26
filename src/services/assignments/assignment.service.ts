@@ -1,12 +1,17 @@
-import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
+import { assignmentBankRepository, assignmentResultsRepository, assignmentsRepository, questionBankRepository } from "@/repository";
+import { createSVClient } from "@/services";
 import type {
   AssignmentDto,
   CreateAssignmentDto,
+  GetAssignedAssignmentsParams,
   GetAssignmentsParams,
+  GetAssignmentStudentsParams,
   GetMyAssignmentsParams,
   UpdateAssignmentDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
+
+import { buildQuestionOptions } from "./question-options";
 
 interface CreateAssignmentResult {
   assignmentId: string;
@@ -16,98 +21,71 @@ async function createAssignmentWithRelations(
   payload: CreateAssignmentDto,
   createdBy: string,
 ): Promise<CreateAssignmentResult> {
+  const supabase = await createSVClient();
   let assignmentId: string | null = null;
+  let assignmentBankId: string | null = null;
+  const createdQuestionIds: string[] = [];
 
   try {
-    // Create the assignment
-    const assignmentData = await assignmentsRepository.createAssignment({
-      name: payload.name,
-      description: payload.description,
-      created_by: createdBy,
-      organization_id: payload.organizationId,
-    });
+    const assignmentBank = await assignmentBankRepository.createAssignmentBank(
+      {
+        name: payload.name,
+        description: payload.description,
+        created_by: createdBy,
+        organization_id: payload.organizationId,
+      },
+      supabase,
+    );
 
-    assignmentId = assignmentData.id;
-    console.log(`Assignment created: ${assignmentId}`);
+    assignmentBankId = assignmentBank.id;
 
-    // Create questions
     if (payload.questions && payload.questions.length > 0) {
-      const questionsToCreate = payload.questions.map((question) => {
-        let options = question.options || null;
+      const questionsToCreate = payload.questions.map((question) => ({
+        type: question.type,
+        label: question.label,
+        score: question.score,
+        options: buildQuestionOptions(question, { shuffleOrderItems: true }),
+        attachments: question.attachments || null,
+        created_by: createdBy,
+      }));
 
-        // Transform matchingData to options for matching type
-        if (question.type === "matching" && question.matchingData) {
-          const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+      const createdQuestions = await questionBankRepository.createQuestionBankQuestions(questionsToCreate, supabase);
+      createdQuestionIds.push(...createdQuestions.map((question) => question.id));
 
-          // Store the matching data structure in options
-          options = {
-            columnAItems,
-            columnBItems,
-            correctMappings,
-          } as any;
-        }
+      const questionRows = createdQuestions.map((question, index) => ({
+        assignment_bank_id: assignmentBankId as string,
+        question_id: question.id,
+        order_index: index + 1,
+      }));
 
-        // Transform orderItems to options for order type
-        // Ensure correctOrder and displayOrder are assigned
-        if (question.type === "order" && question.orderItems) {
-          const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
-            ...item,
-            correctOrder: index + 1, // 1-based index represents the correct order
-          }));
-
-          // Generate shuffled displayOrder using Fisher-Yates algorithm
-          const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
-          for (let i = shuffledIndices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-          }
-
-          const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
-            ...item,
-            displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
-          }));
-
-          // Store the order data structure in options (similar to matching)
-          options = {
-            orderItems: orderItemsWithDisplayOrder,
-          } as any;
-        }
-
-        return {
-          assignment_id: assignmentId as string,
-          type: question.type,
-          label: question.label,
-          score: question.score,
-          options,
-          attachments: question.attachments || null,
-          created_by: createdBy,
-        };
-      });
-
-      await assignmentsRepository.createQuestions(questionsToCreate);
-      console.log(`Created ${questionsToCreate.length} question(s)`);
+      await assignmentBankRepository.createAssignmentBankQuestions(questionRows, supabase);
     }
 
-    // Create assignment categories
     if (payload.assignmentCategories && payload.assignmentCategories.length > 0) {
       const categoriesToCreate = payload.assignmentCategories.map((categoryId) => ({
-        assignment_id: assignmentId as string,
+        assignment_id: assignmentBankId as string,
         category_id: categoryId,
       }));
 
-      await assignmentsRepository.createAssignmentCategories(categoriesToCreate);
-      console.log(`Created ${categoriesToCreate.length} assignment category/categories`);
+      await assignmentBankRepository.createAssignmentBankCategories(categoriesToCreate, supabase);
     }
 
-    // Create assignment employees
+    const assignment = await assignmentsRepository.createAssignmentFromBankWithClient(supabase, {
+      assignment_bank_id: assignmentBankId,
+      assigned_by: createdBy,
+      organization_id: payload.organizationId,
+      status: "open",
+    });
+
+    assignmentId = assignment.id;
+
     if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
       const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
         assignment_id: assignmentId as string,
         employee_id: employeeId,
       }));
 
-      await assignmentsRepository.createAssignmentEmployees(employeesToCreate);
-      console.log(`Created ${employeesToCreate.length} assignment employee(s)`);
+      await assignmentsRepository.createAssignmentEmployeesWithClient(supabase, employeesToCreate);
     }
 
     return {
@@ -118,17 +96,19 @@ async function createAssignmentWithRelations(
     console.error("Service layer error:", error);
 
     if (assignmentId) {
-      console.log(`Rolling back: Deleting questions for assignment ${assignmentId}`);
-      await assignmentsRepository.deleteQuestionsByAssignmentId(assignmentId);
+      await assignmentsRepository.deleteAssignmentEmployeesByAssignmentIdWithClient(supabase, assignmentId);
+      await assignmentsRepository.deleteAssignmentByIdWithClient(supabase, assignmentId);
+    }
 
-      console.log(`Rolling back: Deleting categories for assignment ${assignmentId}`);
-      await assignmentsRepository.deleteAssignmentCategoriesByAssignmentId(assignmentId);
+    if (assignmentBankId) {
+      await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId, supabase);
+      await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentBankId, supabase);
+      await assignmentBankRepository.deleteAssignmentBankById(assignmentBankId, supabase);
+    }
 
-      console.log(`Rolling back: Deleting employees for assignment ${assignmentId}`);
-      await assignmentsRepository.deleteAssignmentEmployeesByAssignmentId(assignmentId);
-
-      console.log(`Rolling back: Deleting assignment ${assignmentId}`);
-      await assignmentsRepository.deleteAssignmentById(assignmentId);
+    for (const questionId of createdQuestionIds) {
+      await questionBankRepository.deleteQuestionBankCategoriesByQuestionId(questionId, supabase);
+      await questionBankRepository.deleteQuestionBankQuestion(questionId, supabase);
     }
 
     console.log("Rollback completed (service layer)");
@@ -147,89 +127,70 @@ async function updateAssignmentWithRelations(
   updatedBy: string,
   options: UpdateAssignmentOptions = {},
 ): Promise<void> {
+  const supabase = await createSVClient();
   const { allowQuestionsUpdate = true, allowAssignedEmployeesUpdate = true } = options;
-  // Update the assignment
-  await assignmentsRepository.updateAssignmentById(payload.id, {
-    name: payload.name,
-    description: payload.description,
-  });
+  const assignmentBankId = await assignmentsRepository.getAssignmentBankIdByAssignmentId(payload.id, supabase);
 
-  // Delete and recreate questions
+  if (!assignmentBankId) {
+    throw new Error("Không tìm thấy bài kiểm tra");
+  }
+
+  await assignmentBankRepository.updateAssignmentBankById(
+    assignmentBankId,
+    {
+      name: payload.name,
+      description: payload.description,
+      updated_at: new Date().toISOString(),
+    },
+    supabase,
+  );
+
   if (allowQuestionsUpdate) {
-    await assignmentsRepository.deleteQuestionsByAssignmentId(payload.id);
+    const existingAssignment = await assignmentBankRepository.getAssignmentBankById(assignmentBankId, undefined, supabase);
+    const existingQuestionIds =
+      existingAssignment?.assignment_questions?.map((question) => question.question_id) ?? [];
+
+    await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId, supabase);
 
     if (payload.questions && payload.questions.length > 0) {
-      const questionsToCreate = payload.questions.map((question) => {
-        let options = question.options || null;
+      const questionsToCreate = payload.questions.map((question) => ({
+        type: question.type,
+        label: question.label,
+        score: question.score,
+        options: buildQuestionOptions(question, { shuffleOrderItems: true }),
+        attachments: question.attachments || null,
+        created_by: updatedBy,
+      }));
 
-        // Transform matchingData to options for matching type
-        if (question.type === "matching" && question.matchingData) {
-          const { columnAItems, columnBItems, correctMappings } = question.matchingData;
+      const createdQuestions = await questionBankRepository.createQuestionBankQuestions(questionsToCreate, supabase);
+      const questionRows = createdQuestions.map((question, index) => ({
+        assignment_bank_id: assignmentBankId,
+        question_id: question.id,
+        order_index: index + 1,
+      }));
 
-          // Store the matching data structure in options
-          options = {
-            columnAItems,
-            columnBItems,
-            correctMappings,
-          } as any;
-        }
+      await assignmentBankRepository.createAssignmentBankQuestions(questionRows, supabase);
+    }
 
-        // Transform orderItems to options for order type
-        // Ensure correctOrder and displayOrder are assigned
-        if (question.type === "order" && question.orderItems) {
-          const orderItemsWithCorrectOrder = question.orderItems.map((item, index) => ({
-            ...item,
-            correctOrder: index + 1, // 1-based index represents the correct order
-          }));
-
-          // Generate shuffled displayOrder using Fisher-Yates algorithm
-          const shuffledIndices = Array.from({ length: orderItemsWithCorrectOrder.length }, (_, i) => i);
-          for (let i = shuffledIndices.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledIndices[i], shuffledIndices[j]] = [shuffledIndices[j], shuffledIndices[i]];
-          }
-
-          const orderItemsWithDisplayOrder = orderItemsWithCorrectOrder.map((item, index) => ({
-            ...item,
-            displayOrder: shuffledIndices[index] + 1, // 1-based shuffled display position
-          }));
-
-          // Store the order data structure in options (similar to matching)
-          options = {
-            orderItems: orderItemsWithDisplayOrder,
-          } as any;
-        }
-
-        return {
-          assignment_id: payload.id,
-          type: question.type,
-          label: question.label,
-          score: question.score,
-          options,
-          attachments: question.attachments || null,
-          created_by: updatedBy,
-        };
-      });
-
-      await assignmentsRepository.createQuestions(questionsToCreate);
+    if (existingQuestionIds.length > 0) {
+      await supabase.from("question_bank_categories").delete().in("question_id", existingQuestionIds);
+      await supabase.from("question_bank").delete().in("id", existingQuestionIds);
     }
   }
 
-  // Delete and recreate assignment categories
-  await assignmentsRepository.deleteAssignmentCategoriesByAssignmentId(payload.id);
+  await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentBankId, supabase);
 
   if (payload.assignmentCategories && payload.assignmentCategories.length > 0) {
     const categoriesToCreate = payload.assignmentCategories.map((categoryId) => ({
-      assignment_id: payload.id,
+      assignment_id: assignmentBankId,
       category_id: categoryId,
     }));
 
-    await assignmentsRepository.createAssignmentCategories(categoriesToCreate);
+    await assignmentBankRepository.createAssignmentBankCategories(categoriesToCreate, supabase);
   }
 
-  // Delete and recreate assignment employees
   if (allowAssignedEmployeesUpdate) {
-    await assignmentsRepository.deleteAssignmentEmployeesByAssignmentId(payload.id);
+    await assignmentsRepository.deleteAssignmentEmployeesByAssignmentIdWithClient(supabase, payload.id);
 
     if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
       const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
@@ -237,7 +198,7 @@ async function updateAssignmentWithRelations(
         employee_id: employeeId,
       }));
 
-      await assignmentsRepository.createAssignmentEmployees(employeesToCreate);
+      await assignmentsRepository.createAssignmentEmployeesWithClient(supabase, employeesToCreate);
     }
   }
 }
@@ -260,8 +221,8 @@ async function getAssignmentById(id: string): Promise<AssignmentDto> {
   return assignmentsRepository.getAssignmentById(id);
 }
 
-async function getAssignmentStudents(assignmentId: string, page: number = 0, limit: number = 25) {
-  return assignmentsRepository.getAssignmentStudents(assignmentId, page, limit);
+async function getAssignmentStudents(assignmentId: string, params?: GetAssignmentStudentsParams) {
+  return assignmentsRepository.getAssignmentStudents(assignmentId, params);
 }
 
 async function getAssignmentQuestions(assignmentId: string) {
@@ -270,6 +231,10 @@ async function getAssignmentQuestions(assignmentId: string) {
 
 async function getMyAssignments(employeeId: string, params?: GetMyAssignmentsParams) {
   return assignmentsRepository.getMyAssignments(employeeId, params);
+}
+
+async function getAssignedAssignments(params?: GetAssignedAssignmentsParams) {
+  return assignmentsRepository.getAssignedAssignments(params);
 }
 
 export {
@@ -281,4 +246,5 @@ export {
   getAssignmentStudents,
   getAssignmentQuestions,
   getMyAssignments,
+  getAssignedAssignments,
 };
