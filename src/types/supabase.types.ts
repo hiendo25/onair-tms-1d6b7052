@@ -34,8 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-<<<<<<< HEAD
-=======
       assignment_bank: {
         Row: {
           created_at: string
@@ -103,7 +101,6 @@ export type Database = {
           },
         ]
       }
->>>>>>> staging
       assignment_categories: {
         Row: {
           assignment_id: string
@@ -1725,6 +1722,7 @@ export type Database = {
       employee_certificate_templates: {
         Row: {
           certificate_template_id: string
+          class_room_id: string
           created_at: string
           data: Json
           employee_id: string
@@ -1734,6 +1732,7 @@ export type Database = {
         }
         Insert: {
           certificate_template_id: string
+          class_room_id: string
           created_at?: string
           data: Json
           employee_id: string
@@ -1743,6 +1742,7 @@ export type Database = {
         }
         Update: {
           certificate_template_id?: string
+          class_room_id?: string
           created_at?: string
           data?: Json
           employee_id?: string
@@ -1756,6 +1756,20 @@ export type Database = {
             columns: ["certificate_template_id"]
             isOneToOne: false
             referencedRelation: "certificate_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
           {
@@ -2437,6 +2451,7 @@ export type Database = {
       }
       lesson_progress: {
         Row: {
+          class_room_id: string | null
           completed_at: string | null
           created_at: string
           current_position_seconds: number | null
@@ -2449,6 +2464,7 @@ export type Database = {
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Insert: {
+          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2461,6 +2477,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Update: {
+          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2473,6 +2490,20 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "lesson_progress_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_progress_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "lesson_progress_employee_id_fkey"
             columns: ["employee_id"]
