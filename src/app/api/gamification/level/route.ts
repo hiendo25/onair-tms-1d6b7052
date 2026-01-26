@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
 
     return http.ok(data);
   } catch (error: any) {
-    console.error(error);
     if (error instanceof DomainError) {
       return http.fromDomainError(error);
     }

@@ -3,6 +3,7 @@ import Image from "next/image";
 
 import { TableDataProps } from "@/shared/ui/TableData";
 import { GetLevelsResponse } from "../../type";
+
 export type LevelColumnItem = NonNullable<GetLevelsResponse["data"]>["data"][number];
 
 const getLevelColumns = (): TableDataProps<LevelColumnItem>["columns"] => [

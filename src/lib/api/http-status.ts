@@ -10,6 +10,7 @@ export type SuccessResponse<T> = {
 export type ErrorResponse<E> = {
   success: false;
   error: E;
+  data: null;
 };
 
 export type ApiError<M = unknown> = {
@@ -26,7 +27,10 @@ const ok = <T>(data: T) => NextResponse.json<SuccessResponse<T>>({ success: true
 const created = <T>(data: T) => NextResponse.json<SuccessResponse<T>>({ success: true, data }, { status: 201 });
 
 const fail = <M = unknown>(status: number, message: string, code = "INTERNAL_ERROR", data?: M) =>
-  NextResponse.json<ErrorResponse<ApiError<M>>>({ success: false, error: { message, code, data, status } }, { status });
+  NextResponse.json<ErrorResponse<ApiError<M>>>(
+    { success: false, error: { message, code, data, status }, data: null },
+    { status },
+  );
 
 const fromDomainError = (error: DomainError) => fail(error.status, error.message, error.code, error.meta);
 
