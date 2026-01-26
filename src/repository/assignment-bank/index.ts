@@ -114,7 +114,7 @@ const getAssignmentBanks = async (
   params?: GetAssignmentBanksParams,
   client?: AssignmentBankClient,
 ): Promise<PaginatedResult<AssignmentBankDto>> => {
-  const supabaseClient = client ?? supabase;
+  const supabaseClient = supabase;
   const page = params?.page ?? 0;
   const limit = params?.limit ?? 12;
   const search = params?.search?.trim();
@@ -122,7 +122,10 @@ const getAssignmentBanks = async (
   const categoryId = params?.categoryId;
 
   const selectQuery = categoryId ? ASSIGNMENT_BANK_SELECT_WITH_CATEGORY : ASSIGNMENT_BANK_SELECT;
-  let query = supabaseClient.from("assignment_bank").select(selectQuery, { count: "exact" });
+  let query = supabaseClient
+    .from("assignment_bank")
+    .select(selectQuery, { count: "exact" })
+    .eq("status", "published");
 
   if (search) {
     query = query.ilike("name", `%${search}%`);
@@ -204,9 +207,7 @@ const updateAssignmentBankById = async (
 };
 
 const deleteAssignmentBankById = async (assignmentId: string, client?: AssignmentBankClient) => {
-  const supabaseClient = client ?? supabase;
-
-  const { error } = await supabaseClient.from("assignment_bank").delete().eq("id", assignmentId);
+  const { error } = await supabase.from("assignment_bank").update({ "status": "deleted" }).eq("id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment bank: ${error.message}`);
@@ -226,19 +227,16 @@ const createAssignmentBankQuestions = async (
     return;
   }
 
-  const supabaseClient = client ?? supabase;
-
-  const { error } = await supabaseClient.from("assignment_questions").insert(questions);
+  const { error } = await supabase.from("assignment_questions").insert(questions);
 
   if (error) {
     throw new Error(`Failed to create assignment questions: ${error.message}`);
   }
 };
 
-const deleteAssignmentBankQuestionsByAssignmentId = async (assignmentId: string, client?: AssignmentBankClient) => {
-  const supabaseClient = client ?? supabase;
+const deleteAssignmentBankQuestionsByAssignmentId = async (assignmentId: string) => {
 
-  const { error } = await supabaseClient.from("assignment_questions").delete().eq("assignment_bank_id", assignmentId);
+  const { error } = await supabase.from("assignment_questions").delete().eq("assignment_bank_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment questions: ${error.message}`);
@@ -246,16 +244,14 @@ const deleteAssignmentBankQuestionsByAssignmentId = async (assignmentId: string,
 };
 
 const createAssignmentBankCategories = async (
-  categories: Array<{ assignment_id: string; category_id: string }>,
+  categories: Array<{ assignment_bank_id: string; category_id: string }>,
   client?: AssignmentBankClient,
 ) => {
   if (!categories.length) {
     return;
   }
 
-  const supabaseClient = client ?? supabase;
-
-  const { error } = await supabaseClient.from("assignment_categories").insert(categories);
+  const { error } = await supabase.from("assignment_categories").insert(categories);
 
   if (error) {
     throw new Error(`Failed to create assignment categories: ${error.message}`);
@@ -263,9 +259,10 @@ const createAssignmentBankCategories = async (
 };
 
 const deleteAssignmentBankCategoriesByAssignmentId = async (assignmentId: string, client?: AssignmentBankClient) => {
-  const supabaseClient = client ?? supabase;
-
-  const { error } = await supabaseClient.from("assignment_categories").delete().eq("assignment_id", assignmentId);
+  const { error } = await supabase
+    .from("assignment_categories")
+    .delete()
+    .eq("assignment_bank_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment categories: ${error.message}`);

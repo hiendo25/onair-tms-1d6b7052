@@ -1,7 +1,7 @@
 import { useTQuery } from "@/lib/queryClient";
 import { GET_ASSIGNMENT_BANK, GET_ASSIGNMENTS, GET_QUESTION_BANK } from "@/modules/assignment-management/operations/key";
 import { assignmentsRepository } from "@/repository";
-import { GetAssignmentsQueryParams } from "@/repository/assignments/type";
+import { GetAssignmentsQueryParams } from "@/repository/assignments-config/type";
 import * as assignmentService from "@/services/assignments/assignment.service";
 import * as assignmentBankService from "@/services/assignments/assignment-bank.service";
 import * as questionBankService from "@/services/assignments/question-bank.service";

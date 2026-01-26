@@ -41,7 +41,7 @@ const createAssignmentBank = async (
 
     if (payload.categoryIds?.length) {
       const categoryRows = payload.categoryIds.map((categoryId) => ({
-        assignment_id: assignmentId!,
+        assignment_bank_id: assignmentId!,
         category_id: categoryId,
       }));
 
@@ -51,7 +51,7 @@ const createAssignmentBank = async (
     return assignment;
   } catch (error) {
     if (assignmentId) {
-      await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId, client);
+      await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId);
       await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentId, client);
       await assignmentBankRepository.deleteAssignmentBankById(assignmentId, client);
     }
@@ -79,7 +79,7 @@ const updateAssignmentBank = async (
     client,
   );
 
-  await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId, client);
+  await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId);
   await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentId, client);
 
   const questionRows = payload.questions.map((question) => ({
@@ -93,7 +93,7 @@ const updateAssignmentBank = async (
 
   if (payload.categoryIds?.length) {
     const categoryRows = payload.categoryIds.map((categoryId) => ({
-      assignment_id: assignmentId,
+      assignment_bank_id: assignmentId,
       category_id: categoryId,
     }));
 
@@ -101,10 +101,10 @@ const updateAssignmentBank = async (
   }
 };
 
-const deleteAssignmentBank = async (assignmentId: string, client?: AssignmentBankClient) => {
-  await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId, client);
-  await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentId, client);
-  await assignmentBankRepository.deleteAssignmentBankById(assignmentId, client);
+const deleteAssignmentBank = async (assignmentId: string) => {
+  // await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentId);
+  // await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentId);
+  await assignmentBankRepository.deleteAssignmentBankById(assignmentId);
 };
 
 const getAssignmentBanks = async (params?: GetAssignmentBanksParams, client?: AssignmentBankClient) => {

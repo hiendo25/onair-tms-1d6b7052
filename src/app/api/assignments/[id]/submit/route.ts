@@ -14,13 +14,13 @@ interface SubmitAssignmentRequest {
   answers: Array<{
     questionId: string;
     answer:
-      | string
-      | string[]
-      | boolean
-      | FileMetadata[]
-      | Array<{ columnAId: string; columnBId: string }>
-      | Array<{ id: string; position: number }>
-      | null;
+    | string
+    | string[]
+    | boolean
+    | FileMetadata[]
+    | Array<{ columnAId: string; columnBId: string }>
+    | Array<{ id: string; position: number }>
+    | null;
     attachments?: FileMetadata[];
   }>;
 }

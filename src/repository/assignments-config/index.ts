@@ -1,19 +1,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { supabase } from "@/services";
 import { createClient, createSVClient } from "@/services";
 import type {
-  AssignmentAssignedDto,
-  AssignmentDto,
   AssignedAssignmentItemDto,
   AssignedAssignmentsSummaryDto,
+  AssignmentAssignedDto,
   AssignmentAssignedStatus,
+  AssignmentDto,
+  AssignmentQuestionDto,
   AssignmentStudentDto,
   AssignmentStudentProgressStatus,
   AssignmentStudentSummaryDto,
-  GetAssignmentStudentsParams,
   GetAssignedAssignmentsParams,
-  AssignmentQuestionDto,
   GetAssignmentsParams,
+  GetAssignmentStudentsParams,
   GetMyAssignmentsParams,
   QuestionOption,
 } from "@/types/dto/assignments";
@@ -23,7 +24,7 @@ import type { Database } from "@/types/supabase.types";
 import { GetAssignmentsQueryParams } from "./type";
 
 type AssignmentRepositoryClient = SupabaseClient<Database>;
-type AttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
+type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
 
 interface AssignmentBankQuestionRow {
   question_id: string;
@@ -177,10 +178,9 @@ const mapAssignmentRecord = (record: AssignmentRecord): AssignmentDto => {
 };
 
 const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedResult<AssignmentDto>> => {
-  const supabase = createClient();
   const { page = 0, limit = 20, search, organizationId, createdBy } = params || {};
 
-  let query = supabase.from("assignments").select(
+  let query = supabase.from("assignment_config").select(
     `
       id,
       assigned_by,
@@ -248,10 +248,8 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
 };
 
 const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
-  const supabase = createClient();
-
   const { data, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select(
       `
       id,
@@ -334,10 +332,8 @@ const getLatestAssignmentByBankId = async (
   assignmentBankId: string,
   organizationId?: string,
 ): Promise<AssignmentAssignedDto | null> => {
-  const supabase = createClient();
-
   let query = supabase
-    .from("assignments")
+    .from("assignment_config")
     .select(
       `
       id,
@@ -386,12 +382,12 @@ export async function createAssignment(data: {
   attempt_limit?: number | null;
   available_from?: string | null;
   available_to?: string | null;
-  status?: Database["public"]["Enums"]["test_assignment_status"];
+  status?: Database["public"]["Enums"]["assignment_config_status"];
 }) {
   const supabase = await createSVClient();
 
   const { data: assignment, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .insert({
       assignment_bank_id: data.assignment_bank_id,
       assigned_by: data.assigned_by,
@@ -420,12 +416,12 @@ export async function createAssignmentFromBank(data: {
   attempt_limit?: number | null;
   available_from?: string | null;
   available_to?: string | null;
-  status?: Database["public"]["Enums"]["test_assignment_status"];
+  status?: Database["public"]["Enums"]["assignment_config_status"];
 }) {
   const supabase = await createSVClient();
 
   const { data: assignment, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .insert({
       assignment_bank_id: data.assignment_bank_id,
       assigned_by: data.assigned_by,
@@ -456,11 +452,11 @@ export async function createAssignmentFromBankWithClient(
     attempt_limit?: number | null;
     available_from?: string | null;
     available_to?: string | null;
-    status?: Database["public"]["Enums"]["test_assignment_status"];
+    status?: Database["public"]["Enums"]["assignment_config_status"];
   },
 ) {
   const { data: assignment, error } = await client
-    .from("assignments")
+    .from("assignment_config")
     .insert({
       assignment_bank_id: data.assignment_bank_id,
       assigned_by: data.assigned_by,
@@ -490,12 +486,12 @@ export async function updateAssignmentById(
     attempt_limit?: number | null;
     available_from?: string | null;
     available_to?: string | null;
-    status?: Database["public"]["Enums"]["test_assignment_status"];
+    status?: Database["public"]["Enums"]["assignment_config_status"];
   },
 ) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase.from("assignments").update(data).eq("id", id);
+  const { error } = await supabase.from("assignment_config").update(data).eq("id", id);
 
   if (error) {
     throw new Error(`Failed to update assignment: ${error.message}`);
@@ -509,10 +505,10 @@ export async function updateAssignmentByIdWithClient(
     attempt_limit?: number | null;
     available_from?: string | null;
     available_to?: string | null;
-    status?: Database["public"]["Enums"]["test_assignment_status"];
+    status?: Database["public"]["Enums"]["assignment_config_status"];
   },
 ) {
-  const { error } = await client.from("assignments").update(data).eq("id", id);
+  const { error } = await client.from("assignment_config").update(data).eq("id", id);
 
   if (error) {
     throw new Error(`Failed to update assignment: ${error.message}`);
@@ -522,7 +518,7 @@ export async function updateAssignmentByIdWithClient(
 export async function deleteAssignmentById(assignmentId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase.from("assignments").delete().eq("id", assignmentId);
+  const { error } = await supabase.from("assignment_config").delete().eq("id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment: ${error.message}`);
@@ -530,7 +526,7 @@ export async function deleteAssignmentById(assignmentId: string) {
 }
 
 export async function deleteAssignmentByIdWithClient(client: AssignmentRepositoryClient, assignmentId: string) {
-  const { error } = await client.from("assignments").delete().eq("id", assignmentId);
+  const { error } = await client.from("assignment_config").delete().eq("id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment: ${error.message}`);
@@ -538,9 +534,7 @@ export async function deleteAssignmentByIdWithClient(client: AssignmentRepositor
 }
 
 export async function deleteAssignmentsByEmployeeId(employeeId: string) {
-  const supabase = await createSVClient();
-
-  const { error } = await supabase.from("assignments").delete().eq("assigned_by", employeeId);
+  const { error } = await supabase.from("assignment_config").delete().eq("assigned_by", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete assignments by employee: ${error.message}`);
@@ -576,7 +570,7 @@ export async function deleteQuestionsByAssignmentId(assignmentId: string) {
   const supabase = await createSVClient();
 
   const { data: assignment, error: assignmentError } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("assignment_bank_id")
     .eq("id", assignmentId)
     .maybeSingle();
@@ -656,7 +650,7 @@ export async function deleteQuestionsByEmployeeId(employeeId: string) {
 // Assignment categories repository methods
 export async function createAssignmentCategories(
   categories: Array<{
-    assignment_id: string;
+    assignment_bank_id: string;
     category_id: string;
   }>,
 ) {
@@ -673,7 +667,7 @@ export async function deleteAssignmentCategoriesByAssignmentId(assignmentId: str
   const supabase = await createSVClient();
 
   const { data: assignment, error: assignmentError } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("assignment_bank_id")
     .eq("id", assignmentId)
     .maybeSingle();
@@ -689,7 +683,7 @@ export async function deleteAssignmentCategoriesByAssignmentId(assignmentId: str
   const { error } = await supabase
     .from("assignment_categories")
     .delete()
-    .eq("assignment_id", assignment.assignment_bank_id);
+    .eq("assignment_bank_id", assignment.assignment_bank_id);
 
   if (error) {
     throw new Error(`Failed to delete assignment categories: ${error.message}`);
@@ -714,7 +708,7 @@ export async function deleteAssignmentCategoriesByEmployeeId(employeeId: string)
 
   const assignmentIds = assignmentBanks.map((assignment) => assignment.id);
 
-  const { error } = await supabase.from("assignment_categories").delete().in("assignment_id", assignmentIds);
+  const { error } = await supabase.from("assignment_categories").delete().in("assignment_bank_id", assignmentIds);
 
   if (error) {
     throw new Error(`Failed to delete assignment categories by employee: ${error.message}`);
@@ -728,7 +722,7 @@ export async function getAssignmentBankIdByAssignmentId(
   const supabase = client ?? createClient();
 
   const { data, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("assignment_bank_id")
     .eq("id", assignmentId)
     .maybeSingle();
@@ -744,7 +738,7 @@ export async function getAssignmentMetaById(assignmentId: string, client?: Assig
   const supabase = client ?? createClient();
 
   const { data, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("id, assignment_bank_id, organization_id")
     .eq("id", assignmentId)
     .maybeSingle();
@@ -759,7 +753,7 @@ export async function getAssignmentMetaById(assignmentId: string, client?: Assig
 // Assignment employees repository methods
 export async function createAssignmentEmployees(
   employees: Array<{
-    assignment_id: string;
+    assignment_config_id: string;
     employee_id: string;
   }>,
 ) {
@@ -775,7 +769,7 @@ export async function createAssignmentEmployees(
 export async function createAssignmentEmployeesWithClient(
   client: AssignmentRepositoryClient,
   employees: Array<{
-    assignment_id: string;
+    assignment_config_id: string;
     employee_id: string;
   }>,
 ) {
@@ -789,7 +783,7 @@ export async function createAssignmentEmployeesWithClient(
 export async function deleteAssignmentEmployeesByAssignmentId(assignmentId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase.from("assignment_employees").delete().eq("assignment_id", assignmentId);
+  const { error } = await supabase.from("assignment_employees").delete().eq("assignment_config_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment employees: ${error.message}`);
@@ -800,7 +794,7 @@ export async function deleteAssignmentEmployeesByAssignmentIdWithClient(
   client: AssignmentRepositoryClient,
   assignmentId: string,
 ) {
-  const { error } = await client.from("assignment_employees").delete().eq("assignment_id", assignmentId);
+  const { error } = await client.from("assignment_employees").delete().eq("assignment_config_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment employees: ${error.message}`);
@@ -841,7 +835,6 @@ const getAssignmentStudents = async (
   assignmentId: string,
   params?: GetAssignmentStudentsParams,
 ): Promise<PaginatedResult<AssignmentStudentDto> & { summary: AssignmentStudentSummaryDto }> => {
-  const supabase = createClient();
   const { page = 0, limit = 25, search, status } = params || {};
 
   // Get assigned employees
@@ -868,7 +861,7 @@ const getAssignmentStudents = async (
       )
     `,
     )
-    .eq("assignment_id", assignmentId)
+    .eq("assignment_config_id", assignmentId)
     .order("employee_id", { ascending: true });
 
   if (error) {
@@ -894,7 +887,7 @@ const getAssignmentStudents = async (
   const { data: attempts, error: attemptsError } = await supabase
     .from("assignments_attempts")
     .select("employee_id, attempt_number, status, submitted_at, created_at, score, max_score")
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_config_id", assignmentId);
 
   if (attemptsError) {
     throw new Error(`Failed to fetch assignment attempts: ${attemptsError.message}`);
@@ -997,10 +990,8 @@ const getAssignmentStudents = async (
 };
 
 const getAssignmentQuestions = async (assignmentId: string) => {
-  const supabase = createClient();
-
   const { data: assignment, error: assignmentError } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("assignment_bank_id")
     .eq("id", assignmentId)
     .maybeSingle();
@@ -1079,14 +1070,13 @@ const getMyAssignments = async (
   employeeId: string,
   params?: GetMyAssignmentsParams,
 ): Promise<PaginatedResult<any>> => {
-  const supabase = createClient();
   const { page = 0, limit = 25, search, status, organizationId } = params || {};
 
   const from = page * limit;
   const to = from + limit - 1;
 
   let query = supabase
-    .from("assignments")
+    .from("assignment_config")
     .select(
       `
         id,
@@ -1140,9 +1130,9 @@ const getMyAssignments = async (
   const assignmentIds = assignmentsData.map((item) => item.id);
   const { data: attempts, error: attemptsError } = await supabase
     .from("assignments_attempts")
-    .select("assignment_id, attempt_number, status, submitted_at, created_at, score, max_score")
+    .select("assignment_config_id, attempt_number, status, submitted_at, created_at, score, max_score")
     .eq("employee_id", employeeId)
-    .in("assignment_id", assignmentIds);
+    .in("assignment_config_id", assignmentIds);
 
   if (attemptsError) {
     throw new Error(`Failed to fetch assignment attempts: ${attemptsError.message}`);
@@ -1162,13 +1152,13 @@ const getMyAssignments = async (
   const attemptsUsedMap = new Map<string, number>();
 
   (attempts ?? []).forEach((attempt) => {
-    const existing = latestAttemptMap.get(attempt.assignment_id);
+    const existing = latestAttemptMap.get(attempt.assignment_config_id);
     if (!existing || attempt.attempt_number > existing.attempt_number) {
-      latestAttemptMap.set(attempt.assignment_id, attempt);
+      latestAttemptMap.set(attempt.assignment_config_id, attempt);
     }
-    const currentMax = attemptsUsedMap.get(attempt.assignment_id) ?? 0;
+    const currentMax = attemptsUsedMap.get(attempt.assignment_config_id) ?? 0;
     if (attempt.attempt_number > currentMax) {
-      attemptsUsedMap.set(attempt.assignment_id, attempt.attempt_number);
+      attemptsUsedMap.set(attempt.assignment_config_id, attempt.attempt_number);
     }
   });
 
@@ -1209,7 +1199,7 @@ const getMyAssignments = async (
     const attemptLimit = item.attempt_limit ?? null;
     const attemptsUsed = attemptsUsedMap.get(item.id) ?? 0;
     const attemptsRemaining = attemptLimit === null ? null : Math.max(attemptLimit - attemptsUsed, 0);
-    const hasAttemptsLeft = attemptLimit === null ? true : attemptsRemaining > 0;
+    const hasAttemptsLeft = attemptLimit === null ? true : attemptsRemaining! > 0;
     const canRetry = hasAttemptsLeft && isWithinWindow(item.available_from, item.available_to);
 
     return {
@@ -1240,11 +1230,10 @@ const getMyAssignments = async (
 const getAssignedAssignments = async (
   params?: GetAssignedAssignmentsParams,
 ): Promise<PaginatedResult<AssignedAssignmentItemDto> & { summary: AssignedAssignmentsSummaryDto }> => {
-  const supabase = createClient();
   const { page = 0, limit = 10, search, status, organizationId } = params || {};
 
   let query = supabase
-    .from("assignments")
+    .from("assignment_config")
     .select(
       `
         id,
@@ -1300,8 +1289,8 @@ const getAssignedAssignments = async (
   const assignmentIds = assignmentsWithEmployees.map((assignment) => assignment.id);
   const { data: attempts, error: attemptsError } = await supabase
     .from("assignments_attempts")
-    .select("assignment_id, employee_id, status")
-    .in("assignment_id", assignmentIds)
+    .select("assignment_config_id, employee_id, status")
+    .in("assignment_config_id", assignmentIds)
     .in("status", SUBMITTED_STATUSES);
 
   if (attemptsError) {
@@ -1310,9 +1299,9 @@ const getAssignedAssignments = async (
 
   const completedEmployeeMap = new Map<string, Set<string>>();
   (attempts ?? []).forEach((attempt) => {
-    const entry = completedEmployeeMap.get(attempt.assignment_id) ?? new Set<string>();
+    const entry = completedEmployeeMap.get(attempt.assignment_config_id) ?? new Set<string>();
     entry.add(attempt.employee_id);
-    completedEmployeeMap.set(attempt.assignment_id, entry);
+    completedEmployeeMap.set(attempt.assignment_config_id, entry);
   });
 
   const mappedAssignments: AssignedAssignmentItemDto[] = assignmentsWithEmployees.map((assignment) => {
@@ -1368,13 +1357,12 @@ const getAssignedAssignments = async (
 };
 
 export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) => {
-  const supabase = createClient();
   const { page = 0, pageSize = 20, search, createdBy, organizationId } = queryParams || {};
 
   const from = page * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabase.from("assignments").select(
+  let query = supabase.from("assignment_config").select(
     `
       id,
       assigned_by,
