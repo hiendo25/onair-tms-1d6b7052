@@ -35,10 +35,10 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     return sessions.every((s) => s.session_type === "live")
       ? "live"
       : sessions.every((s) => s.session_type === "offline")
-      ? "offline"
-      : sessions.every((s) => s.session_type === "online")
-      ? "online"
-      : "hybrid";
+        ? "offline"
+        : sessions.every((s) => s.session_type === "online")
+          ? "online"
+          : "hybrid";
   }, [sessions]);
 
   console.log({ data });
@@ -124,11 +124,12 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
           channelInfo: channelInfo,
           agendas: agendas,
           coursesPeriod: coursesPeriod,
-          assignments: session.session_assignments.map((item) => ({
-            recordId: item.id,
-            assignmentId: item.assignments.id,
-            name: item.assignments.name,
-          })),
+          // assignments: session.session_assignments.map((item) => ({
+          //   recordId: item.id,
+          //   assignmentId: item.assignments.id,
+          //   name: item.assignments.name,
+          // })),
+          assignments: [],
           qrCode: {
             id: session.class_qr_codes[0]?.id,
             isLimitTimeScanQrCode:
@@ -187,16 +188,16 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
     return employees.reduce<StudentItem[]>((acc, emp) => {
       return emp.employee && emp.employee.employee_type === "student"
         ? [
-            ...acc,
-            {
-              id: emp.employee.id,
-              avatar: emp.employee.profile?.avatar || "",
-              email: emp.employee.profile?.email || "",
-              employeeCode: emp.employee.employee_code,
-              employeeType: emp.employee.employee_type,
-              fullName: emp.employee.profile?.full_name || "",
-            },
-          ]
+          ...acc,
+          {
+            id: emp.employee.id,
+            avatar: emp.employee.profile?.avatar || "",
+            email: emp.employee.profile?.email || "",
+            employeeCode: emp.employee.employee_code,
+            employeeType: emp.employee.employee_type,
+            fullName: emp.employee.profile?.full_name || "",
+          },
+        ]
         : acc;
     }, []);
   }, [employees]);

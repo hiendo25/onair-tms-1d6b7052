@@ -125,11 +125,6 @@ const getCourseById = async (courseId: string) => {
                 mime_type, 
                 name
               ),
-              assignments(
-                id,
-                name, 
-                description
-              ),
               lessons_resources(
                 id,
                 resource:resources(

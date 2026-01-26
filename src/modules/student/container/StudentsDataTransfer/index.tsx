@@ -136,16 +136,16 @@ const StudentDataTransfer: React.FC<StudentDataTransferProps> = ({
     const newSelectedStudents = existItem
       ? selectedStudents
       : [
-          ...selectedStudents,
-          {
-            id: emp.id,
-            email: emp.profiles.email,
-            fullName: emp.profiles.full_name,
-            employeeCode: emp.employee_code,
-            avatar: emp.profiles.avatar,
-            employeeType: emp.employee_type,
-          },
-        ];
+        ...selectedStudents,
+        {
+          id: emp.id,
+          email: emp.profiles.email,
+          fullName: emp.profiles.full_name,
+          employeeCode: emp.employee_code,
+          avatar: emp.profiles.avatar,
+          employeeType: emp.employee_type,
+        },
+      ];
     if (onChange) {
       onChange?.(newSelectedStudents);
       return;
