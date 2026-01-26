@@ -63,7 +63,7 @@ async function createAssignmentWithRelations(
 
     if (payload.assignmentCategories && payload.assignmentCategories.length > 0) {
       const categoriesToCreate = payload.assignmentCategories.map((categoryId) => ({
-        assignment_id: assignmentBankId as string,
+        assignment_bank_id: assignmentBankId as string,
         category_id: categoryId,
       }));
 
@@ -182,7 +182,7 @@ async function updateAssignmentWithRelations(
 
   if (payload.assignmentCategories && payload.assignmentCategories.length > 0) {
     const categoriesToCreate = payload.assignmentCategories.map((categoryId) => ({
-      assignment_id: assignmentBankId,
+      assignment_bank_id: assignmentBankId,
       category_id: categoryId,
     }));
 

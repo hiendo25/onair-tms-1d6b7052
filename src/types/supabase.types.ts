@@ -9,6 +9,12 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      antidigital_djf: {
+        Row: {}
+        Insert: {}
+        Update: {}
+        Relationships: []
+      }
       assignment_bank: {
         Row: {
           created_at: string
@@ -21,7 +27,7 @@ export type Database = {
           pass_score: number | null
           shuffle_answers: boolean | null
           shuffle_questions: boolean | null
-          status: Database["public"]["Enums"]["assignment_status"] | null
+          status: Database["public"]["Enums"]["assignment_bank_status"] | null
           updated_at: string
         }
         Insert: {
@@ -35,7 +41,7 @@ export type Database = {
           pass_score?: number | null
           shuffle_answers?: boolean | null
           shuffle_questions?: boolean | null
-          status?: Database["public"]["Enums"]["assignment_status"] | null
+          status?: Database["public"]["Enums"]["assignment_bank_status"] | null
           updated_at?: string
         }
         Update: {
@@ -49,7 +55,7 @@ export type Database = {
           pass_score?: number | null
           shuffle_answers?: boolean | null
           shuffle_questions?: boolean | null
-          status?: Database["public"]["Enums"]["assignment_status"] | null
+          status?: Database["public"]["Enums"]["assignment_bank_status"] | null
           updated_at?: string
         }
         Relationships: [
@@ -78,24 +84,24 @@ export type Database = {
       }
       assignment_categories: {
         Row: {
-          assignment_id: string
+          assignment_bank_id: string
           category_id: string
           created_at: string
         }
         Insert: {
-          assignment_id: string
+          assignment_bank_id: string
           category_id: string
           created_at?: string
         }
         Update: {
-          assignment_id?: string
+          assignment_bank_id?: string
           category_id?: string
           created_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "assignment_categories_assignment_id_fkey"
-            columns: ["assignment_id"]
+            foreignKeyName: "assignment_categories_assignment_bank_id_fkey"
+            columns: ["assignment_bank_id"]
             isOneToOne: false
             referencedRelation: "assignment_bank"
             referencedColumns: ["id"]
@@ -111,26 +117,26 @@ export type Database = {
       }
       assignment_class_session: {
         Row: {
-          assignment_id: string
+          assignment_config_id: string
           created_at: string
           session_id: string
         }
         Insert: {
-          assignment_id: string
+          assignment_config_id: string
           created_at?: string
           session_id: string
         }
         Update: {
-          assignment_id?: string
+          assignment_config_id?: string
           created_at?: string
           session_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "assignment_class_session_assignment_id_fkey"
-            columns: ["assignment_id"]
+            foreignKeyName: "assignment_class_session_assignment_config_id_fkey"
+            columns: ["assignment_config_id"]
             isOneToOne: false
-            referencedRelation: "assignments"
+            referencedRelation: "assignment_config"
             referencedColumns: ["id"]
           },
           {
@@ -142,28 +148,99 @@ export type Database = {
           },
         ]
       }
+      assignment_config: {
+        Row: {
+          assigned_by: string
+          assignment_bank_id: string
+          attempt_duration_minutes: number | null
+          attempt_limit: number | null
+          available_from: string | null
+          available_to: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          status: Database["public"]["Enums"]["assignment_config_status"]
+          updated_at: string
+        }
+        Insert: {
+          assigned_by: string
+          assignment_bank_id: string
+          attempt_duration_minutes?: number | null
+          attempt_limit?: number | null
+          available_from?: string | null
+          available_to?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          status?: Database["public"]["Enums"]["assignment_config_status"]
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string
+          assignment_bank_id?: string
+          attempt_duration_minutes?: number | null
+          attempt_limit?: number | null
+          available_from?: string | null
+          available_to?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["assignment_config_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_assignment_bank_id_fkey"
+            columns: ["assignment_bank_id"]
+            isOneToOne: false
+            referencedRelation: "assignment_bank"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assignment_courses: {
         Row: {
-          assignment_id: string
+          assignment_config_id: string
           course_id: string
           created_at: string
         }
         Insert: {
-          assignment_id: string
+          assignment_config_id: string
           course_id: string
           created_at?: string
         }
         Update: {
-          assignment_id?: string
+          assignment_config_id?: string
           course_id?: string
           created_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "assignment_courses_assignment_id_fkey"
-            columns: ["assignment_id"]
+            foreignKeyName: "assignment_courses_assignment_config_id_fkey"
+            columns: ["assignment_config_id"]
             isOneToOne: false
-            referencedRelation: "assignments"
+            referencedRelation: "assignment_config"
             referencedColumns: ["id"]
           },
           {
@@ -177,26 +254,26 @@ export type Database = {
       }
       assignment_employees: {
         Row: {
-          assignment_id: string
+          assignment_config_id: string
           created_at: string
           employee_id: string
         }
         Insert: {
-          assignment_id: string
+          assignment_config_id: string
           created_at?: string
           employee_id: string
         }
         Update: {
-          assignment_id?: string
+          assignment_config_id?: string
           created_at?: string
           employee_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "assignment_employees_assignment_id_fkey"
-            columns: ["assignment_id"]
+            foreignKeyName: "assignment_employees_assignment_config_id_fkey"
+            columns: ["assignment_config_id"]
             isOneToOne: false
-            referencedRelation: "assignments"
+            referencedRelation: "assignment_config"
             referencedColumns: ["id"]
           },
           {
@@ -246,7 +323,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "assignment_questions_question_id_fkey"
+            foreignKeyName: "assignment_questions_question_id_fkey1"
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "question_bank"
@@ -302,80 +379,9 @@ export type Database = {
           },
         ]
       }
-      assignments: {
-        Row: {
-          assigned_by: string
-          assignment_bank_id: string
-          attempt_duration_minutes: number | null
-          attempt_limit: number | null
-          available_from: string | null
-          available_to: string | null
-          created_at: string
-          id: string
-          organization_id: string
-          status: Database["public"]["Enums"]["test_assignment_status"]
-          updated_at: string
-        }
-        Insert: {
-          assigned_by: string
-          assignment_bank_id: string
-          attempt_duration_minutes?: number | null
-          attempt_limit?: number | null
-          available_from?: string | null
-          available_to?: string | null
-          created_at?: string
-          id?: string
-          organization_id: string
-          status?: Database["public"]["Enums"]["test_assignment_status"]
-          updated_at?: string
-        }
-        Update: {
-          assigned_by?: string
-          assignment_bank_id?: string
-          attempt_duration_minutes?: number | null
-          attempt_limit?: number | null
-          available_from?: string | null
-          available_to?: string | null
-          created_at?: string
-          id?: string
-          organization_id?: string
-          status?: Database["public"]["Enums"]["test_assignment_status"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assignments_assigned_by_fkey"
-            columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "department_gamification_ranking"
-            referencedColumns: ["employee_id"]
-          },
-          {
-            foreignKeyName: "assignments_assigned_by_fkey"
-            columns: ["assigned_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignments_assignment_bank_id_fkey"
-            columns: ["assignment_bank_id"]
-            isOneToOne: false
-            referencedRelation: "assignment_bank"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assignments_organization_id_fkey1"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       assignments_attempts: {
         Row: {
-          assignment_id: string
+          assignment_config_id: string
           attempt_number: number
           created_at: string
           employee_id: string
@@ -386,12 +392,12 @@ export type Database = {
           max_score: number | null
           score: number | null
           started_at: string | null
-          status: Database["public"]["Enums"]["test_attempt_status"]
+          status: Database["public"]["Enums"]["assignment_attempt_status"]
           submitted_at: string | null
           updated_at: string
         }
         Insert: {
-          assignment_id: string
+          assignment_config_id: string
           attempt_number: number
           created_at?: string
           employee_id: string
@@ -402,12 +408,12 @@ export type Database = {
           max_score?: number | null
           score?: number | null
           started_at?: string | null
-          status?: Database["public"]["Enums"]["test_attempt_status"]
+          status?: Database["public"]["Enums"]["assignment_attempt_status"]
           submitted_at?: string | null
           updated_at?: string
         }
         Update: {
-          assignment_id?: string
+          assignment_config_id?: string
           attempt_number?: number
           created_at?: string
           employee_id?: string
@@ -418,16 +424,16 @@ export type Database = {
           max_score?: number | null
           score?: number | null
           started_at?: string | null
-          status?: Database["public"]["Enums"]["test_attempt_status"]
+          status?: Database["public"]["Enums"]["assignment_attempt_status"]
           submitted_at?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "assignments_attempts_assignment_id_fkey"
-            columns: ["assignment_id"]
+            columns: ["assignment_config_id"]
             isOneToOne: false
-            referencedRelation: "assignments"
+            referencedRelation: "assignment_config"
             referencedColumns: ["id"]
           },
           {
@@ -3165,6 +3171,45 @@ export type Database = {
           },
         ]
       }
+      questions: {
+        Row: {
+          assignment_id: string
+          attachments: string[] | null
+          created_at: string
+          created_by: string
+          id: string
+          label: string
+          options: Json | null
+          score: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at: string
+        }
+        Insert: {
+          assignment_id: string
+          attachments?: string[] | null
+          created_at?: string
+          created_by: string
+          id?: string
+          label: string
+          options?: Json | null
+          score: number
+          type: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Update: {
+          assignment_id?: string
+          attachments?: string[] | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          label?: string
+          options?: Json | null
+          score?: number
+          type?: Database["public"]["Enums"]["question_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           created_at: string
@@ -4194,8 +4239,10 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
+      assignment_attempt_status: "in_progress" | "submitted" | "graded"
+      assignment_bank_status: "draft" | "published" | "archived" | "deleted"
+      assignment_config_status: "draft" | "scheduled" | "open" | "closed"
       assignment_result_status: "submitted" | "graded"
-      assignment_status: "draft" | "published" | "archived"
       attendance_method_enum: "qr" | "manual" | "online_auto"
       attendance_mode_enum: "offline" | "online"
       attendance_status: "present" | "late" | "absent" | "rejected"
@@ -4275,8 +4322,6 @@ export type Database = {
         | "yes_no"
       survey_target_type: "class_room" | "learning_path"
       survey_type: "planning" | "classroom"
-      test_assignment_status: "draft" | "scheduled" | "open" | "closed"
-      test_attempt_status: "in_progress" | "submitted" | "graded"
       training_plan_status:
         | "pending"
         | "approved"
@@ -4412,8 +4457,10 @@ export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
+      assignment_attempt_status: ["in_progress", "submitted", "graded"],
+      assignment_bank_status: ["draft", "published", "archived", "deleted"],
+      assignment_config_status: ["draft", "scheduled", "open", "closed"],
       assignment_result_status: ["submitted", "graded"],
-      assignment_status: ["draft", "published", "archived"],
       attendance_method_enum: ["qr", "manual", "online_auto"],
       attendance_mode_enum: ["offline", "online"],
       attendance_status: ["present", "late", "absent", "rejected"],
@@ -4500,8 +4547,6 @@ export const Constants = {
       ],
       survey_target_type: ["class_room", "learning_path"],
       survey_type: ["planning", "classroom"],
-      test_assignment_status: ["draft", "scheduled", "open", "closed"],
-      test_attempt_status: ["in_progress", "submitted", "graded"],
       training_plan_status: [
         "pending",
         "approved",

@@ -112,13 +112,13 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     path: PATHS.ASSIGNMENTS.ROOT,
     persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments"],
     children: [
-      {
-        title: "Tạo bài kiểm tra",
-        icon: React.createElement(ClipboardIcon),
-        key: "assignments/create",
-        path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
-      },
+      // {
+      //   title: "Tạo bài kiểm tra",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "assignments/create",
+      //   path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
+      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
+      // },
       {
         title: "Ngân hàng bài kiểm tra",
         icon: React.createElement(ClipboardIcon),
@@ -126,7 +126,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         path: PATHS.ASSIGNMENTS.ROOT,
       },
       {
-        title: "Danh sách bài gán",
+        title: "Bài kiểm tra đã gán",
         icon: React.createElement(ClipboardIcon),
         key: "assignments/assigned",
         path: PATHS.ASSIGNMENTS.ASSIGNED_LIST,
@@ -139,13 +139,13 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         path: PATHS.ASSIGNMENTS.QUESTION_BANK,
         persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank"],
       },
-      {
-        title: "Tạo câu hỏi",
-        icon: React.createElement(ClipboardIcon),
-        key: "assignments/question-bank/create",
-        path: PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank/create"],
-      },
+      // {
+      //   title: "Tạo câu hỏi",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "assignments/question-bank/create",
+      //   path: PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK,
+      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank/create"],
+      // },
     ],
   },
   {

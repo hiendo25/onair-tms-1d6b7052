@@ -8,7 +8,7 @@ type AssignmentAttemptUpdate = Database["public"]["Tables"]["assignments_attempt
 type AssignmentResultRow = Database["public"]["Tables"]["assignment_results"]["Row"];
 type AssignmentResultInsert = Database["public"]["Tables"]["assignment_results"]["Insert"];
 type AssignmentResultUpdate = Database["public"]["Tables"]["assignment_results"]["Update"];
-type AttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
+type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
 
 export type FileAnswer = { files: FileMetadata[] };
 export type TextAnswer = { text: string };
@@ -61,7 +61,7 @@ export async function getLatestAssignmentAttempt(
   const { data, error } = await supabase
     .from("assignments_attempts")
     .select("*")
-    .eq("assignment_id", assignmentId)
+    .eq("assignment_config_id", assignmentId)
     .eq("employee_id", employeeId)
     .order("attempt_number", { ascending: false })
     .limit(1)
@@ -87,7 +87,7 @@ export async function createAssignmentAttempt(data: {
   const supabase = await createSVClient();
 
   const insertData: AssignmentAttemptInsert = {
-    assignment_id: data.assignment_id,
+    assignment_config_id: data.assignment_id,
     employee_id: data.employee_id,
     attempt_number: data.attempt_number,
     status: data.status,
@@ -244,7 +244,7 @@ export async function getAssignmentAttemptWithEmployee(
     .select(
       `
       id,
-      assignment_id,
+      assignment_config_id,
       employee_id,
       attempt_number,
       status,
@@ -263,7 +263,7 @@ export async function getAssignmentAttemptWithEmployee(
       )
     `,
     )
-    .eq("assignment_id", assignmentId)
+    .eq("assignment_config_id", assignmentId)
     .eq("employee_id", employeeId)
     .order("attempt_number", { ascending: false })
     .limit(1)
@@ -279,7 +279,7 @@ export async function getAssignmentAttemptWithEmployee(
 
   return {
     id: data.id,
-    assignment_id: data.assignment_id,
+    assignment_id: data.assignment_config_id,
     employee_id: data.employee_id,
     attempt_number: data.attempt_number,
     status: data.status,
@@ -298,7 +298,7 @@ export async function deleteAssignmentResultsByAssignmentId(assignmentId: string
   const { data: attempts, error: attemptsError } = await supabase
     .from("assignments_attempts")
     .select("id")
-    .eq("assignment_id", assignmentId);
+    .eq("assignment_config_id", assignmentId);
 
   if (attemptsError) {
     throw new Error(`Failed to fetch assignment attempts: ${attemptsError.message}`);
@@ -317,7 +317,7 @@ export async function deleteAssignmentResultsByAssignmentId(assignmentId: string
     }
   }
 
-  const { error } = await supabase.from("assignments_attempts").delete().eq("assignment_id", assignmentId);
+  const { error } = await supabase.from("assignments_attempts").delete().eq("assignment_config_id", assignmentId);
 
   if (error) {
     throw new Error(`Failed to delete assignment attempts: ${error.message}`);

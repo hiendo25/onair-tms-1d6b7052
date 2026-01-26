@@ -3,7 +3,7 @@ import { alpha, Chip, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 
 import { EmployeeTeacherTypeItem } from "@/model/employee.model";
-import { GetAssignmentsV2Response } from "@/repository/assignments";
+import { GetAssignmentsV2Response } from "@/repository/assignments-config";
 import { AssignmentDto } from "@/types/dto/assignments";
 export const columns: GridColDef<NonNullable<GetAssignmentsV2Response["data"]>[number]>[] = [
   {

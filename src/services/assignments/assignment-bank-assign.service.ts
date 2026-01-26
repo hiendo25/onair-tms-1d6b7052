@@ -69,7 +69,7 @@ const assignAssignmentBankToEmployees = async (
 
     if (payload.assignedEmployeeIds.length > 0) {
       const employeeRows = payload.assignedEmployeeIds.map((employeeId) => ({
-        assignment_id: assignmentMeta.id,
+        assignment_config_id: assignmentMeta.id,
         employee_id: employeeId,
       }));
 
@@ -97,7 +97,7 @@ const assignAssignmentBankToEmployees = async (
 
     if (payload.assignedEmployeeIds.length > 0) {
       const employeeRows = payload.assignedEmployeeIds.map((employeeId) => ({
-        assignment_id: assignmentId as string,
+        assignment_config_id: assignmentId as string,
         employee_id: employeeId,
       }));
 
