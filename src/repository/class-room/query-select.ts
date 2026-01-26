@@ -118,10 +118,6 @@ const selectSession = `
   session_type,
 	weekly_schedule,
   courses_period:class_sessions_courses_period(${selectCoursePeriod}),
-  session_assignments:class_session_assignment(
-    id,
-    assignments(${selectAssignment})
-  ),
   agendas:class_sessions_agendas(${selectAgenda}),
   metadata:class_session_metadata(${selectMetadata}),
   class_qr_codes(${selectQRCode})
@@ -235,10 +231,6 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
             weekly_schedule,
             course:courses(${selectCourseWithLessonSectionCount}),
             teacher:employees(${selectEmployee})
-          ),
-          session_assignments:class_session_assignment(
-            id,
-            assignments(${selectAssignment})
           ),
           agendas:class_sessions_agendas(${selectAgenda}),
           metadata:class_session_metadata(${selectMetadata}),

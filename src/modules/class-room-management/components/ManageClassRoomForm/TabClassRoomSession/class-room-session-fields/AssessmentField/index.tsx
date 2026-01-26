@@ -23,7 +23,7 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
       control={control}
       render={({ field: { value: assignments, onChange }, fieldState: { error } }) => (
         <div>
-          <div className="flex items-center justify-between mb-3">
+          {/* <div className="flex items-center justify-between mb-3">
             <AssignmentHead title="Bài kiểm tra lớp học" description="Chọn một hoặc nhiều bài kiểm tra." />
             {error?.message && <FormHelperText error>{error?.message}</FormHelperText>}
             <Button
@@ -45,7 +45,7 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
             >
               Thêm
             </Button>
-          </div>
+          </div> */}
           <div className="flex flex-col gap-3">
             {assignments.map(({ assignmentId, name }) => (
               <div key={assignmentId} className="flex items-center gap-3">
