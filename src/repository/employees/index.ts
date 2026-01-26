@@ -194,21 +194,25 @@ const getEmployeeById = async (id: string) => {
   } as unknown as EmployeeDto;
 };
 
-export async function getLastEmployeeOrder() {
+export async function getLastEmployeeOrder(organizationId?: string) {
   const supabase = await createSVClient();
 
-  const { data: lastEmployee, error: orderError } = await supabase
-    .from("employees")
-    .select("employee_order")
-    .order("employee_order", { ascending: false, nullsFirst: false })
-    .limit(1)
-    .single();
+  let query = supabase.from("employees").select("employee_order");
 
-  if (orderError && orderError.code !== "PGRST116") {
-    throw new Error(`Failed to get last employee order: ${orderError.message}`);
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
   }
 
-  return lastEmployee?.employee_order ?? 0;
+  const { data, error } = await query
+    .order("employee_order", { ascending: false, nullsFirst: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to get last employee order: ${error.message}`);
+  }
+
+  return data?.employee_order;
 }
 
 export async function checkEmployeeCodeExists(code: string) {
@@ -284,7 +288,7 @@ export async function getCurrentEmployee(userId: string, organizationId: string)
     .select("id, organization_id")
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
@@ -510,5 +514,70 @@ const updateStatus = async (employeeId: string, status: "active" | "inactive") =
     .single();
 };
 export type UpdateStatusResponse = Awaited<ReturnType<typeof updateStatus>>;
+
+export async function getEmployeesByEmailsAndOrganizationId(emails: string[], organizationId: string) {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select(
+      `
+			id,
+			organization_id, 
+			profiles!inner(
+				id, 
+				email
+			)
+			`,
+    )
+    .eq("organization_id", organizationId)
+    .in("profiles.email", emails);
+
+  if (error) {
+    console.error(error);
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  return employee;
+}
+
+export async function getEmployeesByCodes(codes: string[]) {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select(
+      `
+			id,
+			employee_code,
+			organization_id
+			`,
+    )
+    .in("employee_code", codes);
+
+  if (error) {
+    console.error(error);
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  return employee;
+}
+
+export async function getEmployeeIdByUserIdAndOrganizationId(userId: string, organizationId: string) {
+  const supabase = await createSVClient();
+
+  const { data: employee, error } = await supabase
+    .from("employees")
+    .select("id, organization_id")
+    .eq("user_id", userId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  return employee;
+}
 
 export { getEmployees, getEmployeeById, getOneEmployee, updateStatus };

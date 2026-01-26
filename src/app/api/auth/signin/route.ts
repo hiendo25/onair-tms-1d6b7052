@@ -2,10 +2,10 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 import { COOKIE_ORGANIZATION_ID } from "@/constants/api-headers.constant";
+import { http } from "@/lib/api/http-status";
 import { getCookieStore, setCookieStore } from "@/lib/cookies";
 import { SignInService } from "@/services/auth/signin.service";
 import { SignInDto } from "@/types/dto/auth/sign-in.dto";
-import { http } from "@/utils/http-status";
 
 export async function POST(request: NextRequest) {
   try {

@@ -9,7 +9,6 @@ import {
   Button,
   Card,
   CardContent,
-  Checkbox,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -21,19 +20,18 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import dayjs, { Dayjs } from "dayjs";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import BranchSelector from "@/modules/branch/container/BranchSelector";
+import DepartmentSelector from "@/modules/department/container/DepartmentSelector";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import { useCreatePositionMutation } from "@/modules/positions/operations/mutation";
 import { useGetPositionsQuery } from "@/modules/positions/operations/query";
 import { useGetRoleList } from "@/modules/roles/operations/query";
-import { Constants } from "@/types/supabase.types";
+import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
+import RHFTextField from "@/shared/ui/form/RHFTextField";
 import { EMPLOYEE_TYPE_OPTIONS } from "@/utils/employee-type";
 
 import { EmployeeFormData, EmployeeFormSchema } from "./schema";
@@ -53,8 +51,8 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 }) => {
   const notifications = useNotifications();
 
-  const { data: organizationUnitsResult, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
-  const organizationUnits = organizationUnitsResult?.data || [];
+  // const { data: organizationUnitsResult, isLoading: isLoadingOrgUnits } = useGetOrganizationUnitsQuery();
+  // const organizationUnits = organizationUnitsResult?.data || [];
   const { data: employeesResult, isLoading: isLoadingEmployees } = useGetEmployeesQuery();
   const { data: positions, isLoading: isLoadingPositions, refetch: refetchPositions } = useGetPositionsQuery();
   const { data: roles, isLoading: isLoadingRoles } = useGetRoleList();
@@ -63,19 +61,20 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
 
   const { mutateAsync: createPosition, isPending: isCreatingPosition } = useCreatePositionMutation();
 
-  const branches = React.useMemo(
-    () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
-    [organizationUnits],
-  );
-  const departments = React.useMemo(
-    () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[1]),
-    [organizationUnits],
-  );
+  // const branches = React.useMemo(
+  //   () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[0]),
+  //   [organizationUnits],
+  // );
+  // const departments = React.useMemo(
+  //   () => organizationUnits.filter((unit) => unit.type === Constants.public.Enums.organization_unit_type[1]),
+  //   [organizationUnits],
+  // );
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    getValues,
     setValue,
   } = useForm<EmployeeFormData>({
     defaultValues: {
@@ -96,6 +95,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
     resolver: zodResolver(EmployeeFormSchema),
   });
 
+  console.log(getValues());
   const submitForm: SubmitHandler<EmployeeFormData> = async (formData) => {
     await onSubmit?.(formData);
   };
@@ -186,55 +186,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="phone_number"
+              <RHFTextField
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth>
-                    <FormLabel htmlFor="phone_number" sx={{ mb: 1 }}>
-                      Số điện thoại
-                    </FormLabel>
-                    <TextField
-                      {...field}
-                      id="phone_number"
-                      type="tel"
-                      placeholder="Nhập số điện thoại"
-                      error={!!error}
-                      helperText={error?.message}
-                      fullWidth
-                    />
-                  </FormControl>
-                )}
+                name="phone_number"
+                label="Số điện thoại"
+                placeholder="Nhập số điện thoại"
               />
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="birthday"
-                control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth>
-                    <FormLabel sx={{ mb: 1 }}>Ngày sinh</FormLabel>
-                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-                      <DatePicker
-                        value={field.value ? dayjs(field.value) : null}
-                        onChange={(newValue: Dayjs | null) => {
-                          field.onChange(newValue ? newValue.format("YYYY-MM-DD") : null);
-                        }}
-                        slotProps={{
-                          textField: {
-                            size: "small",
-                            placeholder: "Chọn ngày sinh",
-                            error: !!error,
-                            helperText: error?.message,
-                            fullWidth: true,
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </FormControl>
-                )}
-              />
+              <RHFDatePicker control={control} name="birthday" label="Ngày sinh" placeholder="Chọn ngày sinh" />
             </Grid>
           </Grid>
         </CardContent>
@@ -256,16 +217,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel htmlFor="branch" sx={{ mb: 1 }}>
                       Chi nhánh
                     </FormLabel>
-                    <Select {...field} id="branch" displayEmpty disabled={isLoadingOrgUnits}>
-                      <MenuItem value="">
-                        <em>Chọn chi nhánh</em>
-                      </MenuItem>
-                      {branches?.map((branch) => (
-                        <MenuItem key={branch.id} value={branch.id}>
-                          {branch.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                    <BranchSelector
+                      values={field.value ? [field.value] : undefined}
+                      onSelect={(branchIds) => field.onChange(branchIds[0])}
+                    />
                     {error && (
                       <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                         {error.message}
@@ -285,16 +240,10 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                     <FormLabel htmlFor="department" sx={{ mb: 1 }}>
                       Phòng ban <span style={{ color: "red" }}>*</span>
                     </FormLabel>
-                    <Select {...field} id="department" displayEmpty disabled={isLoadingOrgUnits}>
-                      <MenuItem value="">
-                        <em>Chọn phòng ban</em>
-                      </MenuItem>
-                      {departments?.map((dept) => (
-                        <MenuItem key={dept.id} value={dept.id}>
-                          {dept.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                    <DepartmentSelector
+                      values={field.value ? [field.value] : undefined}
+                      onSelect={(departmentIds) => field.onChange(departmentIds[0])}
+                    />
                     {error && (
                       <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
                         {error.message}
@@ -332,7 +281,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
                 render={({ field, fieldState: { error } }) => (
                   <FormControl fullWidth error={!!error}>
                     <FormLabel htmlFor="manager_id" sx={{ mb: 1 }}>
-                      Người quản lý <span style={{ color: "red" }}>*</span>
+                      Người quản lý
                     </FormLabel>
                     <Select {...field} id="manager_id" displayEmpty disabled={isLoadingEmployees}>
                       <MenuItem value="">
@@ -505,33 +454,11 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
             </Grid>
 
             <Grid size={{ xs: 12, md: 6 }}>
-              <Controller
-                name="start_date"
+              <RHFDatePicker
                 control={control}
-                render={({ field, fieldState: { error } }) => (
-                  <FormControl fullWidth error={!!error}>
-                    <FormLabel sx={{ mb: 1 }}>
-                      Ngày bắt đầu làm việc <span style={{ color: "red" }}>*</span>
-                    </FormLabel>
-                    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="vi">
-                      <DatePicker
-                        value={field.value ? dayjs(field.value) : null}
-                        onChange={(newValue: Dayjs | null) => {
-                          field.onChange(newValue ? newValue.format("YYYY-MM-DD") : "");
-                        }}
-                        slotProps={{
-                          textField: {
-                            size: "small",
-                            placeholder: "Chọn ngày bắt đầu làm việc",
-                            error: !!error,
-                            helperText: error?.message,
-                            fullWidth: true,
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </FormControl>
-                )}
+                name="start_date"
+                label="Ngày bắt đầu làm việc"
+                placeholder="Chọn ngày bắt đầu làm việc"
               />
             </Grid>
           </Grid>

@@ -2,10 +2,10 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { organizationsRepository } from "@/repository";
 import { getCurrentUser } from "@/repository/auth";
 import { createServiceRoleClient } from "@/services";
-import { http } from "@/utils/http-status";
 export async function POST(request: NextRequest) {
   const payload = await request.json();
   const { organizationId } = payload;

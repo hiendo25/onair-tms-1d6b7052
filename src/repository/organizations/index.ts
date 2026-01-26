@@ -33,7 +33,7 @@ export async function getOrganizationById(id: string): Promise<OrganizationDto> 
   return data as OrganizationDto;
 }
 
-const getOrganizationsByUserId = async (userId: string) => {
+export async function getOrganizationsByUserId(userId: string) {
   const supabase = await createSVClient();
 
   try {
@@ -44,7 +44,7 @@ const getOrganizationsByUserId = async (userId: string) => {
 				employee_id:id,
 				user_id,
 				organization_id,
-				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain)
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code)
 			`,
       )
       .eq("user_id", userId);
@@ -56,9 +56,10 @@ const getOrganizationsByUserId = async (userId: string) => {
   } catch (err) {
     throw new Error("Fail to get organizations");
   }
-};
+}
 export type GetOrganizationsByUserIdResponse = Awaited<ReturnType<typeof getOrganizationsByUserId>>;
-const getOrganizationByUserIdAndOrganizationId = async (userId: string, organizationId: string) => {
+
+export async function getOrganizationByUserIdAndOrganizationId(userId: string, organizationId: string) {
   const supabase = await createSVClient();
   try {
     return await supabase
@@ -68,7 +69,7 @@ const getOrganizationByUserIdAndOrganizationId = async (userId: string, organiza
 				employee_id:id,
 				user_id,
 				organization_id,
-				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain)
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code)
 			`,
       )
       .eq("user_id", userId)
@@ -76,5 +77,4 @@ const getOrganizationByUserIdAndOrganizationId = async (userId: string, organiza
   } catch (err) {
     throw new Error("Fail to get organizations");
   }
-};
-export { getOrganizationsByUserId, getOrganizationByUserIdAndOrganizationId };
+}

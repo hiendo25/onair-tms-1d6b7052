@@ -1,3 +1,4 @@
+import AlertCircleIcon from "./AlertCircleIcon";
 import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import Bell01Icon from "./Bell01Icon";
@@ -71,6 +72,7 @@ import UsersPlusIcon from "./UsersPlusIcon";
 import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import VideoIcon from "./VideoIcon";
 import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
+import XCircleIcon from "./XCircleIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import ZaloIcon from "./ZaloIcon";
 export {
@@ -149,4 +151,6 @@ export {
   VideoRecorderOffIcon,
   Inbox01Icon,
   ShareIcon,
+  XCircleIcon,
+  AlertCircleIcon,
 };

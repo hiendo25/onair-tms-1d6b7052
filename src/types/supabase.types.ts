@@ -7,14 +7,33 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
-      antidigital_djf: {
-        Row: {}
-        Insert: {}
-        Update: {}
-        Relationships: []
-      }
       assignment_categories: {
         Row: {
           assignment_id: string
@@ -1436,7 +1455,6 @@ export type Database = {
       employee_certificate_templates: {
         Row: {
           certificate_template_id: string
-          class_room_id: string
           created_at: string
           data: Json
           employee_id: string
@@ -1446,7 +1464,6 @@ export type Database = {
         }
         Insert: {
           certificate_template_id: string
-          class_room_id: string
           created_at?: string
           data: Json
           employee_id: string
@@ -1456,7 +1473,6 @@ export type Database = {
         }
         Update: {
           certificate_template_id?: string
-          class_room_id?: string
           created_at?: string
           data?: Json
           employee_id?: string
@@ -1470,20 +1486,6 @@ export type Database = {
             columns: ["certificate_template_id"]
             isOneToOne: false
             referencedRelation: "certificate_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "employee_certificate_templates_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
             referencedColumns: ["id"]
           },
           {
@@ -2162,7 +2164,6 @@ export type Database = {
       }
       lesson_progress: {
         Row: {
-          class_room_id: string | null
           completed_at: string | null
           created_at: string
           current_position_seconds: number | null
@@ -2175,7 +2176,6 @@ export type Database = {
           status: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Insert: {
-          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2188,7 +2188,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Update: {
-          class_room_id?: string | null
           completed_at?: string | null
           created_at?: string
           current_position_seconds?: number | null
@@ -2201,20 +2200,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["lesson_progress_status"]
         }
         Relationships: [
-          {
-            foreignKeyName: "lesson_progress_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lesson_progress_class_room_id_fkey"
-            columns: ["class_room_id"]
-            isOneToOne: false
-            referencedRelation: "class_rooms_priority"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "lesson_progress_employee_id_fkey"
             columns: ["employee_id"]
@@ -2610,6 +2595,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          code: string | null
           created_at: string
           employee_limit: number | null
           favicon: string | null
@@ -2621,6 +2607,7 @@ export type Database = {
           subdomain: string
         }
         Insert: {
+          code?: string | null
           created_at?: string
           employee_limit?: number | null
           favicon?: string | null
@@ -2632,6 +2619,7 @@ export type Database = {
           subdomain: string
         }
         Update: {
+          code?: string | null
           created_at?: string
           employee_limit?: number | null
           favicon?: string | null
@@ -3819,22 +3807,9 @@ export type Database = {
           total_xp: number
         }[]
       }
-      get_filtered_employees:
-        | {
-            Args: {
-              p_branch_id?: string
-              p_department_id?: string
-              p_limit?: number
-              p_page?: number
-              p_search?: string
-            }
-            Returns: {
-              employee_id: string
-              total_count: number
-            }[]
-          }
-        | {
-            Args: {
+      get_filtered_employees: {
+        Args:
+          | {
               p_branch_id?: string
               p_department_id?: string
               p_employee_type?: Database["public"]["Enums"]["employee_type"]
@@ -3842,11 +3817,18 @@ export type Database = {
               p_page?: number
               p_search?: string
             }
-            Returns: {
-              employee_id: string
-              total_count: number
-            }[]
-          }
+          | {
+              p_branch_id?: string
+              p_department_id?: string
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
+        Returns: {
+          employee_id: string
+          total_count: number
+        }[]
+      }
       get_notification_count_by_type: {
         Args: { employee_id: string; unread_only?: boolean }
         Returns: {
@@ -3887,12 +3869,18 @@ export type Database = {
           total: number
         }[]
       }
-      get_user_id_by_email: { Args: { user_email: string }; Returns: string }
+      get_user_id_by_email: {
+        Args: { user_email: string }
+        Returns: string
+      }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: { Args: never; Returns: boolean }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -4115,6 +4103,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],

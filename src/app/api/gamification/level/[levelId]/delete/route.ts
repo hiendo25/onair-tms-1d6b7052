@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { gamificationLevelService } from "@/services";
-import { http } from "@/utils/http-status";
 
 export async function PUT(request: NextRequest, ctx: RouteContext<"/api/gamification/level/[levelId]/delete">) {
   try {

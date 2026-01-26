@@ -8,28 +8,27 @@ type EmployeeDepartmentInsert = {
 /**
  * Create employee-department relationships
  */
-export async function create(data: EmployeeDepartmentInsert[]): Promise<void> {
+export async function create(departmentInsert: EmployeeDepartmentInsert[]) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
+  const { error, data } = await supabase
     .from("employee_departments")
-    .insert(data);
+    .insert(departmentInsert)
+    .select(`*, department:departments(id, name)`);
 
   if (error) {
     throw new Error(`Failed to create employee-department relationships: ${error.message}`);
   }
+  return data;
 }
-
+export type CreateEmployeeDepartmentRecords = Awaited<ReturnType<typeof create>>;
 /**
  * Delete all employee-department relationships for a specific employee
  */
 export async function deleteByEmployeeId(employeeId: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_departments")
-    .delete()
-    .eq("employee_id", employeeId);
+  const { error } = await supabase.from("employee_departments").delete().eq("employee_id", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete employee-department relationships: ${error.message}`);
@@ -42,10 +41,7 @@ export async function deleteByEmployeeId(employeeId: string): Promise<void> {
 export async function deleteByDepartmentId(departmentId: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_departments")
-    .delete()
-    .eq("department_id", departmentId);
+  const { error } = await supabase.from("employee_departments").delete().eq("department_id", departmentId);
 
   if (error) {
     throw new Error(`Failed to delete employee-department relationships: ${error.message}`);
@@ -58,10 +54,7 @@ export async function deleteByDepartmentId(departmentId: string): Promise<void> 
 export async function deleteById(id: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_departments")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("employee_departments").delete().eq("id", id);
 
   if (error) {
     throw new Error(`Failed to delete employee-department relationship: ${error.message}`);
@@ -76,7 +69,8 @@ export async function getDepartmentsByEmployeeId(employeeId: string) {
 
   const { data, error } = await supabase
     .from("employee_departments")
-    .select(`
+    .select(
+      `
       id,
       department_id,
       created_at,
@@ -85,7 +79,8 @@ export async function getDepartmentsByEmployeeId(employeeId: string) {
         name,
         branch_id
       )
-    `)
+    `,
+    )
     .eq("employee_id", employeeId);
 
   if (error) {
@@ -103,7 +98,8 @@ export async function getEmployeesByDepartmentId(departmentId: string) {
 
   const { data, error } = await supabase
     .from("employee_departments")
-    .select(`
+    .select(
+      `
       id,
       employee_id,
       created_at,
@@ -115,7 +111,8 @@ export async function getEmployeesByDepartmentId(departmentId: string) {
           email
         )
       )
-    `)
+    `,
+    )
     .eq("department_id", departmentId);
 
   if (error) {
@@ -145,4 +142,3 @@ export async function checkEmployeeDepartmentExists(employeeId: string, departme
 
   return !!data;
 }
-

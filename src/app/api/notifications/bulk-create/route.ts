@@ -1,6 +1,6 @@
+import { http } from "@/lib/api/http-status";
 import { notificationsRepository } from "@/repository";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
-import { http } from "@/utils/http-status";
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as CreateNotificationPayload[];

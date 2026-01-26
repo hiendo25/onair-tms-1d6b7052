@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo } from "react";
 import type { DateFieldProps } from "@mui/x-date-pickers";
 import { DateField as XDateField } from "@mui/x-date-pickers";
+import { PickerValue } from "@mui/x-date-pickers/internals";
 import dayjs, { Dayjs } from "dayjs";
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
@@ -23,7 +24,7 @@ interface DatePickerProps<T extends FieldValues> {
   format?: DatePickerFormat;
   required?: boolean;
 }
-const DatePicker = <T extends FieldValues>({
+const RHFDatePicker = <T extends FieldValues>({
   className,
   control,
   name,
@@ -43,10 +44,13 @@ const DatePicker = <T extends FieldValues>({
   }, [format, label, required, placeholder]);
 
   const getValueDatePicker = useCallback((value: PathValue<T, Path<T>>) => {
-    if (value && typeof value === "string") {
-      console.log(dayjs(value).isValid());
-      return dayjs(value).isValid() ? dayjs(value) : null;
-    }
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value) : null;
+  }, []);
+
+  const formatDateToIsoStr = useCallback((value: PickerValue) => {
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value).toISOString() : null;
   }, []);
   return (
     <Controller
@@ -55,13 +59,13 @@ const DatePicker = <T extends FieldValues>({
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <CustomDatePickerField
           {...datePickerProps}
-          value={getValueDatePicker(value)?? null}
-          onChange={onChange}
-          helperText={error?.message} 
+          value={getValueDatePicker(value)}
+          onChange={(value) => onChange(formatDateToIsoStr(value))}
+          helperText={error?.message}
           error={!!error}
         />
       )}
     />
   );
 };
-export default DatePicker;
+export default RHFDatePicker;
