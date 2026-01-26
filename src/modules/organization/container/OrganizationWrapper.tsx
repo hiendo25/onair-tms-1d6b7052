@@ -57,11 +57,11 @@ const OrganizationWrapper = async ({ children }: { readonly children: React.Reac
       },
       profile: employee.profiles
         ? {
-            fullName: employee.profiles.full_name,
-            avatarUrl: employee.profiles.avatar || "",
-            email: employee.profiles.email,
-            gender: employee.profiles.gender,
-          }
+          fullName: employee.profiles.full_name,
+          avatarUrl: employee.profiles.avatar || "",
+          email: employee.profiles.email,
+          gender: employee.profiles.gender,
+        }
         : null,
     };
   });
@@ -90,11 +90,11 @@ const OrganizationWrapper = async ({ children }: { readonly children: React.Reac
         },
         profile: currentEmployee.profiles
           ? {
-              fullName: currentEmployee.profiles.full_name,
-              avatarUrl: currentEmployee.profiles.avatar || "",
-              email: currentEmployee.profiles.email,
-              gender: currentEmployee.profiles.gender,
-            }
+            fullName: currentEmployee.profiles.full_name,
+            avatarUrl: currentEmployee.profiles.avatar || "",
+            email: currentEmployee.profiles.email,
+            gender: currentEmployee.profiles.gender,
+          }
           : null,
       }}
       organizations={organizationsStore}

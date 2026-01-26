@@ -42,18 +42,17 @@ export async function getClassRoomDetailWithProgressBySlug(
     return mapClassRoomCoursesProgress(classRoomResponse.data, null);
   }
 
+  // Always fetch progress - either with learning path context or class room context
   let progress: ClassRoomProgressWithRelations | null = null;
 
-  if (normalizedLearningPathId) {
-    try {
-      progress = await getClassRoomProgressWithRelations({
-        classRoomId: classRoomResponse.data.id,
-        employeeId: params.employeeId,
-        learningPathId: normalizedLearningPathId,
-      });
-    } catch (error) {
-      console.error("[ClassRoom] Failed to fetch progress with relations:", error);
-    }
+  try {
+    progress = await getClassRoomProgressWithRelations({
+      classRoomId: classRoomResponse.data.id,
+      employeeId: params.employeeId,
+      learningPathId: normalizedLearningPathId,
+    });
+  } catch (error) {
+    console.error("[ClassRoom] Failed to fetch progress with relations:", error);
   }
 
   return mapClassRoomCoursesProgress(classRoomResponse.data, progress);

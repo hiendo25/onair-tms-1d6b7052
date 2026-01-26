@@ -247,6 +247,7 @@ const getClassRoomSessionsByClassRoomId = async (classRoomId: string) => {
         title,
         class_room_certificate_templates(
           id,
+          days_to_expire,
           certificate_template_id,
           certificate_templates(id, name)
         )
@@ -267,6 +268,7 @@ export type ClassRoomWithCertificate = {
   classRoomId: string;
   classRoomTitle: string;
   certificateTemplateId: string;
+  daysToExpire?: number | null;
 };
 
 /**
@@ -288,6 +290,7 @@ const extractClassRoomsFromSessions = (
         classRoomId: classRoom.id,
         classRoomTitle: classRoom.title,
         certificateTemplateId: certificate.certificate_template_id,
+        daysToExpire: certificate.days_to_expire,
       });
     }
   });

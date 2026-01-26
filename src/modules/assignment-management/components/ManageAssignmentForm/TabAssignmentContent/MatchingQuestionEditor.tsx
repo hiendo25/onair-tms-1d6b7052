@@ -40,7 +40,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
     onChange({
       columnAItems: [...columnAItems, newColumnAItem],
       columnBItems: [...columnBItems, newColumnBItem],
-      correctMappings: [...correctMappings],
+      correctMappings: [...correctMappings, { columnAId: newColumnAItem.id, columnBId: newColumnBItem.id }],
     });
   };
 

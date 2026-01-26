@@ -49,11 +49,17 @@ export const PATHS = {
   ASSIGNMENTS: {
     ROOT: "/admin/assignments",
     CREATE_ASSIGNMENT: "/admin/assignments/create",
+    ASSIGNED_LIST: "/admin/assignments/assigned",
+    DETAIL_ASSIGNMENT: (id: string = ":id") => `/admin/assignments/${id}`,
+    ASSIGN_EMPLOYEES: (id: string = ":id") => `/admin/assignments/${id}/assign`,
     EDIT_ASSIGNMENT: (id: string = ":id") => `/admin/assignments/edit/${id}`,
     STUDENTS: (id: string = ":id") => `/admin/assignments/${id}/students`,
     SUBMIT: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/submit/${employeeId}`,
     GRADE: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/grade/${employeeId}`,
     RESULT: (id: string = ":id", employeeId: string = ":employeeId") => `/admin/assignments/${id}/result/${employeeId}`,
+    QUESTION_BANK: "/admin/assignments/question-bank",
+    CREATE_QUESTION_BANK: "/admin/assignments/question-bank/create",
+    EDIT_QUESTION_BANK: (id: string = ":id") => `/admin/assignments/question-bank/${id}/edit`,
   },
   MY_ASSIGNMENTS: {
     ROOT: "/my-assignments",

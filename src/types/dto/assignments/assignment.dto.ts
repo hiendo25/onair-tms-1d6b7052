@@ -7,6 +7,13 @@ export class AssignmentDto {
   name!: string;
   description!: string;
   created_by!: string;
+  attempt_duration_minutes?: number | null;
+  attempt_limit?: number | null;
+  available_from?: string | null;
+  available_to?: string | null;
+  shuffle_questions?: boolean | null;
+  shuffle_answers?: boolean | null;
+  pass_score?: number | null;
   createdBy?: {
     id: string;
     employee_code: string;

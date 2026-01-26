@@ -14,6 +14,7 @@ export type CertificateEligibilityResult = {
   classRoomId?: string;
   classRoomTitle?: string;
   certificateTemplateId?: string;
+  daysToExpire?: number | null;
 };
 
 /**
@@ -113,6 +114,7 @@ async function checkClassRoomCertificateEligibility(
       classRoomId: classRoom.classRoomId,
       classRoomTitle: classRoom.classRoomTitle,
       certificateTemplateId: classRoom.certificateTemplateId,
+      daysToExpire: classRoom.daysToExpire,
     };
   } catch (error) {
     console.error("[ClassRoomCompletionService] Error checking class room certificate eligibility:", error);
@@ -120,87 +122,4 @@ async function checkClassRoomCertificateEligibility(
   }
 }
 
-/**
- * Check if employee is eligible for certificate after completing a lesson
- * Only applicable for non-learning-path context (learningPathId is null)
- *
- * @param employeeId - The employee ID
- * @param lessonId - The lesson that was just completed
- * @returns Certificate eligibility information
- */
-async function checkCertificateEligibility(
-  employeeId: string,
-  lessonId: string
-): Promise<CertificateEligibilityResult[]> {
-  try {
-    // Step 1: Get the course that contains this lesson
-    const lessonData = await coursesLessonsRepository.getCourseByLessonId(lessonId);
-
-    if (!lessonData?.sections) {
-      return [];
-    }
-
-    const courseId = lessonData.sections.course_id;
-
-    // Step 2: Get all lessons in this course and check completion status
-    const courseLessons = await coursesLessonsRepository.getLessonsByCourseId(courseId);
-
-    if (courseLessons.length === 0) {
-      return [];
-    }
-
-    const lessonIds = courseLessons.map((l) => l.id);
-
-    // Check how many lessons the employee has completed
-    const completedLessons = await lessonProgressRepository.getCompletedLessonsForEmployee(
-      employeeId,
-      lessonIds
-    );
-
-    const allLessonsCompleted = completedLessons.length === courseLessons.length;
-
-    if (!allLessonsCompleted) {
-      return [];
-    }
-
-    // Step 3: Find class rooms that contain this course and employee is assigned to
-    const classRoomSessions = await classRoomSessionRepository.getClassRoomsWithCourseAndEmployee(
-      courseId,
-      employeeId
-    );
-
-    if (classRoomSessions.length === 0) {
-      return [];
-    }
-
-    // Extract unique class rooms with certificate templates
-    const classRooms = classRoomSessionRepository.extractClassRoomsFromSessions(classRoomSessions);
-
-    if (classRooms.length === 0) {
-      return [];
-    }
-
-    // Step 4: Check if all courses in each class room are completed
-    const eligibleClassRooms: CertificateEligibilityResult[] = [];
-
-    for (const classRoom of classRooms) {
-      const isClassRoomComplete = await isClassRoomFullyCompleted(employeeId, classRoom.classRoomId);
-
-      if (isClassRoomComplete) {
-        eligibleClassRooms.push({
-          isEligible: true,
-          classRoomId: classRoom.classRoomId,
-          classRoomTitle: classRoom.classRoomTitle,
-          certificateTemplateId: classRoom.certificateTemplateId,
-        });
-      }
-    }
-
-    return eligibleClassRooms;
-  } catch (error) {
-    console.error("[ClassRoomCompletionService] Error checking certificate eligibility:", error);
-    throw error;
-  }
-}
-
-export { checkCertificateEligibility, checkClassRoomCertificateEligibility };
+export { checkClassRoomCertificateEligibility };

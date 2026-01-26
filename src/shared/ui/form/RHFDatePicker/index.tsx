@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { DateFieldProps } from "@mui/x-date-pickers";
 import { DateField as XDateField } from "@mui/x-date-pickers";
 import { PickerValue } from "@mui/x-date-pickers/internals";
@@ -7,6 +7,7 @@ import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
 import { cn } from "@/utils";
+import { parseDateInput } from "@/utils/date";
 import CustomDatePickerField from "../CustomDatePickerField";
 export const DATE_PICKER_FORMAT = {
   "DD/MM/YYYY": "DD/MM/YYYY",
@@ -52,6 +53,19 @@ const RHFDatePicker = <T extends FieldValues>({
     if (!value) return null;
     return dayjs(value).isValid() ? dayjs(value).toISOString() : null;
   }, []);
+
+  const handleChange = useCallback(
+    (nextValue: Dayjs | null, onChange: (value: string) => void) => {
+      if (!nextValue || !nextValue.isValid()) {
+        onChange("");
+        return;
+      }
+
+      onChange(nextValue.format(format));
+    },
+    [format],
+  );
+
   return (
     <Controller
       name={name}

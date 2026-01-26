@@ -19,6 +19,7 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -44,6 +45,7 @@ export default function LearningPathsContent() {
   const [searchInput, setSearchInput] = React.useState("");
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [selectedLearningPathId, setSelectedLearningPathId] = React.useState<string | null>(null);
+  const [selectedLearningPath, setSelectedLearningPath] = React.useState<LearningPathWithCounts | null>(null);
 
   const debouncedSearch = useDebounce(searchInput, 400);
 
@@ -79,15 +81,17 @@ export default function LearningPathsContent() {
     setPage(1);
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, learningPathId: string) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, learningPath: LearningPathWithCounts) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
-    setSelectedLearningPathId(learningPathId);
+    setSelectedLearningPathId(learningPath.id);
+    setSelectedLearningPath(learningPath);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedLearningPathId(null);
+    setSelectedLearningPath(null);
   };
 
   const handleEdit = () => {
@@ -219,7 +223,7 @@ export default function LearningPathsContent() {
       width: 120,
       fixed: "right",
       renderCell: (_value, row) => (
-        <IconButton size="small" onClick={(e) => handleMenuOpen(e, row.id)}>
+        <IconButton size="small" onClick={(e) => handleMenuOpen(e, row)}>
           <MoreVertIcon fontSize="small" />
         </IconButton>
       ),
@@ -351,12 +355,35 @@ export default function LearningPathsContent() {
             </ListItemIcon>
             <ListItemText>Chỉnh sửa</ListItemText>
           </MenuItem>
-          <MenuItem onClick={handleDelete}>
-            <ListItemIcon>
-              <DeleteIcon fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText sx={{ color: "error.main" }}>Xóa</ListItemText>
-          </MenuItem>
+          <Tooltip
+            title={
+              selectedLearningPath && selectedLearningPath.employee_count > 0
+                ? `Không thể xóa vì có ${selectedLearningPath.employee_count} học viên đang được gán`
+                : ""
+            }
+            placement="left"
+          >
+            <span>
+              <MenuItem
+                onClick={handleDelete}
+                disabled={selectedLearningPath ? selectedLearningPath.employee_count > 0 : false}
+              >
+                <ListItemIcon>
+                  <DeleteIcon
+                    fontSize="small"
+                    color={selectedLearningPath && selectedLearningPath.employee_count > 0 ? "disabled" : "error"}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  sx={{
+                    color: selectedLearningPath && selectedLearningPath.employee_count > 0 ? "text.disabled" : "error.main",
+                  }}
+                >
+                  Xóa
+                </ListItemText>
+              </MenuItem>
+            </span>
+          </Tooltip>
         </Menu>
       </Box>
     </PageContainer>

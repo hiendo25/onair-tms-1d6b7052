@@ -2,7 +2,6 @@ import {
   buildProgressResponse,
   calculateProgressPercentage,
   getMultipleCoursesProgress,
-  resolveLearningPathId,
 } from "@/services/progress/progress.service";
 import { createSVClient } from "@/services/supabase/server";
 import type { ClassRoomProgressWithRelations } from "@/types/progress.types";
@@ -34,7 +33,9 @@ export async function getClassRoomProgressWithRelations(
   if (!employeeId) {
     throw new Error("Employee ID is required");
   }
-  const learningPathId = await resolveLearningPathId(employeeId, providedLearningPathId ?? null);
+  // Use the explicitly provided learningPathId only (do not auto-resolve)
+  // If null, we'll use classroom-level progress instead
+  const learningPathId = providedLearningPathId ?? null;
   const supabase = await createSVClient();
 
   // Step 1: Fetch all class sessions for this class room
@@ -110,6 +111,7 @@ export async function getClassRoomProgressWithRelations(
     uniqueCourseIds,
     employeeId,
     learningPathId,
+    classRoomId,
   );
 
   // Step 4: Group courses by session

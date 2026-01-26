@@ -69,33 +69,44 @@ export default function DepartmentLeaderboard({
               display: "flex",
               justifyContent: "center",
               alignItems: "flex-end",
-              gap: 3,
+              gap: { xs: 0.25, sm: 2, md: 3 },
               mb: 4,
-              flexWrap: "wrap",
+              flexWrap: { xs: "wrap", md: "nowrap" },
             }}
           >
             {/* Rank 2 (index 1) */}
             {top3[1] && (
-              <Box sx={{ textAlign: "center", order: { xs: 2, sm: 1 } }}>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+              <Box sx={{ textAlign: "center", order: 1 }}>
+                <Typography variant="body2" fontWeight={700} gutterBottom sx={{ fontSize: { xs: "0.625rem", sm: "1rem" }, mb: { xs: 0.25, sm: 1 } }}>
                   {2}
                 </Typography>
                 <Avatar
                   src={top3[1].avatar || undefined}
                   sx={{
-                    width: 80,
-                    height: 80,
+                    width: { xs: 36, sm: 80 },
+                    height: { xs: 36, sm: 80 },
                     mx: "auto",
-                    mb: 1,
-                    border: top3[1].employeeId === currentEmployeeId ? "3px solid #2196F3" : "none",
+                    mb: { xs: 0.25, sm: 1 },
+                    border: top3[1].employeeId === currentEmployeeId ? "2px solid #2196F3" : "none",
+                    fontSize: { xs: "0.875rem", sm: "1.25rem" },
                   }}
                 >
                   {top3[1].fullName.charAt(0)}
                 </Avatar>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{
+                    fontSize: { xs: "0.625rem", sm: "0.875rem" },
+                    maxWidth: { xs: "60px", sm: "120px" },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {top3[1].fullName}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.5rem", sm: "0.75rem" } }}>
                   {top3[1].currentXp} điểm
                 </Typography>
               </Box>
@@ -103,27 +114,38 @@ export default function DepartmentLeaderboard({
 
             {/* Rank 1 (index 0) */}
             {top3[0] && (
-              <Box sx={{ textAlign: "center", order: { xs: 1, sm: 2 } }}>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+              <Box sx={{ textAlign: "center", order: 2 }}>
+                <Typography variant="body2" fontWeight={700} gutterBottom sx={{ fontSize: { xs: "0.625rem", sm: "1rem" }, mb: { xs: 0.25, sm: 1 } }}>
                   {1}
                 </Typography>
-                <Box sx={{ fontSize: 32 }}>👑</Box>
+                <Box sx={{ fontSize: { xs: 16, sm: 32 } }}>👑</Box>
                 <Avatar
                   src={top3[0].avatar || undefined}
                   sx={{
-                    width: 100,
-                    height: 100,
+                    width: { xs: 48, sm: 100 },
+                    height: { xs: 48, sm: 100 },
                     mx: "auto",
-                    mb: 1,
-                    border: top3[0].employeeId === currentEmployeeId ? "3px solid #2196F3" : "none",
+                    mb: { xs: 0.25, sm: 1 },
+                    border: top3[0].employeeId === currentEmployeeId ? "2px solid #2196F3" : "none",
+                    fontSize: { xs: "1rem", sm: "1.5rem" },
                   }}
                 >
                   {top3[0].fullName.charAt(0)}
                 </Avatar>
-                <Typography variant="body1" fontWeight={700}>
+                <Typography
+                  variant="body1"
+                  fontWeight={700}
+                  sx={{
+                    fontSize: { xs: "0.7rem", sm: "1rem" },
+                    maxWidth: { xs: "70px", sm: "140px" },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {top3[0].fullName}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.5rem", sm: "0.75rem" } }}>
                   {top3[0].currentXp} điểm
                 </Typography>
               </Box>
@@ -132,25 +154,36 @@ export default function DepartmentLeaderboard({
             {/* Rank 3 (index 2) */}
             {top3[2] && (
               <Box sx={{ textAlign: "center", order: 3 }}>
-                <Typography variant="h6" fontWeight={700} gutterBottom>
+                <Typography variant="body2" fontWeight={700} gutterBottom sx={{ fontSize: { xs: "0.625rem", sm: "1rem" }, mb: { xs: 0.25, sm: 1 } }}>
                   {3}
                 </Typography>
                 <Avatar
                   src={top3[2].avatar || undefined}
                   sx={{
-                    width: 80,
-                    height: 80,
+                    width: { xs: 36, sm: 80 },
+                    height: { xs: 36, sm: 80 },
                     mx: "auto",
-                    mb: 1,
-                    border: top3[2].employeeId === currentEmployeeId ? "3px solid #2196F3" : "none",
+                    mb: { xs: 0.25, sm: 1 },
+                    border: top3[2].employeeId === currentEmployeeId ? "2px solid #2196F3" : "none",
+                    fontSize: { xs: "0.875rem", sm: "1.25rem" },
                   }}
                 >
                   {top3[2].fullName.charAt(0)}
                 </Avatar>
-                <Typography variant="body1" fontWeight={600}>
+                <Typography
+                  variant="body2"
+                  fontWeight={600}
+                  sx={{
+                    fontSize: { xs: "0.625rem", sm: "0.875rem" },
+                    maxWidth: { xs: "60px", sm: "120px" },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {top3[2].fullName}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: "0.5rem", sm: "0.75rem" } }}>
                   {top3[2].currentXp} điểm
                 </Typography>
               </Box>
