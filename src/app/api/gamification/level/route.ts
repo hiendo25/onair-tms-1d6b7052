@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth/require-auth";
 import { DomainError } from "@/lib/errors/DomainError";
 import { CreateLevelPayload } from "@/modules/ranking/type";
 import { gamificationLevelService } from "@/services";
-
+import { CreateLevelService } from "@/services/gamifications/levels/create-level.service";
 export async function GET(request: NextRequest) {
   try {
     const { organizationId } = await requireAuth(request);
@@ -40,14 +40,21 @@ export async function POST(request: NextRequest) {
 
     const payload = (await request.json()) as CreateLevelPayload;
 
-    const data = await gamificationLevelService.createLevel({
-      ...payload,
+    const data = await new CreateLevelService(organizationId).execute({
+      authorId: payload.authorId,
+      description: payload.description,
+      icon: payload.icon,
       organizationId: organizationId,
+      scoreRequired: payload.scoreRequired,
+      title: payload.title,
     });
 
     return http.ok(data);
   } catch (error) {
     console.error(error);
-    throw http.serverError("Server error");
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
+    return http.serverError("Server error");
   }
 }
