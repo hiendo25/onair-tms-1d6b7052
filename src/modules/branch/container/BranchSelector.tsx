@@ -45,10 +45,10 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   };
 
   useEffect(() => {
-    if (!values) return;
+    if (!onSelect) return;
 
-    setBranchIds(values);
-  }, [values]);
+    setBranchIds(values ?? []);
+  }, [values, onSelect]);
 
   return (
     <Select

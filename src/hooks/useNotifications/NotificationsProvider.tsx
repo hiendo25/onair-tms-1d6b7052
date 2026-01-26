@@ -13,15 +13,9 @@ import type { CloseReason } from "@mui/material/SpeedDial";
 import useSlotProps from "@mui/utils/useSlotProps";
 
 import NotificationsContext from "./NotificationsContext";
-import type {
-  CloseNotification,
-  ShowNotification,
-  ShowNotificationOptions,
-} from "./useNotifications";
+import type { CloseNotification, ShowNotification, ShowNotificationOptions } from "./useNotifications";
 
-const RootPropsContext = React.createContext<NotificationsProviderProps | null>(
-  null,
-);
+const RootPropsContext = React.createContext<NotificationsProviderProps | null>(null);
 
 interface NotificationProps {
   notificationKey: string;
@@ -31,13 +25,7 @@ interface NotificationProps {
   options: ShowNotificationOptions;
 }
 
-function Notification({
-  notificationKey,
-  open,
-  message,
-  options,
-  badge,
-}: NotificationProps) {
+function Notification({ notificationKey, open, message, options, badge }: NotificationProps) {
   const notificationsContext = React.useContext(NotificationsContext);
   if (!notificationsContext) {
     throw new Error("Notifications context was used without a provider.");
@@ -69,7 +57,7 @@ function Notification({
         title="Close"
         color="inherit"
         onClick={handleClose}
-				className="w-8 h-8"
+        className="w-8 h-8"
       >
         <CloseIcon fontSize="small" className="w-4 h-4" />
       </IconButton>
@@ -87,29 +75,33 @@ function Notification({
       onClose: handleClose,
       action,
     },
-		
   });
 
-
-	 const baseSx = React.useMemo((): SxProps<Theme> => {
-			return (theme) => ({
-				backgroundColor: "white",
-				color: theme.palette.grey[800],
-				width: 320,
-				boxShadow: "0px 2px 3px -1px rgb(0,0,0,0.1), 0px 3px 6px -6px rgb(0,0,0,0.2)",
-				fontWeight: 500,
-				".MuiAlert-message": {
-					flex: 1,
-				},
-			});
-		}, []);
+  const baseSx = React.useMemo((): SxProps<Theme> => {
+    return (theme) => ({
+      backgroundColor: "white",
+      color: theme.palette.grey[800],
+      width: 320,
+      boxShadow: "0px 2px 3px -1px rgb(0,0,0,0.1), 0px 3px 6px -6px rgb(0,0,0,0.2)",
+      fontWeight: 500,
+      border: "1px solid #f1f1f1",
+      ".MuiAlert-message": {
+        flex: 1,
+      },
+    });
+  }, []);
 
   return (
-    <Snackbar key={notificationKey} {...snackbarSlotProps} anchorOrigin={{vertical: 'top', 'horizontal': 'center'}} sx={{
-			".MuiAlert-action": {
-				paddingTop: '2px'
-			}
-		}}>
+    <Snackbar
+      key={notificationKey}
+      {...snackbarSlotProps}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      sx={{
+        ".MuiAlert-action": {
+          paddingTop: "2px",
+        },
+      }}
+    >
       <Badge badgeContent={badge} color="primary" sx={{ width: "100%" }}>
         {severity ? (
           <Alert severity={severity} sx={baseSx} action={action}>
@@ -142,10 +134,7 @@ function Notifications({ state }: NotificationsProps) {
   const currentNotification = state.queue[0] ?? null;
 
   return currentNotification ? (
-    <Notification
-      {...currentNotification}
-      badge={state.queue.length > 1 ? String(state.queue.length) : null}
-    />
+    <Notification {...currentNotification} badge={state.queue.length > 1 ? String(state.queue.length) : null} />
   ) : null;
 }
 
@@ -164,15 +153,12 @@ const generateId = () => {
  * Provider for Notifications. The subtree of this component can use the `useNotifications` hook to
  * access the notifications API. The notifications are shown in the same order they are requested.
  */
-export default function NotificationsProvider(
-  props: NotificationsProviderProps,
-) {
+export default function NotificationsProvider(props: NotificationsProviderProps) {
   const { children } = props;
   const [state, setState] = React.useState<NotificationsState>({ queue: [] });
 
   const show = React.useCallback<ShowNotification>((message, options = {}) => {
-    const notificationKey =
-      options.key ?? `::toolpad-internal::notification::${generateId()}`;
+    const notificationKey = options.key ?? `::toolpad-internal::notification::${generateId()}`;
     setState((prev) => {
       if (prev.queue.some((n) => n.notificationKey === notificationKey)) {
         // deduplicate by key
@@ -180,10 +166,7 @@ export default function NotificationsProvider(
       }
       return {
         ...prev,
-        queue: [
-          ...prev.queue,
-          { message, options, notificationKey, open: true },
-        ],
+        queue: [...prev.queue, { message, options, notificationKey, open: true }],
       };
     });
     return notificationKey;

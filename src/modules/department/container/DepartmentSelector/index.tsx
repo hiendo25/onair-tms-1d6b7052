@@ -40,10 +40,10 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
   };
 
   useEffect(() => {
-    if (!values) return;
+    if (!onSelect) return;
 
-    setDepartmentIds(values);
-  }, [values]);
+    setDepartmentIds(values ?? []);
+  }, [values, onSelect]);
 
   return (
     <Select

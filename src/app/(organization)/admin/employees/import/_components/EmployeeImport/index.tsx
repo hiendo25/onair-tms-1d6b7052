@@ -1,5 +1,5 @@
 "use client";
-import React, { startTransition, useMemo, useState } from "react";
+import React, { startTransition, useEffect, useMemo, useRef, useState } from "react";
 import { Box, Button, LinearProgress, Stack, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 
@@ -13,7 +13,7 @@ import { cn } from "@/utils";
 
 import EmployeeImportThread from "./EmployeeImportThread";
 import { EmployeeImportThreadProps } from "./EmployeeImportThread";
-import FileDropzone from "./FileDropzone";
+import FileDropzone, { FileDropzoneRef } from "./FileDropzone";
 
 type EmployeeThreadItem = EmployeeImportThreadProps["threads"][number];
 
@@ -27,7 +27,14 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
   const [threads, setThreads] = useState<EmployeeThreadItem[]>([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>();
   const [selectedBranchId, setSelectedBranchId] = useState<string>();
-  const { mutate, isPending: isLoadingList, data: dataValidated, error } = useValidateImportEmployeeMutation();
+  const dropzoneRef = useRef<FileDropzoneRef>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const {
+    mutate: validateFileData,
+    isPending: isLoadingList,
+    data: dataValidated,
+    error,
+  } = useValidateImportEmployeeMutation();
   const { mutateAsync: createEmployeeAsync } = useCreateEmployeeMutation();
 
   const isDisableButtonCreate = useMemo(() => {
@@ -52,10 +59,10 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
   }, [dataValidated?.data]);
 
   const handleChangeInputFile = (file: File) => {
-    mutate(file, {
+    validateFileData(file, {
       onSuccess(data) {
         const records = data.data.map<EmployeeThreadItem>((data, index) => ({
-          index,
+          index: data.index,
           code: data.code,
           dateOfBirth: data.dateOfBirth,
           fullName: data.fullName,
@@ -79,7 +86,10 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
   };
 
   const handleUpdateThreadTasks = async () => {
-    if (!selectedDepartmentId) return;
+    if (!selectedDepartmentId) {
+      notifications.show("Chọn phòng ban.", { severity: "warning" });
+      return;
+    }
 
     threads.forEach((thread) => {
       setThreads((prev) => prev.map((item) => ({ ...item, status: "pending" })));
@@ -116,8 +126,9 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
         }),
     );
 
-    Promise.allSettled(tasks).then(() => {
-      console.log("All threads finished");
+    Promise.allSettled(tasks).then((data) => {
+      notifications.show("Danh sách đã được tạo thành công.", { severity: "success" });
+      setIsCompleted(true);
     });
   };
 
@@ -132,9 +143,23 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
   const handleSelectBranch: BranchSelectorProps["onSelect"] = (branchIds) => {
     setSelectedBranchId(branchIds[0]);
   };
+
+  const handleReset = () => {
+    setThreads([]);
+    setSelectedBranchId(undefined);
+    setSelectedDepartmentId(undefined);
+    dropzoneRef.current?.reset();
+    setIsCompleted(false);
+  };
+
   return (
     <Box sx={{ py: 3 }}>
-      <FileDropzone onChange={handleChangeInputFile} onRemove={handleRemoveFile} errorMessage={error?.message} />
+      <FileDropzone
+        ref={dropzoneRef}
+        onChange={handleChangeInputFile}
+        onRemove={handleRemoveFile}
+        errorMessage={error?.message}
+      />
       <div className="h-6"></div>
 
       {isLoadingList && <LinearProgress />}
@@ -162,9 +187,15 @@ const EmployeeImport: React.FC<EmployeeImportProps> = () => {
           <div>
             <BranchSelector values={selectedBranchId ? [selectedBranchId] : undefined} onSelect={handleSelectBranch} />
           </div>
-          <Button variant="contained" disabled={isDisableButtonCreate} onClick={handleUpdateThreadTasks}>
-            Lưu danh sách
-          </Button>
+          {isCompleted ? (
+            <Button onClick={handleReset} color="success">
+              Làm mới
+            </Button>
+          ) : (
+            <Button variant="contained" disabled={isDisableButtonCreate} onClick={handleUpdateThreadTasks}>
+              Lưu danh sách
+            </Button>
+          )}
         </div>
         <EmployeeImportThread threads={threads} />
       </div>
