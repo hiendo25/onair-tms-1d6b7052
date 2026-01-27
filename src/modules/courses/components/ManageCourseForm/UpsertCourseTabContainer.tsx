@@ -109,7 +109,7 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
     return (
       <div className={cn("class-room-tabs", className)}>
         <TabContext value={currentTab}>
-          <div className="bg-white rounded-xl flex items-center justify-between mb-6 px-6 py-4">
+          <div className="flex items-center justify-between mb-6">
             <ClassRoomTabList onChange={handleChangeTab}>
               {items.map(({ tabKey, tabName, icon }) => (
                 <Tab
@@ -130,7 +130,7 @@ const UpsertCourseTabContainer = React.forwardRef<UpsertCourseTabContainerRef, U
             </ClassRoomTabList>
             <div className="tab-actions">{actions}</div>
           </div>
-          <div className="panels-wraper">
+          <div className="panels-wrapper">
             {items.map((item) => (
               <TabPanel key={item.tabKey} value={item.tabKey} className="p-0">
                 {item?.content}

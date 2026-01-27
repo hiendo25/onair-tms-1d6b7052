@@ -93,7 +93,7 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
   return (
     <div className="flex flex-wrap gap-6">
       <div className="section w-96">
-        <div className="section__iner">
+        <div className="section-inner">
           <div className="sticky top-0 z-10">
             <ButtonAddSection onOk={handleAddSection} />
           </div>
@@ -113,7 +113,7 @@ const TabCourseSections = forwardRef<TabCourseSectionsRef, TabCourseSectionsProp
           />
         </div>
       </div>
-      <div className="lession-wraper flex-1">
+      <div className="lesson-wrapper border rounded-xl border-gray-200 flex-1">
         {isAddLesson || editingLesson ? (
           <div className="bg-white rounded-xl p-6">
             {isAddLesson ? (

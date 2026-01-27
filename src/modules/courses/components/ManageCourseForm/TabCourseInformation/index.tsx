@@ -15,7 +15,7 @@ interface TabCourseInformationProps {
 const TabCourseInformation: React.FC<TabCourseInformationProps> = () => {
   const { control } = useUpsertCourseFormContext();
   return (
-    <div className="bg-white rounded-xl p-6 flex flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <div>
         <RHFTextField
           control={control}
