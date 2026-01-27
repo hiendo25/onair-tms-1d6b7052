@@ -14,8 +14,8 @@ const useUpsertCourse = () => {
   const courseService = new UpsertCourseService(currentEmployee.id, currentEmployee.organization.id);
 
   const queryClient = useQueryClient();
+
   const { mutate: doCreateCourse, isPending } = useTMutation({
-    mutationKey: ["CREATE_COURSE"],
     mutationFn: async (payload: { formData: UpsertCourseFormData }) => {
       const { formData } = payload;
       return await courseService.create({ formData });

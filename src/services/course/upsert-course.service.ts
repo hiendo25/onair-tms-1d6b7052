@@ -10,7 +10,6 @@ import {
   UpsertLessonPayload,
 } from "@/repository/courses-lessons/type";
 import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
-import { NotificationService } from "../notifications/notification-classroom.service";
 export class UpsertCourseService {
   private userId: string;
 
@@ -240,9 +239,8 @@ export class UpsertCourseService {
       sections.map(async (section, sectionIndex) => {
         try {
           const sectionPayload = _this.mapSectionWithCourse(courseId, section, sectionIndex);
-          const { data: sectionData, error: sessionError } = await coursesSectionsRepository.createSection(
-            sectionPayload,
-          );
+          const { data: sectionData, error: sessionError } =
+            await coursesSectionsRepository.createSection(sectionPayload);
 
           if (sessionError) {
             console.log("Create Session failed", sessionError);
