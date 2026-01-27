@@ -2,9 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { useTMutation } from "@/lib";
+import { client } from "@/lib/api";
 import { categoriesRepository, classFieldRepository, coursesRepository } from "@/repository";
 import { CreateCategoryPayload } from "@/repository/categories/type";
 import { CreateClassFieldPayload } from "@/repository/class-room-field/type";
+import { DeleteCourseResponse } from "../type";
 
 const useCreateClassFieldMutation = () => {
   const queryClient = useQueryClient();
@@ -29,7 +31,14 @@ const useCreateCategoriesMutation = () => {
 const useDeleteCourseByIdMutation = () => {
   const queryClient = useQueryClient();
   return useTMutation({
-    mutationFn: (courseId: string) => coursesRepository.deleteCourseById(courseId),
+    mutationFn: async (courseId: string) => {
+      const data = await client.delete<DeleteCourseResponse>(`/courses/${courseId}`);
+      console.log(data);
+      if (!data.success) {
+        throw new Error(data.error.message);
+      }
+      return data;
+    },
     onSuccess(data, variables, onMutateResult, context) {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_COURSES] });
     },

@@ -1,25 +1,25 @@
 import { Lesson } from "@/model/lesson.model";
-export type CreateLessonPayload = Pick<
+export type LessonInsert = Pick<
   Lesson,
   "title" | "content" | "lesson_type" | "priority" | "section_id" | "main_resource" | "status" | "assignment_id"
 >;
 
-export type UpdateLessonPayload = Pick<
+export type LessonUpdate = Pick<
   Lesson,
   "title" | "content" | "lesson_type" | "priority" | "main_resource" | "status" | "id" | "assignment_id"
 >;
 
-export type UpsertLessonPayload =
+export type LessonUpsert =
   | {
       action: "create";
-      payload: CreateLessonPayload;
+      payload: LessonInsert;
     }
   | {
       action: "update";
-      payload: UpdateLessonPayload;
+      payload: LessonUpdate;
     };
 
-export type CreatePivotLessonsWithResourcesPayload = {
+export type LessonResourceInsert = {
   lesson_id: string;
   resource_id: string;
 };

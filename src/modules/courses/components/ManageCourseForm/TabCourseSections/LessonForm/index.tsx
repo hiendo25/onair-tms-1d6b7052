@@ -3,6 +3,7 @@ import { Controller } from "react-hook-form";
 
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 
 import AssessmentSelector, { AssessmentSelectorProps } from "./AssessmentSelector";
@@ -53,7 +54,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
             )}
           />
 
-          <RHFRichEditor
+          <RHFTinyEditor
             control={control}
             label="Mô tả"
             name={`sections.${sectionIndex}.lessons.${lessonIndex}.content`}
@@ -78,7 +79,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
             sectionIndex={sectionIndex}
             lessonIndex={lessonIndex}
           />
-          <RHFRichEditor
+          <RHFTinyEditor
             control={control}
             label="Mô tả"
             name={`sections.${sectionIndex}.lessons.${lessonIndex}.content`}

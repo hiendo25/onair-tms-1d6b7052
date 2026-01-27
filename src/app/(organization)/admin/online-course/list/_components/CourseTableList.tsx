@@ -28,7 +28,6 @@ export default function CourseTableList({ className }: CourseTableListProps) {
   const dialogDeleteRef = useRef<DialogDeleteCourseConfirmationRef>(null);
   const { hasPermissions } = usePermissions();
   const canCreateOrDeleteCourse = hasPermissions([{ $or: "course:create" }, { $or: "course:delete" }]);
-  console.log({ canCreateOrDeleteCourse });
   const {
     organization: { id: organizationId },
     type: employeeType,

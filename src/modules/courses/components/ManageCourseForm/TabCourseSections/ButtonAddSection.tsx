@@ -37,12 +37,12 @@ const ButtonAddSection: React.FC<ButtonAddSectionProps> = ({ onOk }) => {
   };
   return (
     <div className="relative">
-      <div className="bg-white p-4 rounded-xl">
+      <div className="bg-white">
         <Button startIcon={<PlusIcon />} variant="fill" fullWidth onClick={() => setOpenForm(true)} size="large">
           Tạo học phần
         </Button>
         {openForm ? (
-          <div className="border rounded-lg border-gray-200 p-4 overflow-hidden mt-4">
+          <div className="border rounded-xl border-gray-200 p-4 overflow-hidden mt-4">
             <FormControl className="mb-6" variant="outlined" error={!!error}>
               <FormLabel>Tiêu đề</FormLabel>
               <OutlinedInput
