@@ -1,5 +1,5 @@
 import { NotificationType } from "@/model/notification.model";
-import { createClient } from "@/services";
+import { createClient, createSVClient } from "@/services";
 import { createServiceRoleClient } from "@/services";
 
 import { CreateNotificationPayload, MarkNotificationAsReadPayload } from "./type";
@@ -109,15 +109,26 @@ const getNotificationsCount = async ({ employeeId, onlyUnRead }: { employeeId: s
   }
 };
 
-const markNotificationAsRead = async (payload: MarkNotificationAsReadPayload) => {
-  try {
-    const supabase = createClient();
-    return await supabase.from("notifications").update({ is_read: true }).eq("id", payload.id).select("*").single();
-  } catch (err: any) {
-    throw new Error(`Failed to markNotificationAsRead: ${err?.message}`);
-  }
-};
+export async function markNotificationAsRead(payload: MarkNotificationAsReadPayload) {
+  const supabase = createClient();
+  return await supabase.from("notifications").update({ is_read: true }).eq("id", payload.id).select("*").single();
+}
 export type MarkNotificationAsReadResponse = Awaited<ReturnType<typeof markNotificationAsRead>>;
+
+export async function markAllReadNotifications(employeeId: string) {
+  const supabaseSv = await createSVClient();
+
+  const { data, error } = await supabaseSv
+    .from("notifications")
+    .update({ is_read: true })
+    .eq("employee_id", employeeId)
+    .select(`id, is_read`);
+
+  if (error) {
+    throw new Error(error.details || error.message);
+  }
+  return data;
+}
 
 export {
   getNotifications,
@@ -125,5 +136,4 @@ export {
   createNotification,
   bulkCreateNotification,
   getNotificationsCount,
-  markNotificationAsRead,
 };
