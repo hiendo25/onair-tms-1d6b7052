@@ -81,7 +81,7 @@ async function createAssignmentWithRelations(
 
     if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
       const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
-        assignment_id: assignmentId as string,
+        assignment_config_id: assignmentId as string,
         employee_id: employeeId,
       }));
 
@@ -101,7 +101,7 @@ async function createAssignmentWithRelations(
     }
 
     if (assignmentBankId) {
-      await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId, supabase);
+      await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId);
       await assignmentBankRepository.deleteAssignmentBankCategoriesByAssignmentId(assignmentBankId, supabase);
       await assignmentBankRepository.deleteAssignmentBankById(assignmentBankId, supabase);
     }
@@ -150,7 +150,7 @@ async function updateAssignmentWithRelations(
     const existingQuestionIds =
       existingAssignment?.assignment_questions?.map((question) => question.question_id) ?? [];
 
-    await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId, supabase);
+    await assignmentBankRepository.deleteAssignmentBankQuestionsByAssignmentId(assignmentBankId);
 
     if (payload.questions && payload.questions.length > 0) {
       const questionsToCreate = payload.questions.map((question) => ({
@@ -194,7 +194,7 @@ async function updateAssignmentWithRelations(
 
     if (payload.assignedEmployees && payload.assignedEmployees.length > 0) {
       const employeesToCreate = payload.assignedEmployees.map((employeeId) => ({
-        assignment_id: payload.id,
+        assignment_config_id: payload.id,
         employee_id: employeeId,
       }));
 
@@ -217,8 +217,8 @@ async function getAssignments(params?: GetAssignmentsParams): Promise<PaginatedR
   return assignmentsRepository.getAssignments(params);
 }
 
-async function getAssignmentById(id: string): Promise<AssignmentDto> {
-  return assignmentsRepository.getAssignmentById(id);
+async function getAssignmentConfigById(id: string): Promise<AssignmentDto> {
+  return assignmentsRepository.getAssignmentConfigById(id);
 }
 
 async function getAssignmentStudents(assignmentId: string, params?: GetAssignmentStudentsParams) {
@@ -242,7 +242,7 @@ export {
   updateAssignmentWithRelations,
   deleteAssignmentWithRelations,
   getAssignments,
-  getAssignmentById,
+  getAssignmentConfigById,
   getAssignmentStudents,
   getAssignmentQuestions,
   getMyAssignments,

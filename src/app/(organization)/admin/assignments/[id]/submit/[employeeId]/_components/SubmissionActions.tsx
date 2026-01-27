@@ -3,7 +3,6 @@ import { Box, Button, CircularProgress } from "@mui/material";
 
 interface SubmissionActionsProps {
   onCancel: () => void;
-  onSubmit: () => void;
   isSubmitDisabled: boolean;
   isSubmitting?: boolean;
   hideCancelButton?: boolean;
@@ -11,7 +10,6 @@ interface SubmissionActionsProps {
 
 export default function SubmissionActions({
   onCancel,
-  onSubmit,
   isSubmitDisabled,
   isSubmitting = false,
   hideCancelButton = false,
@@ -27,7 +25,6 @@ export default function SubmissionActions({
         type="submit"
         variant="contained"
         disabled={isSubmitDisabled}
-        onClick={onSubmit}
         startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : null}
       >
         {isSubmitting ? "Đang nộp bài..." : "Nộp bài"}

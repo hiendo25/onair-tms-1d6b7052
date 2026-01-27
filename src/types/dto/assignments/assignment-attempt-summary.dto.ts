@@ -1,6 +1,7 @@
 import { Database } from "@/types/supabase.types";
 
-type AttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
+type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
+type AttemptSource = Database["public"]["Enums"]["assignment_attempt_source"];
 
 export interface AssignmentAttemptSummaryDto {
   attemptsUsed: number;
@@ -14,6 +15,10 @@ export interface AssignmentAttemptSummaryDto {
     status: AttemptStatus;
     submittedAt: string | null;
     createdAt: string;
+    startedAt: string | null;
+    expiresAt: string | null;
+    durationMinutesSnapshot: number | null;
+    submissionSource: AttemptSource | null;
     score: number | null;
     maxScore: number | null;
     attemptNumber: number;

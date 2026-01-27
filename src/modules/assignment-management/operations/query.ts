@@ -56,7 +56,7 @@ export const useGetAssignmentsQuery = (params?: GetAssignmentsParams) => {
 export const useGetAssignmentQuery = (id: string) => {
   return useTQuery({
     queryKey: [GET_ASSIGNMENTS, id],
-    queryFn: () => assignmentService.getAssignmentById(id),
+    queryFn: () => assignmentService.getAssignmentConfigById(id),
     enabled: !!id,
   });
 };
