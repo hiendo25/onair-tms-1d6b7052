@@ -60,6 +60,7 @@ export default function PushNotificationManager() {
         {
           onSuccess(data) {
             setSubscription(sub);
+            setShowPopupNotify(false);
             set({ except: true, timeStamp: dayjs().valueOf() });
           },
         },
