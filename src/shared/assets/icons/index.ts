@@ -8,6 +8,7 @@ import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
 import CameraOffIcon from "./CameraOffIcon";
+import CertificateIcon from "./CertificateIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
 import ChevronDownIcon from "./ChevronDownIcon";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
@@ -153,4 +154,5 @@ export {
   ShareIcon,
   XCircleIcon,
   AlertCircleIcon,
+  CertificateIcon,
 };
