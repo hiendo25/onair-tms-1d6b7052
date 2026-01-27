@@ -80,6 +80,7 @@ export default function PushNotificationManager() {
 
   const cancelReceived = () => {
     set({ except: false, timeStamp: dayjs().valueOf() });
+    setShowPopupNotify(false);
   };
 
   useEffect(() => {

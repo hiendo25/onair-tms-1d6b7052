@@ -1,7 +1,6 @@
-import dayjs from "dayjs";
-
 import { ClassRoomPlatformType, getClassRoomPlatformName } from "@/constants/class-room.constant";
 import { PATHS } from "@/constants/path.constant";
+import dayjs from "@/lib/dayjs";
 import { ClassRoomType } from "@/model/class-room.model";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
 import { NotificationBaseService } from "@/services/notifications/base-notification.service";
