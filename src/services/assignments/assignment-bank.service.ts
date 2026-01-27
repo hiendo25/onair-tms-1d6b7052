@@ -24,6 +24,7 @@ const createAssignmentBank = async (
         shuffle_answers: payload.shuffleAnswers,
         created_by: createdBy,
         organization_id: payload.organizationId,
+        status: "published",
       },
       client,
     );
