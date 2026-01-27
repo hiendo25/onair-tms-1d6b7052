@@ -1,21 +1,16 @@
 import React from "react";
 import RouteIcon from "@mui/icons-material/Route";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 
 import {
-  BarChart10Icon,
   BookOpenIcon,
   CertificateIcon,
-  ClassIcon,
   ClipboardIcon,
   FileAttachmentIcon,
   FolderShieldIcon,
   GitIcon,
   MonitorIcon,
-  SquareFourIcon,
+  PieChart2Icon,
   Star01Icon,
-  UsersIcon,
   UsersIcon2,
 } from "@/shared/assets/icons";
 import { MenuItemType } from "@/shared/ui/layouts/MainLayout/MenuList/type";
@@ -38,7 +33,7 @@ export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
 const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   {
     title: "Dashboard",
-    icon: React.createElement(SquareFourIcon),
+    icon: React.createElement(PieChart2Icon),
     key: "dashboard",
     path: PATHS.DASHBOARD,
     persCheck: PATHS_WITH_PERMISSIONS["/dashboard"],

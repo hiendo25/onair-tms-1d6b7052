@@ -59,6 +59,7 @@ import MarkerPinIcon from "./MarkerPinIcon";
 import Menu05Icon from "./Menu05Icon";
 import MonitorIcon from "./MonitorIcon";
 import ParagraphIcon from "./ParagraphIcon";
+import PieChart2Icon from "./PieChart2Icon";
 import SearchIcon from "./SearchIcon";
 import Setting02Icon from "./Setting02Icon";
 import SettingIcon from "./SettingIcon";
@@ -155,4 +156,5 @@ export {
   XCircleIcon,
   AlertCircleIcon,
   CertificateIcon,
+  PieChart2Icon,
 };
