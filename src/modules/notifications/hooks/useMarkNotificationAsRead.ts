@@ -1,11 +1,13 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-import { GetNotificationByEmployeeResponse, GetNotificationQueryParams } from "@/repository/notifications";
+import { GetNotificationQueryParams } from "@/repository/notifications";
 import { notificationQueryKeys } from "../operations/keys";
-import { useMarkReadNotificationMutation } from "../operations/mutation";
+import { useMarkAllReadNotificationMutation, useMarkReadNotificationMutation } from "../operations/mutation";
 
 export const useMarkNotificationAsRead = (params: GetNotificationQueryParams) => {
   const { mutate, isPending } = useMarkReadNotificationMutation();
+
+  const { mutate: mutateAllRead, isPending: isPendingAllRead } = useMarkAllReadNotificationMutation();
   const queryClient = useQueryClient();
 
   const markRead = (recordId: string) => {
@@ -23,5 +25,18 @@ export const useMarkNotificationAsRead = (params: GetNotificationQueryParams) =>
       },
     );
   };
-  return { isPending, markAsRead: markRead };
+  const markAllRead = () => {
+    mutateAllRead(undefined, {
+      onSuccess(data, variables, onMutateResult, context) {
+        queryClient.invalidateQueries({
+          queryKey: notificationQueryKeys.list(params),
+        });
+        queryClient.invalidateQueries({
+          queryKey: notificationQueryKeys.unreadCount(),
+        });
+      },
+    });
+  };
+
+  return { isPending, markAsRead: markRead, markAllRead };
 };

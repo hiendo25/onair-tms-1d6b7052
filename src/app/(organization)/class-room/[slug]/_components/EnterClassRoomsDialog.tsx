@@ -65,8 +65,8 @@ const EnterClassRoomsDialog = ({
 
             const scheduleLabel =
               scheduleDisplay.type === "same-day" &&
-                scheduleDisplay.dateRange?.timeRangeLabel &&
-                scheduleDisplay.dateRange?.dateLabel
+              scheduleDisplay.dateRange?.timeRangeLabel &&
+              scheduleDisplay.dateRange?.dateLabel
                 ? `${scheduleDisplay.dateRange.timeRangeLabel}, ${scheduleDisplay.dateRange.dateLabel}`
                 : scheduleDisplay.type === "weekly" && scheduleDisplay.secondaryLabel
                   ? `${scheduleDisplay.primaryLabel} (${scheduleDisplay.secondaryLabel})`
