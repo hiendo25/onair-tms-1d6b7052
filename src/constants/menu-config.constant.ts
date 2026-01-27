@@ -1,11 +1,12 @@
 import React from "react";
-import RouteIcon from '@mui/icons-material/Route';
+import RouteIcon from "@mui/icons-material/Route";
 import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 
 import {
   BarChart10Icon,
   BookOpenIcon,
+  CertificateIcon,
   ClassIcon,
   ClipboardIcon,
   FileAttachmentIcon,
@@ -27,9 +28,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-    persCheck?: PermissionValue;
-    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-  }
+      persCheck?: PermissionValue;
+      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+    }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -42,6 +43,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     path: PATHS.DASHBOARD,
     persCheck: PATHS_WITH_PERMISSIONS["/dashboard"],
   },
+
   {
     title: "Quản lý tổ chức",
     icon: React.createElement(GitIcon),
@@ -73,79 +75,6 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         path: PATHS.ROLE.ROOT,
         type: "item",
       },
-    ],
-  },
-  {
-    title: "Quản lý lớp học",
-    icon: React.createElement(MonitorIcon),
-    key: "class-room",
-    path: PATHS.CLASSROOMS.ROOT,
-    persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
-    children: [
-      {
-        title: "Tạo lớp học",
-        key: "class-room/create",
-        path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room/create"],
-        type: "item",
-      },
-      {
-        title: "Danh sách lớp học",
-        key: "class-room/list",
-        path: PATHS.CLASSROOMS.LIST_CLASSROOM,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
-        type: "item",
-      },
-      {
-        title: "Môn học",
-        key: "class-room/online-course",
-        path: PATHS.COURSES.ROOT,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/online-course"],
-        type: "item",
-      },
-    ],
-  },
-  {
-    title: "Quản lý bài kiểm tra",
-    icon: React.createElement(ClipboardIcon),
-    key: "assignments",
-    path: PATHS.ASSIGNMENTS.ROOT,
-    persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments"],
-    children: [
-      // {
-      //   title: "Tạo bài kiểm tra",
-      //   icon: React.createElement(ClipboardIcon),
-      //   key: "assignments/create",
-      //   path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
-      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
-      // },
-      {
-        title: "Ngân hàng bài kiểm tra",
-        icon: React.createElement(ClipboardIcon),
-        key: "assignments/list",
-        path: PATHS.ASSIGNMENTS.ROOT,
-      },
-      {
-        title: "Bài kiểm tra đã gán",
-        icon: React.createElement(ClipboardIcon),
-        key: "assignments/assigned",
-        path: PATHS.ASSIGNMENTS.ASSIGNED_LIST,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/assigned"],
-      },
-      {
-        title: "Ngân hàng câu hỏi",
-        icon: React.createElement(ClipboardIcon),
-        key: "assignments/question-bank",
-        path: PATHS.ASSIGNMENTS.QUESTION_BANK,
-        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank"],
-      },
-      // {
-      //   title: "Tạo câu hỏi",
-      //   icon: React.createElement(ClipboardIcon),
-      //   key: "assignments/question-bank/create",
-      //   path: PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK,
-      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank/create"],
-      // },
     ],
   },
   {
@@ -199,6 +128,102 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     ],
   },
   {
+    title: "Quản lý lớp học",
+    icon: React.createElement(MonitorIcon),
+    key: "class-room",
+    path: PATHS.CLASSROOMS.ROOT,
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
+    children: [
+      {
+        title: "Tạo lớp học",
+        key: "class-room/create",
+        path: PATHS.CLASSROOMS.CREATE_CLASSROOM,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room/create"],
+        type: "item",
+      },
+      {
+        title: "Danh sách lớp học",
+        key: "class-room/list",
+        path: PATHS.CLASSROOMS.LIST_CLASSROOM,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/class-room"],
+        type: "item",
+      },
+      {
+        title: "Môn học",
+        key: "class-room/online-course",
+        path: PATHS.COURSES.ROOT,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/online-course"],
+        type: "item",
+      },
+    ],
+  },
+  {
+    title: "Quản lý bài kiểm tra",
+    icon: React.createElement(ClipboardIcon),
+    key: "assignments",
+    path: PATHS.ASSIGNMENTS.ROOT,
+    persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments"],
+    children: [
+      // {
+      //   title: "Tạo bài kiểm tra",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "assignments/create",
+      //   path: PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT,
+      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/create"],
+      // },
+      {
+        title: "Ngân hàng câu hỏi",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/question-bank",
+        path: PATHS.ASSIGNMENTS.QUESTION_BANK,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank"],
+      },
+      {
+        title: "Ngân hàng bài kiểm tra",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/list",
+        path: PATHS.ASSIGNMENTS.ROOT,
+      },
+      {
+        title: "Bài kiểm tra đã gán",
+        icon: React.createElement(ClipboardIcon),
+        key: "assignments/assigned",
+        path: PATHS.ASSIGNMENTS.ASSIGNED_LIST,
+        persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/assigned"],
+      },
+
+      // {
+      //   title: "Tạo câu hỏi",
+      //   icon: React.createElement(ClipboardIcon),
+      //   key: "assignments/question-bank/create",
+      //   path: PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK,
+      //   persCheck: PATHS_WITH_PERMISSIONS["/admin/assignments/question-bank/create"],
+      // },
+    ],
+  },
+
+  {
+    title: "Quản lý chứng nhận",
+    icon: React.createElement(CertificateIcon),
+    key: "certificates",
+    path: PATHS.CERTIFICATES.ROOT,
+    persCheck: [],
+    children: [
+      {
+        title: "Danh sách chứng nhận",
+        key: "certificates/list",
+        path: PATHS.CERTIFICATES.ROOT,
+        type: "item",
+      },
+      {
+        title: "Tạo chứng nhận",
+        key: "certificates/create",
+        path: PATHS.CERTIFICATES.CREATE,
+        type: "item",
+      },
+    ],
+  },
+  {
     title: "Khảo sát",
     icon: React.createElement(FileAttachmentIcon),
     key: "surveys",
@@ -223,27 +248,6 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
     path: PATHS.GAMIFICATIONS.ROOT,
     persCheck: [],
     type: "item",
-  },
-  {
-    title: "Quản lý chứng nhận",
-    icon: React.createElement(WorkspacePremiumIcon),
-    key: "certificates",
-    path: PATHS.CERTIFICATES.ROOT,
-    persCheck: [],
-    children: [
-      {
-        title: "Danh sách chứng nhận",
-        key: "certificates/list",
-        path: PATHS.CERTIFICATES.ROOT,
-        type: "item",
-      },
-      {
-        title: "Tạo chứng nhận",
-        key: "certificates/create",
-        path: PATHS.CERTIFICATES.CREATE,
-        type: "item",
-      },
-    ],
   },
   // {
   //   title: "Báo cáo",
