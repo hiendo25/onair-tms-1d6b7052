@@ -374,7 +374,7 @@ export default function EmployeeList() {
                           label={getStatusLabel(employee.status)}
                           color={getStatusColor(employee.status)}
                           size="small"
-                          sx={{ minWidth: 100 }}
+                          // sx={{ minWidth: 100 }}
                         />
                       </TableCell>
                       <TableCell align="center">
