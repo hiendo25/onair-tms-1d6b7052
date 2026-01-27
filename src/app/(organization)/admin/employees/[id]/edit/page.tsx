@@ -4,7 +4,7 @@ import { Alert, Box, CircularProgress } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
+import type { EmployeeFormData, EmployeeFormProps } from "@/modules/employees/components/EmployeeForm";
 import EmployeeForm from "@/modules/employees/components/EmployeeForm";
 import { useUpdateEmployeeMutation } from "@/modules/employees/operations/mutation";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
@@ -21,7 +21,7 @@ const EditEmployeePage = () => {
 
   const pageTitle = "Chỉnh sửa nhân viên";
 
-  const defaultValues = React.useMemo(() => {
+  const defaultValues = React.useMemo((): EmployeeFormProps["defaultValues"] => {
     if (!employee) return undefined;
 
     // Get department and branch from new junction tables
@@ -42,7 +42,7 @@ const EditEmployeePage = () => {
       manager_id: managerRelationship?.manager_id || "",
       position_id: employee.position_id || "",
       employee_type: employee.employee_type || undefined,
-      start_date: employee.start_date || null,
+      start_date: employee.start_date || undefined,
       role_id: employee.role_ids?.[0] || "",
     };
   }, [employee]);

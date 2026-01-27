@@ -2,8 +2,8 @@
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { createSVClient } from "@/services";
-import { http } from "@/utils/http-status";
 
 export async function requireAuth(request?: NextRequest) {
   const supabaseSV = await createSVClient();

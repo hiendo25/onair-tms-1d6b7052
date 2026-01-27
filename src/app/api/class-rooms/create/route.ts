@@ -2,9 +2,9 @@ import "@/modules/class-room-management/listeners/create-classroom";
 
 import { NextRequest } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { CreateClassRoomDto, CreateClassRoomService } from "@/services/class-room/create-classroom.service";
-import { http } from "@/utils/http-status";
 export async function POST(request: NextRequest) {
   try {
     const { employeeId, organizationId } = await requireAuth();

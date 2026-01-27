@@ -1,7 +1,7 @@
+import { http } from "@/lib/api/http-status";
 import { notificationsRepository } from "@/repository";
 import { authRepository } from "@/repository";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
-import { http } from "@/utils/http-status";
 export async function POST(request: Request) {
   try {
     const currentUser = authRepository.getCurrentUser();

@@ -60,7 +60,7 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
     let employeeCode = payload.employee_code;
     let employeeOrder: number;
 
-    const lastOrder = await employeesRepository.getLastEmployeeOrder();
+    const lastOrder = (await employeesRepository.getLastEmployeeOrder()) || 0;
 
     if (!employeeCode || employeeCode.trim() === "") {
       employeeOrder = lastOrder + 1;
@@ -87,9 +87,10 @@ async function createEmployeeCore(payload: CreateEmployeeDto, organizationId: st
       employee_id: employeeId,
       email: payload.email,
       full_name: payload.full_name,
-      phone_number: payload.phone_number,
+      phone_number: payload.phone_number || "",
       gender: payload.gender,
-      birthday: payload.birthday,
+      birthday: payload.birthday || null,
+      avatar: null,
     });
 
     profileId = profileData.id;

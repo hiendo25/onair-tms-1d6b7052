@@ -19,7 +19,7 @@ import TableRowDataProvider from "./TableDataProvider";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowFixedWidth from "./TableRowFixedWith";
 
-export type TableDataProps<T> = {
+export type TableDataProps<T extends object> = {
   rowKey?: string;
   rows?: T[];
   columns: TableRowDataProps<T>["columns"];
@@ -52,7 +52,7 @@ const initPagination = {
 };
 type PaginationTable = Omit<Required<Exclude<typeof initPagination, undefined>>, "onPagination" | "onChangePageSize">;
 
-const TableData = <T extends { id: number | string; [key: string]: any }>({
+const TableData = <T extends { id?: number | string; [key: string]: any }>({
   rowKey,
   rows,
   columns,
@@ -118,15 +118,15 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
     });
   };
   const genRowKey = useCallback(
-    (row: T) => {
-      const currentRowKey = row[rowKey ?? "id"];
-      if (!currentRowKey) {
-        console.error("Row key is not defined for row:", row);
+    (row: T): string | undefined => {
+      const currentRowKey = rowKey ? row[rowKey] : row?.id;
+
+      if (currentRowKey === null) return undefined;
+
+      if (typeof currentRowKey === "string") {
+        return currentRowKey;
       }
-      if (typeof currentRowKey !== "string" && typeof currentRowKey !== "number") {
-        console.error("Row key must be a string or number.", currentRowKey);
-      }
-      return currentRowKey.toString();
+      return String(currentRowKey);
     },
     [rowKey],
   );
@@ -203,7 +203,7 @@ const TableData = <T extends { id: number | string; [key: string]: any }>({
                 rowsList.length > 0 &&
                 rowsList.map((row, _index) => (
                   <TableDataRow
-                    key={genRowKey(row)}
+                    key={genRowKey(row) ?? String(_index)}
                     showRowCount={showRowCount}
                     hoverRow={hoverRow}
                     indexRow={_index}

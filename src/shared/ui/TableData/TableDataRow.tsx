@@ -26,7 +26,7 @@ export interface TableRowDataProps<T> {
   onCellClick?: (column: FieldKey<T>, row: T, evt: MouseEvent<HTMLTableCellElement>) => void;
 }
 
-const TableDataRow = <T extends { id: number | string } & Record<string, any>>({
+const TableDataRow = <T extends { id?: number | string } & Record<string, any>>({
   row,
   hoverRow,
   page = 1,
@@ -70,11 +70,11 @@ const TableDataRow = <T extends { id: number | string } & Record<string, any>>({
           {renderCell
             ? renderCell(row[field], row)
             : typeof row[field] === "string" ||
-              typeof row[field] === "number" ||
-              typeof row[field] === "bigint" ||
-              typeof row[field] === "boolean"
-            ? row[field]
-            : row[field]}
+                typeof row[field] === "number" ||
+                typeof row[field] === "bigint" ||
+                typeof row[field] === "boolean"
+              ? row[field]
+              : row[field]}
         </TableCell>
       ))}
     </TableRowStyled>

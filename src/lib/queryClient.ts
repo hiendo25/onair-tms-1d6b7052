@@ -14,6 +14,7 @@ import {
 import { useSnackbar } from "notistack";
 
 import { DomainError } from "./errors/DomainError";
+import { HttpError } from "./errors/HttpError";
 
 const getQueryClient = () => {
   return new QueryClient({
@@ -43,14 +44,19 @@ function useTMutation<TData = unknown, TError = DefaultError, TVariables = void,
       ...options,
       onError: (error, variables, onMutateResult, context) => {
         // Interceptor: Show error notification
-        let errorMessage = "";
-        if (error instanceof DomainError) {
-          errorMessage = error.message;
+        if (options?.onError) {
+          options?.onError?.(error, variables, onMutateResult, context);
+          return;
         }
 
-        enqueueSnackbar(errorMessage, { variant: "error" });
-        // Call original onError if provided
-        options?.onError?.(error, variables, onMutateResult, context);
+        let message = "Something went wrong";
+        if (error instanceof HttpError) {
+          message = error.message;
+        } else if (error instanceof Error) {
+          message = error.message;
+        }
+
+        enqueueSnackbar(message, { variant: "error" });
       },
     },
     queryClient,

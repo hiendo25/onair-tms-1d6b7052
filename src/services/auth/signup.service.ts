@@ -54,7 +54,7 @@ export class SignupService {
     /**
      * Create Employee
      */
-    const lastEmployeeOrder = await employeesRepository.getLastEmployeeOrder();
+    const lastEmployeeOrder = (await employeesRepository.getLastEmployeeOrder()) || 0;
     const employeeNextOrder = lastEmployeeOrder + 1;
     const employeeCode = await this.generateEmployeeCode(employeeType);
 
@@ -103,6 +103,9 @@ export class SignupService {
       email: email,
       full_name: fullName,
       gender: "other",
+      avatar: null,
+      birthday: null,
+      phone_number: "",
     });
 
     return {
@@ -127,18 +130,21 @@ export class SignupService {
   private async generateEmployeeCode(type: "student" | "teacher") {
     const prefix = type === "student" ? "ST" : "GV";
 
-    let employeeCode = "";
-    let nextOrder = await employeesRepository.getLastEmployeeOrder();
+    const lastOrder = (await employeesRepository.getLastEmployeeOrder()) || 0;
+    let nextOrder = lastOrder + 1;
+
     for (let attempt = 0; attempt < 5; attempt++) {
+      const employeeCode = `${prefix}${String(nextOrder).padStart(6, "0")}`;
       try {
-        nextOrder++;
-        employeeCode = `${prefix}${String(nextOrder).padStart(6, "0")}`;
         const isExists = await employeesRepository.checkEmployeeCodeExists(employeeCode);
-        if (isExists) continue;
+
+        if (isExists) {
+          nextOrder++;
+          continue;
+        }
         return employeeCode;
       } catch (err) {
-        console.log(err, { employeeCode });
-        continue;
+        console.error(err, { attempt, employeeCode });
       }
     }
     throw new DomainError("Failed to generate unique employee code", "FAIL_TO_GENERATE_CODE", 404);

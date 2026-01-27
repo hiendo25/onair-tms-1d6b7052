@@ -10,6 +10,7 @@ const UNIQUE_KEY_REGEX = /Key\s*\(([^)]+)\)=\(([^)]+)\)/;
  * @returns
  */
 export const mapPostgrestError = (error: PostgrestError): DomainError => {
+  console.error(error);
   if (error.code === "23505") {
     const match = error.details?.match(UNIQUE_KEY_REGEX);
 
