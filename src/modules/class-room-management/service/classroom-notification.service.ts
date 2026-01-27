@@ -39,7 +39,7 @@ export class ClassRoomNotificationService extends NotificationBaseService {
     const detailUrl = PATHS.CLASSROOMS.DETAIL_CLASSROOM(classRoomSlug);
 
     const body = startAt
-      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).format("HH:mm, DD/MM/YYYY")}.`
+      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).utc(true).format("HH:mm, DD/MM/YYYY")}.`
       : `Lớp học "${classRoomTitle}".`;
 
     const bulkCreatePayload = receiverEmployeeIds.map<CreateNotificationPayload>((employeeId) => ({
@@ -91,7 +91,7 @@ export class ClassRoomNotificationService extends NotificationBaseService {
     const detailUrl = PATHS.CLASSROOMS.DETAIL_CLASSROOM(classRoomSlug);
 
     const body = startAt
-      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).format("HH:mm, DD/MM/YYYY")}.`
+      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).utc(true).format("HH:mm, DD/MM/YYYY")}.`
       : `Lớp học "${classRoomTitle}".`;
 
     const bulkCreatePayload = receiverEmployeeIds.map<CreateNotificationPayload>((employeeId) => ({
