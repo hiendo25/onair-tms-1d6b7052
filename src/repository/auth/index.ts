@@ -72,7 +72,7 @@ const getClaims = async () => {
   return await supabase.auth.getClaims();
 };
 
-const checkEmailExists = async (payload: { email: string }) => {
+const getUserIdByEmail = async (payload: { email: string }) => {
   const supabaseAdmin = await createServiceRoleClient();
 
   const { data, error } = await supabaseAdmin.rpc("get_user_id_by_email", { user_email: payload.email });
@@ -94,5 +94,5 @@ export {
   authServerSignOut,
   getServerSession,
   getClaims,
-  checkEmailExists,
+  getUserIdByEmail,
 };

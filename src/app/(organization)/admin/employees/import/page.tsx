@@ -8,7 +8,6 @@ import EmployeeImport from "./_components/EmployeeImport";
 interface EmployeeImportPageProps {
   searchParams: Promise<Record<string, any>>;
 }
-
 export async function generateMetadata(
   { searchParams }: EmployeeImportPageProps,
   parent: ResolvingMetadata,

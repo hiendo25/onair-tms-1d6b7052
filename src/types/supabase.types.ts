@@ -34,12 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      antidigital_djf: {
-        Row: {}
-        Insert: {}
-        Update: {}
-        Relationships: []
-      }
       assignment_bank: {
         Row: {
           created_at: string
@@ -184,7 +178,6 @@ export type Database = {
           created_at: string
           id: string
           organization_id: string
-          scope: Database["public"]["Enums"]["assignment_config_type"] | null
           status: Database["public"]["Enums"]["assignment_config_status"]
           updated_at: string
         }
@@ -198,7 +191,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -212,7 +204,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id?: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -412,7 +403,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at: string
-          duration_minutes_snapshot: number | null
           employee_id: string
           expires_at: string | null
           feedback: string | null
@@ -422,9 +412,6 @@ export type Database = {
           score: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at: string | null
           updated_at: string
         }
@@ -432,7 +419,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id: string
           expires_at?: string | null
           feedback?: string | null
@@ -442,9 +428,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -452,7 +435,6 @@ export type Database = {
           assignment_config_id?: string
           attempt_number?: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id?: string
           expires_at?: string | null
           feedback?: string | null
@@ -462,9 +444,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -3214,45 +3193,6 @@ export type Database = {
           },
         ]
       }
-      questions: {
-        Row: {
-          assignment_id: string
-          attachments: string[] | null
-          created_at: string
-          created_by: string
-          id: string
-          label: string
-          options: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by: string
-          id?: string
-          label: string
-          options?: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          label?: string
-          options?: Json | null
-          score?: number
-          type?: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       resources: {
         Row: {
           created_at: string
@@ -4197,6 +4137,28 @@ export type Database = {
           total_xp: number
         }[]
       }
+      get_employees_by_codes_and_organization: {
+        Args: { p_codes: string[]; p_organization_id: string }
+        Returns: {
+          email: string
+          employee_code: string
+          employee_id: string
+          full_name: string
+          organization_id: string
+          organization_name: string
+          profile_id: string
+        }[]
+      }
+      get_employees_by_emails_and_organization: {
+        Args: { p_emails: string[]; p_organization_id: string }
+        Returns: {
+          email: string
+          employee_id: string
+          organization_id: string
+          organization_name: string
+          profile_id: string
+        }[]
+      }
       get_filtered_employees: {
         Args:
           | {
@@ -4263,6 +4225,13 @@ export type Database = {
         Args: { user_email: string }
         Returns: string
       }
+      get_user_ids_by_emails: {
+        Args: { p_emails: string[] }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
@@ -4282,11 +4251,9 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
-      assignment_attempt_source: "manual" | "auto"
       assignment_attempt_status: "in_progress" | "submitted" | "graded"
       assignment_bank_status: "draft" | "published" | "archived" | "deleted"
       assignment_config_status: "draft" | "scheduled" | "open" | "closed"
-      assignment_config_type: "employee" | "course" | "class_room"
       assignment_result_status: "submitted" | "graded"
       attendance_method_enum: "qr" | "manual" | "online_auto"
       attendance_mode_enum: "offline" | "online"
@@ -4505,11 +4472,9 @@ export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
-      assignment_attempt_source: ["manual", "auto"],
       assignment_attempt_status: ["in_progress", "submitted", "graded"],
       assignment_bank_status: ["draft", "published", "archived", "deleted"],
       assignment_config_status: ["draft", "scheduled", "open", "closed"],
-      assignment_config_type: ["employee", "course", "class_room"],
       assignment_result_status: ["submitted", "graded"],
       attendance_method_enum: ["qr", "manual", "online_auto"],
       attendance_mode_enum: ["offline", "online"],

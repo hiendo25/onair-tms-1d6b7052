@@ -1,8 +1,6 @@
-import dayjs from "dayjs";
 import * as zod from "zod";
 
-import { EmployeeType } from "@/model/employee.model";
-import { Gender } from "@/model/profile.model";
+import dayjs from "@/lib/dayjs";
 
 export const ImportEmployeeValidation = zod.object({
   code: zod.string().min(1, "Không bỏ trống."),
