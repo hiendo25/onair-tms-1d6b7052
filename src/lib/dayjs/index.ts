@@ -2,6 +2,7 @@ import "dayjs/locale/vi";
 
 import dayjs from "dayjs";
 import advancedFormat from "dayjs/plugin/advancedFormat";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 import duration from "dayjs/plugin/duration";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -24,7 +25,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 dayjs.extend(duration);
 dayjs.extend(round);
-
+dayjs.extend(customParseFormat);
 const TIME_ZONE = "Asia/Ho_Chi_Minh";
 
 dayjs.tz.setDefault(TIME_ZONE);

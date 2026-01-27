@@ -5,6 +5,7 @@ import { EmployeeType } from "@/model/employee.model";
 import {
   employeeDepartmentsRepository,
   employeesRepository,
+  libraryRepository,
   managersEmployeesRepository,
   organizationsRepository,
   profilesRepository,
@@ -48,14 +49,15 @@ export class CreateEmployeeService {
       const existingUserId = await userRepository.getUserIdByEmail(input.email);
 
       if (existingUserId) {
-        const employeeOrganization = await employeesRepository.getEmployeeIdByUserIdAndOrganizationId(
+        const existingEmployeeInOrg = await employeesRepository.getEmployeeIdByUserIdAndOrganizationId(
           existingUserId,
           this.organizationId,
         );
-        if (employeeOrganization) {
+
+        if (existingEmployeeInOrg) {
           throw new DomainError(
             "Email đã tồn tại trên hệ thống doanh nghiệp.",
-            "EMAIL_ALREADY_EXISTS_CURRENT_ORGANIZATION",
+            "USER_ALREADY_EXISTED_CURRENT_ORGANIZATION",
             409,
           );
         }
@@ -66,14 +68,10 @@ export class CreateEmployeeService {
           organizationId: this.organizationId,
           email: input.email,
         });
-
         ctx.userId = user.id;
         ctx.userCreatedNew = true;
       }
 
-      /**
-       * Create Employee
-       */
       console.log("Start create employee");
       const lastOrder = (await employeesRepository.getLastEmployeeOrder(this.organizationId)) || 0;
       console.log({ lastOrder });
@@ -298,6 +296,7 @@ export class CreateEmployeeService {
         await employeeBranchesRepository.deleteByEmployeeId(ctx.employeeId);
         await employeeDepartmentsRepository.deleteByEmployeeId(ctx.employeeId);
         await managersEmployeesRepository.deleteManagerRelationshipsByEmployeeId(ctx.employeeId);
+        await libraryRepository.deleteLibraryByEmployeeId(ctx.employeeId);
         if (ctx.profileCreated) {
           await profilesRepository.deleteProfileByEmployeeId(ctx.employeeId);
         }

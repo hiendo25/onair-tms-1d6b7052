@@ -35,46 +35,44 @@ export async function getOrganizationById(id: string): Promise<OrganizationDto> 
 
 export async function getOrganizationsByUserId(userId: string) {
   const supabase = await createSVClient();
-
-  try {
-    const { data, error } = await supabase
-      .from("employees")
-      .select(
-        `
+  const { data, error } = await supabase
+    .from("employees")
+    .select(
+      `
 				employee_id:id,
 				user_id,
 				organization_id,
 				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code)
 			`,
-      )
-      .eq("user_id", userId);
+    )
+    .eq("user_id", userId);
 
-    if (!data || error) {
-      throw new Error(error?.message || "Organizations is empty");
-    }
-    return data;
-  } catch (err) {
-    throw new Error("Fail to get organizations");
+  if (error) {
+    throw new Error(error?.details || error?.message);
   }
+  return data;
 }
 export type GetOrganizationsByUserIdResponse = Awaited<ReturnType<typeof getOrganizationsByUserId>>;
 
 export async function getOrganizationByUserIdAndOrganizationId(userId: string, organizationId: string) {
   const supabase = await createSVClient();
-  try {
-    return await supabase
-      .from("employees")
-      .select(
-        `
+
+  const { data, error } = await supabase
+    .from("employees")
+    .select(
+      `
 				employee_id:id,
 				user_id,
 				organization_id,
-				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code)
+				organization:organizations!inner(id, name)
 			`,
-      )
-      .eq("user_id", userId)
-      .eq("organization_id", organizationId);
-  } catch (err) {
-    throw new Error("Fail to get organizations");
+    )
+    .eq("user_id", userId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.details || error.message);
   }
+  return data;
 }

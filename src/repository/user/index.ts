@@ -34,7 +34,17 @@ export const getUserIdByEmail = async (email: string) => {
   const { data, error } = await supabaseAdmin.rpc("get_user_id_by_email", { user_email: email });
   if (error) {
     console.error(error);
-    // throw new Error(error.message);
+    throw new Error(error.message);
+  }
+  return data;
+};
+
+export const getUserIdsByEmails = async (emails: string[]) => {
+  const supabaseAdmin = await createServiceRoleClient();
+  const { data, error } = await supabaseAdmin.rpc("get_user_ids_by_emails", { p_emails: emails });
+  if (error) {
+    console.error(error);
+    throw new Error(error.message);
   }
   return data;
 };

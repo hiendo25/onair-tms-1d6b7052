@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { DomainError } from "@/lib/errors/DomainError";
 import { EmployeeType } from "@/model/employee.model";
 import { Gender } from "@/model/profile.model";
-import { employeesRepository, organizationsRepository } from "@/repository";
+import { employeesRepository, organizationsRepository, userRepository } from "@/repository";
 
 import { EmployeeHeaderRowKey, EmployeeParseItem, EmployeeParseItemWithValidate } from "./employee.dto";
 import { ImportEmployeeValidation } from "./validation";
@@ -190,7 +190,6 @@ export class ImportEmployeeService {
     this.applyDuplicateFieldErrors(recordsWithValidations, this.collectDuplicateFieldsValue(employees, "email"));
     this.applyDuplicateFieldErrors(recordsWithValidations, this.collectDuplicateFieldsValue(employees, "code"));
 
-    console.log(codeList);
     /**
      * Check email exist
      */
@@ -201,7 +200,7 @@ export class ImportEmployeeService {
     ]);
 
     const codesMap = new Map(codesCheck.map((item) => [item.employee_code, item]));
-    const mailsMap = new Map(emailsCheck.map((item) => [item.profiles.email, item]));
+    const mailsMap = new Map(emailsCheck.map((item) => [item.email, item]));
 
     return recordsWithValidations.map((record) => ({
       ...record,
@@ -215,7 +214,7 @@ export class ImportEmployeeService {
   }
 
   private async getEmployeeByCodes(codes: string[]) {
-    return await employeesRepository.getEmployeesByCodes(codes);
+    return await employeesRepository.getEmployeesByCodesAndOrganizationId(codes, this.organizationId);
   }
 
   private collectDuplicateFieldsValue<K extends keyof EmployeeParseItem>(

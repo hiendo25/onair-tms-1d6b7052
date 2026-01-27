@@ -209,7 +209,7 @@ export async function getLastEmployeeOrder(organizationId?: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error(`Failed to get last employee order: ${error.message}`);
+    throw new Error(`getLastEmployeeOrder: ${error.message}`);
   }
 
   return data?.employee_order;
@@ -218,11 +218,7 @@ export async function getLastEmployeeOrder(organizationId?: string) {
 export async function checkEmployeeCodeExists(code: string) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("employees")
-    .select("employee_code")
-    .eq("employee_code", code)
-    .maybeSingle();
+  const { data, error } = await supabase.from("employees").select("id").eq("employee_code", code).maybeSingle();
 
   if (error) {
     throw new Error(error.message);
@@ -517,21 +513,10 @@ export type UpdateStatusResponse = Awaited<ReturnType<typeof updateStatus>>;
 
 export async function getEmployeesByEmailsAndOrganizationId(emails: string[], organizationId: string) {
   const supabase = await createSVClient();
-
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .select(
-      `
-			id,
-			organization_id, 
-			profiles!inner(
-				id, 
-				email
-			)
-			`,
-    )
-    .eq("organization_id", organizationId)
-    .in("profiles.email", emails);
+  const { data: employee, error } = await supabase.rpc("get_employees_by_emails_and_organization", {
+    p_emails: emails,
+    p_organization_id: organizationId,
+  });
 
   if (error) {
     console.error(error);
@@ -541,19 +526,13 @@ export async function getEmployeesByEmailsAndOrganizationId(emails: string[], or
   return employee;
 }
 
-export async function getEmployeesByCodes(codes: string[]) {
+export async function getEmployeesByCodesAndOrganizationId(codes: string[], organizationId: string) {
   const supabase = await createSVClient();
 
-  const { data: employee, error } = await supabase
-    .from("employees")
-    .select(
-      `
-			id,
-			employee_code,
-			organization_id
-			`,
-    )
-    .in("employee_code", codes);
+  const { data: employee, error } = await supabase.rpc("get_employees_by_codes_and_organization", {
+    p_codes: codes,
+    p_organization_id: organizationId,
+  });
 
   if (error) {
     console.error(error);
@@ -568,13 +547,14 @@ export async function getEmployeeIdByUserIdAndOrganizationId(userId: string, org
 
   const { data: employee, error } = await supabase
     .from("employees")
-    .select("id, organization_id")
+    .select("id, organization_id, employee_code")
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
     .maybeSingle();
 
   if (error) {
-    throw new Error(`Failed to fetch employee: ${error.message}`);
+    console.error(error);
+    throw new Error(error.details || error.message);
   }
 
   return employee;

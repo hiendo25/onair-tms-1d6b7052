@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 
 import { DomainError } from "@/lib/errors/DomainError";
-import { authRepository, profilesRepository, userPreferenceRepository } from "@/repository";
+import { profilesRepository, userPreferenceRepository } from "@/repository";
 import { employeesRepository } from "@/repository";
+import { userRepository } from "@/repository";
 import { SignUpDto, SignUpDtoResponse } from "@/types/dto/auth/signup.dto";
 import { createServiceRoleClient } from "../supabase/service-role-client";
 export class SignupService {
@@ -11,9 +12,7 @@ export class SignupService {
 
     const { email, fullName, employeeType, password } = dto;
 
-    let { data: userId } = await supabaseAdmin.rpc("get_user_id_by_email", {
-      user_email: email,
-    });
+    let userId = await userRepository.getUserIdByEmail(email);
 
     const organizationId = await this.getRootOrganizationId();
 
