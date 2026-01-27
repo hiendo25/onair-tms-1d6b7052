@@ -319,39 +319,39 @@ export class UpdateClassRoomService {
          * Optional
          */
         const oldSessionItem = oldSessions.find((item) => item.id === sessionId);
-        const syncSessionWithAssignmentPromise = (async () => {
-          const oldAssignments = oldSessionItem?.session_assignments;
+        // const syncSessionWithAssignmentPromise = (async () => {
+        //   const oldAssignments = oldSessionItem?.session_assignments;
 
-          const newAssignments = newSession.assignments;
+        //   const newAssignments = newSession.assignments;
 
-          const assignmentAddNewItems = newAssignments.filter((newItem) =>
-            oldAssignments?.every((oldItem) => oldItem.assignments.id !== newItem.assignmentId),
-          );
-          const assignmentDeleteItems = oldAssignments?.filter((oldItem) =>
-            newAssignments?.every((newItem) => newItem.assignmentId !== oldItem.assignments.id),
-          );
+        //   const assignmentAddNewItems = newAssignments.filter((newItem) =>
+        //     oldAssignments?.every((oldItem) => oldItem.assignments.id !== newItem.assignmentId),
+        //   );
+        //   const assignmentDeleteItems = oldAssignments?.filter((oldItem) =>
+        //     newAssignments?.every((newItem) => newItem.assignmentId !== oldItem.assignments.id),
+        //   );
 
-          if (assignmentDeleteItems?.length) {
-            await classRoomSessionRepository.bulkDeletePivotClassSessionWithAssignment(
-              assignmentDeleteItems.map((item) => item.id),
-            );
-          }
+        //   if (assignmentDeleteItems?.length) {
+        //     await classRoomSessionRepository.bulkDeletePivotClassSessionWithAssignment(
+        //       assignmentDeleteItems.map((item) => item.id),
+        //     );
+        //   }
 
-          if (assignmentAddNewItems.length) {
-            const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
-              assignmentAddNewItems.map((item) => ({
-                assignment_id: item.assignmentId,
-                session_id: sessionData.id,
-                start_at: null,
-                end_at: null,
-              })),
-            );
+        //   if (assignmentAddNewItems.length) {
+        //     const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
+        //       assignmentAddNewItems.map((item) => ({
+        //         assignment_id: item.assignmentId,
+        //         session_id: sessionData.id,
+        //         start_at: null,
+        //         end_at: null,
+        //       })),
+        //     );
 
-            if (error) {
-              throw new Error(error.message);
-            }
-          }
-        })();
+        //     if (error) {
+        //       throw new Error(error.message);
+        //     }
+        //   }
+        // })();
 
         /**
          * Sync class Session with course Period
@@ -394,48 +394,48 @@ export class UpdateClassRoomService {
               const coursePeriodWeeklySchedulePayload: UpsertPivotClassSessionWithCoursePeriodPayload["payload"]["weekly_schedule"] =
                 classType === "learning_path"
                   ? {
-                      duration: weeklySchedule?.duration,
-                      from:
-                        weeklySchedule?.from?.day && weeklySchedule?.from?.time
-                          ? {
-                              day: weeklySchedule?.from.day,
-                              time: weeklySchedule?.from.time,
-                            }
-                          : undefined,
-                      to:
-                        weeklySchedule?.to?.day && weeklySchedule?.to?.time
-                          ? {
-                              day: weeklySchedule?.to.day,
-                              time: weeklySchedule?.to.time,
-                            }
-                          : undefined,
-                      isDuration: weeklySchedule?.isDuration,
-                    }
+                    duration: weeklySchedule?.duration,
+                    from:
+                      weeklySchedule?.from?.day && weeklySchedule?.from?.time
+                        ? {
+                          day: weeklySchedule?.from.day,
+                          time: weeklySchedule?.from.time,
+                        }
+                        : undefined,
+                    to:
+                      weeklySchedule?.to?.day && weeklySchedule?.to?.time
+                        ? {
+                          day: weeklySchedule?.to.day,
+                          time: weeklySchedule?.to.time,
+                        }
+                        : undefined,
+                    isDuration: weeklySchedule?.isDuration,
+                  }
                   : null;
 
               console.log({ coursePeriodWeeklySchedulePayload });
               return sessionCoursePeriodId
                 ? {
-                    action: "update",
-                    payload: {
-                      id: sessionCoursePeriodId,
-                      teacher_id: teacherId,
-                      start_at: startAt ? dayjs(startAt).toISOString() : null,
-                      end_at: endAt ? dayjs(endAt).toISOString() : null,
-                      weekly_schedule: coursePeriodWeeklySchedulePayload,
-                    },
-                  }
+                  action: "update",
+                  payload: {
+                    id: sessionCoursePeriodId,
+                    teacher_id: teacherId,
+                    start_at: startAt ? dayjs(startAt).toISOString() : null,
+                    end_at: endAt ? dayjs(endAt).toISOString() : null,
+                    weekly_schedule: coursePeriodWeeklySchedulePayload,
+                  },
+                }
                 : {
-                    action: "create",
-                    payload: {
-                      class_session_id: sessionData.id,
-                      course_id: courseId,
-                      teacher_id: teacherId,
-                      start_at: startAt ? dayjs(startAt).toISOString() : null,
-                      end_at: endAt ? dayjs(endAt).toISOString() : null,
-                      weekly_schedule: coursePeriodWeeklySchedulePayload,
-                    },
-                  };
+                  action: "create",
+                  payload: {
+                    class_session_id: sessionData.id,
+                    course_id: courseId,
+                    teacher_id: teacherId,
+                    start_at: startAt ? dayjs(startAt).toISOString() : null,
+                    end_at: endAt ? dayjs(endAt).toISOString() : null,
+                    weekly_schedule: coursePeriodWeeklySchedulePayload,
+                  },
+                };
             },
           );
 
@@ -474,7 +474,7 @@ export class UpdateClassRoomService {
         await Promise.all([
           upsertAgendaPromise,
           upsertQrCodePromise,
-          syncSessionWithAssignmentPromise,
+          // syncSessionWithAssignmentPromise,
           syncSessionWithCoursePeriodPromise,
         ]);
       }),
@@ -558,21 +558,21 @@ export class UpdateClassRoomService {
 
     return qrCodeId
       ? {
-          action: "update",
-          payload: {
-            id: qrCodeId,
-            ...basePayload,
-          },
-        }
+        action: "update",
+        payload: {
+          id: qrCodeId,
+          ...basePayload,
+        },
+      }
       : {
-          action: "create",
-          payload: {
-            ...basePayload,
-            created_by: useId,
-            class_room_id: classRoomId,
-            class_session_id: classSessionId,
-          },
-        };
+        action: "create",
+        payload: {
+          ...basePayload,
+          created_by: useId,
+          class_room_id: classRoomId,
+          class_session_id: classSessionId,
+        },
+      };
   }
 
   /** --------------------------------------------------------
@@ -591,9 +591,9 @@ export class UpdateClassRoomService {
 
     const courseWeeklySchedule: UpSertClassRoomSessionPayload["payload"]["weekly_schedule"] = weeklySchedule
       ? {
-          from: weeklySchedule.from,
-          to: weeklySchedule.to,
-        }
+        from: weeklySchedule.from,
+        to: weeklySchedule.to,
+      }
       : null;
     const payload = {
       title: roomType === "single" ? classRoomTitle : classSession.title,
@@ -610,19 +610,19 @@ export class UpdateClassRoomService {
 
     return sessionId
       ? {
-          action: "update",
-          payload: {
-            ...payload,
-            id: sessionId,
-          },
-        }
+        action: "update",
+        payload: {
+          ...payload,
+          id: sessionId,
+        },
+      }
       : {
-          action: "create",
-          payload: {
-            ...payload,
-            class_room_id: classRoomId,
-          },
-        };
+        action: "create",
+        payload: {
+          ...payload,
+          class_room_id: classRoomId,
+        },
+      };
   }
 
   /** --------------------------------------------------------
@@ -645,19 +645,19 @@ export class UpdateClassRoomService {
 
       return agendaId
         ? {
-            action: "update",
-            payload: {
-              ...payload,
-              id: agendaId,
-            },
-          }
+          action: "update",
+          payload: {
+            ...payload,
+            id: agendaId,
+          },
+        }
         : {
-            action: "create",
-            payload: {
-              ...payload,
-              class_session_id: sessionId,
-            },
-          };
+          action: "create",
+          payload: {
+            ...payload,
+            class_session_id: sessionId,
+          },
+        };
     });
   }
 }

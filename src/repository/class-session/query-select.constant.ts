@@ -24,13 +24,6 @@ export const SELECT_SESSION_DETAIL = `id,
 		)
 	)
 	),
-	session_assignment:class_session_assignment(
-	id,
-	assignments(
-		id,
-		name
-	)
-	),
 	teachers:class_session_teacher(
 	id,
 	employee:employees!class_session_teacher_teacher_id_fkey(

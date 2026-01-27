@@ -20,24 +20,28 @@ import {
 import { Database, Json } from "@/types/supabase.types";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
-type AttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
+type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
+type AttemptSource = Database["public"]["Enums"]["assignment_attempt_source"];
+type AssignmentAttemptRow = Database["public"]["Tables"]["assignments_attempts"]["Row"];
 
 export interface QuestionAnswerInput {
   questionId: string;
   answer:
-    | string
-    | string[]
-    | boolean
-    | FileMetadata[]
-    | Array<{ columnAId: string; columnBId: string }>
-    | Array<{ id: string; position: number }>
-    | null;
+  | string
+  | string[]
+  | boolean
+  | FileMetadata[]
+  | Array<{ columnAId: string; columnBId: string }>
+  | Array<{ id: string; position: number }>
+  | null;
   attachments?: FileMetadata[];
 }
 
 export interface SubmitAssignmentPayload {
   assignmentId: string;
   employeeId: string;
+  attemptId?: string;
+  submissionSource?: AttemptSource;
   answers: QuestionAnswerInput[];
   allowIncomplete?: boolean;
 }
@@ -83,6 +87,29 @@ interface StoredAnswerPayload {
 const AUTO_GRADABLE_TYPES: QuestionType[] = ["radio", "checkbox", "matching", "order", "true_false"];
 
 const isAutoGradable = (type: QuestionType) => AUTO_GRADABLE_TYPES.includes(type);
+
+const buildAttemptTiming = (startedAt: Date, durationMinutes: number | null) => {
+  if (!durationMinutes || durationMinutes <= 0) {
+    return { startedAt: startedAt.toISOString(), expiresAt: null, durationSnapshot: null };
+  }
+
+  const expiresAt = new Date(startedAt.getTime() + durationMinutes * 60 * 1000).toISOString();
+  return { startedAt: startedAt.toISOString(), expiresAt, durationSnapshot: durationMinutes };
+};
+
+const mapAttemptSummary = (attempt: AssignmentAttemptRow) => ({
+  id: attempt.id,
+  status: attempt.status,
+  submittedAt: attempt.submitted_at ?? null,
+  createdAt: attempt.created_at,
+  startedAt: attempt.started_at ?? null,
+  expiresAt: attempt.expires_at ?? null,
+  durationMinutesSnapshot: attempt.duration_minutes_snapshot ?? null,
+  submissionSource: attempt.submission_source ?? null,
+  score: attempt.score ?? null,
+  maxScore: attempt.max_score ?? null,
+  attemptNumber: attempt.attempt_number,
+});
 
 const normalizeStoredAnswer = (answer: Json | null): StoredAnswerPayload => {
   if (answer === null || answer === undefined) {
@@ -273,16 +300,74 @@ const extractAnswerValue = (questionType: QuestionType, answer: QuestionAnswer |
   }
 };
 
+export async function startAssignmentAttempt(
+  assignment_config_id: string,
+  employeeId: string,
+): Promise<AssignmentAttemptSummaryDto["latestAttempt"]> {
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignment_config_id);
+  const now = new Date();
+
+  if (assignment.available_from) {
+    const startTime = new Date(assignment.available_from);
+    if (now.getTime() < startTime.getTime()) {
+      throw new Error("Bài kiểm tra chưa đến thời gian làm bài.");
+    }
+  }
+
+  if (assignment.available_to) {
+    const endTime = new Date(assignment.available_to);
+    if (now.getTime() > endTime.getTime()) {
+      throw new Error("Bài kiểm tra đã hết thời gian làm bài.");
+    }
+  }
+
+  const activeAttempt = await assignmentResultsRepository.getActiveAssignmentAttempt(assignment_config_id, employeeId);
+  if (activeAttempt) {
+    return mapAttemptSummary(activeAttempt);
+  }
+
+  const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignment_config_id, employeeId);
+  const attemptLimit = assignment.attempt_limit ?? null;
+  const attemptsUsed = latestAttempt?.attempt_number ?? 0;
+
+  if (attemptLimit !== null && attemptsUsed >= attemptLimit) {
+    throw new Error("Bạn đã hết số lần làm bài.");
+  }
+
+  const attemptNumber = latestAttempt ? latestAttempt.attempt_number + 1 : 1;
+  const timing = buildAttemptTiming(now, assignment.attempt_duration_minutes ?? null);
+
+  const attempt = await assignmentResultsRepository.createAssignmentAttempt({
+    assignment_config_id: assignment_config_id,
+    employee_id: employeeId,
+    attempt_number: attemptNumber,
+    status: "in_progress",
+    submitted_at: null,
+    score: null,
+    max_score: null,
+    started_at: timing.startedAt,
+    expires_at: timing.expiresAt,
+    duration_minutes_snapshot: timing.durationSnapshot,
+  });
+
+  return mapAttemptSummary(attempt);
+}
+
 export async function submitAssignment(payload: SubmitAssignmentPayload): Promise<SubmitAssignmentResult> {
-  const { assignmentId, employeeId, answers, allowIncomplete } = payload;
+  const { assignmentId, employeeId, answers, allowIncomplete, attemptId, submissionSource } = payload;
 
   const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignmentId, employeeId);
+  const attemptById = attemptId
+    ? await assignmentResultsRepository.getAssignmentAttemptById(attemptId)
+    : null;
+  const activeAttempt =
+    attemptById ?? (await assignmentResultsRepository.getActiveAssignmentAttempt(assignmentId, employeeId));
 
   if (answers.length === 0) {
     throw new Error("Vui lòng trả lời ít nhất một câu hỏi.");
   }
 
-  const assignment = await assignmentsRepository.getAssignmentById(assignmentId);
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
   const now = new Date();
 
   if (assignment.available_from) {
@@ -302,8 +387,18 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
   const attemptLimit = assignment.attempt_limit ?? null;
   const attemptsUsed = latestAttempt?.attempt_number ?? 0;
 
-  if (attemptLimit !== null && attemptsUsed >= attemptLimit) {
+  if (!activeAttempt && attemptLimit !== null && attemptsUsed >= attemptLimit) {
     throw new Error("Bạn đã hết số lần làm bài.");
+  }
+
+  if (activeAttempt) {
+    if (activeAttempt.assignment_config_id !== assignmentId || activeAttempt.employee_id !== employeeId) {
+      throw new Error("Attempt không hợp lệ.");
+    }
+
+    if (activeAttempt.status !== "in_progress") {
+      throw new Error("Bài kiểm tra đã được nộp trước đó.");
+    }
   }
 
   const answerMap = new Map(answers.map((answer) => [answer.questionId, answer]));
@@ -393,21 +488,29 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
     status = "graded";
   }
 
-  const attemptNumber = latestAttempt ? latestAttempt.attempt_number + 1 : 1;
-  const submittedAt = new Date().toISOString();
-  let attemptId: string | null = null;
+  const attemptNumber = activeAttempt ? activeAttempt.attempt_number : latestAttempt ? latestAttempt.attempt_number + 1 : 1;
+  const submittedAt = now.toISOString();
+  const finalSubmissionSource: AttemptSource = submissionSource ?? "manual";
+  let currentAttempt = activeAttempt ?? null;
+  let createdAttemptId: string | null = null;
 
   try {
-    const attempt = await assignmentResultsRepository.createAssignmentAttempt({
-      assignment_id: assignmentId,
-      employee_id: employeeId,
-      attempt_number: attemptNumber,
-      status,
-      submitted_at: submittedAt,
-      score: totalScore,
-      max_score: maxScore,
-    });
-    attemptId = attempt.id;
+    if (!currentAttempt) {
+      const timing = buildAttemptTiming(now, assignment.attempt_duration_minutes ?? null);
+      currentAttempt = await assignmentResultsRepository.createAssignmentAttempt({
+        assignment_config_id: assignmentId,
+        employee_id: employeeId,
+        attempt_number: attemptNumber,
+        status: "in_progress",
+        submitted_at: null,
+        score: null,
+        max_score: maxScore,
+        started_at: timing.startedAt,
+        expires_at: timing.expiresAt,
+        duration_minutes_snapshot: timing.durationSnapshot,
+      });
+      createdAttemptId = currentAttempt.id;
+    }
 
     const resultRows = questionsWithAnswers.map((question) => {
       const answerValue = extractAnswerValue(question.type, question.answer);
@@ -416,7 +519,7 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
       const isCorrect = score === null ? null : score === question.score;
 
       return {
-        attempt_id: attempt.id,
+        attempt_id: currentAttempt!.id,
         question_id: question.id,
         answer: payload as Json,
         score,
@@ -426,19 +529,27 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
 
     await assignmentResultsRepository.createAssignmentResults(resultRows);
 
+    await assignmentResultsRepository.updateAssignmentAttempt(currentAttempt.id, {
+      status,
+      submitted_at: submittedAt,
+      score: totalScore,
+      max_score: maxScore,
+      submission_source: finalSubmissionSource,
+    });
+
     return {
-      id: attempt.id,
+      id: currentAttempt.id,
       assignmentId,
       employeeId,
-      submittedAt: attempt.submitted_at ?? submittedAt,
+      submittedAt,
       score: totalScore,
       maxScore,
       status,
     };
   } catch (error) {
-    if (attemptId) {
-      await assignmentResultsRepository.deleteAssignmentResultsByAttemptId(attemptId);
-      await assignmentResultsRepository.deleteAssignmentAttemptById(attemptId);
+    if (createdAttemptId) {
+      await assignmentResultsRepository.deleteAssignmentResultsByAttemptId(createdAttemptId);
+      await assignmentResultsRepository.deleteAssignmentAttemptById(createdAttemptId);
     }
 
     throw error;
@@ -450,7 +561,7 @@ export async function getSubmissionStatus(
   employeeId: string,
 ): Promise<AssignmentAttemptSummaryDto> {
   const [assignment, latestAttempt] = await Promise.all([
-    assignmentsRepository.getAssignmentById(assignmentId),
+    assignmentsRepository.getAssignmentConfigById(assignmentId),
     assignmentResultsRepository.getLatestAssignmentAttempt(assignmentId, employeeId),
   ]);
 
@@ -466,17 +577,7 @@ export async function getSubmissionStatus(
     availableFrom: assignment.available_from ?? null,
     availableTo: assignment.available_to ?? null,
     attemptDurationMinutes: assignment.attempt_duration_minutes ?? null,
-    latestAttempt: latestAttempt
-      ? {
-          id: latestAttempt.id,
-          status: latestAttempt.status,
-          submittedAt: latestAttempt.submitted_at ?? null,
-          createdAt: latestAttempt.created_at,
-          score: latestAttempt.score,
-          maxScore: latestAttempt.max_score,
-          attemptNumber: latestAttempt.attempt_number,
-        }
-      : null,
+    latestAttempt: latestAttempt ? mapAttemptSummary(latestAttempt) : null,
   };
 }
 
@@ -494,7 +595,7 @@ export async function getSubmissionDetail(assignmentId: string, employeeId: stri
     throw new Error("Không tìm thấy thông tin học viên");
   }
 
-  const assignment = await assignmentsRepository.getAssignmentById(assignmentId);
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
   const results = await assignmentResultsRepository.getAssignmentResultsByAttemptId(attemptWithEmployee.id);
   const resultsMap = new Map(results.map((result) => [result.question_id, result]));
 
@@ -551,7 +652,7 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
     throw new Error("Không tìm thấy bài nộp của học viên");
   }
 
-  const assignment = await assignmentsRepository.getAssignmentById(assignmentId);
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
   const results = await assignmentResultsRepository.getAssignmentResultsByAttemptId(attemptWithEmployee.id);
   const resultsMap = new Map(results.map((result) => [result.question_id, result]));
   const gradeMap = new Map(questionGrades.map((grade) => [grade.questionId, grade]));

@@ -12,6 +12,7 @@ export interface MyAssignmentDto {
   attempts_remaining: number | null;
   can_retry: boolean;
   has_submitted: boolean;
+  has_active_attempt: boolean;
   submitted_at: string | null;
   score: number | null;
   max_score: number | null;

@@ -98,5 +98,12 @@ const getCategoryNames = (question: QuestionCategorySource) => {
   );
 };
 
-export { buildQuestionOptionList, getCategoryNames, getDifficultyLabel, getQuestionTypeBadgeLabel };
+export {
+  buildQuestionOptionList,
+  getCategoryNames,
+  getDifficultyLabel,
+  getQuestionTypeBadgeLabel,
+  isMatchingOptions,
+  isOrderOptions,
+};
 export type { QuestionOptionListItem };

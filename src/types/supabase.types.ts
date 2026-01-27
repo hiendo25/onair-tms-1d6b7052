@@ -184,6 +184,7 @@ export type Database = {
           created_at: string
           id: string
           organization_id: string
+          scope: Database["public"]["Enums"]["assignment_config_type"] | null
           status: Database["public"]["Enums"]["assignment_config_status"]
           updated_at: string
         }
@@ -197,6 +198,7 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id: string
+          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -210,6 +212,7 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id?: string
+          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -409,6 +412,7 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at: string
+          duration_minutes_snapshot: number | null
           employee_id: string
           expires_at: string | null
           feedback: string | null
@@ -418,6 +422,9 @@ export type Database = {
           score: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_attempt_status"]
+          submission_source:
+            | Database["public"]["Enums"]["assignment_attempt_source"]
+            | null
           submitted_at: string | null
           updated_at: string
         }
@@ -425,6 +432,7 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at?: string
+          duration_minutes_snapshot?: number | null
           employee_id: string
           expires_at?: string | null
           feedback?: string | null
@@ -434,6 +442,9 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
+          submission_source?:
+            | Database["public"]["Enums"]["assignment_attempt_source"]
+            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -441,6 +452,7 @@ export type Database = {
           assignment_config_id?: string
           attempt_number?: number
           created_at?: string
+          duration_minutes_snapshot?: number | null
           employee_id?: string
           expires_at?: string | null
           feedback?: string | null
@@ -450,6 +462,9 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
+          submission_source?:
+            | Database["public"]["Enums"]["assignment_attempt_source"]
+            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -4267,9 +4282,11 @@ export type Database = {
     }
     Enums: {
       action_code_enum: "create" | "read" | "update" | "delete"
+      assignment_attempt_source: "manual" | "auto"
       assignment_attempt_status: "in_progress" | "submitted" | "graded"
       assignment_bank_status: "draft" | "published" | "archived" | "deleted"
       assignment_config_status: "draft" | "scheduled" | "open" | "closed"
+      assignment_config_type: "employee" | "course" | "class_room"
       assignment_result_status: "submitted" | "graded"
       attendance_method_enum: "qr" | "manual" | "online_auto"
       attendance_mode_enum: "offline" | "online"
@@ -4488,9 +4505,11 @@ export const Constants = {
   public: {
     Enums: {
       action_code_enum: ["create", "read", "update", "delete"],
+      assignment_attempt_source: ["manual", "auto"],
       assignment_attempt_status: ["in_progress", "submitted", "graded"],
       assignment_bank_status: ["draft", "published", "archived", "deleted"],
       assignment_config_status: ["draft", "scheduled", "open", "closed"],
+      assignment_config_type: ["employee", "course", "class_room"],
       assignment_result_status: ["submitted", "graded"],
       attendance_method_enum: ["qr", "manual", "online_auto"],
       attendance_mode_enum: ["offline", "online"],

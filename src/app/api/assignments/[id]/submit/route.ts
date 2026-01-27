@@ -11,6 +11,7 @@ type QuestionType = Database["public"]["Enums"]["question_type"];
 interface SubmitAssignmentRequest {
   employeeId: string;
   autoSubmit?: boolean;
+  attemptId?: string;
   answers: Array<{
     questionId: string;
     answer:
@@ -34,7 +35,7 @@ export async function POST(
     const assignmentId = params.id;
 
     const body: SubmitAssignmentRequest = await request.json();
-    const { employeeId, answers, autoSubmit } = body;
+    const { employeeId, answers, autoSubmit, attemptId } = body;
 
     if (!employeeId) {
       return NextResponse.json(
@@ -307,6 +308,8 @@ export async function POST(
     const result = await assignmentResultService.submitAssignment({
       assignmentId,
       employeeId,
+      attemptId,
+      submissionSource: autoSubmit ? "auto" : "manual",
       answers: enrichedAnswers,
       allowIncomplete: Boolean(autoSubmit),
     });
