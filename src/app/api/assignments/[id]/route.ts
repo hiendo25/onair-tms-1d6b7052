@@ -16,7 +16,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }
 
     // Check if assignment has assigned students
-    const assignment = await assignmentService.getAssignmentById(assignmentId);
+    const assignment = await assignmentService.getAssignmentConfigById(assignmentId);
 
     if (assignment.assignment_employees && assignment.assignment_employees.length > 0) {
       return NextResponse.json(
@@ -79,7 +79,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const employee = await employeesRepository.getCurrentEmployee(user.id, payload.organizationId);
 
-    const assignment = await assignmentService.getAssignmentById(assignmentId);
+    const assignment = await assignmentService.getAssignmentConfigById(assignmentId);
     const submissionCount = assignment.submissions?.[0]?.count ?? 0;
     const isAssignmentLocked = submissionCount > 0;
 
@@ -114,7 +114,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ success: false, message: "Invalid assignment ID" }, { status: 400 });
     }
 
-    const assignment = await assignmentService.getAssignmentById(assignmentId);
+    const assignment = await assignmentService.getAssignmentConfigById(assignmentId);
 
     return NextResponse.json(
       {

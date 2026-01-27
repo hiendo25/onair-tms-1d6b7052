@@ -247,7 +247,7 @@ const getAssignments = async (params?: GetAssignmentsParams): Promise<PaginatedR
   };
 };
 
-const getAssignmentById = async (id: string): Promise<AssignmentDto> => {
+const getAssignmentConfigById = async (id: string): Promise<AssignmentDto> => {
   const { data, error } = await supabase
     .from("assignment_config")
     .select(
@@ -1149,12 +1149,46 @@ const getMyAssignments = async (
       max_score: number | null;
     }
   >();
+  const latestSubmittedAttemptMap = new Map<
+    string,
+    {
+      attempt_number: number;
+      status: AttemptStatus;
+      submitted_at: string | null;
+      created_at: string;
+      score: number | null;
+      max_score: number | null;
+    }
+  >();
+  const activeAttemptMap = new Map<
+    string,
+    {
+      attempt_number: number;
+      status: AttemptStatus;
+      submitted_at: string | null;
+      created_at: string;
+      score: number | null;
+      max_score: number | null;
+    }
+  >();
   const attemptsUsedMap = new Map<string, number>();
 
   (attempts ?? []).forEach((attempt) => {
     const existing = latestAttemptMap.get(attempt.assignment_config_id);
     if (!existing || attempt.attempt_number > existing.attempt_number) {
       latestAttemptMap.set(attempt.assignment_config_id, attempt);
+    }
+    if (SUBMITTED_STATUSES.includes(attempt.status)) {
+      const existingSubmitted = latestSubmittedAttemptMap.get(attempt.assignment_config_id);
+      if (!existingSubmitted || attempt.attempt_number > existingSubmitted.attempt_number) {
+        latestSubmittedAttemptMap.set(attempt.assignment_config_id, attempt);
+      }
+    }
+    if (attempt.status === "in_progress") {
+      const existingActive = activeAttemptMap.get(attempt.assignment_config_id);
+      if (!existingActive || attempt.attempt_number > existingActive.attempt_number) {
+        activeAttemptMap.set(attempt.assignment_config_id, attempt);
+      }
     }
     const currentMax = attemptsUsedMap.get(attempt.assignment_config_id) ?? 0;
     if (attempt.attempt_number > currentMax) {
@@ -1164,11 +1198,11 @@ const getMyAssignments = async (
 
   const filteredAssignments = shouldFilterByStatus
     ? assignmentsData.filter((assignment) => {
-      const latestAttempt = latestAttemptMap.get(assignment.id);
+      const latestSubmittedAttempt = latestSubmittedAttemptMap.get(assignment.id);
       if (status === "not_submitted") {
-        return !latestAttempt || !SUBMITTED_STATUSES.includes(latestAttempt.status);
+        return !latestSubmittedAttempt;
       }
-      return latestAttempt?.status === status;
+      return latestSubmittedAttempt?.status === status;
     })
     : assignmentsData;
 
@@ -1193,14 +1227,16 @@ const getMyAssignments = async (
   const pagedAssignments = shouldFilterByStatus ? filteredAssignments.slice(from, to + 1) : filteredAssignments;
 
   const myAssignments = pagedAssignments.map((item) => {
-    const latestAttempt = latestAttemptMap.get(item.id);
-    const hasSubmitted = latestAttempt ? SUBMITTED_STATUSES.includes(latestAttempt.status) : false;
+    const latestSubmittedAttempt = latestSubmittedAttemptMap.get(item.id);
+    const hasSubmitted = Boolean(latestSubmittedAttempt);
+    const activeAttempt = activeAttemptMap.get(item.id);
+    const hasActiveAttempt = Boolean(activeAttempt);
     const assignmentBank = item.assignment_bank ?? null;
     const attemptLimit = item.attempt_limit ?? null;
     const attemptsUsed = attemptsUsedMap.get(item.id) ?? 0;
     const attemptsRemaining = attemptLimit === null ? null : Math.max(attemptLimit - attemptsUsed, 0);
     const hasAttemptsLeft = attemptLimit === null ? true : attemptsRemaining! > 0;
-    const canRetry = hasAttemptsLeft && isWithinWindow(item.available_from, item.available_to);
+    const canRetry = (hasActiveAttempt || hasAttemptsLeft) && isWithinWindow(item.available_from, item.available_to);
 
     return {
       assignment_id: item.id,
@@ -1212,10 +1248,11 @@ const getMyAssignments = async (
       attempts_remaining: attemptsRemaining,
       can_retry: canRetry,
       has_submitted: hasSubmitted,
-      submitted_at: latestAttempt?.submitted_at ?? null,
-      score: latestAttempt?.score ?? null,
-      max_score: latestAttempt?.max_score ?? null,
-      status: latestAttempt?.status ?? null,
+      has_active_attempt: hasActiveAttempt,
+      submitted_at: latestSubmittedAttempt?.submitted_at ?? null,
+      score: latestSubmittedAttempt?.score ?? null,
+      max_score: latestSubmittedAttempt?.max_score ?? null,
+      status: latestSubmittedAttempt?.status ?? null,
     };
   });
 
@@ -1423,7 +1460,7 @@ export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) 
 export type GetAssignmentsV2Response = Awaited<ReturnType<typeof getAssignmentsV2>>;
 export {
   getAssignments,
-  getAssignmentById,
+  getAssignmentConfigById,
   getLatestAssignmentByBankId,
   getAssignmentStudents,
   getAssignmentQuestions,

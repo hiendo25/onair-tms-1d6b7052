@@ -12,7 +12,6 @@ import {
   FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
   Menu,
   MenuItem,
   Select,
@@ -34,6 +33,7 @@ import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
+import { fDateTime, FORMAT_DATE_DAY } from "@/lib";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import PageContainer from "@/shared/ui/PageContainer";
@@ -106,30 +106,24 @@ export default function MyAssignmentsList() {
     }
   }, [selectedAssignmentId, employeeId, router]);
 
-  const formatDate = React.useCallback((dateString: string | null) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }, []);
-
-  const getStatusChip = React.useCallback((status: string | null, hasSubmitted: boolean) => {
-    if (!hasSubmitted) {
+  const getStatusChip = React.useCallback(
+    (status: string | null, hasSubmitted: boolean, hasActiveAttempt: boolean) => {
+      if (hasActiveAttempt) {
+        return <Chip label="Đang làm" color="info" size="small" />;
+      }
+      if (!hasSubmitted) {
+        return <Chip label="Chưa nộp" color="warning" size="small" />;
+      }
+      if (status === "graded") {
+        return <Chip label="Đã chấm" color="success" size="small" />;
+      }
+      if (status === "submitted") {
+        return <Chip label="Đã nộp" color="info" size="small" />;
+      }
       return <Chip label="Chưa nộp" color="warning" size="small" />;
-    }
-    if (status === "graded") {
-      return <Chip label="Đã chấm" color="success" size="small" />;
-    }
-    if (status === "submitted") {
-      return <Chip label="Đã nộp" color="info" size="small" />;
-    }
-    return <Chip label="Chưa nộp" color="warning" size="small" />;
-  }, []);
+    },
+    [],
+  );
 
   const assignments = React.useMemo(() => paginatedResult?.data || [], [paginatedResult?.data]);
   const totalCount = paginatedResult?.total || 0;
@@ -137,7 +131,12 @@ export default function MyAssignmentsList() {
   const selectedAssignment = React.useMemo(() => {
     return assignments?.find((a) => a.assignment_id === selectedAssignmentId);
   }, [assignments, selectedAssignmentId]);
-  const submitLabel = selectedAssignment?.has_submitted ? "Làm lại" : "Nộp bài";
+
+  const submitLabel = selectedAssignment?.has_active_attempt
+    ? "Tiếp tục làm"
+    : selectedAssignment?.has_submitted
+      ? "Làm lại"
+      : "Nộp bài";
 
   return (
     <PageContainer title="Bài kiểm tra của tôi" breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}>
@@ -238,9 +237,11 @@ export default function MyAssignmentsList() {
                             </ReactMarkdown>
                           </TableCell>
                           <TableCell>
-                            <Typography variant="body2">{formatDate(assignment.submitted_at)}</Typography>
+                            <Typography variant="body2">{fDateTime(assignment.submitted_at, FORMAT_DATE_DAY)}</Typography>
                           </TableCell>
-                          <TableCell>{getStatusChip(assignment.status, assignment.has_submitted)}</TableCell>
+                          <TableCell>
+                            {getStatusChip(assignment.status, assignment.has_submitted, assignment.has_active_attempt)}
+                          </TableCell>
                           <TableCell>
                             {assignment.status === "graded" && assignment.score !== null ? (
                               <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -295,7 +296,10 @@ export default function MyAssignmentsList() {
           <MenuItem onClick={handleSubmitAssignment} disabled={!selectedAssignment?.can_retry}>
             {submitLabel}
           </MenuItem>
-          <MenuItem onClick={handleViewResult} disabled={selectedAssignment?.status !== "graded"}>
+          <MenuItem
+            onClick={handleViewResult}
+            disabled={!selectedAssignment?.has_submitted || selectedAssignment?.status !== "graded"}
+          >
             Xem kết quả
           </MenuItem>
         </Menu>
