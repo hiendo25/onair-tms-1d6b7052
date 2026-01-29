@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AuthError } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 
+import { PATHS } from "@/constants/path.constant";
 import { AuthSignInWithPasswordPayload } from "@/repository/auth";
 import { useSignInWithGoogleMutation, useSignInWithPasswordMutation } from "../operations/mutation";
 /**
@@ -22,7 +23,7 @@ export const useAuthSignInWithPassword = () => {
           return;
         }
         setError(null);
-        router.refresh();
+        router.replace(PATHS.DASHBOARD);
       },
       onError: (error) => {
         console.error("Error signing in:", error);

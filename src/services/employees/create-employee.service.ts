@@ -186,28 +186,18 @@ export class CreateEmployeeService {
     }
 
     return type === "admin"
-      ? "ab7b2ebf-2ae4-49c0-aaea-cb8f7c144a4b"
+      ? "4b096c29-4ddb-4603-80d9-b343ebb5fb3a"
       : type === "teacher"
-        ? "af09f332-0256-4361-b0dd-3524bb5ebdb2"
-        : "91be4b67-e292-420d-b6e7-b4619eec077f";
+        ? "666e25a4-94df-4897-9e8b-373494b3f593"
+        : "3aaa6253-89bc-474d-bfde-9986e58a906c";
   }
   private async createUserReference(userId: string) {
-    const { data: currentReferenceData, error: currentReferenceError } =
-      await userPreferenceRepository.getUserPreferencesByUserId(userId);
-
-    if (currentReferenceError) {
-      throw new Error(currentReferenceError.message);
-    }
-
-    if (!currentReferenceData) {
-      const { error: referenceError } = await userPreferenceRepository.createUserPreference({
+    const userReference = await userPreferenceRepository.getUserPreferencesByUserId(userId);
+    if (!userReference) {
+      await userPreferenceRepository.createUserPreference({
         user_id: userId,
         default_organization_id: this.organizationId,
       });
-
-      if (referenceError) {
-        throw new Error(referenceError.message);
-      }
     }
   }
 
@@ -290,7 +280,7 @@ export class CreateEmployeeService {
   }
 
   private async rollback(ctx: RollbackContext) {
-    console.error("[CreateEmployeeService] rollback start", ctx);
+    console.error("Rollback start", ctx);
     try {
       if (ctx.employeeId) {
         await employeeBranchesRepository.deleteByEmployeeId(ctx.employeeId);
@@ -314,7 +304,7 @@ export class CreateEmployeeService {
         }
       }
     } catch (err) {
-      console.error("[CreateEmployeeService] rollback failed", err);
+      console.error("Rollback failed", err);
     }
   }
 

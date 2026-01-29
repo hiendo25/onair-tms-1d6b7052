@@ -5,25 +5,17 @@ import { useUserOrganization } from "@/modules/organization";
 import { useGetBranchesQuery } from "../operations/query";
 export interface BranchSelectorProps {
   className?: string;
-  onSelect?: (branchIds: string[]) => void;
   values?: string[];
   multiple?: boolean;
+  onSelect?: (branchIds: string[]) => void;
+  onChange?: (branchIds: string[]) => void;
 }
-const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, values, multiple = false }) => {
+const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, onChange, values, multiple = false }) => {
   const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
   const [branchIds, setBranchIds] = useState<string[]>([]);
-  const {
-    data: branchesData,
-    isLoading,
-    error,
-  } = useGetBranchesQuery(
-    {
-      organizationId: organizationId!,
-    },
-    {
-      enabled: !!organizationId,
-    },
-  );
+  const { data: branchesData } = useGetBranchesQuery({
+    organizationId,
+  });
   const departmentList = branchesData?.data || [];
 
   const handleChange = (event: SelectChangeEvent<typeof branchIds>) => {
@@ -32,6 +24,12 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
     } = event;
 
     const selectedValues = typeof value === "string" ? value.split(",") : value;
+
+    if (onChange) {
+      onChange?.(selectedValues);
+      return;
+    }
+
     if (onSelect) {
       onSelect?.(selectedValues);
       return;
@@ -45,10 +43,10 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   };
 
   useEffect(() => {
-    if (!onSelect) return;
+    if (!onSelect && !onChange) return;
 
     setBranchIds(values ?? []);
-  }, [values, onSelect]);
+  }, [values, onSelect, onChange]);
 
   return (
     <Select
@@ -70,12 +68,20 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
         return selected.map((item) => getBranchName(item)).join(", ");
       }}
       fullWidth
+      MenuProps={{
+        PaperProps: {
+          sx: (theme) => ({
+            border: `1px solid ${theme.palette.grey[300]}`,
+            maxHeight: 350,
+          }),
+        },
+      }}
     >
-      <MenuItem value="" disabled>
+      <MenuItem value="" disabled sx={{ fontSize: 14 }}>
         Chọn chi nhánh
       </MenuItem>
       {departmentList.map((item) => (
-        <MenuItem key={item.id} value={item.id}>
+        <MenuItem key={item.id} value={item.id} sx={{ fontSize: 14 }}>
           {item.name}
         </MenuItem>
       ))}

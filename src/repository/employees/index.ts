@@ -4,6 +4,8 @@ import type { EmployeeDto, GetEmployeesParams } from "@/types/dto/employees";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 import { Database } from "@/types/supabase.types";
 
+import { GetEmployeesFilter } from "./type";
+
 const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResult<EmployeeDto>> => {
   const page = params?.page ?? 0;
   const limit = params?.limit ?? 12;
@@ -22,6 +24,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
   const departmentJoinType = hasDepartmentFilter ? "!inner" : "";
   const branchJoinType = hasBranchFilter ? "!inner" : "";
 
+  const profileInnerJoin = search ? "!inner" : "";
   // Build query using Supabase ORM with new junction tables
   // Use !inner for profiles to ensure we only get employees with valid profile data
   let query = supabase.from("employees").select(
@@ -34,7 +37,7 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
       user_id,
       created_at,
       status,
-      profiles!inner (
+      profiles${profileInnerJoin} (
         id,
         full_name,
         email,
@@ -120,6 +123,119 @@ const getEmployees = async (params?: GetEmployeesParams): Promise<PaginatedResul
     limit,
   };
 };
+
+export async function getEmployeesV2(employeesFilter: GetEmployeesFilter) {
+  const supabaseSv = await createSVClient();
+
+  const {
+    from = 0,
+    to = 50,
+    departmentId,
+    branchId,
+    status,
+    employeeType,
+    organizationId,
+    filterField,
+    filterValue,
+  } = employeesFilter;
+
+  const departmentInnerJoin = departmentId ? "!inner" : "";
+
+  const branchInnerJoin = branchId ? "!inner" : "";
+
+  const profileInnerJoin = filterField && filterValue ? "!inner" : "";
+
+  let query = supabaseSv.from("employees").select(
+    `
+      id,
+      employee_code,
+      start_date,
+      position_id,
+      employee_type,
+      user_id,
+      created_at,
+      status,
+      profiles${profileInnerJoin} (
+        id,
+        full_name,
+        email,
+        phone_number,
+        gender,
+        birthday,
+        avatar
+      ),
+      positions (
+        id,
+        title
+      ),
+      employee_branches${branchInnerJoin} (
+        id,
+        branch_id,
+        created_at,
+        branches (
+          id,
+          name,
+          code,
+          address
+        )
+      ),
+      employee_departments${departmentInnerJoin} (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
+        )
+      ),
+      managers_employees!managers_employees_employee_id_fkey (
+        manager_id
+      )
+    `,
+    { count: "exact" },
+  );
+
+  if (status) {
+    query = query.eq("status", status);
+  }
+
+  if (employeeType) {
+    query = query.eq("employee_type", employeeType);
+  }
+
+  if (departmentId) {
+    query = query.eq("employee_departments.department_id", departmentId);
+  }
+
+  if (branchId) {
+    query = query.eq("employee_branches.branch_id", branchId);
+  }
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+  const filterMap = {
+    code: "employee_code",
+    email: "profiles.email",
+    name: "profiles.full_name",
+  };
+  if (filterField && filterValue) {
+    query = query.ilike(filterMap[filterField], `%${filterValue}%`);
+  }
+
+  const { data, error, count } = await query.order("created_at", { ascending: false }).range(from, to);
+
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
+  }
+
+  return {
+    data,
+    count,
+  };
+}
 
 const getEmployeeById = async (id: string) => {
   const { data, error } = await supabase

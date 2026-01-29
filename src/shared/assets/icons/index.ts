@@ -19,6 +19,7 @@ import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
 import Copy07Icon from "./Copy07Icon";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
+import DotHorizontalIcon from "./DotHorizontalIcon";
 import Download01Icon from "./Download01Icon";
 import Edit02Icon from "./Edit02Icon";
 import Edit05Icon from "./Edit05Icon";
@@ -157,4 +158,5 @@ export {
   AlertCircleIcon,
   CertificateIcon,
   PieChart2Icon,
+  DotHorizontalIcon,
 };
