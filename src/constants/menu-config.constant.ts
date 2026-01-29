@@ -1,12 +1,12 @@
 import React from "react";
 import RouteIcon from "@mui/icons-material/Route";
-import StyleIcon from "@mui/icons-material/Style";
 
 import {
   BookOpenIcon,
   CertificateIcon,
   ClipboardIcon,
   FileAttachmentIcon,
+  FlashcardIcon,
   FolderShieldIcon,
   GitIcon,
   MonitorIcon,
@@ -239,7 +239,7 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
   },
   {
     title: "Flashcard",
-    icon: React.createElement(StyleIcon),
+    icon: React.createElement(FlashcardIcon),
     key: "flashcards",
     path: PATHS.FLASHCARDS.ROOT,
     persCheck: [],
