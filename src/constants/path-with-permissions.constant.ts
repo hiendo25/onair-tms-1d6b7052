@@ -5,10 +5,10 @@ import { PermissionsCheck } from "./permission.constant";
 type DeepPathValues<T> = T extends string
   ? T
   : T extends (...args: any[]) => infer R
-  ? R
-  : T extends object
-  ? { [K in keyof T]: DeepPathValues<T[K]> }[keyof T]
-  : never;
+    ? R
+    : T extends object
+      ? { [K in keyof T]: DeepPathValues<T[K]> }[keyof T]
+      : never;
 
 type AllPathValues = DeepPathValues<typeof PATHS>;
 
@@ -142,4 +142,8 @@ export const PATHS_WITH_PERMISSIONS = {
   [PATHS.SURVEYS.EDIT()]: ["survey:update"],
   [PATHS.SURVEYS.CREATE]: ["survey:create"],
   [PATHS.SURVEYS.STATISTICS()]: ["survey:read"],
+  [PATHS.FLASHCARDS.ROOT]: [{ $or: "flashcard:read" }, { $or: "flashcard:create" }, { $or: "flashcard:update" }, { $or: "flashcard:delete" }],
+  [PATHS.FLASHCARDS.CREATE]: ["flashcard:create"],
+  [PATHS.FLASHCARDS.DETAIL()]: ["flashcard:read"],
+  [PATHS.FLASHCARDS.EDIT()]: ["flashcard:update"],
 } as const satisfies PathWithPermissionsCheck;

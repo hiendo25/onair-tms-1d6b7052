@@ -1,5 +1,6 @@
 import React from "react";
 import RouteIcon from "@mui/icons-material/Route";
+import StyleIcon from "@mui/icons-material/Style";
 
 import {
   BookOpenIcon,
@@ -233,6 +234,27 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
         title: "Tạo khảo sát",
         key: "surveys/create",
         path: PATHS.SURVEYS.CREATE,
+      },
+    ],
+  },
+  {
+    title: "Flashcard",
+    icon: React.createElement(StyleIcon),
+    key: "flashcards",
+    path: PATHS.FLASHCARDS.ROOT,
+    persCheck: [],
+    children: [
+      {
+        title: "Danh sách Flashcard",
+        key: "flashcards/list",
+        path: PATHS.FLASHCARDS.ROOT,
+        type: "item",
+      },
+      {
+        title: "Tạo Flashcard",
+        key: "flashcards/create",
+        path: PATHS.FLASHCARDS.CREATE,
+        type: "item",
       },
     ],
   },
