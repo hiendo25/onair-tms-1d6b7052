@@ -2,7 +2,9 @@ import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
+import { flashcardsRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
+import FlashcardForm from "../../_components/FlashcardForm";
 
 type EditFlashcardPageProps = {
   params: Promise<{ id: string }>;
@@ -14,38 +16,39 @@ export async function generateMetadata(
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { id } = await params;
+  const flashcard = await flashcardsRepository.getFlashcardById(id);
+
+  if (!flashcard) {
+    return {
+      title: "Chỉnh sửa Flashcard",
+      description: "Chỉnh sửa flashcard",
+    };
+  }
 
   return {
-    title: `Chỉnh sửa Flashcard ${id}`,
-    description: `Chỉnh sửa flashcard ${id}`,
+    title: `Chỉnh sửa Flashcard: ${flashcard.name}`,
+    description: `Chỉnh sửa flashcard ${flashcard.name}`,
   };
 }
 
 export default async function EditFlashcardPage({ params }: EditFlashcardPageProps) {
   const { id } = await params;
+  const flashcard = await flashcardsRepository.getFlashcardById(id);
 
-  // TODO: Fetch flashcard data from API
-  // const flashcardDetail = await flashcardRepository.getFlashcardById(id);
-
-  // For now, just show the page
-  // if (!flashcardDetail) {
-  //   notFound();
-  // }
+  if (!flashcard) {
+    notFound();
+  }
 
   return (
     <PageContainer
-      title={`Chỉnh sửa Flashcard ${id}`}
+      title={`Chỉnh sửa Flashcard: ${flashcard.name}`}
       breadcrumbs={[
         { title: "Flashcard", path: PATHS.FLASHCARDS.ROOT },
-        { title: `Flashcard ${id}`, path: PATHS.FLASHCARDS.DETAIL(id) },
+        { title: flashcard.name, path: PATHS.FLASHCARDS.DETAIL(id) },
         { title: "Chỉnh sửa" },
       ]}
     >
-      <div>
-        <h1>Edit Flashcard Page</h1>
-        <p>Flashcard ID: {id}</p>
-        <p>This is the edit flashcard page. Content will be updated later.</p>
-      </div>
+      <FlashcardForm mode="edit" flashcardId={id} />
     </PageContainer>
   );
 }

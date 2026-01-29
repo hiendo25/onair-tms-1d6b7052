@@ -17,8 +17,13 @@ import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 
 import { PATHS } from "@/constants/path.constant";
+import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import { useOrganizationId } from "@/hooks/useOrganizationId";
-import { useDeleteFlashcardMutation, useGetFlashcardsQuery } from "@/modules/flashcards";
+import {
+  useDeleteFlashcardMutation,
+  useGetFlashcardsQuery,
+  useToggleFlashcardMutation,
+} from "@/modules/flashcards";
 import { SearchIcon } from "@/shared/assets/icons";
 import { FlashcardCard } from "@/shared/ui/flashcards";
 
@@ -26,6 +31,7 @@ const FlashcardsListContainer: React.FC = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { enqueueSnackbar } = useSnackbar();
+  const dialogs = useDialogs();
   const { organizationId } = useOrganizationId();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -54,6 +60,9 @@ const FlashcardsListContainer: React.FC = () => {
   // Delete mutation
   const { mutate: deleteFlashcard } = useDeleteFlashcardMutation();
 
+  // Toggle mutation
+  const { mutate: toggleFlashcard } = useToggleFlashcardMutation();
+
   const flashcards = flashcardsData?.data || [];
   const totalCount = flashcardsData?.count || 0;
 
@@ -65,69 +74,56 @@ const FlashcardsListContainer: React.FC = () => {
     setSearchQuery(event.target.value);
   };
 
-  const handleToggleFlashcard = (_id: string, isActive: boolean) => {
-    // TODO: Implement toggle mutation
-    enqueueSnackbar(isActive ? "Flashcard đã được kích hoạt" : "Flashcard đã được vô hiệu hóa", {
-      variant: "success",
-    });
+  const handleToggleFlashcard = (id: string, isActive: boolean) => {
+    const newStatus = isActive ? "active" : "inactive";
+    toggleFlashcard(
+      { id, status: newStatus },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["flashcards", organizationId] });
+          enqueueSnackbar(isActive ? "Flashcard đã được kích hoạt" : "Flashcard đã được vô hiệu hóa", {
+            variant: "success",
+          });
+        },
+        onError: () => {
+          enqueueSnackbar("Không thể cập nhật trạng thái flashcard", { variant: "error" });
+        },
+      }
+    );
   };
 
   const handleEditFlashcard = (id: string) => {
     router.push(PATHS.FLASHCARDS.EDIT(id));
   };
 
-  const handleDeleteFlashcard = (id: string) => {
+  const handleViewFlashcard = (id: string) => {
+    router.push(PATHS.FLASHCARDS.DETAIL(id));
+  };
+
+  const handleDeleteFlashcard = (id: string, flashcardName: string) => async () => {
+    const confirmed = await dialogs.confirm(
+      `Bạn có chắc chắn muốn xóa "${flashcardName}"? Hành động này không thể hoàn tác.`,
+      {
+        title: "Xác nhận xóa",
+        okText: "Xóa",
+        cancelText: "Hủy",
+        severity: "error",
+      }
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     deleteFlashcard(id, {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["flashcards", organizationId] });
+        enqueueSnackbar("Xóa flashcard thành công", { variant: "success" });
       },
     });
   };
 
-  // Mock data for demonstration - remove when real data is available
-  const mockFlashcards = [
-    {
-      id: "1",
-      name: "Kỹ năng giao tiếp hiệu quả",
-      imageUrl: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=225&fit=crop",
-      status: "active" as const,
-      viewCount: 145,
-      className: "Lớp Marketing 101",
-      extraTag: "+1",
-      isActive: true,
-    },
-    {
-      id: "2",
-      name: "5 nguyên tắc vàng khi làm việc nhóm",
-      imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400&h=225&fit=crop",
-      status: "active" as const,
-      viewCount: 89,
-      className: "Onboarding nhân viên",
-      isActive: true,
-    },
-    {
-      id: "3",
-      name: "Cách quản lý thời gian hiệu quả",
-      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=225&fit=crop",
-      status: "inactive" as const,
-      viewCount: 0,
-      className: "Chưa gán lớp học",
-      isActive: false,
-    },
-    {
-      id: "4",
-      name: "An toàn thông tin - Những điều cần biết",
-      imageUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&h=225&fit=crop",
-      status: "active" as const,
-      viewCount: 234,
-      className: "Lớp IT Security",
-      extraTag: "+1",
-      isActive: true,
-    },
-  ];
-
-  // Use mock data if no real data
-  const displayFlashcards = flashcards.length > 0 ? flashcards : mockFlashcards;
+  const displayFlashcards = flashcards || [];
 
   return (
     <Box>
@@ -188,18 +184,19 @@ const FlashcardsListContainer: React.FC = () => {
       {/* Flashcard Grid */}
       {!isLoading && displayFlashcards.length > 0 && (
         <Grid container spacing={3}>
-          {displayFlashcards.map((flashcard: any) => (
+          {displayFlashcards.map((flashcard) => (
             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={flashcard.id}>
               <FlashcardCard
                 id={flashcard.id}
                 name={flashcard.name}
-                imageUrl={flashcard.imageUrl}
+                imageUrl={flashcard.image_url}
                 status={flashcard.status}
-                viewCount={flashcard.viewCount}
-                className={flashcard.className}
-                extraTag={flashcard.extraTag}
-                isActive={flashcard.isActive}
+                // viewCount={flashcard.viewCount}
+                // className={flashcard.className}
+                // extraTag={flashcard.extraTag}
+                isActive={flashcard.status === "active"}
                 onToggle={handleToggleFlashcard}
+                onView={handleViewFlashcard}
                 onEdit={handleEditFlashcard}
                 onDelete={handleDeleteFlashcard}
               />

@@ -15,7 +15,7 @@ import {
   Switch,
   Typography,
 } from "@mui/material";
-import PopupState, { bindMenu, bindTrigger } from "material-ui-popup-state";
+import PopupState, { bindMenu, bindTrigger, type InjectedProps } from "material-ui-popup-state";
 
 import { EyeIcon } from "@/shared/assets/icons";
 
@@ -29,8 +29,9 @@ export interface FlashcardCardProps {
   extraTag?: string;
   isActive?: boolean;
   onToggle?: (id: string, isActive: boolean) => void;
+  onView?: (id: string) => void;
   onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: string, name: string) => (() => void) | void;
 }
 
 const FlashcardCard: React.FC<FlashcardCardProps> = ({
@@ -43,22 +44,32 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
                                                        extraTag,
                                                        isActive = true,
                                                        onToggle,
+                                                       onView,
                                                        onEdit,
                                                        onDelete,
                                                      }) => {
-  const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggle = (event: React.MouseEvent) => {
     event.stopPropagation();
-    onToggle?.(id, event.target.checked);
+    onToggle?.(id, !isActive);
   };
 
-  const handleEdit = (popupState: any) => () => {
+  const handleNameClick = () => {
+    onView?.(id);
+  };
+
+  const handleView = (popupState: InjectedProps) => () => {
+    onView?.(id);
+    popupState.close();
+  };
+
+  const handleEdit = (popupState: InjectedProps) => () => {
     onEdit?.(id);
     popupState.close();
   };
 
-  const handleDelete = (popupState: any) => () => {
-    onDelete?.(id);
+  const handleDelete = (popupState: InjectedProps) => () => {
     popupState.close();
+    onDelete?.(id, name)?.();
   };
 
   return (
@@ -76,13 +87,13 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
       <Box sx={{ position: "relative" }}>
         <CardMedia
           component="img"
-          height={160}
           image={imageUrl || "/images/placeholder-flashcard.png"}
           alt={name}
           sx={{
             objectFit: "cover",
             borderTopLeftRadius: 8,
             borderTopRightRadius: 8,
+            aspectRatio: "4/3",
           }}
         />
         <Box
@@ -97,7 +108,7 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
         >
           <Switch
             checked={isActive}
-            onChange={handleToggle}
+            onClick={handleToggle}
             size="small"
             sx={{
               "& .MuiSwitch-switchBase": {
@@ -123,6 +134,7 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
         <Typography
           variant="subtitle1"
           fontWeight={600}
+          onClick={handleNameClick}
           sx={{
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -131,6 +143,7 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
             WebkitBoxOrient: "vertical",
             mb: 1.5,
             minHeight: 48,
+            cursor: "pointer",
           }}
         >
           {name}
@@ -207,6 +220,9 @@ const FlashcardCard: React.FC<FlashcardCardProps> = ({
                     },
                   }}
                 >
+                  <MenuItem onClick={handleView(popupState)} sx={{ py: 0.5, minHeight: 28 }}>
+                    <Typography variant="body2">Xem chi tiết</Typography>
+                  </MenuItem>
                   <MenuItem onClick={handleEdit(popupState)} sx={{ py: 0.5, minHeight: 28 }}>
                     <Typography variant="body2">Chỉnh sửa</Typography>
                   </MenuItem>

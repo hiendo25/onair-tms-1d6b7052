@@ -26,12 +26,15 @@ const getFlashcards = async (params?: GetFlashcardsQueryParams) => {
       query = query.eq("organization_id", organizationId);
     }
 
+    // Filter out soft-deleted records
+    query = query.is("deleted_at", null);
+
     if (search) {
       query = query.or(`name.ilike.%${search}%,content.ilike.%${search}%`);
     }
 
     return query.order("created_at", { ascending: false }).range(from, to);
-  } catch (err) {
+  } catch {
     throw new Error("Failed to fetch flashcards");
   }
 };
@@ -55,14 +58,16 @@ const getFlashcardById = async (id: string) => {
       `
       )
       .eq("id", id)
+      .is("deleted_at", null)
       .single();
 
     if (!data || error) {
       throw new Error(error.message);
     }
     return data;
-  } catch (err: any) {
-    throw new Error(`Failed to fetch flashcard: ${err?.message}`);
+  } catch (err) {
+    const error = err as { message?: string };
+    throw new Error(`Failed to fetch flashcard: ${error?.message}`);
   }
 };
 export type GetFlashcardByIdResponse = Awaited<ReturnType<typeof getFlashcardById>>;
@@ -80,8 +85,9 @@ const createFlashcard = async (payload: CreateFlashcardPayload) => {
       throw new Error(error.message);
     }
     return data;
-  } catch (err: any) {
-    throw new Error(`Failed to create flashcard: ${err?.message}`);
+  } catch (err) {
+    const error = err as { message?: string };
+    throw new Error(`Failed to create flashcard: ${error?.message}`);
   }
 };
 export type CreateFlashcardResponse = Awaited<ReturnType<typeof createFlashcard>>;
@@ -101,8 +107,9 @@ const updateFlashcard = async (payload: UpdateFlashcardPayload) => {
       throw new Error(error.message);
     }
     return data;
-  } catch (err: any) {
-    throw new Error(`Failed to update flashcard: ${err?.message}`);
+  } catch (err) {
+    const error = err as { message?: string };
+    throw new Error(`Failed to update flashcard: ${error?.message}`);
   }
 };
 export type UpdateFlashcardResponse = Awaited<ReturnType<typeof updateFlashcard>>;
@@ -110,17 +117,44 @@ export type UpdateFlashcardResponse = Awaited<ReturnType<typeof updateFlashcard>
 const deleteFlashcard = async (id: string) => {
   const supabase = createClient();
   try {
-    const { error } = await supabase.from("flashcards").delete().eq("id", id);
+    const { data, error } = await supabase
+      .from("flashcards")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("*")
+      .single();
 
-    if (error) {
+    if (!data || error) {
       throw new Error(error.message);
     }
-    return { success: true };
-  } catch (err: any) {
-    throw new Error(`Failed to delete flashcard: ${err?.message}`);
+    return data;
+  } catch (err) {
+    const error = err as { message?: string };
+    throw new Error(`Failed to delete flashcard: ${error?.message}`);
   }
 };
 export type DeleteFlashcardResponse = Awaited<ReturnType<typeof deleteFlashcard>>;
+
+const toggleFlashcard = async (id: string, status: "active" | "inactive") => {
+  const supabase = createClient();
+  try {
+    const { data, error } = await supabase
+      .from("flashcards")
+      .update({ status })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (!data || error) {
+      throw new Error(error.message);
+    }
+    return data;
+  } catch (err) {
+    const error = err as { message?: string };
+    throw new Error(`Failed to toggle flashcard: ${error?.message}`);
+  }
+};
+export type ToggleFlashcardResponse = Awaited<ReturnType<typeof toggleFlashcard>>;
 
 export {
   getFlashcards,
@@ -128,4 +162,5 @@ export {
   createFlashcard,
   updateFlashcard,
   deleteFlashcard,
+  toggleFlashcard,
 };

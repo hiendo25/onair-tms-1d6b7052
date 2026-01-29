@@ -9,6 +9,12 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      antidigital_djf: {
+        Row: {}
+        Insert: {}
+        Update: {}
+        Relationships: []
+      }
       assignment_bank: {
         Row: {
           created_at: string
@@ -153,7 +159,6 @@ export type Database = {
           created_at: string
           id: string
           organization_id: string
-          scope: Database["public"]["Enums"]["assignment_config_type"] | null
           status: Database["public"]["Enums"]["assignment_config_status"]
           updated_at: string
         }
@@ -167,7 +172,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -181,7 +185,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id?: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -381,7 +384,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at: string
-          duration_minutes_snapshot: number | null
           employee_id: string
           expires_at: string | null
           feedback: string | null
@@ -391,9 +393,6 @@ export type Database = {
           score: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at: string | null
           updated_at: string
         }
@@ -401,7 +400,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id: string
           expires_at?: string | null
           feedback?: string | null
@@ -411,9 +409,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -421,7 +416,6 @@ export type Database = {
           assignment_config_id?: string
           attempt_number?: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id?: string
           expires_at?: string | null
           feedback?: string | null
@@ -431,9 +425,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -2186,6 +2177,7 @@ export type Database = {
           content: string
           created_at: string
           created_by: string
+          deleted_at: string | null
           id: string
           image_url: string
           name: string
@@ -2196,6 +2188,7 @@ export type Database = {
           content: string
           created_at?: string
           created_by: string
+          deleted_at?: string | null
           id?: string
           image_url: string
           name: string
@@ -2206,6 +2199,7 @@ export type Database = {
           content?: string
           created_at?: string
           created_by?: string
+          deleted_at?: string | null
           id?: string
           image_url?: string
           name?: string

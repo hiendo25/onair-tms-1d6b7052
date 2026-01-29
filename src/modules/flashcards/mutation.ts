@@ -28,3 +28,13 @@ export const useDeleteFlashcardMutation = () => {
     mutationFn: (id: string) => flashcardsRepository.deleteFlashcard(id),
   });
 };
+
+/**
+ * Toggle flashcard active/inactive status
+ */
+export const useToggleFlashcardMutation = () => {
+  return useTMutation({
+    mutationFn: ({ id, status }: { id: string; status: "active" | "inactive" }) =>
+      flashcardsRepository.toggleFlashcard(id, status),
+  });
+};

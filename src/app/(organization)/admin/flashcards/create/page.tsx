@@ -3,6 +3,7 @@ import { Metadata } from "next";
 
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
+import FlashcardForm from "../_components/FlashcardForm";
 
 export const metadata: Metadata = {
   title: "Tạo Flashcard",
@@ -18,10 +19,7 @@ const CreateFlashcardPage: React.FC = () => {
         { title: "Tạo Flashcard", path: PATHS.FLASHCARDS.CREATE },
       ]}
     >
-      <div>
-        <h1>Create Flashcard Page</h1>
-        <p>This is the create flashcard page. Content will be updated later.</p>
-      </div>
+      <FlashcardForm mode="create" />
     </PageContainer>
   );
 };
