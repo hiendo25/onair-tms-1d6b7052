@@ -1,5 +1,5 @@
 import React from "react";
-import { redirect,RedirectType } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 
 import { AuthProvider } from "@/modules/auth/store/AuthProvider";
 import { authRepository } from "@/repository";

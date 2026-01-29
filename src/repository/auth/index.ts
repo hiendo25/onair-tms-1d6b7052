@@ -51,11 +51,8 @@ export type GetServerSessionResponse = Awaited<ReturnType<typeof getServerSessio
 
 const getCurrentUser = async () => {
   const supabase = await createSVClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  return user ? (user as SupabaseUser) : null;
+  const { data } = await supabase.auth.getUser();
+  return data.user ? (data.user as SupabaseUser) : null;
 };
 
 const ensureGetCurrentUser = async () => {

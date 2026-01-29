@@ -42,7 +42,7 @@ export async function getOrganizationsByUserId(userId: string) {
 				employee_id:id,
 				user_id,
 				organization_id,
-				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code)
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code, is_active)
 			`,
     )
     .eq("user_id", userId);
@@ -73,6 +73,44 @@ export async function getOrganizationByUserIdAndOrganizationId(userId: string, o
 
   if (error) {
     throw new Error(error.details || error.message);
+  }
+  return data;
+}
+
+export async function getOrganizationNameById(organizationId: string) {
+  const supabase = await createSVClient();
+  const { data, error } = await supabase
+    .from("organizations")
+    .select("id, name")
+    .eq("id", organizationId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
+  }
+
+  return data;
+}
+
+export async function getOrganizationsActiveByUserId(userId: string) {
+  const supabase = await createSVClient();
+  const { data, error } = await supabase
+    .from("employees")
+    .select(
+      `
+				employee_id:id,
+				user_id,
+				organization_id,
+				organization:organizations!inner(id, name, logo, favicon, shortname, subdomain, code, is_active)
+			`,
+    )
+    .eq("user_id", userId)
+    .eq("organizations.is_active", true)
+    .overrideTypes<Array<{ organization: { is_active: true } }>>();
+
+  if (error) {
+    throw new Error(error?.details || error?.message);
   }
   return data;
 }

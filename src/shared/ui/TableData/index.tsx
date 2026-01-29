@@ -1,24 +1,19 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Box,
-  Table,
-  TableBody,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TablePaginationOwnProps,
-  Typography,
-} from "@mui/material";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Table, TableBody, TableContainer, TableHead, TablePaginationOwnProps, Typography } from "@mui/material";
 
 import { EmptyBoxIcon } from "@/shared/assets/icons";
 
 import TableDataHeader from "./TableDataHeader";
-import TableDataPagination from "./TableDataPagination";
 import { CustomTablePagination } from "./TableDataPagination/CustomTablePagination";
 import TableRowDataProvider from "./TableDataProvider";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowFixedWidth from "./TableRowFixedWith";
 
+type TableActionMenuItem = {
+  iconButton?: React.ReactNode;
+  altText?: string;
+  action?: () => void;
+};
 export type TableDataProps<T extends object> = {
   rowKey?: string;
   rows?: T[];
@@ -30,6 +25,7 @@ export type TableDataProps<T extends object> = {
   showRowCount?: boolean;
   bordered?: boolean;
   ssr?: boolean;
+  disableHoverMenuAction?: boolean;
   pagination?: {
     page?: number;
     pageSize?: number;
@@ -41,13 +37,16 @@ export type TableDataProps<T extends object> = {
   };
   onRowClick?: TableRowDataProps<T>["onRowClick"];
   onCellClick?: TableRowDataProps<T>["onCellClick"];
+  slots?: {
+    menuActions?: TableRowDataProps<T>["cellActions"];
+  };
 };
 
 const initPagination = {
   page: 1,
   pageSize: 10,
   total: 0,
-  totalPages: 0,
+  totalPages: 1,
   perPageOptions: [10, 20, 30, 50],
 };
 type PaginationTable = Omit<Required<Exclude<typeof initPagination, undefined>>, "onPagination" | "onChangePageSize">;
@@ -65,7 +64,9 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
   showRowCount,
   onRowClick,
   onCellClick,
+  slots,
   ssr = true,
+  disableHoverMenuAction = false,
 }: TableDataProps<T>) => {
   const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
@@ -132,8 +133,11 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
   );
 
   const columnCount = useMemo(() => {
-    return showRowCount ? columns.length + 1 : columns.length;
-  }, [showRowCount, columns]);
+    let columnCount = columns.length;
+    if (showRowCount) columnCount += 1;
+    if (slots?.menuActions) columnCount += 1;
+    return columnCount;
+  }, [showRowCount, columns, slots?.menuActions]);
 
   useEffect(() => {
     if (!pagination) return;
@@ -173,7 +177,11 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
         >
           <Table stickyHeader={stickyHeader} sx={{ minWidth: minWidth }} aria-label="sticky table">
             <TableHead>
-              <TableDataHeader showRowCount={showRowCount} columns={columns} />
+              <TableDataHeader
+                showRowCount={showRowCount}
+                columns={columns}
+                showCellAction={Boolean(slots?.menuActions)}
+              />
             </TableHead>
             <TableBody>
               {loading && (
@@ -205,20 +213,19 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
                   <TableDataRow
                     key={genRowKey(row) ?? String(_index)}
                     showRowCount={showRowCount}
+                    rowCount={_index + 1 + (page - 1) * pageSize}
                     hoverRow={hoverRow}
                     indexRow={_index}
-                    page={page}
-                    pageSize={pageSize}
                     row={row}
                     columns={columns}
                     onRowClick={onRowClick}
                     onCellClick={onCellClick}
+                    cellActions={slots?.menuActions}
                   />
                 ))}
             </TableBody>
           </Table>
         </Box>
-        {/* <TableDataPagination /> */}
         <CustomTablePagination
           count={total}
           rowsPerPageOptions={perPageOptions}
