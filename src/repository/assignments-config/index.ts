@@ -989,11 +989,11 @@ const getAssignmentStudents = async (
   };
 };
 
-const getAssignmentQuestions = async (assignmentId: string) => {
+const getAssignmentQuestions = async (assignment_config_id: string) => {
   const { data: assignment, error: assignmentError } = await supabase
     .from("assignment_config")
     .select("assignment_bank_id")
-    .eq("id", assignmentId)
+    .eq("id", assignment_config_id)
     .maybeSingle();
 
   if (assignmentError) {
@@ -1040,7 +1040,7 @@ const getAssignmentQuestions = async (assignmentId: string) => {
 
       return {
         id: question.id,
-        assignment_id: assignmentId,
+        assignment_config_id: assignment_config_id,
         label: question.label,
         type: question.type,
         score: item.score_override ?? question.score,

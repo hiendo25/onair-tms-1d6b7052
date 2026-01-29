@@ -21,6 +21,7 @@ interface UseAssignmentSubmitParams {
   isTimeExpired: boolean;
   attemptId?: string | null;
   onSubmitted?: (payload: { assignmentId: string; employeeId: string }) => void;
+  onSuccess?: () => void;
 }
 
 const useAssignmentSubmit = ({
@@ -34,6 +35,7 @@ const useAssignmentSubmit = ({
   isTimeExpired,
   attemptId,
   onSubmitted,
+  onSuccess,
 }: UseAssignmentSubmitParams) => {
   const router = useRouter();
   const { confirm } = useDialogs();
@@ -112,7 +114,12 @@ const useAssignmentSubmit = ({
           queryKey: [GET_ASSIGNMENTS, assignmentId, "students"],
         });
 
+        queryClient.invalidateQueries({
+          queryKey: [GET_ASSIGNMENTS, assignmentId, "attempt-summary", employeeId],
+        });
+
         onSubmitted?.({ assignmentId, employeeId });
+        onSuccess?.();
 
         if (isEmbedded) {
           return;
@@ -151,6 +158,7 @@ const useAssignmentSubmit = ({
       queryClient,
       router,
       onSubmitted,
+      onSuccess,
     ],
   );
 

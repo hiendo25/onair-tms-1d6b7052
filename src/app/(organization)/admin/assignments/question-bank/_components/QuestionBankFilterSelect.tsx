@@ -36,7 +36,12 @@ const QuestionBankFilterSelect = ({
 
           return options.find((option) => option.value === selected)?.label || selected;
         }}
-        sx={{ backgroundColor: "grey.200" }}
+        sx={{
+          backgroundColor: "grey.200",
+          "& .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+          },
+        }}
       >
         <MenuItem value="">
           <em>Tất cả</em>

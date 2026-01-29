@@ -9,13 +9,22 @@ import {
   buildInitialAnswers,
   getAnswerValidation,
 } from "@/modules/assignment-management/utils/assignment-submission.utils";
+import {
+  clearAssignmentSubmissionDraft,
+  loadAssignmentSubmissionDraft,
+  mergeDraftAnswers,
+  saveAssignmentSubmissionDraft,
+} from "@/modules/assignment-management/utils/assignment-submission-draft.utils";
 import type { AssignmentQuestionDto } from "@/types/dto/assignments";
 
 interface UseAssignmentSubmissionFormParams {
   questions?: AssignmentQuestionDto[];
+  draftKey?: string;
 }
 
-const useAssignmentSubmissionForm = ({ questions }: UseAssignmentSubmissionFormParams) => {
+const SAVE_DEBOUNCE_MS = 800;
+
+const useAssignmentSubmissionForm = ({ questions, draftKey }: UseAssignmentSubmissionFormParams) => {
   const { handleSubmit, watch, setValue, getValues } = useForm<SubmissionFormData>({
     defaultValues: {
       answers: [],
@@ -23,14 +32,47 @@ const useAssignmentSubmissionForm = ({ questions }: UseAssignmentSubmissionFormP
   });
 
   const answers = watch("answers");
+  const saveTimeoutRef = React.useRef<number | null>(null);
 
   React.useEffect(() => {
     if (!questions || questions.length === 0) {
       return;
     }
 
-    setValue("answers", buildInitialAnswers(questions));
-  }, [questions, setValue]);
+    const initialAnswers = buildInitialAnswers(questions);
+    if (!draftKey) {
+      setValue("answers", initialAnswers);
+      return;
+    }
+
+    const draft = loadAssignmentSubmissionDraft(draftKey);
+    if (!draft || draft.answers.length === 0) {
+      setValue("answers", initialAnswers);
+      return;
+    }
+
+    setValue("answers", mergeDraftAnswers(initialAnswers, draft.answers));
+  }, [questions, draftKey, setValue]);
+
+  React.useEffect(() => {
+    if (!draftKey || !answers || answers.length === 0) {
+      return;
+    }
+
+    if (saveTimeoutRef.current) {
+      window.clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = window.setTimeout(() => {
+      saveAssignmentSubmissionDraft(draftKey, answers);
+    }, SAVE_DEBOUNCE_MS);
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        window.clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [answers, draftKey]);
 
   const updateAnswer = React.useCallback(
     (questionId: string, updater: (current: QuestionAnswer) => QuestionAnswer) => {
@@ -192,6 +234,14 @@ const useAssignmentSubmissionForm = ({ questions }: UseAssignmentSubmissionFormP
     [removeFileFromAnswer],
   );
 
+  const clearDraft = React.useCallback(() => {
+    if (!draftKey) {
+      return;
+    }
+
+    clearAssignmentSubmissionDraft(draftKey);
+  }, [draftKey]);
+
   const questionMap = React.useMemo(() => {
     return new Map((questions || []).map((question) => [question.id, question]));
   }, [questions]);
@@ -213,6 +263,7 @@ const useAssignmentSubmissionForm = ({ questions }: UseAssignmentSubmissionFormP
     getValues,
     handleSubmit,
     hasAnyAnswers,
+    clearDraft,
     handlers: {
       handleAttachmentSelect,
       handleCheckboxChange,

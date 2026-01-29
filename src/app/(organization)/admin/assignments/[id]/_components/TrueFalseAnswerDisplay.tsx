@@ -6,7 +6,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { Box, Paper, Typography } from "@mui/material";
 
 interface TrueFalseAnswerDisplayProps {
-  studentAnswer: boolean;
+  studentAnswer?: boolean | null;
   correctAnswer: boolean;
 }
 
@@ -14,7 +14,10 @@ export default function TrueFalseAnswerDisplay({
   studentAnswer,
   correctAnswer,
 }: TrueFalseAnswerDisplayProps) {
-  const isCorrect = studentAnswer === correctAnswer;
+  const hasAnswer = studentAnswer !== undefined && studentAnswer !== null;
+  const isCorrect = hasAnswer && studentAnswer === correctAnswer;
+  const borderColor = hasAnswer ? (isCorrect ? "success.main" : "error.main") : "grey.400";
+  const bgColor = hasAnswer ? (isCorrect ? "success.50" : "error.50") : "grey.50";
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -29,15 +32,19 @@ export default function TrueFalseAnswerDisplay({
           alignItems: "center",
           gap: 2,
           border: "1px solid",
-          borderColor: isCorrect ? "success.main" : "error.main",
-          bgcolor: isCorrect ? "success.50" : "error.50",
+          borderColor,
+          bgcolor: bgColor,
         }}
       >
         <Typography sx={{ flex: 1, fontWeight: 600 }}>
-          {studentAnswer ? "Đúng" : "Sai"}
+          {!hasAnswer ? "Chưa trả lời" : studentAnswer ? "Đúng" : "Sai"}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          {isCorrect ? (
+          {!hasAnswer ? (
+            <Typography variant="body2" color="text.secondary">
+              Đáp án đúng: {correctAnswer ? "Đúng" : "Sai"}
+            </Typography>
+          ) : isCorrect ? (
             <CheckCircleIcon color="success" />
           ) : (
             <>
@@ -52,4 +59,3 @@ export default function TrueFalseAnswerDisplay({
     </Box>
   );
 }
-

@@ -5,6 +5,8 @@ import { Box, Button, InputAdornment, TextField } from "@mui/material";
 import QuestionBankFilterSelect, {
   QuestionBankFilterOption,
 } from "@/app/(organization)/admin/assignments/question-bank/_components/QuestionBankFilterSelect";
+import SearchTextField from "@/shared/ui/filters/SearchTextField";
+import SelectOption from "@/shared/ui/filters/SelectOption";
 
 interface AssignmentBankToolbarProps {
   searchValue: string;
@@ -45,24 +47,8 @@ const AssignmentBankToolbar = ({
           },
         }}
       >
-        <TextField
-          value={searchValue}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Tìm kiếm"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "grey.200",
-            },
-          }}
-        />
 
+        <SearchTextField value={searchValue} onChange={onSearchChange} placeholder="Tìm kiếm" />
         <QuestionBankFilterSelect
           value={categoryValue}
           placeholder="Tất cả các lĩnh vực"

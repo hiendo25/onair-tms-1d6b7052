@@ -27,6 +27,8 @@ import useDebounce from "@/hooks/useDebounce";
 import { fDate, FORMAT_DATE_DAY } from "@/lib";
 import { useGetAssignedAssignmentsQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization";
+import SearchTextField from "@/shared/ui/filters/SearchTextField";
+import SelectOption from "@/shared/ui/filters/SelectOption";
 import PageContainer from "@/shared/ui/PageContainer";
 import ProgressBar from "@/shared/ui/ProgressBar";
 import type {
@@ -135,7 +137,7 @@ const AssignedAssignmentRow = ({
             <Typography variant="subtitle1" fontWeight={600}>
               {assignment.assignment_name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" className="line-clamp-2">
               {assignment.assignment_description || "Chưa có mô tả"}
             </Typography>
             <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
@@ -237,44 +239,23 @@ export default function AssignmentAssignedList() {
           <Card sx={{ p: { xs: 2, md: 3 }, boxShadow: "0px 10px 30px rgba(15, 23, 42, 0.08)", borderRadius: 2 }}>
             <Stack spacing={3}>
               <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
-                alignItems={{ xs: "stretch", md: "center" }}
+                sx={{
+                  display: "grid",
+                  gap: 2,
+                  width: "100%",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "1fr 1fr",
+                    lg: "minmax(240px, 320px) 240px",
+                  },
+                }}
               >
-                <TextField
-                  value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="Tìm kiếm"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    maxWidth: { md: 320 },
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "grey.100",
-                    },
-                  }}
+                <SearchTextField value={searchInput} onChange={setSearchInput} placeholder="Tìm kiếm" />
+                <SelectOption
+                  value={statusFilter}
+                  onChange={(value) => setStatusFilter(value as "all" | AssignmentAssignedStatusFilter)}
+                  options={STATUS_OPTIONS}
                 />
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <Select
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value as "all" | AssignmentAssignedStatusFilter)}
-                    displayEmpty
-                    sx={{
-                      backgroundColor: "grey.100",
-                    }}
-                  >
-                    {STATUS_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
               </Stack>
 
               {isLoading ? (

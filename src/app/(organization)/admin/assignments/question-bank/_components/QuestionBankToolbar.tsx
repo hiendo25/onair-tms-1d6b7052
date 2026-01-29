@@ -3,6 +3,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, InputAdornment, TextField } from "@mui/material";
 
 import QuestionBankFilterSelect, { QuestionBankFilterOption } from "./QuestionBankFilterSelect";
+import SearchTextField from "@/shared/ui/filters/SearchTextField";
 
 interface QuestionBankToolbarProps {
   searchValue: string;
@@ -49,24 +50,8 @@ const QuestionBankToolbar = ({
           },
         }}
       >
-        <TextField
-          value={searchValue}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Tìm kiếm"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <SearchIcon fontSize="small" />
-              </InputAdornment>
-            ),
-          }}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "grey.200",
-            },
-          }}
-        />
 
+        <SearchTextField value={searchValue} onChange={onSearchChange} placeholder="Tìm kiếm" />
         <QuestionBankFilterSelect
           value={questionTypeValue}
           placeholder="Loại câu hỏi"

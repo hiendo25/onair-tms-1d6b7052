@@ -73,9 +73,7 @@ type QuestionBankClient = SupabaseClient<Database>;
 
 const getQuestionBank = async (
   params?: GetQuestionBankParams,
-  client?: QuestionBankClient,
 ): Promise<PaginatedResult<QuestionBankDto>> => {
-  const supabaseClient = supabase;
   const page = params?.page ?? 0;
   const limit = params?.limit ?? 12;
   const search = params?.search?.trim();
@@ -84,7 +82,7 @@ const getQuestionBank = async (
   const categoryId = params?.categoryId;
 
   const selectQuery = categoryId ? QUESTION_BANK_SELECT_WITH_CATEGORY : QUESTION_BANK_SELECT;
-  let query = supabaseClient.from("question_bank").select(selectQuery, { count: "exact" });
+  let query = supabase.from("question_bank").select(selectQuery, { count: "exact" });
 
   if (search) {
     query = query.ilike("label", `%${search}%`);
@@ -120,9 +118,8 @@ const getQuestionBank = async (
 };
 
 const createQuestionBankQuestions = async (questions: QuestionBankInsert[], client?: QuestionBankClient) => {
-  const supabaseClient = client ?? supabase;
 
-  const { data, error } = await supabaseClient.from("question_bank").insert(questions).select("id");
+  const { data, error } = await supabase.from("question_bank").insert(questions).select("id");
 
   if (error) {
     throw new Error(`Failed to create question bank items: ${error.message}`);
@@ -139,9 +136,8 @@ const createQuestionBankCategories = async (
     return;
   }
 
-  const supabaseClient = client ?? supabase;
 
-  const { error } = await supabaseClient.from("question_bank_categories").insert(categories);
+  const { error } = await supabase.from("question_bank_categories").insert(categories);
 
   if (error) {
     throw new Error(`Failed to create question bank categories: ${error.message}`);
@@ -149,9 +145,8 @@ const createQuestionBankCategories = async (
 };
 
 const deleteQuestionBankCategoriesByQuestionId = async (questionId: string, client?: QuestionBankClient) => {
-  const supabaseClient = client ?? supabase;
 
-  const { error } = await supabaseClient.from("question_bank_categories").delete().eq("question_id", questionId);
+  const { error } = await supabase.from("question_bank_categories").delete().eq("question_id", questionId);
 
   if (error) {
     throw new Error(`Failed to delete question bank categories: ${error.message}`);
@@ -159,9 +154,8 @@ const deleteQuestionBankCategoriesByQuestionId = async (questionId: string, clie
 };
 
 const deleteQuestionBankQuestion = async (questionId: string, client?: QuestionBankClient) => {
-  const supabaseClient = client ?? supabase;
 
-  const { error } = await supabaseClient.from("question_bank").delete().eq("id", questionId);
+  const { error } = await supabase.from("question_bank").delete().eq("id", questionId);
 
   if (error) {
     throw new Error(`Failed to delete question bank: ${error.message}`);
@@ -170,11 +164,9 @@ const deleteQuestionBankQuestion = async (questionId: string, client?: QuestionB
 const getQuestionBankById = async (
   questionId: string,
   organizationId: string,
-  client?: QuestionBankClient,
 ): Promise<QuestionBankDto | null> => {
-  const supabaseClient = client ?? supabase;
 
-  const { data, error } = await supabaseClient
+  const { data, error } = await supabase
     .from("question_bank")
     .select(QUESTION_BANK_SELECT)
     .eq("id", questionId)
@@ -191,11 +183,8 @@ const getQuestionBankById = async (
 const updateQuestionBankQuestion = async (
   questionId: string,
   data: QuestionBankUpdate,
-  client?: QuestionBankClient,
 ) => {
-  const supabaseClient = client ?? supabase;
-
-  const { error } = await supabaseClient.from("question_bank").update(data).eq("id", questionId);
+  const { error } = await supabase.from("question_bank").update(data).eq("id", questionId);
 
   if (error) {
     throw new Error(`Failed to update question bank: ${error.message}`);
@@ -205,11 +194,9 @@ const updateQuestionBankQuestion = async (
 const getQuestionBankCount = async (
   organizationId: string,
   types?: QuestionType[] | QuestionType,
-  client?: QuestionBankClient,
 ) => {
-  const supabaseClient = client ?? supabase;
 
-  let query = supabaseClient
+  let query = supabase
     .from("question_bank")
     .select("id, createdBy:employees!inner(organization_id)", { count: "exact", head: true })
     .eq("createdBy.organization_id", organizationId);
@@ -231,7 +218,6 @@ const getQuestionBankCount = async (
 
 const getQuestionBankSummary = async (
   organizationId: string,
-  client?: QuestionBankClient,
 ): Promise<QuestionBankSummaryDto> => {
   const [
     total,
@@ -242,13 +228,13 @@ const getQuestionBankSummary = async (
     order,
     matching,
   ] = await Promise.all([
-    getQuestionBankCount(organizationId, undefined, client),
-    getQuestionBankCount(organizationId, ["checkbox", "radio"], client),
-    getQuestionBankCount(organizationId, "true_false", client),
-    getQuestionBankCount(organizationId, "text", client),
-    getQuestionBankCount(organizationId, "file", client),
-    getQuestionBankCount(organizationId, "order", client),
-    getQuestionBankCount(organizationId, "matching", client),
+    getQuestionBankCount(organizationId, undefined),
+    getQuestionBankCount(organizationId, ["checkbox", "radio"]),
+    getQuestionBankCount(organizationId, "true_false"),
+    getQuestionBankCount(organizationId, "text"),
+    getQuestionBankCount(organizationId, "file"),
+    getQuestionBankCount(organizationId, "order"),
+    getQuestionBankCount(organizationId, "matching"),
   ]);
 
   return {
