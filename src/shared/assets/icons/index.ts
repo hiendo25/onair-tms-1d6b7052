@@ -40,6 +40,7 @@ import FileWord02Icon from "./FileWord02Icon";
 import FileWordIcon from "./FileWordIcon";
 import FileZipIcon from "./FileZipIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
+import FlashcardIcon from "./FlashcardIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
@@ -112,6 +113,7 @@ export {
   FileWord02Icon,
   FileZipIcon,
   FilterFunnelIcon,
+  FlashcardIcon,
   FileAttachmentIcon,
   FolderShieldIcon,
   FaceSadIcon,
