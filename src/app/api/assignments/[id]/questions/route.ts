@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { sanitizeAssignmentQuestionsForSubmit } from "@/modules/assignment-management/utils/assignment-question-sanitize.utils";
 import { getAssignmentQuestions } from "@/services/assignments/assignment.service";
 
 export async function GET(
@@ -10,8 +11,9 @@ export async function GET(
     const { id: assignmentId } = await params;
 
     const questions = await getAssignmentQuestions(assignmentId);
+    const sanitizedQuestions = sanitizeAssignmentQuestionsForSubmit(questions);
 
-    return NextResponse.json(questions, { status: 200 });
+    return NextResponse.json(sanitizedQuestions, { status: 200 });
   } catch (error) {
     console.error("Error fetching assignment questions:", error);
     return NextResponse.json(
@@ -22,4 +24,3 @@ export async function GET(
     );
   }
 }
-

@@ -4,7 +4,7 @@ import { QuestionOption } from "./question-option.dto";
 
 export interface AssignmentQuestionDto {
   id: string;
-  assignment_id: string;
+  assignment_config_id: string;
   label: string;
   type: Database["public"]["Enums"]["question_type"];
   score: number;

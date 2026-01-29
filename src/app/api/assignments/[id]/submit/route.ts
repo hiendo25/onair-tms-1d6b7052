@@ -32,7 +32,7 @@ export async function POST(
 ) {
   try {
     const params = await context.params;
-    const assignmentId = params.id;
+    const assignment_config_id = params.id;
 
     const body: SubmitAssignmentRequest = await request.json();
     const { employeeId, answers, autoSubmit, attemptId } = body;
@@ -306,7 +306,7 @@ export async function POST(
     }
 
     const result = await assignmentResultService.submitAssignment({
-      assignmentId,
+      assignment_config_id,
       employeeId,
       attemptId,
       submissionSource: autoSubmit ? "auto" : "manual",

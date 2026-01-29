@@ -16,7 +16,6 @@ type QuestionBankClient = SupabaseClient<Database>;
 const createQuestionBankQuestions = async (
   payload: CreateQuestionBankDto,
   createdBy: string,
-  client?: QuestionBankClient,
 ) => {
   if (!payload.questions || payload.questions.length === 0) {
     return [];
@@ -34,7 +33,7 @@ const createQuestionBankQuestions = async (
     };
   });
 
-  const createdQuestions = await questionBankRepository.createQuestionBankQuestions(questionsToCreate, client);
+  const createdQuestions = await questionBankRepository.createQuestionBankQuestions(questionsToCreate);
 
   const categoryRelations = payload.questions.flatMap((question, index) => {
     const questionId = createdQuestions[index]?.id;
@@ -47,30 +46,28 @@ const createQuestionBankQuestions = async (
     }));
   });
 
-  await questionBankRepository.createQuestionBankCategories(categoryRelations, client);
+  await questionBankRepository.createQuestionBankCategories(categoryRelations);
 
   return createdQuestions;
 };
 
-const getQuestionBank = async (params?: GetQuestionBankParams, client?: QuestionBankClient) => {
-  return questionBankRepository.getQuestionBank(params, client);
+const getQuestionBank = async (params?: GetQuestionBankParams) => {
+  return questionBankRepository.getQuestionBank(params);
 };
 
-const getQuestionBankById = async (questionId: string, organizationId: string, client?: QuestionBankClient) => {
-  return questionBankRepository.getQuestionBankById(questionId, organizationId, client);
+const getQuestionBankById = async (questionId: string, organizationId: string) => {
+  return questionBankRepository.getQuestionBankById(questionId, organizationId);
 };
 
 const getQuestionBankSummary = async (
   organizationId: string,
-  client?: QuestionBankClient,
 ): Promise<QuestionBankSummaryDto> => {
-  return questionBankRepository.getQuestionBankSummary(organizationId, client);
+  return questionBankRepository.getQuestionBankSummary(organizationId);
 };
 
 const updateQuestionBankQuestion = async (
   questionId: string,
   question: UpdateQuestionBankDto["question"],
-  client?: QuestionBankClient,
 ) => {
   await questionBankRepository.updateQuestionBankQuestion(
     questionId,
@@ -83,17 +80,16 @@ const updateQuestionBankQuestion = async (
       difficulty: question.difficulty ?? null,
       updated_at: new Date().toISOString(),
     },
-    client,
   );
 
-  await questionBankRepository.deleteQuestionBankCategoriesByQuestionId(questionId, client);
+  await questionBankRepository.deleteQuestionBankCategoriesByQuestionId(questionId);
 
   const categoryRelations = (question.questionCategories || []).map((categoryId) => ({
     question_id: questionId,
     category_id: categoryId,
   }));
 
-  await questionBankRepository.createQuestionBankCategories(categoryRelations, client);
+  await questionBankRepository.createQuestionBankCategories(categoryRelations);
 };
 
 const deleteQuestionBankQuestion = async (questionId: string, client?: QuestionBankClient) => {

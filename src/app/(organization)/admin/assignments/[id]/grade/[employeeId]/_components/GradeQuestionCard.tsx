@@ -20,6 +20,7 @@ import QuestionHeader from "../../../_components/QuestionHeader";
 import RadioAnswerDisplay from "../../../_components/RadioAnswerDisplay";
 import TextAnswerDisplay from "../../../_components/TextAnswerDisplay";
 import TrueFalseAnswerDisplay from "../../../_components/TrueFalseAnswerDisplay";
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 
 interface GradeQuestionCardProps {
   question: QuestionGradeDetail;
@@ -194,8 +195,8 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
 
       {question.type === "true_false" && question.options && (
         <TrueFalseAnswerDisplay
-          studentAnswer={question.answer.trueFalseAnswer ?? false}
-          correctAnswer={(question.options as any).correctAnswer === true}
+          studentAnswer={question.answer.trueFalseAnswer}
+          correctAnswer={resolveTrueFalseCorrectAnswer(question.options)}
         />
       )}
     </Card>
