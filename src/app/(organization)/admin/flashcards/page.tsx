@@ -4,6 +4,8 @@ import { Metadata } from "next";
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
 
+import FlashcardsListContainer from "./_components/FlashcardsListContainer";
+
 export const metadata: Metadata = {
   title: "Quản lý Flashcard",
   description: "Quản lý flashcard cho người học",
@@ -12,15 +14,10 @@ export const metadata: Metadata = {
 const FlashcardsPage: React.FC = () => {
   return (
     <PageContainer
-      title="Quản lý Flashcard"
-      breadcrumbs={[
-        { title: "Flashcard", path: PATHS.FLASHCARDS.ROOT },
-      ]}
+      title="Flashcard"
+      breadcrumbs={[{ title: "Flashcard", path: PATHS.FLASHCARDS.ROOT }]}
     >
-      <div>
-        <h1>Flashcard List Page</h1>
-        <p>This is the flashcard list page. Content will be updated later.</p>
-      </div>
+      <FlashcardsListContainer />
     </PageContainer>
   );
 };
