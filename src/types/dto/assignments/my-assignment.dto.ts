@@ -1,6 +1,6 @@
 import { Database } from "@/types/supabase.types";
 
-type AssignmentAttemptStatus = Database["public"]["Enums"]["test_attempt_status"];
+type AssignmentAttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
 
 export interface MyAssignmentDto {
   assignment_id: string;

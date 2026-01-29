@@ -12,8 +12,9 @@ import {
   QUESTION_TYPE_LABELS,
   QuestionType,
 } from "@/modules/assignment-management/constants/question.constants";
+import { DEFAULT_QUESTION_BANK_SUMMARY } from "@/modules/assignment-management/constants/question-bank.constants";
 import { useDeleteQuestionBankMutation } from "@/modules/assignment-management/operations/mutation";
-import { useGetQuestionBankQuery, useGetQuestionBankSummaryQuery } from "@/modules/assignment-management/operations/query";
+import { useGetQuestionBankQuery } from "@/modules/assignment-management/operations/query";
 import { useGetClassFieldQuery } from "@/modules/class-room-management/operation/query";
 import { useUserOrganization } from "@/modules/organization";
 import PageContainer from "@/shared/ui/PageContainer";
@@ -56,20 +57,12 @@ export default function QuestionBankList() {
     organizationId,
     questionType: questionType || undefined,
     categoryId: categoryId || undefined,
+    withSummary: true,
   });
 
   const questions = questionBankResult?.data || [];
   const totalCount = questionBankResult?.total || 0;
-  const { data: summaryData } = useGetQuestionBankSummaryQuery(organizationId);
-  const summary = summaryData || {
-    total: 0,
-    multipleChoice: 0,
-    trueFalse: 0,
-    essay: 0,
-    file: 0,
-    order: 0,
-    matching: 0,
-  };
+  const summary = questionBankResult?.summary ?? DEFAULT_QUESTION_BANK_SUMMARY;
 
   const { mutateAsync: deleteQuestionBank } = useDeleteQuestionBankMutation();
   const { data: categoryListData } = useGetClassFieldQuery();

@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 import { QuestionGradeDetail } from "@/types/dto/assignments";
 import AnswerAttachments from "../../../_components/AnswerAttachments";
 import CheckboxAnswerDisplay from "../../../_components/CheckboxAnswerDisplay";
@@ -133,8 +134,8 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
 
       {question.type === "true_false" && question.options && (
         <TrueFalseAnswerDisplay
-          studentAnswer={question.answer.trueFalseAnswer ?? false}
-          correctAnswer={(question.options as any).correctAnswer === true}
+          studentAnswer={question.answer.trueFalseAnswer}
+          correctAnswer={resolveTrueFalseCorrectAnswer(question.options)}
         />
       )}
     </Card>
@@ -142,4 +143,3 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
 };
 
 export default React.memo(ResultQuestionCard);
-

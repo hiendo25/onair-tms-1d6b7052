@@ -33,7 +33,7 @@ export type QuestionAnswer =
 
 export interface AssignmentAttemptWithEmployee {
   id: string;
-  assignment_id: string;
+  assignment_config_id: string;
   employee_id: string;
   attempt_number: number;
   status: AttemptStatus;
@@ -53,7 +53,7 @@ export interface AssignmentAttemptWithEmployee {
 }
 
 export async function getLatestAssignmentAttempt(
-  assignmentId: string,
+  assignment_config_id: string,
   employeeId: string,
 ): Promise<AssignmentAttemptRow | null> {
   const supabase = await createSVClient();
@@ -61,7 +61,7 @@ export async function getLatestAssignmentAttempt(
   const { data, error } = await supabase
     .from("assignments_attempts")
     .select("*")
-    .eq("assignment_config_id", assignmentId)
+    .eq("assignment_config_id", assignment_config_id)
     .eq("employee_id", employeeId)
     .order("attempt_number", { ascending: false })
     .limit(1)
@@ -75,7 +75,7 @@ export async function getLatestAssignmentAttempt(
 }
 
 export async function getActiveAssignmentAttempt(
-  assignmentId: string,
+  assignment_config_id: string,
   employeeId: string,
 ): Promise<AssignmentAttemptRow | null> {
   const supabase = await createSVClient();
@@ -83,7 +83,7 @@ export async function getActiveAssignmentAttempt(
   const { data, error } = await supabase
     .from("assignments_attempts")
     .select("*")
-    .eq("assignment_config_id", assignmentId)
+    .eq("assignment_config_id", assignment_config_id)
     .eq("employee_id", employeeId)
     .eq("status", "in_progress")
     .order("attempt_number", { ascending: false })
@@ -342,7 +342,7 @@ export async function getAssignmentAttemptWithEmployee(
 
   return {
     id: data.id,
-    assignment_id: data.assignment_config_id,
+    assignment_config_id: data.assignment_config_id,
     employee_id: data.employee_id,
     attempt_number: data.attempt_number,
     status: data.status,

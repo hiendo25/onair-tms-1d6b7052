@@ -1,4 +1,5 @@
 import { useTQuery } from "@/lib/queryClient";
+import { DEFAULT_QUESTION_BANK_SUMMARY } from "@/modules/assignment-management/constants/question-bank.constants";
 import { GET_ASSIGNMENT_BANK, GET_ASSIGNMENTS, GET_QUESTION_BANK } from "@/modules/assignment-management/operations/key";
 import { assignmentsRepository } from "@/repository";
 import { GetAssignmentsQueryParams } from "@/repository/assignments-config/type";
@@ -246,13 +247,28 @@ export const useGetAssignmentBankByIdQuery = (assignmentId: string, organization
   });
 };
 
-export const useGetQuestionBankQuery = (params?: GetQuestionBankParams) => {
-  return useTQuery<PaginatedResult<QuestionBankDto>>({
-    queryKey: [GET_QUESTION_BANK, params],
+type GetQuestionBankQueryParams = GetQuestionBankParams & { withSummary?: boolean };
+
+export const useGetQuestionBankQuery = (params?: GetQuestionBankQueryParams) => {
+  const { withSummary = false, ...queryParams } = params ?? {};
+  const organizationId = queryParams.organizationId;
+
+  return useTQuery<PaginatedResult<QuestionBankDto> & { summary: QuestionBankSummaryDto }>({
+    queryKey: [GET_QUESTION_BANK, queryParams, withSummary],
     queryFn: async () => {
-      return questionBankService.getQuestionBank(params);
+      const [questionBank, summary] = await Promise.all([
+        questionBankService.getQuestionBank(queryParams),
+        withSummary && organizationId
+          ? questionBankService.getQuestionBankSummary(organizationId)
+          : Promise.resolve(DEFAULT_QUESTION_BANK_SUMMARY),
+      ]);
+
+      return {
+        ...questionBank,
+        summary,
+      };
     },
-    enabled: !!params?.organizationId,
+    enabled: !!organizationId,
   });
 };
 
@@ -281,15 +297,7 @@ export const useGetQuestionBankSummaryQuery = (organizationId?: string) => {
     queryKey: [GET_QUESTION_BANK, "summary", organizationId],
     queryFn: async () => {
       if (!organizationId) {
-        return {
-          total: 0,
-          multipleChoice: 0,
-          trueFalse: 0,
-          essay: 0,
-          file: 0,
-          order: 0,
-          matching: 0,
-        };
+        return DEFAULT_QUESTION_BANK_SUMMARY;
       }
 
       return questionBankService.getQuestionBankSummary(organizationId);

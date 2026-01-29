@@ -43,14 +43,15 @@ const shuffleArray = <T,>(items: T[], seed: number) => {
   return result;
 };
 
-const buildShuffleSeedBase = (assignmentId?: string, employeeId?: string) => {
+const buildShuffleSeedBase = (assignmentId?: string, employeeId?: string, attemptKey?: number | string) => {
   if (!assignmentId) {
     return "";
   }
   if (!employeeId) {
-    return assignmentId;
+    return attemptKey !== undefined ? `${assignmentId}:attempt:${attemptKey}` : assignmentId;
   }
-  return `${assignmentId}:${employeeId}`;
+  const base = `${assignmentId}:${employeeId}`;
+  return attemptKey !== undefined ? `${base}:attempt:${attemptKey}` : base;
 };
 
 const buildDisplayQuestions = (
@@ -77,19 +78,54 @@ const buildDisplayQuestions = (
   }
 
   return nextQuestions.map((question) => {
-    if (question.type !== "radio" && question.type !== "checkbox") {
-      return question;
+    if (question.type === "radio" || question.type === "checkbox") {
+      if (!Array.isArray(question.options) || question.options.length <= 1) {
+        return question;
+      }
+
+      const seed = createSeedFromString(`${seedBase}:options:${question.id}`);
+      return {
+        ...question,
+        options: shuffleArray(question.options, seed),
+      };
     }
 
-    if (!Array.isArray(question.options) || question.options.length <= 1) {
-      return question;
+    if (question.type === "matching") {
+      if (!isMatchingOptions(question.options)) {
+        return question;
+      }
+
+      const seed = createSeedFromString(`${seedBase}:matching:${question.id}`);
+      return {
+        ...question,
+        options: {
+          ...question.options,
+          columnBItems: shuffleArray(question.options.columnBItems, seed),
+        },
+      };
     }
 
-    const seed = createSeedFromString(`${seedBase}:options:${question.id}`);
-    return {
-      ...question,
-      options: shuffleArray(question.options, seed),
-    };
+    if (question.type === "order") {
+      if (!isOrderOptions(question.options) || question.options.orderItems.length <= 1) {
+        return question;
+      }
+
+      const seed = createSeedFromString(`${seedBase}:order:${question.id}`);
+      const shuffledItems = shuffleArray(question.options.orderItems, seed).map((item, index) => ({
+        ...item,
+        displayOrder: index + 1,
+      }));
+
+      return {
+        ...question,
+        options: {
+          ...question.options,
+          orderItems: shuffledItems,
+        },
+      };
+    }
+
+    return question;
   });
 };
 

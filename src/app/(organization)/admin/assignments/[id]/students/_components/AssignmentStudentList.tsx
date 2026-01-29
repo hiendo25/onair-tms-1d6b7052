@@ -4,28 +4,22 @@ import * as React from "react";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import HourglassEmptyOutlinedIcon from "@mui/icons-material/HourglassEmptyOutlined";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
-import SearchIcon from "@mui/icons-material/Search";
 import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 import {
   Alert,
   Box,
   Button,
   Card,
-  Chip,
   CircularProgress,
-  FormControl,
   Grid,
-  InputAdornment,
-  MenuItem,
-  Select,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
+import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useGetAssignmentStudentsQuery } from "@/modules/assignment-management/operations/query";
 import { useGetAssignmentQuery } from "@/modules/assignment-management/operations/query";
 import { calculateAssignmentTotals } from "@/modules/assignment-management/utils/assignment.utils";
@@ -35,6 +29,8 @@ import {
   getStudentResultStatus,
   getStudentScoreLabel,
 } from "@/modules/assignment-management/utils/assignment-student.utils";
+import SearchTextField from "@/shared/ui/filters/SearchTextField";
+import SelectOption from "@/shared/ui/filters/SelectOption";
 import PageContainer from "@/shared/ui/PageContainer";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import type { AssignmentStudentDto, AssignmentStudentProgressStatus, AssignmentStudentSummaryDto } from "@/types/dto/assignments";
@@ -65,7 +61,7 @@ const SummaryCard = ({
   <Card
     sx={{
       p: 2.5,
-      borderRadius: 3,
+      borderRadius: 2,
       boxShadow: "0px 10px 30px rgba(15, 23, 42, 0.08)",
     }}
   >
@@ -74,9 +70,9 @@ const SummaryCard = ({
         sx={{
           width: 48,
           height: 48,
-          borderRadius: 3,
-          backgroundColor: "#E8F1FF",
-          color: "#1D4ED8",
+          borderRadius: 1,
+          backgroundColor: "#E6F2FF",
+          color: "#004999",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -125,18 +121,6 @@ export default function AssignmentStudentList() {
     setPage(1);
   }, [debouncedSearch, statusFilter]);
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Không giới hạn";
-    const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return "Không giới hạn";
-    const formatted = date.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    return formatted.replaceAll("/", ".");
-  };
-
   const students = paginatedResult?.data || [];
   const totalCount = paginatedResult?.total || 0;
   const summary: AssignmentStudentSummaryDto = paginatedResult?.summary ?? {
@@ -160,7 +144,7 @@ export default function AssignmentStudentList() {
     assignment?.attempt_duration_minutes !== null && assignment?.attempt_duration_minutes !== undefined
       ? `${assignment.attempt_duration_minutes} phút`
       : "Không giới hạn";
-  const dueDateLabel = formatDate(assignment?.available_to ?? null);
+  const dueDateLabel = fDate(assignment?.available_to ?? null, FORMAT_DATE_TIME_CLEANER);
 
   const handleChangePage = (newPage: number) => {
     setPage(newPage);
@@ -245,15 +229,21 @@ export default function AssignmentStudentList() {
             return "-";
           }
           return (
-            <Chip
-              label={resultStatus === "pass" ? "Đạt" : "Không đạt"}
-              size="small"
-              sx={{
-                backgroundColor: resultStatus === "pass" ? "#E7F8EC" : "#FFE7EE",
-                color: resultStatus === "pass" ? "#159947!" : "#E11D48!",
-                fontWeight: 600,
-              }}
-            />
+            <>
+              {
+                resultStatus === "pass" ? (
+                  <Box className="py-1 px-1.5 bg-[#22C55E29] text-[#118D57] rounded-md inline-block font-bold text-[10px]">
+                    Đạt
+                  </Box>
+                )
+                  :
+                  (
+                    <Box className="py-1 px-1.5 bg-[#F63D6814] text-[#F63D68] rounded-md inline-block font-bold text-[10px]">
+                      Không đạt
+                    </Box>
+                  )
+              }
+            </>
           );
         },
       },
@@ -274,14 +264,11 @@ export default function AssignmentStudentList() {
                 : "Chưa nộp";
 
           return (
-            <Chip
-              label={gradingLabel}
-              size="small"
-              sx={{
-                backgroundColor: "#F3F4F6",
-                fontWeight: 500,
-              }}
-            />
+            <>
+              <Box className="py-1 px-1.5 bg-[#F9FAFB] text-[#000000] rounded-md inline-block font-normal text-[12px]">
+                {gradingLabel}
+              </Box>
+            </>
           );
         },
       },
@@ -290,15 +277,9 @@ export default function AssignmentStudentList() {
         field: "department_name",
         headerName: "Phòng ban",
         renderCell: (_value, row) =>
-          row.department_name ? (
-            <Chip
-              label={row.department_name}
-              size="small"
-              color="info"
-            />
-          ) : (
-            "-"
-          ),
+          <Box className="py-1 px-1.5 bg-[#F9FAFB] text-[#000000] rounded-md inline-block font-normal text-[12px]">
+            {row.department_name ?? "--"}
+          </Box>
       },
       {
         id: "action",
@@ -341,34 +322,34 @@ export default function AssignmentStudentList() {
               justifyContent="space-between"
             >
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   Thời gian
                 </Typography>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={600}>
                   {durationLabel}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   Số câu hỏi
                 </Typography>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={600}>
                   {assignmentTotals.totalQuestions} câu
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body1" color="text.secondary">
                   Điểm đạt tối thiểu
                 </Typography>
-                <Typography variant="h6" fontWeight={700}>
+                <Typography variant="h6" fontWeight={600}>
                   {passScoreLabel}
                 </Typography>
               </Box>
               <Box>
-                <Typography variant="body2" color="error.main">
+                <Typography variant="body1" color="error.main">
                   Hạn nộp
                 </Typography>
-                <Typography variant="h6" fontWeight={700} color="error.main">
+                <Typography variant="h6" fontWeight={600} color="error.main">
                   {dueDateLabel}
                 </Typography>
               </Box>
@@ -409,45 +390,24 @@ export default function AssignmentStudentList() {
           <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, boxShadow: "0px 10px 30px rgba(15, 23, 42, 0.08)" }}>
             <Stack spacing={3}>
               <Stack
-                direction={{ xs: "column", md: "row" }}
-                spacing={2}
-                alignItems={{ xs: "stretch", md: "center" }}
+                sx={{
+                  display: "grid",
+                  gap: 2,
+                  width: "100%",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "1fr 1fr",
+                    lg: "minmax(240px, 320px) 240px",
+                  },
+                }}
                 pb={3}
               >
-                <TextField
-                  value={searchInput}
-                  onChange={(event) => setSearchInput(event.target.value)}
-                  placeholder="Tìm kiếm"
-                  size="small"
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <SearchIcon fontSize="small" />
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    maxWidth: { md: 320 },
-                    "& .MuiOutlinedInput-root": {
-                      backgroundColor: "grey.100",
-                    },
-                  }}
+                <SearchTextField value={searchInput} onChange={setSearchInput} placeholder="Tìm kiếm" />
+                <SelectOption
+                  value={statusFilter}
+                  onChange={(value) => setStatusFilter(value as "all" | AssignmentStudentProgressStatus)}
+                  options={STATUS_OPTIONS}
                 />
-                <FormControl size="small" sx={{ minWidth: 200 }}>
-                  <Select
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value as "all" | AssignmentStudentProgressStatus)}
-                    sx={{
-                      backgroundColor: "grey.100",
-                    }}
-                  >
-                    {STATUS_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
               </Stack>
 
               {isLoading ? (

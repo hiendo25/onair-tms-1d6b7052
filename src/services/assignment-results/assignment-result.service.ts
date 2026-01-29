@@ -18,6 +18,7 @@ import {
   SubmissionDetailDto,
 } from "@/types/dto/assignments";
 import { Database, Json } from "@/types/supabase.types";
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
@@ -38,7 +39,7 @@ export interface QuestionAnswerInput {
 }
 
 export interface SubmitAssignmentPayload {
-  assignmentId: string;
+  assignment_config_id: string;
   employeeId: string;
   attemptId?: string;
   submissionSource?: AttemptSource;
@@ -48,7 +49,7 @@ export interface SubmitAssignmentPayload {
 
 export interface SubmitAssignmentResult {
   id: string;
-  assignmentId: string;
+  assignment_config_id: string;
   employeeId: string;
   submittedAt: string;
   score: number | null;
@@ -354,20 +355,20 @@ export async function startAssignmentAttempt(
 }
 
 export async function submitAssignment(payload: SubmitAssignmentPayload): Promise<SubmitAssignmentResult> {
-  const { assignmentId, employeeId, answers, allowIncomplete, attemptId, submissionSource } = payload;
+  const { assignment_config_id, employeeId, answers, allowIncomplete, attemptId, submissionSource } = payload;
 
-  const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignmentId, employeeId);
+  const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignment_config_id, employeeId);
   const attemptById = attemptId
     ? await assignmentResultsRepository.getAssignmentAttemptById(attemptId)
     : null;
   const activeAttempt =
-    attemptById ?? (await assignmentResultsRepository.getActiveAssignmentAttempt(assignmentId, employeeId));
+    attemptById ?? (await assignmentResultsRepository.getActiveAssignmentAttempt(assignment_config_id, employeeId));
 
   if (answers.length === 0) {
     throw new Error("Vui lòng trả lời ít nhất một câu hỏi.");
   }
 
-  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignment_config_id);
   const now = new Date();
 
   if (assignment.available_from) {
@@ -392,7 +393,7 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
   }
 
   if (activeAttempt) {
-    if (activeAttempt.assignment_config_id !== assignmentId || activeAttempt.employee_id !== employeeId) {
+    if (activeAttempt.assignment_config_id !== assignment_config_id || activeAttempt.employee_id !== employeeId) {
       throw new Error("Attempt không hợp lệ.");
     }
 
@@ -460,7 +461,7 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
       const orderItems = (question.options as any).orderItems || [];
       earnedScore = gradeOrderQuestion(typedAnswer as OrderAnswer, orderItems, question.score);
     } else if (question.type === "true_false" && question.options) {
-      const correctAnswer = (question.options as any).correctAnswer === true;
+      const correctAnswer = resolveTrueFalseCorrectAnswer(question.options);
       earnedScore = gradeTrueFalseQuestion(typedAnswer as TrueFalseAnswer, correctAnswer, question.score);
     }
 
@@ -498,7 +499,7 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
     if (!currentAttempt) {
       const timing = buildAttemptTiming(now, assignment.attempt_duration_minutes ?? null);
       currentAttempt = await assignmentResultsRepository.createAssignmentAttempt({
-        assignment_config_id: assignmentId,
+        assignment_config_id: assignment_config_id,
         employee_id: employeeId,
         attempt_number: attemptNumber,
         status: "in_progress",
@@ -539,7 +540,7 @@ export async function submitAssignment(payload: SubmitAssignmentPayload): Promis
 
     return {
       id: currentAttempt.id,
-      assignmentId,
+      assignment_config_id: assignment_config_id,
       employeeId,
       submittedAt,
       score: totalScore,
