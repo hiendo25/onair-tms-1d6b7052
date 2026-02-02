@@ -98,7 +98,11 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void) => async () => {
       try {
         const TAB_LIST = isLearningPath
-          ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
+          ? [
+              TAB_KEYS_CLASS_ROOM["clsTab-information"],
+              TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              TAB_KEYS_CLASS_ROOM["clsTab-flashcard"],
+            ]
           : [
               TAB_KEYS_CLASS_ROOM["clsTab-information"],
               TAB_KEYS_CLASS_ROOM["clsTab-session"],
@@ -148,7 +152,9 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           tabName: "Thời gian",
           tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
           prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-          next: isLearningPath ? null : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+          next: isLearningPath
+            ? TAB_KEYS_CLASS_ROOM["clsTab-flashcard"]
+            : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
           icon: <CalendarDateIcon className="w-5 h-5" />,
           content: <TabClassRoomSession />,
         },

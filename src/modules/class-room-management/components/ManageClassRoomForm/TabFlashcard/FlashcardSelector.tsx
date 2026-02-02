@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useCallback, useMemo,useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,23 +20,12 @@ const FlashcardSelector: React.FC<FlashcardSelectorProps> = () => {
   const [search, setSearch] = useState("");
 
   const { data: flashcardsData, isPending } = useGetFlashcardsQuery(
-    { page: 1, pageSize: 9999, organizationId },
+    { page: 1, pageSize: 100, organizationId, search: search || undefined },
     { enabled: !!organizationId },
   );
 
   const flashcards = flashcardsData?.data || [];
   const selectedFlashcards = watch("flashcards") || [];
-
-  // Filter flashcards based on search
-  const filteredFlashcards = useMemo(() => {
-    if (!search.trim()) return flashcards;
-    const searchLower = search.toLowerCase();
-    return flashcards.filter(
-      (fc) =>
-        fc.name?.toLowerCase().includes(searchLower) ||
-        fc.content?.toLowerCase().includes(searchLower),
-    );
-  }, [flashcards, search]);
 
   const handleToggle = useCallback(
     (flashcardId: string) => {
@@ -82,8 +71,10 @@ const FlashcardSelector: React.FC<FlashcardSelectorProps> = () => {
       {/* Flashcard grid */}
       {isPending ? (
         <Typography color="text.secondary">Đang tải...</Typography>
-      ) : filteredFlashcards.length === 0 ? (
-        <Typography color="text.secondary">Không có flashcard nào</Typography>
+      ) : flashcards.length === 0 ? (
+        <Typography color="text.secondary">
+          {search ? "Không tìm thấy flashcard nào" : "Không có flashcard nào"}
+        </Typography>
       ) : (
         <Box
           sx={{
@@ -94,7 +85,7 @@ const FlashcardSelector: React.FC<FlashcardSelectorProps> = () => {
             overflowY: "auto",
           }}
         >
-          {filteredFlashcards.map((flashcard) => {
+          {flashcards.map((flashcard) => {
             const isSelected = selectedFlashcards.includes(flashcard.id);
             const selectionIndex = getSelectionIndex(flashcard.id);
 
