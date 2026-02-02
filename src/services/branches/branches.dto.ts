@@ -72,5 +72,17 @@ export interface GetBranchItem extends BaseBranchItemResult {
   children: GetBranchItem[] | null;
 }
 export interface CreateBranchResult extends BaseBranchItemResult {}
+export interface DeleteBranchResult {
+  id: string;
+  name: string;
+  address: string;
+  code: string;
+  path: string | null;
+  priority: number;
+  parentId: string | null;
+  createdAt: string;
+  level: number | null;
+  status: BranchStatus;
+}
 export interface UpdateBranchResult extends BaseBranchItemResult {}
 export interface UpdateBranchStatusResult extends BaseBranchItemResult {}

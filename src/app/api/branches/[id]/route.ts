@@ -42,8 +42,6 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     const { id } = await params;
     await branchService.deleteBranch(id);
 
-    revalidatePath(PATHS.BRANCHES.ROOT);
-
     return NextResponse.json(
       {
         success: true,

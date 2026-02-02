@@ -1715,38 +1715,50 @@ export type Database = {
         Row: {
           branch_id: string | null
           created_at: string
+          created_by: string | null
           id: string
           level: number | null
+          managed_by: string | null
           name: string
           organization_id: string
           parent_id: string | null
           path: string | null
+          priority: number | null
           status: Database["public"]["Enums"]["department_status"] | null
           type: Database["public"]["Enums"]["department_type"] | null
+          updated_at: string | null
         }
         Insert: {
           branch_id?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           level?: number | null
+          managed_by?: string | null
           name: string
           organization_id: string
           parent_id?: string | null
           path?: string | null
+          priority?: number | null
           status?: Database["public"]["Enums"]["department_status"] | null
           type?: Database["public"]["Enums"]["department_type"] | null
+          updated_at?: string | null
         }
         Update: {
           branch_id?: string | null
           created_at?: string
+          created_by?: string | null
           id?: string
           level?: number | null
+          managed_by?: string | null
           name?: string
           organization_id?: string
           parent_id?: string | null
           path?: string | null
+          priority?: number | null
           status?: Database["public"]["Enums"]["department_status"] | null
           type?: Database["public"]["Enums"]["department_type"] | null
+          updated_at?: string | null
         }
         Relationships: [
           {
@@ -1754,6 +1766,34 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "departments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_managed_by_fkey"
+            columns: ["managed_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "departments_managed_by_fkey"
+            columns: ["managed_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {

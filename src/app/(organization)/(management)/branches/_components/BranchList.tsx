@@ -208,11 +208,11 @@ export default function BranchList() {
                   iconButton: <Edit02Icon className="w-4 h-4" />,
                   altText: "Chỉnh sửa",
                 },
-                {
-                  action: handleDelete(row.id),
-                  iconButton: <Trash01Icon className="w-4 h-4 stroke-red-600" />,
-                  altText: "Xóa",
-                },
+                // {
+                //   action: handleDelete(row.id),
+                //   iconButton: <Trash01Icon className="w-4 h-4 stroke-red-600" />,
+                //   altText: "Xóa",
+                // },
               ];
             },
           }}

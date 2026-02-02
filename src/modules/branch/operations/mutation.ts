@@ -1,11 +1,8 @@
-import { useQueryClient } from "@tanstack/react-query";
-
-import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { client } from "@/lib/api";
 import { useTMutation } from "@/lib/queryClient";
 import { BranchStatus } from "@/model/branches.model";
 import type { ImportBranchesDto, UpdateBranchDto } from "@/types/dto/branches";
-import { CreateBranchPayload, CreateBranchResponse, UpdateBranchPayload } from "../type";
+import { CreateBranchPayload, CreateBranchResponse, DeleteBranchResponse, UpdateBranchPayload } from "../type";
 
 export const useCreateBranchMutation = () => {
   return useTMutation({
@@ -46,16 +43,11 @@ export const useToggleBranchStatusMutation = () => {
 export const useDeleteBranchMutation = () => {
   return useTMutation({
     mutationFn: async (branchId: string) => {
-      const response = await fetch(`/api/branches/${branchId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete branch");
+      const data = await client.delete<DeleteBranchResponse>(`branches/${branchId}`);
+      if (!data.success) {
+        throw data.error.message;
       }
-
-      return response.json();
+      return data.data;
     },
   });
 };

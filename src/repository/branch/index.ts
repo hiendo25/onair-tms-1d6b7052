@@ -311,6 +311,17 @@ export async function getLastPriorityBranch(parentId?: string) {
   return data?.priority || 0;
 }
 
+export async function deleteBranchById(id: string) {
+  const supabase = await createSVClient();
+
+  const { data, error } = await supabase.from("branches").delete().eq("id", id).select("*").limit(1).single();
+
+  if (error) {
+    throw new Error(error.details || error.message);
+  }
+  return data;
+}
+
 export const branchRepository = {
   /**
    * Get list of branches with optional filters and pagination

@@ -2,7 +2,7 @@ import { HttpResponse } from "@/lib/api/http-status";
 import {
   CreateBranchInput,
   CreateBranchResult,
-  GetBranchesInput,
+  DeleteBranchResult,
   GetBranchesResult,
   UpdateBranchInput,
   UpdateBranchResult,
@@ -12,7 +12,10 @@ import {
 
 export type CreateBranchPayload = CreateBranchInput;
 export type CreateBranchItem = CreateBranchResult;
+export type DeleteBranchItem = DeleteBranchResult;
+
 export type CreateBranchResponse = HttpResponse<CreateBranchItem>;
+export type DeleteBranchResponse = HttpResponse<DeleteBranchItem>;
 
 export type GetBranchesQueryParams = {
   page?: number;
