@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
 
     const supabase = createClient();
 
-    // Call the RPC function
+    // Call the RPC function (order: class_type_filter, employee_id)
     const { data, error } = await supabase.rpc("get_completed_class_rooms", {
-      employee_id: employee.id,
-      class_type_filter: classTypeFilter || undefined,
+      p_class_type_filter: classTypeFilter || undefined,
+      p_employee_id: employee.id,
     });
 
     if (error) {
