@@ -1,3 +1,4 @@
+import AlertCircleIcon from "./AlertCircleIcon";
 import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import Bell01Icon from "./Bell01Icon";
@@ -7,6 +8,7 @@ import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
 import CameraOffIcon from "./CameraOffIcon";
+import CertificateIcon from "./CertificateIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
 import ChevronDownIcon from "./ChevronDownIcon";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
@@ -17,6 +19,7 @@ import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
 import Copy07Icon from "./Copy07Icon";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
+import DotHorizontalIcon from "./DotHorizontalIcon";
 import Download01Icon from "./Download01Icon";
 import Edit02Icon from "./Edit02Icon";
 import Edit05Icon from "./Edit05Icon";
@@ -38,6 +41,7 @@ import FileWord02Icon from "./FileWord02Icon";
 import FileWordIcon from "./FileWordIcon";
 import FileZipIcon from "./FileZipIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
+import FlashcardIcon from "./FlashcardIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
@@ -57,6 +61,7 @@ import MarkerPinIcon from "./MarkerPinIcon";
 import Menu05Icon from "./Menu05Icon";
 import MonitorIcon from "./MonitorIcon";
 import ParagraphIcon from "./ParagraphIcon";
+import PieChart2Icon from "./PieChart2Icon";
 import SearchIcon from "./SearchIcon";
 import Setting02Icon from "./Setting02Icon";
 import SettingIcon from "./SettingIcon";
@@ -71,6 +76,7 @@ import UsersPlusIcon from "./UsersPlusIcon";
 import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import VideoIcon from "./VideoIcon";
 import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
+import XCircleIcon from "./XCircleIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import ZaloIcon from "./ZaloIcon";
 export {
@@ -108,6 +114,7 @@ export {
   FileWord02Icon,
   FileZipIcon,
   FilterFunnelIcon,
+  FlashcardIcon,
   FileAttachmentIcon,
   FolderShieldIcon,
   FaceSadIcon,
@@ -149,4 +156,9 @@ export {
   VideoRecorderOffIcon,
   Inbox01Icon,
   ShareIcon,
+  XCircleIcon,
+  AlertCircleIcon,
+  CertificateIcon,
+  PieChart2Icon,
+  DotHorizontalIcon,
 };

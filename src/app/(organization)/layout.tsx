@@ -1,5 +1,5 @@
 "use server";
-import React from "react";
+import React, { Suspense } from "react";
 
 import Authorized from "@/modules/auth-wrapper/Authorized";
 import LayoutWrapper from "@/modules/layout-wrapper/container/LayoutWrapper";

@@ -1,6 +1,8 @@
 import React, { useCallback, useMemo } from "react";
 import type { DateFieldProps } from "@mui/x-date-pickers";
-import dayjs, { type Dayjs } from "dayjs";
+import { DateField as XDateField } from "@mui/x-date-pickers";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import dayjs, { Dayjs } from "dayjs";
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
 import { Controller } from "react-hook-form";
 
@@ -23,7 +25,7 @@ interface DatePickerProps<T extends FieldValues> {
   format?: DatePickerFormat;
   required?: boolean;
 }
-const DatePicker = <T extends FieldValues>({
+const RHFDatePicker = <T extends FieldValues>({
   className,
   control,
   name,
@@ -43,24 +45,13 @@ const DatePicker = <T extends FieldValues>({
   }, [format, label, required, placeholder]);
 
   const getValueDatePicker = useCallback((value: PathValue<T, Path<T>>) => {
-    if (!value) {
-      return null;
-    }
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value) : null;
+  }, []);
 
-    if (dayjs.isDayjs(value)) {
-      return value;
-    }
-
-    if (value instanceof Date) {
-      return dayjs(value);
-    }
-
-    if (typeof value === "string" || typeof value === "number") {
-      const parsed = typeof value === "string" ? parseDateInput(value) : new Date(value);
-      return parsed ? dayjs(parsed) : null;
-    }
-
-    return null;
+  const formatDateToIsoStr = useCallback((value: PickerValue) => {
+    if (!value) return null;
+    return dayjs(value).isValid() ? dayjs(value).toISOString() : null;
   }, []);
 
   const handleChange = useCallback(
@@ -83,7 +74,7 @@ const DatePicker = <T extends FieldValues>({
         <CustomDatePickerField
           {...datePickerProps}
           value={getValueDatePicker(value)}
-          onChange={(nextValue) => handleChange(nextValue, onChange)}
+          onChange={(value) => onChange(formatDateToIsoStr(value))}
           helperText={error?.message}
           error={!!error}
         />
@@ -91,4 +82,4 @@ const DatePicker = <T extends FieldValues>({
     />
   );
 };
-export default DatePicker;
+export default RHFDatePicker;

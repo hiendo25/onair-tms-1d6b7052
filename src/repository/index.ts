@@ -52,3 +52,5 @@ export * as certificateTemplatesRepository from "./certificate-templates";
 export * as certificateFramesRepository from "./certificate-frames";
 export * as classRoomCertificateTemplatesRepository from "./class-room-certificate-templates";
 export * as employeeCertificateTemplatesRepository from "./employee-certificate-templates";
+export * as userRepository from "./user";
+export * as flashcardsRepository from "./flashcards";

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { setCookieStore } from "@/lib/cookies";
 import { SignupService } from "@/services/auth/signup.service";
 import { SignUpDto } from "@/types/dto/auth/signup.dto";
-import { http } from "@/utils/http-status";
 export async function POST(request: NextRequest) {
   try {
     const payload: SignUpDto = await request.json();

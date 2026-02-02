@@ -1,5 +1,14 @@
 import React, { PropsWithChildren, useState } from "react";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 
 import { LessonType } from "@/model/lesson.model";
 import { Trash01Icon } from "@/shared/assets/icons";
@@ -19,20 +28,26 @@ const LessonFormWraper: React.FC<LessonFormWraperProps> = ({ onDelete, lessonTyp
     setIsOpenDialog(false);
   };
 
+  const renderLessonTypeName = (lessonType: LessonType) => {
+    return lessonType === "file" ? (
+      <BoxLessonType name="PDF" className="bg-gray-900" />
+    ) : lessonType === "video" ? (
+      <BoxLessonType name="Video" className="bg-blue-600" />
+    ) : lessonType === "assessment" ? (
+      <BoxLessonType name="Bài kiểm tra" className="bg-purple-700" />
+    ) : (
+      <Typography>Unknown</Typography>
+    );
+  };
+
   return (
     <div>
       <div className="mb-6 flex justify-between">
         <div className="flex-1 flex flex-col gap-2">
-          {lessonType === "file" ? (
-            <BoxLessonType name="PDF" className="bg-gray-900" />
-          ) : lessonType === "video" ? (
-            <BoxLessonType name="Video" className="bg-blue-600" />
-          ) : lessonType === "assessment" ? (
-            <BoxLessonType name="Bài kiểm tra" className="bg-purple-700" />
-          ) : (
-            <Typography>Unknown</Typography>
-          )}
-          <Typography sx={{ fontWeight: "bold" }}>Tạo Bài giảng</Typography>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Typography sx={{ fontWeight: "bold" }}>Tạo Bài giảng </Typography>
+            {renderLessonTypeName(lessonType)}
+          </Stack>
         </div>
         <IconButton
           sx={(theme) => ({
@@ -96,7 +111,7 @@ const BoxLessonType: React.FC<BoxLessonTypeProps> = ({ name, className }) => {
       sx={() => ({
         backgroundColor: "black",
         borderRadius: "8px",
-        padding: "6px 12px",
+        padding: "4px 8px",
         width: "fit-content",
         fontSize: "0.75rem",
         color: "white",

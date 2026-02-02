@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { UpdateClassRoomDto, UpdateClassRoomService } from "@/services/class-room/update-classroom.service";
-import { http } from "@/utils/http-status";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ classRoomId: string }> }) {
   try {

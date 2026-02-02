@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { PushSubscriptionService } from "@/modules/notifications/service/push-subscriptions.service";
-import { http } from "@/utils/http-status";
 
 export async function POST(req: NextRequest) {
   try {

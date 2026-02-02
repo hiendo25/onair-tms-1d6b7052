@@ -51,11 +51,8 @@ export type GetServerSessionResponse = Awaited<ReturnType<typeof getServerSessio
 
 const getCurrentUser = async () => {
   const supabase = await createSVClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-  return user ? (user as SupabaseUser) : null;
+  const { data } = await supabase.auth.getUser();
+  return data.user ? (data.user as SupabaseUser) : null;
 };
 
 const ensureGetCurrentUser = async () => {
@@ -72,7 +69,7 @@ const getClaims = async () => {
   return await supabase.auth.getClaims();
 };
 
-const checkEmailExists = async (payload: { email: string }) => {
+const getUserIdByEmail = async (payload: { email: string }) => {
   const supabaseAdmin = await createServiceRoleClient();
 
   const { data, error } = await supabaseAdmin.rpc("get_user_id_by_email", { user_email: payload.email });
@@ -94,5 +91,5 @@ export {
   authServerSignOut,
   getServerSession,
   getClaims,
-  checkEmailExists,
+  getUserIdByEmail,
 };

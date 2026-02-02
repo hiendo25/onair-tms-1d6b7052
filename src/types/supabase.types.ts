@@ -159,7 +159,6 @@ export type Database = {
           created_at: string
           id: string
           organization_id: string
-          scope: Database["public"]["Enums"]["assignment_config_type"] | null
           status: Database["public"]["Enums"]["assignment_config_status"]
           updated_at: string
         }
@@ -173,7 +172,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -187,7 +185,6 @@ export type Database = {
           created_at?: string
           id?: string
           organization_id?: string
-          scope?: Database["public"]["Enums"]["assignment_config_type"] | null
           status?: Database["public"]["Enums"]["assignment_config_status"]
           updated_at?: string
         }
@@ -387,7 +384,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at: string
-          duration_minutes_snapshot: number | null
           employee_id: string
           expires_at: string | null
           feedback: string | null
@@ -397,9 +393,6 @@ export type Database = {
           score: number | null
           started_at: string | null
           status: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at: string | null
           updated_at: string
         }
@@ -407,7 +400,6 @@ export type Database = {
           assignment_config_id: string
           attempt_number: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id: string
           expires_at?: string | null
           feedback?: string | null
@@ -417,9 +409,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -427,7 +416,6 @@ export type Database = {
           assignment_config_id?: string
           attempt_number?: number
           created_at?: string
-          duration_minutes_snapshot?: number | null
           employee_id?: string
           expires_at?: string | null
           feedback?: string | null
@@ -437,9 +425,6 @@ export type Database = {
           score?: number | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["assignment_attempt_status"]
-          submission_source?:
-            | Database["public"]["Enums"]["assignment_attempt_source"]
-            | null
           submitted_at?: string | null
           updated_at?: string
         }
@@ -2187,6 +2172,64 @@ export type Database = {
           },
         ]
       }
+      flashcards: {
+        Row: {
+          content: string
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          id: string
+          image_url: string
+          name: string
+          organization_id: string
+          status: Database["public"]["Enums"]["flashcard_status"]
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          id?: string
+          image_url: string
+          name: string
+          organization_id: string
+          status: Database["public"]["Enums"]["flashcard_status"]
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          organization_id?: string
+          status?: Database["public"]["Enums"]["flashcard_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "flashcards_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "flashcards_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gamification_rules: {
         Row: {
           conditions: Json | null
@@ -2895,6 +2938,7 @@ export type Database = {
       }
       organizations: {
         Row: {
+          code: string | null
           created_at: string
           employee_limit: number | null
           favicon: string | null
@@ -2906,6 +2950,7 @@ export type Database = {
           subdomain: string
         }
         Insert: {
+          code?: string | null
           created_at?: string
           employee_limit?: number | null
           favicon?: string | null
@@ -2917,6 +2962,7 @@ export type Database = {
           subdomain: string
         }
         Update: {
+          code?: string | null
           created_at?: string
           employee_limit?: number | null
           favicon?: string | null
@@ -3185,45 +3231,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      questions: {
-        Row: {
-          assignment_id: string
-          attachments: string[] | null
-          created_at: string
-          created_by: string
-          id: string
-          label: string
-          options: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at: string
-        }
-        Insert: {
-          assignment_id: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by: string
-          id?: string
-          label: string
-          options?: Json | null
-          score: number
-          type: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Update: {
-          assignment_id?: string
-          attachments?: string[] | null
-          created_at?: string
-          created_by?: string
-          id?: string
-          label?: string
-          options?: Json | null
-          score?: number
-          type?: Database["public"]["Enums"]["question_type"]
-          updated_at?: string
-        }
-        Relationships: []
       }
       resources: {
         Row: {
@@ -4169,9 +4176,22 @@ export type Database = {
           total_xp: number
         }[]
       }
-      get_filtered_employees: {
-        Args:
-          | {
+      get_filtered_employees:
+        | {
+            Args: {
+              p_branch_id?: string
+              p_department_id?: string
+              p_limit?: number
+              p_page?: number
+              p_search?: string
+            }
+            Returns: {
+              employee_id: string
+              total_count: number
+            }[]
+          }
+        | {
+            Args: {
               p_branch_id?: string
               p_department_id?: string
               p_employee_type?: Database["public"]["Enums"]["employee_type"]
@@ -4179,18 +4199,11 @@ export type Database = {
               p_page?: number
               p_search?: string
             }
-          | {
-              p_branch_id?: string
-              p_department_id?: string
-              p_limit?: number
-              p_page?: number
-              p_search?: string
-            }
-        Returns: {
-          employee_id: string
-          total_count: number
-        }[]
-      }
+            Returns: {
+              employee_id: string
+              total_count: number
+            }[]
+          }
       get_notification_count_by_type: {
         Args: { employee_id: string; unread_only?: boolean }
         Returns: {
@@ -4231,18 +4244,12 @@ export type Database = {
           total: number
         }[]
       }
-      get_user_id_by_email: {
-        Args: { user_email: string }
-        Returns: string
-      }
+      get_user_id_by_email: { Args: { user_email: string }; Returns: string }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       is_qr_code_valid: {
         Args: { p_current_time?: string; p_qr_code: string }
         Returns: {
@@ -4290,6 +4297,7 @@ export type Database = {
         | "saturday"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
+      flashcard_status: "active" | "inactive"
       gender: "male" | "female" | "other"
       hashtag_type: "class_room"
       leaderboard_period:
@@ -4513,6 +4521,7 @@ export const Constants = {
       ],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
+      flashcard_status: ["active", "inactive"],
       gender: ["male", "female", "other"],
       hashtag_type: ["class_room"],
       leaderboard_period: [

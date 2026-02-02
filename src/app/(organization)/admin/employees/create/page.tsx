@@ -7,9 +7,10 @@ import useNotifications from "@/hooks/useNotifications/useNotifications";
 import type { EmployeeFormData } from "@/modules/employees/components/EmployeeForm";
 import EmployeeForm from "@/modules/employees/components/EmployeeForm";
 import { useCreateEmployeeMutation } from "@/modules/employees/operations/mutation";
+// import type { CreateEmployeeDto } from "@/types/dto/employees";
+import { CreateEmployeePayload } from "@/modules/employees/types/create-employee.type";
 import { useUserOrganization } from "@/modules/organization";
 import PageContainer from "@/shared/ui/PageContainer";
-import type { CreateEmployeeDto } from "@/types/dto/employees";
 
 const CreateEmployeePage = () => {
   const pageTitle = "Tạo nhân viên";
@@ -17,24 +18,21 @@ const CreateEmployeePage = () => {
   const notifications = useNotifications();
   const { mutate: createEmployee, isPending } = useCreateEmployeeMutation();
 
-  const { orgId } = useUserOrganization((state) => state.currentOrganization);
-
   const handleSubmit = async (data: EmployeeFormData) => {
-    const payload: CreateEmployeeDto = {
+    const payload: CreateEmployeePayload = {
       email: data.email,
-      full_name: data.full_name,
-      phone_number: data.phone_number,
+      fullName: data.full_name,
+      phoneNumber: data.phone_number,
       gender: data.gender,
-      birthday: data.birthday,
-      branch: data.branch,
-      department: data.department,
-      employee_code: data.employee_code,
-      manager_id: data.manager_id,
-      position_id: data.position_id,
-      employee_type: data.employee_type,
-      start_date: data.start_date,
-      role_id: data.role_id,
-      organizationId: orgId,
+      dateOfBirth: data.birthday ?? undefined,
+      branchId: data.branch,
+      departmentId: data.department,
+      code: data.employee_code,
+      managerId: data.manager_id,
+      // position_id: data.position_id,
+      type: data.employee_type,
+      startAt: data.start_date,
+      roleId: data.role_id,
     };
 
     createEmployee(payload, {

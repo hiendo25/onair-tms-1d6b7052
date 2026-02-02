@@ -13,6 +13,7 @@ export const RESOURCES = {
   plan: "plan",
   survey: "survey",
   report: "report",
+  flashcard: "flashcard",
 } as const;
 
 export type Permissions = BuildPermission<Resources, PerActions>;

@@ -6,17 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ErrorIcon from "@mui/icons-material/Error";
 import PeopleIcon from "@mui/icons-material/People";
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  Button,
-  Card,
-  IconButton,
-  LinearProgress,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Alert, AlertTitle, Box, Button, Card, IconButton, LinearProgress, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import { alpha } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
@@ -44,9 +34,11 @@ const EmployeeImport = () => {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     ];
 
-    if (!validTypes.includes(selectedFile.type) &&
+    if (
+      !validTypes.includes(selectedFile.type) &&
       !selectedFile.name.endsWith(".csv") &&
-      !selectedFile.name.endsWith(".xlsx")) {
+      !selectedFile.name.endsWith(".xlsx")
+    ) {
       notifications.show("Chỉ hỗ trợ file .csv hoặc .xlsx", {
         severity: "error",
         autoHideDuration: 5000,
@@ -183,25 +175,19 @@ const EmployeeImport = () => {
       const result = await response.json();
 
       if (result.failedCount === 0) {
-        notifications.show(
-          `Import thành công ${result.successCount} nhân viên!`,
-          {
-            severity: "success",
-            autoHideDuration: 3000,
-          },
-        );
+        notifications.show(`Import thành công ${result.successCount} nhân viên!`, {
+          severity: "success",
+          autoHideDuration: 3000,
+        });
 
         setTimeout(() => {
           router.push("/admin/employees");
         }, 2000);
       } else {
-        notifications.show(
-          `Import hoàn tất: ${result.successCount} thành công, ${result.failedCount} thất bại`,
-          {
-            severity: "warning",
-            autoHideDuration: 5000,
-          },
-        );
+        notifications.show(`Import hoàn tất: ${result.successCount} thành công, ${result.failedCount} thất bại`, {
+          severity: "warning",
+          autoHideDuration: 5000,
+        });
       }
     } catch (error) {
       console.error("Error importing employees:", error);
@@ -225,12 +211,16 @@ const EmployeeImport = () => {
     <Box sx={{ py: 3 }}>
       <Stack spacing={3}>
         {/* File Upload Area */}
-        <Card sx={{
-          p: 2,
-        }}>
-          <Stack sx={{
-            gap: 2,
-          }}>
+        <Card
+          sx={{
+            p: 2,
+          }}
+        >
+          <Stack
+            sx={{
+              gap: 2,
+            }}
+          >
             <Box
               sx={{
                 p: 4,
@@ -252,9 +242,7 @@ const EmployeeImport = () => {
               onClick={() => fileInputRef.current?.click()}
             >
               <Button
-                startIcon={
-                  <CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />
-                }
+                startIcon={<CloudUploadIcon sx={{ fontSize: 48, color: "text.secondary" }} />}
                 color="inherit"
                 size="small"
                 disabled
@@ -301,7 +289,9 @@ const EmployeeImport = () => {
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <DescriptionIcon sx={{ color: "success.main" }} />
-                  <Typography color="text.primary" variant="body2" fontWeight={700}>{file.name}</Typography>
+                  <Typography color="text.primary" variant="body2" fontWeight={700}>
+                    {file.name}
+                  </Typography>
                 </Box>
                 <IconButton size="small" onClick={handleRemoveFile} color="inherit">
                   <DeleteIcon fontSize="small" />
@@ -313,18 +303,20 @@ const EmployeeImport = () => {
 
         {/* Statistics Cards - Only show if file is uploaded */}
         {file && validationResult && (
-          <Card sx={{
-            p: 2,
-          }}>
+          <Card
+            sx={{
+              p: 2,
+            }}
+          >
             <Grid container spacing={2}>
               <Grid size={4}>
-                <Card sx={{
-                  p: 2,
-                  bgcolor: (theme) =>
-                    alpha(theme.palette.grey[300], 0.2),
-                  borderColor: (theme) =>
-                    alpha(theme.palette.grey[300], 0.2),
-                }}>
+                <Card
+                  sx={{
+                    p: 2,
+                    bgcolor: (theme) => alpha(theme.palette.grey[300], 0.2),
+                    borderColor: (theme) => alpha(theme.palette.grey[300], 0.2),
+                  }}
+                >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <PeopleIcon sx={{ fontSize: 40, color: "text.secondary" }} />
                     <Box>
@@ -339,13 +331,13 @@ const EmployeeImport = () => {
                 </Card>
               </Grid>
               <Grid size={4}>
-                <Card sx={{
-                  p: 2,
-                  bgcolor: (theme) =>
-                    alpha(theme.palette.success.light, 0.2),
-                  borderColor: (theme) =>
-                    alpha(theme.palette.success.light, 0.2),
-                }}>
+                <Card
+                  sx={{
+                    p: 2,
+                    bgcolor: (theme) => alpha(theme.palette.success.light, 0.2),
+                    borderColor: (theme) => alpha(theme.palette.success.light, 0.2),
+                  }}
+                >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <CheckCircleIcon sx={{ fontSize: 40, color: "success.main" }} />
                     <Box>
@@ -360,13 +352,13 @@ const EmployeeImport = () => {
                 </Card>
               </Grid>
               <Grid size={4}>
-                <Card sx={{
-                  p: 2,
-                  bgcolor: (theme) =>
-                    alpha(theme.palette.error.light, 0.2),
-                  borderColor: (theme) =>
-                    alpha(theme.palette.error.light, 0.2),
-                }}>
+                <Card
+                  sx={{
+                    p: 2,
+                    bgcolor: (theme) => alpha(theme.palette.error.light, 0.2),
+                    borderColor: (theme) => alpha(theme.palette.error.light, 0.2),
+                  }}
+                >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                     <ErrorIcon sx={{ fontSize: 40, color: "error.main" }} />
                     <Box>
@@ -386,9 +378,13 @@ const EmployeeImport = () => {
             {errorCount === 0 ? (
               <Alert
                 severity="success"
-                icon={<CheckCircleIcon sx={{
-                  color: "success.main",
-                }} />}
+                icon={
+                  <CheckCircleIcon
+                    sx={{
+                      color: "success.main",
+                    }}
+                  />
+                }
                 sx={(theme) => ({
                   bgcolor: alpha(theme.palette.success.light, 0.3),
                   border: "1px solid",
@@ -398,9 +394,7 @@ const EmployeeImport = () => {
                 })}
               >
                 <AlertTitle>
-                  <Typography variant="body2">
-                    Không có lỗi nào trong tệp. Bạn có thể tiếp tục import ngay.
-                  </Typography>
+                  <Typography variant="body2">Không có lỗi nào trong tệp. Bạn có thể tiếp tục import ngay.</Typography>
                 </AlertTitle>
               </Alert>
             ) : (
@@ -421,22 +415,16 @@ const EmployeeImport = () => {
           </Card>
         )}
 
-        {
-          startImportable && (
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
-              <Button
-                variant="contained"
-                onClick={handleImport}
-              >
-                {isImporting ? "Đang import..." : "Thêm hàng loạt"}
-              </Button>
-            </Box>
-          )
-        }
+        {startImportable && (
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+            <Button variant="contained" onClick={handleImport}>
+              {isImporting ? "Đang import..." : "Thêm hàng loạt"}
+            </Button>
+          </Box>
+        )}
       </Stack>
     </Box>
   );
 };
 
 export default EmployeeImport;
-

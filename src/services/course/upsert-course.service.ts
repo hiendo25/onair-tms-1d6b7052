@@ -9,13 +9,9 @@ import {
   coursesSectionsRepository,
 } from "@/repository";
 import { GetCourseByIdResponse } from "@/repository/courses";
-import {
-  CreateLessonPayload,
-  CreatePivotLessonsWithResourcesPayload,
-  UpsertLessonPayload,
-} from "@/repository/courses-lessons/type";
-import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
-import { supabase } from "@/services/supabase/client";
+import { LessonInsert, LessonResourceInsert, LessonUpsert } from "@/repository/courses-lessons/type";
+import { SectionInsert, SectionUpsert } from "@/repository/courses-sections/type";
+
 export class UpsertCourseService {
   private userId: string;
 
@@ -152,7 +148,7 @@ export class UpsertCourseService {
     await Promise.all(
       sections.map(async (section, _indexSection) => {
         const { data: dataSection, error: errorSection } = await coursesSectionsRepository.upsertSection(
-          _this.mapUpsertSectionPayload({
+          _this.mapSectionUpsert({
             courseId: courseDetail.id,
             section,
             sectionIndex: _indexSection,
@@ -190,17 +186,13 @@ export class UpsertCourseService {
 
           await Promise.all(
             newLessons.map(async (newLesson, _lessonIndex) => {
-              const { data: dataLesson, error: errorLesson } = await coursesLessonsRepository.upsertLesson(
+              const dataLesson = await coursesLessonsRepository.upsertLesson(
                 _this.mapUpsertLessonsPayload({
                   sectionId: sectionId,
                   lessonIndex: _lessonIndex,
                   lesson: newLesson,
                 }),
               );
-
-              if (!dataLesson || errorLesson) {
-                throw new Error(`upsert lesson ${_lessonIndex} failed in section ${indexSection}`);
-              }
 
               const lessonId = newLesson.id;
 
@@ -216,7 +208,7 @@ export class UpsertCourseService {
                   newResources: newLesson.resources,
                 });
               } else {
-                await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(
+                await coursesLessonsRepository.bulkCreateLessonsWithResources(
                   newLesson.resources.map((resource) => ({
                     lesson_id: dataLesson.id,
                     resource_id: resource.id,
@@ -248,9 +240,8 @@ export class UpsertCourseService {
       sections.map(async (section, sectionIndex) => {
         try {
           const sectionPayload = _this.mapSectionWithCourse(courseId, section, sectionIndex);
-          const { data: sectionData, error: sessionError } = await coursesSectionsRepository.createSection(
-            sectionPayload,
-          );
+          const { data: sectionData, error: sessionError } =
+            await coursesSectionsRepository.createSection(sectionPayload);
 
           if (sessionError) {
             console.log("Create Session failed", sessionError);
@@ -261,14 +252,14 @@ export class UpsertCourseService {
            * lessons
            */
           const lessonPromises = (async () => {
-            const dataLessons = await coursesLessonsRepository.createLessons(
+            const dataLessons = await coursesLessonsRepository.bulkCreateLessons(
               _this.mapLessonWithSection(sectionData.id, section.lessons),
             );
 
             /**
              * sync lesson With Resouce after create success.
              */
-            const createPivotLessonsWithResourcesPayload = dataLessons.reduce<CreatePivotLessonsWithResourcesPayload[]>(
+            const createPivotLessonsWithResourcesPayload = dataLessons.reduce<LessonResourceInsert[]>(
               (acc, dataLesson, lessonIndex) => {
                 const lessonResources = section.lessons[lessonIndex]?.resources;
 
@@ -284,7 +275,7 @@ export class UpsertCourseService {
               },
               [],
             );
-            await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(createPivotLessonsWithResourcesPayload);
+            await coursesLessonsRepository.bulkCreateLessonsWithResources(createPivotLessonsWithResourcesPayload);
           })();
 
           /**
@@ -337,7 +328,7 @@ export class UpsertCourseService {
     const lessonsResourcesIdsDeletion = delLessons.reduce<number[]>((acc, lesson) => {
       return [...acc, ...lesson.lessons_resources.map((lr) => lr.id)];
     }, []);
-    await coursesLessonsRepository.bulkDeletePivotLessonsWithResources(lessonsResourcesIdsDeletion);
+    await coursesLessonsRepository.bulkDeleteLessonWithResource(lessonsResourcesIdsDeletion);
     await coursesLessonsRepository.bulkDeleteLessonProgressByLessonIds(delLessons.map((lesson) => lesson.id));
     await coursesLessonsRepository.bulkDeleteLessons(delLessons.map((lesson) => lesson.id));
   }
@@ -355,10 +346,10 @@ export class UpsertCourseService {
     const addLessonsResources = newResources.filter((rs) => oldLessonResources.every((lr) => lr.resource.id !== rs.id));
 
     if (delLessonsResources?.length) {
-      await coursesLessonsRepository.bulkDeletePivotLessonsWithResources(delLessonsResources.map((lr) => lr.id));
+      await coursesLessonsRepository.bulkDeleteLessonWithResource(delLessonsResources.map((lr) => lr.id));
     }
     if (addLessonsResources.length) {
-      await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(
+      await coursesLessonsRepository.bulkCreateLessonsWithResources(
         addLessonsResources.map((lr) => ({
           lesson_id: lessonId,
           resource_id: lr.id,
@@ -452,7 +443,7 @@ export class UpsertCourseService {
     courseId: string,
     section: UpsertCourseFormData["sections"][number],
     index: number,
-  ): CreateSectionPayload {
+  ): SectionInsert {
     return {
       title: section.title,
       description: section.description,
@@ -468,8 +459,8 @@ export class UpsertCourseService {
   private mapLessonWithSection(
     sessionId: string,
     lessons: UpsertCourseFormData["sections"][number]["lessons"],
-  ): CreateLessonPayload[] {
-    return lessons.map<CreateLessonPayload>((lesson, _index) => ({
+  ): LessonInsert[] {
+    return lessons.map<LessonInsert>((lesson, _index) => ({
       content: lesson.content,
       lesson_type: lesson.lessonType,
       priority: _index + 1,
@@ -487,8 +478,8 @@ export class UpsertCourseService {
   private mapBulkUpsertLessonsPayload(
     sectionId: string,
     lessons: UpsertCourseFormData["sections"][number]["lessons"],
-  ): UpsertLessonPayload[] {
-    return lessons.map<UpsertLessonPayload>((lesson, lessonIndex) => {
+  ): LessonUpsert[] {
+    return lessons.map<LessonUpsert>((lesson, lessonIndex) => {
       const lessonId = lesson.id;
       if (lessonId) {
         return {
@@ -526,7 +517,7 @@ export class UpsertCourseService {
     sectionId: string;
     lesson: UpsertCourseFormData["sections"][number]["lessons"][number];
     lessonIndex: number;
-  }): UpsertLessonPayload {
+  }): LessonUpsert {
     const { lesson, lessonIndex, sectionId } = params;
     return lesson.id
       ? {
@@ -562,11 +553,11 @@ export class UpsertCourseService {
    * Helper: Map Upsert section payload
    *
    */
-  private mapUpsertSectionPayload(params: {
+  private mapSectionUpsert(params: {
     courseId: string;
     section: UpsertCourseFormData["sections"][number];
     sectionIndex: number;
-  }): UpsertSectionPayload {
+  }): SectionUpsert {
     const { courseId, section, sectionIndex } = params;
     return section.id
       ? {

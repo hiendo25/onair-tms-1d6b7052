@@ -112,6 +112,12 @@ export const PATHS = {
     EDIT: (id: string = ":id") => `/admin/certificates/edit/${id}`,
     DETAIL: (id: string = ":id") => `/admin/certificates/${id}`,
   },
+  FLASHCARDS: {
+    ROOT: "/admin/flashcards",
+    CREATE: "/admin/flashcards/create",
+    DETAIL: (id: string = ":id") => `/admin/flashcards/${id}`,
+    EDIT: (id: string = ":id") => `/admin/flashcards/${id}/edit`,
+  },
 } as const;
 
 export const AUTH_PATHS = {

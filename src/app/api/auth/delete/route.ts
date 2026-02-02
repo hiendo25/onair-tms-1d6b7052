@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { createSVClient } from "@/services";
 import { DeleteUserService } from "@/services/auth/delete-user.service";
-import { http } from "@/utils/http-status";
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request);

@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 
 import EnterClassRoomsDialog from "@/app/(organization)/my-class/_components/EnterClassRooms";
 import { PATHS } from "@/constants/path.constant";
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { fDate, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useDeleteClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
 import QRCodeViewDialog from "@/modules/qr-attendance/components/QRCodeViewDialog";
@@ -84,6 +85,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
     if (classRoomId) {
       await deleteClassRoom(classRoomId);
       queryClient.invalidateQueries({ queryKey: ["class-rooms-priority"] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] });
       setIsOpenDialogDelete(false);
     }
   };
@@ -243,8 +245,7 @@ export default function ClassRoomListTable({ classRooms, page, pageSize, isAdmin
                   room?.class_sessions?.[0]?.session_type === "online" ||
                   room?.class_sessions?.[0]?.session_type === "live";
                 const isPast = room.runtime_status === "past";
-                const isLearningPath = room.class_type === "learning_path"
-
+                const isLearningPath = room.class_type === "learning_path";
 
                 return (
                   <TableRow

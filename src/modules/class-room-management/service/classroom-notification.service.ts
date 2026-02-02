@@ -1,7 +1,6 @@
-import dayjs from "dayjs";
-
 import { ClassRoomPlatformType, getClassRoomPlatformName } from "@/constants/class-room.constant";
 import { PATHS } from "@/constants/path.constant";
+import dayjs from "@/lib/dayjs";
 import { ClassRoomType } from "@/model/class-room.model";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
 import { NotificationBaseService } from "@/services/notifications/base-notification.service";
@@ -40,7 +39,7 @@ export class ClassRoomNotificationService extends NotificationBaseService {
     const detailUrl = PATHS.CLASSROOMS.DETAIL_CLASSROOM(classRoomSlug);
 
     const body = startAt
-      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).format("HH:mm, DD/MM/YYYY")}.`
+      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).tz().format("HH:mm, DD/MM/YYYY")}.`
       : `Lớp học "${classRoomTitle}".`;
 
     const bulkCreatePayload = receiverEmployeeIds.map<CreateNotificationPayload>((employeeId) => ({
@@ -92,7 +91,7 @@ export class ClassRoomNotificationService extends NotificationBaseService {
     const detailUrl = PATHS.CLASSROOMS.DETAIL_CLASSROOM(classRoomSlug);
 
     const body = startAt
-      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).format("HH:mm, DD/MM/YYYY")}.`
+      ? `Lớp học "${classRoomTitle}" sẽ diễn ra vào ${dayjs(startAt).tz().format("HH:mm, DD/MM/YYYY")}.`
       : `Lớp học "${classRoomTitle}".`;
 
     const bulkCreatePayload = receiverEmployeeIds.map<CreateNotificationPayload>((employeeId) => ({

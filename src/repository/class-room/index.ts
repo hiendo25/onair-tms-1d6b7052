@@ -469,7 +469,7 @@ const normalizeStudentSessionAttendances = (student: ClassRoomStudentDto, classR
 
   const normalizedSessions = sessions.map((session) => ({
     ...session,
-    class_attendances: session.id ? attendanceBySessionId[session.id] ?? [] : [],
+    class_attendances: session.id ? (attendanceBySessionId[session.id] ?? []) : [],
   }));
 
   return {
@@ -832,6 +832,30 @@ const createEmployeeAttendance = async (payload: EmployeeClassRoomAttendancePayl
     .maybeSingle();
 };
 export type CreateEmployeeAttendanceResponse = Awaited<ReturnType<typeof createEmployeeAttendance>>;
+
+export async function getClassRoomByCourseId(courseId: string) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase
+    .from("class_rooms")
+    .select(
+      `
+			*,   
+			class_sessions!inner (
+        id,
+        class_sessions_courses_period!inner (
+        course_id
+      )
+    	)`,
+    )
+    .eq("class_sessions.class_sessions_courses_period.course_id", courseId);
+
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
+  }
+  return data;
+}
 
 export {
   createClassRoom,

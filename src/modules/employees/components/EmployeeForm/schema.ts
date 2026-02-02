@@ -2,7 +2,6 @@ import { z } from "zod";
 
 import { Constants } from "@/types/supabase.types";
 
-
 const genderValues = Constants.public.Enums.gender;
 const employeeTypeValues = Constants.public.Enums.employee_type;
 
@@ -34,12 +33,12 @@ export const EmployeeFormSchema = z.object({
   branch: z.string().optional(),
   department: z.string().min(1, { message: "Vui lòng chọn phòng ban" }),
   employee_code: z.string().optional(),
-  manager_id: z.string().min(1, { message: "Vui lòng chọn người quản lý" }),
+  manager_id: z.string(),
   position_id: z.string().optional(),
   employee_type: z.enum(employeeTypeValues, {
     message: "Vui lòng chọn vai trò",
   }),
-  start_date: z.string().min(1, { message: "Vui lòng chọn ngày bắt đầu" }),
+  start_date: z.string(),
   role_id: z.string().min(1, { message: "Vui lòng chọn vai trò" }),
 });
 

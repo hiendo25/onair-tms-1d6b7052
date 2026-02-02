@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import webpush from "web-push";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { SubscribePushSubscriptionDto } from "@/modules/notifications/dto/push-subscription.dto";
 import { PushSubscriptionService } from "@/modules/notifications/service/push-subscriptions.service";
-import { http } from "@/utils/http-status";
 
 export async function POST(request: NextRequest) {
   try {

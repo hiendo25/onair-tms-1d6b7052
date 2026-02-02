@@ -13,7 +13,6 @@ import { IOSSwitch } from "@/shared/ui/form/CustomSwitcher";
 import TableData, { TableDataProps } from "@/shared/ui/TableData";
 import { useDeleteLevelMutation, useToggleActiveStatusLevelMutation } from "../../operations/mutations";
 import { useGetLevelsQuery } from "../../operations/query";
-import { GetLevelsResponse } from "../../type";
 import DrawerUpdateLevelForm, { DrawerUpdateLevelFormRef } from "../DrawerUpdateLevelForm";
 
 import { getLevelColumns, type LevelColumnItem } from "./level-columns";
@@ -109,7 +108,7 @@ const ListManageLevels: React.FC<ListManageLevelsProps> = () => {
     return getLevelColumns();
   }, []);
 
-  const levelColumns: TableDataProps<NonNullable<GetLevelsResponse["data"]>["data"][number]>["columns"] = [
+  const levelColumns: TableDataProps<LevelColumnItem>["columns"] = [
     ...baseColumns,
     {
       id: "actions",

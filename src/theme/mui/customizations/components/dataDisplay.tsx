@@ -174,6 +174,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
             },
             style: {
               backgroundColor: alpha(theme.palette.primary.light, 0.16),
+              borderWidth: 0,
               [`& .${chipClasses.label}`]: {
                 color: theme.palette.primary.dark,
               },
@@ -199,6 +200,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
             },
             style: {
               backgroundColor: alpha(theme.palette.secondary.light, 0.16),
+              borderWidth: 0,
               [`& .${chipClasses.label}`]: {
                 color: theme.palette.secondary.dark,
               },
@@ -224,6 +226,8 @@ export const dataDisplayCustomizations: Components<Theme> = {
             },
             style: {
               backgroundColor: alpha(theme.palette.success.light, 0.16),
+              borderWidth: 0,
+              // borderColor: "transparent",
               [`& .${chipClasses.label}`]: {
                 color: theme.palette.success.dark,
               },
@@ -249,6 +253,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
             },
             style: {
               backgroundColor: alpha(theme.palette.warning.light, 0.16),
+              borderWidth: 0,
               [`& .${chipClasses.label}`]: {
                 color: theme.palette.warning.dark,
               },
@@ -275,7 +280,7 @@ export const dataDisplayCustomizations: Components<Theme> = {
             },
             style: {
               backgroundColor: alpha(theme.palette.error.light, 0.16),
-
+              borderWidth: 0,
               [`& .${chipClasses.label}`]: {
                 color: theme.palette.error.main,
               },

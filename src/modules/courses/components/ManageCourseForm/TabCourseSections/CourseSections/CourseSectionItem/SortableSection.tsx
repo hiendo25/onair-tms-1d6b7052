@@ -25,9 +25,10 @@ const SortableSection: React.FC<SortableSectionProps> = ({ id, children, subLabe
       ref={setNodeRef}
       {...attributes}
       style={style}
-      className={cn("border border-transparent rounded-xl overflow-hidden", {
+      className={cn("border rounded-xl overflow-hidden", {
         "border-blue-600": isActive,
         "border-dashed border-gray-300": isDragging,
+        "border-gray-300": !isDragging && !isError,
         "border-solid": !isDragging,
         "border-red-600": isError && !isDragging,
       })}
