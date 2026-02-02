@@ -1,11 +1,9 @@
 "use client";
-import { alpha, Chip, Typography } from "@mui/material";
+import { Chip } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 
-import { EmployeeTeacherTypeItem } from "@/model/employee.model";
-import { GetAssignmentsV2Response } from "@/repository/assignments-config";
-import { AssignmentDto } from "@/types/dto/assignments";
-export const columns: GridColDef<NonNullable<GetAssignmentsV2Response["data"]>[number]>[] = [
+import { AssignmentBankDto } from "@/types/dto/assignment-bank";
+export const columns: GridColDef<AssignmentBankDto>[] = [
   {
     field: "id",
     headerName: "ID",
@@ -27,9 +25,9 @@ export const columns: GridColDef<NonNullable<GetAssignmentsV2Response["data"]>[n
     headerName: "Danh mục",
     width: 180,
     renderCell: ({ row: { assignment_categories: categories } }) => {
-      if (!categories.length) return <div className="pl-2">--</div>;
+      if (!categories?.length) return <div className="pl-2">--</div>;
       return categories.map((cat) => (
-        <Chip key={cat.category_id} color="primary" variant="outlined" label={cat.categories.name} />
+        <Chip key={cat.category_id} color="primary" variant="outlined" label={cat.categories?.name ?? "--"} />
       ));
     },
   },
@@ -37,8 +35,8 @@ export const columns: GridColDef<NonNullable<GetAssignmentsV2Response["data"]>[n
     field: "created_by",
     headerName: "Người tạo",
     width: 220,
-    renderCell: ({ row: { createdBy } }) => {
-      return createdBy.profiles?.full_name;
+    renderCell: ({ row: { createdBy, created_by } }) => {
+      return createdBy?.profiles?.full_name ?? created_by ?? "--";
     },
   },
   // {

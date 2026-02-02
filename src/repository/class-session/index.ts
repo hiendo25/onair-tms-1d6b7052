@@ -142,7 +142,7 @@ const upsertPivotClassSessionWithCoursePeriod = async (payload: UpsertPivotClass
 
 const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload) => {
   try {
-    return await supabase.from("class_session_assignment").insert(payload).select();
+    return await supabase.from("assignment_class_session").insert(payload).select();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
@@ -151,19 +151,50 @@ const createPivotClassSessionWithAssignment = async (payload: CreatePivotClassSe
 
 const bulkCreatePivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload[]) => {
   try {
-    return await supabase.from("class_session_assignment").insert(payload).select();
+    return await supabase.from("assignment_class_session").insert(payload).select();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
   }
 };
 
-const bulkDeletePivotClassSessionWithAssignment = async (ids: number[]) => {
+const bulkDeletePivotClassSessionWithAssignment = async (payload: CreatePivotClassSessionWithAssignmentPayload[]) => {
   try {
-    return await supabase.from("class_session_assignment").delete().in("id", ids).select();
+    if (!payload.length) {
+      return { data: [], error: null };
+    }
+    const filter = payload
+      .map(
+        (item) =>
+          `and(session_id.eq.${item.session_id},assignment_config_id.eq.${item.assignment_config_id})`,
+      )
+      .join(",");
+    return await supabase.from("assignment_class_session").delete().or(filter).select();
   } catch (err: any) {
     console.error("Unexpected error:", err);
     throw new Error(err.message ?? "Unknown error createPivotClassSessionWithAssignment");
+  }
+};
+
+const getAssignmentSessionRefsByAssignmentConfigIds = async (assignmentConfigIds: string[]) => {
+  try {
+    if (!assignmentConfigIds.length) {
+      return [];
+    }
+
+    const { data, error } = await supabase
+      .from("assignment_class_session")
+      .select("assignment_config_id")
+      .in("assignment_config_id", assignmentConfigIds);
+
+    if (error) {
+      throw error;
+    }
+
+    return data ?? [];
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error get assignment session refs");
   }
 };
 
@@ -310,6 +341,7 @@ export {
   bulkUpsertClassSession,
   bulkCreateClassSession,
   bulkDeletePivotClassSessionWithAssignment,
+  getAssignmentSessionRefsByAssignmentConfigIds,
   bulkDeletePivotClassSessionWithCoursePeriod,
   updatePivotClassSessionWithCoursePeriod,
   upsertPivotClassSessionWithCoursePeriod,

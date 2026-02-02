@@ -66,6 +66,29 @@ const getClassRoomById = async (classRoomId: string) => {
             url: string;
             password: string;
           };
+          assignments: {
+            assignment_config_id: string;
+            assignment_config: {
+              assignment_bank_id: string | null;
+              attempt_duration_minutes: number | null;
+              assignment_bank: {
+                id: string;
+                name: string;
+                description: string | null;
+                duration_minutes: number | null;
+                pass_score: number | null;
+                assignment_questions: {
+                  question_id: string;
+                  order_index: number;
+                  score_override: number | null;
+                  question_bank: {
+                    id: string;
+                    score: number | null;
+                  } | null;
+                }[];
+              } | null;
+            } | null;
+          }[];
           weekly_schedule: {
             from: DayOfWeek;
             time: string;

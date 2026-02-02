@@ -40,6 +40,11 @@ type AssignmentStudentRow = AssignmentStudentDto & {
   id: string;
   displayIndex: string;
 };
+const PROGRESS_STATUS_LABELS: Record<AssignmentStudentProgressStatus, string> = {
+  completed: "Hoàn thành",
+  in_progress: "Đang làm",
+  not_started: "Chưa bắt đầu",
+};
 const STATUS_OPTIONS: Array<{ value: "all" | AssignmentStudentProgressStatus; label: string }> = [
   { value: "all", label: "Tất cả trạng thái" },
   { value: "completed", label: "Hoàn thành" },
@@ -132,8 +137,6 @@ export default function AssignmentStudentList() {
 
   const assignmentTotals = React.useMemo(() => calculateAssignmentTotals(assignment ?? null), [assignment]);
   const passScoreValue = assignment?.pass_score ?? null;
-  console.log("assignment", assignment);
-
   const passScoreLabel =
     passScoreValue !== null && assignmentTotals.totalScore > 0
       ? `${passScoreValue}/${assignmentTotals.totalScore}`
@@ -156,10 +159,6 @@ export default function AssignmentStudentList() {
 
   const handleNavigateToGrade = (employeeId: string) => {
     router.push(PATHS.ASSIGNMENTS.GRADE(assignmentId, employeeId));
-  };
-
-  const handleNavigateToSubmission = (employeeId: string) => {
-    router.push(PATHS.ASSIGNMENTS.SUBMIT(assignmentId, employeeId));
   };
 
   const tableRows = React.useMemo<AssignmentStudentRow[]>(() => {
@@ -248,20 +247,29 @@ export default function AssignmentStudentList() {
         },
       },
       {
+        id: "progress-status",
+        field: "progress_status",
+        headerName: "Trạng thái làm bài",
+        renderCell: (_value, row) => {
+          const progressStatus = getStudentProgressStatus(row);
+          const progressLabel = PROGRESS_STATUS_LABELS[progressStatus];
+
+          return (
+            <Box className="py-1 px-1.5 bg-[#F9FAFB] text-[#000000] rounded-md inline-block font-normal text-[12px]">
+              {progressLabel}
+            </Box>
+          );
+        },
+      },
+      {
         id: "grading-status",
-        field: "status",
+        field: "grading_status",
         headerName: "Trạng thái chấm",
         renderCell: (_value, row) => {
           const progressStatus = getStudentProgressStatus(row);
           const gradingStatus = getStudentGradingStatus(row);
           const gradingLabel =
-            progressStatus === "completed"
-              ? gradingStatus === "graded"
-                ? "Đã chấm"
-                : "Chưa chấm"
-              : progressStatus === "in_progress"
-                ? "Đang làm"
-                : "Chưa nộp";
+            progressStatus === "completed" ? (gradingStatus === "graded" ? "Đã chấm" : "Chưa chấm") : "-";
 
           return (
             <>
@@ -287,24 +295,33 @@ export default function AssignmentStudentList() {
         headerName: "Thao tác",
         align: "right",
         renderCell: (_value, row) => {
-          const actionLabel =
-            row.status === "graded" ? "Xem chi tiết" : row.has_submitted ? "Chấm điểm" : "Xem chi tiết";
+          const progressStatus = getStudentProgressStatus(row);
+          const gradingStatus = getStudentGradingStatus(row);
+          const isActionDisabled = progressStatus !== "completed";
+          const actionLabel = isActionDisabled
+            ? ""
+            : gradingStatus === "graded"
+              ? "Xem chi tiết"
+              : "Chấm điểm";
           const handleAction =
-            row.status === "graded"
+            gradingStatus === "graded"
               ? () => handleNavigateToResult(row.employee_id)
-              : row.has_submitted
-                ? () => handleNavigateToGrade(row.employee_id)
-                : () => handleNavigateToSubmission(row.employee_id);
+              : () => handleNavigateToGrade(row.employee_id);
 
           return (
-            <Button variant="text" onClick={handleAction} sx={{ fontWeight: 600, textTransform: "none" }}>
+            <Button
+              variant="text"
+              onClick={handleAction}
+              disabled={isActionDisabled}
+              sx={{ fontWeight: 600, textTransform: "none" }}
+            >
               {actionLabel}
             </Button>
           );
         },
       },
     ],
-    [handleNavigateToGrade, handleNavigateToResult, handleNavigateToSubmission, passScoreValue],
+    [handleNavigateToGrade, handleNavigateToResult, passScoreValue],
   );
 
   return (

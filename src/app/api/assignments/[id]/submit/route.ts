@@ -370,7 +370,7 @@ export async function GET(
     );
 
     const submitted = Boolean(summary.latestAttempt) &&
-      ["submitted", "graded"].includes(summary.latestAttempt.status);
+      ["submitted", "graded"].includes(summary?.latestAttempt?.status!);
 
     return NextResponse.json(
       {

@@ -8,6 +8,7 @@ import { useParams, useRouter } from "next/navigation";
 import { PATHS } from "@/constants/path.constant";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
 import {
+  useGetAssignmentAccessQuery,
   useGetAssignmentAttemptSummaryQuery,
   useGetAssignmentQuery,
   useGetAssignmentQuestionsQuery,
@@ -68,15 +69,25 @@ export default function AssignmentSubmission({
     assignmentId || "",
     employeeId || "",
   );
+  const accessEmployeeId = employeeId || currentEmployeeId;
+  const { data: accessResult, isLoading: isLoadingAccess } = useGetAssignmentAccessQuery(
+    assignmentId || "",
+    accessEmployeeId || "",
+  );
 
   const autoSubmittedRef = React.useRef(false);
   const shuffleQuestions = Boolean(assignment?.shuffle_questions);
   const shuffleAnswers = Boolean(assignment?.shuffle_answers);
-  const isAssigned = assignment?.assignment_employees?.some(
-    (assignmentEmployee) => assignmentEmployee.employee_id === currentEmployeeId,
+  const isAssignedDirectly = assignment?.assignment_employees?.some(
+    (assignmentEmployee) => assignmentEmployee.employee_id === accessEmployeeId,
   );
+  const isAssigned = Boolean(isAssignedDirectly || accessResult?.isAssigned);
   const shouldRedirectToForbidden =
-    !isEmbedded && !isLoadingAssignment && Boolean(assignment) && !isAssigned;
+    !isEmbedded &&
+    !isLoadingAssignment &&
+    !isLoadingAccess &&
+    Boolean(assignment) &&
+    !isAssigned;
   const {
     attemptLimit,
     attemptsRemaining,
@@ -166,7 +177,7 @@ export default function AssignmentSubmission({
 
   React.useEffect(() => {
     if (!shouldRedirectToForbidden) return;
-    router.push(FORBIDDEN_PATH);
+    // router.push(FORBIDDEN_PATH);
   }, [router, shouldRedirectToForbidden]);
 
   const handleBack = React.useCallback(() => {

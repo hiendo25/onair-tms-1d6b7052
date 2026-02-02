@@ -30,6 +30,23 @@ const bulkDeleteLessons = async (lessonIds: string[]) => {
   }
 };
 
+const bulkDeleteLessonProgressByLessonIds = async (lessonIds: string[]) => {
+  if (!lessonIds.length) {
+    return;
+  }
+
+  try {
+    const { error } = await supabase.from("lesson_progress").delete().in("lesson_id", lessonIds);
+
+    if (error) {
+      throw new Error(`Delete lesson progress failed: ${error.message}`);
+    }
+  } catch (err: any) {
+    console.log(err);
+    throw new Error(err?.message);
+  }
+};
+
 const bulkUpsertLesson = async (upsertPayload: UpsertLessonPayload[]) => {
   try {
     return await supabase
@@ -130,6 +147,7 @@ export {
   bulkCreatePivotLessonsWithResources,
   bulkDeletePivotLessonsWithResources,
   bulkDeleteLessons,
+  bulkDeleteLessonProgressByLessonIds,
   upsertLesson,
   bulkUpsertLesson,
   getCourseByLessonId,

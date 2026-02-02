@@ -124,7 +124,7 @@ const classRoomSessionSchema = zod
       )
       .min(1, { error: "Chọn ít nhất 1 môn học." }),
     assignments: zod.array(
-      zod.object({ recordId: zod.number().optional(), assignmentId: zod.string(), name: zod.string().optional() }),
+      zod.object({ recordId: zod.number().optional(), assignmentBankId: zod.string(), name: zod.string().optional() }),
     ),
     weeklySchedule: zod
       .object({

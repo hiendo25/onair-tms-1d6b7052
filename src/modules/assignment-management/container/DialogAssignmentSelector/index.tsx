@@ -12,7 +12,7 @@ import { DataGrid, DataGridProps, GridRowSelectionModel } from "@mui/x-data-grid
 import useDebounce from "@/hooks/useDebounce";
 import { useUserOrganization } from "@/modules/organization";
 import { SearchIcon } from "@/shared/assets/icons";
-import { useGetAssignmentsV2Query } from "../../operations/query";
+import { useGetAssignmentBanksQuery } from "../../operations/query";
 
 import { columns } from "./columns";
 import { AssignmentSelectItem } from "./type";
@@ -42,19 +42,22 @@ const DialogAssignmentSelector = forwardRef<DialogAssignmentSelectorRef, DialogA
     const prevRowIdsSet = useRef<GridRowSelectionModel["ids"]>(null);
 
     const searchQueryDebounce = useDebounce(searchQuery, 600);
-    const { data: assignmentsData, isPending } = useGetAssignmentsV2Query({
-      queryParams: {
-        page: paginationModel.page,
-        pageSize: paginationModel.pageSize,
-        excludes: values,
-        search: searchQueryDebounce,
-        organizationId: organizationId,
-      },
-      enabled: openDialog,
-    });
+    const assignmentQueryParams = useMemo(
+      () =>
+        openDialog
+          ? {
+              page: paginationModel.page,
+              limit: paginationModel.pageSize,
+              search: searchQueryDebounce,
+              organizationId: organizationId,
+            }
+          : undefined,
+      [openDialog, paginationModel.page, paginationModel.pageSize, searchQueryDebounce, organizationId],
+    );
+    const { data: assignmentsData, isPending } = useGetAssignmentBanksQuery(assignmentQueryParams);
 
     const assignmentRows = useMemo(() => assignmentsData?.data || [], [assignmentsData?.data]);
-    const rowCount = useMemo(() => assignmentsData?.count || 0, [assignmentsData?.count]);
+    const rowCount = useMemo(() => assignmentsData?.total || 0, [assignmentsData?.total]);
 
     const handleClose = () => {
       //Reset State after close

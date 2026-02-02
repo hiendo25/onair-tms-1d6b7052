@@ -38,6 +38,7 @@ export const initLessonFormData = (type: LessonType): LessonItem => {
     content: "",
     resources: [],
     mainResource: undefined,
+    assignmentBankId: undefined,
   };
 };
 export type CourseLessonsRef = {

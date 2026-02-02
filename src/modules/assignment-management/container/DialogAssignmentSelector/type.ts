@@ -1,3 +1,3 @@
-import { AssignmentDto } from "@/types/dto/assignments";
+import { AssignmentBankDto } from "@/types/dto/assignment-bank";
 
-export type AssignmentSelectItem = Pick<AssignmentDto, "id" | "name"> & Record<string, any>;
+export type AssignmentSelectItem = Pick<AssignmentBankDto, "id" | "name"> & Record<string, any>;
