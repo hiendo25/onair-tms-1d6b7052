@@ -1,3 +1,4 @@
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type {
   CheckboxAnswer,
@@ -18,7 +19,6 @@ import {
   SubmissionDetailDto,
 } from "@/types/dto/assignments";
 import { Database, Json } from "@/types/supabase.types";
-import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];

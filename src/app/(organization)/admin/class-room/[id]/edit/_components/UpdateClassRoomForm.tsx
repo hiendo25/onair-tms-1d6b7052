@@ -17,7 +17,10 @@ type UpdateClassRoomFormValue = Exclude<ManageClassRoomFormProps["initFormValue"
 type ClassRoomSession = UpdateClassRoomFormValue["classRoomSessions"][number];
 type SessionAgenda = UpdateClassRoomFormValue["classRoomSessions"][number]["agendas"][number];
 type StudentItem = Exclude<ManageClassRoomFormProps["students"], undefined>[number];
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useUpdateClassRoomMutation } from "@/modules/class-room-management/operations/mutation";
+import { QUERY_KEYS } from "@/constants/query-key.constant";
 interface UpdateClassRoomFormProps {
   data: Exclude<GetClassRoomByIdData, null>;
 }
@@ -27,6 +30,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
   const [isTransition, startTransition] = useTransition();
   const { enqueueSnackbar } = useSnackbar();
   const formClassRoomRef = useRef<ManageClassRoomFormRef>(null);
+  const queryClient = useQueryClient();
   // const { isLoading, onUpdate } = useCRUDClassRoom();
 
   const { mutate: onUpdate, isPending: isLoading } = useUpdateClassRoomMutation();
@@ -124,12 +128,14 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
           channelInfo: channelInfo,
           agendas: agendas,
           coursesPeriod: coursesPeriod,
-          // assignments: session.session_assignments.map((item) => ({
-          //   recordId: item.id,
-          //   assignmentId: item.assignments.id,
-          //   name: item.assignments.name,
-          // })),
-          assignments: [],
+          assignments:
+            session.assignments
+              ?.map((item) => ({
+                assignmentBankId:
+                  item.assignment_config?.assignment_bank?.id ?? item.assignment_config?.assignment_bank_id ?? "",
+                name: item.assignment_config?.assignment_bank?.name ?? "",
+              }))
+              .filter((item) => Boolean(item.assignmentBankId)) ?? [],
           qrCode: {
             id: session.class_qr_codes[0]?.id,
             isLimitTimeScanQrCode:
@@ -208,6 +214,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       { classRoomId: data.id, formData, students, certificate },
       {
         onSuccess(data, variables, onMutateResult, context) {
+          queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_CLASS_ROOMS] })
           enqueueSnackbar("Cập nhật lớp học thành công..", { variant: "success" });
           // router.refresh();
           router.push(PATHS.CLASSROOMS.LIST_CLASSROOM);

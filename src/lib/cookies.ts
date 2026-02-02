@@ -3,13 +3,7 @@
 import { ResponseCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 
-const COOKIE_STORE_KEY = {
-  organization_id: "organization_id",
-  employee_id: "employee_id",
-} as const;
-type CookieStoreKey = keyof typeof COOKIE_STORE_KEY;
-
-type CookieStoreValue<K extends CookieStoreKey> = K extends "organization_id" ? string : never;
+import { CookieStoreKey, CookieStoreValue } from "@/constants/cookie.constant";
 
 export const getCookieStore = async <K extends CookieStoreKey>(key: K) => {
   const cookieStore = await cookies();
@@ -23,6 +17,10 @@ export const setCookieStore = async <K extends CookieStoreKey>(
   cookie?: Partial<ResponseCookie>,
 ) => {
   const cookieStore = await cookies();
-
   return cookieStore.set(key, value, cookie);
+};
+
+export const removeCookieStore = async <K extends CookieStoreKey>(key: K) => {
+  const cookieStore = await cookies();
+  return cookieStore.delete(key);
 };

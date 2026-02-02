@@ -110,7 +110,5 @@ export type UpsertPivotClassSessionWithCoursePeriodPayload =
 
 export type CreatePivotClassSessionWithAssignmentPayload = {
   session_id: string;
-  assignment_id: string;
-  start_at: string | null;
-  end_at: string | null;
+  assignment_config_id: string;
 };

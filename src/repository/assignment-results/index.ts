@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createSVClient } from "@/services";
 import type { FileMetadata } from "@/types/dto/assignments";
 import type { Database, Json } from "@/types/supabase.types";
@@ -381,6 +383,46 @@ export async function deleteAssignmentResultsByAssignmentId(assignmentId: string
   }
 
   const { error } = await supabase.from("assignments_attempts").delete().eq("assignment_config_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment attempts: ${error.message}`);
+  }
+}
+
+export async function deleteAssignmentResultsByAssignmentAndEmployeeIdsWithClient(
+  client: SupabaseClient<Database>,
+  assignmentId: string,
+  employeeIds: string[],
+): Promise<void> {
+  if (employeeIds.length === 0) {
+    return;
+  }
+
+  const { data: attempts, error: attemptsError } = await client
+    .from("assignments_attempts")
+    .select("id")
+    .eq("assignment_config_id", assignmentId)
+    .in("employee_id", employeeIds);
+
+  if (attemptsError) {
+    throw new Error(`Failed to fetch assignment attempts: ${attemptsError.message}`);
+  }
+
+  const attemptIds = (attempts ?? []).map((attempt) => attempt.id);
+
+  if (attemptIds.length > 0) {
+    const { error: resultsError } = await client.from("assignment_results").delete().in("attempt_id", attemptIds);
+
+    if (resultsError) {
+      throw new Error(`Failed to delete assignment results: ${resultsError.message}`);
+    }
+  }
+
+  const { error } = await client
+    .from("assignments_attempts")
+    .delete()
+    .eq("assignment_config_id", assignmentId)
+    .in("employee_id", employeeIds);
 
   if (error) {
     throw new Error(`Failed to delete assignment attempts: ${error.message}`);

@@ -31,22 +31,37 @@ export async function bulkDeleteLessons(lessonIds: string[]) {
     console.error(error);
     throw new Error(error.details || error.message);
   }
-  return data;
-}
+};
 
-export async function bulkUpsertLesson(upsertPayload: LessonUpsert[]) {
+export const bulkDeleteLessonProgressByLessonIds = async (lessonIds: string[]) => {
   const supabase = createClient();
-
-  const { data, error } = await supabase
-    .from("lessons")
-    .upsert(upsertPayload.map((usPl) => usPl.payload))
-    .select("*");
-
-  if (error) {
-    console.error(error);
-    throw new Error(error.details || error.message);
+  if (!lessonIds.length) {
+    return;
   }
-  return data;
+
+  try {
+    const { error } = await supabase.from("lesson_progress").delete().in("lesson_id", lessonIds);
+
+    if (error) {
+      throw new Error(`Delete lesson progress failed: ${error.message}`);
+    }
+  } catch (err: any) {
+    console.log(err);
+    throw new Error(err?.message);
+  }
+};
+
+export const bulkUpsertLesson = async (upsertPayload: LessonUpsert[]) => {
+  const supabase = createClient();
+  try {
+    return await supabase
+      .from("lessons")
+      .upsert(upsertPayload.map((usPl) => usPl.payload))
+      .select("*");
+  } catch (err: any) {
+    console.log(err);
+    throw new Error(err?.message);
+  }
 }
 
 export async function upsertLesson(upsertPayload: LessonUpsert) {
@@ -133,4 +148,4 @@ export async function getLessonsByCourseId(courseId: string) {
   }
 
   return data || [];
-}
+};

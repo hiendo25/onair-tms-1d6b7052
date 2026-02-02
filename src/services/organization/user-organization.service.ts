@@ -7,7 +7,7 @@ export const getOrganizations = cache(async (userId: string) => {
   return await organizationsRepository.getOrganizationsByUserId(userId);
 });
 
-export const getEmployees = cache(async (userId: string) => {
+export const getEmployeesByUserId = cache(async (userId: string) => {
   return await employeesRepository.getEmployeesByUserId(userId);
 });
 

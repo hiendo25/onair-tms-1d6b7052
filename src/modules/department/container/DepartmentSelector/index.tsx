@@ -1,23 +1,26 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { FormControl, FormLabel, MenuItem, Select, SelectChangeEvent, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { MenuItem, Typography } from "@mui/material";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
 
 import { useGetDepartmentsQuery } from "@/modules/department/operations/query";
 import { useUserOrganization } from "@/modules/organization";
 export interface DepartmentSelectorProps {
-  className?: string;
-  onSelect?: (departmentId: string[]) => void;
   values?: string[];
   multiple?: boolean;
+  className?: string;
+  onSelect?: (departmentId: string[]) => void;
+  onChange?: (departmentId: string[]) => void;
 }
-const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSelect, values, multiple = false }) => {
+const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({
+  className,
+  onSelect,
+  values,
+  onChange,
+  multiple = false,
+}) => {
   const organizationId = useUserOrganization((state) => state.currentOrganization.orgId);
   const [departmentIds, setDepartmentIds] = useState<string[]>([]);
-  const { data: departmentsData, isPending } = useGetDepartmentsQuery(
-    { organizationId },
-    {
-      enabled: true,
-    },
-  );
+  const { data: departmentsData, isPending } = useGetDepartmentsQuery({ organizationId });
 
   const departmentList = departmentsData?.data || [];
 
@@ -27,6 +30,11 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
     } = event;
 
     const selectedValues = typeof value === "string" ? value.split(",") : value;
+
+    if (onChange) {
+      onChange?.(selectedValues);
+      return;
+    }
 
     if (onSelect) {
       onSelect?.(selectedValues);
@@ -40,10 +48,10 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
   };
 
   useEffect(() => {
-    if (!onSelect) return;
+    if (!onSelect && !onChange) return;
 
     setDepartmentIds(values ?? []);
-  }, [values, onSelect]);
+  }, [values, onSelect, onChange]);
 
   return (
     <Select
@@ -65,12 +73,25 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({ className, onSe
         return selected.map((item) => getDepartmentName(item)).join(", ");
       }}
       fullWidth
+      sx={{
+        ".MuiPaper-root": {
+          border: "1px solid blue",
+        },
+      }}
+      MenuProps={{
+        PaperProps: {
+          sx: (theme) => ({
+            border: `1px solid ${theme.palette.grey[300]}`,
+            maxHeight: 350,
+          }),
+        },
+      }}
     >
-      <MenuItem value="" disabled>
+      <MenuItem value="" disabled sx={{ fontSize: 14 }}>
         Chọn phòng ban
       </MenuItem>
       {departmentList.map((item) => (
-        <MenuItem key={item.id} value={item.id}>
+        <MenuItem key={item.id} value={item.id} sx={{ fontSize: 14 }}>
           {item.name}
         </MenuItem>
       ))}

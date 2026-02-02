@@ -383,6 +383,7 @@ export async function createAssignment(data: {
   available_from?: string | null;
   available_to?: string | null;
   status?: Database["public"]["Enums"]["assignment_config_status"];
+  scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
 }) {
   const supabase = await createSVClient();
 
@@ -397,6 +398,7 @@ export async function createAssignment(data: {
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -417,6 +419,7 @@ export async function createAssignmentFromBank(data: {
   available_from?: string | null;
   available_to?: string | null;
   status?: Database["public"]["Enums"]["assignment_config_status"];
+  scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
 }) {
   const supabase = await createSVClient();
 
@@ -431,6 +434,7 @@ export async function createAssignmentFromBank(data: {
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -443,7 +447,6 @@ export async function createAssignmentFromBank(data: {
 }
 
 export async function createAssignmentFromBankWithClient(
-  client: AssignmentRepositoryClient,
   data: {
     assignment_bank_id: string;
     assigned_by: string;
@@ -453,9 +456,10 @@ export async function createAssignmentFromBankWithClient(
     available_from?: string | null;
     available_to?: string | null;
     status?: Database["public"]["Enums"]["assignment_config_status"];
+    scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
   },
 ) {
-  const { data: assignment, error } = await client
+  const { data: assignment, error } = await supabase
     .from("assignment_config")
     .insert({
       assignment_bank_id: data.assignment_bank_id,
@@ -466,6 +470,7 @@ export async function createAssignmentFromBankWithClient(
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -801,6 +806,22 @@ export async function deleteAssignmentEmployeesByAssignmentIdWithClient(
   }
 }
 
+export async function getAssignmentEmployeeIdsByAssignmentIdWithClient(
+  client: AssignmentRepositoryClient,
+  assignmentId: string,
+): Promise<string[]> {
+  const { data, error } = await client
+    .from("assignment_employees")
+    .select("employee_id")
+    .eq("assignment_config_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to fetch assignment employees: ${error.message}`);
+  }
+
+  return (data ?? []).map((item) => item.employee_id);
+}
+
 export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) {
   const supabase = await createSVClient();
 
@@ -809,6 +830,84 @@ export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) 
   if (error) {
     throw new Error(`Failed to delete assignment employees by employee: ${error.message}`);
   }
+}
+
+// Assignment courses repository methods
+export async function getAssignmentCoursesByCourseId(courseId: string) {
+  const { data, error } = await supabase
+    .from("assignment_courses")
+    .select(
+      `
+      assignment_config_id,
+      assignment_config:assignment_config(
+        assignment_bank_id
+      )
+    `,
+    )
+    .eq("course_id", courseId);
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  return { data: data ?? [], error: null };
+}
+
+export async function createAssignmentCourses(
+  rows: Array<{
+    assignment_config_id: string;
+    course_id: string;
+  }>,
+) {
+  if (!rows.length) {
+    return;
+  }
+
+  const { error } = await supabase.from("assignment_courses").insert(rows);
+
+  if (error) {
+    throw new Error(`Failed to create assignment courses: ${error.message}`);
+  }
+}
+
+export async function deleteAssignmentCoursesByAssignmentConfigIds(
+  courseId: string,
+  assignmentConfigIds: string[],
+) {
+  if (!assignmentConfigIds.length) {
+    return;
+  }
+  const { error } = await supabase
+    .from("assignment_courses")
+    .delete()
+    .eq("course_id", courseId)
+    .in("assignment_config_id", assignmentConfigIds);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment courses: ${error.message}`);
+  }
+}
+
+export async function getAssignmentConfigIdByCourseAndBank(courseId: string, assignmentBankId: string) {
+  const { data, error } = await supabase
+    .from("assignment_courses")
+    .select(
+      `
+      assignment_config_id,
+      assignment_config:assignment_config(
+        assignment_bank_id
+      )
+    `,
+    )
+    .eq("course_id", courseId)
+    .eq("assignment_config.assignment_bank_id", assignmentBankId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch course assignment config: ${error.message}`);
+  }
+
+  return data?.assignment_config_id ?? null;
 }
 
 export async function nullifyLessonsAssignmentId(assignmentId: string) {
@@ -1243,6 +1342,8 @@ const getMyAssignments = async (
       assignment_name: assignmentBank?.name ?? "",
       assignment_description: assignmentBank?.description || "",
       created_at: item.created_at,
+      available_from: item.available_from ?? null,
+      available_to: item.available_to ?? null,
       attempt_limit: attemptLimit,
       attempts_used: attemptsUsed,
       attempts_remaining: attemptsRemaining,
@@ -1467,4 +1568,5 @@ export {
   getMyAssignments,
   getAssignedAssignments,
   getQuestionsByIds,
+  getAssignmentEmployeeIdsByAssignmentIdWithClient,
 };

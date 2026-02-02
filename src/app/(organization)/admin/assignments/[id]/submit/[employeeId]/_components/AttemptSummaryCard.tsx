@@ -1,6 +1,8 @@
 import * as React from "react";
 import { Card, Stack, Typography } from "@mui/material";
 
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
+
 interface AttemptSummaryCardProps {
   attemptsRemaining: number | null;
   attemptLimit: number | null;
@@ -9,25 +11,6 @@ interface AttemptSummaryCardProps {
   durationMinutes: number | null;
   remainingSeconds: number | null;
 }
-
-const formatDateTime = (value: string | null) => {
-  if (!value) {
-    return "--";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "--";
-  }
-
-  return date.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
 
 const formatRemainingTime = (seconds: number) => {
   const totalSeconds = Math.max(seconds, 0);
@@ -79,7 +62,7 @@ const AttemptSummaryCard = ({
               Cửa sổ làm bài
             </Typography>
             <Typography variant="body2" fontWeight={600}>
-              {formatDateTime(availableFrom)} - {formatDateTime(availableTo)}
+              {fDateTime(availableFrom, FORMAT_DATE_TIME_CLEANER)} - {fDateTime(availableTo, FORMAT_DATE_TIME_CLEANER)}
             </Typography>
           </Stack>
           {timeLeftLabel && (

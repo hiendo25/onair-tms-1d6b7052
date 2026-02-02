@@ -18,7 +18,8 @@ const HEADER_DETAIL_MAX_WIDTH = 760;
 const JOIN_PANEL_WIDTH = 320;
 
 const ClassRoomHeader = ({ data, isAdminView, isFromLearningPath }: ClassRoomHeaderProps) => {
-  const shouldShowProgress = Boolean(data.progress);
+  const shouldShowProgress = !isAdminView;
+  const progressValue = data.progress?.progressPercentage ?? 0;
 
   return (
     <Box>
@@ -42,9 +43,7 @@ const ClassRoomHeader = ({ data, isAdminView, isFromLearningPath }: ClassRoomHea
                 <Typography component="h1" variant="h3" className="leading-9 text-[24px] md:leading-11 md:text-[36px]">
                   {data?.title}
                 </Typography>
-                {shouldShowProgress ? (
-                  <ClassRoomProgressBar value={data.progress?.progressPercentage ?? 0} size="md" />
-                ) : null}
+                {shouldShowProgress ? <ClassRoomProgressBar value={progressValue} size="md" /> : null}
                 <ClassRoomDetailBox data={data} isFromLearningPath={isFromLearningPath} />
               </Stack>
             </Stack>

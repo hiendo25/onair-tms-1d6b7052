@@ -2,15 +2,21 @@ import { useMemo } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 
 import { ClassRoomDetailWithProgress } from "@/services/class-room/class-room-progress-mapping.service";
+import { CLASSROOM_DETAIL_SECTION_TITLES } from "../_constants";
 
 import { ClassRoomSubjectCard } from "./ClassRoomSubjectCard";
 
 interface ClassRoomSubjectsProps {
   data: ClassRoomDetailWithProgress;
   isFromLearningPath?: boolean;
+  isAdminView?: boolean;
 }
 
-export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoomSubjectsProps) {
+export default function ClassRoomSubjects({
+  data,
+  isFromLearningPath,
+  isAdminView,
+}: ClassRoomSubjectsProps) {
   const coursePeriods = useMemo(() => {
     if (data.room_type !== "single") return [];
 
@@ -23,12 +29,13 @@ export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoo
 
   return (
     <Stack spacing={3}>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Typography component="h1" variant="h3" className="leading-9 text-[24px] md:leading-11 md:text-[26px]">
-          Môn học
-        </Typography>
-      </Stack>
-
+      <Typography
+        component="h2"
+        variant="h3"
+        className="leading-9 text-[24px] md:leading-11 md:text-[26px]"
+      >
+        {CLASSROOM_DETAIL_SECTION_TITLES.SUBJECTS}
+      </Typography>
       <Box
         sx={{
           overflowX: "auto",
@@ -42,6 +49,7 @@ export default function ClassRoomSubjects({ data, isFromLearningPath }: ClassRoo
               coursePeriod={coursePeriod}
               classRoomSlug={classRoomSlug}
               isFromLearningPath={isFromLearningPath}
+              isAdminView={isAdminView}
               classRoomEndAt={data.end_at}
             />
           ))}

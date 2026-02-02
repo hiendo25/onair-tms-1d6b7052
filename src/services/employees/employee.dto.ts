@@ -83,3 +83,39 @@ export interface CreateEmployeeResult {
   order?: number;
   status: Employee["status"];
 }
+
+export interface GetEmployeesInput {
+  page?: number;
+  pageSize?: number;
+  organizationId?: string;
+  branchId?: string;
+  departmentId?: string;
+  employeeType?: EmployeeType;
+  filter?: {
+    field?: "name" | "email" | "code";
+    value?: string;
+  };
+}
+
+interface EmployeeItem {
+  id: string;
+  employeeCode: string;
+  type: EmployeeType | null;
+  status: Employee["status"];
+  profile: {
+    fullName: string;
+    email: string;
+    gender: Gender;
+    avatar: string | null;
+    phoneNumber: string | null;
+    dob: string | null;
+  } | null;
+  department: { id: string; name: string } | null;
+  branch: { id: string; name: string } | null;
+}
+export interface GetEmployeesResult {
+  page: number;
+  pageSize: number;
+  total: number;
+  data: EmployeeItem[];
+}
