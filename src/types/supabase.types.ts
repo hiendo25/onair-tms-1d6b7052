@@ -4259,7 +4259,7 @@ export type Database = {
         }[]
       }
       get_completed_class_rooms: {
-        Args: { class_type_filter?: string; employee_id: string }
+        Args: { p_class_type_filter?: string; p_employee_id: string }
         Returns: {
           class_type: string
           completed_at: string
