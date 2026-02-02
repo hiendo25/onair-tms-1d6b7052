@@ -167,6 +167,7 @@ const UpdateClassRoomForm: React.FC<UpdateClassRoomFormProps> = ({ data }) => {
       classRoomId: data.id,
       platform: platform,
       classType: class_type ?? "room",
+      flashcards: data.class_room_flashcards?.map((fc) => fc.flashcard_id) || [],
     };
   }, [data, platform, class_type]);
 

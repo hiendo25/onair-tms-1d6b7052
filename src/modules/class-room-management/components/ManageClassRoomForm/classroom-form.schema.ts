@@ -338,6 +338,7 @@ const classRoomSchema = zod
     platform: zod.enum<ClassRoomPlatformType[]>(["live", "offline", "online", "hybrid"]),
     status: zod.enum<ClassRoomStatus[]>(["publish", "draft", "pending", "deleted"]),
     classType: zod.enum<ClassType[]>(["learning_path", "room"]),
+    flashcards: zod.array(zod.string()).optional(),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

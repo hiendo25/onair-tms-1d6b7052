@@ -171,6 +171,13 @@ export const SELECT_CLASSROOM_DETAIL = `
     certificate_template_id,
     days_to_expire,
     certificate_template:certificate_templates(${selectCertificateTemplate})
+  ),
+  class_room_flashcards(
+    id,
+    flashcard_id,
+    class_room_id,
+    order_index,
+    created_at
   )
 `;
 
@@ -241,5 +248,12 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
         certificate_template_id,
         days_to_expire,
         certificate_template:certificate_templates(${selectCertificateTemplate})
+      ),
+      class_room_flashcards(
+        id,
+        flashcard_id,
+        class_room_id,
+        order_index,
+        created_at
       )
     `;
