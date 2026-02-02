@@ -61,6 +61,7 @@ export class CreateClassRoomService {
       forWhom,
       docs,
       classType,
+      flashcards,
     } = formData;
 
     const uniqueSlug = `${slug}-${new Date().getTime()}`;
@@ -182,6 +183,19 @@ export class CreateClassRoomService {
         certificate_template_id: certificate.id,
         days_to_expire: certificate.daysToExpire,
       });
+    }
+
+    /**
+     * Step 10: Sync Class Room with Flashcards
+     */
+    if (flashcards && flashcards.length > 0) {
+      await classRoomRepository.createClassRoomFlashcards(
+        flashcards.map((flashcardId, index) => ({
+          class_room_id: classRoomData.id,
+          flashcard_id: flashcardId,
+          order_index: index,
+        })),
+      );
     }
 
     eventBus.emit("classroom.created", {

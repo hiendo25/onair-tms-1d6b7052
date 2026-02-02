@@ -472,24 +472,39 @@ export type Database = {
           code: string
           created_at: string
           id: string
+          level: number | null
           name: string
           organization_id: string
+          parent_id: string | null
+          path: string | null
+          priority: number | null
+          status: Database["public"]["Enums"]["status"] | null
         }
         Insert: {
           address?: string
           code?: string
           created_at?: string
           id?: string
+          level?: number | null
           name: string
           organization_id: string
+          parent_id?: string | null
+          path?: string | null
+          priority?: number | null
+          status?: Database["public"]["Enums"]["status"] | null
         }
         Update: {
           address?: string
           code?: string
           created_at?: string
           id?: string
+          level?: number | null
           name?: string
           organization_id?: string
+          parent_id?: string | null
+          path?: string | null
+          priority?: number | null
+          status?: Database["public"]["Enums"]["status"] | null
         }
         Relationships: [
           {
@@ -497,6 +512,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "branches_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
             referencedColumns: ["id"]
           },
         ]
@@ -1044,6 +1066,52 @@ export type Database = {
             columns: ["class_room_id"]
             isOneToOne: false
             referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_room_flashcards: {
+        Row: {
+          class_room_id: string
+          created_at: string
+          flashcard_id: string
+          id: string
+          order_index: number
+        }
+        Insert: {
+          class_room_id: string
+          created_at?: string
+          flashcard_id: string
+          id?: string
+          order_index?: number
+        }
+        Update: {
+          class_room_id?: string
+          created_at?: string
+          flashcard_id?: string
+          id?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_flashcards_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
             referencedColumns: ["id"]
           },
         ]
@@ -1623,22 +1691,37 @@ export type Database = {
           branch_id: string | null
           created_at: string
           id: string
+          level: number | null
           name: string
           organization_id: string
+          parent_id: string | null
+          path: string | null
+          status: Database["public"]["Enums"]["status"] | null
+          type: Database["public"]["Enums"]["department_type"] | null
         }
         Insert: {
           branch_id?: string | null
           created_at?: string
           id?: string
+          level?: number | null
           name: string
           organization_id: string
+          parent_id?: string | null
+          path?: string | null
+          status?: Database["public"]["Enums"]["status"] | null
+          type?: Database["public"]["Enums"]["department_type"] | null
         }
         Update: {
           branch_id?: string | null
           created_at?: string
           id?: string
+          level?: number | null
           name?: string
           organization_id?: string
+          parent_id?: string | null
+          path?: string | null
+          status?: Database["public"]["Enums"]["status"] | null
+          type?: Database["public"]["Enums"]["department_type"] | null
         }
         Relationships: [
           {
@@ -1653,6 +1736,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
@@ -2035,9 +2125,11 @@ export type Database = {
       employees: {
         Row: {
           created_at: string
+          email: string | null
           employee_code: string
           employee_order: number | null
           employee_type: Database["public"]["Enums"]["employee_type"] | null
+          full_name: string | null
           id: string
           organization_id: string
           position_id: string | null
@@ -2047,9 +2139,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          email?: string | null
           employee_code: string
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
+          full_name?: string | null
           id?: string
           organization_id: string
           position_id?: string | null
@@ -2059,9 +2153,11 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          email?: string | null
           employee_code?: string
           employee_order?: number | null
           employee_type?: Database["public"]["Enums"]["employee_type"] | null
+          full_name?: string | null
           id?: string
           organization_id?: string
           position_id?: string | null
@@ -4162,6 +4258,18 @@ export type Database = {
           total_xp: number
         }[]
       }
+      get_completed_class_rooms: {
+        Args: { class_type_filter?: string; employee_id: string }
+        Returns: {
+          class_type: string
+          completed_at: string
+          description: string
+          id: string
+          slug: string
+          thumbnail_url: string
+          title: string
+        }[]
+      }
       get_department_leaderboard: {
         Args: {
           p_department_id: string
@@ -4174,6 +4282,28 @@ export type Database = {
           employee_name: string
           rank: number
           total_xp: number
+        }[]
+      }
+      get_employees_by_codes_and_organization: {
+        Args: { p_codes: string[]; p_organization_id: string }
+        Returns: {
+          email: string
+          employee_code: string
+          employee_id: string
+          full_name: string
+          organization_id: string
+          organization_name: string
+          profile_id: string
+        }[]
+      }
+      get_employees_by_emails_and_organization: {
+        Args: { p_emails: string[]; p_organization_id: string }
+        Returns: {
+          email: string
+          employee_id: string
+          organization_id: string
+          organization_name: string
+          profile_id: string
         }[]
       }
       get_filtered_employees:
@@ -4245,6 +4375,13 @@ export type Database = {
         }[]
       }
       get_user_id_by_email: { Args: { user_email: string }; Returns: string }
+      get_user_ids_by_emails: {
+        Args: { p_emails: string[] }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       has_permission: {
         Args: { action_code: string; resource_code: string }
         Returns: boolean
@@ -4295,6 +4432,7 @@ export type Database = {
         | "thursday"
         | "friday"
         | "saturday"
+      department_type: "division" | "department" | "team" | "unit"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       flashcard_status: "active" | "inactive"
@@ -4519,6 +4657,7 @@ export const Constants = {
         "friday",
         "saturday",
       ],
+      department_type: ["division", "department", "team", "unit"],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       flashcard_status: ["active", "inactive"],

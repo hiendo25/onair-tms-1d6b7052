@@ -33,6 +33,7 @@ import {
   ClassRoomStatusFilter,
   ClassRoomTypeFilter,
   ClassSessionModeFilter,
+  CreateClassRoomFlashcardPayload,
   CreateClassRoomPayload,
   CreatePivotClassRoomAndEmployeePayload,
   CreatePivotClassRoomAndFieldPayload,
@@ -59,6 +60,13 @@ const getClassRoomById = async (classRoomId: string) => {
           id: string;
           key: ClassRoomMetaKey;
           value: ClassRoomMetaValue;
+        }[];
+        class_room_flashcards: {
+          class_room_id: string;
+          created_at: string;
+          flashcard_id: string;
+          id: string;
+          order_index?: number;
         }[];
         sessions: {
           channel_info: {
@@ -840,7 +848,7 @@ export async function getClassRoomByCourseId(courseId: string) {
     .from("class_rooms")
     .select(
       `
-			*,   
+			*,
 			class_sessions!inner (
         id,
         class_sessions_courses_period!inner (
@@ -856,6 +864,42 @@ export async function getClassRoomByCourseId(courseId: string) {
   }
   return data;
 }
+
+// Class Room Flashcards operations
+const createClassRoomFlashcards = async (payload: CreateClassRoomFlashcardPayload[]) => {
+  try {
+    return await supabase.from("class_room_flashcards").insert(payload).select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error create class room flashcards");
+  }
+};
+
+const deleteClassRoomFlashcards = async (classRoomId: string, flashcardIds?: string[]) => {
+  try {
+    let query = supabase.from("class_room_flashcards").delete().eq("class_room_id", classRoomId);
+    if (flashcardIds && flashcardIds.length > 0) {
+      query = query.in("flashcard_id", flashcardIds);
+    }
+    return await query.select();
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error delete class room flashcards");
+  }
+};
+
+const getClassRoomFlashcards = async (classRoomId: string) => {
+  try {
+    return await supabase
+      .from("class_room_flashcards")
+      .select("*, flashcards(*)")
+      .eq("class_room_id", classRoomId)
+      .order("order_index", { ascending: true });
+  } catch (err: any) {
+    console.error("Unexpected error:", err);
+    throw new Error(err.message ?? "Unknown error get class room flashcards");
+  }
+};
 
 export {
   createClassRoom,
@@ -884,4 +928,7 @@ export {
   isEmployeeAssignedToClassRoom,
   getEmployeeAttendance,
   createEmployeeAttendance,
+  createClassRoomFlashcards,
+  deleteClassRoomFlashcards,
+  getClassRoomFlashcards,
 };
