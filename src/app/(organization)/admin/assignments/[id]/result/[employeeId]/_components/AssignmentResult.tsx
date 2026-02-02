@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Alert, Box, Button, Card, CircularProgress, Stack, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import { useGetSubmissionDetailQuery } from "@/modules/assignment-management/operations/query";
@@ -24,7 +24,24 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   basePath = PATHS.ASSIGNMENTS.ROOT,
 }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
+  const returnPath = useMemo(() => {
+    const rawReturnPath = searchParams.get("returnPath");
+    if (!rawReturnPath || !rawReturnPath.startsWith("/") || rawReturnPath.startsWith("//")) {
+      return null;
+    }
+    return rawReturnPath;
+  }, [searchParams]);
+
+  const fallbackBackPath = useMemo(() => {
+    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
+      return basePath;
+    }
+    return `${basePath}/${assignmentId}/students`;
+  }, [basePath, assignmentId]);
+
+  const backPath = returnPath ?? fallbackBackPath;
 
   const totalScore = useMemo(() => {
     if (!submission) return 0;
@@ -38,11 +55,7 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
   }, [submission]);
 
   const handleBack = () => {
-    if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
-      router.push(basePath);
-    } else {
-      router.push(`${basePath}/${assignmentId}/students`);
-    }
+    router.push(backPath);
   };
 
   const loadingBreadcrumbs = useMemo(() => {

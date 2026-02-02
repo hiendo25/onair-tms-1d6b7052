@@ -18,6 +18,7 @@ interface ClassRoomSubjectCardProps {
   coursePeriod: CoursePeriod;
   classRoomSlug?: string;
   isFromLearningPath?: boolean;
+  isAdminView?: boolean;
   classRoomEndAt?: string | null;
 }
 
@@ -28,7 +29,13 @@ const getTeacherName = (teacher: CoursePeriod["teacher"]): string => {
 const CARD_MIN_WIDTH = { xs: 260, sm: 280, md: 320 };
 const CARD_RADIUS = 16;
 
-export const ClassRoomSubjectCard = ({ coursePeriod, classRoomSlug, isFromLearningPath, classRoomEndAt }: ClassRoomSubjectCardProps) => {
+export const ClassRoomSubjectCard = ({
+  coursePeriod,
+  classRoomSlug,
+  isFromLearningPath,
+  isAdminView,
+  classRoomEndAt,
+}: ClassRoomSubjectCardProps) => {
   const weeklyScheduleLabel = isFromLearningPath ? formatWeeklyScheduleLabel(coursePeriod.weekly_schedule) : null;
   const scheduleLabel = weeklyScheduleLabel
     ? weeklyScheduleLabel
@@ -48,7 +55,7 @@ export const ClassRoomSubjectCard = ({ coursePeriod, classRoomSlug, isFromLearni
       0,
     ) ?? 0;
   const progressValue = coursePeriod.course?.progress?.progressPercentage ?? 0;
-  const shouldShowProgress = Boolean(coursePeriod.course?.progress);
+  const shouldShowProgress = !isAdminView;
 
   // Check if classroom has ended (is in the past)
   const isClassRoomEnded = classRoomEndAt ? dayjs(classRoomEndAt).isBefore(dayjs()) : false;

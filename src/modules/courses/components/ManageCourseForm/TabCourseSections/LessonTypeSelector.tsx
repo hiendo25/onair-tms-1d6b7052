@@ -57,7 +57,7 @@ const LessonTypeSelector: React.FC<LessonTypeSelectorProps> = ({ onSelect, onCan
             "border-blue-600": lessonType === "assessment",
             "border-gray-300": lessonType !== "assessment",
           })}
-        // onClick={handleSelect("assessment")}
+          onClick={handleSelect("assessment")}
         >
           <div>
             <FileWord02Icon className="w-[72px] h-[72px] mb-3" />

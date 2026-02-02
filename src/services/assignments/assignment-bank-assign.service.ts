@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { assignmentBankRepository, assignmentsRepository } from "@/repository";
+import { assignmentBankRepository, assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type { AssignAssignmentBankDto } from "@/types/dto/assignment-bank";
 import type { Database } from "@/types/supabase.types";
 import { parseDateRange } from "@/utils/date";
@@ -59,6 +59,21 @@ const assignAssignmentBankToEmployees = async (
       throw new Error("Dữ liệu bài kiểm tra không hợp lệ");
     }
 
+    const currentAssignedEmployeeIds = await assignmentsRepository.getAssignmentEmployeeIdsByAssignmentIdWithClient(
+      client,
+      assignmentMeta.id,
+    );
+    const nextAssignedEmployeeIds = new Set(payload.assignedEmployeeIds);
+    const removedEmployeeIds = currentAssignedEmployeeIds.filter((employeeId) => !nextAssignedEmployeeIds.has(employeeId));
+
+    if (removedEmployeeIds.length > 0) {
+      await assignmentResultsRepository.deleteAssignmentResultsByAssignmentAndEmployeeIdsWithClient(
+        client,
+        assignmentMeta.id,
+        removedEmployeeIds,
+      );
+    }
+
     await assignmentsRepository.updateAssignmentByIdWithClient(client, assignmentMeta.id, {
       attempt_limit: payload.attemptLimit,
       available_from: dateRange.start,
@@ -82,7 +97,7 @@ const assignAssignmentBankToEmployees = async (
   let assignmentId: string | null = null;
 
   try {
-    const assignment = await assignmentsRepository.createAssignmentFromBankWithClient(client, {
+    const assignment = await assignmentsRepository.createAssignmentFromBankWithClient({
       assignment_bank_id: payload.assignmentBankId,
       assigned_by: assignedBy,
       organization_id: payload.organizationId,

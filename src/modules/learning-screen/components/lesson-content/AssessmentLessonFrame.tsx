@@ -2,6 +2,7 @@ import { Alert, Stack, Typography } from "@mui/material";
 
 import AssignmentSubmission from "@/app/(organization)/admin/assignments/[id]/submit/[employeeId]/_components/AssignmentSubmission";
 import { PATHS } from "@/constants/path.constant";
+import { useGetAssignmentConfigByCourseQuery } from "@/modules/assignment-management/operations/query";
 import { useMarkLessonComplete } from "@/modules/learning-screen/hooks/useMarkLessonComplete";
 import type { LearningLesson, LearningLessonSummary } from "@/modules/learning-screen/types";
 
@@ -24,6 +25,10 @@ const AssessmentLessonFrame = ({
   courseId,
   selectedLessonSummary,
 }: AssessmentLessonFrameProps) => {
+  const {
+    data: assignmentConfigId,
+    isLoading: isLoadingAssignmentConfig,
+  } = useGetAssignmentConfigByCourseQuery(courseId ?? undefined, assignmentId ?? undefined);
   const { markComplete } = useMarkLessonComplete({
     courseId: courseId ?? null,
     learningPathId,
@@ -39,6 +44,18 @@ const AssessmentLessonFrame = ({
     return <Alert severity="warning">Không xác định được thông tin người học. Vui lòng đăng nhập lại.</Alert>;
   }
 
+  if (!courseId) {
+    return <Alert severity="warning">Không xác định được thông tin môn học.</Alert>;
+  }
+
+  if (isLoadingAssignmentConfig) {
+    return <Alert severity="info">Đang tải cấu hình bài kiểm tra...</Alert>;
+  }
+
+  if (!assignmentConfigId) {
+    return <Alert severity="warning">Chưa cấu hình bài kiểm tra cho môn học này.</Alert>;
+  }
+
   const handleAssignmentSubmitted = () => {
     if (learningPathId || classRoomId) {
       markComplete(lesson.id);
@@ -52,7 +69,7 @@ const AssessmentLessonFrame = ({
       </Typography>
 
       <AssignmentSubmission
-        assignmentId={assignmentId}
+        assignmentId={assignmentConfigId}
         employeeId={studentId}
         basePath={PATHS.MY_ASSIGNMENTS.ROOT}
         variant="embedded"

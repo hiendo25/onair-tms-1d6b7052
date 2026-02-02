@@ -131,6 +131,21 @@ export const useGetAssignmentAttemptSummaryQuery = (assignmentId: string, employ
   });
 };
 
+export const useGetAssignmentAccessQuery = (assignmentId: string, employeeId: string, enabled: boolean = true) => {
+  return useTQuery<{ isAssigned: boolean }>({
+    queryKey: [GET_ASSIGNMENTS, assignmentId, "access", employeeId],
+    queryFn: async () => {
+      const response = await fetch(`/api/assignments/${assignmentId}/access?employeeId=${employeeId}`);
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.error || "Failed to check assignment access");
+      }
+      return response.json();
+    },
+    enabled: Boolean(assignmentId) && Boolean(employeeId) && enabled,
+  });
+};
+
 export const useGetSubmissionDetailQuery = (assignmentId: string, employeeId: string) => {
   return useTQuery<SubmissionDetailDto>({
     queryKey: [GET_ASSIGNMENTS, assignmentId, "grade", employeeId],
@@ -218,6 +233,17 @@ export const useGetAssignmentsV2Query = (variables?: { queryParams: GetAssignmen
       return await assignmentsRepository.getAssignmentsV2(queryParams);
     },
     enabled,
+  });
+};
+
+export const useGetAssignmentConfigByCourseQuery = (courseId?: string, assignmentBankId?: string) => {
+  return useTQuery<string | null>({
+    queryKey: [GET_ASSIGNMENTS, "course", courseId, assignmentBankId],
+    queryFn: async () => {
+      if (!courseId || !assignmentBankId) return null;
+      return assignmentsRepository.getAssignmentConfigIdByCourseAndBank(courseId, assignmentBankId);
+    },
+    enabled: Boolean(courseId) && Boolean(assignmentBankId),
   });
 };
 

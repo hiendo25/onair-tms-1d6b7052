@@ -38,7 +38,7 @@ const UpdateCourseForm: React.FC<UpdateCourseFormProps> = ({ data }) => {
             id: id,
             title: title || "",
             content: content || "",
-            assignmentId: assignment_id ?? undefined,
+            assignmentBankId: assignment_id ?? undefined,
             lessonType: lesson_type,
             mainResource: main_resource
               ? {

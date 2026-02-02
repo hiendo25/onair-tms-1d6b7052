@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, CircularProgress, Divider, Stack } from "@mui/material";
+import { Box, CircularProgress, Stack } from "@mui/material";
 
 import EmptyData from "@/shared/ui/EmptyData";
 import PageContainer from "@/shared/ui/PageContainer";
@@ -12,14 +12,10 @@ import {
 import { useClassRoomDetail } from "../_hooks/useClassRoomDetail";
 import { useClassRoomScrollSpy } from "../_hooks/useClassRoomScrollSpy";
 
-import ClassRoomAgenda from "./ClassRoomAgenda";
-import ClassRoomDescriptions from "./ClassRoomDes";
-import ClassRoomDocuments from "./ClassRoomDocuments";
+import ClassRoomAdminTabs from "./ClassRoomAdminTabs";
 import ClassRoomHeader from "./ClassRoomHeader";
-import ClassRoomJoinHorizontal from "./ClassRoomJoinHorizontal";
-import ClassRoomObjectives from "./ClassRoomObjectives";
 import ClassRoomSeries from "./ClassRoomSeries";
-import ClassRoomSubjects from "./ClassRoomSubjects";
+import ClassRoomStudentSections from "./ClassRoomStudentSections";
 
 interface ClassRoomDetailSectionProps {
   slug: string;
@@ -33,6 +29,7 @@ export default function ClassRoomDetailSection({ slug }: ClassRoomDetailSectionP
     errorMessage,
     isAdminView,
     isFromLearningPath,
+    learningPathId,
     breadcrumbs,
     pageTitle,
   } = useClassRoomDetail(slug);
@@ -78,33 +75,20 @@ export default function ClassRoomDetailSection({ slug }: ClassRoomDetailSectionP
           isAdminView={isAdminView}
           isFromLearningPath={isFromLearningPath}
         />
-        <ClassRoomSubjects data={classRoomData} isFromLearningPath={isFromLearningPath} />
-        <Divider className={`${JOIN_HORIZONTAL_ZONE_CLASS} invisible`} />
-
-        {showJoinHorizontal && (
-          <Box className="z-101 top-0 left-0 sticky w-full bg-white pt-3 pb-2">
-            <ClassRoomJoinHorizontal data={classRoomData} isFromLearningPath={isFromLearningPath} />
-          </Box>
+        {isAdminView ? (
+          <ClassRoomAdminTabs
+            data={classRoomData}
+            isFromLearningPath={isFromLearningPath}
+            showJoinHorizontal={showJoinHorizontal}
+            learningPathId={learningPathId}
+          />
+        ) : (
+          <ClassRoomStudentSections
+            data={classRoomData}
+            isFromLearningPath={isFromLearningPath}
+            showJoinHorizontal={showJoinHorizontal}
+          />
         )}
-
-        <Box sx={{ width: "100%", mt: 3 }}>
-          <Box sx={{ borderBottom: 1, borderColor: "divider", pb: 4 }}>
-            <Box mt={6} className={queryClassName}>
-              <ClassRoomDescriptions description={classRoomData.description ?? ""} />
-            </Box>
-            {!isFromLearningPath && (
-              <Box mt={4} className={queryClassName}>
-                <ClassRoomAgenda data={classRoomData} />
-              </Box>
-            )}
-            <Box mt={6} className={queryClassName}>
-              <ClassRoomDocuments data={classRoomData} />
-            </Box>
-            <Box mt={6}>
-              <ClassRoomObjectives data={classRoomData} />
-            </Box>
-          </Box>
-        </Box>
       </Stack>
     </PageContainer>
   );
