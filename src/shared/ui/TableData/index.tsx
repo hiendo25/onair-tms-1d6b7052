@@ -9,11 +9,6 @@ import TableRowDataProvider from "./TableDataProvider";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowFixedWidth from "./TableRowFixedWith";
 
-type TableActionMenuItem = {
-  iconButton?: React.ReactNode;
-  altText?: string;
-  action?: () => void;
-};
 export type TableDataProps<T extends object> = {
   rowKey?: string;
   rows?: T[];

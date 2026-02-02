@@ -19,7 +19,8 @@ import {
   Zoom,
 } from "@mui/material";
 
-import { DotHorizontalIcon } from "@/shared/assets/icons";
+import { DotHorizontalIcon, MinusIcon } from "@/shared/assets/icons";
+import PlusIcon from "@/shared/assets/icons/PlusIcon";
 
 import { TableRowStyled } from "./table-row-styled";
 import { useStickyCell } from "./use-sticky-node";
@@ -47,12 +48,14 @@ export interface TableRowDataProps<T> {
   rowCount: number;
   indexRow: number;
   showRowCount?: boolean;
+  asChild?: boolean;
+  depth?: number;
   onRowClick?: (row: T, index: number) => void;
   onCellClick?: (column: FieldKey<T>, row: T, evt: MouseEvent<HTMLTableCellElement>) => void;
   cellActions?: (row: T, index: number) => TableCellActionMenuItem[];
 }
 
-const TableDataRow = <T extends { id?: number | string } & Record<string, any>>({
+const TableDataRow = <T extends { id?: number | string; children?: T[] } & Record<string, any>>({
   row,
   hoverRow,
   rowCount,
@@ -62,10 +65,12 @@ const TableDataRow = <T extends { id?: number | string } & Record<string, any>>(
   onRowClick,
   onCellClick,
   cellActions,
+  asChild = false,
+  depth = 0,
 }: TableRowDataProps<T>) => {
   const buttonActionRef = useRef<ButtonActionCellRef>(null);
   const getNodeIndex = useStickyCell([columns]);
-
+  const [openChildRow, setOpenChildRow] = useState(false);
   const handleClickRow = useCallback(
     (row: T) => () => {
       onRowClick?.(row, indexRow);
@@ -83,43 +88,83 @@ const TableDataRow = <T extends { id?: number | string } & Record<string, any>>(
     return cellActions?.(row, indexRow);
   }, [row, cellActions, indexRow]);
 
+  const toggleOpenChildRow = useCallback(() => {
+    setOpenChildRow((prev) => !prev);
+  }, []);
+
+  const hasChild = Boolean(row.children && row.children.length);
   return (
-    <TableRowStyled
-      className="table-data-row h-13"
-      hover={hoverRow}
-      onClick={handleClickRow(row)}
-      onMouseEnter={() => {
-        buttonActionRef.current?.onOpen();
-      }}
-      onMouseLeave={() => {
-        buttonActionRef.current?.onClose();
-      }}
-    >
-      {showRowCount && (
-        <TableCell className="w-20" sx={{ padding: "6px 12px" }}>
-          {rowCount}
-        </TableCell>
-      )}
-      {columns.map(({ headerName, field, renderCell, id, ...restProps }, _index) => (
-        <TableCell
-          ref={getNodeIndex(restProps.fixed, _index)}
-          key={field.toString()}
-          onClick={(evt) => handleClickCell(field, row, evt)}
-          {...restProps}
-          sx={{ padding: "6px 12px" }}
-        >
-          {renderCell
-            ? renderCell(row[field], row)
-            : typeof row[field] === "string" ||
-                typeof row[field] === "number" ||
-                typeof row[field] === "bigint" ||
-                typeof row[field] === "boolean"
-              ? row[field]
-              : row[field]}
-        </TableCell>
-      ))}
-      {cellMenuItems && <ButtonActionCell ref={buttonActionRef} index={indexRow} items={cellMenuItems} />}
-    </TableRowStyled>
+    <>
+      <TableRowStyled
+        className="table-data-row h-13"
+        hover={hoverRow}
+        onClick={handleClickRow(row)}
+        onMouseEnter={() => {
+          buttonActionRef.current?.onOpen();
+        }}
+        onMouseLeave={() => {
+          buttonActionRef.current?.onClose();
+        }}
+      >
+        {showRowCount && (
+          <TableCell className="w-20" sx={{ padding: "6px 12px" }}>
+            {!asChild ? rowCount : null}
+          </TableCell>
+        )}
+        {columns.map(({ headerName, field, renderCell, id, ...restProps }, _index) => (
+          <TableCell
+            ref={getNodeIndex(restProps.fixed, _index)}
+            key={field.toString()}
+            onClick={(evt) => handleClickCell(field, row, evt)}
+            {...restProps}
+            sx={{ padding: "6px 12px" }}
+          >
+            {asChild && _index === 0 ? (
+              <span className="h-1 inline-block" style={{ width: `${depth * 24}px` }} />
+            ) : null}
+            {hasChild && _index === 0 ? (
+              <IconButton
+                size="small"
+                className="mr-2 bg-transparent border border-gray-500 w-4 h-4"
+                onClick={toggleOpenChildRow}
+              >
+                {openChildRow ? <MinusIcon className="w-3 h-3" /> : <PlusIcon className="w-3 h-3" />}
+              </IconButton>
+            ) : null}
+
+            {renderCell
+              ? renderCell(row[field], row)
+              : typeof row[field] === "string" ||
+                  typeof row[field] === "number" ||
+                  typeof row[field] === "bigint" ||
+                  typeof row[field] === "boolean"
+                ? row[field]
+                : row[field]}
+          </TableCell>
+        ))}
+        {cellMenuItems && <ButtonActionCell ref={buttonActionRef} index={indexRow} items={cellMenuItems} />}
+      </TableRowStyled>
+      {row.children && row.children.length
+        ? row.children.map((childRow, index) => (
+            <Activity key={index} mode={openChildRow ? "visible" : "hidden"}>
+              <TableDataRow
+                key={index}
+                row={childRow}
+                hoverRow={hoverRow}
+                rowCount={index + 1}
+                indexRow={index}
+                showRowCount={showRowCount}
+                columns={columns}
+                asChild={true}
+                depth={depth + 1}
+                onRowClick={onRowClick}
+                onCellClick={onCellClick}
+                cellActions={cellActions}
+              />
+            </Activity>
+          ))
+        : null}
+    </>
   );
 };
 export default TableDataRow;

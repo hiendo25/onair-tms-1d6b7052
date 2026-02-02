@@ -2,11 +2,10 @@ import * as React from "react";
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import RemoveRoundedIcon from "@mui/icons-material/RemoveRounded";
-import { alpha,Components, Theme } from "@mui/material/styles";
+import { alpha, Components, Theme } from "@mui/material/styles";
 
 import { error, grey, info, primary, secondary, success, warning } from "../../theme-color";
 
- 
 export const checkboxCustomizations: Components<Theme> = {
   MuiCheckbox: {
     defaultProps: {
@@ -20,10 +19,10 @@ export const checkboxCustomizations: Components<Theme> = {
         margin: "0.5rem",
         height: "1.125rem",
         width: "1.125rem",
-        borderRadius: "0.375rem",
-        border: "2px solid",
+        borderRadius: "0.325rem",
+        border: "1px solid",
         padding: "8px",
-        borderColor: theme.palette.grey[400],
+        borderColor: theme.palette.grey[500],
         transition: "border-color, background-color, 120ms ease-in",
         // ...theme.applyStyles("dark", {
         //   borderColor: alpha(gray[700], 0.8),
@@ -194,7 +193,7 @@ export const checkboxCustomizations: Components<Theme> = {
               // margin: "0.2rem",
               height: "1rem",
               width: "1rem",
-              borderRadius: "0.325rem",
+              borderRadius: "0.275rem",
               padding: "7px",
             },
           },

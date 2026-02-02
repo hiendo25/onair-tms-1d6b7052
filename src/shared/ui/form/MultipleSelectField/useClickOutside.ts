@@ -1,22 +1,23 @@
 "use client";
-import { RefObject } from "react";
-import { useEffect } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 
-const useClickOutSide = (ref: RefObject<HTMLElement | null>, cb?: () => void) => {
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const handleClickOutSide = (e: MouseEvent) => {
-      if (!element.contains(e.target as Node)) {
-        cb && cb();
+const useClickOutSide = (ref: RefObject<HTMLElement | null>, cb: () => void) => {
+  const handleClickOutSide = useCallback(
+    (e: MouseEvent) => {
+      const element = ref.current;
+      if (element && !element.contains(e.target as Node)) {
+        cb();
       }
-    };
-    window.addEventListener("click", handleClickOutSide);
+    },
+    [ref, cb],
+  );
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutSide);
 
     return () => {
-      window.removeEventListener("click", handleClickOutSide);
+      document.removeEventListener("mousedown", handleClickOutSide);
     };
-  }, [ref]);
+  }, [handleClickOutSide]);
 };
 export default useClickOutSide;

@@ -1,4 +1,5 @@
 "use server";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
@@ -36,7 +37,7 @@ export async function requireAuth(request?: NextRequest) {
   };
 }
 
-const getEmployee =
+const getEmployee = cache(
   (supabaseSV: Awaited<ReturnType<typeof createSVClient>>) => async (userId: string, organizationId: string) => {
     const { data: employee, error } = await supabaseSV
       .from("employees")
@@ -48,7 +49,8 @@ const getEmployee =
       throw new Error(error.details);
     }
     return employee;
-  };
+  },
+);
 
 const getBearerToken = (request: NextRequest) => {
   const authHeader = request.headers.get("authorization");

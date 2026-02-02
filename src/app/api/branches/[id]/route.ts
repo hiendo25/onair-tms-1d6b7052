@@ -2,36 +2,38 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { PATHS } from "@/constants/path.constant";
+import { http } from "@/lib/api/http-status";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DomainError } from "@/lib/errors/DomainError";
+import type { UpdateBranchPayload } from "@/modules/branch/type";
 import { branchService } from "@/services";
-import type { UpdateBranchDto } from "@/types/dto/branches";
+import { UpdateBranchService } from "@/services/branches/update-branch.service";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { organizationId, employeeId } = await requireAuth();
     const { id } = await params;
-    const body = await request.json();
-    const payload: UpdateBranchDto = {
-      id,
-      ...body,
-    };
+    const payload: UpdateBranchPayload = await request.json();
 
-    const result = await branchService.updateBranch(payload);
+    const data = await new UpdateBranchService(organizationId, employeeId).execute({
+      id: id,
+      code: payload?.code,
+      name: payload?.name,
+      address: payload?.address,
+      parentId: payload?.parentId,
+      managedById: payload.managedById,
+    });
 
-    revalidatePath(PATHS.BRANCHES.ROOT);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Cập nhật chi nhánh thành công",
-        data: result,
-      },
-      { status: 200 },
-    );
+    return http.ok(data);
   } catch (error) {
     console.error("Error updating branch:", error);
 
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật chi nhánh";
 
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+    return http.serverError(errorMessage);
   }
 }
 

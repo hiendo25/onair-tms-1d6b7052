@@ -237,8 +237,8 @@ export async function getEmployeesV2(employeesFilter: GetEmployeesFilter) {
   };
 }
 
-const getEmployeeById = async (id: string) => {
-  const { data, error } = await supabase
+const getEmployeeById = async (id: string, organizationId?: string) => {
+  let query = supabase
     .from("employees")
     .select(
       `
@@ -289,8 +289,13 @@ const getEmployeeById = async (id: string) => {
       )
     `,
     )
-    .eq("id", id)
-    .single();
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.single();
 
   if (error) {
     throw new Error(`Failed to fetch employee: ${error.message}`);
@@ -674,6 +679,73 @@ export async function getEmployeeIdByUserIdAndOrganizationId(userId: string, org
   }
 
   return employee;
+}
+
+export async function getOneEmployeeById(id: string, organizationId?: string) {
+  let query = supabase
+    .from("employees")
+    .select(
+      `
+      id,
+      employee_code,
+      start_date,
+      position_id,
+      employee_type,
+      user_id,
+      created_at,
+      status,
+      profiles!profiles_employee_id_fkey (
+        id,
+        full_name,
+        email,
+        phone_number,
+        gender,
+        birthday,
+        avatar
+      ),
+      positions (
+        id,
+        title
+      ),
+      employee_branches (
+        id,
+        branch_id,
+        created_at,
+        branches (
+          id,
+          name,
+          code,
+          address
+        )
+      ),
+      employee_departments (
+        id,
+        department_id,
+        created_at,
+        departments (
+          id,
+          name,
+          branch_id
+        )
+      ),
+      managers_employees!managers_employees_employee_id_fkey (
+        manager_id
+      )
+    `,
+    )
+    .eq("id", id);
+
+  if (organizationId) {
+    query = query.eq("organization_id", organizationId);
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch employee: ${error.message}`);
+  }
+
+  return data;
 }
 
 export { getEmployees, getEmployeeById, getOneEmployee, updateStatus };

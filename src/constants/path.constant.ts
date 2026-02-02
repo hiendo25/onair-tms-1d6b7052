@@ -10,10 +10,11 @@ export const PATHS = {
     DETAIL: (id: string = ":id") => `/department/departments/${id}`,
   },
   BRANCHES: {
-    ROOT: "/department/branches",
-    CREATE_BRANCH: "/department/branches/create",
-    IMPORT_BRANCHES: "/department/branches/import",
-    DETAIL: (id: string = ":id") => `/department/branches/${id}`,
+    ROOT: "/branches",
+    LIST: "/branches/list",
+    CREATE_BRANCH: "/branches/create",
+    IMPORT_BRANCHES: "/branches/import",
+    DETAIL: (id: string = ":id") => `/branches/${id}`,
   },
   EMPLOYEES: {
     ROOT: "/admin/employees",

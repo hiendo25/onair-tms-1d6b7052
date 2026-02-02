@@ -1,31 +1,58 @@
-import { revalidatePath } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { isNumber } from "lodash";
+import { NextRequest } from "next/server";
 
-import { PATHS } from "@/constants/path.constant";
-import { branchService } from "@/services";
-import type { CreateBranchDto } from "@/types/dto/branches";
+import { http } from "@/lib/api/http-status";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DomainError } from "@/lib/errors/DomainError";
+import { CreateBranchPayload } from "@/modules/branch/type";
+import { CreateBranchService } from "@/services/branches/create-branch.service";
+import { GetBranchService } from "@/services/branches/get-branch.service";
 
 export async function POST(request: NextRequest) {
   try {
-    const payload: CreateBranchDto = await request.json();
+    const { organizationId, employeeId } = await requireAuth();
+    const payload: CreateBranchPayload = await request.json();
 
-    const result = await branchService.createBranch(payload);
+    const data = await new CreateBranchService(organizationId, employeeId).execute(payload);
 
-    revalidatePath(PATHS.BRANCHES.ROOT);
+    return http.created(data);
+  } catch (error: any) {
+    console.error(error);
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Tạo chi nhánh thành công",
-        data: result,
-      },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error("Error creating branch:", error);
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
 
-    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo chi nhánh";
+    return http.serverError(error?.message || "Có lỗi xảy ra khi tạo chi nhánh");
+  }
+}
 
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+export async function GET(request: NextRequest) {
+  try {
+    const { organizationId, employeeId } = await requireAuth();
+    const searchParams = request.nextUrl.searchParams;
+
+    const pageParam = searchParams.get("page");
+    const pageSizeParam = searchParams.get("pageSize");
+    const excludesParams = searchParams.get("excludes");
+
+    const page = pageParam && isNumber(Number(pageParam)) ? Number(pageParam) : undefined;
+    const pageSize = pageSizeParam && isNumber(Number(pageSizeParam)) ? Number(pageSizeParam) : undefined;
+
+    const data = await new GetBranchService(organizationId, employeeId).getBranches({
+      page,
+      pageSize,
+      excludes: excludesParams ? excludesParams.split(",") : undefined,
+    });
+
+    return http.ok(data);
+  } catch (error: any) {
+    console.error(error);
+
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
+
+    return http.serverError(error?.message || "Có lỗi xảy ra khi tạo chi nhánh");
   }
 }

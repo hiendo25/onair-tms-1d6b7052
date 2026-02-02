@@ -59,6 +59,7 @@ import LogoutIcon from "./LogoutIcon";
 import MarkerPin01Icon from "./MarkerPin01Icon";
 import MarkerPinIcon from "./MarkerPinIcon";
 import Menu05Icon from "./Menu05Icon";
+import MinusIcon from "./MinusIcon";
 import MonitorIcon from "./MonitorIcon";
 import ParagraphIcon from "./ParagraphIcon";
 import PieChart2Icon from "./PieChart2Icon";
@@ -161,4 +162,5 @@ export {
   CertificateIcon,
   PieChart2Icon,
   DotHorizontalIcon,
+  MinusIcon,
 };
