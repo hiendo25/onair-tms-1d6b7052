@@ -4258,6 +4258,18 @@ export type Database = {
           total_xp: number
         }[]
       }
+      get_completed_class_rooms: {
+        Args: { class_type_filter?: string; employee_id: string }
+        Returns: {
+          class_type: string
+          completed_at: string
+          description: string
+          id: string
+          slug: string
+          thumbnail_url: string
+          title: string
+        }[]
+      }
       get_department_leaderboard: {
         Args: {
           p_department_id: string

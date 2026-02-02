@@ -95,3 +95,14 @@ export type ClassRoomStatusCountDto = {
   runtime_status: string | null;
   total: number;
 };
+
+export type CompletedClassRoomDto = {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  class_type: "room" | "learning_path";
+  completed_at: string | null;
+};
+
