@@ -5,7 +5,7 @@ import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 import { ClassRoomPlatformType } from "@/constants/class-room.constant";
 import { ClassRoomType } from "@/model/class-room.model";
-import { CalendarDateIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
+import { CalendarDateIcon, FlashcardIcon, GlobeIcon, UsersPlusIcon } from "@/shared/assets/icons";
 import { useClassRoomStore } from "../../store/class-room-context";
 import { ClassRoomStore } from "../../store/class-room-store";
 
@@ -16,11 +16,13 @@ import ClassRoomTabContainer, { ClassRoomTabContainerRef } from "./ClassRoomTabC
 import TabClassRoomInformation from "./TabClassRoomInformation";
 import TabClassRoomSession, { initClassSessionFormData } from "./TabClassRoomSession";
 import TabClassRoomSetting from "./TabClassRoomSetting";
+import TabFlashcard from "./TabFlashcard";
 import { getKeyFieldByTab } from "./utils";
 export const TAB_KEYS_CLASS_ROOM = {
   "clsTab-information": "clsTab-information",
   "clsTab-session": "clsTab-session",
   "clsTab-setting": "clsTab-setting",
+  "clsTab-flashcard": "clsTab-flashcard",
 } as const;
 
 export const initClassRoomFormData = (option: {
@@ -41,6 +43,7 @@ export const initClassRoomFormData = (option: {
     platform: option?.platform,
     classRoomSessions: [],
     classType: "room",
+    flashcards: [],
   };
 };
 
@@ -95,11 +98,16 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
     const checkAllFieldsValueTabBeforeSubmit = (submitAction: () => void) => async () => {
       try {
         const TAB_LIST = isLearningPath
-          ? [TAB_KEYS_CLASS_ROOM["clsTab-information"], TAB_KEYS_CLASS_ROOM["clsTab-session"]]
+          ? [
+              TAB_KEYS_CLASS_ROOM["clsTab-information"],
+              TAB_KEYS_CLASS_ROOM["clsTab-session"],
+              TAB_KEYS_CLASS_ROOM["clsTab-flashcard"],
+            ]
           : [
               TAB_KEYS_CLASS_ROOM["clsTab-information"],
               TAB_KEYS_CLASS_ROOM["clsTab-session"],
               TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+              TAB_KEYS_CLASS_ROOM["clsTab-flashcard"],
             ];
         const allTabsTriggers = await Promise.allSettled(
           TAB_LIST.map(async (key) => {
@@ -144,24 +152,36 @@ const ClassRoomFormContainer = forwardRef<ClassRoomFormContainerRef, ClassRoomFo
           tabName: "Thời gian",
           tabKey: TAB_KEYS_CLASS_ROOM["clsTab-session"],
           prev: TAB_KEYS_CLASS_ROOM["clsTab-information"],
-          next: isLearningPath ? null : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+          next: isLearningPath
+            ? TAB_KEYS_CLASS_ROOM["clsTab-flashcard"]
+            : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
           icon: <CalendarDateIcon className="w-5 h-5" />,
           content: <TabClassRoomSession />,
         },
       ];
-      return isLearningPath
-        ? BASE_ITEMS
-        : [
-            ...BASE_ITEMS,
-            {
-              tabName: "Thiết lập",
-              tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
-              prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
-              next: null,
-              icon: <UsersPlusIcon className="w-5 h-5" />,
-              content: <TabClassRoomSetting />,
-            },
-          ];
+      const SETTING_TAB = {
+        tabName: "Thiết lập",
+        tabKey: TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+        prev: TAB_KEYS_CLASS_ROOM["clsTab-session"],
+        next: TAB_KEYS_CLASS_ROOM["clsTab-flashcard"],
+        icon: <UsersPlusIcon className="w-5 h-5" />,
+        content: <TabClassRoomSetting />,
+      };
+      const FLASHCARD_TAB = {
+        tabName: "Flashcard",
+        tabKey: TAB_KEYS_CLASS_ROOM["clsTab-flashcard"],
+        prev: isLearningPath ? TAB_KEYS_CLASS_ROOM["clsTab-session"] : TAB_KEYS_CLASS_ROOM["clsTab-setting"],
+        next: null,
+        icon: <FlashcardIcon className="w-5 h-5" />,
+        content: <TabFlashcard />,
+      };
+      if (isLearningPath) {
+        return [
+          ...BASE_ITEMS,
+          { ...FLASHCARD_TAB, prev: TAB_KEYS_CLASS_ROOM["clsTab-session"] },
+        ];
+      }
+      return [...BASE_ITEMS, SETTING_TAB, FLASHCARD_TAB];
     }, [action, isLearningPath]);
     /**
      * Init form value

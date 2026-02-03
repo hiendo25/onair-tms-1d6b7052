@@ -65,6 +65,7 @@ export class UpdateClassRoomService {
       forWhom,
       docs,
       classType,
+      flashcards,
     } = formData;
 
     const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
@@ -138,6 +139,11 @@ export class UpdateClassRoomService {
     if (classType !== "learning_path") {
       await this.updateCertificate(classRoomData.id, classRoomDetail, certificate);
     }
+
+    /**
+     * Step 8: Sync Class Room with Flashcards
+     */
+    await this.updateFlashcards(classRoomData.id, classRoomDetail, flashcards);
 
     console.log("Update Susscess", classRoomData);
     return classRoomData;
@@ -810,5 +816,41 @@ export class UpdateClassRoomService {
     }
 
     return assignmentConfigId;
+  }
+
+  private async updateFlashcards(
+    classRoomId: string,
+    classRoomDetail: NonNullable<GetClassRoomByIdResponse["data"]>,
+    flashcards?: ClassRoomFormValues["flashcards"],
+  ) {
+    const currentFlashcards = classRoomDetail.class_room_flashcards || [];
+
+    // Get current flashcard IDs
+    const currentFlashcardIds = currentFlashcards.map((fc) => fc.flashcard_id);
+
+    // Get new flashcard IDs from form
+    const newFlashcardIds = flashcards || [];
+
+    // Find flashcards to delete (in current but not in new)
+    const flashcardIdsToDelete = currentFlashcardIds.filter((id) => !newFlashcardIds.includes(id));
+
+    // Find flashcards to add (in new but not in current)
+    const flashcardsToAdd = newFlashcardIds.filter((id) => !currentFlashcardIds.includes(id));
+
+    // Delete removed flashcards
+    if (flashcardIdsToDelete.length > 0) {
+      await classRoomRepository.deleteClassRoomFlashcards(classRoomId, flashcardIdsToDelete);
+    }
+
+    // Add new flashcards with order_index
+    if (flashcardsToAdd.length > 0) {
+      await classRoomRepository.createClassRoomFlashcards(
+        flashcardsToAdd.map((flashcardId, index) => ({
+          class_room_id: classRoomId,
+          flashcard_id: flashcardId,
+          order_index: index,
+        })),
+      );
+    }
   }
 }
