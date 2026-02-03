@@ -43,6 +43,7 @@ import FileZipIcon from "./FileZipIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
 import FlashcardIcon from "./FlashcardIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
+import Gamefication from "./Gamefication";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
@@ -163,4 +164,5 @@ export {
   PieChart2Icon,
   DotHorizontalIcon,
   LearningPathIcon,
+  Gamefication,
 };
