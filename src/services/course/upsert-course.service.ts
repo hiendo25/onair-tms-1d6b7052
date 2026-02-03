@@ -11,6 +11,7 @@ import {
 import { GetCourseByIdResponse } from "@/repository/courses";
 import { LessonInsert, LessonResourceInsert, LessonUpsert } from "@/repository/courses-lessons/type";
 import { SectionInsert, SectionUpsert } from "@/repository/courses-sections/type";
+import { supabase } from "../supabase/client";
 
 export class UpsertCourseService {
   private userId: string;
@@ -417,7 +418,7 @@ export class UpsertCourseService {
           throw new Error("Không tìm thấy bài kiểm tra");
         }
 
-        return assignmentsRepository.createAssignmentFromBankWithClient({
+        return assignmentsRepository.createAssignmentFromBankWithClient(supabase, {
           assignment_bank_id: assignmentBankId,
           assigned_by: this.userId,
           organization_id: this.organizationId,
