@@ -36,6 +36,7 @@ export interface LearningSectionOutline extends SectionRow {
 export interface LearningCourseOutline {
   course: CourseRow | null;
   sections: LearningSectionOutline[];
+  progressPercentage: number;
 }
 
 export interface LessonContentLike {

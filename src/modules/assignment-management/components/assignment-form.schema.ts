@@ -118,10 +118,10 @@ const questionSchema = zod
         const { columnAItems, columnBItems, correctMappings } = data.matchingData;
 
         // Check minimum items
-        if (columnAItems.length === 0 || columnBItems.length === 0) {
+        if (columnAItems.length < 2 || columnBItems.length < 2) {
           ctx.addIssue({
             code: "custom",
-            message: "Câu hỏi ghép đôi phải có ít nhất 1 mục ở mỗi cột.",
+            message: "Câu hỏi ghép đôi phải có ít nhất 2 cặp ghép.",
             path: ["matchingData"],
           });
         }

@@ -9,10 +9,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_ORGANIZATION_ID, HEADER_ORGANIZATION_ID } from "@/constants/api-headers.constant";
 import { employeesRepository } from "@/repository";
 import { createSVClient, createSVClientWithToken } from "@/services/supabase/server";
+import type { EmployeeType } from "@/utils/employee-type";
 
 export interface AuthenticatedEmployee {
   id: string;
   organization_id: string;
+  employee_type: EmployeeType | null;
 }
 
 /**

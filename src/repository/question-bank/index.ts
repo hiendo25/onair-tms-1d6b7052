@@ -161,6 +161,23 @@ const deleteQuestionBankQuestion = async (questionId: string, client?: QuestionB
     throw new Error(`Failed to delete question bank: ${error.message}`);
   }
 };
+
+const getAssignmentQuestionCountByQuestionId = async (
+  questionId: string,
+  client?: QuestionBankClient,
+): Promise<number> => {
+  const supabaseClient = client ?? supabase;
+  const { count, error } = await supabaseClient
+    .from("assignment_questions")
+    .select("assignment_bank_id", { count: "exact", head: true })
+    .eq("question_id", questionId);
+
+  if (error) {
+    throw new Error(`Failed to check assignment questions: ${error.message}`);
+  }
+
+  return count ?? 0;
+};
 const getQuestionBankById = async (
   questionId: string,
   organizationId: string,
@@ -253,6 +270,7 @@ export {
   createQuestionBankQuestions,
   deleteQuestionBankCategoriesByQuestionId,
   deleteQuestionBankQuestion,
+  getAssignmentQuestionCountByQuestionId,
   getQuestionBank,
   getQuestionBankById,
   getQuestionBankSummary,

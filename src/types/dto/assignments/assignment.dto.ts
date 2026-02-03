@@ -13,6 +13,7 @@ export class AssignmentDto {
   available_to?: string | null;
   shuffle_questions?: boolean | null;
   shuffle_answers?: boolean | null;
+  hide_correct_answers?: boolean | null;
   pass_score?: number | null;
   createdBy?: {
     id: string;

@@ -1,5 +1,14 @@
 import type { MyAssignmentDto } from "@/types/dto/assignments";
 
+type MyAssignmentResultStatus = "late" | "pass" | "fail" | "none";
+
+const MY_ASSIGNMENT_RESULT_LABEL: Record<MyAssignmentResultStatus, string> = {
+  late: "Trễ hạn",
+  pass: "Đạt",
+  fail: "Chưa đạt",
+  none: "-",
+};
+
 export type MyAssignmentDisplayStatus = "graded" | "in_progress" | "not_submitted" | "not_yet_started" | "submitted";
 
 const isBeforeAvailableFrom = (availableFrom?: string | null): boolean => {
@@ -11,6 +20,27 @@ const isBeforeAvailableFrom = (availableFrom?: string | null): boolean => {
     return false;
   }
   return Date.now() < startMs;
+};
+
+const isOverdue = (availableTo?: string | null, submittedAt?: string | null, now: number = Date.now()): boolean => {
+  if (!availableTo) {
+    return false;
+  }
+
+  const deadlineMs = new Date(availableTo).getTime();
+  if (Number.isNaN(deadlineMs)) {
+    return false;
+  }
+
+  if (submittedAt) {
+    const submittedMs = new Date(submittedAt).getTime();
+    if (Number.isNaN(submittedMs)) {
+      return false;
+    }
+    return submittedMs > deadlineMs;
+  }
+
+  return now > deadlineMs;
 };
 
 export const getMyAssignmentDisplayStatus = (
@@ -30,3 +60,27 @@ export const getMyAssignmentDisplayStatus = (
   }
   return "not_submitted";
 };
+
+export const getMyAssignmentResultStatus = (
+  assignment: Pick<MyAssignmentDto, "available_to" | "submitted_at" | "status" | "score" | "pass_score">,
+  now: number = Date.now(),
+): MyAssignmentResultStatus => {
+  if (isOverdue(assignment.available_to, assignment.submitted_at, now)) {
+    return "late";
+  }
+
+  if (
+    assignment.status === "graded" &&
+    typeof assignment.score === "number" &&
+    typeof assignment.pass_score === "number"
+  ) {
+    return assignment.score >= assignment.pass_score ? "pass" : "fail";
+  }
+
+  return "none";
+};
+
+export const getMyAssignmentResultLabel = (status: MyAssignmentResultStatus): string =>
+  MY_ASSIGNMENT_RESULT_LABEL[status];
+
+export type { MyAssignmentResultStatus };

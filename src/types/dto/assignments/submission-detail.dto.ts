@@ -33,6 +33,7 @@ export interface SubmissionDetailDto {
   assignmentId: string;
   assignmentName: string;
   assignmentDescription: string;
+  showCorrectAnswers: boolean;
   employeeId: string;
   employeeCode: string;
   fullName: string;
