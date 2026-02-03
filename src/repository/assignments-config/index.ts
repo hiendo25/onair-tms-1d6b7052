@@ -365,7 +365,7 @@ const getLatestAssignmentByBankId = async (
       available_to,
       status,
       created_at,
-      assignment_employees (
+      assignment_employees!inner (
         employee_id,
         employees (
           id,
