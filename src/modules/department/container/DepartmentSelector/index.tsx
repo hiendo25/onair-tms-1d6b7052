@@ -22,7 +22,7 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({
   const [departmentIds, setDepartmentIds] = useState<string[]>([]);
   const { data: departmentsData, isPending } = useGetDepartmentsQuery({ organizationId });
 
-  const departmentList = departmentsData?.data || [];
+  const departmentList = departmentsData?.items || [];
 
   const handleChange = (event: SelectChangeEvent<typeof departmentIds>) => {
     const {
@@ -44,7 +44,7 @@ const DepartmentSelector: React.FC<DepartmentSelectorProps> = ({
   };
 
   const getDepartmentName = (optionId: string) => {
-    return departmentsData?.data.find((item) => item.id === optionId)?.name;
+    return departmentsData?.items.find((item) => item.id === optionId)?.name;
   };
 
   useEffect(() => {

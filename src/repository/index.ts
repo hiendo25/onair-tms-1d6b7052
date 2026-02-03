@@ -10,6 +10,7 @@ export * as organizationsRepository from "./organizations";
 export * as positionsRepository from "./positions";
 export * as profilesRepository from "./profiles";
 export * as departmentRepository from "./department";
+export * as departmentsRepository from "./departments";
 export * as branchRepository from "./branch";
 export * as teacherRepository from "./teacher";
 export * as employeeRepository from "./employee";

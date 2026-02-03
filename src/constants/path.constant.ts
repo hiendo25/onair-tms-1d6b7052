@@ -4,10 +4,10 @@ export const PATHS = {
   ANALYTIC: "/analytic",
   ORGANIZATION: "/organization",
   DEPARTMENTS: {
-    ROOT: "/department/departments",
-    CREATE_DEPARTMENT: "/department/departments/create",
-    IMPORT_DEPARTMENTS: "/department/departments/import",
-    DETAIL: (id: string = ":id") => `/department/departments/${id}`,
+    ROOT: "/departments",
+    CREATE_DEPARTMENT: "/departments/create",
+    IMPORT_DEPARTMENTS: "/departments/import",
+    DETAIL: (id: string = ":id") => `/departments/${id}`,
   },
   BRANCHES: {
     ROOT: "/branches",

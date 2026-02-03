@@ -5,9 +5,9 @@ import { useUserOrganization } from "@/modules/organization";
 import { ChevronDownIcon } from "@/shared/assets/icons";
 import useClickOutSide from "@/shared/ui/form/MultipleSelectField/useClickOutside";
 import { cn } from "@/utils";
-import { useGetBranchesQuery } from "../operations/query";
-import { GetBranchesResponse } from "../type";
-export interface BranchSelectorProps {
+import { useGetDepartmentsQuery } from "../operations/query";
+import { GetDepartmentsResponse } from "../type";
+export interface DepartmentSelectorV2Props {
   className?: string;
   values?: string[];
   multiple?: boolean;
@@ -17,8 +17,8 @@ export interface BranchSelectorProps {
   error?: boolean;
 }
 
-type BranchItems = NonNullable<GetBranchesResponse["data"]>["items"];
-const BranchSelector: React.FC<BranchSelectorProps> = ({
+type DepartmentItems = NonNullable<GetDepartmentsResponse["data"]>["items"];
+const DepartmentSelectorV2: React.FC<DepartmentSelectorV2Props> = ({
   className,
   onSelect,
   onChange,
@@ -32,21 +32,21 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedBranchIds, setSelectedBranchIds] = useState<string[]>([]);
 
-  const { data: branchesData } = useGetBranchesQuery({
+  const { data: departmentsData } = useGetDepartmentsQuery({
     organizationId,
     excludes,
     pageSize: 99,
   });
 
   const branchFlatList = useMemo(() => {
-    return branchesData?.items ? flattenBranches(branchesData?.items) : [];
-  }, [branchesData]);
+    return departmentsData?.items ? flattenDepartments(departmentsData?.items) : [];
+  }, [departmentsData]);
 
   const branchOptions = useMemo(() => {
-    if (!branchesData?.items) return [];
+    if (!departmentsData?.items) return [];
 
-    return mapChildItems(branchesData?.items);
-  }, [branchesData]);
+    return mapChildItems(departmentsData?.items);
+  }, [departmentsData]);
 
   const handleSelect: BranchMenuListProps["onSelect"] = (selectedValue) => {
     let selectedValuesArr: string[];
@@ -154,12 +154,12 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
     </div>
   );
 };
-export default memo(BranchSelector);
+export default memo(DepartmentSelectorV2);
 
-type BranchMenuItem = { id: string; value: string; label: string; children: BranchMenuItem[] };
+type DepartmentMenuItem = { id: string; value: string; label: string; children: DepartmentMenuItem[] };
 interface BranchMenuListProps {
   values?: string[];
-  items: BranchMenuItem[];
+  items: DepartmentMenuItem[];
   asChild?: boolean;
   depth?: number;
   onSelect: (value: string) => void;
@@ -188,9 +188,9 @@ const BranchMenuList: React.FC<BranchMenuListProps> = ({
   ));
 };
 
-function mapChildItems(items: BranchItems): BranchMenuItem[] {
+function mapChildItems(items: DepartmentItems): DepartmentMenuItem[] {
   return items.map((item) => {
-    let children: BranchMenuItem["children"] = [];
+    let children: DepartmentMenuItem["children"] = [];
     if (item.children?.length) {
       children = mapChildItems(item.children);
     }
@@ -203,11 +203,11 @@ function mapChildItems(items: BranchItems): BranchMenuItem[] {
   });
 }
 
-function flattenBranches(items: BranchItems) {
-  return items.reduce<BranchItems>((acc, item) => {
+function flattenDepartments(items: DepartmentItems) {
+  return items.reduce<DepartmentItems>((acc, item) => {
     acc = [...acc, item];
     if (item.children?.length) {
-      const childItems = flattenBranches(item.children);
+      const childItems = flattenDepartments(item.children);
       acc = [...acc, ...childItems];
     }
     return acc;

@@ -1,3 +1,4 @@
+"use client";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Table, TableBody, TableContainer, TableHead, TablePaginationOwnProps, Typography } from "@mui/material";
 

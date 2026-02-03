@@ -1714,6 +1714,7 @@ export type Database = {
       departments: {
         Row: {
           branch_id: string | null
+          code: string | null
           created_at: string
           created_by: string | null
           id: string
@@ -1725,11 +1726,11 @@ export type Database = {
           path: string | null
           priority: number | null
           status: Database["public"]["Enums"]["department_status"] | null
-          type: Database["public"]["Enums"]["department_type"] | null
           updated_at: string | null
         }
         Insert: {
           branch_id?: string | null
+          code?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1741,11 +1742,11 @@ export type Database = {
           path?: string | null
           priority?: number | null
           status?: Database["public"]["Enums"]["department_status"] | null
-          type?: Database["public"]["Enums"]["department_type"] | null
           updated_at?: string | null
         }
         Update: {
           branch_id?: string | null
+          code?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1757,7 +1758,6 @@ export type Database = {
           path?: string | null
           priority?: number | null
           status?: Database["public"]["Enums"]["department_status"] | null
-          type?: Database["public"]["Enums"]["department_type"] | null
           updated_at?: string | null
         }
         Relationships: [

@@ -1,15 +1,21 @@
+import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { client } from "@/lib/api";
 import { useTQuery } from "@/lib/queryClient";
 import * as departmentService from "@/services/departments/department.service";
-import type { GetDepartmentsParams } from "@/types/dto/departments";
+import { GetDepartmentsQueryParams, GetDepartmentsResponse } from "../type";
 
-export const useGetDepartmentsQuery = (
-  params?: GetDepartmentsParams,
-  options?: { enabled?: boolean }
-) => {
+export const useGetDepartmentsQuery = (params?: GetDepartmentsQueryParams, options?: { enabled?: boolean }) => {
+  const { enabled = true } = options || {};
   return useTQuery({
-    queryKey: ["departments", params],
-    queryFn: () => departmentService.getDepartments(params),
-    enabled: options?.enabled !== false && !!params?.organizationId,
+    queryKey: [QUERY_KEYS.GET_DEPARTMENTS, params],
+    queryFn: async () => {
+      const data = await client.get<GetDepartmentsResponse>("departments", params);
+      if (!data.success) {
+        throw data.error.message;
+      }
+      return data.data;
+    },
+    enabled,
   });
 };
 
@@ -21,10 +27,7 @@ export const useGetDepartmentQuery = (id: string) => {
   });
 };
 
-export const useGetBranchesForDepartmentQuery = (
-  organizationId: string,
-  options?: { enabled?: boolean }
-) => {
+export const useGetBranchesForDepartmentQuery = (organizationId: string, options?: { enabled?: boolean }) => {
   return useTQuery({
     queryKey: ["branches", "for-department", organizationId],
     queryFn: () => departmentService.getBranches(organizationId),
