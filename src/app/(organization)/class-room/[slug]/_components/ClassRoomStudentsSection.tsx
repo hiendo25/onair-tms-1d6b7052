@@ -150,6 +150,9 @@ export default function ClassRoomStudentsSection({
     );
   }
 
+  console.log("progressResult", progressResult);
+
+
   return (
     <Stack spacing={3}>
       <Table

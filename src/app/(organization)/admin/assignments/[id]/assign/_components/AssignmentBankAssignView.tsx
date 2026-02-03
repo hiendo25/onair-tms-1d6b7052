@@ -3,7 +3,6 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Alert, Box, Button, CircularProgress, Stack } from "@mui/material";
-import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 import { useSnackbar } from "notistack";
 import { FormProvider, SubmitHandler, useController, useForm } from "react-hook-form";
@@ -101,10 +100,8 @@ const AssignmentBankAssignView = ({ assignmentId }: AssignmentBankAssignViewProp
       return;
     }
 
-    const startDate = latestAssignment.available_from
-      ? dayjs(latestAssignment.available_from).format("DD/MM/YYYY")
-      : "";
-    const endDate = latestAssignment.available_to ? dayjs(latestAssignment.available_to).format("DD/MM/YYYY") : "";
+    const startDate = latestAssignment.available_from ?? "";
+    const endDate = latestAssignment.available_to ?? "";
     const selectedEmployees: StudentSelectedItem[] = (latestAssignment.assignment_employees || [])
       .map((item) => item.employees)
       .filter((employee): employee is NonNullable<typeof employee> => Boolean(employee))

@@ -171,7 +171,8 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
         Các cặp ghép đôi <span className="text-red-500">*</span>
       </FormLabel>
       <Typography className="text-xs text-gray-600">
-        Nhập nội dung cho hai cột. Nhấp vào mục ở cột A, sau đó nhấp vào mục ở cột B để tạo kết nối.
+        Nhập nội dung cho hai cột (tối thiểu 2 cặp). Nhấp vào mục ở cột A, sau đó nhấp vào mục ở cột B để tạo kết
+        nối.
       </Typography>
 
       <div ref={containerRef} className="relative min-h-[200px]">
@@ -247,7 +248,7 @@ const MatchingQuestionEditor: React.FC<MatchingQuestionEditorProps> = ({ matchin
                       e.stopPropagation();
                       handleRemoveItem(index);
                     }}
-                    disabled={columnAItems.length === 1}
+                    disabled={columnAItems.length <= 2}
                     className="mt-1"
                   >
                     <TrashIcon1 className="w-4 h-4" />

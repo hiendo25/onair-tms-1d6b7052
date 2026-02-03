@@ -1,7 +1,8 @@
-import React, { memo } from "react";
+import React, { memo, useEffect } from "react";
 import { Button, Card, Grid, InputAdornment, Stack, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
+import RHFCheckboxField from "@/shared/ui/form/RHFCheckboxField";
 import RHFTextAreaField from "@/shared/ui/form/RHFTextAreaField";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
 
@@ -22,7 +23,30 @@ const AssignmentBankInformationCard = ({
   questionError,
   totalScore,
 }: AssignmentBankInformationCardProps) => {
-  const { control } = useFormContext<AssignmentBankFormValues>();
+  const { control, setValue, trigger, formState, getValues } = useFormContext<AssignmentBankFormValues>();
+  const isUnlimitedDuration = useWatch({ control, name: "isUnlimitedDuration" });
+
+  const shouldRevalidateDuration = formState.isSubmitted || Boolean(formState.errors.durationMinutes);
+
+  useEffect(() => {
+    if (!isUnlimitedDuration) {
+      return;
+    }
+
+    if (getValues("durationMinutes")) {
+      setValue("durationMinutes", "");
+    }
+
+    if (shouldRevalidateDuration) {
+      void trigger("durationMinutes");
+    }
+  }, [
+    getValues,
+    isUnlimitedDuration,
+    setValue,
+    shouldRevalidateDuration,
+    trigger,
+  ]);
 
   return (
     <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3, border: "1px solid", borderColor: "grey.200", boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
@@ -72,15 +96,24 @@ const AssignmentBankInformationCard = ({
 
         <Grid container spacing={3}>
           <Grid size={{ xs: 12, md: 6 }}>
-            <RHFTextField
-              control={control}
-              name="durationMinutes"
-              label="Thời gian làm bài (phút)"
-              required
-              placeholder="45"
-              inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-              size="small"
-            />
+            <Stack spacing={1}>
+              <RHFTextField
+                control={control}
+                name="durationMinutes"
+                label="Thời gian làm bài (phút)"
+                required={!isUnlimitedDuration}
+                disabled={isUnlimitedDuration}
+                placeholder={isUnlimitedDuration ? "Không giới hạn" : "45"}
+                inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+                size="small"
+                helpText={
+                  isUnlimitedDuration ? (
+                    <span className="text-xs text-gray-400">Đang chọn không giới hạn thời gian.</span>
+                  ) : null
+                }
+              />
+              <RHFCheckboxField control={control} name="isUnlimitedDuration" label="Không giới hạn thời gian" />
+            </Stack>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
             <RHFTextField

@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo } from "react";
-import type { DateFieldProps } from "@mui/x-date-pickers";
-import { DateField as XDateField } from "@mui/x-date-pickers";
+import type { DatePickerProps } from "@mui/x-date-pickers";
 import { PickerValue } from "@mui/x-date-pickers/internals";
 import dayjs, { Dayjs } from "dayjs";
 import type { Control, FieldValues, Path, PathValue } from "react-hook-form";
@@ -16,7 +15,7 @@ export const DATE_PICKER_FORMAT = {
 
 export type DatePickerFormat = keyof typeof DATE_PICKER_FORMAT;
 
-interface DatePickerProps<T extends FieldValues> {
+interface RHFDatePickerProps<T extends FieldValues> {
   className?: string;
   label?: React.ReactNode;
   placeholder?: React.ReactNode | string;
@@ -24,6 +23,7 @@ interface DatePickerProps<T extends FieldValues> {
   name: Path<T>;
   format?: DatePickerFormat;
   required?: boolean;
+  minDate?: Dayjs | null;
 }
 const RHFDatePicker = <T extends FieldValues>({
   className,
@@ -33,16 +33,18 @@ const RHFDatePicker = <T extends FieldValues>({
   placeholder,
   format = "DD/MM/YYYY",
   required,
-}: DatePickerProps<T>) => {
-  const datePickerProps = useMemo<DateFieldProps>(() => {
+  minDate,
+}: RHFDatePickerProps<T>) => {
+  const datePickerProps = useMemo<Omit<DatePickerProps<Dayjs>, "value" | "onChange">>(() => {
     return {
       format,
       label,
       required,
       placeholder,
       className: cn("date-picker", className),
+      minDate,
     };
-  }, [format, label, required, placeholder]);
+  }, [format, label, required, placeholder, className, minDate]);
 
   const getValueDatePicker = useCallback((value: PathValue<T, Path<T>>) => {
     if (!value) return null;

@@ -18,6 +18,11 @@ const AssignmentBankConfigCard = () => {
         <Stack spacing={1}>
           <RHFCheckboxField control={control} name="shuffleQuestions" label="Xáo trộn câu hỏi" />
           <RHFCheckboxField control={control} name="shuffleAnswers" label="Xáo trộn đáp án" />
+          <RHFCheckboxField
+            control={control}
+            name="hideCorrectAnswers"
+            label="Ẩn đáp án đúng khi xem kết quả"
+          />
         </Stack>
       </Stack>
     </Card>

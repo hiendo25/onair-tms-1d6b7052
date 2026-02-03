@@ -28,7 +28,11 @@ import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
 import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
-import { getMyAssignmentDisplayStatus } from "@/modules/assignment-management/utils/my-assignment.utils";
+import {
+  getMyAssignmentDisplayStatus,
+  getMyAssignmentResultLabel,
+  getMyAssignmentResultStatus,
+} from "@/modules/assignment-management/utils/my-assignment.utils";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import PageContainer from "@/shared/ui/PageContainer";
 import TableData from "@/shared/ui/TableData";
@@ -123,6 +127,22 @@ export default function MyAssignmentsList() {
     return <Chip label="Chưa nộp" color="warning" size="small" />;
   }, []);
 
+  const getResultChip = React.useCallback((row: MyAssignmentRow) => {
+    const resultStatus = getMyAssignmentResultStatus(row);
+    if (resultStatus === "none") {
+      return (
+        <Typography variant="body2" color="text.secondary">
+          -
+        </Typography>
+      );
+    }
+
+    const label = getMyAssignmentResultLabel(resultStatus);
+    const color = resultStatus === "pass" ? "success" : resultStatus === "late" ? "error" : "warning";
+
+    return <Chip label={label} color={color} size="small" />;
+  }, []);
+
   const assignments = React.useMemo(() => paginatedResult?.data || [], [paginatedResult?.data]);
   const rows = React.useMemo(
     () =>
@@ -142,7 +162,7 @@ export default function MyAssignmentsList() {
     ? "Tiếp tục làm"
     : selectedAssignment?.has_submitted
       ? "Làm lại"
-      : "Nộp bài";
+      : "Làm bài";
 
   const columns = React.useMemo<TableDataColumn<MyAssignmentRow>[]>(
     () => [
@@ -186,6 +206,12 @@ export default function MyAssignmentsList() {
         renderCell: (_value, row) => getStatusChip(row),
       },
       {
+        id: "result",
+        field: "result",
+        headerName: "Kết quả",
+        renderCell: (_value, row) => getResultChip(row),
+      },
+      {
         id: "score",
         field: "score",
         headerName: "Điểm",
@@ -218,7 +244,7 @@ export default function MyAssignmentsList() {
         ),
       },
     ],
-    [getStatusChip, handleOpenMenu],
+    [getResultChip, getStatusChip, handleOpenMenu],
   );
 
   return (
@@ -253,7 +279,7 @@ export default function MyAssignmentsList() {
                 onChange={(e) => setStatusFilter(e.target.value as StatusFilterUI)}
               >
                 <MenuItem value="all">Tất cả</MenuItem>
-                <MenuItem value="not_submitted">Chưa nộp</MenuItem>
+                <MenuItem value="in_progress">Chưa nộp</MenuItem>
                 <MenuItem value="submitted">Đã nộp</MenuItem>
                 <MenuItem value="graded">Đã chấm</MenuItem>
               </Select>

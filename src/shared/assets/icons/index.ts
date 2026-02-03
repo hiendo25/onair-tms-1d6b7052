@@ -50,6 +50,7 @@ import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
 import Inbox01Icon from "./Inbox01Icon";
 import InforCircleIcon from "./InforCircleIcon";
+import LearningPathIcon from "./learningPathIcon";
 import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
 import Loading from "./LoadingIcon";
@@ -161,4 +162,5 @@ export {
   CertificateIcon,
   PieChart2Icon,
   DotHorizontalIcon,
+  LearningPathIcon,
 };

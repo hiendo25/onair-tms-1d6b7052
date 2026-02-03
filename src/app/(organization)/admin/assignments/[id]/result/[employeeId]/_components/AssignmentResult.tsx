@@ -128,7 +128,12 @@ const AssignmentResult: React.FC<AssignmentResultProps> = ({
 
         <Stack spacing={2} sx={{ mb: 3 }}>
           {submission.questions.map((question, index) => (
-            <ResultQuestionCard key={question.id} question={question} questionNumber={index + 1} />
+            <ResultQuestionCard
+              key={question.id}
+              question={question}
+              questionNumber={index + 1}
+              showCorrectAnswers={submission.showCorrectAnswers}
+            />
           ))}
         </Stack>
 

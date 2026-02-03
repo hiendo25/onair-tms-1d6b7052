@@ -52,15 +52,13 @@ const STATUS_OPTIONS: Array<{ value: "all" | AssignmentStudentProgressStatus; la
   { value: "not_started", label: "Chưa bắt đầu" },
 ];
 
-const formatNumber = (value: number) => new Intl.NumberFormat("vi-VN").format(value);
-
 const SummaryCard = ({
   title,
   value,
   icon,
 }: {
   title: string;
-  value: string;
+  value: number;
   icon: React.ReactNode;
 }) => (
   <Card
@@ -161,44 +159,11 @@ export default function AssignmentStudentList() {
     router.push(PATHS.ASSIGNMENTS.GRADE(assignmentId, employeeId));
   };
 
-  const tableRows = React.useMemo<AssignmentStudentRow[]>(() => {
-    const offset = (page - 1) * PAGE_SIZE;
-    const placeholders: AssignmentStudentRow[] = Array.from({ length: offset }, (_, index) => ({
-      id: `placeholder-${index + 1}`,
-      displayIndex: "",
-      employee_id: "",
-      employee_code: "",
-      full_name: "",
-      email: "",
-      avatar: null,
-      department_name: null,
-      has_submitted: false,
-      submitted_at: null,
-      score: null,
-      max_score: null,
-      status: null,
-    }));
-
-    const currentRows = students.map((student, index) => ({
-      ...student,
-      id: student.employee_id,
-      displayIndex: String(offset + index + 1).padStart(2, "0"),
-    }));
-
-    return [...placeholders, ...currentRows];
-  }, [students, page]);
-
-  const columns = React.useMemo<TableDataProps<AssignmentStudentRow>["columns"]>(
-    () => [
-      {
-        id: "index",
-        field: "displayIndex",
-        headerName: "STT",
-        width: 80,
-      },
+  const columns: TableDataProps<any>["columns"] =
+    [
       {
         id: "student",
-        field: "full_name",
+        field: "student",
         headerName: "Học viên",
         sx: { minWidth: 260 },
         renderCell: (_value, row) => (
@@ -282,7 +247,7 @@ export default function AssignmentStudentList() {
       },
       {
         id: "department",
-        field: "department_name",
+        field: "department",
         headerName: "Phòng ban",
         renderCell: (_value, row) =>
           <Box className="py-1 px-1.5 bg-[#F9FAFB] text-[#000000] rounded-md inline-block font-normal text-[12px]">
@@ -291,7 +256,7 @@ export default function AssignmentStudentList() {
       },
       {
         id: "action",
-        field: "employee_id",
+        field: "action",
         headerName: "Thao tác",
         align: "right",
         renderCell: (_value, row) => {
@@ -320,9 +285,8 @@ export default function AssignmentStudentList() {
           );
         },
       },
-    ],
-    [handleNavigateToGrade, handleNavigateToResult, passScoreValue],
-  );
+    ]
+
 
   return (
     <PageContainer
@@ -377,28 +341,28 @@ export default function AssignmentStudentList() {
             <Grid size={{ xs: 12, md: 3 }}>
               <SummaryCard
                 title="Tổng học viên"
-                value={formatNumber(summary.total_students)}
+                value={summary.total_students}
                 icon={<PeopleAltOutlinedIcon fontSize="medium" />}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <SummaryCard
                 title="Hoàn thành"
-                value={formatNumber(summary.completed_count)}
+                value={summary.completed_count}
                 icon={<TaskAltOutlinedIcon fontSize="medium" />}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <SummaryCard
                 title="Đang làm"
-                value={formatNumber(summary.in_progress_count)}
+                value={summary.in_progress_count}
                 icon={<AccessTimeOutlinedIcon fontSize="medium" />}
               />
             </Grid>
             <Grid size={{ xs: 12, md: 3 }}>
               <SummaryCard
                 title="Chưa bắt đầu"
-                value={formatNumber(summary.not_started_count)}
+                value={summary.not_started_count}
                 icon={<HourglassEmptyOutlinedIcon fontSize="medium" />}
               />
             </Grid>
@@ -455,7 +419,7 @@ export default function AssignmentStudentList() {
                 </Box>
               ) : (
                 <TableData
-                  rows={tableRows}
+                  rows={students}
                   columns={columns}
                   loading={isLoading}
                   hoverRow

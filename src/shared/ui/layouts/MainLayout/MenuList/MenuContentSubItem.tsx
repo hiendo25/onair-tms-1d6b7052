@@ -11,6 +11,7 @@ export interface MenuContentSubItemProps {
   id: string;
   title: string;
   href: string;
+  nonAction?: boolean;
   action?: React.ReactNode;
   defaultExpanded?: boolean;
   expanded?: boolean;
@@ -23,6 +24,7 @@ export default function MenuContentSubItem({
   id,
   title,
   href,
+  nonAction = false,
   action,
   defaultExpanded = false,
   expanded = defaultExpanded,
@@ -62,7 +64,8 @@ export default function MenuContentSubItem({
         };
   }, [mini, expanded]);
 
-  const hasExternalHref = href ? href.startsWith("http://") || href.startsWith("https://") : false;
+  const isActionable = Boolean(href) && !nonAction;
+  const hasExternalHref = isActionable ? href.startsWith("http://") || href.startsWith("https://") : false;
 
   const correctPath = React.useCallback((path: string) => (path.startsWith("/") ? path : ["/", path].join("")), []);
 
@@ -165,7 +168,7 @@ export default function MenuContentSubItem({
                 onClick: handleClick,
               }
             : {})}
-          {...(!nestedNavigation
+          {...(!nestedNavigation && isActionable
             ? {
                 LinkComponent,
                 ...(hasExternalHref

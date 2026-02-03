@@ -8,12 +8,14 @@ export interface MenuContentItemType {
   key: string; // for handle active menu item
   children?: (MenuContentItemType | MenuGroupItemType)[];
   type?: "item";
+  nonAction?: boolean;
 }
 export interface MenuGroupItemType {
   title: string;
   key: string; // for handle active menu item
   children: MenuContentItemType[];
   type: "group";
+  nonAction?: boolean;
 }
 
 export type MenuItemType = MenuGroupItemType | MenuContentItemType;

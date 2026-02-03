@@ -96,6 +96,7 @@ const mappingPathWithRolePermissions = (
               key: menuItem.key,
               title: menuItem.title,
               type: "group",
+              nonAction: menuItem.nonAction,
               children: childItems.filter((item) => item.type !== "group"),
             }
           : {
@@ -104,6 +105,7 @@ const mappingPathWithRolePermissions = (
               subTitle: menuItem.subTitle,
               title: menuItem.title,
               path: menuItem.path,
+              nonAction: menuItem.nonAction,
               type: "item",
               children: childItems || [],
             };

@@ -8,6 +8,7 @@ export class AssignmentBankDto {
   pass_score?: number | null;
   shuffle_questions?: boolean | null;
   shuffle_answers?: boolean | null;
+  hide_correct_answers?: boolean | null;
   created_by!: string;
   organization_id?: string | null;
   created_at!: string;

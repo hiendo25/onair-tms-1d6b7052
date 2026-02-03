@@ -1,4 +1,5 @@
 import { assignmentBankRepository, assignmentResultsRepository, assignmentsRepository, questionBankRepository } from "@/repository";
+import type { MyAssignmentRpcRow } from "@/repository/assignments-config";
 import { createSVClient } from "@/services";
 import type {
   AssignmentDto,
@@ -7,6 +8,7 @@ import type {
   GetAssignmentsParams,
   GetAssignmentStudentsParams,
   GetMyAssignmentsParams,
+  MyAssignmentDto,
   UpdateAssignmentDto,
 } from "@/types/dto/assignments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
@@ -16,6 +18,27 @@ import { buildQuestionOptions } from "./question-options";
 interface CreateAssignmentResult {
   assignmentId: string;
 }
+
+const isWithinAssignmentWindow = (
+  availableFrom?: string | null,
+  availableTo?: string | null,
+  now: number = Date.now(),
+): boolean => {
+  if (availableFrom) {
+    const startMs = new Date(availableFrom).getTime();
+    if (!Number.isNaN(startMs) && now < startMs) {
+      return false;
+    }
+  }
+  if (availableTo) {
+    const endMs = new Date(availableTo).getTime();
+    if (!Number.isNaN(endMs) && now > endMs) {
+      return false;
+    }
+  }
+  return true;
+};
+
 
 async function createAssignmentWithRelations(
   payload: CreateAssignmentDto,
@@ -229,8 +252,61 @@ async function getAssignmentQuestions(assignmentId: string) {
   return assignmentsRepository.getAssignmentQuestions(assignmentId);
 }
 
-async function getMyAssignments(employeeId: string, params?: GetMyAssignmentsParams) {
-  return assignmentsRepository.getMyAssignments(employeeId, params);
+async function getMyAssignments(
+  employeeId: string,
+  params?: GetMyAssignmentsParams,
+): Promise<PaginatedResult<MyAssignmentDto>> {
+  const { page = 0, limit = 25 } = params || {};
+  const rawResult = await assignmentsRepository.getMyAssignments(employeeId, params);
+
+  if (rawResult.data.length === 0) {
+    return {
+      data: [],
+      total: rawResult.total,
+      page,
+      limit,
+    };
+  }
+
+  const now = Date.now();
+  const data = rawResult.data.map((assignment: MyAssignmentRpcRow) => {
+    const attemptLimit = assignment.attempt_limit === null ? null : Number(assignment.attempt_limit);
+    const attemptsUsed = Number(assignment.attempts_used ?? 0);
+    const attemptsRemaining = attemptLimit === null ? null : Math.max(attemptLimit - attemptsUsed, 0);
+    const hasAttemptsLeft = attemptLimit === null ? true : attemptsRemaining! > 0;
+    const hasActiveAttempt = Boolean(assignment.has_active_attempt);
+    const hasSubmitted = Boolean(assignment.has_submitted);
+    const canRetry =
+      (hasActiveAttempt || hasAttemptsLeft) &&
+      isWithinAssignmentWindow(assignment.available_from, assignment.available_to, now);
+
+    return {
+      assignment_id: assignment.assignment_id,
+      assignment_name: assignment.assignment_name ?? "",
+      assignment_description: assignment.assignment_description ?? "",
+      pass_score: assignment.pass_score ?? null,
+      created_at: assignment.created_at,
+      available_from: assignment.available_from ?? null,
+      available_to: assignment.available_to ?? null,
+      attempt_limit: attemptLimit,
+      attempts_used: attemptsUsed,
+      attempts_remaining: attemptsRemaining,
+      can_retry: canRetry,
+      has_submitted: hasSubmitted,
+      has_active_attempt: hasActiveAttempt,
+      submitted_at: assignment.submitted_at ?? null,
+      score: assignment.score ?? null,
+      max_score: assignment.max_score ?? null,
+      status: assignment.status ?? null,
+    };
+  });
+
+  return {
+    data,
+    total: rawResult.total,
+    page,
+    limit,
+  };
 }
 
 async function getAssignedAssignments(params?: GetAssignedAssignmentsParams) {

@@ -1,13 +1,20 @@
 import React, { memo } from "react";
 import { Card, Grid, Stack, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
+import dayjs from "dayjs";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import type { AssignmentBankAssignFormValues } from "@/modules/assignment-management/components/assignment-bank";
-import RHFDatePicker from "@/shared/ui/form/RHFDatePicker";
+import RHFDateTimePicker from "@/shared/ui/form/RHFDateTimePicker";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+
+const MIN_END_DATE_OFFSET_MINUTES = 1;
 
 const AssignmentBankAssignConfigCard = () => {
   const { control } = useFormContext<AssignmentBankAssignFormValues>();
+  const startDate = useWatch({ control, name: "startDate" });
+  const minEndDate = startDate
+    ? dayjs(startDate).add(MIN_END_DATE_OFFSET_MINUTES, "minute")
+    : dayjs();
 
   return (
     <Card sx={{ borderRadius: 3, border: "1px solid", borderColor: "grey.200", boxShadow: "none" }}>
@@ -19,21 +26,21 @@ const AssignmentBankAssignConfigCard = () => {
           <Grid size={{ xs: 12, md: 6 }}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFDatePicker
+                <RHFDateTimePicker
                   control={control}
                   name="startDate"
                   label="Từ ngày"
                   required
-                  placeholder="DD/MM/YYYY"
+                  minDateTime={dayjs()}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <RHFDatePicker
+                <RHFDateTimePicker
                   control={control}
                   name="endDate"
                   label="Đến ngày"
                   required
-                  placeholder="DD/MM/YYYY"
+                  minDateTime={minEndDate}
                 />
               </Grid>
             </Grid>

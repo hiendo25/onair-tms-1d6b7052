@@ -86,6 +86,9 @@ const LearningScreenSection = ({
     return <Alert severity="info">Khoá học hiện chưa có nội dung bài giảng. Vui lòng quay lại sau.</Alert>;
   }
 
+  console.log("course", course);
+
+
   return (
     <Stack spacing={3}>
       <Box

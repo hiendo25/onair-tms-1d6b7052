@@ -3,19 +3,19 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { assignmentBankRepository, assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type { AssignAssignmentBankDto } from "@/types/dto/assignment-bank";
 import type { Database } from "@/types/supabase.types";
-import { parseDateRange } from "@/utils/date";
+import { parseDateTimeRange } from "@/utils/date";
 
 interface AssignAssignmentBankResult {
   assignmentId: string;
 }
 
 const parseAssignmentDateRange = (startDate: string, endDate: string) => {
-  const range = parseDateRange(startDate, endDate);
+  const range = parseDateTimeRange(startDate, endDate);
   if (!range) {
     throw new Error("Hạn làm bài không hợp lệ");
   }
 
-  if (range.start.getTime() > range.end.getTime()) {
+  if (range.start.getTime() >= range.end.getTime()) {
     throw new Error("Hạn làm bài không hợp lệ");
   }
 
@@ -97,7 +97,7 @@ const assignAssignmentBankToEmployees = async (
   let assignmentId: string | null = null;
 
   try {
-    const assignment = await assignmentsRepository.createAssignmentFromBankWithClient({
+    const assignment = await assignmentsRepository.createAssignmentFromBankWithClient(client, {
       assignment_bank_id: payload.assignmentBankId,
       assigned_by: assignedBy,
       organization_id: payload.organizationId,
@@ -106,6 +106,7 @@ const assignAssignmentBankToEmployees = async (
       available_from: dateRange.start,
       available_to: dateRange.end,
       status: "open",
+      scope: "employee"
     });
 
     assignmentId = assignment.id;

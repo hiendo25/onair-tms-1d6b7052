@@ -208,6 +208,9 @@ export const useDeleteQuestionBankMutation = () => {
     mutationFn: async (questionId: string) => {
       return questionBankService.deleteQuestionBankQuestion(questionId);
     },
+    onError: () => {
+      return;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [GET_QUESTION_BANK] });
     },
