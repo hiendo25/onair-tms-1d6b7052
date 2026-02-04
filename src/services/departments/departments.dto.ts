@@ -81,6 +81,22 @@ export interface UpdateDepartmentInput {
   branchId?: string;
 }
 
+export interface UpdateRootDepartmentInput {
+  id?: string;
+  name?: string;
+  code?: string;
+  managedById?: string;
+  branchId?: string;
+}
+
+export interface UpdateChildDepartmentInput {
+  id?: string;
+  name?: string;
+  code?: string;
+  managedById?: string;
+  parentId?: string;
+}
+
 export interface UpdateDepartmentStatusInput {
   id?: string;
   status?: Extract<DepartmentStatus, "active" | "inactive">;
@@ -102,3 +118,41 @@ export interface DeleteDepartmentResult {
 }
 export interface UpdateDepartmentResult extends BaseDepartmentItemResult {}
 export interface UpdateDepartmentStatusResult extends BaseDepartmentItemResult {}
+
+export interface GetDepartmentDetailByIdResult {
+  id: string;
+  name: string;
+  code: string | null;
+  path: string | null;
+  priority: number | null;
+  parentId: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  level: number | null;
+  status: DepartmentStatus;
+  organization: {
+    id: string;
+    name: string;
+  } | null;
+  parent: {
+    id: string;
+    name: string;
+    code: string | null;
+    path: string | null;
+  } | null;
+  author: {
+    id: string;
+    fullName: string;
+  } | null;
+  managedBy: {
+    id: string;
+    fullName: string;
+  } | null;
+  branch: {
+    id: string;
+    name: string;
+    code: string | null;
+    path: string | null;
+    level: number | null;
+  } | null;
+}

@@ -93,13 +93,19 @@ export class CreateDepartmentService {
     const { managedById, parentId } = createChildDepartmentInput;
 
     if (!parentId) {
-      throw new DomainError("Thiếu phòng ban cha", "INVALID_PARENT_DEPARTMENT_ID", 400, createChildDepartmentInput);
+      throw new DomainError(
+        "Thiếu parentId phòng ban",
+        "INVALID_PARENT_DEPARTMENT_ID",
+        400,
+        createChildDepartmentInput,
+      );
     }
 
     const departmentName = createChildDepartmentInput.name ? createChildDepartmentInput.name.trim() : "";
 
     const parentDepartment = await this.getParentDepartment(parentId);
 
+    console.log({ parentDepartment });
     const departmentLevel = parentDepartment.level ? parentDepartment.level + 1 : this.defaultDepartmentLevel;
 
     const manager = await this.getManagedDepartment(managedById);

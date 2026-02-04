@@ -5,8 +5,10 @@ import {
   CreateRootDepartmentInput,
   GetDepartmentsInput,
   GetDepartmentsResult,
+  UpdateChildDepartmentInput,
   UpdateDepartmentInput,
   UpdateDepartmentResult,
+  UpdateRootDepartmentInput,
 } from "@/services/departments/departments.dto";
 
 export type CreateRootDepartmentPayload = CreateRootDepartmentInput & { type: "root" };
@@ -17,14 +19,8 @@ export type CreateDepartmentResponse = HttpResponse<CreateDepartmentResult>;
 export type GetDepartmentsQueryParams = GetDepartmentsInput;
 export type GetDepartmentsResponse = HttpResponse<GetDepartmentsResult>;
 
-export type UpdateRootDepartmentPayload = Pick<
-  UpdateDepartmentInput,
-  "id" | "branchId" | "code" | "managedById" | "name"
->;
+export type UpdateRootDepartmentPayload = UpdateRootDepartmentInput & { type: "root" };
 
-export type UpdateChildDepartmentPayload = Pick<
-  UpdateDepartmentInput,
-  "id" | "parentId" | "code" | "managedById" | "name"
->;
+export type UpdateChildDepartmentPayload = UpdateChildDepartmentInput & { type: "children" };
 
 export type UpdateDepartmentResponse = HttpResponse<UpdateDepartmentResult>;

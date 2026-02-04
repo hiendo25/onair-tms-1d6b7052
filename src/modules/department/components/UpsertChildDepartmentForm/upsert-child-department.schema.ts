@@ -20,10 +20,6 @@ const upsertChildDepartmentSchema = zod.object({
   id: zod.string().optional(),
   name: zod.string().min(1, { error: "Tên phòng ban không bỏ trống" }).max(100, "Tên phòng ban tối đa 100 ký tự"),
   code: departmentCodeSchema,
-  parentId: zod
-    .string()
-    .optional()
-    .refine((value) => Boolean(value), { error: "Phòng ban không bỏ trống." }),
   managedById: zod.string().optional(),
   status: zod.enum(["active", "inactive", "deleted"]).nullable(),
 });

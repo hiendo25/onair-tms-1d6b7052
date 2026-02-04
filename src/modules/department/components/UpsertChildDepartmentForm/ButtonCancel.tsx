@@ -5,32 +5,32 @@ import { isEqual } from "lodash";
 import { useWatch } from "react-hook-form";
 
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
-import { useUpsertRootDepartmentFormContext } from ".";
+import { useUpsertChilDepartmentForm } from ".";
 
-import { UpsertRootDepartmentFormData } from "./upsert-child-department.schema";
+import { UpsertChildDepartmentFormData } from "./upsert-child-department.schema";
 export interface ButtonCancelRef {
   triggerClick: () => void;
 }
 export interface ButtonCancelProps {
   loading?: boolean;
   onOk?: () => void;
-  initialValues?: UpsertRootDepartmentFormData;
+  initialValues?: UpsertChildDepartmentFormData;
   className?: string;
 }
 const ButtonCancel = forwardRef<ButtonCancelRef, ButtonCancelProps>(
   ({ loading, initialValues, onOk, className }, ref) => {
-    const { control } = useUpsertRootDepartmentFormContext();
+    const { control } = useUpsertChilDepartmentForm();
     const [isTransition, startTransition] = useTransition();
     const dialog = useDialogs();
 
-    const [name, code, branchId, managedById] = useWatch({
+    const [name, code, managedById] = useWatch({
       control,
-      name: ["name", "code", "branchId", "managedById"],
+      name: ["name", "code", "managedById"],
     });
 
     const isOpenDialogConfirm = useMemo(() => {
       if (!initialValues) {
-        return [name, branchId, code, managedById].some((val) => {
+        return [name, code, managedById].some((val) => {
           if (!val) return false;
           if (typeof val === "string" && val.length > 0) return true;
           return false;
@@ -40,13 +40,12 @@ const ButtonCancel = forwardRef<ButtonCancelRef, ButtonCancelProps>(
       return !isEqual(
         {
           name: initialValues.name,
-          branchId: initialValues.branchId,
           code: initialValues.code,
           managedById: initialValues.managedById,
         },
-        { name, branchId, code, managedById },
+        { name, code, managedById },
       );
-    }, [name, branchId, code, managedById, initialValues]);
+    }, [name, code, managedById, initialValues]);
 
     const handleClickCancel = async () => {
       if (isOpenDialogConfirm) {

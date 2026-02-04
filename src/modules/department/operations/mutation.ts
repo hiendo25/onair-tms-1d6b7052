@@ -4,8 +4,10 @@ import { client } from "@/lib/api";
 import { useTMutation } from "@/lib/queryClient";
 import type { ImportDepartmentsDto } from "@/types/dto/departments";
 import {
+  CreateChildDepartmentPayload,
   CreateDepartmentResponse,
   CreateRootDepartmentPayload,
+  UpdateChildDepartmentPayload,
   UpdateDepartmentResponse,
   UpdateRootDepartmentPayload,
 } from "../type";
@@ -50,7 +52,7 @@ export const useImportDepartmentsMutation = () => {
 
 export const useCreateDepartmentMutation = ({ isRoot = false }: { isRoot?: boolean }) => {
   return useTMutation({
-    mutationFn: async (payload: CreateRootDepartmentPayload) => {
+    mutationFn: async (payload: CreateRootDepartmentPayload | CreateChildDepartmentPayload) => {
       const data = await client.post<CreateDepartmentResponse>("departments", payload);
       if (!data.success) {
         throw data.error.message;
@@ -62,7 +64,7 @@ export const useCreateDepartmentMutation = ({ isRoot = false }: { isRoot?: boole
 
 export const useUpdateDepartmentMutation = ({ isRoot = false }: { isRoot?: boolean }) => {
   return useTMutation({
-    mutationFn: async ({ id, ...payload }: UpdateRootDepartmentPayload) => {
+    mutationFn: async ({ id, ...payload }: UpdateRootDepartmentPayload | UpdateChildDepartmentPayload) => {
       const data = await client.put<UpdateDepartmentResponse>(`departments/${id}`, payload);
       if (!data.success) {
         throw data.error.message;

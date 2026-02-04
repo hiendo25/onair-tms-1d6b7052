@@ -3,7 +3,7 @@ import { branchRepository, departmentsRepository } from "@/repository";
 import { GetBranchesByPathsRecords, GetRootBranchesRecords } from "@/repository/branch";
 import { GetDepartmentsByPathsRecords, GetRootDepartmentsRecords } from "@/repository/departments";
 
-import { GetDepartmentsInput, GetDepartmentsResult } from "./departments.dto";
+import { GetDepartmentDetailByIdResult, GetDepartmentsInput, GetDepartmentsResult } from "./departments.dto";
 
 export class GetDepartmentService {
   private organizationId: string;
@@ -61,6 +61,57 @@ export class GetDepartmentService {
       page,
       pageSize,
       total: count || 0,
+    };
+  }
+
+  async getDetailDepartmentById(recordId?: string): Promise<GetDepartmentDetailByIdResult> {
+    if (!recordId) {
+      throw new DomainError("thiếu Id phòng ban.", "MISSING_ID_DEPARTMENT", 400);
+    }
+
+    const data = await departmentsRepository.getDepartmentById(recordId, this.organizationId);
+
+    if (!data) {
+      throw new DomainError("Không tìm thấy phòng ban", "DEPARTMENT_NOT_FOUND", 400);
+    }
+
+    return {
+      id: data.id,
+      name: data.name,
+      priority: data.priority,
+      code: data.code,
+      createdAt: data.created_at,
+      updatedAt: data.updated_at,
+      path: data.path,
+      level: data.level,
+      status: data.status,
+      author: data.createdBy
+        ? {
+            fullName: data.createdBy.full_name || "",
+            id: data.createdBy.id,
+          }
+        : null,
+      managedBy: data.managedBy
+        ? {
+            id: data.managedBy.id,
+            fullName: data.managedBy.full_name || "",
+          }
+        : null,
+      parent: null,
+      parentId: data.parent_id,
+      organization: {
+        id: data.organizations.id,
+        name: data.organizations.name,
+      },
+      branch: data.branch
+        ? {
+            id: data.branch.id,
+            level: data.branch.level,
+            name: data.branch.name,
+            path: data.branch.path,
+            code: data.branch.code,
+          }
+        : null,
     };
   }
 

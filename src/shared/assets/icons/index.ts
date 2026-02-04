@@ -1,4 +1,5 @@
 import AlertCircleIcon from "./AlertCircleIcon";
+import ArchiveIcon from "./ArchiveIcon";
 import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import Bell01Icon from "./Bell01Icon";
@@ -17,6 +18,7 @@ import ClassIcon from "./ClassIcon";
 import ClipboardIcon from "./ClipboardIcon";
 import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
+import CodeSquareIcon from "./CodeSquareIcon";
 import Copy07Icon from "./Copy07Icon";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
 import DotHorizontalIcon from "./DotHorizontalIcon";
@@ -46,6 +48,7 @@ import FolderShieldIcon from "./FolderShieldIcon";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
+import Hash01Icon from "./Hash01Icon";
 import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
 import Inbox01Icon from "./Inbox01Icon";
@@ -71,6 +74,8 @@ import SquareFourIcon from "./SquareFourIcon";
 import Star01Icon from "./Star01Icon";
 import TrashIcon1 from "./TrashIcon1";
 import Trash01Icon from "./TrashIcon1";
+import UserIcon from "./UserIcon";
+import Users02Icon from "./Users02Icon";
 import UsersIcon from "./UsersIcon";
 import UsersIcon2 from "./UsersIcon2";
 import UsersPlusIcon from "./UsersPlusIcon";
@@ -163,4 +168,9 @@ export {
   PieChart2Icon,
   DotHorizontalIcon,
   MinusIcon,
+  Users02Icon,
+  CodeSquareIcon,
+  UserIcon,
+  Hash01Icon,
+  ArchiveIcon,
 };

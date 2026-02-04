@@ -1,12 +1,23 @@
+import dayjs from "@/lib/dayjs";
 import { DomainError } from "@/lib/errors/DomainError";
 import { branchRepository, departmentsRepository, employeesRepository, organizationsRepository } from "@/repository";
+import { GetBranchById } from "@/repository/branch";
 
-import { UpdateDepartmentInput, UpdateDepartmentResult } from "./departments.dto";
+import {
+  UpdateChildDepartmentInput,
+  UpdateDepartmentInput,
+  UpdateDepartmentResult,
+  UpdateRootDepartmentInput,
+} from "./departments.dto";
 
 export class UpdateDepartmentService {
   private organizationId: string;
+
   private authorId: string;
-  private defaultDepartmentLevel = 1;
+
+  private defaultLevel = 1;
+
+  private rootLevel = 1;
 
   private maxDepthLevel = 2;
 
@@ -15,60 +26,71 @@ export class UpdateDepartmentService {
     this.authorId = authorId;
   }
 
-  async execute(createDepartmentInput: UpdateDepartmentInput): Promise<UpdateDepartmentResult> {
-    const { managedById, parentId, branchId } = createDepartmentInput;
-    const departmentName = createDepartmentInput.name ? createDepartmentInput.name.trim() : "";
+  async updateRoot(updateRootDepartmentInput: UpdateRootDepartmentInput): Promise<UpdateDepartmentResult> {
+    const { managedById, branchId, id } = updateRootDepartmentInput;
 
-    const parentDepartment = await this.getParentDepartment(parentId);
+    if (!id) {
+      throw new DomainError("Thiếu id.", "ID_IS_MISSING", 404);
+    }
 
-    const branch = await this.getBranch(branchId);
+    const currentDepartment = await departmentsRepository.getDepartmentById(id, this.organizationId);
 
-    const departmentLevel =
-      parentDepartment && parentDepartment.level ? parentDepartment.level + 1 : this.defaultDepartmentLevel;
+    if (!currentDepartment) {
+      throw new DomainError("Phòng ban không hợp lệ", "DEPARTMENT_ID_IS_INVALID", 400);
+    }
+
+    const { branch: oldBranch } = currentDepartment;
+    const departmentName = updateRootDepartmentInput.name ? updateRootDepartmentInput.name.trim() : "";
+
+    let newBranch: NonNullable<GetBranchById> | undefined;
+
+    if (branchId && branchId !== currentDepartment.branch_id) {
+      newBranch = await this.getBranchDetail(branchId);
+    }
+
+    const finalBranch = newBranch || oldBranch;
 
     const manager = await this.getManagedEmployee(managedById);
 
-    if (departmentLevel > this.maxDepthLevel) {
-      throw new DomainError(
-        `Phân cấp chi nhánh tối đa cho phép là ${this.maxDepthLevel}`,
-        "MAXIMUM_DEPARTMENT_DEPTH_LEVEL",
-        400,
-      );
+    let departmentCode = updateRootDepartmentInput.code?.trim();
+
+    if (!departmentCode) {
+      departmentCode = await this.generateDepartmentCode(currentDepartment.priority || 0, this.rootLevel);
     }
 
-    let path: string | null = null;
-    if (parentDepartment) {
-      path = parentDepartment.path ? `${parentDepartment.path}/${parentDepartment.id}` : parentDepartment.id;
-    }
-
-    const lastPriority = await departmentsRepository.getLastPriorityDepartment(parentId ?? undefined);
-
-    const nextPriority = lastPriority + 1;
-
-    let departmentCode = createDepartmentInput.code;
-    if (departmentCode) {
+    if (departmentCode && departmentCode !== currentDepartment.code) {
       const existedDepartmentCode = await departmentsRepository.getDepartmentByCodeOrName("code", departmentCode);
 
       if (existedDepartmentCode) {
         throw new DomainError("Mã phòng ban đã tồn tại trên hệ thống.", "DEPARTMENT_CODE_ALREADY_EXISTS", 409);
       }
-    } else {
-      departmentCode = await this.generateDepartmentCode(nextPriority, departmentLevel);
     }
 
-    const data = await departmentsRepository.createDepartment({
-      branch_id: branch ? branch.id : null,
+    const data = await departmentsRepository.updateDepartment({
+      id,
+      branch_id: finalBranch ? finalBranch.id : null,
       code: departmentCode,
-      level: departmentLevel,
+      level: currentDepartment.level || this.rootLevel,
       name: departmentName,
-      organization_id: this.organizationId,
-      parent_id: parentDepartment ? parentDepartment.id : null,
-      path,
-      priority: nextPriority,
+      parent_id: null,
+      path: null,
+      priority: currentDepartment.priority,
       status: "active",
-      created_by: this.authorId,
       managed_by: manager ? manager.id : null,
+      updated_at: dayjs().toISOString(),
     });
+
+    const branchResult = (
+      finalBranch
+        ? {
+            id: finalBranch.id,
+            code: finalBranch.code,
+            level: finalBranch.level,
+            name: finalBranch.name,
+            path: finalBranch.path,
+          }
+        : null
+    ) satisfies UpdateDepartmentResult["branch"];
 
     return {
       id: data.id,
@@ -91,24 +113,113 @@ export class UpdateDepartmentService {
             fullName: data.managedBy.full_name || "",
           }
         : null,
-      parent: parentDepartment
-        ? {
-            id: parentDepartment.id,
-            name: parentDepartment.name,
-            code: parentDepartment.code,
-            path: parentDepartment.path,
-          }
-        : null,
+      parent: null,
       parentId: data.parent_id,
       organization: {
         id: data.organizations.id,
         name: data.organizations.name,
       },
-      branch: branch
-        ? { id: branch.id, name: branch.name, path: branch.path, code: branch.code, level: branch.level }
-        : null,
+      branch: branchResult,
     };
   }
+
+  async updateChild(updateChildDepartmentInput: UpdateChildDepartmentInput) {
+    const { managedById, parentId } = updateChildDepartmentInput;
+  }
+
+  // async execute(createDepartmentInput: UpdateDepartmentInput): Promise<UpdateDepartmentResult> {
+  //   const { managedById, parentId, branchId } = createDepartmentInput;
+  //   const departmentName = createDepartmentInput.name ? createDepartmentInput.name.trim() : "";
+
+  //   const parentDepartment = await this.getParentDepartment(parentId);
+
+  //   const branch = await this.getBranch(branchId);
+
+  //   const departmentLevel = parentDepartment && parentDepartment.level ? parentDepartment.level + 1 : this.defaultLevel;
+
+  //   const manager = await this.getManagedEmployee(managedById);
+
+  //   if (departmentLevel > this.maxDepthLevel) {
+  //     throw new DomainError(
+  //       `Phân cấp chi nhánh tối đa cho phép là ${this.maxDepthLevel}`,
+  //       "MAXIMUM_DEPARTMENT_DEPTH_LEVEL",
+  //       400,
+  //     );
+  //   }
+
+  //   let path: string | null = null;
+  //   if (parentDepartment) {
+  //     path = parentDepartment.path ? `${parentDepartment.path}/${parentDepartment.id}` : parentDepartment.id;
+  //   }
+
+  //   const lastPriority = await departmentsRepository.getLastPriorityDepartment(parentId ?? undefined);
+
+  //   const nextPriority = lastPriority + 1;
+
+  //   let departmentCode = createDepartmentInput.code;
+  //   if (departmentCode) {
+  //     const existedDepartmentCode = await departmentsRepository.getDepartmentByCodeOrName("code", departmentCode);
+
+  //     if (existedDepartmentCode) {
+  //       throw new DomainError("Mã phòng ban đã tồn tại trên hệ thống.", "DEPARTMENT_CODE_ALREADY_EXISTS", 409);
+  //     }
+  //   } else {
+  //     departmentCode = await this.generateDepartmentCode(nextPriority, departmentLevel);
+  //   }
+
+  //   const data = await departmentsRepository.createDepartment({
+  //     branch_id: branch ? branch.id : null,
+  //     code: departmentCode,
+  //     level: departmentLevel,
+  //     name: departmentName,
+  //     organization_id: this.organizationId,
+  //     parent_id: parentDepartment ? parentDepartment.id : null,
+  //     path,
+  //     priority: nextPriority,
+  //     status: "active",
+  //     created_by: this.authorId,
+  //     managed_by: manager ? manager.id : null,
+  //   });
+
+  //   return {
+  //     id: data.id,
+  //     name: data.name,
+  //     priority: data.priority || 0,
+  //     code: data.code,
+  //     createdAt: data.created_at,
+  //     path: data.path,
+  //     level: data.level,
+  //     status: data.status,
+  //     author: data.createdBy
+  //       ? {
+  //           fullName: data.createdBy.full_name || "",
+  //           id: data.createdBy.id,
+  //         }
+  //       : null,
+  //     managedBy: data.managedBy
+  //       ? {
+  //           id: data.managedBy.id,
+  //           fullName: data.managedBy.full_name || "",
+  //         }
+  //       : null,
+  //     parent: parentDepartment
+  //       ? {
+  //           id: parentDepartment.id,
+  //           name: parentDepartment.name,
+  //           code: parentDepartment.code,
+  //           path: parentDepartment.path,
+  //         }
+  //       : null,
+  //     parentId: data.parent_id,
+  //     organization: {
+  //       id: data.organizations.id,
+  //       name: data.organizations.name,
+  //     },
+  //     branch: branch
+  //       ? { id: branch.id, name: branch.name, path: branch.path, code: branch.code, level: branch.level }
+  //       : null,
+  //   };
+  // }
 
   private async getParentDepartment(departmentId?: string) {
     if (!departmentId) return null;
@@ -144,8 +255,7 @@ export class UpdateDepartmentService {
     return departmentCode;
   }
 
-  private async getBranch(branchId?: string) {
-    if (!branchId) return null;
+  private async getBranchDetail(branchId: string) {
     const branch = await branchRepository.getBranchById(branchId, this.organizationId);
 
     if (!branch) {

@@ -2,58 +2,74 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { PATHS } from "@/constants/path.constant";
+import { http } from "@/lib/api/http-status";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DomainError } from "@/lib/errors/DomainError";
+import { UpdateChildDepartmentPayload, UpdateRootDepartmentPayload } from "@/modules/department/type";
 import { departmentService } from "@/services";
-import type { UpdateDepartmentDto } from "@/types/dto/departments";
+import { GetDepartmentService } from "@/services/departments/get-department.service";
+import { UpdateDepartmentService } from "@/services/departments/update-department.service";
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { organizationId, employeeId } = await requireAuth();
     const { id } = await params;
-    const body = await request.json();
-    const payload: UpdateDepartmentDto = {
-      id,
-      ...body,
-    };
+    const payload = (await request.json()) as UpdateRootDepartmentPayload | UpdateChildDepartmentPayload;
 
-    const result = await departmentService.updateDepartment(payload);
+    if (payload.type !== "root" && payload.type !== "children") {
+      return http.badRequest("type không hợp lệ.");
+    }
 
-    revalidatePath(PATHS.DEPARTMENTS.ROOT);
+    if (payload.type === "root") {
+      const data = await new UpdateDepartmentService(organizationId, employeeId).updateRoot({
+        id: id,
+        branchId: payload.branchId,
+        code: payload.code,
+        managedById: payload.managedById,
+        name: payload.name,
+      });
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Cập nhật phòng ban thành công",
-        data: result,
-      },
-      { status: 200 },
-    );
+      return http.created(data);
+    }
+
+    if (payload.type === "children") {
+      const data = await new UpdateDepartmentService(organizationId, employeeId).updateChild({
+        id,
+        parentId: payload.parentId,
+        code: payload.code,
+        managedById: payload.managedById,
+        name: payload.name,
+      });
+
+      return http.created(data);
+    }
   } catch (error) {
     console.error("Error updating department:", error);
-
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật phòng ban";
 
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+    return http.serverError(errorMessage);
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { organizationId, employeeId } = await requireAuth();
     const { id } = await params;
-    await departmentService.deleteDepartment(id);
+    // revalidatePath(PATHS.DEPARTMENTS.ROOT);
+    const data = await new GetDepartmentService(organizationId, employeeId).getDetailDepartmentById(id);
 
-    revalidatePath(PATHS.DEPARTMENTS.ROOT);
-
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Xóa phòng ban thành công",
-      },
-      { status: 200 },
-    );
+    return http.ok(data);
   } catch (error) {
-    console.error("Error deleting department:", error);
+    console.error("Error get department:", error);
 
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
     const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa phòng ban";
 
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+    return http.serverError(errorMessage);
   }
 }

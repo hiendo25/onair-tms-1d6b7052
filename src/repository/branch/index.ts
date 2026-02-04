@@ -293,6 +293,7 @@ export async function getBranchById(recordId: string, organizationId?: string) {
 
   return data;
 }
+export type GetBranchById = Awaited<ReturnType<typeof getBranchById>>;
 
 export async function getLastPriorityBranch(parentId?: string) {
   const supabase = await createSVClient();

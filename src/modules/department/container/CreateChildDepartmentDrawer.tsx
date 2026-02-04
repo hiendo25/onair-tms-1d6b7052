@@ -3,73 +3,75 @@ import React, { memo, useImperativeHandle, useState, useTransition } from "react
 import { useRef } from "react";
 import { Box, Button, Drawer, IconButton, Toolbar, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { enqueueSnackbar } from "notistack";
 
 import { QUERY_KEYS } from "@/constants/query-key.constant";
+import { useUserOrganization } from "@/modules/organization";
 import { CloseIcon } from "@/shared/assets/icons";
-import UpsertBranchForm, {
-  UpsertDepartmentFormProps,
-  UpsertDepartmentFormRef,
-} from "../components/UpsertRootDepartmentForm";
-import { useUpdateDepartmentMutation } from "../operations/mutation";
-import { UpdateRootDepartmentPayload } from "../type";
-
-export interface UpdateRootDepartmentDrawerRef {
-  open: (data: UpsertDepartmentFormProps["initialValues"]) => void;
+import UpsertChildDepartmentForm, {
+  UpsertChildDepartmentFormProps,
+  UpsertChildDepartmentFormRef,
+} from "../components/UpsertChildDepartmentForm";
+import { useCreateDepartmentMutation } from "../operations/mutation";
+import { CreateChildDepartmentPayload } from "../type";
+export interface CreateChildDepartmentDrawerRef {
+  open: (departmentParentId: string) => void;
   close: () => void;
 }
-export interface UpdateRootDepartmentDrawerProps {
+export interface CreateChildDepartmentDrawerProps {
   open?: boolean;
 }
-const UpdateRootDepartmentDrawer = React.forwardRef<UpdateRootDepartmentDrawerRef, UpdateRootDepartmentDrawerProps>(
+const CreateChildDepartmentDrawer = React.forwardRef<CreateChildDepartmentDrawerRef, CreateChildDepartmentDrawerProps>(
   ({ open = false }, ref) => {
-    const upsertFormRef = useRef<UpsertDepartmentFormRef>(null);
-    const [openDrawer, setOpenDrawer] = useState(open);
-
-    const [initialValues, setInitialValues] = useState<UpsertDepartmentFormProps["initialValues"]>(undefined);
-
-    const [isTransition, startTransition] = useTransition();
     const queryClient = useQueryClient();
 
-    const { mutate: updateDepartment, isPending } = useUpdateDepartmentMutation({ isRoot: true });
+    const upsertFormRef = useRef<UpsertChildDepartmentFormRef>(null);
+    const [openDrawer, setOpenDrawer] = useState(open);
+    const [isTransition, startTransition] = useTransition();
 
-    const handleUpdateDepartment: UpsertDepartmentFormProps["onSubmit"] = (formData) => {
-      const updatePayload: UpdateRootDepartmentPayload = {
-        id: formData.id,
+    const [departmentParentId, setDepartmentParentId] = useState<string>();
+    const { mutate: createDepartment, isPending } = useCreateDepartmentMutation({ isRoot: false });
+
+    const handleCreateLevel: UpsertChildDepartmentFormProps["onSubmit"] = (formData) => {
+      const createDepartmentPayload: CreateChildDepartmentPayload = {
+        parentId: departmentParentId,
         code: formData.code,
         name: formData.name,
         managedById: formData.managedById,
-        branchId: formData.branchId,
+        type: "children",
       };
 
-      updateDepartment(updatePayload, {
+      createDepartment(createDepartmentPayload, {
         onSuccess(data, variables, onMutateResult, context) {
           startTransition(() => {
-            enqueueSnackbar("Cập nhật chi nhánh thành công.", { variant: "success" });
-            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_BRANCHES] });
+            enqueueSnackbar("Tạo nhóm thành công.", { variant: "success" });
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_DEPARTMENTS] });
             setOpenDrawer(false);
           });
         },
       });
     };
+
     const handleCloseDrawer = () => {
       setOpenDrawer(false);
     };
+
     const handleTriggerSubmitForm = () => {
       upsertFormRef.current?.triggerSubmit();
     };
+
     const handleTriggerCancelForm = () => {
       upsertFormRef.current?.triggerCancel();
     };
 
     useImperativeHandle(ref, () => ({
-      open: (formValues) => {
-        setInitialValues(formValues);
+      open: (departmentParentId: string) => {
         setOpenDrawer(true);
+        setDepartmentParentId(departmentParentId);
       },
       close: () => {
         setOpenDrawer(false);
-        setInitialValues(undefined);
       },
     }));
 
@@ -77,7 +79,7 @@ const UpdateRootDepartmentDrawer = React.forwardRef<UpdateRootDepartmentDrawerRe
       <Drawer anchor="right" open={openDrawer}>
         <div className="flex flex-col overflow-hidden h-screen w-[450px]">
           <Toolbar className="border-b border-gray-200 z-10 bg-white">
-            <Typography variant="h6">Cập nhật chi nhánh</Typography>
+            <Typography variant="h6">Tạo nhóm</Typography>
             <div className="flex-1"></div>
             <IconButton
               size="small"
@@ -89,21 +91,25 @@ const UpdateRootDepartmentDrawer = React.forwardRef<UpdateRootDepartmentDrawerRe
             </IconButton>
           </Toolbar>
           <Box sx={{ overflowY: "auto", scrollbarWidth: "thin" }} className="p-6 flex-1">
-            <UpsertBranchForm
+            <UpsertChildDepartmentForm
               ref={upsertFormRef}
               isLoading={isPending || isTransition}
-              onSubmit={handleUpdateDepartment}
+              onSubmit={handleCreateLevel}
               onCancel={handleCloseDrawer}
-              initialValues={initialValues}
               hideButtonCancel
               hideButtonSubmit
             />
           </Box>
           <Toolbar className="gap-2 border-t border-gray-200">
-            <Button variant="outlined" className="w-24" onClick={handleTriggerCancelForm}>
+            <Button
+              variant="outlined"
+              className="w-24"
+              onClick={handleTriggerCancelForm}
+              disabled={isPending || isTransition}
+            >
               Hủy bỏ
             </Button>
-            <Button className="w-24" onClick={handleTriggerSubmitForm}>
+            <Button className="w-24" onClick={handleTriggerSubmitForm} disabled={isPending || isTransition}>
               Lưu
             </Button>
           </Toolbar>
@@ -112,4 +118,4 @@ const UpdateRootDepartmentDrawer = React.forwardRef<UpdateRootDepartmentDrawerRe
     );
   },
 );
-export default memo(UpdateRootDepartmentDrawer);
+export default memo(CreateChildDepartmentDrawer);

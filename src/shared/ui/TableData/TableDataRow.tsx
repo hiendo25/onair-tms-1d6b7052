@@ -42,6 +42,8 @@ export type TableDataColumn<T> = TableCellProps & {
   fixed?: "left" | "right";
   renderCell?: (value: T[keyof T], row: T) => React.ReactNode | string;
 };
+
+type Expandable<T> = { expandedRowRender?: (row: T) => React.ReactNode; defaultExpandedRowKeys?: string[] };
 export interface TableRowDataProps<T> {
   row: T;
   hoverRow?: boolean;
@@ -51,6 +53,8 @@ export interface TableRowDataProps<T> {
   showRowCount?: boolean;
   asChild?: boolean;
   depth?: number;
+  expandable?: Expandable<T>;
+  hideChildrenRow?: boolean;
   onRowClick?: (row: T, index: number) => void;
   onCellClick?: (column: FieldKey<T>, row: T, evt: MouseEvent<HTMLTableCellElement>) => void;
   cellActions?: (row: T, index: number) => TableCellActionMenuItem[];
@@ -68,10 +72,13 @@ const TableDataRow = <T extends { id?: number | string; children?: T[] } & Recor
   cellActions,
   asChild = false,
   depth = 0,
+  expandable,
+  hideChildrenRow,
 }: TableRowDataProps<T>) => {
   const buttonActionRef = useRef<ButtonActionCellRef>(null);
   const getNodeIndex = useStickyCell([columns]);
   const [openChildRow, setOpenChildRow] = useState(false);
+  const [isExpandRow, setIsExpandRow] = useState(false);
   const handleClickRow = useCallback(
     (row: T) => () => {
       onRowClick?.(row, indexRow);
@@ -93,7 +100,23 @@ const TableDataRow = <T extends { id?: number | string; children?: T[] } & Recor
     setOpenChildRow((prev) => !prev);
   }, []);
 
+  const toggleExpandRow = () => {
+    setIsExpandRow((prev) => !prev);
+  };
+
   const hasChild = Boolean(row.children && row.children.length);
+
+  const expandSpanColumn = useMemo(() => {
+    let columnSpan = columns.length;
+    if (showRowCount) {
+      columnSpan += 1;
+    }
+    if (cellActions) {
+      columnSpan += 1;
+    }
+    return columnSpan;
+  }, [showRowCount, columns.length, cellActions]);
+
   return (
     <>
       <TableRowStyled
@@ -107,6 +130,19 @@ const TableDataRow = <T extends { id?: number | string; children?: T[] } & Recor
           buttonActionRef.current?.onClose();
         }}
       >
+        {expandable?.expandedRowRender ? (
+          <TableCell>
+            {expandable?.expandedRowRender(row) ? (
+              <IconButton
+                size="small"
+                className="mr-2 bg-transparent border border-gray-500 w-4 h-4"
+                onClick={toggleExpandRow}
+              >
+                {isExpandRow ? <MinusIcon className="w-3 h-3" /> : <PlusIcon className="w-3 h-3" />}
+              </IconButton>
+            ) : null}
+          </TableCell>
+        ) : null}
         {showRowCount && (
           <TableCell className="w-20" sx={{ padding: "6px 12px" }}>
             {!asChild ? rowCount : null}
@@ -123,7 +159,7 @@ const TableDataRow = <T extends { id?: number | string; children?: T[] } & Recor
             {asChild && _index === 0 ? (
               <span className="h-1 inline-block" style={{ width: `${depth * 24}px` }} />
             ) : null}
-            {hasChild && _index === 0 ? (
+            {!hideChildrenRow && hasChild && _index === 0 ? (
               <IconButton
                 size="small"
                 className="mr-2 bg-transparent border border-gray-500 w-4 h-4"
@@ -145,7 +181,17 @@ const TableDataRow = <T extends { id?: number | string; children?: T[] } & Recor
         ))}
         {cellMenuItems && <ButtonActionCell ref={buttonActionRef} index={indexRow} items={cellMenuItems} />}
       </TableRowStyled>
-      {row.children && row.children.length
+      {expandable?.expandedRowRender ? (
+        <Activity mode={isExpandRow ? "visible" : "hidden"}>
+          <TableRowStyled className="expand-ale-row h-13" hover={hoverRow}>
+            <TableCell sx={{ padding: "0" }} className="bg-gray-100"></TableCell>
+            <TableCell sx={{ padding: "0" }} colSpan={expandSpanColumn}>
+              {expandable.expandedRowRender(row)}
+            </TableCell>
+          </TableRowStyled>
+        </Activity>
+      ) : null}
+      {!hideChildrenRow && row.children && row.children.length
         ? row.children.map((childRow, index) => (
             <Activity key={index} mode={openChildRow ? "visible" : "hidden"}>
               <TableDataRow

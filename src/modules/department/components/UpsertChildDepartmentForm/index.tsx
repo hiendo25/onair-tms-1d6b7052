@@ -21,7 +21,7 @@ export interface UpsertChildDepartmentFormRef {
   setFormValues: (initialValues: UpsertChildDepartmentFormData) => void;
   resetForm: () => void;
 }
-export interface UpsertDepartmentFormProps {
+export interface UpsertChildDepartmentFormProps {
   onSubmit?: (formData: UpsertChildDepartmentFormData) => void;
   onInvalid?: () => void;
   onCancel?: () => void;
@@ -35,12 +35,11 @@ const initUpsertChildDepartmentFormData = (): UpsertChildDepartmentFormData => {
   return {
     name: "",
     code: "",
-    parentId: undefined,
     managedById: undefined,
     status: "active",
   };
 };
-const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertDepartmentFormProps>(
+const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertChildDepartmentFormProps>(
   (
     { isLoading, onSubmit, onCancel, onInvalid, initialValues, hideButtonCancel = false, hideButtonSubmit = false },
     ref,
@@ -51,9 +50,8 @@ const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertDepartmen
       defaultValues: initUpsertChildDepartmentFormData(),
     });
 
-    const { control, reset, handleSubmit, setValue, getValues } = methods;
+    const { control, reset, handleSubmit } = methods;
 
-    const branchId = useWatch({ control, name: "id" });
     const handleSumbitForm = () => {
       if (onSubmit) handleSubmit(onSubmit, onInvalid)();
     };
@@ -80,13 +78,13 @@ const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertDepartmen
     return (
       <FormProvider {...methods}>
         <div className="flex flex-col gap-6">
-          <RHFTextField control={control} name="name" label="Tên phòng ban" required placeholder="Tên phòng ban" />
+          <RHFTextField control={control} name="name" label="Tên nhóm" required placeholder="Tên Tên nhóm" />
           <RHFTextField
             control={control}
             name="code"
             label="Mã"
             required
-            placeholder="Mã phòng ban"
+            placeholder="Mã nhóm"
             note={
               <Stack component="ul" style={{ listStyle: "outside", paddingLeft: 15 }}>
                 <Typography component="li" sx={{ fontSize: 12 }} color="text.secondary">
@@ -103,36 +101,10 @@ const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertDepartmen
           />
           <Controller
             control={control}
-            name="parentId"
-            render={({ field: { value, onChange }, fieldState: { error } }) => (
-              <FormControl>
-                <FormLabel
-                  className={cn({
-                    "text-red-500": !!error?.message,
-                  })}
-                >
-                  Chi nhánh <span className="text-red-600">*</span>
-                </FormLabel>
-                <DepartmentSelectorV2
-                  excludes={branchId ? [branchId] : undefined}
-                  values={value ? [value] : undefined}
-                  onChange={(values) => onChange(values[0])}
-                  error={!!error?.message}
-                />
-                {error?.message && (
-                  <FormHelperText className="mx-0" error>
-                    {error.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-            )}
-          />
-          <Controller
-            control={control}
             name="managedById"
             render={({ field: { value, onChange } }) => (
               <FormControl>
-                <FormLabel>Chọn người quản lý</FormLabel>
+                <FormLabel>Người quản lý</FormLabel>
                 <EmployeeSelector
                   placeholder="Chọn người quản lý"
                   values={value ? [value] : undefined}
@@ -171,4 +143,4 @@ const UpsertLevelForm = forwardRef<UpsertChildDepartmentFormRef, UpsertDepartmen
 );
 export default memo(UpsertLevelForm);
 
-export const useUpsertRootDepartmentFormContext = useFormContext<UpsertChildDepartmentFormData>;
+export const useUpsertChilDepartmentForm = useFormContext<UpsertChildDepartmentFormData>;

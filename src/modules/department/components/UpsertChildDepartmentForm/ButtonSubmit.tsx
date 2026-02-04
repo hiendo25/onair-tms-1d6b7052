@@ -2,14 +2,14 @@ import React, { memo, useMemo } from "react";
 import { Button, ButtonProps } from "@mui/material";
 import { useWatch } from "react-hook-form";
 
-import { UpsertRootDepartmentFormData } from "./upsert-child-department.schema";
+import { UpsertChildDepartmentFormData } from "./upsert-child-department.schema";
 interface ButtonSubmitProps extends ButtonProps {
   isLoading?: boolean;
   className?: string;
 }
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ isLoading, children, className, ...restProps }) => {
-  const values = useWatch<UpsertRootDepartmentFormData>({
-    name: ["name", "code", "branchId", "managedById"],
+  const values = useWatch<UpsertChildDepartmentFormData>({
+    name: ["name", "code", "managedById"],
   });
   const isDisabledButton = useMemo(() => {
     return values.some((v) => {
