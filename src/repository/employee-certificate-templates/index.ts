@@ -22,13 +22,15 @@ export type CreateEmployeeCertificateTemplatePayload = {
  * Create employee certificate template record
  */
 export async function createEmployeeCertificateTemplate(
-  payload: CreateEmployeeCertificateTemplatePayload
+  payload: CreateEmployeeCertificateTemplatePayload,
 ): Promise<EmployeeCertificateTemplateRow> {
   const supabase = await createSVClient();
 
   const { data, error } = await supabase
     .from("employee_certificate_templates")
-    .insert(payload)
+    .upsert(payload, {
+      onConflict: "employee_id,class_room_id,certificate_template_id",
+    })
     .select()
     .single();
 
@@ -44,7 +46,7 @@ export async function createEmployeeCertificateTemplate(
  * Get employee certificate by ID
  */
 export async function getEmployeeCertificateById(
-  id: string
+  id: string,
 ): Promise<EmployeeCertificateTemplateRow | null> {
   const supabase = await createSVClient();
 
@@ -66,7 +68,7 @@ export async function getEmployeeCertificateById(
  * Get employee certificates by employee ID
  */
 export async function getEmployeeCertificatesByEmployeeId(
-  employeeId: string
+  employeeId: string,
 ): Promise<EmployeeCertificateTemplateRow[]> {
   const supabase = await createSVClient();
 
@@ -89,7 +91,7 @@ export async function getEmployeeCertificatesByEmployeeId(
  */
 export async function getEmployeeCertificateByClassRoom(
   employeeId: string,
-  classRoomId: string
+  classRoomId: string,
 ): Promise<EmployeeCertificateTemplateRow | null> {
   const supabase = createClient();
 
@@ -114,7 +116,7 @@ export async function getEmployeeCertificateByClassRoom(
 export async function hasEmployeeCertificate(
   employeeId: string,
   certificateTemplateId: string,
-  classRoomId: string
+  classRoomId: string,
 ): Promise<boolean> {
   const supabase = await createSVClient();
 
