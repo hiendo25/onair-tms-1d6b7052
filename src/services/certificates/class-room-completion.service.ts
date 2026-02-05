@@ -41,7 +41,7 @@ async function isCourseCompleted(
     classRoomId
   );
 
-  return courseCompletedLessons.length === courseLessons.length;
+  return courseCompletedLessons.length >= courseLessons.length;
 }
 
 /**
