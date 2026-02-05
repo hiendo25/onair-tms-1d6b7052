@@ -13,7 +13,18 @@ const ASSIGNMENT_BANK_SELECT = `
   pass_score,
   shuffle_questions,
   shuffle_answers,
+  hide_correct_answers,
   created_by,
+  createdBy:employees!assignments_created_by_fkey (
+    id,
+    employee_code,
+    profiles (
+      id,
+      full_name,
+      email,
+      avatar
+    )
+  ),
   organization_id,
   created_at,
   updated_at,
@@ -43,7 +54,18 @@ const ASSIGNMENT_BANK_SELECT_WITH_CATEGORY = `
   pass_score,
   shuffle_questions,
   shuffle_answers,
+  hide_correct_answers,
   created_by,
+  createdBy:employees!assignments_created_by_fkey (
+    id,
+    employee_code,
+    profiles (
+      id,
+      full_name,
+      email,
+      avatar
+    )
+  ),
   organization_id,
   created_at,
   updated_at,
@@ -73,7 +95,18 @@ const ASSIGNMENT_BANK_DETAIL_SELECT = `
   pass_score,
   shuffle_questions,
   shuffle_answers,
+  hide_correct_answers,
   created_by,
+  createdBy:employees!assignments_created_by_fkey (
+    id,
+    employee_code,
+    profiles (
+      id,
+      full_name,
+      email,
+      avatar
+    )
+  ),
   organization_id,
   created_at,
   updated_at,

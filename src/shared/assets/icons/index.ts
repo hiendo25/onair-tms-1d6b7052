@@ -45,6 +45,7 @@ import FileZipIcon from "./FileZipIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
 import FlashcardIcon from "./FlashcardIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
+import Gamefication from "./Gamefication";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
@@ -53,6 +54,7 @@ import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
 import Inbox01Icon from "./Inbox01Icon";
 import InforCircleIcon from "./InforCircleIcon";
+import LearningPathIcon from "./learningPathIcon";
 import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
 import Loading from "./LoadingIcon";
@@ -167,6 +169,8 @@ export {
   CertificateIcon,
   PieChart2Icon,
   DotHorizontalIcon,
+  LearningPathIcon,
+  Gamefication,
   MinusIcon,
   Users02Icon,
   CodeSquareIcon,

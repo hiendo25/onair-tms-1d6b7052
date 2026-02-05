@@ -50,6 +50,7 @@ interface AssignmentBankRow {
   pass_score?: number | null;
   shuffle_questions?: boolean | null;
   shuffle_answers?: boolean | null;
+  hide_correct_answers?: boolean | null;
   created_by: string;
   createdBy?: {
     id: string;
@@ -104,6 +105,25 @@ interface AssignmentRecord {
   assignment_employees?: AssignmentEmployeeRow[];
   assignmentEmployees?: Array<{ count: number }>;
   submissions?: Array<{ count: number }>;
+}
+
+interface MyAssignmentRpcRow {
+  assignment_id: string;
+  assignment_name: string | null;
+  assignment_description: string | null;
+  created_at: string;
+  available_from: string | null;
+  available_to: string | null;
+  pass_score: number | null;
+  attempt_limit: number | null;
+  attempts_used: number | string | null;
+  has_submitted: boolean | null;
+  has_active_attempt: boolean | null;
+  submitted_at: string | null;
+  score: number | null;
+  max_score: number | null;
+  status: AttemptStatus | null;
+  total_count: number | string | null;
 }
 
 const SUBMITTED_STATUSES: AttemptStatus[] = ["submitted", "graded"];
@@ -169,6 +189,7 @@ const mapAssignmentRecord = (record: AssignmentRecord): AssignmentDto => {
     available_to: record.available_to ?? null,
     shuffle_questions: assignmentBank?.shuffle_questions ?? null,
     shuffle_answers: assignmentBank?.shuffle_answers ?? null,
+    hide_correct_answers: assignmentBank?.hide_correct_answers ?? null,
     questions: mapAssignmentQuestions(assignmentBank),
     assignment_categories: assignmentBank?.assignment_categories ?? [],
     assignment_employees: record.assignment_employees ?? [],
@@ -268,6 +289,7 @@ const getAssignmentConfigById = async (id: string): Promise<AssignmentDto> => {
         pass_score,
         shuffle_questions,
         shuffle_answers,
+        hide_correct_answers,
         createdBy:employees!assignments_created_by_fkey (
           id,
           employee_code,
@@ -343,7 +365,7 @@ const getLatestAssignmentByBankId = async (
       available_to,
       status,
       created_at,
-      assignment_employees (
+      assignment_employees!inner (
         employee_id,
         employees (
           id,
@@ -383,6 +405,7 @@ export async function createAssignment(data: {
   available_from?: string | null;
   available_to?: string | null;
   status?: Database["public"]["Enums"]["assignment_config_status"];
+  scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
 }) {
   const supabase = await createSVClient();
 
@@ -397,6 +420,7 @@ export async function createAssignment(data: {
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -417,6 +441,7 @@ export async function createAssignmentFromBank(data: {
   available_from?: string | null;
   available_to?: string | null;
   status?: Database["public"]["Enums"]["assignment_config_status"];
+  scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
 }) {
   const supabase = await createSVClient();
 
@@ -431,6 +456,7 @@ export async function createAssignmentFromBank(data: {
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -443,7 +469,7 @@ export async function createAssignmentFromBank(data: {
 }
 
 export async function createAssignmentFromBankWithClient(
-  client: AssignmentRepositoryClient,
+  client: SupabaseClient<Database>,
   data: {
     assignment_bank_id: string;
     assigned_by: string;
@@ -453,6 +479,7 @@ export async function createAssignmentFromBankWithClient(
     available_from?: string | null;
     available_to?: string | null;
     status?: Database["public"]["Enums"]["assignment_config_status"];
+    scope?: Database["public"]["Enums"]["assignment_config_type"] | null;
   },
 ) {
   const { data: assignment, error } = await client
@@ -466,6 +493,7 @@ export async function createAssignmentFromBankWithClient(
       available_from: data.available_from ?? null,
       available_to: data.available_to ?? null,
       status: data.status ?? "open",
+      scope: data.scope ?? null,
     })
     .select()
     .single();
@@ -801,6 +829,22 @@ export async function deleteAssignmentEmployeesByAssignmentIdWithClient(
   }
 }
 
+async function getAssignmentEmployeeIdsByAssignmentIdWithClient(
+  client: AssignmentRepositoryClient,
+  assignmentId: string,
+): Promise<string[]> {
+  const { data, error } = await client
+    .from("assignment_employees")
+    .select("employee_id")
+    .eq("assignment_config_id", assignmentId);
+
+  if (error) {
+    throw new Error(`Failed to fetch assignment employees: ${error.message}`);
+  }
+
+  return (data ?? []).map((item) => item.employee_id);
+}
+
 export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) {
   const supabase = await createSVClient();
 
@@ -809,6 +853,84 @@ export async function deleteAssignmentEmployeesByEmployeeId(employeeId: string) 
   if (error) {
     throw new Error(`Failed to delete assignment employees by employee: ${error.message}`);
   }
+}
+
+// Assignment courses repository methods
+export async function getAssignmentCoursesByCourseId(courseId: string) {
+  const { data, error } = await supabase
+    .from("assignment_courses")
+    .select(
+      `
+      assignment_config_id,
+      assignment_config:assignment_config(
+        assignment_bank_id
+      )
+    `,
+    )
+    .eq("course_id", courseId);
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  return { data: data ?? [], error: null };
+}
+
+export async function createAssignmentCourses(
+  rows: Array<{
+    assignment_config_id: string;
+    course_id: string;
+  }>,
+) {
+  if (!rows.length) {
+    return;
+  }
+
+  const { error } = await supabase.from("assignment_courses").insert(rows);
+
+  if (error) {
+    throw new Error(`Failed to create assignment courses: ${error.message}`);
+  }
+}
+
+export async function deleteAssignmentCoursesByAssignmentConfigIds(
+  courseId: string,
+  assignmentConfigIds: string[],
+) {
+  if (!assignmentConfigIds.length) {
+    return;
+  }
+  const { error } = await supabase
+    .from("assignment_courses")
+    .delete()
+    .eq("course_id", courseId)
+    .in("assignment_config_id", assignmentConfigIds);
+
+  if (error) {
+    throw new Error(`Failed to delete assignment courses: ${error.message}`);
+  }
+}
+
+export async function getAssignmentConfigIdByCourseAndBank(courseId: string, assignmentBankId: string) {
+  const { data, error } = await supabase
+    .from("assignment_courses")
+    .select(
+      `
+      assignment_config_id,
+      assignment_config:assignment_config(
+        assignment_bank_id
+      )
+    `,
+    )
+    .eq("course_id", courseId)
+    .eq("assignment_config.assignment_bank_id", assignmentBankId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch course assignment config: ${error.message}`);
+  }
+
+  return data?.assignment_config_id ?? null;
 }
 
 export async function nullifyLessonsAssignmentId(assignmentId: string) {
@@ -927,6 +1049,7 @@ const getAssignmentStudents = async (
     const departmentName = employee?.employee_departments?.[0]?.departments?.name ?? null;
 
     return {
+      id: item.employee_id,
       employee_id: item.employee_id,
       employee_code: employee?.employee_code || "",
       full_name: profile?.full_name || "",
@@ -1069,196 +1192,30 @@ async function getQuestionsByIds(questionIds: string[]) {
 const getMyAssignments = async (
   employeeId: string,
   params?: GetMyAssignmentsParams,
-): Promise<PaginatedResult<any>> => {
+): Promise<PaginatedResult<MyAssignmentRpcRow>> => {
   const { page = 0, limit = 25, search, status, organizationId } = params || {};
+  const searchValue = search ? search : null;
 
-  const from = page * limit;
-  const to = from + limit - 1;
-
-  let query = supabase
-    .from("assignment_config")
-    .select(
-      `
-        id,
-        created_at,
-        organization_id,
-        attempt_limit,
-        available_from,
-        available_to,
-        assignment_bank!inner (
-          id,
-          name,
-          description
-        ),
-        assignment_employees!inner (
-          employee_id
-        )
-      `,
-      { count: "exact" },
-    )
-    .eq("assignment_employees.employee_id", employeeId);
-
-  if (organizationId) {
-    query = query.eq("organization_id", organizationId);
-  }
-
-  if (search) {
-    query = query.ilike("assignment_bank.name", `%${search}%`);
-  }
-
-  const shouldFilterByStatus = Boolean(status);
-  const assignmentQuery = shouldFilterByStatus ? query.order("created_at", { ascending: false }) : query;
-
-  const { data: assignments, error, count } = shouldFilterByStatus
-    ? await assignmentQuery
-    : await assignmentQuery.order("created_at", { ascending: false }).range(from, to);
+  const { data, error } = await supabase.rpc("get_my_assignments", {
+    p_employee_id: employeeId,
+    p_organization_id: organizationId! ?? null,
+    p_search: searchValue!,
+    p_status: status! ?? null,
+    p_page: page,
+    p_limit: limit,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch my assignments: ${error.message}`);
   }
 
-  const assignmentsData = assignments ?? [];
-  if (assignmentsData.length === 0) {
-    return {
-      data: [],
-      total: 0,
-      page,
-      limit,
-    };
-  }
-
-  const assignmentIds = assignmentsData.map((item) => item.id);
-  const { data: attempts, error: attemptsError } = await supabase
-    .from("assignments_attempts")
-    .select("assignment_config_id, attempt_number, status, submitted_at, created_at, score, max_score")
-    .eq("employee_id", employeeId)
-    .in("assignment_config_id", assignmentIds);
-
-  if (attemptsError) {
-    throw new Error(`Failed to fetch assignment attempts: ${attemptsError.message}`);
-  }
-
-  const latestAttemptMap = new Map<
-    string,
-    {
-      attempt_number: number;
-      status: AttemptStatus;
-      submitted_at: string | null;
-      created_at: string;
-      score: number | null;
-      max_score: number | null;
-    }
-  >();
-  const latestSubmittedAttemptMap = new Map<
-    string,
-    {
-      attempt_number: number;
-      status: AttemptStatus;
-      submitted_at: string | null;
-      created_at: string;
-      score: number | null;
-      max_score: number | null;
-    }
-  >();
-  const activeAttemptMap = new Map<
-    string,
-    {
-      attempt_number: number;
-      status: AttemptStatus;
-      submitted_at: string | null;
-      created_at: string;
-      score: number | null;
-      max_score: number | null;
-    }
-  >();
-  const attemptsUsedMap = new Map<string, number>();
-
-  (attempts ?? []).forEach((attempt) => {
-    const existing = latestAttemptMap.get(attempt.assignment_config_id);
-    if (!existing || attempt.attempt_number > existing.attempt_number) {
-      latestAttemptMap.set(attempt.assignment_config_id, attempt);
-    }
-    if (SUBMITTED_STATUSES.includes(attempt.status)) {
-      const existingSubmitted = latestSubmittedAttemptMap.get(attempt.assignment_config_id);
-      if (!existingSubmitted || attempt.attempt_number > existingSubmitted.attempt_number) {
-        latestSubmittedAttemptMap.set(attempt.assignment_config_id, attempt);
-      }
-    }
-    if (attempt.status === "in_progress") {
-      const existingActive = activeAttemptMap.get(attempt.assignment_config_id);
-      if (!existingActive || attempt.attempt_number > existingActive.attempt_number) {
-        activeAttemptMap.set(attempt.assignment_config_id, attempt);
-      }
-    }
-    const currentMax = attemptsUsedMap.get(attempt.assignment_config_id) ?? 0;
-    if (attempt.attempt_number > currentMax) {
-      attemptsUsedMap.set(attempt.assignment_config_id, attempt.attempt_number);
-    }
-  });
-
-  const filteredAssignments = shouldFilterByStatus
-    ? assignmentsData.filter((assignment) => {
-      const latestSubmittedAttempt = latestSubmittedAttemptMap.get(assignment.id);
-      if (status === "not_submitted") {
-        return !latestSubmittedAttempt;
-      }
-      return latestSubmittedAttempt?.status === status;
-    })
-    : assignmentsData;
-
-  const now = Date.now();
-  const isWithinWindow = (availableFrom?: string | null, availableTo?: string | null) => {
-    if (availableFrom) {
-      const startMs = new Date(availableFrom).getTime();
-      if (!Number.isNaN(startMs) && now < startMs) {
-        return false;
-      }
-    }
-    if (availableTo) {
-      const endMs = new Date(availableTo).getTime();
-      if (!Number.isNaN(endMs) && now > endMs) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const total = shouldFilterByStatus ? filteredAssignments.length : count ?? 0;
-  const pagedAssignments = shouldFilterByStatus ? filteredAssignments.slice(from, to + 1) : filteredAssignments;
-
-  const myAssignments = pagedAssignments.map((item) => {
-    const latestSubmittedAttempt = latestSubmittedAttemptMap.get(item.id);
-    const hasSubmitted = Boolean(latestSubmittedAttempt);
-    const activeAttempt = activeAttemptMap.get(item.id);
-    const hasActiveAttempt = Boolean(activeAttempt);
-    const assignmentBank = item.assignment_bank ?? null;
-    const attemptLimit = item.attempt_limit ?? null;
-    const attemptsUsed = attemptsUsedMap.get(item.id) ?? 0;
-    const attemptsRemaining = attemptLimit === null ? null : Math.max(attemptLimit - attemptsUsed, 0);
-    const hasAttemptsLeft = attemptLimit === null ? true : attemptsRemaining! > 0;
-    const canRetry = (hasActiveAttempt || hasAttemptsLeft) && isWithinWindow(item.available_from, item.available_to);
-
-    return {
-      assignment_id: item.id,
-      assignment_name: assignmentBank?.name ?? "",
-      assignment_description: assignmentBank?.description || "",
-      created_at: item.created_at,
-      attempt_limit: attemptLimit,
-      attempts_used: attemptsUsed,
-      attempts_remaining: attemptsRemaining,
-      can_retry: canRetry,
-      has_submitted: hasSubmitted,
-      has_active_attempt: hasActiveAttempt,
-      submitted_at: latestSubmittedAttempt?.submitted_at ?? null,
-      score: latestSubmittedAttempt?.score ?? null,
-      max_score: latestSubmittedAttempt?.max_score ?? null,
-      status: latestSubmittedAttempt?.status ?? null,
-    };
-  });
+  const rows = (data ?? []) as MyAssignmentRpcRow[];
+  const total = rows.length > 0 ? Number(rows?.[0]?.total_count ?? 0) : 0;
+  const safeTotal = Number.isNaN(total) ? 0 : total;
 
   return {
-    data: myAssignments,
-    total,
+    data: rows,
+    total: safeTotal,
     page,
     limit,
   };
@@ -1458,6 +1415,7 @@ export const getAssignmentsV2 = async (queryParams?: GetAssignmentsQueryParams) 
   };
 };
 export type GetAssignmentsV2Response = Awaited<ReturnType<typeof getAssignmentsV2>>;
+export type { MyAssignmentRpcRow };
 export {
   getAssignments,
   getAssignmentConfigById,
@@ -1467,4 +1425,5 @@ export {
   getMyAssignments,
   getAssignedAssignments,
   getQuestionsByIds,
+  getAssignmentEmployeeIdsByAssignmentIdWithClient,
 };

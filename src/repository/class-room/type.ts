@@ -1,5 +1,4 @@
 import { ClassRoom } from "@/model/class-room.model";
-import { ClassAttendances } from "@/model/class-room-attendance.model";
 import { ClassAttendance } from "@/model/qr-attendance.model";
 
 export type CreateClassRoomPayload = Pick<
@@ -104,6 +103,17 @@ export type DeletePivotClassRoomAndEmployeePayload = {
 export type CreatePivotClassRoomWithResourcePayload = {
   class_room_id: string;
   resource_id: string;
+};
+
+export type CreateClassRoomFlashcardPayload = {
+  class_room_id: string;
+  flashcard_id: string;
+  order_index?: number;
+};
+
+export type DeleteClassRoomFlashcardPayload = {
+  class_room_id: string;
+  flashcard_ids?: string[];
 };
 
 export type EmployeeClassRoomAttendancePayload = Pick<

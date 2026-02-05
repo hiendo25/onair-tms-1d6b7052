@@ -12,10 +12,12 @@ interface AssignmentBankSummaryCardProps {
 const AssignmentBankSummaryCard = ({ totalQuestions, totalScore }: AssignmentBankSummaryCardProps) => {
   const { control } = useFormContext<AssignmentBankFormValues>();
   const durationMinutes = useWatch({ control, name: "durationMinutes" });
+  const isUnlimitedDuration = useWatch({ control, name: "isUnlimitedDuration" });
   const passScore = useWatch({ control, name: "passScore" });
 
   const passScoreLabel =
     passScore && totalScore > 0 ? `${passScore}/${totalScore}` : passScore ? `${passScore}` : "--";
+  const durationLabel = isUnlimitedDuration ? "Không giới hạn" : durationMinutes || "--";
 
   return (
     <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 2, boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}>
@@ -46,7 +48,7 @@ const AssignmentBankSummaryCard = ({ totalQuestions, totalScore }: AssignmentBan
               Thời gian (phút)
             </Typography>
             <Typography variant="body2" fontWeight={600}>
-              {durationMinutes || "--"}
+              {durationLabel}
             </Typography>
           </Stack>
           <Stack direction="row" justifyContent="space-between">

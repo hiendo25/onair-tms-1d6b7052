@@ -5,10 +5,11 @@ export class UpdateAssignmentBankDto {
   assignment!: {
     name: string;
     description: string;
-    durationMinutes: number;
+    durationMinutes: number | null;
     passScore: number;
     shuffleQuestions: boolean;
     shuffleAnswers: boolean;
+    hideCorrectAnswers: boolean;
     questions: AssignmentBankQuestionInput[];
     categoryIds?: string[];
   };

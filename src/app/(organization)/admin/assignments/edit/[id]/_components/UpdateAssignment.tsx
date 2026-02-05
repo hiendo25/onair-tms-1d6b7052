@@ -33,10 +33,12 @@ const DEFAULT_FORM_VALUES: AssignmentBankFormValues = {
   name: "",
   description: "",
   durationMinutes: "",
+  isUnlimitedDuration: false,
   passScore: "",
   totalScore: 0,
   shuffleQuestions: true,
   shuffleAnswers: false,
+  hideCorrectAnswers: false,
   questionIds: [],
 };
 
@@ -86,14 +88,19 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
       return;
     }
 
+    const durationMinutesValue = assignment.duration_minutes;
+    const isUnlimitedDuration = !durationMinutesValue || durationMinutesValue <= 0;
+
     const defaultValues: AssignmentBankFormValues = {
       name: assignment.name,
       description: assignment.description,
-      durationMinutes: assignment.duration_minutes?.toString() || "",
+      durationMinutes: isUnlimitedDuration ? "" : durationMinutesValue.toString(),
+      isUnlimitedDuration,
       passScore: assignment.pass_score?.toString() || "",
       totalScore: 0,
       shuffleQuestions: Boolean(assignment.shuffle_questions),
       shuffleAnswers: Boolean(assignment.shuffle_answers),
+      hideCorrectAnswers: Boolean(assignment.hide_correct_answers),
       questionIds: assignment.assignment_questions?.map((question) => question.question_id) || [],
     };
 
@@ -181,16 +188,19 @@ const UpdateAssignment: React.FC<UpdateAssignmentProps> = ({ assignmentId }) => 
 
     const categoryIds = getCategoryIdsFromQuestions(selectedQuestions);
 
+    const durationMinutes = data.isUnlimitedDuration ? null : Number(data.durationMinutes);
+
     updateAssignmentBank(
       {
         id: assignmentId,
         assignment: {
           name: data.name,
           description: data.description,
-          durationMinutes: Number(data.durationMinutes),
+          durationMinutes,
           passScore: Number(data.passScore),
           shuffleQuestions: data.shuffleQuestions,
           shuffleAnswers: data.shuffleAnswers,
+          hideCorrectAnswers: data.hideCorrectAnswers,
           questions,
           categoryIds,
         },

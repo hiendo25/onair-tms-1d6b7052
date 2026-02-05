@@ -402,7 +402,7 @@ export async function getCurrentEmployee(userId: string, organizationId: string)
 
   const { data: employee, error } = await supabase
     .from("employees")
-    .select("id, organization_id")
+    .select("id, organization_id, employee_type")
     .eq("user_id", userId)
     .eq("organization_id", organizationId)
     .maybeSingle();

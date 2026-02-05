@@ -23,6 +23,7 @@ import TrueFalseAnswerDisplay from "../../../_components/TrueFalseAnswerDisplay"
 interface ResultQuestionCardProps {
   question: QuestionGradeDetail;
   questionNumber: number;
+  showCorrectAnswers: boolean;
 }
 
 interface ScoreDisplayProps {
@@ -63,6 +64,7 @@ const FeedbackDisplay: React.FC<FeedbackDisplayProps> = ({ feedback }) => {
 const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
   question,
   questionNumber,
+  showCorrectAnswers,
 }) => {
   return (
     <Card variant="outlined" sx={{ p: 2.5 }}>
@@ -72,6 +74,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
         maxScore={question.maxScore}
         earnedScore={question.earnedScore}
         isAutoGraded={true}
+        showCorrectAnswers={showCorrectAnswers}
       />
 
       {question.attachments && question.attachments.length > 0 && (
@@ -82,6 +85,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
         <RadioAnswerDisplay
           selectedOptionId={question.answer.selectedOptionId}
           options={question.options}
+          showCorrectAnswers={showCorrectAnswers}
         />
       )}
 
@@ -89,6 +93,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
         <CheckboxAnswerDisplay
           selectedOptionIds={question.answer.selectedOptionIds}
           options={question.options}
+          showCorrectAnswers={showCorrectAnswers}
         />
       )}
 
@@ -122,6 +127,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
           columnAItems={(question.options as any).columnAItems || []}
           columnBItems={(question.options as any).columnBItems || []}
           correctMappings={(question.options as any).correctMappings || []}
+          showCorrectAnswers={showCorrectAnswers}
         />
       )}
 
@@ -129,6 +135,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
         <OrderAnswerDisplay
           studentOrder={question.answer.orderedItems || []}
           correctItems={(question.options as any).orderItems || []}
+          showCorrectAnswers={showCorrectAnswers}
         />
       )}
 
@@ -136,6 +143,7 @@ const ResultQuestionCard: React.FC<ResultQuestionCardProps> = ({
         <TrueFalseAnswerDisplay
           studentAnswer={question.answer.trueFalseAnswer}
           correctAnswer={resolveTrueFalseCorrectAnswer(question.options)}
+          showCorrectAnswers={showCorrectAnswers}
         />
       )}
     </Card>

@@ -135,6 +135,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <RadioAnswerDisplay
           selectedOptionId={question.answer.selectedOptionId}
           options={question.options}
+          showCorrectAnswers
         />
       )}
 
@@ -142,6 +143,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <CheckboxAnswerDisplay
           selectedOptionIds={question.answer.selectedOptionIds}
           options={question.options}
+          showCorrectAnswers
         />
       )}
 
@@ -183,6 +185,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
           columnAItems={(question.options as any).columnAItems || []}
           columnBItems={(question.options as any).columnBItems || []}
           correctMappings={(question.options as any).correctMappings || []}
+          showCorrectAnswers
         />
       )}
 
@@ -190,6 +193,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <OrderAnswerDisplay
           studentOrder={question.answer.orderedItems || []}
           correctItems={(question.options as any).orderItems || []}
+          showCorrectAnswers
         />
       )}
 
@@ -197,6 +201,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <TrueFalseAnswerDisplay
           studentAnswer={question.answer.trueFalseAnswer}
           correctAnswer={resolveTrueFalseCorrectAnswer(question.options)}
+          showCorrectAnswers
         />
       )}
     </Card>

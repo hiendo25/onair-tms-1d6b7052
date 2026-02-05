@@ -17,11 +17,13 @@ import { QuestionOption } from "@/types/dto/assignments";
 interface CheckboxAnswerDisplayProps {
   selectedOptionIds: string[] | undefined;
   options: QuestionOption[] | undefined;
+  showCorrectAnswers: boolean;
 }
 
 const CheckboxAnswerDisplay: React.FC<CheckboxAnswerDisplayProps> = ({
   selectedOptionIds,
   options,
+  showCorrectAnswers,
 }) => {
   return (
     <Box>
@@ -40,13 +42,13 @@ const CheckboxAnswerDisplay: React.FC<CheckboxAnswerDisplayProps> = ({
               label={
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="body2">{option.label}</Typography>
-                  {isSelected && isCorrectOption && (
+                  {showCorrectAnswers && isSelected && isCorrectOption && (
                     <CheckCircleIcon fontSize="small" color="success" />
                   )}
-                  {isSelected && !isCorrectOption && (
+                  {showCorrectAnswers && isSelected && !isCorrectOption && (
                     <CancelIcon fontSize="small" color="error" />
                   )}
-                  {!isSelected && isCorrectOption && (
+                  {showCorrectAnswers && !isSelected && isCorrectOption && (
                     <Typography variant="caption" color="success.main">
                       (Đáp án đúng)
                     </Typography>
@@ -63,4 +65,3 @@ const CheckboxAnswerDisplay: React.FC<CheckboxAnswerDisplayProps> = ({
 };
 
 export default CheckboxAnswerDisplay;
-

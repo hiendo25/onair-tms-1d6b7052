@@ -44,9 +44,34 @@ const parseDateInput = (value: string, options?: ParseDateInputOptions): Date | 
   return applyTime(baseDate, options?.endOfDay);
 };
 
+const parseDateTimeInput = (value: string): Date | null => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const isoCandidate = new Date(trimmed);
+  if (!Number.isNaN(isoCandidate.getTime())) {
+    return isoCandidate;
+  }
+
+  return parseDateInput(trimmed);
+};
+
 const parseDateRange = (startDate: string, endDate: string) => {
   const start = parseDateInput(startDate);
   const end = parseDateInput(endDate, { endOfDay: true });
+
+  if (!start || !end) {
+    return null;
+  }
+
+  return { start, end };
+};
+
+const parseDateTimeRange = (startDate: string, endDate: string) => {
+  const start = parseDateTimeInput(startDate);
+  const end = parseDateTimeInput(endDate);
 
   if (!start || !end) {
     return null;
@@ -65,4 +90,4 @@ const applyTime = (value: Date, endOfDay?: boolean) => {
   return value;
 };
 
-export { parseDateInput, parseDateRange };
+export { parseDateInput, parseDateRange, parseDateTimeInput, parseDateTimeRange };

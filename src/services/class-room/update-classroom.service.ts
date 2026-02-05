@@ -4,6 +4,8 @@ import { isUndefined } from "lodash";
 import { ClassRoomFormValues } from "@/modules/class-room-management/components/ManageClassRoomForm/classroom-form.schema";
 import { ClassRoomStore } from "@/modules/class-room-management/store/class-room-store";
 import {
+  assignmentBankRepository,
+  assignmentsRepository,
   classRoomCertificateTemplatesRepository,
   classRoomMetaRepository,
   classRoomRepository,
@@ -11,8 +13,10 @@ import {
   classSessionAgendaRepository,
   qrAttendanceRepository,
 } from "@/repository";
+import { deleteAssignmentWithRelations } from "@/services/assignments/assignment.service";
 import { GetClassRoomByIdResponse } from "@/repository/class-room";
 import {
+  CreatePivotClassSessionWithAssignmentPayload,
   UpSertClassRoomSessionPayload,
   UpsertPivotClassSessionWithCoursePeriodPayload,
 } from "@/repository/class-session";
@@ -44,6 +48,11 @@ export class UpdateClassRoomService {
       throw new Error(classRoomDetailError?.message || "Classroom not found.");
     }
 
+    const organizationId = classRoomDetail.organization?.id;
+    if (!organizationId) {
+      throw new Error("organizationId is required");
+    }
+
     const {
       categories,
       classRoomSessions,
@@ -56,6 +65,7 @@ export class UpdateClassRoomService {
       forWhom,
       docs,
       classType,
+      flashcards,
     } = formData;
 
     const { startDate, endDate } = this.getStartDateAndEndDateFromClassSession(classRoomSessions, roomType);
@@ -120,6 +130,7 @@ export class UpdateClassRoomService {
       oldSessions: classRoomDetail.sessions,
       newSessions: classRoomSessions,
       classType: classType,
+      organizationId,
     });
 
     /**
@@ -128,6 +139,11 @@ export class UpdateClassRoomService {
     if (classType !== "learning_path") {
       await this.updateCertificate(classRoomData.id, classRoomDetail, certificate);
     }
+
+    /**
+     * Step 8: Sync Class Room with Flashcards
+     */
+    await this.updateFlashcards(classRoomData.id, classRoomDetail, flashcards);
 
     console.log("Update Susscess", classRoomData);
     return classRoomData;
@@ -256,10 +272,17 @@ export class UpdateClassRoomService {
       newSessions: ClassRoomFormValues["classRoomSessions"];
       roomType: ClassRoomFormValues["roomType"];
       classType: ClassRoomFormValues["classType"];
+      organizationId: string;
     },
   ) {
     const _this = this;
-    const { title, description, oldSessions, newSessions, roomType, classType } = data;
+    const { title, description, oldSessions, newSessions, roomType, classType, organizationId } = data;
+    const assignmentConfigMap = await this.ensureAssignmentConfigs(oldSessions, newSessions, organizationId);
+    const oldAssignmentConfigIds = this.getAssignmentConfigIdsFromSessions(oldSessions);
+    const newAssignmentConfigIds = this.getAssignmentConfigIdsFromFormSessions(newSessions, assignmentConfigMap);
+    const removedAssignmentConfigIds = oldAssignmentConfigIds.filter(
+      (assignmentId) => !newAssignmentConfigIds.includes(assignmentId),
+    );
     /**
      * todo: compare new sessions List: classRoomSessions vs old Session List: classRoomDetail/sessions
      * - delete: these session has Id in classRoomSessions is not in classRoomDetail/sessions.
@@ -319,39 +342,39 @@ export class UpdateClassRoomService {
          * Optional
          */
         const oldSessionItem = oldSessions.find((item) => item.id === sessionId);
-        // const syncSessionWithAssignmentPromise = (async () => {
-        //   const oldAssignments = oldSessionItem?.session_assignments;
+        const syncSessionWithAssignmentPromise = (async () => {
+          const oldAssignmentConfigIds = this.getAssignmentConfigIdsFromSession(oldSessionItem);
+          const newAssignmentConfigIds = this.getAssignmentConfigIdsFromForm(newSession, assignmentConfigMap);
 
-        //   const newAssignments = newSession.assignments;
+          const assignmentDeleteItems = oldAssignmentConfigIds.filter(
+            (assignmentId) => !newAssignmentConfigIds.includes(assignmentId),
+          );
+          const assignmentAddNewItems = newAssignmentConfigIds.filter(
+            (assignmentId) => !oldAssignmentConfigIds.includes(assignmentId),
+          );
 
-        //   const assignmentAddNewItems = newAssignments.filter((newItem) =>
-        //     oldAssignments?.every((oldItem) => oldItem.assignments.id !== newItem.assignmentId),
-        //   );
-        //   const assignmentDeleteItems = oldAssignments?.filter((oldItem) =>
-        //     newAssignments?.every((newItem) => newItem.assignmentId !== oldItem.assignments.id),
-        //   );
+          if (assignmentDeleteItems.length) {
+            await classRoomSessionRepository.bulkDeletePivotClassSessionWithAssignment(
+              assignmentDeleteItems.map<CreatePivotClassSessionWithAssignmentPayload>((assignmentId) => ({
+                assignment_config_id: assignmentId,
+                session_id: sessionData.id,
+              })),
+            );
+          }
 
-        //   if (assignmentDeleteItems?.length) {
-        //     await classRoomSessionRepository.bulkDeletePivotClassSessionWithAssignment(
-        //       assignmentDeleteItems.map((item) => item.id),
-        //     );
-        //   }
+          if (assignmentAddNewItems.length) {
+            const { error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
+              assignmentAddNewItems.map<CreatePivotClassSessionWithAssignmentPayload>((assignmentId) => ({
+                assignment_config_id: assignmentId,
+                session_id: sessionData.id,
+              })),
+            );
 
-        //   if (assignmentAddNewItems.length) {
-        //     const { data, error } = await classRoomSessionRepository.bulkCreatePivotClassSessionWithAssignment(
-        //       assignmentAddNewItems.map((item) => ({
-        //         assignment_id: item.assignmentId,
-        //         session_id: sessionData.id,
-        //         start_at: null,
-        //         end_at: null,
-        //       })),
-        //     );
-
-        //     if (error) {
-        //       throw new Error(error.message);
-        //     }
-        //   }
-        // })();
+            if (error) {
+              throw new Error(error.message);
+            }
+          }
+        })();
 
         /**
          * Sync class Session with course Period
@@ -474,11 +497,13 @@ export class UpdateClassRoomService {
         await Promise.all([
           upsertAgendaPromise,
           upsertQrCodePromise,
-          // syncSessionWithAssignmentPromise,
+          syncSessionWithAssignmentPromise,
           syncSessionWithCoursePeriodPromise,
         ]);
       }),
     );
+
+    await this.deleteOrphanAssignmentConfigs(removedAssignmentConfigIds);
   }
 
   private async updateClassroomWithResource(payload: {
@@ -659,5 +684,173 @@ export class UpdateClassRoomService {
           },
         };
     });
+  }
+
+  private getAssignmentConfigIdsFromSession(
+    session: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"][number] | undefined,
+  ) {
+    if (!session?.assignments?.length) {
+      return [];
+    }
+
+    const assignmentIds = session.assignments
+      .map((item) => item.assignment_config_id ?? item.assignment_config?.id)
+      .filter((id): id is string => Boolean(id));
+
+    return Array.from(new Set(assignmentIds));
+  }
+
+  private getAssignmentConfigIdsFromSessions(
+    sessions: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"],
+  ) {
+    const assignmentIds = sessions.flatMap((session) => this.getAssignmentConfigIdsFromSession(session));
+    return Array.from(new Set(assignmentIds));
+  }
+
+  private getAssignmentConfigIdsFromForm(
+    session: ClassRoomFormValues["classRoomSessions"][number],
+    assignmentConfigMap: Map<string, string>,
+  ) {
+    const assignmentIds = session.assignments
+      .map((assignment) => this.getAssignmentConfigId(assignmentConfigMap, assignment.assignmentBankId))
+      .filter((id) => Boolean(id));
+
+    return Array.from(new Set(assignmentIds));
+  }
+
+  private getAssignmentConfigIdsFromFormSessions(
+    sessions: ClassRoomFormValues["classRoomSessions"],
+    assignmentConfigMap: Map<string, string>,
+  ) {
+    const assignmentIds = sessions.flatMap((session) =>
+      this.getAssignmentConfigIdsFromForm(session, assignmentConfigMap),
+    );
+    return Array.from(new Set(assignmentIds));
+  }
+
+  private async deleteOrphanAssignmentConfigs(assignmentConfigIds: string[]) {
+    if (!assignmentConfigIds.length) {
+      return;
+    }
+
+    const assignmentRefs =
+      await classRoomSessionRepository.getAssignmentSessionRefsByAssignmentConfigIds(assignmentConfigIds);
+    const usedAssignmentIds = new Set(assignmentRefs.map((ref) => ref.assignment_config_id));
+    const orphanAssignmentIds = assignmentConfigIds.filter((id) => !usedAssignmentIds.has(id));
+
+    await Promise.all(orphanAssignmentIds.map((assignmentId) => deleteAssignmentWithRelations(assignmentId)));
+  }
+
+  private async ensureAssignmentConfigs(
+    oldSessions: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"],
+    newSessions: ClassRoomFormValues["classRoomSessions"],
+    organizationId: string,
+  ) {
+    const assignmentConfigMap = this.buildAssignmentConfigMap(oldSessions);
+    const assignmentBankIds = Array.from(
+      new Set(
+        newSessions.flatMap((session) => session.assignments.map((assignment) => assignment.assignmentBankId)),
+      ),
+    );
+
+    const missingAssignmentBankIds = assignmentBankIds.filter((assignmentBankId) => !assignmentConfigMap.has(assignmentBankId));
+
+    if (!missingAssignmentBankIds.length) {
+      return assignmentConfigMap;
+    }
+
+    const createdAssignmentConfigs = await Promise.all(
+      missingAssignmentBankIds.map(async (assignmentBankId) => {
+        const assignmentBank = await assignmentBankRepository.getAssignmentBankById(assignmentBankId, organizationId);
+
+        if (!assignmentBank) {
+          throw new Error("Không tìm thấy bài kiểm tra");
+        }
+
+        const assignmentConfig = await assignmentsRepository.createAssignmentFromBank({
+          assignment_bank_id: assignmentBankId,
+          assigned_by: this.employeeId,
+          organization_id: organizationId,
+          attempt_duration_minutes: assignmentBank.duration_minutes,
+          attempt_limit: 1,
+          available_from: null,
+          available_to: null,
+          status: "open",
+          scope: "class_room",
+        });
+
+        return [assignmentBankId, assignmentConfig.id] as const;
+      }),
+    );
+
+    createdAssignmentConfigs.forEach(([assignmentBankId, assignmentConfigId]) => {
+      assignmentConfigMap.set(assignmentBankId, assignmentConfigId);
+    });
+
+    return assignmentConfigMap;
+  }
+
+  private buildAssignmentConfigMap(oldSessions: NonNullable<GetClassRoomByIdResponse["data"]>["sessions"]) {
+    const assignmentConfigMap = new Map<string, string>();
+
+    oldSessions.forEach((session) => {
+      session.assignments?.forEach((assignment) => {
+        const assignmentBankId =
+          assignment.assignment_config?.assignment_bank?.id ?? assignment.assignment_config?.assignment_bank_id;
+        const assignmentConfigId = assignment.assignment_config_id ?? assignment.assignment_config?.id;
+
+        if (assignmentBankId && assignmentConfigId) {
+          assignmentConfigMap.set(assignmentBankId, assignmentConfigId);
+        }
+      });
+    });
+
+    return assignmentConfigMap;
+  }
+
+  private getAssignmentConfigId(assignmentConfigMap: Map<string, string>, assignmentBankId: string) {
+    const assignmentConfigId = assignmentConfigMap.get(assignmentBankId);
+
+    if (!assignmentConfigId) {
+      throw new Error("Không tìm thấy cấu hình bài kiểm tra");
+    }
+
+    return assignmentConfigId;
+  }
+
+  private async updateFlashcards(
+    classRoomId: string,
+    classRoomDetail: NonNullable<GetClassRoomByIdResponse["data"]>,
+    flashcards?: ClassRoomFormValues["flashcards"],
+  ) {
+    const currentFlashcards = classRoomDetail.class_room_flashcards || [];
+
+    // Get current flashcard IDs
+    const currentFlashcardIds = currentFlashcards.map((fc) => fc.flashcard_id);
+
+    // Get new flashcard IDs from form
+    const newFlashcardIds = flashcards || [];
+
+    // Find flashcards to delete (in current but not in new)
+    const flashcardIdsToDelete = currentFlashcardIds.filter((id) => !newFlashcardIds.includes(id));
+
+    // Find flashcards to add (in new but not in current)
+    const flashcardsToAdd = newFlashcardIds.filter((id) => !currentFlashcardIds.includes(id));
+
+    // Delete removed flashcards
+    if (flashcardIdsToDelete.length > 0) {
+      await classRoomRepository.deleteClassRoomFlashcards(classRoomId, flashcardIdsToDelete);
+    }
+
+    // Add new flashcards with order_index
+    if (flashcardsToAdd.length > 0) {
+      await classRoomRepository.createClassRoomFlashcards(
+        flashcardsToAdd.map((flashcardId, index) => ({
+          class_room_id: classRoomId,
+          flashcard_id: flashcardId,
+          order_index: index,
+        })),
+      );
+    }
   }
 }

@@ -6,9 +6,12 @@ import {
   CertificateIcon,
   ClipboardIcon,
   FileAttachmentIcon,
+  FileExcelIcon,
   FlashcardIcon,
   FolderShieldIcon,
+  Gamefication,
   GitIcon,
+  LearningPathIcon,
   MonitorIcon,
   PieChart2Icon,
   Star01Icon,
@@ -24,9 +27,9 @@ type PermissionValue = (typeof PATHS_WITH_PERMISSIONS)[keyof typeof PATHS_WITH_P
 
 type AddPermissionCheck<T> = T extends { children?: infer C }
   ? Omit<T, "children"> & {
-      persCheck?: PermissionValue;
-      children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
-    }
+    persCheck?: PermissionValue;
+    children?: C extends Array<infer Item> ? AddPermissionCheck<Item>[] : never;
+  }
   : T & { persCheck?: PermissionValue };
 
 export type MenuItemTypeWithPer = AddPermissionCheck<MenuItemType>;
@@ -285,32 +288,72 @@ const ADMIN_MENU_LIST: MenuItemTypeWithPer[] = [
 
 const STUDENTS_MENU_LIST: MenuItemTypeWithPer[] = [
   {
-    title: "Bài kiểm tra của tôi",
+    title: "Tổng quan",
     icon: React.createElement(ClipboardIcon),
-    key: "my-assignments",
-    path: PATHS.MY_ASSIGNMENTS.ROOT,
+    key: "",
+    path: "gg",
+    persCheck: [],
+    nonAction: true,
+  },
+  {
+    title: "Lộ trình",
+    icon: React.createElement(BookOpenIcon),
+    key: "my-learning-paths",
+    path: PATHS.MY_LEARNING_PATHS.ROOT,
     persCheck: [],
   },
   {
-    title: "Lớp học của tôi",
+    title: "Lớp học",
     icon: React.createElement(UsersIcon2),
     key: "my-class",
     path: PATHS.STUDENTS.ROOT,
     persCheck: [],
   },
   {
-    title: "Lộ trình của tôi",
-    icon: React.createElement(RouteIcon),
-    key: "my-learning-paths",
-    path: PATHS.MY_LEARNING_PATHS.ROOT,
+    title: "Bài kiểm tra",
+    icon: React.createElement(ClipboardIcon),
+    key: "my-assignments",
+    path: PATHS.MY_ASSIGNMENTS.ROOT,
     persCheck: [],
   },
   {
-    title: "Thưởng",
-    icon: React.createElement(Star01Icon),
-    key: "my-gamification",
+    title: "Thưởng học tập",
+    icon: React.createElement(CertificateIcon),
+    key: "my-assignments",
     path: PATHS.MY_GAMIFICATION.ROOT,
     persCheck: [],
+  },
+  {
+    title: "Thư viện",
+    icon: React.createElement(Star01Icon),
+    key: "gg",
+    path: "",
+    persCheck: [],
+    nonAction: true,
+    children: [
+      {
+        title: "Chứng nhận",
+        key: "",
+        path: "gg",
+        type: "item",
+        nonAction: true,
+      },
+      {
+        title: "FlashCard",
+        key: "",
+        path: "gg",
+        type: "item",
+        nonAction: true,
+      },
+      {
+        title: "Mục yêu thich",
+        key: "",
+        path: "gg",
+        type: "item",
+        nonAction: true,
+      },
+
+    ],
   },
 ];
 

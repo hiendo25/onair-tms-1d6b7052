@@ -1,21 +1,21 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { assignmentBankRepository, assignmentsRepository } from "@/repository";
+import { assignmentBankRepository, assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type { AssignAssignmentBankDto } from "@/types/dto/assignment-bank";
 import type { Database } from "@/types/supabase.types";
-import { parseDateRange } from "@/utils/date";
+import { parseDateTimeRange } from "@/utils/date";
 
 interface AssignAssignmentBankResult {
   assignmentId: string;
 }
 
 const parseAssignmentDateRange = (startDate: string, endDate: string) => {
-  const range = parseDateRange(startDate, endDate);
+  const range = parseDateTimeRange(startDate, endDate);
   if (!range) {
     throw new Error("Hạn làm bài không hợp lệ");
   }
 
-  if (range.start.getTime() > range.end.getTime()) {
+  if (range.start.getTime() >= range.end.getTime()) {
     throw new Error("Hạn làm bài không hợp lệ");
   }
 
@@ -59,6 +59,21 @@ const assignAssignmentBankToEmployees = async (
       throw new Error("Dữ liệu bài kiểm tra không hợp lệ");
     }
 
+    const currentAssignedEmployeeIds = await assignmentsRepository.getAssignmentEmployeeIdsByAssignmentIdWithClient(
+      client,
+      assignmentMeta.id,
+    );
+    const nextAssignedEmployeeIds = new Set(payload.assignedEmployeeIds);
+    const removedEmployeeIds = currentAssignedEmployeeIds.filter((employeeId) => !nextAssignedEmployeeIds.has(employeeId));
+
+    if (removedEmployeeIds.length > 0) {
+      await assignmentResultsRepository.deleteAssignmentResultsByAssignmentAndEmployeeIdsWithClient(
+        client,
+        assignmentMeta.id,
+        removedEmployeeIds,
+      );
+    }
+
     await assignmentsRepository.updateAssignmentByIdWithClient(client, assignmentMeta.id, {
       attempt_limit: payload.attemptLimit,
       available_from: dateRange.start,
@@ -91,6 +106,7 @@ const assignAssignmentBankToEmployees = async (
       available_from: dateRange.start,
       available_to: dateRange.end,
       status: "open",
+      scope: "employee"
     });
 
     assignmentId = assignment.id;

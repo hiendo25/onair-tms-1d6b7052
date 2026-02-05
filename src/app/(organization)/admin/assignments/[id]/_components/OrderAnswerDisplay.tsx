@@ -15,11 +15,13 @@ interface OrderItem {
 interface OrderAnswerDisplayProps {
   studentOrder: Array<{ id: string; position: number }>;
   correctItems: OrderItem[];
+  showCorrectAnswers: boolean;
 }
 
 export default function OrderAnswerDisplay({
   studentOrder,
   correctItems,
+  showCorrectAnswers,
 }: OrderAnswerDisplayProps) {
   // Create a map of student's order
   const studentOrderMap = new Map(
@@ -41,7 +43,10 @@ export default function OrderAnswerDisplay({
       <Stack spacing={0.75}>
         {sortedByStudentOrder.map((item, index) => {
           const studentPosition = index + 1;
-          const isCorrect = item.correctOrder === studentPosition;
+          const isCorrect = showCorrectAnswers && item.correctOrder === studentPosition;
+          const borderColor = showCorrectAnswers ? (isCorrect ? "success.main" : "error.main") : "grey.300";
+          const backgroundColor = showCorrectAnswers ? (isCorrect ? "success.50" : "error.50") : "grey.50";
+          const badgeColor = showCorrectAnswers ? (isCorrect ? "success.main" : "error.main") : "grey.500";
 
           return (
             <Paper
@@ -54,8 +59,8 @@ export default function OrderAnswerDisplay({
                 alignItems: "center",
                 gap: 1.5,
                 border: "1px solid",
-                borderColor: isCorrect ? "success.main" : "error.main",
-                bgcolor: isCorrect ? "success.50" : "error.50",
+                borderColor,
+                bgcolor: backgroundColor,
                 borderRadius: 1,
               }}
             >
@@ -64,7 +69,7 @@ export default function OrderAnswerDisplay({
                   minWidth: 28,
                   height: 28,
                   borderRadius: "50%",
-                  bgcolor: isCorrect ? "success.main" : "error.main",
+                  bgcolor: badgeColor,
                   color: "white",
                   display: "flex",
                   alignItems: "center",
@@ -78,18 +83,20 @@ export default function OrderAnswerDisplay({
               <Typography variant="body2" sx={{ flex: 1, lineHeight: 1.5 }}>
                 {item.content}
               </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                {isCorrect ? (
-                  <CheckCircleIcon fontSize="small" color="success" />
-                ) : (
-                  <>
-                    <CancelIcon fontSize="small" color="error" />
-                    <Typography variant="caption" color="error" sx={{ fontSize: "0.75rem" }}>
-                      Đúng: {item.correctOrder}
-                    </Typography>
-                  </>
-                )}
-              </Box>
+              {showCorrectAnswers && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                  {isCorrect ? (
+                    <CheckCircleIcon fontSize="small" color="success" />
+                  ) : (
+                    <>
+                      <CancelIcon fontSize="small" color="error" />
+                      <Typography variant="caption" color="error" sx={{ fontSize: "0.75rem" }}>
+                        Đúng: {item.correctOrder}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              )}
             </Paper>
           );
         })}
@@ -97,4 +104,3 @@ export default function OrderAnswerDisplay({
     </Box>
   );
 }
-

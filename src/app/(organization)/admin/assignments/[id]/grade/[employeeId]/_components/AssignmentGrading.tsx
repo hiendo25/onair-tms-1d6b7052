@@ -4,7 +4,7 @@ import React, { useEffect, useMemo } from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { Alert, Box, Button, Card, CircularProgress, Stack, TextField, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 
 import { PATHS } from "@/constants/path.constant";
@@ -29,9 +29,19 @@ interface GradeFormData {
 
 const AssignmentGrading: React.FC<AssignmentGradingProps> = ({ assignmentId, employeeId }) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const notifications = useNotifications();
   const { data: submission, isLoading, error } = useGetSubmissionDetailQuery(assignmentId, employeeId);
   const saveGradeMutation = useSaveGradeMutation();
+  const returnPath = useMemo(() => {
+    const rawReturnPath = searchParams.get("returnPath");
+    if (!rawReturnPath || !rawReturnPath.startsWith("/") || rawReturnPath.startsWith("//")) {
+      return null;
+    }
+    return rawReturnPath;
+  }, [searchParams]);
+  const fallbackPath = PATHS.ASSIGNMENTS.STUDENTS(assignmentId);
+  const backPath = returnPath ?? fallbackPath;
 
   const defaultGrades = useMemo(() => {
     if (!submission) return {};
@@ -152,7 +162,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({ assignmentId, emp
         severity: "success",
         autoHideDuration: 3000,
       });
-      router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
+      router.push(backPath);
     } catch (error) {
       console.error("Failed to save grade:", error);
       notifications.show(error instanceof Error ? error.message : "Có lỗi xảy ra khi chấm bài", {
@@ -163,7 +173,7 @@ const AssignmentGrading: React.FC<AssignmentGradingProps> = ({ assignmentId, emp
   };
 
   const handleBack = () => {
-    router.push(PATHS.ASSIGNMENTS.STUDENTS(assignmentId));
+    router.push(backPath);
   };
 
   if (isLoading) {

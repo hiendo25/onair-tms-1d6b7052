@@ -28,10 +28,12 @@ const DEFAULT_FORM_VALUES: AssignmentBankFormValues = {
   name: "",
   description: "",
   durationMinutes: "",
+  isUnlimitedDuration: false,
   passScore: "",
   totalScore: 0,
   shuffleQuestions: true,
   shuffleAnswers: false,
+  hideCorrectAnswers: false,
   questionIds: [],
 };
 
@@ -149,14 +151,17 @@ export default function AssignmentBankCreateForm() {
 
     const categoryIds = getCategoryIdsFromQuestions(selectedQuestions);
 
+    const durationMinutes = data.isUnlimitedDuration ? null : Number(data.durationMinutes);
+
     createAssignmentBank(
       {
         name: data.name,
         description: data.description,
-        durationMinutes: Number(data.durationMinutes),
+        durationMinutes,
         passScore: Number(data.passScore),
         shuffleQuestions: data.shuffleQuestions,
         shuffleAnswers: data.shuffleAnswers,
+        hideCorrectAnswers: data.hideCorrectAnswers,
         questions,
         organizationId,
         categoryIds,

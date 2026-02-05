@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import type { AssignmentDto, AssignmentAttemptSummaryDto } from "@/types/dto/assignments";
+import type { AssignmentAttemptSummaryDto, AssignmentDto } from "@/types/dto/assignments";
 
 import { useAssignmentAttemptStart } from "./useAssignmentAttemptStart";
 

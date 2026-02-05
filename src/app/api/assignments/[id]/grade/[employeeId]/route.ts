@@ -1,24 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createSVClient } from "@/services";
 import * as assignmentResultService from "@/services/assignment-results/assignment-result.service";
+import { authenticateAndGetEmployee } from "@/services/auth/api-auth.helper";
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ id: string; employeeId: string }> }
 ) {
   try {
+    const authResult = await authenticateAndGetEmployee(request);
+    if ("error" in authResult) {
+      return authResult.error;
+    }
+
     const params = await context.params;
     const { id: assignmentId, employeeId } = params;
 
-    const submissionDetail = await assignmentResultService.getSubmissionDetail(
+    const submissionDetail = await assignmentResultService.getSubmissionDetailForViewer(
       assignmentId,
-      employeeId
+      employeeId,
+      {
+        id: authResult.employee.id,
+        employeeType: authResult.employee.employee_type,
+      },
     );
 
     return NextResponse.json(submissionDetail, { status: 200 });
   } catch (error) {
     console.error("Error fetching submission detail:", error);
+
+    if (error instanceof assignmentResultService.SubmissionAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
 
     const errorMessage = error instanceof Error
       ? error.message
@@ -36,6 +49,11 @@ export async function POST(
   context: { params: Promise<{ id: string; employeeId: string }> }
 ) {
   try {
+    const authResult = await authenticateAndGetEmployee(request);
+    if ("error" in authResult) {
+      return authResult.error;
+    }
+
     const params = await context.params;
     const { id: assignmentId, employeeId } = params;
 
@@ -49,12 +67,18 @@ export async function POST(
       );
     }
 
-    const result = await assignmentResultService.saveGrade({
-      assignmentId,
-      employeeId,
-      questionGrades,
-      overallFeedback,
-    });
+    const result = await assignmentResultService.saveGradeForViewer(
+      {
+        assignmentId,
+        employeeId,
+        questionGrades,
+        overallFeedback,
+      },
+      {
+        id: authResult.employee.id,
+        employeeType: authResult.employee.employee_type,
+      },
+    );
 
     return NextResponse.json(
       {
@@ -68,6 +92,10 @@ export async function POST(
   } catch (error) {
     console.error("Error saving grade:", error);
 
+    if (error instanceof assignmentResultService.SubmissionAccessError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+    }
+
     const errorMessage = error instanceof Error
       ? error.message
       : "Có lỗi xảy ra khi lưu điểm";
@@ -78,4 +106,3 @@ export async function POST(
     );
   }
 }
-

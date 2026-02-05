@@ -1,3 +1,5 @@
+import { isMatchingOptions, isOrderOptions } from "@/modules/assignment-management/utils/question-bank.utils";
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type {
   CheckboxAnswer,
@@ -18,7 +20,7 @@ import {
   SubmissionDetailDto,
 } from "@/types/dto/assignments";
 import { Database, Json } from "@/types/supabase.types";
-import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
+import type { EmployeeType } from "@/utils/employee-type";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
 type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
@@ -86,8 +88,81 @@ interface StoredAnswerPayload {
 }
 
 const AUTO_GRADABLE_TYPES: QuestionType[] = ["radio", "checkbox", "matching", "order", "true_false"];
+const RESULT_VISIBLE_STATUSES: AttemptStatus[] = ["submitted", "graded"];
+const PRIVILEGED_EMPLOYEE_TYPES: EmployeeType[] = ["admin", "teacher"];
 
 const isAutoGradable = (type: QuestionType) => AUTO_GRADABLE_TYPES.includes(type);
+const isPrivilegedEmployee = (employeeType: EmployeeType | null | undefined) =>
+  Boolean(employeeType && PRIVILEGED_EMPLOYEE_TYPES.includes(employeeType));
+const hasRemainingAttempts = (attemptNumber: number, attemptLimit: number | null | undefined) => {
+  if (attemptLimit === null || attemptLimit === undefined) {
+    return true;
+  }
+  return attemptNumber < attemptLimit;
+};
+
+const sanitizeQuestionOptions = (options: QuestionWithAnswer["options"]) => {
+  if (!options) {
+    return options;
+  }
+
+  if (Array.isArray(options)) {
+    return options.map((option) => ({
+      ...option,
+      correct: false,
+    }));
+  }
+
+  if (isMatchingOptions(options)) {
+    return {
+      ...options,
+      correctMappings: [],
+    };
+  }
+
+  if (isOrderOptions(options)) {
+    return {
+      ...options,
+      orderItems: (options.orderItems || []).map((item) => ({
+        ...item,
+        correctOrder: 0,
+      })),
+    };
+  }
+
+  return options;
+};
+
+export class SubmissionAccessError extends Error {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "SubmissionAccessError";
+    this.statusCode = statusCode;
+  }
+}
+
+export interface SubmissionViewer {
+  id: string;
+  employeeType: EmployeeType | null;
+}
+
+const assertCanViewSubmission = (viewer: SubmissionViewer, targetEmployeeId: string) => {
+  if (viewer.id === targetEmployeeId) {
+    return;
+  }
+
+  if (!isPrivilegedEmployee(viewer.employeeType)) {
+    throw new SubmissionAccessError("Bạn không có quyền xem kết quả của học viên khác.", 403);
+  }
+};
+
+const assertCanGradeSubmission = (viewer: SubmissionViewer) => {
+  if (!isPrivilegedEmployee(viewer.employeeType)) {
+    throw new SubmissionAccessError("Bạn không có quyền chấm điểm bài nộp.", 403);
+  }
+};
 
 const buildAttemptTiming = (startedAt: Date, durationMinutes: number | null) => {
   if (!durationMinutes || durationMinutes <= 0) {
@@ -582,7 +657,11 @@ export async function getSubmissionStatus(
   };
 }
 
-export async function getSubmissionDetail(assignmentId: string, employeeId: string): Promise<SubmissionDetailDto> {
+export async function getSubmissionDetail(
+  assignmentId: string,
+  employeeId: string,
+  viewer?: SubmissionViewer,
+): Promise<SubmissionDetailDto> {
   const attemptWithEmployee = await assignmentResultsRepository.getAssignmentAttemptWithEmployee(
     assignmentId,
     employeeId,
@@ -592,11 +671,32 @@ export async function getSubmissionDetail(assignmentId: string, employeeId: stri
     throw new Error("Không tìm thấy bài nộp của học viên");
   }
 
+  if (!RESULT_VISIBLE_STATUSES.includes(attemptWithEmployee.status)) {
+    throw new SubmissionAccessError("Bài làm chưa được nộp nên chưa thể xem kết quả.", 409);
+  }
+
   if (!attemptWithEmployee.employee || !attemptWithEmployee.employee.profiles) {
     throw new Error("Không tìm thấy thông tin học viên");
   }
 
   const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
+  const hideCorrectAnswers = Boolean(assignment.hide_correct_answers);
+  const canRetry = hasRemainingAttempts(
+    attemptWithEmployee.attempt_number,
+    assignment.attempt_limit ?? null,
+  );
+
+  console.log("attemptWithEmployee", attemptWithEmployee);
+
+  console.log("attemptWithEmployee.attempt_number", attemptWithEmployee.attempt_number);
+  console.log("assignment.attempt_limit", assignment.attempt_limit);
+
+
+  console.log("canRetry", canRetry);
+
+
+  const showCorrectAnswers =
+    !hideCorrectAnswers || isPrivilegedEmployee(viewer?.employeeType) || !canRetry;
   const results = await assignmentResultsRepository.getAssignmentResultsByAttemptId(attemptWithEmployee.id);
   const resultsMap = new Map(results.map((result) => [result.question_id, result]));
 
@@ -604,13 +704,14 @@ export async function getSubmissionDetail(assignmentId: string, employeeId: stri
     const result = resultsMap.get(question.id) ?? null;
     const storedAnswer = normalizeStoredAnswer(result?.answer ?? null);
     const isAutoGraded = isAutoGradable(question.type);
+    const options = showCorrectAnswers ? question.options : sanitizeQuestionOptions(question.options);
 
     return {
       id: question.id,
       label: question.label,
       type: question.type,
       maxScore: question.score,
-      options: question.options,
+      options: options as QuestionGradeDetail["options"],
       attachments: question.attachments,
       answer: buildQuestionAnswer(question.type, storedAnswer),
       answerAttachments: storedAnswer.attachments,
@@ -627,6 +728,7 @@ export async function getSubmissionDetail(assignmentId: string, employeeId: stri
     assignmentId: assignment.id,
     assignmentName: assignment.name,
     assignmentDescription: assignment.description,
+    showCorrectAnswers,
     employeeId: attemptWithEmployee.employee_id,
     employeeCode: attemptWithEmployee.employee.employee_code,
     fullName: attemptWithEmployee.employee.profiles.full_name,
@@ -641,6 +743,23 @@ export async function getSubmissionDetail(assignmentId: string, employeeId: stri
   };
 }
 
+export async function getSubmissionDetailForViewer(
+  assignmentId: string,
+  employeeId: string,
+  viewer: SubmissionViewer,
+): Promise<SubmissionDetailDto> {
+  assertCanViewSubmission(viewer, employeeId);
+  return getSubmissionDetail(assignmentId, employeeId, viewer);
+}
+
+export async function saveGradeForViewer(
+  payload: SaveGradeDto,
+  viewer: SubmissionViewer,
+): Promise<{ totalScore: number; maxScore: number }> {
+  assertCanGradeSubmission(viewer);
+  return saveGrade(payload);
+}
+
 export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: number; maxScore: number }> {
   const { assignmentId, employeeId, questionGrades, overallFeedback } = payload;
 
@@ -651,6 +770,10 @@ export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: nu
 
   if (!attemptWithEmployee) {
     throw new Error("Không tìm thấy bài nộp của học viên");
+  }
+
+  if (!RESULT_VISIBLE_STATUSES.includes(attemptWithEmployee.status)) {
+    throw new SubmissionAccessError("Bài làm chưa được nộp nên chưa thể chấm điểm.", 409);
   }
 
   const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);

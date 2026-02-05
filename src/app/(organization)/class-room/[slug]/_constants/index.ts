@@ -65,6 +65,28 @@ export const CLASSROOM_DETAIL_TEXT = {
   EMPTY_INFO: "Chưa có thông tin",
   SCHEDULE_FALLBACK: "Thời gian chưa được cập nhật",
   WEEKLY_LABEL: "Lặp lại hàng tuần",
+  EXAMS_EMPTY_TITLE: "Chưa có bài kiểm tra",
+  EXAMS_EMPTY_DESCRIPTION: "Hiện chưa có bài kiểm tra cho lớp học này.",
+  STUDENTS_EMPTY_TITLE: "Chưa có học viên",
+  STUDENTS_EMPTY_DESCRIPTION: "Hiện chưa có học viên trong lớp học này.",
+} as const;
+
+export const CLASSROOM_STUDENT_STATUS_TEXT = {
+  ATTENDANCE: {
+    attended: "Đã điểm danh",
+    absent: "Chưa điểm danh",
+  },
+  EXAM_RESULT: {
+    passed: "Đạt",
+    failed: "Chưa đạt",
+    pending: "Chưa chấm",
+    not_submitted: "Chưa nộp",
+  },
+  GRADING_STATUS: {
+    graded: "Đã chấm",
+    submitted: "Chưa chấm",
+    not_submitted: "Chưa nộp",
+  },
 } as const;
 
 export const CLASS_SESSION_TYPE = {
@@ -72,3 +94,24 @@ export const CLASS_SESSION_TYPE = {
   ONLINE: "online",
   LIVE: "live",
 } as const;
+
+export const CLASSROOM_DETAIL_TAB_KEYS = {
+  OVERVIEW: "overview",
+  SUBJECTS: "subjects",
+  EXAMS: "exams",
+  STUDENTS: "students",
+} as const;
+
+export const CLASSROOM_DETAIL_SECTION_TITLES = {
+  OVERVIEW: "Thông tin chung",
+  SUBJECTS: "Môn học",
+  EXAMS: "Bài kiểm tra",
+  STUDENTS: "Danh sách học viên",
+} as const;
+
+export const CLASSROOM_DETAIL_TAB_ITEMS = [
+  { tabKey: CLASSROOM_DETAIL_TAB_KEYS.OVERVIEW, tabLabel: CLASSROOM_DETAIL_SECTION_TITLES.OVERVIEW },
+  { tabKey: CLASSROOM_DETAIL_TAB_KEYS.SUBJECTS, tabLabel: CLASSROOM_DETAIL_SECTION_TITLES.SUBJECTS },
+  { tabKey: CLASSROOM_DETAIL_TAB_KEYS.EXAMS, tabLabel: CLASSROOM_DETAIL_SECTION_TITLES.EXAMS },
+  { tabKey: CLASSROOM_DETAIL_TAB_KEYS.STUDENTS, tabLabel: CLASSROOM_DETAIL_SECTION_TITLES.STUDENTS },
+] as const;

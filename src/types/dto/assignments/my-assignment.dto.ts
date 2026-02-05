@@ -7,6 +7,9 @@ export interface MyAssignmentDto {
   assignment_name: string;
   assignment_description: string;
   created_at: string;
+  available_from?: string | null;
+  available_to?: string | null;
+  pass_score: number | null;
   attempt_limit: number | null;
   attempts_used: number;
   attempts_remaining: number | null;

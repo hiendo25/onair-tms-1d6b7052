@@ -190,10 +190,10 @@ const LessonContentPanel = ({
     }
 
     if (contentKind === "assessment") {
-      const assignmentId = lesson.assignment_id;
+      const assignmentBankId = lesson.assignment_id;
       return (
         <AssessmentLessonFrame
-          assignmentId={assignmentId}
+          assignmentId={assignmentBankId}
           studentId={studentId}
           lesson={lesson}
           learningPathId={learningPathId}

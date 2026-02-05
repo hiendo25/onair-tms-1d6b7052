@@ -167,6 +167,11 @@ const LessonNavigator = ({
         );
         const sectionProgressPercent = Math.round(clampedProgressValue);
 
+        console.log("sectionProgressById", sectionProgressById);
+
+        console.log("sectionProgressValue", sectionProgressValue);
+
+
         return (
           <Box
             key={section.id}
