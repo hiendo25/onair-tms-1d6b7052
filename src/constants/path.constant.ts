@@ -6,6 +6,7 @@ export const PATHS = {
   DEPARTMENTS: {
     ROOT: "/departments",
     CREATE_DEPARTMENT: "/departments/create",
+    LIST: "/departments/list",
     IMPORT_DEPARTMENTS: "/departments/import",
     DETAIL: (id: string = ":id") => `/departments/${id}`,
   },
