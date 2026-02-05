@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { Metadata, ResolvingMetadata } from "next";
 
 import { PATHS } from "@/constants/path.constant";

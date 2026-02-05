@@ -2,7 +2,7 @@ import { Container } from "@mui/material";
 
 import TableDataSkeleton from "@/shared/ui/TableData/TableDataSkeleton";
 
-export default function BranchesListLoadingPage() {
+export default async function BranchesListLoadingPage() {
   return (
     <div className="skeleton-loading-list py-8">
       <div className="skeleton-item animate-pulse">
