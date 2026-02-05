@@ -114,7 +114,7 @@ async function generateCertificate(payload: CertificateGenerationPayload): Promi
       frameUrl,
     };
 
-    // Call BFF API for certificate generation
+    // Call BFF API for certificate generation.
     const response = await fetch(`${BFF_BASE_URL}/api/v1/image-generator/certificates/generate`, {
       method: "POST",
       headers: {
