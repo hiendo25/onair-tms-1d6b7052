@@ -1,7 +1,12 @@
 import { DomainError } from "@/lib/errors/DomainError";
 import { branchRepository, departmentsRepository, employeesRepository, organizationsRepository } from "@/repository";
 
-import { CreateChildDepartmentInput, CreateDepartmentResult, CreateRootDepartmentInput } from "./departments.dto";
+import {
+  CreateDepartmentGroupInput,
+  CreateDepartmentGroupResult,
+  CreateRootDepartmentInput,
+  CreateRootDepartmentResult,
+} from "./departments.dto";
 
 export class CreateDepartmentService {
   private organizationId: string;
@@ -16,7 +21,7 @@ export class CreateDepartmentService {
     this.authorId = authorId;
   }
 
-  async createRoot(createDepartmentRootInput: CreateRootDepartmentInput) {
+  async createRoot(createDepartmentRootInput: CreateRootDepartmentInput): Promise<CreateRootDepartmentResult> {
     const { managedById, branchId } = createDepartmentRootInput;
 
     const managedDepartment = await this.getManagedDepartment(managedById);
@@ -89,19 +94,14 @@ export class CreateDepartmentService {
     };
   }
 
-  async createChild(createChildDepartmentInput: CreateChildDepartmentInput): Promise<CreateDepartmentResult> {
-    const { managedById, parentId } = createChildDepartmentInput;
+  async createChild(input: CreateDepartmentGroupInput): Promise<CreateDepartmentGroupResult> {
+    const { managedById, parentId } = input;
 
     if (!parentId) {
-      throw new DomainError(
-        "Thiếu parentId phòng ban",
-        "INVALID_PARENT_DEPARTMENT_ID",
-        400,
-        createChildDepartmentInput,
-      );
+      throw new DomainError("Thiếu parentId phòng ban", "INVALID_PARENT_DEPARTMENT_ID", 400, input);
     }
 
-    const departmentName = createChildDepartmentInput.name ? createChildDepartmentInput.name.trim() : "";
+    const departmentName = input.name ? input.name.trim() : "";
 
     const parentDepartment = await this.getParentDepartment(parentId);
 
@@ -124,7 +124,7 @@ export class CreateDepartmentService {
 
     const nextPriority = lastPriority + 1;
 
-    let departmentCode = createChildDepartmentInput.code;
+    let departmentCode = input.code;
 
     if (departmentCode) {
       const existedDepartmentCode = await departmentsRepository.getDepartmentByCodeOrName("code", departmentCode);

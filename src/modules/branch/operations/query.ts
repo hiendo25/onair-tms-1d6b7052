@@ -1,7 +1,8 @@
 import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { client } from "@/lib/api";
 import { useTQuery } from "@/lib/queryClient";
-import * as branchService from "@/services/branches/branch.service";
+import { sleep } from "@/utils";
+// import * as branchService from "@/services/branches/branch.service";
 // import type { GetBranchesParams } from "@/types/dto/branches";
 import { GetBranchesQueryParams, GetBranchesResponse } from "../type";
 
@@ -16,13 +17,5 @@ export const useGetBranchesQuery = (params: GetBranchesQueryParams, options?: { 
       return data.data;
     },
     enabled: options?.enabled,
-  });
-};
-
-export const useGetBranchQuery = (id: string) => {
-  return useTQuery({
-    queryKey: ["branches", id],
-    queryFn: () => branchService.getBranchById(id),
-    enabled: !!id,
   });
 };

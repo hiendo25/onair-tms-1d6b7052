@@ -1,15 +1,15 @@
-import { cache } from "react";
+import { cache, Suspense } from "react";
+import { Divider } from "@mui/material";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
 import organizationAuth from "@/lib/auth";
 import { branchRepository } from "@/repository";
-import InfoGroupCard from "@/shared/ui/InfoGroupCard";
 import PageContainer from "@/shared/ui/PageContainer";
 
-import DepartmentListContainer from "./_components/DepartmentListContainer";
-import TestServerComp from "./TestServerComponent";
+import BranchDepartmentListContainer from "./_components/BranchDepartmentListContainer";
+import BranchInformationContainer from "./_components/BranchInformationContainer";
 
 interface BranchDetailPageProps {
   params: Promise<{ id: string }>;
@@ -39,7 +39,6 @@ export default async function BranchDetailRoute({ params }: BranchDetailPageProp
 
   const auth = await organizationAuth();
 
-  console.log({ auth });
   const branchDetail = await getBranchDetailById(id);
 
   if (!branchDetail) {
@@ -50,18 +49,18 @@ export default async function BranchDetailRoute({ params }: BranchDetailPageProp
 
   return (
     <PageContainer title={branchDetail.name} breadcrumbs={breadcrumbs}>
-      <InfoGroupCard
-        title="Thông tin chi nhánh"
-        description="Thông tin cơ bản và mã định danh chi nhánh."
-        items={[
-          { label: "Tên chi nhánh", value: branchDetail.name },
-          { label: "Mã chi nhánh", value: branchDetail.code },
-          { label: "Địa điểm", value: branchDetail.address },
-          { label: "Ngày tạo", value: branchDetail.created_at },
-        ]}
+      <BranchInformationContainer
+        name={branchDetail.name}
+        code={branchDetail.code}
+        managedName={branchDetail.managedBy?.full_name || branchDetail.managedBy?.profiles?.full_name}
+        address={branchDetail.address}
+        createdAt={branchDetail.created_at}
+        updatedAt={branchDetail.updated_at ?? undefined}
+        data={branchDetail}
+        status={branchDetail.status ?? undefined}
       />
-      <DepartmentListContainer branchId={branchDetail.id} />
-      <TestServerComp />
+      <Divider className="my-6" />
+      <BranchDepartmentListContainer branchId={branchDetail.id} />
     </PageContainer>
   );
 }

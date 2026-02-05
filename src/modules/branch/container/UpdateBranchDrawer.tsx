@@ -9,9 +9,14 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { CloseIcon } from "@/shared/assets/icons";
 import UpsertBranchForm, { UpsertBranchFormProps, UpsertBranchFormRef } from "../components/UpsertBranchForm";
 import { useUpdateBranchMutation } from "../operations/mutation";
-import { UpdateBranchPayload } from "../type";
+import { UpdateBranchPayload, UpdateBranchResponse } from "../type";
 export interface UpdateBranchDrawerRef {
-  open: (data: UpsertBranchFormProps["initialValues"]) => void;
+  open: (
+    data: UpsertBranchFormProps["initialValues"],
+    callback?: {
+      onSuccess?: (data: NonNullable<UpdateBranchResponse["data"]>) => void;
+    },
+  ) => void;
   close: () => void;
 }
 export interface UpdateBranchDrawerProps {
@@ -21,6 +26,7 @@ const UpdateBranchDrawer = React.forwardRef<UpdateBranchDrawerRef, UpdateBranchD
   const upsertFormRef = useRef<UpsertBranchFormRef>(null);
   const [openDrawer, setOpenDrawer] = useState(open);
   const [initialValues, setInitialValues] = useState<UpsertBranchFormProps["initialValues"]>(undefined);
+  const [onSuccess, setOnSuccess] = useState<(data: NonNullable<UpdateBranchResponse["data"]>) => void>();
 
   const [isTransition, startTransition] = useTransition();
   const queryClient = useQueryClient();
@@ -28,13 +34,11 @@ const UpdateBranchDrawer = React.forwardRef<UpdateBranchDrawerRef, UpdateBranchD
   const { mutate: updateBranch, isPending } = useUpdateBranchMutation();
 
   const handleCreateLevel: UpsertBranchFormProps["onSubmit"] = (formData) => {
-    console.log({ formData });
     const updateBranchPayload: UpdateBranchPayload = {
       id: formData.id,
       address: formData.address,
       code: formData.code,
       name: formData.name,
-      parentId: formData.parentId,
       managedById: formData.managedById,
     };
 
@@ -44,6 +48,7 @@ const UpdateBranchDrawer = React.forwardRef<UpdateBranchDrawerRef, UpdateBranchD
           enqueueSnackbar("Cập nhật chi nhánh thành công.", { variant: "success" });
           queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.GET_BRANCHES] });
           setOpenDrawer(false);
+          onSuccess?.(data);
         });
       },
     });
@@ -59,9 +64,10 @@ const UpdateBranchDrawer = React.forwardRef<UpdateBranchDrawerRef, UpdateBranchD
   };
 
   useImperativeHandle(ref, () => ({
-    open: (formValues) => {
+    open: (formValues, callback) => {
       setInitialValues(formValues);
       setOpenDrawer(true);
+      if (callback?.onSuccess) setOnSuccess(() => callback.onSuccess);
     },
     close: () => {
       setOpenDrawer(false);

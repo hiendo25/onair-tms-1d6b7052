@@ -40,6 +40,7 @@ export type Database = {
           created_by: string
           description: string
           duration_minutes: number | null
+          hide_correct_answers: boolean | null
           id: string
           name: string
           organization_id: string | null
@@ -54,6 +55,7 @@ export type Database = {
           created_by: string
           description: string
           duration_minutes?: number | null
+          hide_correct_answers?: boolean | null
           id?: string
           name: string
           organization_id?: string | null
@@ -68,6 +70,7 @@ export type Database = {
           created_by?: string
           description?: string
           duration_minutes?: number | null
+          hide_correct_answers?: boolean | null
           id?: string
           name?: string
           organization_id?: string | null
@@ -1141,6 +1144,52 @@ export type Database = {
           },
         ]
       }
+      class_room_flashcards: {
+        Row: {
+          class_room_id: string
+          created_at: string
+          flashcard_id: string
+          id: string
+          order_index: number
+        }
+        Insert: {
+          class_room_id: string
+          created_at?: string
+          flashcard_id: string
+          id?: string
+          order_index?: number
+        }
+        Update: {
+          class_room_id?: string
+          created_at?: string
+          flashcard_id?: string
+          id?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_room_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_room_flashcards_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_room_metadata: {
         Row: {
           class_room_id: string | null
@@ -1963,6 +2012,78 @@ export type Database = {
             columns: ["employee_id"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_flashcards: {
+        Row: {
+          class_room_id: string
+          created_at: string
+          employee_id: string
+          flashcard_id: string
+          id: string
+          order_index: number
+          read_at: string | null
+          shown_at: string | null
+          status: Database["public"]["Enums"]["employee_flashcard_status"]
+        }
+        Insert: {
+          class_room_id: string
+          created_at?: string
+          employee_id: string
+          flashcard_id: string
+          id?: string
+          order_index?: number
+          read_at?: string | null
+          shown_at?: string | null
+          status?: Database["public"]["Enums"]["employee_flashcard_status"]
+        }
+        Update: {
+          class_room_id?: string
+          created_at?: string
+          employee_id?: string
+          flashcard_id?: string
+          id?: string
+          order_index?: number
+          read_at?: string | null
+          shown_at?: string | null
+          status?: Database["public"]["Enums"]["employee_flashcard_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_flashcards_class_room_id_fkey"
+            columns: ["class_room_id"]
+            isOneToOne: false
+            referencedRelation: "class_rooms_priority"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_flashcards_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "department_gamification_ranking"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employee_flashcards_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_flashcards_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
             referencedColumns: ["id"]
           },
         ]
@@ -4323,6 +4444,18 @@ export type Database = {
           total_xp: number
         }[]
       }
+      get_completed_class_rooms: {
+        Args: { p_class_type_filter?: string; p_employee_id: string }
+        Returns: {
+          class_type: string
+          completed_at: string
+          description: string
+          id: string
+          slug: string
+          thumbnail_url: string
+          title: string
+        }[]
+      }
       get_department_leaderboard: {
         Args: {
           p_department_id: string
@@ -4378,6 +4511,34 @@ export type Database = {
             }
         Returns: {
           employee_id: string
+          total_count: number
+        }[]
+      }
+      get_my_assignments: {
+        Args: {
+          p_employee_id: string
+          p_limit?: number
+          p_organization_id: string
+          p_page?: number
+          p_search?: string
+          p_status?: Database["public"]["Enums"]["assignment_attempt_status"]
+        }
+        Returns: {
+          assignment_description: string
+          assignment_id: string
+          assignment_name: string
+          attempt_limit: number
+          attempts_used: number
+          available_from: string
+          available_to: string
+          created_at: string
+          has_active_attempt: boolean
+          has_submitted: boolean
+          max_score: number
+          pass_score: number
+          score: number
+          status: Database["public"]["Enums"]["assignment_attempt_status"]
+          submitted_at: string
           total_count: number
         }[]
       }
@@ -4488,6 +4649,7 @@ export type Database = {
         | "saturday"
       department_status: "active" | "inactive" | "deleted"
       department_type: "division" | "department" | "team" | "unit"
+      employee_flashcard_status: "in_queue" | "available"
       employee_status: "active" | "inactive"
       employee_type: "admin" | "student" | "teacher"
       flashcard_status: "active" | "inactive"
@@ -4718,6 +4880,7 @@ export const Constants = {
       ],
       department_status: ["active", "inactive", "deleted"],
       department_type: ["division", "department", "team", "unit"],
+      employee_flashcard_status: ["in_queue", "available"],
       employee_status: ["active", "inactive"],
       employee_type: ["admin", "student", "teacher"],
       flashcard_status: ["active", "inactive"],

@@ -3,7 +3,13 @@ import { branchRepository, departmentsRepository } from "@/repository";
 import { GetBranchesByPathsRecords, GetRootBranchesRecords } from "@/repository/branch";
 import { GetDepartmentsByPathsRecords, GetRootDepartmentsRecords } from "@/repository/departments";
 
-import { GetDepartmentDetailByIdResult, GetDepartmentsInput, GetDepartmentsResult } from "./departments.dto";
+import {
+  GetDepartmentDetailByIdResult,
+  GetDepartmentGroupsByIdsResult,
+  GetDepartmentGroupsInput,
+  GetDepartmentsInput,
+  GetDepartmentsResult,
+} from "./departments.dto";
 
 export class GetDepartmentService {
   private organizationId: string;
@@ -112,6 +118,58 @@ export class GetDepartmentService {
             code: data.branch.code,
           }
         : null,
+    };
+  }
+
+  async getChildDepartmentByIds(input: GetDepartmentGroupsInput): Promise<GetDepartmentGroupsByIdsResult> {
+    const { departmentIds } = input;
+
+    if (!departmentIds || !departmentIds.length || !Array.isArray(departmentIds)) {
+      throw new DomainError("Invalid Ids", "INVALID_DEPARTMENT_IDS", 400, departmentIds);
+    }
+
+    const { data, count } = await departmentsRepository.getDepartmentGroupsByDepartmentIds(departmentIds);
+
+    const departmentMaps = data.map((item) => ({
+      id: item.id,
+      name: item.name,
+      createdAt: item.created_at,
+      path: item.path,
+      level: item.level,
+      code: item.code,
+      status: item.status,
+      parentId: item.parent_id,
+      priority: item.priority || 1,
+      author: item.createdBy
+        ? {
+            fullName: item.createdBy.profiles?.full_name || "",
+            id: item.createdBy.id,
+          }
+        : null,
+      managedBy: item.managedBy
+        ? {
+            id: item.managedBy.id,
+            fullName: item.managedBy.full_name || item.managedBy.profiles?.full_name || "",
+          }
+        : null,
+      organization: {
+        id: item.organizations.id,
+        name: item.organizations.name,
+      },
+      branch: item.branch
+        ? {
+            id: item.branch.id,
+            name: item.branch.name,
+            code: item.branch.code,
+            path: item.branch.path,
+            level: item.branch.level,
+          }
+        : null,
+    }));
+
+    return {
+      items: departmentMaps,
+      count: count || 0,
     };
   }
 

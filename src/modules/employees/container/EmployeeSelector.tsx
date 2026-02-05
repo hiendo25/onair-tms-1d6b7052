@@ -139,7 +139,7 @@ const EmployeeSelector: React.FC<EmployeeSelectorProps> = ({
           )}
           {selectedEmployeeIds.map((selectedId) => (
             <Typography key={selectedId} sx={{ fontSize: 14 }}>
-              {getEmployeeName(selectedId)}
+              {getEmployeeName(selectedId) ?? selectedId}
             </Typography>
           ))}
         </div>

@@ -5,32 +5,10 @@ import { HttpError } from "../errors/HttpError";
 import { http } from "./http-status";
 
 type QueryParams = Record<string, any>;
+import * as qs from "qs";
 
 const buildObjectToQueryString = (params?: QueryParams, prefix?: string) => {
-  if (!params) return "";
-
-  const searchParams = new URLSearchParams();
-
-  const appendParams = (obj: QueryParams, parentKey?: string) => {
-    Object.entries(obj).forEach(([key, value]) => {
-      if (value === undefined || value === null) return;
-
-      const fullKey = parentKey ? `${parentKey}[${key}]` : key;
-
-      if (Array.isArray(value)) {
-        searchParams.append(fullKey, String(value.join(",")));
-      } else if (typeof value === "object" && value !== null) {
-        appendParams(value, fullKey);
-      } else {
-        searchParams.append(fullKey, String(value));
-      }
-    });
-  };
-
-  appendParams(params, prefix);
-
-  const qs = searchParams.toString();
-  return qs ? `?${qs}` : "";
+  return params ? `?${qs.stringify(params)}` : "";
 };
 
 const buildUrl = (url: string) => (url.startsWith("http") ? url : url.startsWith("/") ? `/api${url}` : `/api/${url}`);

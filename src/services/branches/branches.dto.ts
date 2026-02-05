@@ -32,7 +32,6 @@ interface BaseBranchItemResult {
 export interface CreateBranchInput {
   name?: string;
   address?: string;
-  parentId?: string;
   code?: string;
   managedById?: string;
 }
@@ -58,7 +57,6 @@ export interface GetBranchesResult {
 export interface UpdateBranchInput {
   id?: string;
   name?: string;
-  parentId?: string;
   code?: string;
   address?: string;
   managedById?: string;

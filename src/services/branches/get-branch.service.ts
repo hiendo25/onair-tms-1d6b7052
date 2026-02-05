@@ -73,7 +73,6 @@ export class GetBranchService {
       createdAt: record.created_at,
       path: record.path,
       level: record.level,
-      children: childItems,
       code: record.code,
       status: record.status,
       parentId: record.parent_id,
@@ -83,13 +82,14 @@ export class GetBranchService {
       managedBy: record.managedBy
         ? {
             id: record.managedBy.id,
-            fullName: record.managedBy.full_name || "",
+            fullName: record.managedBy.full_name || record.managedBy.profiles?.full_name || "",
           }
         : null,
       organization: {
         id: record.organizations.id,
         name: record.organizations.name,
       },
+      children: childItems,
     };
   }
 }

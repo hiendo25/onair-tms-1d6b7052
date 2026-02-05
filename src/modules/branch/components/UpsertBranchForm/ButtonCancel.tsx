@@ -23,14 +23,14 @@ const ButtonCancel = forwardRef<ButtonCancelRef, ButtonCancelProps>(
     const [isTransition, startTransition] = useTransition();
     const dialog = useDialogs();
 
-    const [name, address, code, parentId] = useWatch({
+    const [name, address, code] = useWatch({
       control,
-      name: ["name", "address", "code", "parentId"],
+      name: ["name", "address", "code"],
     });
 
     const isOpenDialogConfirm = useMemo(() => {
       if (!initialValues) {
-        return [name, address, code, parentId].some((val) => (typeof val === "string" ? val.length : val !== 0));
+        return [name, address, code].some((val) => (typeof val === "string" ? val.length : val !== 0));
       }
 
       return !isEqual(
@@ -38,11 +38,10 @@ const ButtonCancel = forwardRef<ButtonCancelRef, ButtonCancelProps>(
           name: initialValues.name,
           address: initialValues.address,
           code: initialValues.code,
-          parentId: initialValues.parentId,
         },
-        { name, address, code, parentId },
+        { name, address, code },
       );
-    }, [name, address, code, parentId, initialValues]);
+    }, [name, address, code, initialValues]);
 
     const handleClickCancel = async () => {
       if (isOpenDialogConfirm) {

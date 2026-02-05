@@ -2,7 +2,13 @@ import { QUERY_KEYS } from "@/constants/query-key.constant";
 import { client } from "@/lib/api";
 import { useTQuery } from "@/lib/queryClient";
 import * as departmentService from "@/services/departments/department.service";
-import { GetDepartmentsQueryParams, GetDepartmentsResponse } from "../type";
+import { sleep } from "@/utils";
+import {
+  GetDepartmentGroupsQueryParams,
+  GetDepartmentGroupsResponse,
+  GetDepartmentsQueryParams,
+  GetDepartmentsResponse,
+} from "../type";
 
 export const useGetDepartmentsQuery = (params?: GetDepartmentsQueryParams, options?: { enabled?: boolean }) => {
   const { enabled = true } = options || {};
@@ -10,6 +16,27 @@ export const useGetDepartmentsQuery = (params?: GetDepartmentsQueryParams, optio
     queryKey: [QUERY_KEYS.GET_DEPARTMENTS, params],
     queryFn: async () => {
       const data = await client.get<GetDepartmentsResponse>("departments", params);
+      if (!data.success) {
+        throw data.error.message;
+      }
+      return data.data;
+    },
+    enabled,
+  });
+};
+
+export const useGetDepartmentGroupsQuery = (options: {
+  queryParams: GetDepartmentGroupsQueryParams;
+  enabled?: boolean;
+}) => {
+  const { enabled = true, queryParams } = options || {};
+  return useTQuery({
+    queryKey: [QUERY_KEYS.GET_DEPARTMENT_GROUPS, queryParams],
+    queryFn: async () => {
+      const data = await client.get<GetDepartmentGroupsResponse>(
+        `departments/${queryParams.departmentId}/group`,
+        queryParams,
+      );
       if (!data.success) {
         throw data.error.message;
       }

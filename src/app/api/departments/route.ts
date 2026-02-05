@@ -5,7 +5,7 @@ import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { DomainError } from "@/lib/errors/DomainError";
 import {
-  CreateChildDepartmentPayload,
+  CreateDepartmentGroupPayload,
   CreateRootDepartmentPayload,
   GetDepartmentsQueryParams,
 } from "@/modules/department/type";
@@ -17,9 +17,9 @@ export async function POST(request: NextRequest) {
   try {
     const { organizationId, employeeId } = await requireAuth();
 
-    const payload: CreateRootDepartmentPayload | CreateChildDepartmentPayload = await request.json();
+    const payload: CreateRootDepartmentPayload | CreateDepartmentGroupPayload = await request.json();
 
-    if (payload.type !== "root" && payload.type !== "children") {
+    if (payload.type !== "root" && payload.type !== "group") {
       return http.badRequest("type không hợp lệ", "INVALID_TYPE", payload);
     }
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       return http.created(data);
     }
 
-    if (payload.type === "children") {
+    if (payload.type === "group") {
       const data = await new CreateDepartmentService(organizationId, employeeId).createChild({
         parentId: payload.parentId,
         code: payload.code,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
 
-    const queryObject = parseQueryParams(searchParams) as GetDepartmentsQueryParams;
+    const queryObject = <GetDepartmentsQueryParams>parseQueryParams(searchParams);
 
     const page = queryObject.page && isNumber(Number(queryObject.page)) ? Number(queryObject.page) : undefined;
     const pageSize =

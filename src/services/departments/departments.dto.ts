@@ -44,7 +44,7 @@ export interface CreateRootDepartmentInput {
   branchId?: string;
 }
 
-export interface CreateChildDepartmentInput {
+export interface CreateDepartmentGroupInput {
   name?: string;
   parentId?: string;
   code?: string;
@@ -52,6 +52,8 @@ export interface CreateChildDepartmentInput {
 }
 
 export interface CreateDepartmentResult extends BaseDepartmentItemResult {}
+export interface CreateRootDepartmentResult extends BaseDepartmentItemResult {}
+export interface CreateDepartmentGroupResult extends BaseDepartmentItemResult {}
 
 export interface GetDepartmentsInput {
   page?: number;
@@ -63,6 +65,14 @@ export interface GetDepartmentsInput {
   };
   branchIds?: string[];
   excludes?: string[];
+}
+
+export interface GetDepartmentGroupsInput {
+  departmentIds?: string[];
+}
+export interface GetDepartmentGroupsByIdsResult {
+  items: Omit<BaseDepartmentItemResult, "parent">[];
+  count: number;
 }
 
 export interface GetDepartmentsResult {
@@ -89,7 +99,7 @@ export interface UpdateRootDepartmentInput {
   branchId?: string;
 }
 
-export interface UpdateChildDepartmentInput {
+export interface UpdateDepartmentGroupInput {
   id?: string;
   name?: string;
   code?: string;

@@ -74,7 +74,7 @@ export async function updateDepartmentStatus({ id, ...branchUpdateStatus }: Depa
 }
 
 export async function getRootDepartments(departmentFilter: DepartmentFilter) {
-  const { from = 0, to = 90, filterField, filterValue, organizationId, excludes } = departmentFilter;
+  const { from = 0, to = 90, filterField, filterValue, organizationId, excludes, branchIds } = departmentFilter;
 
   const supabaseSv = await createSVClient();
 
@@ -105,6 +105,10 @@ export async function getRootDepartments(departmentFilter: DepartmentFilter) {
 
   if (excludes && excludes.length) {
     query = query.not("id", "in", `(${excludes.join(",")})`);
+  }
+
+  if (branchIds?.length) {
+    query = query.in("branch_id", branchIds);
   }
 
   const { data, error, count } = await query.range(from, to).order("created_at", { ascending: false });
@@ -221,3 +225,32 @@ export async function getDepartmentsByPaths(paths: string[]) {
   return data;
 }
 export type GetDepartmentsByPathsRecords = Awaited<ReturnType<typeof getDepartmentsByPaths>>;
+
+export async function getDepartmentGroupsByDepartmentIds(ids: string[]) {
+  const supabaseSv = await createSVClient();
+
+  let query = supabaseSv.from("departments").select(
+    `*, 
+			${createdBySelector},
+			${managedBySelector},
+			${branchSelector},
+			organizations(id, name, code)
+		`,
+    {
+      count: "exact",
+    },
+  );
+
+  if (ids.length) {
+    query = query.in("parent_id", ids);
+  }
+
+  const { data, error, count } = await query.order("created_at");
+
+  if (error) {
+    throw new Error(error.details || error.message);
+  }
+
+  return { data, count };
+}
+export type GetDepartmentGroupsByDepartmentIds = Awaited<ReturnType<typeof getDepartmentGroupsByDepartmentIds>>;

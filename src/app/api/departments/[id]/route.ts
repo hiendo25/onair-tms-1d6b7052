@@ -5,7 +5,7 @@ import { PATHS } from "@/constants/path.constant";
 import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { DomainError } from "@/lib/errors/DomainError";
-import { UpdateChildDepartmentPayload, UpdateRootDepartmentPayload } from "@/modules/department/type";
+import { UpdateDepartmentGroupPayload, UpdateRootDepartmentPayload } from "@/modules/department/type";
 import { departmentService } from "@/services";
 import { GetDepartmentService } from "@/services/departments/get-department.service";
 import { UpdateDepartmentService } from "@/services/departments/update-department.service";
@@ -14,9 +14,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { organizationId, employeeId } = await requireAuth();
     const { id } = await params;
-    const payload = (await request.json()) as UpdateRootDepartmentPayload | UpdateChildDepartmentPayload;
+    const payload = (await request.json()) as UpdateRootDepartmentPayload | UpdateDepartmentGroupPayload;
 
-    if (payload.type !== "root" && payload.type !== "children") {
+    if (payload.type !== "root" && payload.type !== "group") {
       return http.badRequest("type không hợp lệ.");
     }
 
@@ -32,8 +32,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return http.created(data);
     }
 
-    if (payload.type === "children") {
-      const data = await new UpdateDepartmentService(organizationId, employeeId).updateChild({
+    if (payload.type === "group") {
+      const data = await new UpdateDepartmentService(organizationId, employeeId).updateGroup({
         id,
         parentId: payload.parentId,
         code: payload.code,
@@ -53,12 +53,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return http.serverError(errorMessage);
   }
 }
-
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { organizationId, employeeId } = await requireAuth();
     const { id } = await params;
-    // revalidatePath(PATHS.DEPARTMENTS.ROOT);
+
     const data = await new GetDepartmentService(organizationId, employeeId).getDetailDepartmentById(id);
 
     return http.ok(data);

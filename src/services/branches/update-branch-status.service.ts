@@ -33,8 +33,6 @@ export class UpdateBranchStatusService {
       throw new DomainError("Trạng thái không hợp lệ", "BRANCH_STATUS_IS_INVALID", 400, updateBranchInput);
     }
 
-    const parentBranch = await this.getParentBranch(currentBranch.parent_id ?? undefined);
-
     const data = await branchRepository.updateBranchStatus({
       id: updateBranchInput.id,
       status: updateBranchInput.status,
@@ -64,13 +62,7 @@ export class UpdateBranchStatusService {
             fullName: data.managedBy.full_name || "",
           }
         : null,
-      parent: parentBranch
-        ? {
-            id: parentBranch.id,
-            name: parentBranch.code,
-            path: parentBranch.path,
-          }
-        : null,
+      parent: null,
       organization: {
         id: data.organizations.id,
         name: data.organizations.name,

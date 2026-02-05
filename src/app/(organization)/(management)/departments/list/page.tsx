@@ -2,7 +2,8 @@ import { Metadata, ResolvingMetadata } from "next";
 
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
-import DepartmentListContainer from "../_components/DepartmentListContainer";
+
+import DepartmentListContainer from "./_components/DepartmentListContainer";
 type ManageBranchProps = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

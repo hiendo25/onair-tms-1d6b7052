@@ -1,6 +1,6 @@
 import { forwardRef, memo, useEffect, useImperativeHandle, useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormControl, FormHelperText, FormLabel, Stack, Typography } from "@mui/material";
+import { Button, FormControl, FormHelperText, FormLabel, Stack, Typography } from "@mui/material";
 import { Controller, FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
@@ -27,6 +27,7 @@ export interface UpsertDepartmentFormProps {
   initialValues?: UpsertRootDepartmentFormData;
   hideButtonCancel?: boolean;
   hideButtonSubmit?: boolean;
+  action?: "create" | "update";
 }
 
 const initUpsertRootDepartmentFormData = (): UpsertRootDepartmentFormData => {
@@ -34,13 +35,21 @@ const initUpsertRootDepartmentFormData = (): UpsertRootDepartmentFormData => {
     name: "",
     code: "",
     branchId: undefined,
-    managedById: undefined,
     status: "active",
   };
 };
 const UpsertLevelForm = forwardRef<UpsertDepartmentFormRef, UpsertDepartmentFormProps>(
   (
-    { isLoading, onSubmit, onCancel, onInvalid, initialValues, hideButtonCancel = false, hideButtonSubmit = false },
+    {
+      isLoading,
+      onSubmit,
+      onCancel,
+      onInvalid,
+      initialValues,
+      hideButtonCancel = false,
+      hideButtonSubmit = false,
+      action = "create",
+    },
     ref,
   ) => {
     const buttonCancelRef = useRef<ButtonCancelRef>(null);
@@ -112,7 +121,6 @@ const UpsertLevelForm = forwardRef<UpsertDepartmentFormRef, UpsertDepartmentForm
                   Chi nhánh <span className="text-red-600">*</span>
                 </FormLabel>
                 <BranchSelector
-                  excludes={branchId ? [branchId] : undefined}
                   values={value ? [value] : undefined}
                   onChange={(values) => onChange(values[0])}
                   error={!!error?.message}

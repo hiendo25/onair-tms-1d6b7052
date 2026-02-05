@@ -4,7 +4,7 @@ import { branchRepository, departmentsRepository, employeesRepository, organizat
 import { GetBranchById } from "@/repository/branch";
 
 import {
-  UpdateChildDepartmentInput,
+  UpdateDepartmentGroupInput,
   UpdateDepartmentInput,
   UpdateDepartmentResult,
   UpdateRootDepartmentInput,
@@ -123,8 +123,93 @@ export class UpdateDepartmentService {
     };
   }
 
-  async updateChild(updateChildDepartmentInput: UpdateChildDepartmentInput) {
-    const { managedById, parentId } = updateChildDepartmentInput;
+  async updateGroup(input: UpdateDepartmentGroupInput) {
+    const { managedById, parentId, id } = input;
+
+    if (!id) {
+      throw new DomainError("Thiếu id.", "ID_IS_MISSING", 400);
+    }
+
+    const currentDepartment = await departmentsRepository.getDepartmentById(id, this.organizationId);
+
+    if (!currentDepartment) {
+      throw new DomainError("Phòng ban không hợp lệ", "DEPARTMENT_ID_IS_INVALID", 400);
+    }
+
+    const { branch: oldBranch } = currentDepartment;
+    const departmentName = input.name ? input.name.trim() : "";
+
+    const manager = await this.getManagedEmployee(managedById);
+
+    let departmentCode = input.code?.trim();
+
+    if (!departmentCode) {
+      departmentCode = await this.generateDepartmentCode(currentDepartment.priority || 0, this.rootLevel);
+    }
+
+    if (departmentCode && departmentCode !== currentDepartment.code) {
+      const existedDepartmentCode = await departmentsRepository.getDepartmentByCodeOrName("code", departmentCode);
+
+      if (existedDepartmentCode) {
+        throw new DomainError("Mã phòng ban đã tồn tại trên hệ thống.", "DEPARTMENT_CODE_ALREADY_EXISTS", 409);
+      }
+    }
+
+    const data = await departmentsRepository.updateDepartment({
+      id,
+      branch_id: currentDepartment.branch_id,
+      code: departmentCode,
+      level: currentDepartment.level || this.rootLevel,
+      name: departmentName,
+      parent_id: currentDepartment.parent_id,
+      path: currentDepartment.path,
+      priority: currentDepartment.priority,
+      status: "active",
+      managed_by: manager ? manager.id : null,
+      updated_at: dayjs().toISOString(),
+    });
+
+    // const branchResult = (
+    //   finalBranch
+    //     ? {
+    //         id: finalBranch.id,
+    //         code: finalBranch.code,
+    //         level: finalBranch.level,
+    //         name: finalBranch.name,
+    //         path: finalBranch.path,
+    //       }
+    //     : null
+    // ) satisfies UpdateDepartmentResult["branch"];
+
+    return {
+      id: data.id,
+      name: data.name,
+      priority: data.priority || 0,
+      code: data.code,
+      createdAt: data.created_at,
+      path: data.path,
+      level: data.level,
+      status: data.status,
+      author: data.createdBy
+        ? {
+            fullName: data.createdBy.full_name || "",
+            id: data.createdBy.id,
+          }
+        : null,
+      managedBy: data.managedBy
+        ? {
+            id: data.managedBy.id,
+            fullName: data.managedBy.full_name || "",
+          }
+        : null,
+      parent: null,
+      parentId: data.parent_id,
+      organization: {
+        id: data.organizations.id,
+        name: data.organizations.name,
+      },
+      branch: null,
+    };
   }
 
   // async execute(createDepartmentInput: UpdateDepartmentInput): Promise<UpdateDepartmentResult> {

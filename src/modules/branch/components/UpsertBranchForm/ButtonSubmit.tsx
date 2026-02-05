@@ -2,18 +2,17 @@ import React, { memo, useMemo } from "react";
 import { Button, ButtonProps } from "@mui/material";
 import { useWatch } from "react-hook-form";
 
-import { UpsertLevelFormData } from "./upsert-branch.schema";
+import { UpsertBranchFormData } from "./upsert-branch.schema";
 interface ButtonSubmitProps extends ButtonProps {
   isLoading?: boolean;
   className?: string;
 }
 const ButtonSubmit: React.FC<ButtonSubmitProps> = ({ isLoading, children, className, ...restProps }) => {
-  const values = useWatch<UpsertLevelFormData>({
-    name: ["title", "icon", "scoreRequired"],
+  const values = useWatch<UpsertBranchFormData>({
+    name: ["name", "code"],
   });
   const isDisabledButton = useMemo(() => {
     return values.some((v) => {
-      if (Array.isArray(v)) return v.length === 0;
       return !v;
     });
   }, [values]);

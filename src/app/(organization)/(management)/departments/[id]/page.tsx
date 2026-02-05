@@ -1,17 +1,15 @@
-import React, { cache } from "react";
-import { Button, Stack, Typography } from "@mui/material";
+import React, { cache, Suspense } from "react";
 import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 
 import { PATHS } from "@/constants/path.constant";
+import organizationAuth from "@/lib/auth";
 import { departmentsRepository } from "@/repository";
-import PlusIcon from "@/shared/assets/icons/PlusIcon";
-import InfoGroupCard from "@/shared/ui/InfoGroupCard";
 import PageContainer from "@/shared/ui/PageContainer";
 
-import DepartmentGroupContainer from "./_components/DepartmentGroupContainer";
+import DepartmentEmployeesContainer from "./_components/DepartmentEmployeesContainer";
+import DepartmentGroupsContainer from "./_components/DepartmentGroupsContainer";
 import DepartmentInformationContainer from "./_components/DepartmentInformationContainer";
-import EmployeeTableData from "./_components/EmployeesTableData";
 interface DepartmentDetailPageProps {
   params: Promise<{
     id: string;
@@ -40,6 +38,8 @@ export async function generateMetadata(
 export default async function DepartmentDetailPage({ params }: DepartmentDetailPageProps) {
   const { id } = await params;
 
+  const { organizationId, employeeId } = await organizationAuth();
+
   const departmentDetail = await getDepartmentDetail(id);
 
   if (!departmentDetail) {
@@ -47,6 +47,7 @@ export default async function DepartmentDetailPage({ params }: DepartmentDetailP
   }
   const breadcrumbs = [{ title: "Phòng ban", path: PATHS.DEPARTMENTS.ROOT }, { title: departmentDetail.name }];
 
+  // console.log({ departmentDetail });
   return (
     <PageContainer title={departmentDetail.name} breadcrumbs={breadcrumbs}>
       <DepartmentInformationContainer
@@ -61,18 +62,13 @@ export default async function DepartmentDetailPage({ params }: DepartmentDetailP
         data={departmentDetail}
       />
       <div className="line my-6 bg-gray-200 h-px"></div>
-      <DepartmentGroupContainer departmentId={departmentDetail.id} />
+      <Suspense fallback="loading">
+        <DepartmentGroupsContainer departmentId={departmentDetail.id} />
+      </Suspense>
       <div className="line my-6 bg-gray-200 h-px"></div>
-      <div className="section-content flex flex-col gap-6">
-        <div className="section-content__header flex justify-between mb-3">
-          <Typography component="h3" sx={{ fontSize: 18, fontWeight: 600 }}>
-            Danh sách người dùng
-          </Typography>
-        </div>
-        <div className="section-content__body">
-          <EmployeeTableData departmentId={departmentDetail.id} />
-        </div>
-      </div>
+      <Suspense fallback="loading">
+        <DepartmentEmployeesContainer departmentId={departmentDetail.id} />
+      </Suspense>
     </PageContainer>
   );
 }

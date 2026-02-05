@@ -17,3 +17,11 @@ export const toNonAccentVietnamese = (str: string) => {
   str = str.replace(/đ/g, "d");
   return str;
 };
+
+export const sleep = (timeout = 3000) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("ok");
+    }, timeout);
+  });
+};

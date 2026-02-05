@@ -23,7 +23,6 @@ const CreateBranchDrawer = React.forwardRef<CreateBranchDrawerRef, CreateBranchD
   const upsertFormRef = useRef<UpsertBranchFormRef>(null);
   const [openDrawer, setOpenDrawer] = useState(open);
 
-  const router = useRouter();
   const [isTransition, startTransition] = useTransition();
   const queryClient = useQueryClient();
 
@@ -34,7 +33,7 @@ const CreateBranchDrawer = React.forwardRef<CreateBranchDrawerRef, CreateBranchD
       address: formData.address,
       code: formData.code,
       name: formData.name,
-      parentId: formData.parentId,
+      managedById: formData.managedById,
     };
 
     createBranch(createBranchPayload, {

@@ -5,7 +5,8 @@ import { CreateBranchInput, CreateBranchResult } from "./branches.dto";
 export class CreateBranchService {
   private organizationId: string;
   private authorId: string;
-  private defaultBranchLevel = 1;
+
+  private rootLevel = 1;
 
   private maxBranchLevel = 2;
 
@@ -14,34 +15,19 @@ export class CreateBranchService {
     this.authorId = authorId;
   }
 
-  async execute(createBranchInput: CreateBranchInput): Promise<CreateBranchResult> {
-    const { managedById, parentId } = createBranchInput;
-    const branchName = createBranchInput.name ? createBranchInput.name.trim() : "";
-    const address = createBranchInput.address ? createBranchInput.address.trim() : "";
+  async execute(input: CreateBranchInput): Promise<CreateBranchResult> {
+    const { managedById } = input;
 
-    const parentBranch = await this.getParentBranch(parentId);
-
-    const branchLevel = parentBranch && parentBranch.level ? parentBranch.level + 1 : this.defaultBranchLevel;
+    const branchName = input.name ? input.name.trim() : "";
+    const address = input.address ? input.address.trim() : "";
 
     const manager = await this.getManagedEmployee(managedById);
 
-    if (branchLevel > this.maxBranchLevel) {
-      throw new DomainError(
-        `Phân cấp chi nhánh tối đa cho phép là ${this.maxBranchLevel}`,
-        "MAXIMUM_BRANCH_DEPTH_LEVEL",
-        400,
-      );
-    }
-
-    let path: string | null = null;
-    if (parentBranch) {
-      path = parentBranch.path ? `${parentBranch.path}/${parentBranch.id}` : parentBranch.id;
-    }
-
-    const lastPriority = await branchRepository.getLastPriorityBranch(parentId ?? undefined);
+    const lastPriority = await branchRepository.getLastPriorityBranch();
     const nextPriority = lastPriority + 1;
 
-    let branchCode = createBranchInput.code;
+    let branchCode = input.code;
+
     if (branchCode) {
       const existedBranchByCode = await branchRepository.getBranchByCodeOrName("code", branchCode);
 
@@ -49,17 +35,17 @@ export class CreateBranchService {
         throw new DomainError("Mã chi nhánh đã tồn tại trên hệ thống.", "BRANCH_CODE_ALREADY_EXISTS", 409);
       }
     } else {
-      branchCode = await this.generateBranchCode(nextPriority, branchLevel);
+      branchCode = await this.generateBranchCode(nextPriority, this.rootLevel);
     }
 
     const data = await branchRepository.createBranch({
       address,
       code: branchCode,
-      level: branchLevel,
+      level: this.rootLevel,
       name: branchName,
       organization_id: this.organizationId,
-      parent_id: parentBranch ? parentBranch.id : null,
-      path,
+      parent_id: null,
+      path: null,
       priority: nextPriority,
       status: "active",
       created_by: this.authorId,
@@ -85,16 +71,10 @@ export class CreateBranchService {
       managedBy: data.managedBy
         ? {
             id: data.managedBy.id,
-            fullName: data.managedBy.full_name || "",
+            fullName: data.managedBy.full_name || data.managedBy.profiles?.full_name || "",
           }
         : null,
-      parent: parentBranch
-        ? {
-            id: parentBranch.id,
-            name: parentBranch.code,
-            path: parentBranch.path,
-          }
-        : null,
+      parent: null,
       parentId: data.parent_id,
       organization: {
         id: data.organizations.id,

@@ -1,6 +1,6 @@
 import React, { forwardRef, memo, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormControl, FormLabel } from "@mui/material";
+import { FormControl, FormLabel, Stack, Typography } from "@mui/material";
 import { Controller, FormProvider, useFormContext, useWatch } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
@@ -35,7 +35,6 @@ const initUpsertBranchFormData = (): UpsertBranchFormData => {
     name: "",
     code: "",
     address: "",
-    parentId: undefined,
     managedById: undefined,
     status: "active",
   };
@@ -53,7 +52,6 @@ const UpsertLevelForm = forwardRef<UpsertBranchFormRef, UpsertBranchFormProps>(
 
     const { control, reset, handleSubmit, setValue, getValues } = methods;
 
-    const branchId = useWatch({ control, name: "id" });
     const handleSumbitForm = () => {
       if (onSubmit) handleSubmit(onSubmit, onInvalid)();
     };
@@ -81,20 +79,25 @@ const UpsertLevelForm = forwardRef<UpsertBranchFormRef, UpsertBranchFormProps>(
       <FormProvider {...methods}>
         <div className="flex flex-col gap-6">
           <RHFTextField control={control} name="name" label="Tên chi nhánh" required placeholder="Tên chi nhánh" />
-          <RHFTextField control={control} name="code" label="Mã chi nhánh" placeholder="Mã chi nhánh" />
-          <Controller
+          <RHFTextField
             control={control}
-            name="parentId"
-            render={({ field: { value, onChange } }) => (
-              <FormControl>
-                <FormLabel>Chi nhánh cha</FormLabel>
-                <BranchSelector
-                  excludes={branchId ? [branchId] : undefined}
-                  values={value ? [value] : undefined}
-                  onChange={(values) => onChange(values[0])}
-                />
-              </FormControl>
-            )}
+            name="code"
+            label="Mã chi nhánh"
+            placeholder="Mã chi nhánh"
+            required
+            note={
+              <Stack component="ul" style={{ listStyle: "outside", paddingLeft: 15 }}>
+                <Typography component="li" sx={{ fontSize: 12 }} color="text.secondary">
+                  Mã chỉ từ 2 - 8 ký tự.
+                </Typography>
+                <Typography component="li" sx={{ fontSize: 12 }} color="text.secondary">
+                  Không chứa ký tự đặc biệt, ngoại từ (-)
+                </Typography>
+                <Typography component="li" sx={{ fontSize: 12 }} color="text.secondary">
+                  Không có khoảng cách.
+                </Typography>
+              </Stack>
+            }
           />
           <Controller
             control={control}

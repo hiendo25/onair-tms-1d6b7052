@@ -6,7 +6,7 @@ import { UpdateBranchInput, UpdateBranchResult } from "./branches.dto";
 export class UpdateBranchService {
   private organizationId: string;
   private authorId: string;
-  private defaultBranchLevel = 1;
+  private rootLevel = 1;
   private maxBranchLevel = 2;
 
   constructor(organizationId: string, authorId: string) {
@@ -14,47 +14,28 @@ export class UpdateBranchService {
     this.authorId = authorId;
   }
 
-  async execute(updateBranchInput: UpdateBranchInput): Promise<UpdateBranchResult> {
-    const { managedById } = updateBranchInput;
-    if (!updateBranchInput.id) {
+  async execute(input: UpdateBranchInput): Promise<UpdateBranchResult> {
+    const { managedById } = input;
+    if (!input.id) {
       throw new DomainError("Thiếu Id chi nhánh", "BRANCH_ID_IS_MISSING", 400);
     }
 
-    const currentBranch = await branchRepository.getBranchById(updateBranchInput.id, this.organizationId);
+    const currentBranch = await branchRepository.getBranchById(input.id, this.organizationId);
 
     const manager = await this.getManagedEmployee(managedById);
 
     console.log({ manager, managedById });
     if (!currentBranch) {
-      throw new DomainError("Chi nhánh không hợp lệ.", "BRANCH_ID_IS_INVALID", 400, updateBranchInput);
+      throw new DomainError("Chi nhánh không hợp lệ.", "BRANCH_ID_IS_INVALID", 400, input);
     }
 
-    const name = updateBranchInput.name ? updateBranchInput.name.trim() : currentBranch.name;
-    const address = updateBranchInput.address ? updateBranchInput.address.trim() : currentBranch.address;
+    const name = input.name ? input.name.trim() : currentBranch.name;
+    const address = input.address ? input.address.trim() : currentBranch.address;
 
-    const parentBranch = await this.getParentBranch(updateBranchInput.parentId);
-    const branchLevel = parentBranch?.level ? parentBranch?.level + 1 : this.defaultBranchLevel;
-
-    if (branchLevel > this.maxBranchLevel) {
-      throw new DomainError(
-        `Phân cấp chi nhánh tối đa cho phép là ${this.maxBranchLevel}`,
-        "MAXIMUM_BRANCH_DEPTH_LEVEL",
-        400,
-      );
-    }
-    if (parentBranch?.id) {
-      await this.applyValidateParentBranch(parentBranch.id, currentBranch.id);
-    }
-
-    let path: string | null = null;
-    if (parentBranch) {
-      path = parentBranch.path ? `${parentBranch.path}/${parentBranch.id}` : parentBranch.id;
-    }
-
-    const lastPriority = await branchRepository.getLastPriorityBranch(updateBranchInput.parentId ?? undefined);
+    const lastPriority = await branchRepository.getLastPriorityBranch();
     const nextPriority = lastPriority + 1;
 
-    let branchCode = updateBranchInput.code;
+    let branchCode = input.code;
 
     if (branchCode && branchCode !== currentBranch.code) {
       const branch = await branchRepository.getBranchByCodeOrName("code", branchCode);
@@ -63,19 +44,19 @@ export class UpdateBranchService {
         throw new DomainError("Mã chi nhánh đã tồn tại trên hệ thống.", "BRANCH_CODE_ALREADY_EXISTED", 409);
       }
     } else if (!branchCode) {
-      branchCode = await this.generateBranchCode(nextPriority, branchLevel);
+      branchCode = await this.generateBranchCode(nextPriority, this.rootLevel);
     } else {
       branchCode = currentBranch.code;
     }
 
     const data = await branchRepository.updateBranch({
-      id: updateBranchInput.id,
+      id: input.id,
       address,
       name,
-      path,
+      path: null,
       code: branchCode,
-      level: branchLevel,
-      parent_id: parentBranch ? parentBranch.id : null,
+      level: this.rootLevel,
+      parent_id: null,
       priority: nextPriority,
       status: "active",
       managed_by: manager?.id ?? null,
@@ -105,13 +86,7 @@ export class UpdateBranchService {
             fullName: data.managedBy.full_name || "",
           }
         : null,
-      parent: parentBranch
-        ? {
-            id: parentBranch.id,
-            name: parentBranch.code,
-            path: parentBranch.path,
-          }
-        : null,
+      parent: null,
       organization: {
         id: data.organizations.id,
         name: data.organizations.name,

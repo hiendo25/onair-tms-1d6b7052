@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import { Metadata, ResolvingMetadata } from "next";
 
 import { PATHS } from "@/constants/path.constant";
 import PageContainer from "@/shared/ui/PageContainer";
-import BranchList from "../_components/BranchList";
+
+import BranchListContainer from "./_components/BranchListContainer";
 
 type ManageBranchProps = {
   params: Promise<{ slug: string }>;
@@ -25,7 +27,7 @@ export default function BranchesPage(props: ManageBranchProps) {
       title="Quản lý Chi nhánh"
       breadcrumbs={[{ title: "Quản lý Chi nhánh", path: PATHS.BRANCHES.ROOT }, { title: "Danh sách chi nhánh" }]}
     >
-      <BranchList />
+      <BranchListContainer />
     </PageContainer>
   );
 }

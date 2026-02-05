@@ -4,52 +4,47 @@ import { Button, Chip, IconButton, Stack, Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
 
-import UpdateRootDepartmentDrawer, {
-  UpdateRootDepartmentDrawerRef,
-} from "@/modules/department/container/UpdateRootDepartmentDrawer";
-import { GetDepartmentById } from "@/repository/departments";
+import UpdateBranchDrawer, { UpdateBranchDrawerRef } from "@/modules/branch/container/UpdateBranchDrawer";
+import { GetBranchById } from "@/repository/branch";
 import {
   ArchiveIcon,
   CalendarDateIcon,
   CalendarDateIcon2,
   Edit02Icon,
-  GitIcon,
   Hash01Icon,
   UserIcon,
 } from "@/shared/assets/icons";
-interface DepartmentInformationContainerProps {
+interface BranchInformationContainerProps {
   name?: string;
   code?: string;
+  address?: string;
   managedName?: string;
   createdAt?: string;
   updatedAt?: string;
-  branchName?: string;
-  branchCode?: string;
   status?: "active" | "inactive" | "deleted";
-  data: NonNullable<GetDepartmentById>;
+  data: NonNullable<GetBranchById>;
 }
-const DepartmentInformationContainer: React.FC<DepartmentInformationContainerProps> = ({
+const BranchInformationContainer: React.FC<BranchInformationContainerProps> = ({
   name,
   code,
   createdAt,
   managedName,
-  branchName,
   updatedAt,
   status,
   data,
 }) => {
   const router = useRouter();
-  const updateDepartmentRef = useRef<UpdateRootDepartmentDrawerRef>(null);
+  const updateBranchDrawerRef = useRef<UpdateBranchDrawerRef>(null);
 
   const handleUpdateDepartment = () => {
-    updateDepartmentRef.current?.open(
+    updateBranchDrawerRef.current?.open(
       {
-        branchId: data.branch_id ?? undefined,
-        code: data.code || "",
         id: data.id,
+        code: data.code || "",
         managedById: data.managed_by ?? undefined,
         name: data.name,
         status: data.status,
+        address: data.address,
       },
       {
         onSuccess(data) {
@@ -64,7 +59,7 @@ const DepartmentInformationContainer: React.FC<DepartmentInformationContainerPro
         <div className="section-content__header flex justify-between mb-3">
           <Stack direction="row" alignItems="center" spacing={2}>
             <Typography component="h3" sx={{ fontSize: 18, fontWeight: 600 }}>
-              Thông tin phòng ban
+              Thông tin chi nhánh
             </Typography>
             <Button
               color="primary"
@@ -81,12 +76,10 @@ const DepartmentInformationContainer: React.FC<DepartmentInformationContainerPro
         </div>
         <div className="section-content__body">
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 mb-6">
-            <BoxContentItem icon={<ArchiveIcon />} title="Tên phòng ban" content={name} />
-            <BoxContentItem icon={<Hash01Icon />} title="Mã phòng ban" content={code} />
+            <BoxContentItem icon={<ArchiveIcon />} title="Tên chi nhánh" content={name} />
+            <BoxContentItem icon={<Hash01Icon />} title="Mã chi nhánh" content={code} />
             <BoxContentItem icon={<UserIcon />} title="Người quản lý" content={managedName || "-"} />
-            <BoxContentItem icon={<GitIcon />} title="Chi nhánh" content={branchName} />
-            {/* <BoxContentItem icon={<Users02Icon />} title="Số nhóm" content={"3"} />
-            <BoxContentItem icon={<Users02Icon />} title="Số người dùng" content={"30"} /> */}
+
             <BoxContentItem
               icon={<CalendarDateIcon />}
               title="Ngày tạo"
@@ -109,11 +102,11 @@ const DepartmentInformationContainer: React.FC<DepartmentInformationContainerPro
           </>
         </div>
       </div>
-      <UpdateRootDepartmentDrawer ref={updateDepartmentRef} />
+      <UpdateBranchDrawer ref={updateBranchDrawerRef} />
     </>
   );
 };
-export default DepartmentInformationContainer;
+export default BranchInformationContainer;
 
 const BoxContentItem = ({
   title,
