@@ -20,6 +20,7 @@ export const PATHS = {
   EMPLOYEES: {
     ROOT: "/admin/employees",
     EMPLOYEES_ID: (id: string = ":id") => `/admin/employees/${id}`,
+    EMPLOYEES_DETAIL: (id: string = ":id") => `/admin/employees/${id}/detail`,
     CREATE_EMPLOYEE: "/admin/employees/create",
     IMPORT_EMPLOYEES: "/admin/employees/import",
   },
