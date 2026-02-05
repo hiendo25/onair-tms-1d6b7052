@@ -7,6 +7,7 @@ import { PATHS } from "@/constants/path.constant";
 import organizationAuth from "@/lib/auth";
 import { branchRepository } from "@/repository";
 import PageContainer from "@/shared/ui/PageContainer";
+import TableDataSkeleton from "@/shared/ui/TableData/TableDataSkeleton";
 
 import BranchDepartmentListContainer from "./_components/BranchDepartmentListContainer";
 import BranchInformationContainer from "./_components/BranchInformationContainer";

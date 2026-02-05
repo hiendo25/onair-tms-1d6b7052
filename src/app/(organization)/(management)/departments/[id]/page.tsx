@@ -62,13 +62,9 @@ export default async function DepartmentDetailPage({ params }: DepartmentDetailP
         data={departmentDetail}
       />
       <div className="line my-6 bg-gray-200 h-px"></div>
-      <Suspense fallback="loading">
-        <DepartmentGroupsContainer departmentId={departmentDetail.id} />
-      </Suspense>
+      <DepartmentGroupsContainer departmentId={departmentDetail.id} />
       <div className="line my-6 bg-gray-200 h-px"></div>
-      <Suspense fallback="loading">
-        <DepartmentEmployeesContainer departmentId={departmentDetail.id} />
-      </Suspense>
+      <DepartmentEmployeesContainer departmentId={departmentDetail.id} />
     </PageContainer>
   );
 }

@@ -60,12 +60,6 @@ const DepartmentGroupContainer: React.FC<DepartmentGroupContainerProps> = ({ dep
             menuActions(row, index) {
               return [
                 {
-                  // action: handleViewDetail(row.id),
-                  // loading: actionRef.current === "view" && isTransition,
-                  iconButton: <EyeIcon className="w-4 h-4" />,
-                  altText: "Xem chi tiết",
-                },
-                {
                   action: handleEditGroup(row),
                   iconButton: <Edit02Icon className="w-4 h-4" />,
                   altText: "Chỉnh sửa",

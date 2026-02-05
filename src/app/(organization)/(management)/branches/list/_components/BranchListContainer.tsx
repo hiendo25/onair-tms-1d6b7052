@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, InputAdornment, Stack, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ export default function BranchListContainer() {
   const createBranchDrawerRef = React.useRef<CreateBranchDrawerRef>(null);
   const updateBranchDrawerRef = React.useRef<UpdateBranchDrawerRef>(null);
 
+  const [isTransitionViewDetail, startTransitionViewDetail] = useTransition();
   const { organizationId, isLoading: isLoadingOrgId } = useOrganizationId();
 
   const [queryParams, setQueryParams] = useState({ page: 1, pageSize: 20 });
@@ -47,7 +48,9 @@ export default function BranchListContainer() {
   };
 
   const handleViewDetail = (branchId: string) => () => {
-    router.push(PATHS.BRANCHES.DETAIL(branchId));
+    startTransitionViewDetail(() => {
+      router.push(PATHS.BRANCHES.DETAIL(branchId));
+    });
   };
 
   const handleEdit = (record: BranchRecord) => () => {
@@ -125,6 +128,7 @@ export default function BranchListContainer() {
                 action: handleViewDetail(row.id),
                 iconButton: <EyeIcon className="w-4 h-4" />,
                 altText: "Xem chi tiết",
+                loading: isTransitionViewDetail,
               },
               {
                 action: handleEdit(row),
