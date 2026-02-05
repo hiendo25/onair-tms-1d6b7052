@@ -3,7 +3,6 @@ import { Alert, Checkbox, FormControlLabel } from "@mui/material";
 
 import { useGetBranchesQuery } from "@/modules/branch/operations/query";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
-import { useGetOrganizationUnitDepartmentOrBranchQuery } from "@/modules/organization-units/operations/query";
 
 export interface BranchSelectorProps {
   className?: string;
@@ -26,8 +25,8 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({ className, onSelect, va
   );
 
   const departmentList = useMemo(() => {
-    return branchesData?.data || [];
-  }, [branchesData?.data]);
+    return branchesData?.items || [];
+  }, [branchesData?.items]);
 
   const hasChecked = (itemId: string) => {
     return values?.some((val) => val === itemId);

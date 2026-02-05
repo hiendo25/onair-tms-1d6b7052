@@ -1,3 +1,4 @@
+"use client";
 import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Table, TableBody, TableContainer, TableHead, TablePaginationOwnProps, Typography } from "@mui/material";
 
@@ -9,11 +10,6 @@ import TableRowDataProvider from "./TableDataProvider";
 import TableDataRow, { TableRowDataProps } from "./TableDataRow";
 import TableRowFixedWidth from "./TableRowFixedWith";
 
-type TableActionMenuItem = {
-  iconButton?: React.ReactNode;
-  altText?: string;
-  action?: () => void;
-};
 export type TableDataProps<T extends object> = {
   rowKey?: string;
   rows?: T[];
@@ -26,6 +22,8 @@ export type TableDataProps<T extends object> = {
   bordered?: boolean;
   ssr?: boolean;
   disableHoverMenuAction?: boolean;
+  hidePagination?: boolean;
+  hideChildrenRow?: boolean;
   pagination?: {
     page?: number;
     pageSize?: number;
@@ -40,6 +38,7 @@ export type TableDataProps<T extends object> = {
   slots?: {
     menuActions?: TableRowDataProps<T>["cellActions"];
   };
+  expandable?: TableRowDataProps<T>["expandable"];
 };
 
 const initPagination = {
@@ -66,7 +65,10 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
   onCellClick,
   slots,
   ssr = true,
+  expandable,
   disableHoverMenuAction = false,
+  hideChildrenRow = false,
+  hidePagination = false,
 }: TableDataProps<T>) => {
   const [tablePagination, setTablePagination] = useState<PaginationTable>(() => {
     return {
@@ -181,6 +183,7 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
                 showRowCount={showRowCount}
                 columns={columns}
                 showCellAction={Boolean(slots?.menuActions)}
+                showExpandAble={Boolean(expandable?.expandedRowRender)}
               />
             </TableHead>
             <TableBody>
@@ -221,19 +224,23 @@ const TableData = <T extends { id?: number | string; [key: string]: any }>({
                     onRowClick={onRowClick}
                     onCellClick={onCellClick}
                     cellActions={slots?.menuActions}
+                    expandable={expandable}
+                    hideChildrenRow={hideChildrenRow}
                   />
                 ))}
             </TableBody>
           </Table>
         </Box>
-        <CustomTablePagination
-          count={total}
-          rowsPerPageOptions={perPageOptions}
-          rowsPerPage={pageSize}
-          onPageChange={onChangePage}
-          onRowsPerPageChange={onChangePageSize}
-          page={page - 1}
-        />
+        {hidePagination ? null : (
+          <CustomTablePagination
+            count={total}
+            rowsPerPageOptions={perPageOptions}
+            rowsPerPage={pageSize}
+            onPageChange={onChangePage}
+            onRowsPerPageChange={onChangePageSize}
+            page={page - 1}
+          />
+        )}
       </TableContainer>
     </TableRowDataProvider>
   );

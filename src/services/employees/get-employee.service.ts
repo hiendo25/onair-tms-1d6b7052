@@ -26,7 +26,7 @@ export class GetEmployeeService {
   }
 
   async getList(input: GetEmployeesInput): Promise<GetEmployeesResult> {
-    const { organizationId, branchId, departmentId, employeeType, filter } = input;
+    const { organizationId, branchId, departmentId, employeeType, filter, priorityIds } = input;
 
     const page = input?.page && input?.page > 0 ? input.page : 1;
     const pageSize = input?.pageSize && input.pageSize > 0 ? Math.min(input.pageSize, this.maxPageSize) : 10;

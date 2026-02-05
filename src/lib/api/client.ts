@@ -2,22 +2,13 @@ type RequestInit = globalThis.RequestInit;
 
 import { HttpError } from "../errors/HttpError";
 
-import { http, HttpResponse } from "./http-status";
+import { http } from "./http-status";
 
-type QueryParams = Record<string, string | number | boolean | null | undefined>;
+type QueryParams = Record<string, any>;
+import * as qs from "qs";
 
-const buildObjectToQueryString = (params?: QueryParams) => {
-  if (!params) return "";
-
-  const searchParams = new URLSearchParams();
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    searchParams.append(key, String(value));
-  });
-
-  const qs = searchParams.toString();
-  return qs ? `?${qs}` : "";
+const buildObjectToQueryString = (params?: QueryParams, prefix?: string) => {
+  return params ? `?${qs.stringify(params)}` : "";
 };
 
 const buildUrl = (url: string) => (url.startsWith("http") ? url : url.startsWith("/") ? `/api${url}` : `/api/${url}`);

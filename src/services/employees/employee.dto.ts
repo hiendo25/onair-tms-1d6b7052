@@ -91,6 +91,7 @@ export interface GetEmployeesInput {
   branchId?: string;
   departmentId?: string;
   employeeType?: EmployeeType;
+  priorityIds?: string[]; //  wanna get some employees first in list then get remain
   filter?: {
     field?: "name" | "email" | "code";
     value?: string;
