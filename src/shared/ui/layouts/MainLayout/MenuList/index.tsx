@@ -57,7 +57,7 @@ const MenuList: React.FC<MenuListProps> = ({
     [pathname],
   );
 
-  useEffect(() => {}, []);
+  useEffect(() => { }, []);
   if (!items.length) return null;
 
   return (
@@ -112,12 +112,12 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
         flexDirection: "column",
         ...(isSubNavigation
           ? {
-              gap: 0,
-              marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
-              // borderLeft: mini ? undefined : "2px solid #cdcdcd",
-              padding: mini ? 1 : 0.5,
-              width: mini ? 220 : "auto",
-            }
+            gap: 0,
+            marginLeft: mini ? undefined : `${depth === 1 ? 38 : depth * 8}px !important`,
+            // borderLeft: mini ? undefined : "2px solid #cdcdcd",
+            padding: mini ? 1 : 0.5,
+            width: mini ? 220 : "auto",
+          }
           : { gap: 0.5, padding: mini ? 1 : 0.5, width: mini ? MINI_DRAWER_WIDTH : "auto" }),
       };
     },
@@ -135,8 +135,9 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
                 id={item.key}
                 title={item.title}
                 href={item.path}
-                selected={matchPath(item.path)}
-                defaultExpanded={matchPath(item.path)}
+                nonAction={item.nonAction}
+                selected={!item.nonAction && matchPath(item.path)}
+                defaultExpanded={!item.nonAction && matchPath(item.path)}
                 expanded={hasExpanded(item.key)}
                 nestedNavigation={
                   item.children?.length ? <MenuContentList items={item.children} depth={depth + 1} /> : undefined
@@ -154,8 +155,9 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
                         id={groupItem.key}
                         title={groupItem.title}
                         href={groupItem.path}
-                        selected={matchPath(groupItem.path)}
-                        defaultExpanded={matchPath(groupItem.path)}
+                        nonAction={groupItem.nonAction}
+                        selected={!groupItem.nonAction && matchPath(groupItem.path)}
+                        defaultExpanded={!groupItem.nonAction && matchPath(groupItem.path)}
                         expanded={hasExpanded(groupItem.key)}
                         nestedNavigation={
                           groupItem.children?.length ? (
@@ -186,8 +188,9 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
               subTitle={item.subTitle}
               icon={depth === 0 ? item.icon : undefined} // only show icon at first
               href={item.path}
-              selected={matchPath(item.path)}
-              defaultExpanded={matchPath(item.path)}
+              nonAction={item.nonAction}
+              selected={!item.nonAction && matchPath(item.path)}
+              defaultExpanded={!item.nonAction && matchPath(item.path)}
               expanded={hasExpanded(item.key)}
               isSubItem={depth > 0}
               nestedNavigation={
@@ -208,8 +211,9 @@ const MenuContentList: React.FC<MenuContentListProps> = memo(({ items: menuItems
                       subTitle={groupItem.subTitle}
                       icon={depth === 0 ? groupItem.icon : undefined} // only show icon at first
                       href={groupItem.path}
-                      selected={matchPath(groupItem.path)}
-                      defaultExpanded={matchPath(groupItem.path)}
+                      nonAction={groupItem.nonAction}
+                      selected={!groupItem.nonAction && matchPath(groupItem.path)}
+                      defaultExpanded={!groupItem.nonAction && matchPath(groupItem.path)}
                       expanded={hasExpanded(groupItem.key)}
                       isSubItem={depth > 0}
                       nestedNavigation={

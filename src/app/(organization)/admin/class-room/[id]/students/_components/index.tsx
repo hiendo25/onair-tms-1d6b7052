@@ -299,14 +299,13 @@ const StudentsSection = ({ classRoomId }: StudentsSectionProps) => {
   const deleteConfirmationTitle = isDeleteLocked
     ? "Không thể gỡ học viên khỏi lớp học"
     : deleteTargetIds.length > 1
-    ? `Gỡ ${deleteTargetIds.length} học viên khỏi lớp học`
-    : "Xác nhận gỡ học viên khỏi lớp học";
+      ? `Gỡ ${deleteTargetIds.length} học viên khỏi lớp học`
+      : "Xác nhận gỡ học viên khỏi lớp học";
 
   const deleteConfirmationContent = isDeleteLocked
     ? "Khi lớp học đang diễn ra hoặc đã diễn ra, hệ thống tạm khóa chức năng gỡ học viên để đảm bảo ổn định buổi học."
-    : `Bạn có chắc muốn gỡ ${
-        deleteTargetIds.length > 1 ? `${deleteTargetIds.length} học viên` : "học viên này"
-      } khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học.`;
+    : `Bạn có chắc muốn gỡ ${deleteTargetIds.length > 1 ? `${deleteTargetIds.length} học viên` : "học viên này"
+    } khỏi lớp học trực tuyến? Sau khi gỡ, học viên sẽ không thể truy cập hoặc tham gia buổi học.`;
 
   const handleMarkAttendance = async (classSessionId: string, employeeId?: string) => {
     if (!employeeId) {

@@ -198,7 +198,7 @@ const getCourseHeaderById = async (courseId: string): Promise<CourseHeaderRow | 
   return data ?? null;
 };
 
-const getAssignmentById = async (assignmentId: string): Promise<Tables<"assignments"> | null> => {
+const getAssignmentById = async (assignmentId: string): Promise<Tables<"assignment_config"> | null> => {
   const trimmedAssignmentId = assignmentId?.trim();
   if (!trimmedAssignmentId) {
     return null;
@@ -206,7 +206,7 @@ const getAssignmentById = async (assignmentId: string): Promise<Tables<"assignme
 
   const supabase = await createSVClient();
   const { data, error } = await supabase
-    .from("assignments")
+    .from("assignment_config")
     .select("*")
     .eq("id", trimmedAssignmentId)
     .maybeSingle();

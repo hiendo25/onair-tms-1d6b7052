@@ -1,36 +1,58 @@
-import { createSVClient, supabase } from "@/services";
+import { createSVClient } from "@/services";
+import { createClient } from "@/services";
 
-import {
-  CreateLessonPayload,
-  CreatePivotLessonsWithResourcesPayload,
-  UpdateLessonPayload,
-  UpsertLessonPayload,
-} from "./type";
+import { LessonInsert, LessonResourceInsert, LessonUpdate, LessonUpsert } from "./type";
 
-const createLessons = async (payload: CreateLessonPayload[]) => {
+export async function createLesson(lessonInsert: LessonInsert) {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("lessons").insert(lessonInsert).select("*");
+
+  if (error) {
+    throw new Error(`Create Lessons failed.`);
+  }
+  return data;
+}
+
+export async function bulkCreateLessons(payload: LessonInsert[]) {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("lessons").insert(payload).select("*");
+
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
+  }
+  return data;
+}
+
+export async function bulkDeleteLessons(lessonIds: string[]) {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("lessons").delete().in("id", lessonIds);
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
+  }
+};
+
+export const bulkDeleteLessonProgressByLessonIds = async (lessonIds: string[]) => {
+  const supabase = createClient();
+  if (!lessonIds.length) {
+    return;
+  }
+
   try {
-    const { data, error } = await supabase.from("lessons").insert(payload).select("*");
+    const { error } = await supabase.from("lesson_progress").delete().in("lesson_id", lessonIds);
 
     if (error) {
-      throw new Error(`Create Lessons failed.`);
+      throw new Error(`Delete lesson progress failed: ${error.message}`);
     }
-    return data;
   } catch (err: any) {
     console.log(err);
     throw new Error(err?.message);
   }
 };
 
-const bulkDeleteLessons = async (lessonIds: string[]) => {
-  try {
-    return await supabase.from("lessons").delete().in("id", lessonIds);
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
-};
-
-const bulkUpsertLesson = async (upsertPayload: UpsertLessonPayload[]) => {
+export const bulkUpsertLesson = async (upsertPayload: LessonUpsert[]) => {
+  const supabase = createClient();
   try {
     return await supabase
       .from("lessons")
@@ -40,55 +62,59 @@ const bulkUpsertLesson = async (upsertPayload: UpsertLessonPayload[]) => {
     console.log(err);
     throw new Error(err?.message);
   }
-};
+}
 
-const upsertLesson = async (upsertPayload: UpsertLessonPayload) => {
-  try {
-    return await supabase.from("lessons").upsert(upsertPayload.payload).select("*").single();
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
+export async function upsertLesson(upsertPayload: LessonUpsert) {
+  const supabase = createClient();
+
+  const { data, error } = await supabase.from("lessons").upsert(upsertPayload.payload).select("*").single();
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
   }
-};
+  return data;
+}
 
-const updateSection = async (payload: UpdateLessonPayload) => {
-  try {
-    const { id: sectionId, ...restPayload } = payload;
-    return await supabase.from("lessons").update(payload).match({ id: sectionId }).select("*").single();
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
+export async function updateSection(payload: LessonUpdate) {
+  const supabase = createClient();
+  const { id: sectionId, ...restPayload } = payload;
+  const { data, error } = await supabase
+    .from("lessons")
+    .update(restPayload)
+    .match({ id: sectionId })
+    .select("*")
+    .single();
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
   }
-};
+  return data;
+}
 
-const bulkCreatePivotLessonsWithResources = async (payload: CreatePivotLessonsWithResourcesPayload[]) => {
-  try {
-    const { data, error } = await supabase.from("lessons_resources").insert(payload).select("*");
-
-    if (error) {
-      console.error(payload);
-      throw new Error("Sync Lessons with Resouces Failed");
-    }
-    return data;
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
+export async function bulkCreateLessonsWithResources(payload: LessonResourceInsert[]) {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("lessons_resources").insert(payload).select("*");
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
   }
-};
+  return data;
+}
 
-const bulkDeletePivotLessonsWithResources = async (ids: number[]) => {
-  try {
-    return await supabase.from("lessons_resources").delete().in("id", ids);
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
+export async function bulkDeleteLessonWithResource(recordIds: number[]) {
+  const supabase = createClient();
+  const { data, error } = await supabase.from("lessons_resources").delete().in("id", recordIds);
+  if (error) {
+    console.error(error);
+    throw new Error(error.details || error.message);
   }
-};
+  return data;
+}
 
 /**
  * Get the course that contains a specific lesson
  */
-const getCourseByLessonId = async (lessonId: string) => {
+export async function getCourseByLessonId(lessonId: string) {
   const supabase = await createSVClient();
 
   const { data, error } = await supabase
@@ -103,12 +129,12 @@ const getCourseByLessonId = async (lessonId: string) => {
   }
 
   return data;
-};
+}
 
 /**
  * Get all lessons in a specific course
  */
-const getLessonsByCourseId = async (courseId: string) => {
+export async function getLessonsByCourseId(courseId: string) {
   const supabase = await createSVClient();
 
   const { data, error } = await supabase
@@ -122,16 +148,4 @@ const getLessonsByCourseId = async (courseId: string) => {
   }
 
   return data || [];
-};
-
-export {
-  createLessons,
-  updateSection,
-  bulkCreatePivotLessonsWithResources,
-  bulkDeletePivotLessonsWithResources,
-  bulkDeleteLessons,
-  upsertLesson,
-  bulkUpsertLesson,
-  getCourseByLessonId,
-  getLessonsByCourseId,
 };

@@ -2,52 +2,34 @@
 
 import * as React from "react";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Alert, Box, Button, Card, CircularProgress, LinearProgress, Stack, Typography } from "@mui/material";
-import { useQueryClient } from "@tanstack/react-query";
+import { Alert, Box, Button, Card, CircularProgress, Stack, Typography } from "@mui/material";
 import { useParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import ReactMarkdown from "react-markdown";
-import rehypeRaw from "rehype-raw";
-import rehypeSanitize from "rehype-sanitize";
-import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
-import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
-import { GET_ASSIGNMENTS } from "@/modules/assignment-management/operations/key";
 import {
+  useGetAssignmentAccessQuery,
+  useGetAssignmentAttemptSummaryQuery,
   useGetAssignmentQuery,
   useGetAssignmentQuestionsQuery,
 } from "@/modules/assignment-management/operations/query";
+import type { SubmissionFormData } from "@/modules/assignment-management/types/assignment-submission.types";
+import {
+  buildDisplayQuestions,
+  buildShuffleSeedBase,
+} from "@/modules/assignment-management/utils/assignment-submission.utils";
+import { buildAssignmentSubmissionDraftKey } from "@/modules/assignment-management/utils/assignment-submission-draft.utils";
 import { useGetEmployeeQuery } from "@/modules/employees/operations/query";
 import { useUserOrganization } from "@/modules/organization";
 import PageContainer from "@/shared/ui/PageContainer";
-import { FileMetadata } from "@/types/dto/assignments";
-import { uploadFileToS3 } from "@/utils/s3-upload";
+import { useAssignmentAttemptState } from "../_hooks/useAssignmentAttemptState";
+import { useAssignmentSubmissionForm } from "../_hooks/useAssignmentSubmissionForm";
+import { useAssignmentSubmit } from "../_hooks/useAssignmentSubmit";
 
-import QuestionCard from "./QuestionCard";
-import SubmissionActions from "./SubmissionActions";
+import AssignmentDescriptionSection from "./AssignmentDescriptionSection";
+import AssignmentQuestionsForm from "./AssignmentQuestionsForm";
 
 const FORBIDDEN_PATH = "/403";
-const ASSIGNMENT_DESCRIPTION_TITLE = "Mô tả bài kiểm tra";
-const EMPTY_ASSIGNMENT_DESCRIPTION = "Chưa có mô tả bài kiểm tra.";
-
-interface QuestionAnswer {
-  questionId: string;
-  questionType: "file" | "text" | "checkbox" | "radio" | "matching" | "order" | "true_false";
-  files?: File[];
-  textAnswer?: string;
-  radioAnswer?: string;
-  checkboxAnswers?: string[];
-  matchingMappings?: Array<{ columnAId: string; columnBId: string }>;
-  orderedItems?: Array<{ id: string; position: number }>;
-  trueFalseAnswer?: boolean;
-  attachments?: File[];
-}
-
-interface SubmissionFormData {
-  answers: QuestionAnswer[];
-}
 
 interface AssignmentSubmissionProps {
   basePath?: string;
@@ -68,15 +50,13 @@ export default function AssignmentSubmission({
 }: AssignmentSubmissionProps) {
   const params = useParams<{ id?: string; employeeId?: string }>();
   const router = useRouter();
-  const { confirm } = useDialogs();
   const notifications = useNotifications();
-  const queryClient = useQueryClient();
 
   const assignmentId = assignmentIdProp ?? (params?.id as string | undefined);
   const employeeId = employeeIdProp ?? (params?.employeeId as string | undefined);
   const isEmbedded = variant === "embedded";
 
-  const currentEmployeeId = useUserOrganization((state) => state.currentEmployee.id)
+  const currentEmployeeId = useUserOrganization((state) => state.currentEmployee.id);
 
   const { data: assignment, isLoading: isLoadingAssignment } = useGetAssignmentQuery(assignmentId || "");
   const {
@@ -84,61 +64,120 @@ export default function AssignmentSubmission({
     isLoading: isLoadingQuestions,
     error: questionsError,
   } = useGetAssignmentQuestionsQuery(assignmentId || "");
-  const { data: employee, isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId || "");
+  const { isLoading: isLoadingEmployee } = useGetEmployeeQuery(employeeId || "");
+  const { data: attemptSummary, isLoading: isLoadingAttemptSummary } = useGetAssignmentAttemptSummaryQuery(
+    assignmentId || "",
+    employeeId || "",
+  );
+  const accessEmployeeId = employeeId || currentEmployeeId;
+  const { data: accessResult, isLoading: isLoadingAccess } = useGetAssignmentAccessQuery(
+    assignmentId || "",
+    accessEmployeeId || "",
+  );
 
-  const { control, handleSubmit, watch, setValue } = useForm<SubmissionFormData>({
-    defaultValues: {
-      answers: [],
+  const autoSubmittedRef = React.useRef(false);
+  const shuffleQuestions = Boolean(assignment?.shuffle_questions);
+  const shuffleAnswers = Boolean(assignment?.shuffle_answers);
+  const isAssignedDirectly = assignment?.assignment_employees?.some(
+    (assignmentEmployee) => assignmentEmployee.employee_id === accessEmployeeId,
+  );
+  const isAssigned = Boolean(isAssignedDirectly || accessResult?.isAssigned);
+  const shouldRedirectToForbidden =
+    !isEmbedded &&
+    !isLoadingAssignment &&
+    !isLoadingAccess &&
+    Boolean(assignment) &&
+    !isAssigned;
+  const {
+    attemptLimit,
+    attemptsRemaining,
+    availableFrom,
+    availableTo,
+    displayDurationMinutes,
+    remainingSeconds,
+    isWithinWindow,
+    isTimeExpired,
+    manualStartRequested,
+    setManualStartRequested,
+    requiresManualStart,
+    isStartingAttempt,
+    isLoading,
+    activeAttemptId,
+    hasAttemptsLeft,
+    attemptSeedKey,
+  } = useAssignmentAttemptState({
+    assignmentId,
+    employeeId,
+    assignment,
+    attemptSummary,
+    isLoadingAssignment,
+    isLoadingQuestions,
+    isLoadingEmployee,
+    isLoadingAttemptSummary,
+    shuffleQuestions,
+    shuffleAnswers,
+    onAttemptStartError: (error) => {
+      notifications.show(error.message, { severity: "error" });
     },
   });
 
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [uploadProgress, setUploadProgress] = React.useState(0);
-  const isLoading = isLoadingAssignment || isLoadingQuestions || isLoadingEmployee;
-  const answers = watch("answers");
-  const isAssigned = assignment?.assignment_employees?.some(
-    (assignmentEmployee) => assignmentEmployee.employee_id === currentEmployeeId,
+  const shuffleSeedBase = React.useMemo(
+    () => buildShuffleSeedBase(assignmentId, employeeId, attemptSeedKey),
+    [assignmentId, employeeId, attemptSeedKey],
   );
-  const shouldRedirectToForbidden =
-    !isEmbedded && !isLoadingAssignment && Boolean(assignment) && !isAssigned;
 
-  React.useEffect(() => {
-    if (questions && questions.length > 0) {
-      const initialAnswers = questions.map((q) => {
-        const answer: any = {
-          questionId: q.id,
-          questionType: q.type,
-          files: q.type === "file" ? [] : undefined,
-          textAnswer: q.type === "text" ? "" : undefined,
-          radioAnswer: q.type === "radio" ? "" : undefined,
-          checkboxAnswers: q.type === "checkbox" ? [] : undefined,
-          matchingMappings: q.type === "matching" ? [] : undefined,
-          trueFalseAnswer: q.type === "true_false" ? undefined : undefined,
-          attachments: q.type !== "file" ? [] : undefined,
-        };
+  const displayQuestions = React.useMemo(
+    () =>
+      buildDisplayQuestions(questions || [], {
+        seedBase: shuffleSeedBase,
+        shuffleQuestions,
+        shuffleAnswers,
+      }),
+    [questions, shuffleAnswers, shuffleQuestions, shuffleSeedBase],
+  );
 
-        // Initialize order questions with the display order from database
-        if (q.type === "order" && q.options) {
-          const orderItems = (q.options as any).orderItems || [];
-          // Sort by displayOrder and create initial orderedItems
-          const sortedByDisplayOrder = [...orderItems].sort((a: any, b: any) => a.displayOrder - b.displayOrder);
-          answer.orderedItems = sortedByDisplayOrder.map((item: any, index: number) => ({
-            id: item.id,
-            position: index + 1,
-          }));
-        } else {
-          answer.orderedItems = q.type === "order" ? [] : undefined;
-        }
+  const draftKey = React.useMemo(
+    () => buildAssignmentSubmissionDraftKey(assignmentId, employeeId, activeAttemptId),
+    [assignmentId, employeeId, activeAttemptId],
+  );
 
-        return answer;
-      });
-      setValue("answers", initialAnswers);
-    }
-  }, [questions, setValue]);
+  const {
+    answers,
+    getValues,
+    handleSubmit,
+    hasAnyAnswers,
+    clearDraft,
+    handlers: {
+      handleAttachmentSelect,
+      handleCheckboxChange,
+      handleFileSelect,
+      handleMatchingChange,
+      handleOrderChange,
+      handleRadioChange,
+      handleRemoveAttachment,
+      handleRemoveFile,
+      handleTextChange,
+      handleTrueFalseChange,
+    },
+  } = useAssignmentSubmissionForm({ questions: displayQuestions, draftKey });
+
+  const { isSubmitting, submitAnswers, uploadProgress } = useAssignmentSubmit({
+    assignmentId,
+    employeeId,
+    questions: displayQuestions,
+    basePath,
+    isEmbedded,
+    hasAttemptsLeft,
+    isWithinWindow,
+    isTimeExpired,
+    attemptId: activeAttemptId,
+    onSubmitted,
+    onSuccess: clearDraft,
+  });
 
   React.useEffect(() => {
     if (!shouldRedirectToForbidden) return;
-    router.push(FORBIDDEN_PATH);
+    // router.push(FORBIDDEN_PATH);
   }, [router, shouldRedirectToForbidden]);
 
   const handleBack = React.useCallback(() => {
@@ -158,474 +197,12 @@ export default function AssignmentSubmission({
     }
   }, [onCancel, isEmbedded, router, assignmentId, basePath]);
 
-  const handleFileSelect = React.useCallback(
-    (questionId: string, files: FileList | null) => {
-      if (!files || files.length === 0) return;
-
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const newFiles = Array.from(files);
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          files: [...(currentAnswer.files || []), ...newFiles],
-        };
-        setValue("answers", updatedAnswers);
-      }
+  const onSubmit = React.useCallback(
+    async (data: SubmissionFormData) => {
+      await submitAnswers(data);
     },
-    [answers, setValue],
+    [submitAnswers],
   );
-
-  const handleRemoveFile = React.useCallback(
-    (questionId: string, fileIndex: number) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer || !currentAnswer.files) return;
-
-        const updatedAnswers = [...currentAnswers];
-        const updatedFiles = [...currentAnswer.files];
-        updatedFiles.splice(fileIndex, 1);
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          files: updatedFiles,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleTextChange = React.useCallback(
-    (questionId: string, text: string) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          textAnswer: text,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleRadioChange = React.useCallback(
-    (questionId: string, optionId: string) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          radioAnswer: optionId,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleCheckboxChange = React.useCallback(
-    (questionId: string, optionIds: string[]) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          checkboxAnswers: optionIds,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleMatchingChange = React.useCallback(
-    (questionId: string, mappings: Array<{ columnAId: string; columnBId: string }>) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          matchingMappings: mappings,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleAttachmentSelect = React.useCallback(
-    (questionId: string, files: FileList | null) => {
-      if (!files || files.length === 0) return;
-
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const newFiles = Array.from(files);
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          attachments: [...(currentAnswer.attachments || []), ...newFiles],
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleRemoveAttachment = React.useCallback(
-    (questionId: string, fileIndex: number) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer || !currentAnswer.attachments) return;
-
-        const updatedAnswers = [...currentAnswers];
-        const updatedAttachments = [...currentAnswer.attachments];
-        updatedAttachments.splice(fileIndex, 1);
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          attachments: updatedAttachments,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleOrderChange = React.useCallback(
-    (questionId: string, orderedItems: Array<{ id: string; position: number }>) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          orderedItems,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const handleTrueFalseChange = React.useCallback(
-    (questionId: string, answer: boolean) => {
-      const currentAnswers = answers || [];
-      const answerIndex = currentAnswers.findIndex((a) => a.questionId === questionId);
-
-      if (answerIndex >= 0) {
-        const currentAnswer = currentAnswers[answerIndex];
-        if (!currentAnswer) return;
-
-        const updatedAnswers = [...currentAnswers];
-        updatedAnswers[answerIndex] = {
-          ...currentAnswer,
-          trueFalseAnswer: answer,
-        };
-        setValue("answers", updatedAnswers);
-      }
-    },
-    [answers, setValue],
-  );
-
-  const hasAnyAnswers = () => {
-    return (
-      answers?.some((answer) => {
-        switch (answer.questionType) {
-          case "file":
-            return answer.files && answer.files.length > 0;
-          case "text":
-            return answer.textAnswer && answer.textAnswer.trim() !== "";
-          case "radio":
-            return answer.radioAnswer && answer.radioAnswer.trim() !== "";
-          case "checkbox":
-            return answer.checkboxAnswers && answer.checkboxAnswers.length > 0;
-          case "matching":
-            return answer.matchingMappings && answer.matchingMappings.length > 0;
-          case "order":
-            return answer.orderedItems && answer.orderedItems.length > 0;
-          case "true_false":
-            return answer.trueFalseAnswer !== undefined;
-          default:
-            return false;
-        }
-      }) || false
-    );
-  };
-
-  const onSubmit = async (data: SubmissionFormData) => {
-    if (!assignmentId || !employeeId) {
-      notifications.show("Không tìm thấy thông tin bài kiểm tra hoặc người học.", {
-        severity: "error",
-      });
-      return;
-    }
-
-    const confirmed = await confirm("Bạn có chắc chắn muốn nộp bài? Sau khi nộp bài, bạn không thể chỉnh sửa.", {
-      title: "Xác nhận nộp bài",
-      okText: "Nộp bài",
-      cancelText: "Hủy",
-    });
-
-    if (!confirmed) return;
-
-    setIsSubmitting(true);
-    setUploadProgress(0);
-
-    try {
-      const unansweredQuestions = data.answers.filter((answer) => {
-        switch (answer.questionType) {
-          case "file":
-            return !answer.files || answer.files.length === 0;
-          case "text":
-            return !answer.textAnswer || answer.textAnswer.trim() === "";
-          case "radio":
-            return !answer.radioAnswer || answer.radioAnswer.trim() === "";
-          case "checkbox":
-            return !answer.checkboxAnswers || answer.checkboxAnswers.length === 0;
-          case "matching":
-            // For matching questions, check if all Column A items have been mapped
-            const matchingQuestion = questions?.find((q) => q.id === answer.questionId);
-            const columnAItems = (matchingQuestion?.options as any)?.columnAItems || [];
-            return !answer.matchingMappings || answer.matchingMappings.length !== columnAItems.length;
-          case "order":
-            // For order questions, check if all items have been ordered
-            const orderQuestion = questions?.find((q) => q.id === answer.questionId);
-            const orderItems = (orderQuestion?.options as any)?.orderItems || [];
-            return !answer.orderedItems || answer.orderedItems.length !== orderItems.length;
-          case "true_false":
-            return answer.trueFalseAnswer === undefined;
-          default:
-            return true;
-        }
-      });
-
-      if (unansweredQuestions.length > 0) {
-        throw new Error("Vui lòng trả lời tất cả các câu hỏi");
-      }
-
-      const fileAnswers = data.answers.filter((a) => a.questionType === "file" && a.files);
-      const answersWithAttachments = data.answers.filter((a) => a.attachments && a.attachments.length > 0);
-      const totalFiles =
-        fileAnswers.reduce((sum, answer) => sum + (answer.files?.length || 0), 0) +
-        answersWithAttachments.reduce((sum, answer) => sum + (answer.attachments?.length || 0), 0);
-      let completedFiles = 0;
-
-      const processedAnswers = await Promise.all(
-        data.answers.map(async (answer) => {
-          const question = questions?.find((q) => q.id === answer.questionId);
-          if (!question) {
-            throw new Error("Không tìm thấy thông tin câu hỏi");
-          }
-
-          let answerData: string | string[] | FileMetadata[];
-
-          switch (answer.questionType) {
-            case "file":
-              if (!answer.files || answer.files.length === 0) {
-                throw new Error(`Vui lòng tải lên file cho câu hỏi: ${question.label}`);
-              }
-
-              const uploadedFiles = await Promise.all(
-                answer.files.map(async (file) => {
-                  const result = await uploadFileToS3(file, {
-                    onProgress: (percent) => {
-                      if (totalFiles > 0) {
-                        const currentFileProgress = percent / 100;
-                        const overallProgress = Math.round(((completedFiles + currentFileProgress) / totalFiles) * 100);
-                        setUploadProgress(overallProgress);
-                      }
-                    },
-                  });
-
-                  completedFiles++;
-                  if (totalFiles > 0) {
-                    setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
-                  }
-
-                  return {
-                    url: result.url,
-                    originalName: file.name,
-                    fileSize: file.size,
-                    mimeType: file.type,
-                  };
-                }),
-              );
-              answerData = uploadedFiles;
-              break;
-
-            case "text":
-              if (!answer.textAnswer || answer.textAnswer.trim() === "") {
-                throw new Error(`Vui lòng nhập câu trả lời cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.textAnswer.trim();
-              break;
-
-            case "radio":
-              if (!answer.radioAnswer || answer.radioAnswer.trim() === "") {
-                throw new Error(`Vui lòng chọn đáp án cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.radioAnswer;
-              break;
-
-            case "checkbox":
-              if (!answer.checkboxAnswers || answer.checkboxAnswers.length === 0) {
-                throw new Error(`Vui lòng chọn ít nhất một đáp án cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.checkboxAnswers;
-              break;
-
-            case "matching":
-              if (!answer.matchingMappings || answer.matchingMappings.length === 0) {
-                throw new Error(`Vui lòng hoàn thành ghép đôi cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.matchingMappings;
-              break;
-
-            case "order":
-              if (!answer.orderedItems || answer.orderedItems.length === 0) {
-                throw new Error(`Vui lòng sắp xếp các mục cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.orderedItems;
-              break;
-
-            case "true_false":
-              if (answer.trueFalseAnswer === undefined) {
-                throw new Error(`Vui lòng chọn Đúng hoặc Sai cho câu hỏi: ${question.label}`);
-              }
-              answerData = answer.trueFalseAnswer;
-              break;
-
-            default:
-              throw new Error(`Loại câu hỏi không hợp lệ: ${answer.questionType}`);
-          }
-
-          let attachmentMetadata: FileMetadata[] | undefined = undefined;
-          if (answer.attachments && answer.attachments.length > 0) {
-            attachmentMetadata = await Promise.all(
-              answer.attachments.map(async (file) => {
-                const result = await uploadFileToS3(file, {
-                  onProgress: (percent) => {
-                    if (totalFiles > 0) {
-                      const currentFileProgress = percent / 100;
-                      const overallProgress = Math.round(((completedFiles + currentFileProgress) / totalFiles) * 100);
-                      setUploadProgress(overallProgress);
-                    }
-                  },
-                });
-
-                completedFiles++;
-                if (totalFiles > 0) {
-                  setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
-                }
-
-                return {
-                  url: result.url,
-                  originalName: file.name,
-                  fileSize: file.size,
-                  mimeType: file.type,
-                };
-              }),
-            );
-          }
-
-          return {
-            questionId: answer.questionId,
-            answer: answerData,
-            attachments: attachmentMetadata,
-          };
-        }),
-      );
-
-      const response = await fetch(`/api/assignments/${assignmentId}/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employeeId,
-          answers: processedAnswers,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Có lỗi xảy ra khi nộp bài");
-      }
-
-      notifications.show(result.message || "Nộp bài thành công!", {
-        severity: "success",
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: [GET_ASSIGNMENTS, assignmentId, "students"],
-      });
-
-      onSubmitted?.({ assignmentId, employeeId });
-
-      if (isEmbedded) {
-        return;
-      }
-
-      if (basePath === PATHS.MY_ASSIGNMENTS.ROOT) {
-        router.push(PATHS.MY_ASSIGNMENTS.RESULT(assignmentId, employeeId));
-      } else {
-        router.push(`${basePath}/${assignmentId}/students`);
-      }
-    } catch (error) {
-      console.error("Error submitting assignment:", error);
-
-      const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi nộp bài. Vui lòng thử lại.";
-
-      notifications.show(errorMessage, {
-        severity: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
-      setUploadProgress(0);
-    }
-  };
 
   const breadcrumbs = React.useMemo(() => {
     if (isEmbedded) {
@@ -672,42 +249,48 @@ export default function AssignmentSubmission({
       return <Alert severity="error">Có lỗi xảy ra khi tải danh sách câu hỏi</Alert>;
     }
 
-    const descriptionContent = assignment?.description?.trim();
     const descriptionSection = (
-      <Stack
-        spacing={1}
-        sx={{
-          p: 2,
-          borderRadius: 2,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.default",
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight={600}>
-          {ASSIGNMENT_DESCRIPTION_TITLE}
-        </Typography>
-        {descriptionContent ? (
-          <Box
-            sx={{
-              "& p": { mb: 1 },
-              "& ul, & ol": { pl: 3, mb: 1 },
-              "& li": { mb: 0.5 },
-            }}
-          >
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypeSanitize]}>
-              {descriptionContent}
-            </ReactMarkdown>
-          </Box>
-        ) : (
-          <Typography variant="body2" color="text.secondary">
-            {EMPTY_ASSIGNMENT_DESCRIPTION}
-          </Typography>
-        )}
-      </Stack>
+      <AssignmentDescriptionSection
+        description={assignment?.description}
+        attemptsRemaining={attemptsRemaining}
+        attemptLimit={attemptLimit}
+        availableFrom={availableFrom}
+        availableTo={availableTo}
+        durationMinutes={displayDurationMinutes}
+        remainingSeconds={remainingSeconds}
+        hasAttemptsLeft={hasAttemptsLeft}
+        isWithinWindow={isWithinWindow}
+        isTimeExpired={isTimeExpired}
+      />
     );
 
-    if (!questions || questions.length === 0) {
+    const questionsForDisplay = displayQuestions;
+
+    if (!isWithinWindow) {
+      return <Stack spacing={3}>{descriptionSection}</Stack>;
+    }
+
+    if (requiresManualStart && !manualStartRequested) {
+      return (
+        <Stack spacing={3}>
+          {descriptionSection}
+          <Alert severity="info">
+            Bạn đã nộp bài. Nhấn &quot;Làm lại&quot; để bắt đầu lần làm bài tiếp theo.
+          </Alert>
+          <Box>
+            <Button
+              variant="contained"
+              onClick={() => setManualStartRequested(true)}
+              disabled={!hasAttemptsLeft || isStartingAttempt}
+            >
+              {isStartingAttempt ? "Đang bắt đầu..." : "Làm lại"}
+            </Button>
+          </Box>
+        </Stack>
+      );
+    }
+
+    if (questionsForDisplay.length === 0) {
       return (
         <Stack spacing={3}>
           {descriptionSection}
@@ -730,68 +313,66 @@ export default function AssignmentSubmission({
     return (
       <Stack spacing={3}>
         {descriptionSection}
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Stack spacing={3}>
-            {/* Upload Progress */}
-            {isSubmitting && uploadProgress > 0 && (
-              <Box>
-                <LinearProgress variant="determinate" value={uploadProgress} />
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
-                  Đang tải lên... {uploadProgress}%
-                </Typography>
-              </Box>
-            )}
-
-            {questions.map((question, index) => {
-              const answer = answers?.find((a) => a.questionId === question.id);
-
-              return (
-                <QuestionCard
-                  key={question.id}
-                  question={question}
-                  questionNumber={index + 1}
-                  // File type props
-                  files={answer?.files}
-                  onFileSelect={(files) => handleFileSelect(question.id, files)}
-                  onRemoveFile={(fileIndex) => handleRemoveFile(question.id, fileIndex)}
-                  // Text type props
-                  textAnswer={answer?.textAnswer}
-                  onTextChange={(text) => handleTextChange(question.id, text)}
-                  // Radio type props
-                  radioAnswer={answer?.radioAnswer}
-                  onRadioChange={(optionId) => handleRadioChange(question.id, optionId)}
-                  // Checkbox type props
-                  checkboxAnswers={answer?.checkboxAnswers}
-                  onCheckboxChange={(optionIds) => handleCheckboxChange(question.id, optionIds)}
-                  // Matching type props
-                  matchingMappings={answer?.matchingMappings}
-                  onMatchingChange={(mappings) => handleMatchingChange(question.id, mappings)}
-                  // Order type props
-                  orderedItems={answer?.orderedItems}
-                  onOrderChange={(orderedItems) => handleOrderChange(question.id, orderedItems)}
-                  // True/False type props
-                  trueFalseAnswer={answer?.trueFalseAnswer}
-                  onTrueFalseChange={(answer) => handleTrueFalseChange(question.id, answer)}
-                  // Attachment props
-                  attachments={answer?.attachments}
-                  onAttachmentSelect={(files) => handleAttachmentSelect(question.id, files)}
-                  onRemoveAttachment={(fileIndex) => handleRemoveAttachment(question.id, fileIndex)}
-                />
-              );
-            })}
-
-            <SubmissionActions
-              onCancel={handleBack}
-              onSubmit={() => { }}
-              isSubmitDisabled={!hasAnyAnswers() || isSubmitting}
-              isSubmitting={isSubmitting}
-              hideCancelButton={isEmbedded && !onCancel}
-            />
-          </Stack>
-        </form>
+        <AssignmentQuestionsForm
+          questions={questionsForDisplay}
+          answers={answers}
+          handleSubmit={handleSubmit}
+          onSubmit={onSubmit}
+          isSubmitting={isSubmitting}
+          uploadProgress={uploadProgress}
+          hasAnyAnswers={hasAnyAnswers}
+          isSubmitDisabled={!hasAttemptsLeft || !isWithinWindow || isTimeExpired}
+          onCancel={handleBack}
+          hideCancelButton={isEmbedded && !onCancel}
+          handlers={{
+            handleAttachmentSelect,
+            handleCheckboxChange,
+            handleFileSelect,
+            handleMatchingChange,
+            handleOrderChange,
+            handleRadioChange,
+            handleRemoveAttachment,
+            handleRemoveFile,
+            handleTextChange,
+            handleTrueFalseChange,
+          }}
+        />
       </Stack>
     );
   };
+
+  React.useEffect(() => {
+    if (remainingSeconds === null || remainingSeconds > 0) {
+      return;
+    }
+
+    if (autoSubmittedRef.current || isSubmitting) {
+      return;
+    }
+
+    if (!questions || questions.length === 0) {
+      return;
+    }
+
+    if (!hasAttemptsLeft || !isWithinWindow) {
+      return;
+    }
+
+    autoSubmittedRef.current = true;
+    notifications.show("Hết thời gian làm bài. Hệ thống đang tự động nộp bài...", { severity: "info" });
+
+    const data = getValues();
+    submitAnswers(data, { autoSubmit: true });
+  }, [
+    remainingSeconds,
+    hasAttemptsLeft,
+    isWithinWindow,
+    isSubmitting,
+    getValues,
+    submitAnswers,
+    notifications,
+    questions,
+  ]);
 
   const content = (
     <Box sx={{ py: isEmbedded ? 0 : 3 }}>

@@ -124,7 +124,7 @@ const classRoomSessionSchema = zod
       )
       .min(1, { error: "Chọn ít nhất 1 môn học." }),
     assignments: zod.array(
-      zod.object({ recordId: zod.number().optional(), assignmentId: zod.string(), name: zod.string().optional() }),
+      zod.object({ recordId: zod.number().optional(), assignmentBankId: zod.string(), name: zod.string().optional() }),
     ),
     weeklySchedule: zod
       .object({
@@ -338,6 +338,7 @@ const classRoomSchema = zod
     platform: zod.enum<ClassRoomPlatformType[]>(["live", "offline", "online", "hybrid"]),
     status: zod.enum<ClassRoomStatus[]>(["publish", "draft", "pending", "deleted"]),
     classType: zod.enum<ClassType[]>(["learning_path", "room"]),
+    flashcards: zod.array(zod.string()).optional(),
   })
   .superRefine(({ roomType, classRoomSessions }, ctx) => {
     if (roomType === "multiple") {

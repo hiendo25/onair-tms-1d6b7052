@@ -178,8 +178,20 @@ const MultipleSelectField = <T,>({
     setSearchInput(evt.target.value);
   };
 
+  const normalizeSearchValue = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase()
+      .trim();
+
   const filterOptionBySearchInput = (options: Option<T>[]) => {
-    return options.filter((opt) => opt.label.includes(searchInput));
+    const keyword = normalizeSearchValue(searchInput);
+    if (!keyword) return options;
+    return options.filter((opt) => {
+      const label = getOptionLabelWithOptionField(opt) || "";
+      return normalizeSearchValue(label).includes(keyword);
+    });
   };
   const hasSelectedItem = (option: Option<T>) => {
     return isArray(selectedItem) ? selectedItem.some((it) => it === option.value) : option.value === selectedItem;
@@ -204,8 +216,8 @@ const MultipleSelectField = <T,>({
             {selectedItem.length
               ? renderSelectedValues(selectedItem)
               : !isOpenSelectDropdown
-              ? renderPlaceHolder()
-              : null}
+                ? renderPlaceHolder()
+                : null}
             <ChipSelectInput
               ref={inputRef}
               value={searchInput}

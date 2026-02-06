@@ -2,45 +2,50 @@ type RequestInit = globalThis.RequestInit;
 
 import { HttpError } from "../errors/HttpError";
 
-type QueryParams = Record<string, string | number | boolean | null | undefined>;
+import { http } from "./http-status";
 
-const buildObjectToQueryString = (params?: QueryParams) => {
-  if (!params) return "";
+type QueryParams = Record<string, any>;
+import * as qs from "qs";
 
-  const searchParams = new URLSearchParams();
+const buildObjectToQueryString = (params?: QueryParams, prefix?: string) => {
+  return params ? `?${qs.stringify(params)}` : "";
+};
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-    searchParams.append(key, String(value));
-  });
+const buildUrl = (url: string) => (url.startsWith("http") ? url : url.startsWith("/") ? `/api${url}` : `/api/${url}`);
 
-  const qs = searchParams.toString();
-  return qs ? `?${qs}` : "";
+const buildBody = (body?: unknown): RequestInit["body"] | undefined => {
+  if (body === undefined) return undefined;
+  if (body instanceof FormData) return body;
+  if (typeof body === "string") return body;
+  return JSON.stringify(body);
 };
 
 const request = async <T>(url: string, init: RequestInit = {}): Promise<T> => {
-  const finalUrl = url.startsWith("/") ? `/api${url}` : `/api/${url}`;
-  const response = await fetch(finalUrl, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init.headers,
-    },
-  });
+  const finalUrl = buildUrl(url);
 
-  let data: any = null;
+  const isFormData = init.body instanceof FormData;
 
   try {
-    data = await response.json();
-  } catch {
-    throw new Error("Fetch error from server");
-  }
+    const response = await fetch(finalUrl, {
+      ...init,
+      headers: {
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+        ...init.headers,
+      },
+    });
+    const data = await response.json();
 
-  if (!response.ok) {
-    throw new HttpError(response.status, data?.message || response.statusText, data);
-  }
+    if (!response.ok) {
+      throw new HttpError(response.status, data?.error?.code || response.statusText, data?.error?.message || "", data);
+    }
 
-  return data as T;
+    return data as T;
+  } catch (error: any) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    throw http.serverError("Network error");
+  }
 };
 
 const get = <T>(url: string, queryParams?: QueryParams, init?: RequestInit) =>
@@ -53,14 +58,14 @@ const post = <T, B = unknown>(url: string, body?: B, init?: RequestInit) =>
   request<T>(url, {
     ...init,
     method: "POST",
-    body: body ? JSON.stringify(body) : undefined,
+    body: buildBody(body),
   });
 
-const put = <T, B = unknown>(url: string, body?: B, init?: RequestInit) =>
+const put = <T = HttpError, B = unknown>(url: string, body?: B, init?: RequestInit) =>
   request<T>(url, {
     ...init,
     method: "PUT",
-    body: body ? JSON.stringify(body) : undefined,
+    body: buildBody(body),
   });
 
 const del = <T>(url: string, init?: RequestInit) =>

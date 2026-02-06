@@ -5,10 +5,10 @@ import { PermissionsCheck } from "./permission.constant";
 type DeepPathValues<T> = T extends string
   ? T
   : T extends (...args: any[]) => infer R
-  ? R
-  : T extends object
-  ? { [K in keyof T]: DeepPathValues<T[K]> }[keyof T]
-  : never;
+    ? R
+    : T extends object
+      ? { [K in keyof T]: DeepPathValues<T[K]> }[keyof T]
+      : never;
 
 type AllPathValues = DeepPathValues<typeof PATHS>;
 
@@ -81,8 +81,38 @@ export const PATHS_WITH_PERMISSIONS = {
       $or: "assignment:update",
     },
   ],
+  [PATHS.ASSIGNMENTS.ASSIGNED_LIST]: [
+    {
+      $or: "assignment:create",
+    },
+    {
+      $or: "assignment:read",
+    },
+    {
+      $or: "assignment:delete",
+    },
+    {
+      $or: "assignment:update",
+    },
+  ],
   [PATHS.ASSIGNMENTS.CREATE_ASSIGNMENT]: ["assignment:create"],
   [PATHS.ASSIGNMENTS.EDIT_ASSIGNMENT()]: ["assignment:update"],
+  [PATHS.ASSIGNMENTS.QUESTION_BANK]: [
+    {
+      $or: "assignment:create",
+    },
+    {
+      $or: "assignment:read",
+    },
+    {
+      $or: "assignment:delete",
+    },
+    {
+      $or: "assignment:update",
+    },
+  ],
+  [PATHS.ASSIGNMENTS.CREATE_QUESTION_BANK]: ["assignment:create"],
+  [PATHS.ASSIGNMENTS.EDIT_QUESTION_BANK()]: ["assignment:update"],
   [PATHS.PLANS.ROOT]: [{ $or: "plan:read" }, { $or: "plan:create" }, { $or: "plan:update" }, { $or: "plan:delete" }],
   [PATHS.PLANS.CREATE]: [{ $or: "plan:create" }],
   [PATHS.PLANS.DETAIL()]: [{ $or: "plan:read" }],
@@ -112,4 +142,8 @@ export const PATHS_WITH_PERMISSIONS = {
   [PATHS.SURVEYS.EDIT()]: ["survey:update"],
   [PATHS.SURVEYS.CREATE]: ["survey:create"],
   [PATHS.SURVEYS.STATISTICS()]: ["survey:read"],
+  [PATHS.FLASHCARDS.ROOT]: [{ $or: "flashcard:read" }, { $or: "flashcard:create" }, { $or: "flashcard:update" }, { $or: "flashcard:delete" }],
+  [PATHS.FLASHCARDS.CREATE]: ["flashcard:create"],
+  [PATHS.FLASHCARDS.DETAIL()]: ["flashcard:read"],
+  [PATHS.FLASHCARDS.EDIT()]: ["flashcard:update"],
 } as const satisfies PathWithPermissionsCheck;

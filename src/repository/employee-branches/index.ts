@@ -8,16 +8,16 @@ type EmployeeBranchInsert = {
 /**
  * Create employee-branch relationships
  */
-export async function create(data: EmployeeBranchInsert[]): Promise<void> {
+export async function create(branchInsert: EmployeeBranchInsert[]) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_branches")
-    .insert(data);
+  const { error, data } = await supabase.from("employee_branches").insert(branchInsert).select(`*, branches(id, name)`);
 
   if (error) {
     throw new Error(`Failed to create employee-branch relationships: ${error.message}`);
   }
+
+  return data;
 }
 
 /**
@@ -26,10 +26,7 @@ export async function create(data: EmployeeBranchInsert[]): Promise<void> {
 export async function deleteByEmployeeId(employeeId: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_branches")
-    .delete()
-    .eq("employee_id", employeeId);
+  const { error } = await supabase.from("employee_branches").delete().eq("employee_id", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete employee-branch relationships: ${error.message}`);
@@ -42,10 +39,7 @@ export async function deleteByEmployeeId(employeeId: string): Promise<void> {
 export async function deleteByBranchId(branchId: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_branches")
-    .delete()
-    .eq("branch_id", branchId);
+  const { error } = await supabase.from("employee_branches").delete().eq("branch_id", branchId);
 
   if (error) {
     throw new Error(`Failed to delete employee-branch relationships: ${error.message}`);
@@ -58,10 +52,7 @@ export async function deleteByBranchId(branchId: string): Promise<void> {
 export async function deleteById(id: string): Promise<void> {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("employee_branches")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("employee_branches").delete().eq("id", id);
 
   if (error) {
     throw new Error(`Failed to delete employee-branch relationship: ${error.message}`);
@@ -76,7 +67,8 @@ export async function getBranchesByEmployeeId(employeeId: string) {
 
   const { data, error } = await supabase
     .from("employee_branches")
-    .select(`
+    .select(
+      `
       id,
       branch_id,
       created_at,
@@ -86,7 +78,8 @@ export async function getBranchesByEmployeeId(employeeId: string) {
         code,
         address
       )
-    `)
+    `,
+    )
     .eq("employee_id", employeeId);
 
   if (error) {
@@ -104,7 +97,8 @@ export async function getEmployeesByBranchId(branchId: string) {
 
   const { data, error } = await supabase
     .from("employee_branches")
-    .select(`
+    .select(
+      `
       id,
       employee_id,
       created_at,
@@ -116,7 +110,8 @@ export async function getEmployeesByBranchId(branchId: string) {
           email
         )
       )
-    `)
+    `,
+    )
     .eq("branch_id", branchId);
 
   if (error) {
@@ -146,4 +141,3 @@ export async function checkEmployeeBranchExists(employeeId: string, branchId: st
 
   return !!data;
 }
-

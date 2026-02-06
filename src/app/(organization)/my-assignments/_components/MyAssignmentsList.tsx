@@ -12,17 +12,9 @@ import {
   FormControl,
   IconButton,
   InputAdornment,
-  InputLabel,
   Menu,
   MenuItem,
   Select,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -34,12 +26,23 @@ import remarkGfm from "remark-gfm";
 
 import { PATHS } from "@/constants/path.constant";
 import useDebounce from "@/hooks/useDebounce";
+import { fDateTime, FORMAT_DATE_TIME_CLEANER } from "@/lib";
 import { useGetMyAssignmentsQuery } from "@/modules/assignment-management/operations/query";
+import {
+  getMyAssignmentDisplayStatus,
+  getMyAssignmentResultLabel,
+  getMyAssignmentResultStatus,
+} from "@/modules/assignment-management/utils/my-assignment.utils";
 import { useUserOrganization } from "@/modules/organization/store/OrganizationProvider";
 import PageContainer from "@/shared/ui/PageContainer";
+import TableData from "@/shared/ui/TableData";
+import type { TableDataColumn } from "@/shared/ui/TableData/TableDataRow";
 import type { MyAssignmentStatusFilter } from "@/types/dto/assignments";
+import type { MyAssignmentDto } from "@/types/dto/assignments";
 
 type StatusFilterUI = "all" | MyAssignmentStatusFilter;
+
+type MyAssignmentRow = MyAssignmentDto & { id: string };
 
 export default function MyAssignmentsList() {
   const router = useRouter();
@@ -71,12 +74,12 @@ export default function MyAssignmentsList() {
     organizationId: currentOrg.orgId,
   });
 
-  const handleChangePage = React.useCallback((_event: unknown, newPage: number) => {
+  const handleChangePage = React.useCallback((newPage: number) => {
     setPage(newPage);
   }, []);
 
-  const handleChangeRowsPerPage = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
+  const handleChangeRowsPerPage = React.useCallback((newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
     setPage(0);
   }, []);
 
@@ -87,6 +90,9 @@ export default function MyAssignmentsList() {
 
   const handleCloseMenu = React.useCallback(() => {
     setAnchorEl(null);
+  }, []);
+
+  const handleMenuExited = React.useCallback(() => {
     setSelectedAssignmentId(null);
   }, []);
 
@@ -94,7 +100,6 @@ export default function MyAssignmentsList() {
     if (selectedAssignmentId && employeeId) {
       router.push(PATHS.MY_ASSIGNMENTS.SUBMIT(selectedAssignmentId, employeeId));
       setAnchorEl(null);
-      setSelectedAssignmentId(null);
     }
   }, [selectedAssignmentId, employeeId, router]);
 
@@ -102,41 +107,145 @@ export default function MyAssignmentsList() {
     if (selectedAssignmentId && employeeId) {
       router.push(PATHS.MY_ASSIGNMENTS.RESULT(selectedAssignmentId, employeeId));
       setAnchorEl(null);
-      setSelectedAssignmentId(null);
     }
   }, [selectedAssignmentId, employeeId, router]);
 
-  const formatDate = React.useCallback((dateString: string | null) => {
-    if (!dateString) return "-";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }, []);
-
-  const getStatusChip = React.useCallback((status: string | null, hasSubmitted: boolean) => {
-    if (!hasSubmitted) {
-      return <Chip label="Chưa nộp" color="warning" size="small" />;
+  const getStatusChip = React.useCallback((row: MyAssignmentRow) => {
+    const displayStatus = getMyAssignmentDisplayStatus(row);
+    if (displayStatus === "in_progress") {
+      return <Chip label="Đang làm" color="info" size="small" />;
     }
-    if (status === "graded") {
+    if (displayStatus === "not_yet_started") {
+      return <Chip label="Chưa tới giờ làm" color="secondary" size="small" />;
+    }
+    if (displayStatus === "graded") {
       return <Chip label="Đã chấm" color="success" size="small" />;
     }
-    if (status === "submitted") {
+    if (displayStatus === "submitted") {
       return <Chip label="Đã nộp" color="info" size="small" />;
     }
     return <Chip label="Chưa nộp" color="warning" size="small" />;
   }, []);
 
+  const getResultChip = React.useCallback((row: MyAssignmentRow) => {
+    const resultStatus = getMyAssignmentResultStatus(row);
+    if (resultStatus === "none") {
+      return (
+        <Typography variant="body2" color="text.secondary">
+          -
+        </Typography>
+      );
+    }
+
+    const label = getMyAssignmentResultLabel(resultStatus);
+    const color = resultStatus === "pass" ? "success" : resultStatus === "late" ? "error" : "warning";
+
+    return <Chip label={label} color={color} size="small" />;
+  }, []);
+
   const assignments = React.useMemo(() => paginatedResult?.data || [], [paginatedResult?.data]);
+  const rows = React.useMemo(
+    () =>
+      assignments.map((assignment) => ({
+        ...assignment,
+        id: assignment.assignment_id,
+      })),
+    [assignments],
+  );
   const totalCount = paginatedResult?.total || 0;
 
   const selectedAssignment = React.useMemo(() => {
     return assignments?.find((a) => a.assignment_id === selectedAssignmentId);
   }, [assignments, selectedAssignmentId]);
+
+  const submitLabel = selectedAssignment?.has_active_attempt
+    ? "Tiếp tục làm"
+    : selectedAssignment?.has_submitted
+      ? "Làm lại"
+      : "Làm bài";
+
+  const columns = React.useMemo<TableDataColumn<MyAssignmentRow>[]>(
+    () => [
+      {
+        id: "assignment_name",
+        field: "assignment_name",
+        headerName: "Tên bài kiểm tra",
+        renderCell: (value) => (
+          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            {value as string}
+          </Typography>
+        ),
+      },
+      {
+        id: "assignment_description",
+        field: "assignment_description",
+        headerName: "Mô tả",
+        sx: { width: 500 },
+        renderCell: (value) => (
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeRaw, rehypeSanitize]}
+            className="line-clamp-1"
+          >
+            {(value as string) || "-"}
+          </ReactMarkdown>
+        ),
+      },
+      {
+        id: "submitted_at",
+        field: "submitted_at",
+        headerName: "Ngày nộp",
+        renderCell: (_value, row) => (
+          <Typography variant="body2">{fDateTime(row.submitted_at, FORMAT_DATE_TIME_CLEANER)}</Typography>
+        ),
+      },
+      {
+        id: "status",
+        field: "status",
+        headerName: "Trạng thái",
+        renderCell: (_value, row) => getStatusChip(row),
+      },
+      {
+        id: "result",
+        field: "result",
+        headerName: "Kết quả",
+        renderCell: (_value, row) => getResultChip(row),
+      },
+      {
+        id: "score",
+        field: "score",
+        headerName: "Điểm",
+        renderCell: (_value, row) =>
+          row.status === "graded" && row.score !== null ? (
+            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+              {row.score}/{row.max_score}
+            </Typography>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              -
+            </Typography>
+          ),
+      },
+      {
+        id: "actions",
+        field: "actions",
+        headerName: "Thao tác",
+        align: "right",
+        renderCell: (_value, row) => (
+          <IconButton
+            size="small"
+            onClick={(event) => {
+              event.stopPropagation();
+              handleOpenMenu(event, row.assignment_id);
+            }}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        ),
+      },
+    ],
+    [getResultChip, getStatusChip, handleOpenMenu],
+  );
 
   return (
     <PageContainer title="Bài kiểm tra của tôi" breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}>
@@ -170,7 +279,7 @@ export default function MyAssignmentsList() {
                 onChange={(e) => setStatusFilter(e.target.value as StatusFilterUI)}
               >
                 <MenuItem value="all">Tất cả</MenuItem>
-                <MenuItem value="not_submitted">Chưa nộp</MenuItem>
+                <MenuItem value="in_progress">Chưa nộp</MenuItem>
                 <MenuItem value="submitted">Đã nộp</MenuItem>
                 <MenuItem value="graded">Đã chấm</MenuItem>
               </Select>
@@ -193,88 +302,21 @@ export default function MyAssignmentsList() {
               {error instanceof Error ? error.message : "Không thể tải danh sách bài kiểm tra"}
             </Alert>
           ) : (
-            <>
-              <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Tên bài kiểm tra</TableCell>
-                      <TableCell sx={{ fontWeight: 600, width: 500 }}>Mô tả</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Ngày nộp</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Trạng thái</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Điểm</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }} align="right">
-                        Thao tác
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {!assignments || assignments.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 8 }}>
-                          <Typography color="text.secondary">
-                            {debouncedSearch
-                              ? "Không tìm thấy bài kiểm tra nào phù hợp"
-                              : "Bạn chưa được giao bài kiểm tra nào"}
-                          </Typography>
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      assignments.map((assignment) => (
-                        <TableRow key={assignment.assignment_id} hover>
-                          <TableCell>
-                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                              {assignment.assignment_name}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm]}
-                              rehypePlugins={[rehypeRaw, rehypeSanitize]}
-                              className="line-clamp-1"
-                            >
-                              {assignment.assignment_description || "-"}
-                            </ReactMarkdown>
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">{formatDate(assignment.submitted_at)}</Typography>
-                          </TableCell>
-                          <TableCell>{getStatusChip(assignment.status, assignment.has_submitted)}</TableCell>
-                          <TableCell>
-                            {assignment.status === "graded" && assignment.score !== null ? (
-                              <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                {assignment.score}/{assignment.max_score}
-                              </Typography>
-                            ) : (
-                              <Typography variant="body2" color="text.secondary">
-                                -
-                              </Typography>
-                            )}
-                          </TableCell>
-                          <TableCell align="right">
-                            <IconButton size="small" onClick={(e) => handleOpenMenu(e, assignment.assignment_id)}>
-                              <MoreVertIcon />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-
-              <TablePagination
-                component="div"
-                count={totalCount}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                rowsPerPageOptions={[10, 25, 50, 100]}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) => `${from}-${to} trong tổng số ${count}`}
-              />
-            </>
+            <TableData<MyAssignmentRow>
+              rows={rows}
+              columns={columns}
+              rowKey="id"
+              loading={isLoading}
+              hoverRow
+              pagination={{
+                page: page + 1,
+                pageSize: rowsPerPage,
+                total: totalCount,
+                perPageOptions: [10, 25, 50, 100],
+                onChangePage: (nextPage) => handleChangePage(nextPage - 1),
+                onChangePageSize: handleChangeRowsPerPage,
+              }}
+            />
           )}
         </Card>
 
@@ -282,6 +324,7 @@ export default function MyAssignmentsList() {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
+          TransitionProps={{ onExited: handleMenuExited }}
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "right",
@@ -291,10 +334,13 @@ export default function MyAssignmentsList() {
             horizontal: "right",
           }}
         >
-          <MenuItem onClick={handleSubmitAssignment} disabled={selectedAssignment?.status === "graded"}>
-            Nộp bài
+          <MenuItem onClick={handleSubmitAssignment} disabled={!selectedAssignment?.can_retry}>
+            {submitLabel}
           </MenuItem>
-          <MenuItem onClick={handleViewResult} disabled={selectedAssignment?.status !== "graded"}>
+          <MenuItem
+            onClick={handleViewResult}
+            disabled={!selectedAssignment?.has_submitted || selectedAssignment?.status !== "graded"}
+          >
             Xem kết quả
           </MenuItem>
         </Menu>

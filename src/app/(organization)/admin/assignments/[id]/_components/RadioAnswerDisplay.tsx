@@ -17,11 +17,13 @@ import { QuestionOption } from "@/types/dto/assignments";
 interface RadioAnswerDisplayProps {
   selectedOptionId: string | undefined;
   options: QuestionOption[] | undefined;
+  showCorrectAnswers: boolean;
 }
 
 const RadioAnswerDisplay: React.FC<RadioAnswerDisplayProps> = ({
   selectedOptionId,
   options,
+  showCorrectAnswers,
 }) => {
   return (
     <Box>
@@ -41,13 +43,13 @@ const RadioAnswerDisplay: React.FC<RadioAnswerDisplayProps> = ({
               label={
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Typography variant="body2">{option.label}</Typography>
-                  {isSelected && isCorrectOption && (
+                  {showCorrectAnswers && isSelected && isCorrectOption && (
                     <CheckCircleIcon fontSize="small" color="success" />
                   )}
-                  {isSelected && !isCorrectOption && (
+                  {showCorrectAnswers && isSelected && !isCorrectOption && (
                     <CancelIcon fontSize="small" color="error" />
                   )}
-                  {!isSelected && isCorrectOption && (
+                  {showCorrectAnswers && !isSelected && isCorrectOption && (
                     <Typography variant="caption" color="success.main">
                       (Đáp án đúng)
                     </Typography>
@@ -64,4 +66,3 @@ const RadioAnswerDisplay: React.FC<RadioAnswerDisplayProps> = ({
 };
 
 export default RadioAnswerDisplay;
-

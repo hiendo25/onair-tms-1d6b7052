@@ -10,6 +10,16 @@ export const useMarkReadNotificationMutation = () => {
   });
 };
 
+export const useMarkAllReadNotificationMutation = () => {
+  const queryClient = useQueryClient();
+  return useTMutation({
+    mutationFn: () => client.post("/notifications/mark-all-read"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["GET_SUBSCRIBE_USER"] });
+    },
+  });
+};
+
 export const useSendNotificationsMutation = () => {
   return useTMutation({
     mutationFn: (payload: any) =>

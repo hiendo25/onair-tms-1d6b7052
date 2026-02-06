@@ -3,6 +3,7 @@ import { Controller } from "react-hook-form";
 
 import RHFRichEditor from "@/shared/ui/form/RHFRichEditor";
 import RHFTextField from "@/shared/ui/form/RHFTextField";
+import RHFTinyEditor from "@/shared/ui/form/RHFTinyEditor";
 import { useUpsertCourseFormContext } from "../../UpsertCourseFormContainer";
 
 import AssessmentSelector, { AssessmentSelectorProps } from "./AssessmentSelector";
@@ -20,10 +21,10 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
   const title = getValues(`sections.${sectionIndex}.lessons.${lessonIndex}.title`);
 
   const handleSelectAssignment: AssessmentSelectorProps["onSelect"] = (data) => {
-    setValue(`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentId`, data.id);
+    setValue(`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentBankId`, data.id);
     setValue(`sections.${sectionIndex}.lessons.${lessonIndex}.title`, data.title);
     setValue(`sections.${sectionIndex}.lessons.${lessonIndex}.content`, data.description);
-    clearErrors(`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentId`);
+    clearErrors(`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentBankId`);
   };
   const handleConfirmDelete = useCallback(() => {
     onDelete?.(sectionIndex, lessonIndex);
@@ -41,7 +42,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
           />
           <Controller
             control={control}
-            name={`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentId`}
+            name={`sections.${sectionIndex}.lessons.${lessonIndex}.assignmentBankId`}
             render={({ field: { value }, fieldState: { error } }) => (
               <AssessmentSelector
                 value={value}
@@ -53,7 +54,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
             )}
           />
 
-          <RHFRichEditor
+          <RHFTinyEditor
             control={control}
             label="Mô tả"
             name={`sections.${sectionIndex}.lessons.${lessonIndex}.content`}
@@ -78,7 +79,7 @@ const LessonForm: React.FC<LessonFormProps> = ({ lessonIndex, sectionIndex, onDe
             sectionIndex={sectionIndex}
             lessonIndex={lessonIndex}
           />
-          <RHFRichEditor
+          <RHFTinyEditor
             control={control}
             label="Mô tả"
             name={`sections.${sectionIndex}.lessons.${lessonIndex}.content`}

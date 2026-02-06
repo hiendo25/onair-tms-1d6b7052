@@ -12,6 +12,7 @@ interface CourseOutlineOptions {
 const DEFAULT_OUTLINE: LearningCourseOutline = {
   course: null,
   sections: [],
+  progressPercentage: 0,
 };
 
 const fetchFromApi = async <T>(input: string | URL, init?: RequestInit) => {

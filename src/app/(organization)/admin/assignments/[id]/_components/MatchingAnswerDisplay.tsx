@@ -15,6 +15,7 @@ interface MatchingAnswerDisplayProps {
   columnAItems: Array<{ id: string; content: string }>;
   columnBItems: Array<{ id: string; content: string }>;
   correctMappings: Array<{ columnAId: string; columnBId: string }>;
+  showCorrectAnswers: boolean;
 }
 
 const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
@@ -22,6 +23,7 @@ const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
   columnAItems,
   columnBItems,
   correctMappings,
+  showCorrectAnswers,
 }) => {
   // Helper function to check if a student mapping is correct
   const isMappingCorrect = (columnAId: string, columnBId: string): boolean => {
@@ -52,9 +54,11 @@ const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
             (sm) => sm.columnAId === itemA.id
           );
           const correctColumnBId = getCorrectColumnBId(itemA.id);
-          const isCorrect = studentMapping
+          const isCorrect = showCorrectAnswers && studentMapping
             ? isMappingCorrect(itemA.id, studentMapping.columnBId)
             : false;
+          const borderColor = showCorrectAnswers ? (isCorrect ? "success.main" : "error.main") : "grey.300";
+          const backgroundColor = showCorrectAnswers ? (isCorrect ? "success.lighter" : "error.lighter") : "grey.50";
 
           return (
             <Paper
@@ -62,8 +66,8 @@ const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
               variant="outlined"
               sx={{
                 p: 2,
-                backgroundColor: isCorrect ? "success.lighter" : "error.lighter",
-                borderColor: isCorrect ? "success.main" : "error.main",
+                backgroundColor,
+                borderColor,
               }}
             >
               <Stack spacing={1}>
@@ -82,15 +86,15 @@ const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
                       ? getColumnBContent(studentMapping.columnBId)
                       : "(Chưa ghép)"}
                   </Typography>
-                  {isCorrect ? (
+                  {showCorrectAnswers && (isCorrect ? (
                     <CheckCircleIcon fontSize="small" color="success" />
                   ) : (
                     <CancelIcon fontSize="small" color="error" />
-                  )}
+                  ))}
                 </Stack>
 
                 {/* Show correct answer if student's answer is wrong */}
-                {!isCorrect && correctColumnBId && (
+                {showCorrectAnswers && !isCorrect && correctColumnBId && (
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Typography variant="body2" color="success.main" sx={{ fontWeight: 600 }}>
                       Đáp án đúng:
@@ -110,4 +114,3 @@ const MatchingAnswerDisplay: React.FC<MatchingAnswerDisplayProps> = ({
 };
 
 export default MatchingAnswerDisplay;
-

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { http } from "@/lib/api/http-status";
 import { requireAuth } from "@/lib/auth/require-auth";
 import { DeleteUserService } from "@/services/auth/delete-user.service";
-import { http } from "@/utils/http-status";
 
 export async function GET(request: NextRequest) {
   try {

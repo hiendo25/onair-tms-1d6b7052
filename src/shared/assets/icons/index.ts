@@ -1,3 +1,5 @@
+import AlertCircleIcon from "./AlertCircleIcon";
+import ArchiveIcon from "./ArchiveIcon";
 import ArrowRightIcon from "./ArrowIcon";
 import BarChart10Icon from "./BarChart10Icon";
 import Bell01Icon from "./Bell01Icon";
@@ -7,6 +9,7 @@ import CalendarIcon2 from "./CalendaIcon2";
 import CalendarDateIcon from "./CalendarDateIcon";
 import CalendarDateIcon2 from "./CalendarDateIcon2";
 import CameraOffIcon from "./CameraOffIcon";
+import CertificateIcon from "./CertificateIcon";
 import CheckCircleIcon from "./CheckCircleIcon";
 import ChevronDownIcon from "./ChevronDownIcon";
 import ChevronRightDoubleIcon from "./ChevronRightDoubleIcon";
@@ -15,8 +18,10 @@ import ClassIcon from "./ClassIcon";
 import ClipboardIcon from "./ClipboardIcon";
 import CloseIcon from "./CloseIcon";
 import CloudUploadIcon from "./CloudUploadIcon";
+import CodeSquareIcon from "./CodeSquareIcon";
 import Copy07Icon from "./Copy07Icon";
 import Dot2RowVerticalIcon from "./Dot2RowVerticalIcon";
+import DotHorizontalIcon from "./DotHorizontalIcon";
 import Download01Icon from "./Download01Icon";
 import Edit02Icon from "./Edit02Icon";
 import Edit05Icon from "./Edit05Icon";
@@ -38,14 +43,18 @@ import FileWord02Icon from "./FileWord02Icon";
 import FileWordIcon from "./FileWordIcon";
 import FileZipIcon from "./FileZipIcon";
 import FilterFunnelIcon from "./FilterFunnelIcon";
+import FlashcardIcon from "./FlashcardIcon";
 import FolderShieldIcon from "./FolderShieldIcon";
+import Gamefication from "./Gamefication";
 import GitIcon from "./GitIcon";
 import GlobeIcon from "./GlobeIcon";
 import GoogleIcon from "./GoogleIcon";
+import Hash01Icon from "./Hash01Icon";
 import HelpIcon from "./HelpIcon";
 import ImageIcon from "./ImageIcon";
 import Inbox01Icon from "./Inbox01Icon";
 import InforCircleIcon from "./InforCircleIcon";
+import LearningPathIcon from "./learningPathIcon";
 import LineChartUp01Icon from "./LineChartUp01Icon";
 import LinkIcon from "./LinkIcon";
 import Loading from "./LoadingIcon";
@@ -55,8 +64,10 @@ import LogoutIcon from "./LogoutIcon";
 import MarkerPin01Icon from "./MarkerPin01Icon";
 import MarkerPinIcon from "./MarkerPinIcon";
 import Menu05Icon from "./Menu05Icon";
+import MinusIcon from "./MinusIcon";
 import MonitorIcon from "./MonitorIcon";
 import ParagraphIcon from "./ParagraphIcon";
+import PieChart2Icon from "./PieChart2Icon";
 import SearchIcon from "./SearchIcon";
 import Setting02Icon from "./Setting02Icon";
 import SettingIcon from "./SettingIcon";
@@ -65,12 +76,15 @@ import SquareFourIcon from "./SquareFourIcon";
 import Star01Icon from "./Star01Icon";
 import TrashIcon1 from "./TrashIcon1";
 import Trash01Icon from "./TrashIcon1";
+import UserIcon from "./UserIcon";
+import Users02Icon from "./Users02Icon";
 import UsersIcon from "./UsersIcon";
 import UsersIcon2 from "./UsersIcon2";
 import UsersPlusIcon from "./UsersPlusIcon";
 import VideoCameraRecordFillIcon from "./VideoCameraRecordFIll";
 import VideoIcon from "./VideoIcon";
 import VideoRecorderOffIcon from "./VideoRecorderOffIcon";
+import XCircleIcon from "./XCircleIcon";
 import YoutubeIcon from "./YoutubeIcon";
 import ZaloIcon from "./ZaloIcon";
 export {
@@ -108,6 +122,7 @@ export {
   FileWord02Icon,
   FileZipIcon,
   FilterFunnelIcon,
+  FlashcardIcon,
   FileAttachmentIcon,
   FolderShieldIcon,
   FaceSadIcon,
@@ -149,4 +164,17 @@ export {
   VideoRecorderOffIcon,
   Inbox01Icon,
   ShareIcon,
+  XCircleIcon,
+  AlertCircleIcon,
+  CertificateIcon,
+  PieChart2Icon,
+  DotHorizontalIcon,
+  LearningPathIcon,
+  Gamefication,
+  MinusIcon,
+  Users02Icon,
+  CodeSquareIcon,
+  UserIcon,
+  Hash01Icon,
+  ArchiveIcon,
 };

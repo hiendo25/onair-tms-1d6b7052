@@ -53,7 +53,7 @@ const NotificationDrawerContainer: React.FC<NotificationDrawerContainerProps> = 
     params: { employeeId },
     enabled: isOpenDrawer,
   });
-  const { markAsRead } = useMarkNotificationAsRead(notificationQueryParams);
+  const { markAsRead, markAllRead } = useMarkNotificationAsRead(notificationQueryParams);
 
   const notificationOptionWithCount = useMemo(() => {
     let totalCount = 0;
@@ -93,6 +93,10 @@ const NotificationDrawerContainer: React.FC<NotificationDrawerContainerProps> = 
     markAsRead(recordId);
   };
 
+  const handleMarkAllRead = () => {
+    markAllRead();
+  };
+
   useEffect(() => {
     if (!isOpenDrawer) return;
     closeNotification();
@@ -109,6 +113,7 @@ const NotificationDrawerContainer: React.FC<NotificationDrawerContainerProps> = 
       onFilterChange={handleFilterNotification}
       onFetchNext={handleFetchNextPage}
       isFetchingNext={isFetchingNextPage}
+      onMarkAllRead={handleMarkAllRead}
       render={(item, index) => (
         <div className="-mx-4">
           {item.type === "class_room" ? (

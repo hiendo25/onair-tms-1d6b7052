@@ -11,7 +11,6 @@ import { Database } from "@/types/supabase.types";
 export async function createSVClient() {
   const cookieStore = await cookies();
 
-  // console.log({ cookieStore });
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,

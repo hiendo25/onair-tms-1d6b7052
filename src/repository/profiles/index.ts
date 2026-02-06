@@ -1,25 +1,20 @@
 import { createSVClient } from "@/services";
 import type { Database } from "@/types/supabase.types";
 
-export async function createProfile(data: {
-  employee_id: string;
-  email: string;
-  full_name: string;
-  phone_number?: string;
-  gender: Database["public"]["Enums"]["gender"];
-  birthday?: string | null;
-}) {
+import { ProfileInsert } from "./profile.entity";
+
+export async function createProfile(profileInsert: ProfileInsert) {
   const supabase = await createSVClient();
 
   const { data: profile, error } = await supabase
     .from("profiles")
     .insert({
-      employee_id: data.employee_id,
-      email: data.email,
-      full_name: data.full_name,
-      phone_number: data.phone_number || "",
-      gender: data.gender,
-      birthday: data.birthday || null,
+      employee_id: profileInsert.employee_id,
+      email: profileInsert.email,
+      full_name: profileInsert.full_name,
+      phone_number: profileInsert.phone_number,
+      gender: profileInsert.gender,
+      birthday: profileInsert.birthday,
     })
     .select()
     .single();
@@ -39,14 +34,11 @@ export async function updateProfileByEmployeeId(
     phone_number?: string;
     gender?: Database["public"]["Enums"]["gender"];
     birthday?: string | null;
-  }
+  },
 ) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("profiles")
-    .update(data)
-    .eq("employee_id", employeeId);
+  const { error } = await supabase.from("profiles").update(data).eq("employee_id", employeeId);
 
   if (error) {
     throw new Error(`Failed to update profile: ${error.message}`);
@@ -56,10 +48,7 @@ export async function updateProfileByEmployeeId(
 export async function deleteProfileByEmployeeId(employeeId: string) {
   const supabase = await createSVClient();
 
-  const { error } = await supabase
-    .from("profiles")
-    .delete()
-    .eq("employee_id", employeeId);
+  const { error } = await supabase.from("profiles").delete().eq("employee_id", employeeId);
 
   if (error) {
     throw new Error(`Failed to delete profile: ${error.message}`);
@@ -69,10 +58,7 @@ export async function deleteProfileByEmployeeId(employeeId: string) {
 export async function findProfilesByEmails(emails: string[]) {
   const supabase = await createSVClient();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("email")
-    .in("email", emails);
+  const { data, error } = await supabase.from("profiles").select("email").in("email", emails);
 
   if (error) {
     throw new Error(`Failed to check emails: ${error.message}`);

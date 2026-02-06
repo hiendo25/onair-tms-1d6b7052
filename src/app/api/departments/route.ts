@@ -1,31 +1,84 @@
-import { revalidatePath } from "next/cache";
-import { NextRequest, NextResponse } from "next/server";
+import { isNumber } from "lodash";
+import { NextRequest } from "next/server";
 
-import { PATHS } from "@/constants/path.constant";
-import { departmentService } from "@/services";
-import type { CreateDepartmentDto } from "@/types/dto/departments";
+import { http } from "@/lib/api/http-status";
+import { requireAuth } from "@/lib/auth/require-auth";
+import { DomainError } from "@/lib/errors/DomainError";
+import {
+  CreateDepartmentGroupPayload,
+  CreateRootDepartmentPayload,
+  GetDepartmentsQueryParams,
+} from "@/modules/department/type";
+import { CreateDepartmentService } from "@/services/departments/create-department.service";
+import { GetDepartmentService } from "@/services/departments/get-department.service";
+import { parseQueryParams } from "@/utils/query-params";
 
 export async function POST(request: NextRequest) {
   try {
-    const payload: CreateDepartmentDto = await request.json();
+    const { organizationId, employeeId } = await requireAuth();
 
-    const result = await departmentService.createDepartment(payload);
+    const payload: CreateRootDepartmentPayload | CreateDepartmentGroupPayload = await request.json();
 
-    revalidatePath(PATHS.DEPARTMENTS.ROOT);
+    if (payload.type !== "root" && payload.type !== "group") {
+      return http.badRequest("type không hợp lệ", "INVALID_TYPE", payload);
+    }
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "Tạo phòng ban thành công",
-        data: result,
-      },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error("Error creating department:", error);
+    if (payload.type === "root") {
+      const data = await new CreateDepartmentService(organizationId, employeeId).createRoot({
+        branchId: payload.branchId,
+        code: payload.code,
+        managedById: payload.managedById,
+        name: payload.name,
+      });
 
-    const errorMessage = error instanceof Error ? error.message : "Có lỗi xảy ra khi tạo phòng ban";
+      return http.created(data);
+    }
 
-    return NextResponse.json({ success: false, message: errorMessage }, { status: 500 });
+    if (payload.type === "group") {
+      const data = await new CreateDepartmentService(organizationId, employeeId).createChild({
+        parentId: payload.parentId,
+        code: payload.code,
+        managedById: payload.managedById,
+        name: payload.name,
+      });
+      return http.created(data);
+    }
+  } catch (error: any) {
+    console.error(error);
+
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
+    return http.serverError(error?.message);
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { organizationId, employeeId } = await requireAuth();
+
+    const searchParams = request.nextUrl.searchParams;
+
+    const queryObject = <GetDepartmentsQueryParams>parseQueryParams(searchParams);
+
+    const page = queryObject.page && isNumber(Number(queryObject.page)) ? Number(queryObject.page) : undefined;
+    const pageSize =
+      queryObject.pageSize && isNumber(Number(queryObject.pageSize)) ? Number(queryObject.pageSize) : undefined;
+
+    const data = await new GetDepartmentService(organizationId, employeeId).getDepartments({
+      page,
+      pageSize,
+      branchIds: queryObject.branchIds,
+      excludes: queryObject.excludes,
+    });
+
+    return http.ok(data);
+  } catch (error: any) {
+    console.error(error);
+
+    if (error instanceof DomainError) {
+      return http.fromDomainError(error);
+    }
+    return http.serverError(error?.message);
   }
 }

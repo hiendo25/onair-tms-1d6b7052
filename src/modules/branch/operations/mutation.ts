@@ -1,44 +1,41 @@
+import { client } from "@/lib/api";
 import { useTMutation } from "@/lib/queryClient";
-import type { CreateBranchDto, ImportBranchesDto, UpdateBranchDto } from "@/types/dto/branches";
+import { BranchStatus } from "@/model/branches.model";
+import type { ImportBranchesDto, UpdateBranchDto } from "@/types/dto/branches";
+import { CreateBranchPayload, CreateBranchResponse, DeleteBranchResponse, UpdateBranchPayload } from "../type";
 
 export const useCreateBranchMutation = () => {
   return useTMutation({
-    mutationFn: async (payload: CreateBranchDto) => {
-      const response = await fetch("/api/branches", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to create branch");
+    mutationFn: async (payload: CreateBranchPayload) => {
+      const data = await client.post<CreateBranchResponse>("branches", payload);
+      if (!data.success) {
+        throw data.error.message;
       }
-
-      return response.json();
+      return data.data;
     },
   });
 };
 
 export const useUpdateBranchMutation = () => {
   return useTMutation({
-    mutationFn: async (payload: UpdateBranchDto) => {
-      const response = await fetch(`/api/branches/${payload.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to update branch");
+    mutationFn: async (payload: UpdateBranchPayload) => {
+      const data = await client.put<CreateBranchResponse>(`branches/${payload.id}`, payload);
+      if (!data.success) {
+        throw data.error.message;
       }
+      return data.data;
+    },
+  });
+};
 
-      return response.json();
+export const useToggleBranchStatusMutation = () => {
+  return useTMutation({
+    mutationFn: async (payload: { status: Extract<BranchStatus, "active" | "inactive">; id: string }) => {
+      const data = await client.put<CreateBranchResponse>(`branches/${payload.id}/status`, payload);
+      if (!data.success) {
+        throw data.error.message;
+      }
+      return data.data;
     },
   });
 };
@@ -46,16 +43,11 @@ export const useUpdateBranchMutation = () => {
 export const useDeleteBranchMutation = () => {
   return useTMutation({
     mutationFn: async (branchId: string) => {
-      const response = await fetch(`/api/branches/${branchId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to delete branch");
+      const data = await client.delete<DeleteBranchResponse>(`branches/${branchId}`);
+      if (!data.success) {
+        throw data.error.message;
       }
-
-      return response.json();
+      return data.data;
     },
   });
 };

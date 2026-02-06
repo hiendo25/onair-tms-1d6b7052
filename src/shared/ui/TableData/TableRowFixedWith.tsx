@@ -1,3 +1,4 @@
+"use client";
 import React, { PropsWithChildren, useEffect, useRef } from "react";
 import { TableCell, TableRow } from "@mui/material";
 

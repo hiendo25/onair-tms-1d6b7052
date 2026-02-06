@@ -1,21 +1,22 @@
+import { createSVClient } from "@/services";
 import { createClient } from "@/services/supabase/client";
 import type { BranchDto } from "@/types/dto/branches";
-import type { CreateDepartmentDto, DepartmentDto, GetDepartmentsParams, UpdateDepartmentDto } from "@/types/dto/departments";
+import type {
+  CreateDepartmentDto,
+  DepartmentDto,
+  GetDepartmentsParams,
+  UpdateDepartmentDto,
+} from "@/types/dto/departments";
 import type { PaginatedResult } from "@/types/dto/pagination.dto";
 
 export const departmentRepository = {
   /**
    * Get list of departments with optional filters and pagination
    */
-  async getList(
-    params?: GetDepartmentsParams
-  ): Promise<PaginatedResult<DepartmentDto>> {
+  async getList(params?: GetDepartmentsParams): Promise<PaginatedResult<DepartmentDto>> {
     const { page = 0, limit = 10, search, organizationId, branchId } = params || {};
     const supabase = createClient();
-    let query = supabase
-      .from("departments")
-      .select("*", { count: "exact" })
-      .order("created_at", { ascending: false });
+    let query = supabase.from("departments").select("*", { count: "exact" }).order("created_at", { ascending: false });
 
     // Apply organization filter
     if (organizationId) {
@@ -43,7 +44,7 @@ export const departmentRepository = {
 
     // Return plain objects to avoid Next.js serialization issues
     return {
-      data: (data || []).map(item => ({ ...item })) as DepartmentDto[],
+      data: (data || []).map((item) => ({ ...item })) as DepartmentDto[],
       total: count ?? 0,
       page,
       limit,
@@ -55,11 +56,7 @@ export const departmentRepository = {
    */
   async getById(id: string): Promise<DepartmentDto> {
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from("departments")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { data, error } = await supabase.from("departments").select("*").eq("id", id).single();
 
     if (error) throw error;
     // Return plain object to avoid Next.js serialization issues
@@ -72,11 +69,7 @@ export const departmentRepository = {
   async create(department: CreateDepartmentDto): Promise<DepartmentDto> {
     const supabase = createClient();
 
-    const { data, error } = await supabase
-      .from("departments")
-      .insert(department)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("departments").insert(department).select().single();
 
     if (error) throw error;
     // Return plain object to avoid Next.js serialization issues
@@ -89,12 +82,7 @@ export const departmentRepository = {
   async update(payload: UpdateDepartmentDto): Promise<DepartmentDto> {
     const supabase = createClient();
     const { id, ...updateData } = payload;
-    const { data, error } = await supabase
-      .from("departments")
-      .update(updateData)
-      .eq("id", id)
-      .select()
-      .single();
+    const { data, error } = await supabase.from("departments").update(updateData).eq("id", id).select().single();
 
     if (error) throw error;
     return data as DepartmentDto;
@@ -116,15 +104,10 @@ export const departmentRepository = {
     if (checkError) throw checkError;
 
     if (employeeDepartments && employeeDepartments.length > 0) {
-      throw new Error(
-        "Không thể xóa phòng ban có nhân viên"
-      );
+      throw new Error("Không thể xóa phòng ban có nhân viên");
     }
 
-    const { error } = await supabase
-      .from("departments")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("departments").delete().eq("id", id);
 
     if (error) throw error;
   },
@@ -132,17 +115,9 @@ export const departmentRepository = {
   /**
    * Check if department name already exists in the organization
    */
-  async checkNameExists(
-    name: string,
-    organizationId: string,
-    excludeId?: string
-  ): Promise<boolean> {
+  async checkNameExists(name: string, organizationId: string, excludeId?: string): Promise<boolean> {
     const supabase = createClient();
-    let query = supabase
-      .from("departments")
-      .select("id")
-      .eq("organization_id", organizationId)
-      .eq("name", name);
+    let query = supabase.from("departments").select("id").eq("organization_id", organizationId).eq("name", name);
 
     if (excludeId) {
       query = query.neq("id", excludeId);
@@ -167,7 +142,7 @@ export const departmentRepository = {
 
     if (error) throw error;
     // Return plain objects to avoid Next.js serialization issues
-    return (data || []).map(item => ({ ...item })) as BranchDto[];
+    return (data || []).map((item) => ({ ...item })) as BranchDto[];
   },
 
   /**
@@ -176,10 +151,7 @@ export const departmentRepository = {
   async bulkImport(departments: CreateDepartmentDto[]): Promise<DepartmentDto[]> {
     const supabase = createClient();
 
-    const { data, error } = await supabase
-      .from("departments")
-      .insert(departments)
-      .select();
+    const { data, error } = await supabase.from("departments").insert(departments).select();
 
     if (error) throw error;
     return data as DepartmentDto[];

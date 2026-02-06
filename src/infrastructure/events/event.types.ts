@@ -1,3 +1,6 @@
+import { ClassRoomPlatformType } from "@/constants/class-room.constant";
+import { ClassRoomType } from "@/model/class-room.model";
+
 export type EventMap = {
   "notification.realtime.received": {
     id: string;
@@ -18,10 +21,10 @@ export type EventMap = {
     classRoomId: string;
     classRoomTitle: string;
     classRoomSlug: string;
-    classRoomType: string;
+    classRoomType: ClassRoomType;
     thumbnailUrl: string;
     startAt: string;
-    platform: string;
+    platform: ClassRoomPlatformType;
     createdBy: string;
     receiverStudentIds: string[];
     receiverTeacherIds: string[];

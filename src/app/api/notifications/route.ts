@@ -1,7 +1,8 @@
+import { http } from "@/lib/api/http-status";
+import { DomainError } from "@/lib/errors/DomainError";
 import { notificationsRepository } from "@/repository";
 import { authRepository } from "@/repository";
 import { CreateNotificationPayload } from "@/repository/notifications/type";
-import { http } from "@/utils/http-status";
 export async function POST(request: Request) {
   try {
     const currentUser = authRepository.getCurrentUser();
@@ -24,6 +25,9 @@ export async function POST(request: Request) {
 
     return http.created(data);
   } catch (err) {
-    return http.internalServerError("Can't create notification");
+    if (err instanceof DomainError) {
+      return http.fromDomainError(err);
+    }
+    return http.serverError("Can't create notification");
   }
 }

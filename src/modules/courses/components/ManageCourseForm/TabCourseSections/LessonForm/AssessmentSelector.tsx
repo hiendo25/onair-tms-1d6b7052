@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, useEffect, useState } from "react";
 import { Box, Button, FilledInput, FormHelperText, FormLabel, Popover, Typography } from "@mui/material";
 
 import useDebounce from "@/hooks/useDebounce";
-import { useGetAssignmentsQuery } from "@/modules/assignment-management/operations/query";
+import { useGetAssignmentBanksQuery } from "@/modules/assignment-management/operations/query";
 import { useUserOrganization } from "@/modules/organization";
 import { cn } from "@/utils";
 export interface AssessmentSelectorProps {
@@ -25,12 +25,12 @@ const AssessmentSelector: React.FC<AssessmentSelectorProps> = ({
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const [searchText, setSearchText] = useState("");
   const debourceText = useDebounce(searchText, 600);
-  const { data: assignments, isLoading } = useGetAssignmentsQuery({
+  const { data: assignmentBanks, isLoading } = useGetAssignmentBanksQuery({
     search: debourceText,
     organizationId: organization.orgId,
   });
 
-  type AssignmentItem = Exclude<typeof assignments, undefined>["data"][number];
+  type AssignmentItem = Exclude<typeof assignmentBanks, undefined>["data"][number];
   const [selectedAssignment, setSelectedAssignment] = useState<AssignmentItem>();
 
   const handleSelect = (data: AssignmentItem) => () => {
@@ -55,12 +55,12 @@ const AssessmentSelector: React.FC<AssessmentSelectorProps> = ({
   const id = open ? "simple-popover" : undefined;
 
   useEffect(() => {
-    if (!value && !assignments) return;
+    if (!value && !assignmentBanks) return;
 
-    const selectedItem = assignments?.data.find((item) => item.id === value);
+    const selectedItem = assignmentBanks?.data.find((item) => item.id === value);
 
     if (selectedItem) setSelectedAssignment(selectedItem);
-  }, [value, assignments]);
+  }, [value, assignmentBanks]);
   return (
     <div className={cn("assessment-selector", className)}>
       <FormLabel component="div">
@@ -119,7 +119,7 @@ const AssessmentSelector: React.FC<AssessmentSelectorProps> = ({
                 paddingBlock: "8px",
               }}
             >
-              {assignments?.data.map((assignment) => (
+              {assignmentBanks?.data.map((assignment) => (
                 <div key={assignment.id} className="assessment-item">
                   <div
                     className={cn("cursor-pointer px-3 py-2 hover:bg-gray-100 rounded-md", {

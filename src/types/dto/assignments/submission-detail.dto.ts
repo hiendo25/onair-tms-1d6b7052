@@ -4,7 +4,7 @@ import { FileMetadata } from "./file-metadata.dto";
 import { QuestionOption } from "./question-option.dto";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
-type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
+type AssignmentResultStatus = Database["public"]["Enums"]["test_attempt_status"];
 
 export interface QuestionGradeDetail {
   id: string;
@@ -33,6 +33,7 @@ export interface SubmissionDetailDto {
   assignmentId: string;
   assignmentName: string;
   assignmentDescription: string;
+  showCorrectAnswers: boolean;
   employeeId: string;
   employeeCode: string;
   fullName: string;

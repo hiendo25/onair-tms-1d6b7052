@@ -117,11 +117,33 @@ const selectSession = `
   priority,
   session_type,
 	weekly_schedule,
-  courses_period:class_sessions_courses_period(${selectCoursePeriod}),
-  session_assignments:class_session_assignment(
-    id,
-    assignments(${selectAssignment})
+  assignments:assignment_class_session(
+    assignment_config_id,
+    assignment_config:assignment_config(
+      id,
+      assignment_bank_id,
+      attempt_duration_minutes,
+      available_from,
+      available_to,
+      assignment_bank(
+        id,
+        name,
+        description,
+        duration_minutes,
+        pass_score,
+        assignment_questions(
+          question_id,
+          order_index,
+          score_override,
+          question_bank(
+            id,
+            score
+          )
+        )
+      )
+    )
   ),
+  courses_period:class_sessions_courses_period(${selectCoursePeriod}),
   agendas:class_sessions_agendas(${selectAgenda}),
   metadata:class_session_metadata(${selectMetadata}),
   class_qr_codes(${selectQRCode})
@@ -175,6 +197,13 @@ export const SELECT_CLASSROOM_DETAIL = `
     certificate_template_id,
     days_to_expire,
     certificate_template:certificate_templates(${selectCertificateTemplate})
+  ),
+  class_room_flashcards(
+    id,
+    flashcard_id,
+    class_room_id,
+    order_index,
+    created_at
   )
 `;
 
@@ -228,6 +257,32 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
           priority,
           session_type,
           weekly_schedule,
+          assignments:assignment_class_session(
+            assignment_config_id,
+            assignment_config:assignment_config(
+              id,
+              assignment_bank_id,
+              attempt_duration_minutes,
+              available_from,
+              available_to,
+              assignment_bank(
+                id,
+                name,
+                description,
+                duration_minutes,
+                pass_score,
+                assignment_questions(
+                  question_id,
+                  order_index,
+                  score_override,
+                  question_bank(
+                    id,
+                    score
+                  )
+                )
+              )
+            )
+          ),
           courses_period:class_sessions_courses_period(
             id,
             start_at,
@@ -235,10 +290,6 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
             weekly_schedule,
             course:courses(${selectCourseWithLessonSectionCount}),
             teacher:employees(${selectEmployee})
-          ),
-          session_assignments:class_session_assignment(
-            id,
-            assignments(${selectAssignment})
           ),
           agendas:class_sessions_agendas(${selectAgenda}),
           metadata:class_session_metadata(${selectMetadata}),
@@ -249,5 +300,12 @@ export const SELECT_CLASSROOM_DETAIL_BY_SLUG = `
         certificate_template_id,
         days_to_expire,
         certificate_template:certificate_templates(${selectCertificateTemplate})
+      ),
+      class_room_flashcards(
+        id,
+        flashcard_id,
+        class_room_id,
+        order_index,
+        created_at
       )
     `;

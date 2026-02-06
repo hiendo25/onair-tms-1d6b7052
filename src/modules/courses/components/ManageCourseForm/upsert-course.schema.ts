@@ -15,9 +15,9 @@ const lessonSchema = zod
     mainResource: courseResourceSchema.optional(),
     resources: zod.array(courseResourceSchema),
     lessonType: zod.enum(["file", "video", "assessment"]),
-    assignmentId: zod.string().optional(),
+    assignmentBankId: zod.string().optional(),
   })
-  .superRefine(({ mainResource, lessonType, assignmentId }, context) => {
+  .superRefine(({ mainResource, lessonType, assignmentBankId }, context) => {
     switch (lessonType) {
       case "file": {
         if (!mainResource) {
@@ -40,11 +40,11 @@ const lessonSchema = zod
         break;
       }
       case "assessment": {
-        if (!assignmentId) {
+        if (!assignmentBankId) {
           context.addIssue({
             code: "custom",
             message: "Chưa chọn bài kiểm tra.",
-            path: ["assignmentId"],
+            path: ["assignmentBankId"],
           });
         }
         break;

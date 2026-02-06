@@ -11,6 +11,7 @@ interface QuestionHeaderProps {
   maxScore: number;
   earnedScore: number | null;
   isAutoGraded?: boolean;
+  showCorrectAnswers?: boolean;
 }
 
 const QuestionHeader: React.FC<QuestionHeaderProps> = ({
@@ -19,6 +20,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   maxScore,
   earnedScore,
   isAutoGraded = false,
+  showCorrectAnswers = true,
 }) => {
   const isCorrect = earnedScore === maxScore;
 
@@ -28,7 +30,7 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
           Câu {questionNumber} ({maxScore} điểm)
         </Typography>
-        {isAutoGraded && (
+        {isAutoGraded && showCorrectAnswers && (
           <Chip
             icon={isCorrect ? <CheckCircleIcon /> : <CancelIcon />}
             label={`${earnedScore}/${maxScore} điểm`}
@@ -46,4 +48,3 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
 };
 
 export default QuestionHeader;
-

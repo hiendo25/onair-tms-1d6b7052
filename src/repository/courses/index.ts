@@ -125,11 +125,6 @@ const getCourseById = async (courseId: string) => {
                 mime_type, 
                 name
               ),
-              assignments(
-                id,
-                name, 
-                description
-              ),
               lessons_resources(
                 id,
                 resource:resources(
@@ -244,11 +239,18 @@ const getCourses = async (input: GetCoursesQueryInput = {}): Promise<PaginatedRe
 };
 
 const deleteCourseById = async (courseId: string) => {
-  const { error } = await supabase.from("courses").update({ status: "deleted" }).eq("id", courseId);
+  const { data, error } = await supabase
+    .from("courses")
+    .update({ status: "deleted" })
+    .eq("id", courseId)
+    .select()
+    .single();
 
   if (error) {
     throw new Error(`Failed to delete course: ${error.message}`);
   }
+
+  return data;
 };
 
 export type GetCoursesListMinimalQueryParams = {

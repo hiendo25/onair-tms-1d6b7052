@@ -30,11 +30,11 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
               variant="fill"
               onClick={() =>
                 assignmentDialogRef.current?.openDialog(
-                  { value: assignments.map((item) => item.assignmentId) },
+                  { value: assignments.map((item) => item.assignmentBankId) },
                   {
                     onOk: (assignments) => {
                       const assignmentValues = assignments.map<AssignmentSelectItem>((item) => ({
-                        assignmentId: item.id,
+                        assignmentBankId: item.id,
                         name: item.name,
                       }));
                       onChange(assignmentValues);
@@ -47,14 +47,14 @@ const AssessmentField: React.FC<AssessmentFieldProps> = ({ sessionIndex, control
             </Button>
           </div>
           <div className="flex flex-col gap-3">
-            {assignments.map(({ assignmentId, name }) => (
-              <div key={assignmentId} className="flex items-center gap-3">
+            {assignments.map(({ assignmentBankId, name }) => (
+              <div key={assignmentBankId} className="flex items-center gap-3">
                 <IconButton
                   size="small"
                   className="p-1!"
                   sx={{ width: 24, height: 24 }}
                   onClick={() => {
-                    const updateAssignments = assignments.filter((item) => item.assignmentId !== assignmentId);
+                    const updateAssignments = assignments.filter((item) => item.assignmentBankId !== assignmentBankId);
                     onChange(updateAssignments);
                   }}
                 >

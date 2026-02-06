@@ -1,50 +1,25 @@
 import { supabase } from "@/services";
 
-import { CreateSectionPayload, UpdateSectionPayload, UpsertSectionPayload } from "./type";
+import { SectionInsert, SectionUpdate, SectionUpsert } from "./type";
 
-const createSection = async (payload: CreateSectionPayload) => {
-  try {
-    return await supabase.from("sections").insert(payload).select("*").single();
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
+const createSection = async (payload: SectionInsert) => {
+  return await supabase.from("sections").insert(payload).select("*").single();
 };
 
-const upsertSection = async (upsertPayload: UpsertSectionPayload) => {
-  try {
-    return await supabase.from("sections").upsert(upsertPayload.payload).select("*").single();
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
+const upsertSection = async (upsertPayload: SectionUpsert) => {
+  return await supabase.from("sections").upsert(upsertPayload.payload).select("*").single();
 };
 const bulkdeleteSections = async (sectionIds: string[]) => {
-  try {
-    return await supabase.from("sections").delete().in("id", sectionIds).select("*");
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
+  return await supabase.from("sections").delete().in("id", sectionIds).select("*");
 };
 
 const deleteSection = async (sectionId: string) => {
-  try {
-    return await supabase.from("sections").delete().eq("id", sectionId);
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
+  return await supabase.from("sections").delete().eq("id", sectionId);
 };
 
-const updateSection = async (payload: UpdateSectionPayload) => {
-  try {
-    const { id: sectionId, ...restPayload } = payload;
-    return await supabase.from("sections").update(payload).match({ id: sectionId }).select("*").single();
-  } catch (err: any) {
-    console.log(err);
-    throw new Error(err?.message);
-  }
+const updateSection = async (payload: SectionUpdate) => {
+  const { id: sectionId, ...restPayload } = payload;
+  return await supabase.from("sections").update(payload).match({ id: sectionId }).select("*").single();
 };
 
 export { createSection, updateSection, bulkdeleteSections, deleteSection, upsertSection };

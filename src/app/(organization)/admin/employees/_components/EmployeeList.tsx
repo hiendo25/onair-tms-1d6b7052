@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import React, { useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -34,30 +34,36 @@ import { useRouter } from "next/navigation";
 
 import { useDialogs } from "@/hooks/useDialogs/useDialogs";
 import useNotifications from "@/hooks/useNotifications/useNotifications";
+import BranchSelector from "@/modules/branch/container/BranchSelector";
+import DepartmentSelector from "@/modules/department/container/DepartmentSelector";
 import { useDeleteEmployeeMutation } from "@/modules/employees/operations/mutation";
 import { useGetEmployeesQuery } from "@/modules/employees/operations/query";
 import { useUserOrganization } from "@/modules/organization";
-import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
+// import { useGetOrganizationUnitsQuery } from "@/modules/organization-units/operations/query";
 import type { EmployeeDto } from "@/types/dto/employees";
 import { Database } from "@/types/supabase.types";
 import { getEmployeeTypeLabel } from "@/utils/employee-type";
 
+interface EmployeeListContainerProps {}
 export default function EmployeeList() {
   const router = useRouter();
   const dialogs = useDialogs();
   const notifications = useNotifications();
   const queryClient = useQueryClient();
+
+  const [queryParams, setQueryParams] = useState({});
+
   const {
     organization: { id: organizationId },
   } = useUserOrganization((state) => state.currentEmployee);
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(12);
-  const [searchInput, setSearchInput] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
-  const [departmentFilter, setDepartmentFilter] = React.useState("all");
-  const [branchFilter, setBranchFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(12);
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [departmentFilter, setDepartmentFilter] = useState("all");
+  const [branchFilter, setBranchFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,15 +86,7 @@ export default function EmployeeList() {
     setPage(0);
   }, [statusFilter]);
 
-  const { data: organizationUnitsResult } = useGetOrganizationUnitsQuery();
-  const organizationUnits = organizationUnitsResult?.data || [];
-
-  const departments = React.useMemo(
-    () => organizationUnits.filter((unit: any) => unit.type === "department"),
-    [organizationUnits],
-  );
-
-  const branches = React.useMemo(() => organizationUnits.filter((unit: any) => unit.type === "branch"), [organizationUnits]);
+  // const { data: organizationUnitsResult } = useGetOrganizationUnitsQuery();
 
   const {
     data: employeesResult,
@@ -260,34 +258,13 @@ export default function EmployeeList() {
             sx={{ maxWidth: 200 }}
           />
 
-          <Select
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            displayEmpty
-            sx={{ minWidth: 150 }}
-          >
-            <MenuItem value="all">Phòng ban</MenuItem>
-            {departments.map((dept) => (
-              <MenuItem key={dept.id} value={dept.id}>
-                {dept.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <div>
+            <DepartmentSelector />
+          </div>
 
-          <Select
-            size="small"
-            value={branchFilter}
-            onChange={(e) => setBranchFilter(e.target.value)}
-            displayEmpty
-            sx={{ minWidth: 150 }}
-          >
-            <MenuItem value="all">Chi nhánh</MenuItem>
-            {branches.map((branch) => (
-              <MenuItem key={branch.id} value={branch.id}>
-                {branch.name}
-              </MenuItem>
-            ))}
-          </Select>
+          <div>
+            <BranchSelector />
+          </div>
 
           <Select
             size="small"
@@ -371,7 +348,7 @@ export default function EmployeeList() {
                           label={getStatusLabel(employee.status)}
                           color={getStatusColor(employee.status)}
                           size="small"
-                          sx={{ minWidth: 100 }}
+                          // sx={{ minWidth: 100 }}
                         />
                       </TableCell>
                       <TableCell align="center">

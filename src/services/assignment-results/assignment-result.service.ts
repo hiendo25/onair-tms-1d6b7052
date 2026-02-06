@@ -1,3 +1,5 @@
+import { isMatchingOptions, isOrderOptions } from "@/modules/assignment-management/utils/question-bank.utils";
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 import { assignmentResultsRepository, assignmentsRepository } from "@/repository";
 import type {
   CheckboxAnswer,
@@ -5,82 +7,287 @@ import type {
   MatchingAnswer,
   OrderAnswer,
   QuestionAnswer,
-  QuestionWithAnswer,
   RadioAnswer,
-  SubmissionData,
   TextAnswer,
   TrueFalseAnswer,
 } from "@/repository/assignment-results";
-import { AssignmentDto, FileMetadata, QuestionGradeDetail, QuestionOption, SaveGradeDto, SubmissionDetailDto } from "@/types/dto/assignments";
-import { Database } from "@/types/supabase.types";
+import {
+  AssignmentAttemptSummaryDto,
+  FileMetadata,
+  QuestionGradeDetail,
+  QuestionOption,
+  SaveGradeDto,
+  SubmissionDetailDto,
+} from "@/types/dto/assignments";
+import { Database, Json } from "@/types/supabase.types";
+import type { EmployeeType } from "@/utils/employee-type";
 
 type QuestionType = Database["public"]["Enums"]["question_type"];
-type AssignmentResultStatus = Database["public"]["Enums"]["assignment_result_status"];
+type AttemptStatus = Database["public"]["Enums"]["assignment_attempt_status"];
+type AttemptSource = Database["public"]["Enums"]["assignment_attempt_source"];
+type AssignmentAttemptRow = Database["public"]["Tables"]["assignments_attempts"]["Row"];
 
 export interface QuestionAnswerInput {
   questionId: string;
-  answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>;
+  answer:
+  | string
+  | string[]
+  | boolean
+  | FileMetadata[]
+  | Array<{ columnAId: string; columnBId: string }>
+  | Array<{ id: string; position: number }>
+  | null;
   attachments?: FileMetadata[];
 }
 
 export interface SubmitAssignmentPayload {
-  assignmentId: string;
+  assignment_config_id: string;
   employeeId: string;
+  attemptId?: string;
+  submissionSource?: AttemptSource;
   answers: QuestionAnswerInput[];
+  allowIncomplete?: boolean;
 }
 
 export interface SubmitAssignmentResult {
   id: string;
-  assignmentId: string;
+  assignment_config_id: string;
   employeeId: string;
   submittedAt: string;
   score: number | null;
   maxScore: number;
-  status: AssignmentResultStatus;
+  status: AttemptStatus;
 }
 
-function gradeRadioQuestion(
-  answer: RadioAnswer,
-  options: QuestionOption[],
-  questionScore: number
-): number {
-  const correctOption = options.find(opt => opt.correct);
+interface QuestionWithAnswer {
+  id: string;
+  label: string;
+  type: QuestionType;
+  score: number;
+  options?: QuestionOption[];
+  attachments?: string[];
+  answer: QuestionAnswer | null;
+  answerAttachments?: FileMetadata[];
+  earnedScore: number | null;
+  feedback?: string;
+}
+
+type StoredAnswerValue =
+  | string
+  | string[]
+  | boolean
+  | FileMetadata[]
+  | Array<{ columnAId: string; columnBId: string }>
+  | Array<{ id: string; position: number }>
+  | null;
+
+interface StoredAnswerPayload {
+  value: StoredAnswerValue;
+  attachments?: FileMetadata[];
+  feedback?: string;
+}
+
+const AUTO_GRADABLE_TYPES: QuestionType[] = ["radio", "checkbox", "matching", "order", "true_false"];
+const RESULT_VISIBLE_STATUSES: AttemptStatus[] = ["submitted", "graded"];
+const PRIVILEGED_EMPLOYEE_TYPES: EmployeeType[] = ["admin", "teacher"];
+
+const isAutoGradable = (type: QuestionType) => AUTO_GRADABLE_TYPES.includes(type);
+const isPrivilegedEmployee = (employeeType: EmployeeType | null | undefined) =>
+  Boolean(employeeType && PRIVILEGED_EMPLOYEE_TYPES.includes(employeeType));
+const hasRemainingAttempts = (attemptNumber: number, attemptLimit: number | null | undefined) => {
+  if (attemptLimit === null || attemptLimit === undefined) {
+    return true;
+  }
+  return attemptNumber < attemptLimit;
+};
+
+const sanitizeQuestionOptions = (options: QuestionWithAnswer["options"]) => {
+  if (!options) {
+    return options;
+  }
+
+  if (Array.isArray(options)) {
+    return options.map((option) => ({
+      ...option,
+      correct: false,
+    }));
+  }
+
+  if (isMatchingOptions(options)) {
+    return {
+      ...options,
+      correctMappings: [],
+    };
+  }
+
+  if (isOrderOptions(options)) {
+    return {
+      ...options,
+      orderItems: (options.orderItems || []).map((item) => ({
+        ...item,
+        correctOrder: 0,
+      })),
+    };
+  }
+
+  return options;
+};
+
+export class SubmissionAccessError extends Error {
+  public readonly statusCode: number;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.name = "SubmissionAccessError";
+    this.statusCode = statusCode;
+  }
+}
+
+export interface SubmissionViewer {
+  id: string;
+  employeeType: EmployeeType | null;
+}
+
+const assertCanViewSubmission = (viewer: SubmissionViewer, targetEmployeeId: string) => {
+  if (viewer.id === targetEmployeeId) {
+    return;
+  }
+
+  if (!isPrivilegedEmployee(viewer.employeeType)) {
+    throw new SubmissionAccessError("Bạn không có quyền xem kết quả của học viên khác.", 403);
+  }
+};
+
+const assertCanGradeSubmission = (viewer: SubmissionViewer) => {
+  if (!isPrivilegedEmployee(viewer.employeeType)) {
+    throw new SubmissionAccessError("Bạn không có quyền chấm điểm bài nộp.", 403);
+  }
+};
+
+const buildAttemptTiming = (startedAt: Date, durationMinutes: number | null) => {
+  if (!durationMinutes || durationMinutes <= 0) {
+    return { startedAt: startedAt.toISOString(), expiresAt: null, durationSnapshot: null };
+  }
+
+  const expiresAt = new Date(startedAt.getTime() + durationMinutes * 60 * 1000).toISOString();
+  return { startedAt: startedAt.toISOString(), expiresAt, durationSnapshot: durationMinutes };
+};
+
+const mapAttemptSummary = (attempt: AssignmentAttemptRow) => ({
+  id: attempt.id,
+  status: attempt.status,
+  submittedAt: attempt.submitted_at ?? null,
+  createdAt: attempt.created_at,
+  startedAt: attempt.started_at ?? null,
+  expiresAt: attempt.expires_at ?? null,
+  durationMinutesSnapshot: attempt.duration_minutes_snapshot ?? null,
+  submissionSource: attempt.submission_source ?? null,
+  score: attempt.score ?? null,
+  maxScore: attempt.max_score ?? null,
+  attemptNumber: attempt.attempt_number,
+});
+
+const normalizeStoredAnswer = (answer: Json | null): StoredAnswerPayload => {
+  if (answer === null || answer === undefined) {
+    return { value: null };
+  }
+
+  if (Array.isArray(answer)) {
+    return { value: answer as StoredAnswerValue };
+  }
+
+  if (typeof answer === "object") {
+    const payload = answer as Record<string, Json | undefined>;
+    if ("value" in payload) {
+      return {
+        value: (payload.value ?? null) as StoredAnswerValue,
+        attachments: payload.attachments as FileMetadata[] | undefined,
+        feedback: payload.feedback as string | undefined,
+      };
+    }
+    return { value: answer as StoredAnswerValue };
+  }
+
+  return { value: answer as StoredAnswerValue };
+};
+
+const buildStoredAnswerPayload = (
+  value: StoredAnswerValue,
+  attachments?: FileMetadata[],
+  feedback?: string,
+): StoredAnswerPayload => {
+  const payload: StoredAnswerPayload = { value };
+
+  if (attachments && attachments.length > 0) {
+    payload.attachments = attachments;
+  }
+  if (feedback) {
+    payload.feedback = feedback;
+  }
+
+  return payload;
+};
+
+const buildQuestionAnswer = (type: QuestionType, storedAnswer: StoredAnswerPayload) => {
+  const { value } = storedAnswer;
+  const answer: QuestionGradeDetail["answer"] = {};
+
+  if (value === null || value === undefined) {
+    return answer;
+  }
+
+  if (type === "file") {
+    answer.files = value as FileMetadata[];
+  } else if (type === "text") {
+    answer.text = value as string;
+  } else if (type === "radio") {
+    answer.selectedOptionId = value as string;
+  } else if (type === "checkbox") {
+    answer.selectedOptionIds = value as string[];
+  } else if (type === "matching") {
+    answer.mappings = value as Array<{ columnAId: string; columnBId: string }>;
+  } else if (type === "order") {
+    answer.orderedItems = value as Array<{ id: string; position: number }>;
+  } else if (type === "true_false") {
+    answer.trueFalseAnswer = value as boolean;
+  }
+
+  return answer;
+};
+
+function gradeRadioQuestion(answer: RadioAnswer, options: QuestionOption[], questionScore: number): number {
+  const correctOption = options.find((opt) => opt.correct);
   if (!correctOption) return 0;
 
   return answer.selectedOptionId === correctOption.id ? questionScore : 0;
 }
 
-function gradeCheckboxQuestion(
-  answer: CheckboxAnswer,
-  options: QuestionOption[],
-  questionScore: number
-): number {
-  const correctOptionIds = options.filter(opt => opt.correct).map(opt => opt.id);
+function gradeCheckboxQuestion(answer: CheckboxAnswer, options: QuestionOption[], questionScore: number): number {
+  const correctOptionIds = options.filter((opt) => opt.correct).map((opt) => opt.id);
   const selectedIds = answer.selectedOptionIds;
 
-  const allCorrectSelected = correctOptionIds.every(id => selectedIds.includes(id));
-  const noIncorrectSelected = selectedIds.every(id => correctOptionIds.includes(id));
+  const allCorrectSelected = correctOptionIds.every((id) => selectedIds.includes(id));
+  const noIncorrectSelected = selectedIds.every((id) => correctOptionIds.includes(id));
 
-  return (allCorrectSelected && noIncorrectSelected) ? questionScore : 0;
+  return allCorrectSelected && noIncorrectSelected ? questionScore : 0;
 }
 
 function gradeMatchingQuestion(
   answer: MatchingAnswer,
   correctMappings: Array<{ columnAId: string; columnBId: string }>,
-  questionScore: number
+  questionScore: number,
 ): number {
   const studentMappings = answer.mappings;
 
-  // Check if all mappings are correct
   if (studentMappings.length !== correctMappings.length) {
     return 0;
   }
 
-  const allCorrect = correctMappings.every(correctMapping => {
+  const allCorrect = correctMappings.every((correctMapping) => {
     return studentMappings.some(
-      studentMapping =>
+      (studentMapping) =>
         studentMapping.columnAId === correctMapping.columnAId &&
-        studentMapping.columnBId === correctMapping.columnBId
+        studentMapping.columnBId === correctMapping.columnBId,
     );
   });
 
@@ -90,34 +297,29 @@ function gradeMatchingQuestion(
 function gradeOrderQuestion(
   answer: OrderAnswer,
   correctItems: Array<{ id: string; correctOrder: number }>,
-  questionScore: number
+  questionScore: number,
 ): number {
   const studentItems = answer.orderedItems;
 
-  // Check if all items are in correct positions
   if (studentItems.length !== correctItems.length) {
     return 0;
   }
 
-  const allCorrect = correctItems.every(correctItem => {
-    const studentItem = studentItems.find(si => si.id === correctItem.id);
+  const allCorrect = correctItems.every((correctItem) => {
+    const studentItem = studentItems.find((item) => item.id === correctItem.id);
     return studentItem && studentItem.position === correctItem.correctOrder;
   });
 
   return allCorrect ? questionScore : 0;
 }
 
-function gradeTrueFalseQuestion(
-  answer: TrueFalseAnswer,
-  correctAnswer: boolean,
-  questionScore: number
-): number {
+function gradeTrueFalseQuestion(answer: TrueFalseAnswer, correctAnswer: boolean, questionScore: number): number {
   return answer.answer === correctAnswer ? questionScore : 0;
 }
 
 function convertAnswerToTypedFormat(
   questionType: QuestionType,
-  answer: string | string[] | boolean | FileMetadata[] | Array<{ columnAId: string; columnBId: string }> | Array<{ id: string; position: number }>
+  answer: StoredAnswerValue,
 ): QuestionAnswer {
   switch (questionType) {
     case "file":
@@ -149,78 +351,162 @@ function convertAnswerToTypedFormat(
   }
 }
 
-export async function submitAssignment(
-  payload: SubmitAssignmentPayload
-): Promise<SubmitAssignmentResult> {
-  const { assignmentId, employeeId, answers } = payload;
-
-  const existingResult = await assignmentResultsRepository.getAssignmentResult(
-    assignmentId,
-    employeeId
-  );
-
-  if (existingResult) {
-    throw new Error("Bài kiểm tra đã được nộp trước đó. Không thể nộp lại.");
+const extractAnswerValue = (questionType: QuestionType, answer: QuestionAnswer | null): StoredAnswerValue => {
+  if (!answer) {
+    return null;
   }
+
+  switch (questionType) {
+    case "file":
+      return (answer as FileAnswer).files;
+    case "text":
+      return (answer as TextAnswer).text;
+    case "radio":
+      return (answer as RadioAnswer).selectedOptionId;
+    case "checkbox":
+      return (answer as CheckboxAnswer).selectedOptionIds;
+    case "matching":
+      return (answer as MatchingAnswer).mappings;
+    case "order":
+      return (answer as OrderAnswer).orderedItems;
+    case "true_false":
+      return (answer as TrueFalseAnswer).answer;
+    default:
+      return null;
+  }
+};
+
+export async function startAssignmentAttempt(
+  assignment_config_id: string,
+  employeeId: string,
+): Promise<AssignmentAttemptSummaryDto["latestAttempt"]> {
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignment_config_id);
+  const now = new Date();
+
+  if (assignment.available_from) {
+    const startTime = new Date(assignment.available_from);
+    if (now.getTime() < startTime.getTime()) {
+      throw new Error("Bài kiểm tra chưa đến thời gian làm bài.");
+    }
+  }
+
+  if (assignment.available_to) {
+    const endTime = new Date(assignment.available_to);
+    if (now.getTime() > endTime.getTime()) {
+      throw new Error("Bài kiểm tra đã hết thời gian làm bài.");
+    }
+  }
+
+  const activeAttempt = await assignmentResultsRepository.getActiveAssignmentAttempt(assignment_config_id, employeeId);
+  if (activeAttempt) {
+    return mapAttemptSummary(activeAttempt);
+  }
+
+  const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignment_config_id, employeeId);
+  const attemptLimit = assignment.attempt_limit ?? null;
+  const attemptsUsed = latestAttempt?.attempt_number ?? 0;
+
+  if (attemptLimit !== null && attemptsUsed >= attemptLimit) {
+    throw new Error("Bạn đã hết số lần làm bài.");
+  }
+
+  const attemptNumber = latestAttempt ? latestAttempt.attempt_number + 1 : 1;
+  const timing = buildAttemptTiming(now, assignment.attempt_duration_minutes ?? null);
+
+  const attempt = await assignmentResultsRepository.createAssignmentAttempt({
+    assignment_config_id: assignment_config_id,
+    employee_id: employeeId,
+    attempt_number: attemptNumber,
+    status: "in_progress",
+    submitted_at: null,
+    score: null,
+    max_score: null,
+    started_at: timing.startedAt,
+    expires_at: timing.expiresAt,
+    duration_minutes_snapshot: timing.durationSnapshot,
+  });
+
+  return mapAttemptSummary(attempt);
+}
+
+export async function submitAssignment(payload: SubmitAssignmentPayload): Promise<SubmitAssignmentResult> {
+  const { assignment_config_id, employeeId, answers, allowIncomplete, attemptId, submissionSource } = payload;
+
+  const latestAttempt = await assignmentResultsRepository.getLatestAssignmentAttempt(assignment_config_id, employeeId);
+  const attemptById = attemptId
+    ? await assignmentResultsRepository.getAssignmentAttemptById(attemptId)
+    : null;
+  const activeAttempt =
+    attemptById ?? (await assignmentResultsRepository.getActiveAssignmentAttempt(assignment_config_id, employeeId));
 
   if (answers.length === 0) {
     throw new Error("Vui lòng trả lời ít nhất một câu hỏi.");
   }
 
-  try {
-    const assignment: AssignmentDto = await assignmentsRepository.getAssignmentById(assignmentId);
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignment_config_id);
+  const now = new Date();
 
-    const answerMap = new Map(
-      answers.map(a => [a.questionId, a])
-    );
+  if (assignment.available_from) {
+    const startTime = new Date(assignment.available_from);
+    if (now.getTime() < startTime.getTime()) {
+      throw new Error("Bài kiểm tra chưa đến thời gian làm bài.");
+    }
+  }
 
-    const questionsWithAnswers: QuestionWithAnswer[] = assignment.questions.map(question => {
-      const answerInput = answerMap.get(question.id);
+  if (assignment.available_to) {
+    const endTime = new Date(assignment.available_to);
+    if (now.getTime() > endTime.getTime()) {
+      throw new Error("Bài kiểm tra đã hết thời gian làm bài.");
+    }
+  }
 
-      if (!answerInput) {
+  const attemptLimit = assignment.attempt_limit ?? null;
+  const attemptsUsed = latestAttempt?.attempt_number ?? 0;
+
+  if (!activeAttempt && attemptLimit !== null && attemptsUsed >= attemptLimit) {
+    throw new Error("Bạn đã hết số lần làm bài.");
+  }
+
+  if (activeAttempt) {
+    if (activeAttempt.assignment_config_id !== assignment_config_id || activeAttempt.employee_id !== employeeId) {
+      throw new Error("Attempt không hợp lệ.");
+    }
+
+    if (activeAttempt.status !== "in_progress") {
+      throw new Error("Bài kiểm tra đã được nộp trước đó.");
+    }
+  }
+
+  const answerMap = new Map(answers.map((answer) => [answer.questionId, answer]));
+  const shouldAllowIncomplete = Boolean(allowIncomplete);
+  const isAnswerMissing = (questionType: QuestionType, answer: QuestionAnswerInput["answer"] | undefined) => {
+    if (answer === undefined || answer === null) {
+      return true;
+    }
+
+    switch (questionType) {
+      case "file":
+        return !Array.isArray(answer) || answer.length === 0;
+      case "text":
+      case "radio":
+        return typeof answer !== "string" || answer.trim() === "";
+      case "checkbox":
+        return !Array.isArray(answer) || answer.length === 0;
+      case "matching":
+      case "order":
+        return !Array.isArray(answer) || answer.length === 0;
+      case "true_false":
+        return typeof answer !== "boolean";
+      default:
+        return false;
+    }
+  };
+
+  const questionsWithAnswers: QuestionWithAnswer[] = assignment.questions.map((question) => {
+    const answerInput = answerMap.get(question.id);
+    if (!answerInput || isAnswerMissing(question.type, answerInput.answer)) {
+      if (!shouldAllowIncomplete) {
         throw new Error(`Thiếu câu trả lời cho câu hỏi: ${question.label}`);
-      }
-
-      const typedAnswer = convertAnswerToTypedFormat(question.type, answerInput.answer);
-
-      let earnedScore: number | null = null;
-
-      if (question.type === "radio" && question.options) {
-        earnedScore = gradeRadioQuestion(
-          typedAnswer as RadioAnswer,
-          question.options,
-          question.score
-        );
-      } else if (question.type === "checkbox" && question.options) {
-        earnedScore = gradeCheckboxQuestion(
-          typedAnswer as CheckboxAnswer,
-          question.options,
-          question.score
-        );
-      } else if (question.type === "matching" && question.options) {
-        // Extract correctMappings from options field
-        const correctMappings = (question.options as any).correctMappings || [];
-        earnedScore = gradeMatchingQuestion(
-          typedAnswer as MatchingAnswer,
-          correctMappings,
-          question.score
-        );
-      } else if (question.type === "order" && question.options) {
-        // Extract orderItems from options field
-        const orderItems = (question.options as any).orderItems || [];
-        earnedScore = gradeOrderQuestion(
-          typedAnswer as OrderAnswer,
-          orderItems,
-          question.score
-        );
-      } else if (question.type === "true_false" && question.options) {
-        // Extract correctAnswer from options field
-        const correctAnswer = (question.options as any).correctAnswer === true;
-        earnedScore = gradeTrueFalseQuestion(
-          typedAnswer as TrueFalseAnswer,
-          correctAnswer,
-          question.score
-        );
       }
 
       return {
@@ -230,231 +516,321 @@ export async function submitAssignment(
         score: question.score,
         options: question.options,
         attachments: question.attachments || undefined,
-        created_at: question.created_at,
-        updated_at: question.updated_at,
-        answer: typedAnswer,
-        answerAttachments: answerInput.attachments,
-        earnedScore,
+        answer: null,
+        answerAttachments: answerInput?.attachments,
+        earnedScore: isAutoGradable(question.type) ? 0 : null,
+      };
+    }
+
+    const typedAnswer = convertAnswerToTypedFormat(question.type, answerInput.answer);
+    let earnedScore: number | null = null;
+
+    if (question.type === "radio" && question.options) {
+      earnedScore = gradeRadioQuestion(typedAnswer as RadioAnswer, question.options, question.score);
+    } else if (question.type === "checkbox" && question.options) {
+      earnedScore = gradeCheckboxQuestion(typedAnswer as CheckboxAnswer, question.options, question.score);
+    } else if (question.type === "matching" && question.options) {
+      const correctMappings = (question.options as any).correctMappings || [];
+      earnedScore = gradeMatchingQuestion(typedAnswer as MatchingAnswer, correctMappings, question.score);
+    } else if (question.type === "order" && question.options) {
+      const orderItems = (question.options as any).orderItems || [];
+      earnedScore = gradeOrderQuestion(typedAnswer as OrderAnswer, orderItems, question.score);
+    } else if (question.type === "true_false" && question.options) {
+      const correctAnswer = resolveTrueFalseCorrectAnswer(question.options);
+      earnedScore = gradeTrueFalseQuestion(typedAnswer as TrueFalseAnswer, correctAnswer, question.score);
+    }
+
+    return {
+      id: question.id,
+      label: question.label,
+      type: question.type,
+      score: question.score,
+      options: question.options,
+      attachments: question.attachments || undefined,
+      answer: typedAnswer,
+      answerAttachments: answerInput.attachments,
+      earnedScore,
+    };
+  });
+
+  const maxScore = questionsWithAnswers.reduce((sum, question) => sum + question.score, 0);
+  const allAutoGradable = questionsWithAnswers.every((question) => isAutoGradable(question.type));
+
+  let totalScore: number | null = null;
+  let status: AttemptStatus = "submitted";
+
+  if (allAutoGradable) {
+    totalScore = questionsWithAnswers.reduce((sum, question) => sum + (question.earnedScore ?? 0), 0);
+    status = "graded";
+  }
+
+  const attemptNumber = activeAttempt ? activeAttempt.attempt_number : latestAttempt ? latestAttempt.attempt_number + 1 : 1;
+  const submittedAt = now.toISOString();
+  const finalSubmissionSource: AttemptSource = submissionSource ?? "manual";
+  let currentAttempt = activeAttempt ?? null;
+  let createdAttemptId: string | null = null;
+
+  try {
+    if (!currentAttempt) {
+      const timing = buildAttemptTiming(now, assignment.attempt_duration_minutes ?? null);
+      currentAttempt = await assignmentResultsRepository.createAssignmentAttempt({
+        assignment_config_id: assignment_config_id,
+        employee_id: employeeId,
+        attempt_number: attemptNumber,
+        status: "in_progress",
+        submitted_at: null,
+        score: null,
+        max_score: maxScore,
+        started_at: timing.startedAt,
+        expires_at: timing.expiresAt,
+        duration_minutes_snapshot: timing.durationSnapshot,
+      });
+      createdAttemptId = currentAttempt.id;
+    }
+
+    const resultRows = questionsWithAnswers.map((question) => {
+      const answerValue = extractAnswerValue(question.type, question.answer);
+      const payload = buildStoredAnswerPayload(answerValue, question.answerAttachments);
+      const score = question.earnedScore;
+      const isCorrect = score === null ? null : score === question.score;
+
+      return {
+        attempt_id: currentAttempt!.id,
+        question_id: question.id,
+        answer: payload as Json,
+        score,
+        is_correct: isCorrect,
       };
     });
 
-    const maxScore = questionsWithAnswers.reduce((sum, q) => sum + q.score, 0);
+    await assignmentResultsRepository.createAssignmentResults(resultRows);
 
-    const allAutoGradable = questionsWithAnswers.every(
-      q => q.type === "radio" || q.type === "checkbox" || q.type === "matching" || q.type === "order" || q.type === "true_false"
-    );
-
-    let totalScore: number | null = null;
-    let status: AssignmentResultStatus = "submitted";
-
-    if (allAutoGradable) {
-      totalScore = questionsWithAnswers.reduce(
-        (sum, q) => sum + (q.earnedScore ?? 0),
-        0
-      );
-      status = "graded";
-    }
-
-    const submissionData: SubmissionData = {
-      assignment: {
-        id: assignment.id,
-        name: assignment.name,
-        description: assignment.description,
-        created_by: assignment.created_by,
-        created_at: assignment.created_at,
-        updated_at: assignment.updated_at,
-      },
-      questions: questionsWithAnswers,
-    };
-
-    const result = await assignmentResultsRepository.createAssignmentResult({
-      assignment_id: assignmentId,
-      employee_id: employeeId,
-      submissionData,
+    await assignmentResultsRepository.updateAssignmentAttempt(currentAttempt.id, {
+      status,
+      submitted_at: submittedAt,
       score: totalScore,
       max_score: maxScore,
-      status,
+      submission_source: finalSubmissionSource,
     });
 
     return {
-      id: result.id,
-      assignmentId: result.assignment_id,
-      employeeId: result.employee_id,
-      submittedAt: result.created_at,
+      id: currentAttempt.id,
+      assignment_config_id: assignment_config_id,
+      employeeId,
+      submittedAt,
       score: totalScore,
       maxScore,
       status,
     };
   } catch (error) {
-    console.error("Failed to create assignment result:", error);
-    if (error instanceof Error) {
-      throw error;
+    if (createdAttemptId) {
+      await assignmentResultsRepository.deleteAssignmentResultsByAttemptId(createdAttemptId);
+      await assignmentResultsRepository.deleteAssignmentAttemptById(createdAttemptId);
     }
-    throw new Error("Không thể lưu bài nộp. Vui lòng thử lại.");
+
+    throw error;
   }
 }
 
 export async function getSubmissionStatus(
   assignmentId: string,
-  employeeId: string
-) {
-  const result = await assignmentResultsRepository.getAssignmentResult(
-    assignmentId,
-    employeeId
-  );
+  employeeId: string,
+): Promise<AssignmentAttemptSummaryDto> {
+  const [assignment, latestAttempt] = await Promise.all([
+    assignmentsRepository.getAssignmentConfigById(assignmentId),
+    assignmentResultsRepository.getLatestAssignmentAttempt(assignmentId, employeeId),
+  ]);
 
-  if (!result) {
-    return null;
-  }
-
-  let submissionData: SubmissionData | null = null;
-
-  try {
-    const data = result.data as any;
-
-    if (data && typeof data === 'object' && 'assignment' in data && 'questions' in data) {
-      submissionData = data as SubmissionData;
-    }
-  } catch (error) {
-    console.error("Failed to parse submission data:", error);
-  }
+  const attemptsUsed = latestAttempt?.attempt_number ?? 0;
+  const attemptLimit = assignment.attempt_limit ?? null;
+  const attemptsRemaining =
+    attemptLimit === null ? null : Math.max(attemptLimit - attemptsUsed, 0);
 
   return {
-    id: result.id,
-    assignmentId: result.assignment_id,
-    employeeId: result.employee_id,
-    submittedAt: result.created_at,
-    score: result.score,
-    maxScore: result.max_score,
-    status: result.status,
-    submissionData,
+    attemptsUsed,
+    attemptsRemaining,
+    attemptLimit,
+    availableFrom: assignment.available_from ?? null,
+    availableTo: assignment.available_to ?? null,
+    attemptDurationMinutes: assignment.attempt_duration_minutes ?? null,
+    latestAttempt: latestAttempt ? mapAttemptSummary(latestAttempt) : null,
   };
 }
 
 export async function getSubmissionDetail(
   assignmentId: string,
-  employeeId: string
+  employeeId: string,
+  viewer?: SubmissionViewer,
 ): Promise<SubmissionDetailDto> {
-  const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
+  const attemptWithEmployee = await assignmentResultsRepository.getAssignmentAttemptWithEmployee(
     assignmentId,
-    employeeId
+    employeeId,
   );
 
-  if (!resultWithEmployee) {
+  if (!attemptWithEmployee) {
     throw new Error("Không tìm thấy bài nộp của học viên");
   }
 
-  if (!resultWithEmployee.employee || !resultWithEmployee.employee.profiles) {
+  if (!RESULT_VISIBLE_STATUSES.includes(attemptWithEmployee.status)) {
+    throw new SubmissionAccessError("Bài làm chưa được nộp nên chưa thể xem kết quả.", 409);
+  }
+
+  if (!attemptWithEmployee.employee || !attemptWithEmployee.employee.profiles) {
     throw new Error("Không tìm thấy thông tin học viên");
   }
 
-  const submissionData = resultWithEmployee.data as SubmissionData;
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
+  const hideCorrectAnswers = Boolean(assignment.hide_correct_answers);
+  const canRetry = hasRemainingAttempts(
+    attemptWithEmployee.attempt_number,
+    assignment.attempt_limit ?? null,
+  );
 
-  const questions: QuestionGradeDetail[] = submissionData.questions.map((q) => {
-    const isAutoGraded = q.type === "radio" || q.type === "checkbox" || q.type === "matching" || q.type === "order" || q.type === "true_false";
+  console.log("attemptWithEmployee", attemptWithEmployee);
 
-    const answer: QuestionGradeDetail["answer"] = {};
+  console.log("attemptWithEmployee.attempt_number", attemptWithEmployee.attempt_number);
+  console.log("assignment.attempt_limit", assignment.attempt_limit);
 
-    if (q.type === "file") {
-      answer.files = (q.answer as FileAnswer).files;
-    } else if (q.type === "text") {
-      answer.text = (q.answer as TextAnswer).text;
-    } else if (q.type === "radio") {
-      answer.selectedOptionId = (q.answer as RadioAnswer).selectedOptionId;
-    } else if (q.type === "checkbox") {
-      answer.selectedOptionIds = (q.answer as CheckboxAnswer).selectedOptionIds;
-    } else if (q.type === "matching") {
-      answer.mappings = (q.answer as MatchingAnswer).mappings;
-    } else if (q.type === "order") {
-      answer.orderedItems = (q.answer as OrderAnswer).orderedItems;
-    } else if (q.type === "true_false") {
-      answer.trueFalseAnswer = (q.answer as TrueFalseAnswer).answer;
-    }
+
+  console.log("canRetry", canRetry);
+
+
+  const showCorrectAnswers =
+    !hideCorrectAnswers || isPrivilegedEmployee(viewer?.employeeType) || !canRetry;
+  const results = await assignmentResultsRepository.getAssignmentResultsByAttemptId(attemptWithEmployee.id);
+  const resultsMap = new Map(results.map((result) => [result.question_id, result]));
+
+  const questions: QuestionGradeDetail[] = assignment.questions.map((question) => {
+    const result = resultsMap.get(question.id) ?? null;
+    const storedAnswer = normalizeStoredAnswer(result?.answer ?? null);
+    const isAutoGraded = isAutoGradable(question.type);
+    const options = showCorrectAnswers ? question.options : sanitizeQuestionOptions(question.options);
 
     return {
-      id: q.id,
-      label: q.label,
-      type: q.type,
-      maxScore: q.score,
-      options: q.options,
-      attachments: q.attachments,
-      answer,
-      answerAttachments: q.answerAttachments,
-      earnedScore: q.earnedScore,
+      id: question.id,
+      label: question.label,
+      type: question.type,
+      maxScore: question.score,
+      options: options as QuestionGradeDetail["options"],
+      attachments: question.attachments,
+      answer: buildQuestionAnswer(question.type, storedAnswer),
+      answerAttachments: storedAnswer.attachments,
+      earnedScore: result?.score ?? null,
       isAutoGraded,
-      feedback: q.feedback,
+      feedback: storedAnswer.feedback,
     };
   });
 
+  const maxScore = attemptWithEmployee.max_score ?? questions.reduce((sum, question) => sum + question.maxScore, 0);
+
   return {
-    resultId: resultWithEmployee.id,
-    assignmentId: submissionData.assignment.id,
-    assignmentName: submissionData.assignment.name,
-    assignmentDescription: submissionData.assignment.description,
-    employeeId: resultWithEmployee.employee_id,
-    employeeCode: resultWithEmployee.employee.employee_code,
-    fullName: resultWithEmployee.employee.profiles.full_name,
-    email: resultWithEmployee.employee.profiles.email,
-    avatar: resultWithEmployee.employee.profiles.avatar,
-    submittedAt: resultWithEmployee.created_at,
-    status: resultWithEmployee.status,
-    totalScore: resultWithEmployee.score,
-    maxScore: resultWithEmployee.max_score || 0,
+    resultId: attemptWithEmployee.id,
+    assignmentId: assignment.id,
+    assignmentName: assignment.name,
+    assignmentDescription: assignment.description,
+    showCorrectAnswers,
+    employeeId: attemptWithEmployee.employee_id,
+    employeeCode: attemptWithEmployee.employee.employee_code,
+    fullName: attemptWithEmployee.employee.profiles.full_name,
+    email: attemptWithEmployee.employee.profiles.email,
+    avatar: attemptWithEmployee.employee.profiles.avatar,
+    submittedAt: attemptWithEmployee.submitted_at ?? attemptWithEmployee.created_at,
+    status: attemptWithEmployee.status,
+    totalScore: attemptWithEmployee.score,
+    maxScore,
     questions,
-    feedback: resultWithEmployee.feedback,
+    feedback: attemptWithEmployee.feedback,
   };
+}
+
+export async function getSubmissionDetailForViewer(
+  assignmentId: string,
+  employeeId: string,
+  viewer: SubmissionViewer,
+): Promise<SubmissionDetailDto> {
+  assertCanViewSubmission(viewer, employeeId);
+  return getSubmissionDetail(assignmentId, employeeId, viewer);
+}
+
+export async function saveGradeForViewer(
+  payload: SaveGradeDto,
+  viewer: SubmissionViewer,
+): Promise<{ totalScore: number; maxScore: number }> {
+  assertCanGradeSubmission(viewer);
+  return saveGrade(payload);
 }
 
 export async function saveGrade(payload: SaveGradeDto): Promise<{ totalScore: number; maxScore: number }> {
   const { assignmentId, employeeId, questionGrades, overallFeedback } = payload;
 
-  const resultWithEmployee = await assignmentResultsRepository.getAssignmentResultWithEmployee(
+  const attemptWithEmployee = await assignmentResultsRepository.getAssignmentAttemptWithEmployee(
     assignmentId,
-    employeeId
+    employeeId,
   );
 
-  if (!resultWithEmployee) {
+  if (!attemptWithEmployee) {
     throw new Error("Không tìm thấy bài nộp của học viên");
   }
 
-  const submissionData = resultWithEmployee.data as SubmissionData;
+  if (!RESULT_VISIBLE_STATUSES.includes(attemptWithEmployee.status)) {
+    throw new SubmissionAccessError("Bài làm chưa được nộp nên chưa thể chấm điểm.", 409);
+  }
 
-  const gradeMap = new Map(questionGrades.map((g) => [g.questionId, { score: g.score, feedback: g.feedback }]));
+  const assignment = await assignmentsRepository.getAssignmentConfigById(assignmentId);
+  const results = await assignmentResultsRepository.getAssignmentResultsByAttemptId(attemptWithEmployee.id);
+  const resultsMap = new Map(results.map((result) => [result.question_id, result]));
+  const gradeMap = new Map(questionGrades.map((grade) => [grade.questionId, grade]));
 
-  const updatedQuestions = submissionData.questions.map((q) => {
-    if (q.type === "radio" || q.type === "checkbox" || q.type === "true_false" || q.type === "matching" || q.type === "order" || q.type === "drag_and_drop" || q.type === "fill") {
-      return q;
+  for (const question of assignment.questions) {
+    if (isAutoGradable(question.type)) {
+      continue;
     }
 
-    const gradeData = gradeMap.get(q.id);
+    const gradeData = gradeMap.get(question.id);
     if (!gradeData || gradeData.score === undefined) {
-      throw new Error(`Thiếu điểm cho câu hỏi: ${q.label}`);
+      throw new Error(`Thiếu điểm cho câu hỏi: ${question.label}`);
     }
 
-    if (gradeData.score < 0 || gradeData.score > q.score) {
-      throw new Error(`Điểm không hợp lệ cho câu hỏi "${q.label}". Điểm phải từ 0 đến ${q.score}`);
+    if (gradeData.score < 0 || gradeData.score > question.score) {
+      throw new Error(`Điểm không hợp lệ cho câu hỏi "${question.label}". Điểm phải từ 0 đến ${question.score}`);
     }
 
-    return {
-      ...q,
-      earnedScore: gradeData.score,
-      feedback: gradeData.feedback,
-    };
-  });
+    const result = resultsMap.get(question.id);
+    if (!result) {
+      throw new Error(`Không tìm thấy câu trả lời cho câu hỏi: ${question.label}`);
+    }
 
-  const totalScore = updatedQuestions.reduce((sum, q) => sum + (q.earnedScore ?? 0), 0);
-  const maxScore = updatedQuestions.reduce((sum, q) => sum + q.score, 0);
+    const storedAnswer = normalizeStoredAnswer(result.answer);
+    const updatedAnswer = buildStoredAnswerPayload(
+      storedAnswer.value,
+      storedAnswer.attachments,
+      gradeData.feedback ?? storedAnswer.feedback,
+    );
 
-  const updatedSubmissionData: SubmissionData = {
-    ...submissionData,
-    questions: updatedQuestions,
-  };
+    await assignmentResultsRepository.updateAssignmentResult(attemptWithEmployee.id, question.id, {
+      score: gradeData.score,
+      is_correct: gradeData.score === question.score,
+      answer: updatedAnswer as Json,
+    });
 
-  await assignmentResultsRepository.updateAssignmentResult(resultWithEmployee.id, {
-    submissionData: updatedSubmissionData,
+    resultsMap.set(question.id, {
+      ...result,
+      score: gradeData.score,
+      answer: updatedAnswer as Json,
+    });
+  }
+
+  const maxScore = assignment.questions.reduce((sum, question) => sum + question.score, 0);
+  const totalScore = assignment.questions.reduce((sum, question) => {
+    const result = resultsMap.get(question.id);
+    return sum + (result?.score ?? 0);
+  }, 0);
+
+  await assignmentResultsRepository.updateAssignmentAttempt(attemptWithEmployee.id, {
     score: totalScore,
+    max_score: maxScore,
     status: "graded",
-    feedback: overallFeedback || null,
+    feedback: overallFeedback ?? null,
   });
 
   return { totalScore, maxScore };

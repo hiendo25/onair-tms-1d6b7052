@@ -20,6 +20,7 @@ import QuestionHeader from "../../../_components/QuestionHeader";
 import RadioAnswerDisplay from "../../../_components/RadioAnswerDisplay";
 import TextAnswerDisplay from "../../../_components/TextAnswerDisplay";
 import TrueFalseAnswerDisplay from "../../../_components/TrueFalseAnswerDisplay";
+import { resolveTrueFalseCorrectAnswer } from "@/modules/assignment-management/utils/true-false.utils";
 
 interface GradeQuestionCardProps {
   question: QuestionGradeDetail;
@@ -134,6 +135,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <RadioAnswerDisplay
           selectedOptionId={question.answer.selectedOptionId}
           options={question.options}
+          showCorrectAnswers
         />
       )}
 
@@ -141,6 +143,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <CheckboxAnswerDisplay
           selectedOptionIds={question.answer.selectedOptionIds}
           options={question.options}
+          showCorrectAnswers
         />
       )}
 
@@ -182,6 +185,7 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
           columnAItems={(question.options as any).columnAItems || []}
           columnBItems={(question.options as any).columnBItems || []}
           correctMappings={(question.options as any).correctMappings || []}
+          showCorrectAnswers
         />
       )}
 
@@ -189,13 +193,15 @@ const GradeQuestionCard: React.FC<GradeQuestionCardProps> = ({
         <OrderAnswerDisplay
           studentOrder={question.answer.orderedItems || []}
           correctItems={(question.options as any).orderItems || []}
+          showCorrectAnswers
         />
       )}
 
       {question.type === "true_false" && question.options && (
         <TrueFalseAnswerDisplay
-          studentAnswer={question.answer.trueFalseAnswer ?? false}
-          correctAnswer={(question.options as any).correctAnswer === true}
+          studentAnswer={question.answer.trueFalseAnswer}
+          correctAnswer={resolveTrueFalseCorrectAnswer(question.options)}
+          showCorrectAnswers
         />
       )}
     </Card>

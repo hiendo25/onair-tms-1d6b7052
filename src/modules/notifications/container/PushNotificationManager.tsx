@@ -60,6 +60,7 @@ export default function PushNotificationManager() {
         {
           onSuccess(data) {
             setSubscription(sub);
+            setShowPopupNotify(false);
             set({ except: true, timeStamp: dayjs().valueOf() });
           },
         },
@@ -80,6 +81,7 @@ export default function PushNotificationManager() {
 
   const cancelReceived = () => {
     set({ except: false, timeStamp: dayjs().valueOf() });
+    setShowPopupNotify(false);
   };
 
   useEffect(() => {

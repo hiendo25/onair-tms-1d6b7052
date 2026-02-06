@@ -1,16 +1,18 @@
-import dayjs from "dayjs";
 import { isUndefined } from "lodash";
 
 import { UpsertCourseFormData } from "@/modules/courses/components/ManageCourseForm/upsert-course.schema";
-import { coursesLessonsRepository, coursesRepository, coursesSectionsRepository } from "@/repository";
-import { GetCourseByIdResponse } from "@/repository/courses";
 import {
-  CreateLessonPayload,
-  CreatePivotLessonsWithResourcesPayload,
-  UpsertLessonPayload,
-} from "@/repository/courses-lessons/type";
-import { CreateSectionPayload, UpsertSectionPayload } from "@/repository/courses-sections/type";
-import { NotificationService } from "../notifications/notification-classroom.service";
+  assignmentBankRepository,
+  assignmentsRepository,
+  coursesLessonsRepository,
+  coursesRepository,
+  coursesSectionsRepository,
+} from "@/repository";
+import { GetCourseByIdResponse } from "@/repository/courses";
+import { LessonInsert, LessonResourceInsert, LessonUpsert } from "@/repository/courses-lessons/type";
+import { SectionInsert, SectionUpsert } from "@/repository/courses-sections/type";
+import { supabase } from "../supabase/client";
+
 export class UpsertCourseService {
   private userId: string;
 
@@ -63,6 +65,7 @@ export class UpsertCourseService {
      */
 
     await _this.bulkCreateCourseSections(courseData.id, payload.formData.sections);
+    await _this.syncCourseAssignments(courseData.id, _this.collectAssignmentBankIds(sections));
 
     return courseData;
   }
@@ -134,6 +137,7 @@ export class UpsertCourseService {
         return [...sumLessonIds, ...lessonIds];
       }, []);
 
+      await coursesLessonsRepository.bulkDeleteLessonProgressByLessonIds(LessonsDeletionIds);
       await coursesLessonsRepository.bulkDeleteLessons(LessonsDeletionIds);
       await coursesSectionsRepository.bulkdeleteSections(sectionsDeletion.map((sec) => sec.id));
     }
@@ -145,7 +149,7 @@ export class UpsertCourseService {
     await Promise.all(
       sections.map(async (section, _indexSection) => {
         const { data: dataSection, error: errorSection } = await coursesSectionsRepository.upsertSection(
-          _this.mapUpsertSectionPayload({
+          _this.mapSectionUpsert({
             courseId: courseDetail.id,
             section,
             sectionIndex: _indexSection,
@@ -183,17 +187,13 @@ export class UpsertCourseService {
 
           await Promise.all(
             newLessons.map(async (newLesson, _lessonIndex) => {
-              const { data: dataLesson, error: errorLesson } = await coursesLessonsRepository.upsertLesson(
+              const dataLesson = await coursesLessonsRepository.upsertLesson(
                 _this.mapUpsertLessonsPayload({
                   sectionId: sectionId,
                   lessonIndex: _lessonIndex,
                   lesson: newLesson,
                 }),
               );
-
-              if (!dataLesson || errorLesson) {
-                throw new Error(`upsert lesson ${_lessonIndex} failed in section ${indexSection}`);
-              }
 
               const lessonId = newLesson.id;
 
@@ -209,7 +209,7 @@ export class UpsertCourseService {
                   newResources: newLesson.resources,
                 });
               } else {
-                await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(
+                await coursesLessonsRepository.bulkCreateLessonsWithResources(
                   newLesson.resources.map((resource) => ({
                     lesson_id: dataLesson.id,
                     resource_id: resource.id,
@@ -229,6 +229,7 @@ export class UpsertCourseService {
         await Promise.all([upsertLessonsPromise]);
       }),
     );
+    await _this.syncCourseAssignments(courseId, _this.collectAssignmentBankIds(sections));
     console.log("Update Susscess", courseDataUpdated);
     return courseDataUpdated;
   }
@@ -240,9 +241,8 @@ export class UpsertCourseService {
       sections.map(async (section, sectionIndex) => {
         try {
           const sectionPayload = _this.mapSectionWithCourse(courseId, section, sectionIndex);
-          const { data: sectionData, error: sessionError } = await coursesSectionsRepository.createSection(
-            sectionPayload,
-          );
+          const { data: sectionData, error: sessionError } =
+            await coursesSectionsRepository.createSection(sectionPayload);
 
           if (sessionError) {
             console.log("Create Session failed", sessionError);
@@ -253,30 +253,30 @@ export class UpsertCourseService {
            * lessons
            */
           const lessonPromises = (async () => {
-            const dataLessons = await coursesLessonsRepository.createLessons(
+            const dataLessons = await coursesLessonsRepository.bulkCreateLessons(
               _this.mapLessonWithSection(sectionData.id, section.lessons),
             );
 
             /**
              * sync lesson With Resouce after create success.
              */
-            const createPivotLessonsWithResourcesPayload = dataLessons.reduce<CreatePivotLessonsWithResourcesPayload[]>(
+            const createPivotLessonsWithResourcesPayload = dataLessons.reduce<LessonResourceInsert[]>(
               (acc, dataLesson, lessonIndex) => {
                 const lessonResources = section.lessons[lessonIndex]?.resources;
 
                 return lessonResources
                   ? [
-                      ...acc,
-                      ...lessonResources.map((lessonResouce) => ({
-                        lesson_id: dataLesson.id,
-                        resource_id: lessonResouce.id,
-                      })),
-                    ]
+                    ...acc,
+                    ...lessonResources.map((lessonResouce) => ({
+                      lesson_id: dataLesson.id,
+                      resource_id: lessonResouce.id,
+                    })),
+                  ]
                   : acc;
               },
               [],
             );
-            await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(createPivotLessonsWithResourcesPayload);
+            await coursesLessonsRepository.bulkCreateLessonsWithResources(createPivotLessonsWithResourcesPayload);
           })();
 
           /**
@@ -329,7 +329,8 @@ export class UpsertCourseService {
     const lessonsResourcesIdsDeletion = delLessons.reduce<number[]>((acc, lesson) => {
       return [...acc, ...lesson.lessons_resources.map((lr) => lr.id)];
     }, []);
-    await coursesLessonsRepository.bulkDeletePivotLessonsWithResources(lessonsResourcesIdsDeletion);
+    await coursesLessonsRepository.bulkDeleteLessonWithResource(lessonsResourcesIdsDeletion);
+    await coursesLessonsRepository.bulkDeleteLessonProgressByLessonIds(delLessons.map((lesson) => lesson.id));
     await coursesLessonsRepository.bulkDeleteLessons(delLessons.map((lesson) => lesson.id));
   }
 
@@ -346,10 +347,10 @@ export class UpsertCourseService {
     const addLessonsResources = newResources.filter((rs) => oldLessonResources.every((lr) => lr.resource.id !== rs.id));
 
     if (delLessonsResources?.length) {
-      await coursesLessonsRepository.bulkDeletePivotLessonsWithResources(delLessonsResources.map((lr) => lr.id));
+      await coursesLessonsRepository.bulkDeleteLessonWithResource(delLessonsResources.map((lr) => lr.id));
     }
     if (addLessonsResources.length) {
-      await coursesLessonsRepository.bulkCreatePivotLessonsWithResources(
+      await coursesLessonsRepository.bulkCreateLessonsWithResources(
         addLessonsResources.map((lr) => ({
           lesson_id: lessonId,
           resource_id: lr.id,
@@ -365,11 +366,85 @@ export class UpsertCourseService {
    *  Helper: Map create session payloads
    * -------------------------------------------------------- */
 
+  private collectAssignmentBankIds(sections: UpsertCourseFormData["sections"]) {
+    const assignmentBankIds = new Set<string>();
+    sections.forEach((section) => {
+      section.lessons.forEach((lesson) => {
+        if (lesson.lessonType !== "assessment") return;
+        if (!lesson.assignmentBankId) return;
+        assignmentBankIds.add(lesson.assignmentBankId);
+      });
+    });
+    return Array.from(assignmentBankIds);
+  }
+
+  private async syncCourseAssignments(courseId: string, assignmentBankIds: string[]) {
+    const uniqueBankIds = Array.from(new Set(assignmentBankIds));
+    const { data: existingAssignments, error } = await assignmentsRepository.getAssignmentCoursesByCourseId(courseId);
+
+    if (error) {
+      throw new Error(`Failed to fetch course assignments: ${error.message}`);
+    }
+
+    const existingRows = (existingAssignments ?? []).filter(
+      (item) => Boolean(item.assignment_config?.assignment_bank_id),
+    );
+    const existingMap = new Map(
+      existingRows.map((item) => [item.assignment_config!.assignment_bank_id as string, item.assignment_config_id]),
+    );
+    const incomingSet = new Set(uniqueBankIds);
+
+    const assignmentConfigIdsToDelete = existingRows
+      .filter((item) => !incomingSet.has(item.assignment_config!.assignment_bank_id as string))
+      .map((item) => item.assignment_config_id);
+
+    if (assignmentConfigIdsToDelete.length) {
+      await assignmentsRepository.deleteAssignmentCoursesByAssignmentConfigIds(courseId, assignmentConfigIdsToDelete);
+    }
+
+    const assignmentBankIdsToCreate = uniqueBankIds.filter((bankId) => !existingMap.has(bankId));
+    if (!assignmentBankIdsToCreate.length) {
+      return;
+    }
+
+    const assignmentConfigs = await Promise.all(
+      assignmentBankIdsToCreate.map(async (assignmentBankId) => {
+        const assignmentBank = await assignmentBankRepository.getAssignmentBankById(
+          assignmentBankId,
+          this.organizationId,
+        );
+
+        if (!assignmentBank) {
+          throw new Error("Không tìm thấy bài kiểm tra");
+        }
+
+        return assignmentsRepository.createAssignmentFromBankWithClient(supabase, {
+          assignment_bank_id: assignmentBankId,
+          assigned_by: this.userId,
+          organization_id: this.organizationId,
+          attempt_duration_minutes: assignmentBank.duration_minutes ?? null,
+          attempt_limit: 1,
+          available_from: null,
+          available_to: null,
+          status: "open",
+          scope: "course",
+        });
+      }),
+    );
+
+    await assignmentsRepository.createAssignmentCourses(
+      assignmentConfigs.map((assignment) => ({
+        assignment_config_id: assignment.id,
+        course_id: courseId,
+      })),
+    );
+  }
+
   private mapSectionWithCourse(
     courseId: string,
     section: UpsertCourseFormData["sections"][number],
     index: number,
-  ): CreateSectionPayload {
+  ): SectionInsert {
     return {
       title: section.title,
       description: section.description,
@@ -385,8 +460,8 @@ export class UpsertCourseService {
   private mapLessonWithSection(
     sessionId: string,
     lessons: UpsertCourseFormData["sections"][number]["lessons"],
-  ): CreateLessonPayload[] {
-    return lessons.map<CreateLessonPayload>((lesson, _index) => ({
+  ): LessonInsert[] {
+    return lessons.map<LessonInsert>((lesson, _index) => ({
       content: lesson.content,
       lesson_type: lesson.lessonType,
       priority: _index + 1,
@@ -394,7 +469,7 @@ export class UpsertCourseService {
       title: lesson.title,
       section_id: sessionId,
       main_resource: lesson.mainResource?.id || null,
-      assignment_id: lesson.assignmentId || null,
+      assignment_id: lesson.assignmentBankId || null,
     }));
   }
 
@@ -404,8 +479,8 @@ export class UpsertCourseService {
   private mapBulkUpsertLessonsPayload(
     sectionId: string,
     lessons: UpsertCourseFormData["sections"][number]["lessons"],
-  ): UpsertLessonPayload[] {
-    return lessons.map<UpsertLessonPayload>((lesson, lessonIndex) => {
+  ): LessonUpsert[] {
+    return lessons.map<LessonUpsert>((lesson, lessonIndex) => {
       const lessonId = lesson.id;
       if (lessonId) {
         return {
@@ -416,7 +491,7 @@ export class UpsertCourseService {
             lesson_type: lesson.lessonType,
             content: lesson.content,
             main_resource: lesson.mainResource?.id ?? null,
-            assignment_id: lesson.assignmentId ?? null,
+            assignment_id: lesson.assignmentBankId ?? null,
             priority: lessonIndex + 1,
             status: lesson.status,
           },
@@ -429,7 +504,7 @@ export class UpsertCourseService {
             lesson_type: lesson.lessonType,
             content: lesson.content,
             main_resource: lesson.mainResource?.id ?? null,
-            assignment_id: lesson.assignmentId ?? null,
+            assignment_id: lesson.assignmentBankId ?? null,
             priority: lessonIndex + 1,
             status: lesson.status,
             section_id: sectionId,
@@ -443,35 +518,35 @@ export class UpsertCourseService {
     sectionId: string;
     lesson: UpsertCourseFormData["sections"][number]["lessons"][number];
     lessonIndex: number;
-  }): UpsertLessonPayload {
+  }): LessonUpsert {
     const { lesson, lessonIndex, sectionId } = params;
     return lesson.id
       ? {
-          action: "update",
-          payload: {
-            id: lesson.id,
-            title: lesson.title,
-            lesson_type: lesson.lessonType,
-            content: lesson.content,
-            main_resource: lesson.mainResource?.id ?? null,
-            assignment_id: lesson.assignmentId ?? null,
-            priority: lessonIndex + 1,
-            status: lesson.status,
-          },
-        }
+        action: "update",
+        payload: {
+          id: lesson.id,
+          title: lesson.title,
+          lesson_type: lesson.lessonType,
+          content: lesson.content,
+          main_resource: lesson.mainResource?.id ?? null,
+          assignment_id: lesson.assignmentBankId ?? null,
+          priority: lessonIndex + 1,
+          status: lesson.status,
+        },
+      }
       : {
-          action: "create",
-          payload: {
-            section_id: sectionId,
-            title: lesson.title,
-            lesson_type: lesson.lessonType,
-            content: lesson.content,
-            main_resource: lesson.mainResource?.id ?? null,
-            assignment_id: lesson.assignmentId ?? null,
-            priority: lessonIndex + 1,
-            status: lesson.status,
-          },
-        };
+        action: "create",
+        payload: {
+          section_id: sectionId,
+          title: lesson.title,
+          lesson_type: lesson.lessonType,
+          content: lesson.content,
+          main_resource: lesson.mainResource?.id ?? null,
+          assignment_id: lesson.assignmentBankId ?? null,
+          priority: lessonIndex + 1,
+          status: lesson.status,
+        },
+      };
   }
 
   /**
@@ -479,32 +554,32 @@ export class UpsertCourseService {
    * Helper: Map Upsert section payload
    *
    */
-  private mapUpsertSectionPayload(params: {
+  private mapSectionUpsert(params: {
     courseId: string;
     section: UpsertCourseFormData["sections"][number];
     sectionIndex: number;
-  }): UpsertSectionPayload {
+  }): SectionUpsert {
     const { courseId, section, sectionIndex } = params;
     return section.id
       ? {
-          action: "update",
-          payload: {
-            id: section.id,
-            description: section.description,
-            priority: sectionIndex + 1, // update new priority
-            status: section.status,
-            title: section.title,
-          },
-        }
+        action: "update",
+        payload: {
+          id: section.id,
+          description: section.description,
+          priority: sectionIndex + 1, // update new priority
+          status: section.status,
+          title: section.title,
+        },
+      }
       : {
-          action: "create",
-          payload: {
-            course_id: courseId,
-            description: section.description,
-            priority: sectionIndex + 1, // update new priority
-            status: section.status,
-            title: section.title,
-          },
-        };
+        action: "create",
+        payload: {
+          course_id: courseId,
+          description: section.description,
+          priority: sectionIndex + 1, // update new priority
+          status: section.status,
+          title: section.title,
+        },
+      };
   }
 }

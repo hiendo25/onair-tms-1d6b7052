@@ -6,5 +6,5 @@ export class OrganizationDto {
   is_active!: boolean;
   employee_limit!: number | null;
   created_at!: string;
+  code!: string | null;
 }
-
