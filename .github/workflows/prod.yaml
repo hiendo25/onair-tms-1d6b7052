@@ -12,6 +12,8 @@ jobs:
   build-and-push-docker:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    environment:
+      name: main
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
