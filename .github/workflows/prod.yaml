@@ -38,9 +38,15 @@ jobs:
             --build-arg NEXT_PUBLIC_APP_ENV=production \
             --build-arg NEXT_PUBLIC_REQUEST_ENCRYPTION=true \
             --build-arg NEXT_PUBLIC_SITE_URL=onairlms.com \
+            --build-arg NEXT_PUBLIC_STORAGE_URL=${{ secrets.NEXT_PUBLIC_STORAGE_URL }} \
             --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY }} \
             --build-arg NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
             --build-arg PROJECT_REF=${{ secrets.PROJECT_REF }} \
+            --build-arg SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }} \
+            --build-arg AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            --build-arg AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            --build-arg AWS_REGION=${{ secrets.AWS_REGION }} \
+            --build-arg AWS_S3_PUBLIC_BUCKET=${{ secrets.AWS_S3_PUBLIC_BUCKET }} \
             -f Dockerfile .
           docker push $IMAGE_NAME:$TAG
           docker push $IMAGE_NAME:$LATEST_TAG
