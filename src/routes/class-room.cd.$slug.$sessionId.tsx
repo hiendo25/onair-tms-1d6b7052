@@ -19,7 +19,7 @@ function KioskPage() {
           </div>
           <div>
             <div className="text-sm font-semibold">{slug} — Phiên #{sessionId}</div>
-            <div className="text-xs text-white/60">Giảng viên: Trần Thị Bích</div>
+            <div className="text-xs text-white/60">Giảng viên: Trần Thị Mai</div>
           </div>
         </div>
         <div className="flex items-center gap-3">
