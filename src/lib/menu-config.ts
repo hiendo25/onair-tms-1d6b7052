@@ -43,7 +43,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: FolderKanban,
     children: [
       { title: "Danh sách kế hoạch", key: "plans-list", path: "/admin/plans" },
-      { title: "Tạo kế hoạch", key: "plans-create", path: "/admin/plans/create" },
     ],
   },
   {
@@ -52,7 +51,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: BookOpen,
     children: [
       { title: "Danh sách lộ trình", key: "lp-list", path: "/admin/learning-paths" },
-      { title: "Tạo lộ trình", key: "lp-create", path: "/admin/learning-paths/create" },
     ],
   },
   {
@@ -61,7 +59,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: Monitor,
     children: [
       { title: "Danh sách lớp học", key: "cr-list", path: "/admin/class-room" },
-      { title: "Tạo lớp học", key: "cr-create", path: "/admin/class-room/create" },
       { title: "Môn học", key: "courses", path: "/admin/online-course" },
     ],
   },
