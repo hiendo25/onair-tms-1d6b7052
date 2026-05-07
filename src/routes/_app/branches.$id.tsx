@@ -19,7 +19,7 @@ function BranchDetail() {
     <PageContainer
       title={b.name}
       description={`Mã: ${b.code}`}
-      breadcrumbs={[{ title: "Tổ chức" }, { title: "Chi nhánh", path: "/admin/branches" }, { title: b.name }]}
+      breadcrumbs={[{ title: "Tổ chức" }, { title: "Chi nhánh", path: "/branches" }, { title: b.name }]}
       actions={<Button size="sm"><Edit className="h-4 w-4" />Chỉnh sửa</Button>}
     >
       <Tabs defaultValue="info">

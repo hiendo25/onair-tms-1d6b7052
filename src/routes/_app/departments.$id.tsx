@@ -16,7 +16,7 @@ function DepartmentDetail() {
   return (
     <PageContainer
       title={`Phòng ban #${id}`}
-      breadcrumbs={[{ title: "Tổ chức" }, { title: "Phòng ban", path: "/admin/departments" }, { title: `#${id}` }]}
+      breadcrumbs={[{ title: "Tổ chức" }, { title: "Phòng ban", path: "/departments" }, { title: `#${id}` }]}
       actions={<Button size="sm"><Edit className="h-4 w-4" />Chỉnh sửa</Button>}
     >
       <Tabs defaultValue="info">

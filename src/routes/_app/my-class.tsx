@@ -50,7 +50,7 @@ export const Route = createFileRoute("/_app/my-class")({
                       <div className="flex items-center gap-2 text-xs"><GraduationCap className="h-4 w-4" />{c.teacher}</div>
                     </div>
                     <Button asChild size="sm" className="w-full">
-                      <Link to="/my-class/$id" params={{ id: c.id }}><PlayCircle className="h-4 w-4" />Vào lớp học</Link>
+                      <Link to="/class-room/$slug" params={{ slug: c.id }}><PlayCircle className="h-4 w-4" />Vào lớp học</Link>
                     </Button>
                   </div>
                 </Card>
