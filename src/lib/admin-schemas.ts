@@ -25,8 +25,9 @@ export type BranchForm = z.infer<typeof branchSchema>;
 export const departmentSchema = z.object({
   code: codeSchema("phòng ban"),
   name: z.string().min(1, "Tên phòng ban không bỏ trống").max(100, "Tên phòng ban tối đa 100 ký tự"),
-  branch: optStr,
+  branch: z.string().min(1, "Không bỏ trống chi nhánh."),
   head: optStr,
+  status: z.enum(["active", "inactive"]),
 });
 export type DepartmentForm = z.infer<typeof departmentSchema>;
 
