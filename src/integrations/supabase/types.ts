@@ -14,6 +14,206 @@ export type Database = {
   }
   public: {
     Tables: {
+      branches: {
+        Row: {
+          address: string
+          code: string
+          created_at: string
+          employees: number
+          id: string
+          manager: string
+          name: string
+          org_id: string
+          phone: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string
+          code: string
+          created_at?: string
+          employees?: number
+          id?: string
+          manager?: string
+          name: string
+          org_id: string
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          code?: string
+          created_at?: string
+          employees?: number
+          id?: string
+          manager?: string
+          name?: string
+          org_id?: string
+          phone?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branches_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          branch: string
+          code: string
+          created_at: string
+          employees: number
+          head: string
+          id: string
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          branch?: string
+          code: string
+          created_at?: string
+          employees?: number
+          head?: string
+          id?: string
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          branch?: string
+          code?: string
+          created_at?: string
+          employees?: number
+          head?: string
+          id?: string
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      org_roles: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          name: string
+          org_id: string
+          permissions: number
+          updated_at: string
+          users: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          org_id: string
+          permissions?: number
+          updated_at?: string
+          users?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          org_id?: string
+          permissions?: number
+          updated_at?: string
+          users?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_roles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          brand_color: string
+          created_at: string
+          domain: string
+          id: string
+          industry: string
+          name: string
+          short: string
+        }
+        Insert: {
+          brand_color: string
+          created_at?: string
+          domain: string
+          id: string
+          industry: string
+          name: string
+          short: string
+        }
+        Update: {
+          brand_color?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          industry?: string
+          name?: string
+          short?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -69,6 +269,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
     }
