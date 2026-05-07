@@ -7,8 +7,6 @@ import {
   ClipboardList,
   Award,
   FileText,
-  Layers,
-  Star,
   GraduationCap,
   Users,
   Trophy,
