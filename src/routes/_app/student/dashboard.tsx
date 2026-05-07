@@ -18,6 +18,9 @@ import { PageContainer } from "@/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { getUserRole } from "@/lib/roles";
+import { logLearningActivity } from "@/lib/log-activity";
+import { WeeklyLearningSummary } from "@/components/student/WeeklyLearningSummary";
+import { BranchRankingCard } from "@/components/student/BranchRankingCard";
 
 export const Route = createFileRoute("/_app/student/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — OnAir TMS" }] }),
