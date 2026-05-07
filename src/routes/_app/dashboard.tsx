@@ -24,44 +24,44 @@ export const Route = createFileRoute("/_app/dashboard")({
 });
 
 const summaryCards = [
-  { title: "Lớp học đang diễn ra", value: "12", icon: GraduationCap, bg: "bg-pink-100", color: "text-pink-600" },
-  { title: "Lớp học sắp diễn ra", value: "9", icon: PlayCircle, bg: "bg-blue-100", color: "text-blue-600" },
-  { title: "Lớp học sắp hết hạn", value: "5", icon: Clock, bg: "bg-purple-100", color: "text-purple-600" },
-  { title: "Lớp học đã diễn ra", value: "34", icon: Trophy, bg: "bg-amber-100", color: "text-amber-600" },
+  { title: "Lớp đang diễn ra", value: "23", icon: GraduationCap, bg: "bg-pink-100", color: "text-pink-600" },
+  { title: "Lớp sắp diễn ra", value: "14", icon: PlayCircle, bg: "bg-blue-100", color: "text-blue-600" },
+  { title: "Lớp sắp hết hạn", value: "7", icon: Clock, bg: "bg-purple-100", color: "text-purple-600" },
+  { title: "Lớp đã hoàn thành", value: "128", icon: Trophy, bg: "bg-amber-100", color: "text-amber-600" },
 ];
 
 const courseRows = [
-  { id: "1", label: "Đơn", name: "AI ứng dụng cho Doanh nghiệp: Cơ bản đến nâng cao", tag: "Chất lượng", mode: "Trực tuyến (Online)", students: "26", lecturer: "Nguyễn Thị Mai Linh" },
-  { id: "2", label: "Chuỗi", name: "Xây dựng năng lực lãnh đạo trong kỷ nguyên số", tag: "Chất lượng", mode: "Trực tiếp (Offline)", students: "32", lecturer: "Phạm Quang Huy" },
-  { id: "3", label: "Đơn", name: "Thiết kế chương trình đào tạo nội bộ hiệu quả", tag: "Chất lượng", mode: "Trực tuyến (Online)", students: "18", lecturer: "Lê Thanh Tùng" },
-  { id: "4", label: "Chuỗi", name: "Data Analytics cho quản lý cấp trung", tag: "Chất lượng", mode: "Trực tuyến (Online)", students: "24", lecturer: "Trần Hồng Vân" },
+  { id: "1", label: "Chuỗi", name: "Onboarding Nhân viên Pha chế Q2/2025", tag: "Bắt buộc", mode: "Trực tiếp (Offline)", students: "284", lecturer: "Trần Thị Mai" },
+  { id: "2", label: "Đơn", name: "An toàn vệ sinh thực phẩm tháng 5", tag: "Bắt buộc", mode: "Trực tuyến (Online)", students: "1.240", lecturer: "Vũ Minh Đức" },
+  { id: "3", label: "Chuỗi", name: "Đào tạo Trưởng ca - Đợt 2/2025", tag: "Nâng cao", mode: "Hybrid", students: "124", lecturer: "Lý Thị Ngọc" },
+  { id: "4", label: "Đơn", name: "Vận hành máy POS & thanh toán", tag: "Chất lượng", mode: "Trực tuyến (Online)", students: "467", lecturer: "Trần Thị Mai" },
 ];
 
 const channelData = [
-  { label: "Online", value: 62 },
-  { label: "Offline", value: 48 },
-  { label: "eLearning", value: 78 },
+  { label: "Đào tạo tại cửa hàng", value: 72 },
+  { label: "eLearning trên app", value: 88 },
+  { label: "Lớp tập trung Hub", value: 41 },
 ];
 
 const topCourses = [
-  { title: "Chuyển đổi số doanh nghiệp", rating: 4.6 },
-  { title: "Khai thác dữ liệu nâng cao", rating: 4.4 },
-  { title: "Xây dựng văn hóa học tập", rating: 4.3 },
-  { title: "Huấn luyện lãnh đạo trẻ", rating: 4.1 },
-  { title: "Tối ưu vận hành số", rating: 4.0 },
+  { title: "An toàn vệ sinh thực phẩm (VSATTP)", rating: 4.9 },
+  { title: "Quy trình pha chế chuẩn Highlands", rating: 4.8 },
+  { title: "Văn hoá thương hiệu Highlands Coffee", rating: 4.8 },
+  { title: "Kỹ năng phục vụ khách hàng", rating: 4.7 },
+  { title: "Quản lý ca & xếp lịch nhân sự", rating: 4.7 },
 ];
 
 const lowCourses = [
-  { title: "Tư duy phản biện", rating: 3.2 },
-  { title: "Kỹ năng thuyết trình", rating: 3.1 },
-  { title: "Vận hành dự án", rating: 3.0 },
-  { title: "Quản trị rủi ro", rating: 2.9 },
-  { title: "Kỹ năng bán hàng", rating: 2.7 },
+  { title: "Báo cáo doanh thu cuối ca", rating: 3.6 },
+  { title: "Kiểm kê nguyên liệu nâng cao", rating: 3.4 },
+  { title: "Xử lý sự cố máy pha Espresso", rating: 3.3 },
+  { title: "Quản trị tồn kho cửa hàng", rating: 3.1 },
+  { title: "Báo cáo P&L cửa hàng", rating: 2.9 },
 ];
 
 function Dashboard() {
   const [range, setRange] = useState("year");
-  const completion = { completed: 360, total: 480 };
+  const completion = { completed: 1078, total: 1240 };
   const completionPct = Math.round((completion.completed / completion.total) * 100);
 
   return (

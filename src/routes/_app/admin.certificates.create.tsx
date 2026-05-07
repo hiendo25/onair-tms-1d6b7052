@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_app/admin/certificates/create")({
         <Card>
           <CardHeader><CardTitle className="text-base">Thông tin chứng nhận</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5"><Label>Tên chứng nhận *</Label><Input placeholder="VD: Chứng nhận hoàn thành Onboarding" /></div>
+            <div className="space-y-1.5"><Label>Tên chứng nhận *</Label><Input placeholder="VD: Chứng chỉ Vệ sinh An toàn Thực phẩm" /></div>
             <div className="space-y-1.5">
               <Label>Mẫu thiết kế</Label>
               <Select defaultValue="default"><SelectTrigger><SelectValue /></SelectTrigger>

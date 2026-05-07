@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const MY_PATH = {
-  title: "Lộ trình Onboarding nhân viên mới",
+  title: "Onboarding nhân viên mới - Highlands Coffee",
   progress: 42,
   phases: [
-    { title: "Tuần đầu - Văn hoá & quy định", weeks: 1, status: "done" as const, courses: ["Văn hoá công ty", "Quy định lao động", "Hệ thống IT"] },
-    { title: "Tháng 1 - Kỹ năng cốt lõi", weeks: 4, status: "doing" as const, courses: ["Giao tiếp chuyên nghiệp", "Quản lý thời gian", "Excel cơ bản", "Email & Slack", "Họp hiệu quả"] },
-    { title: "Tháng 2 - Nghiệp vụ chuyên sâu", weeks: 4, status: "locked" as const, courses: ["Nghiệp vụ phòng ban", "Sản phẩm dịch vụ", "Quy trình bán hàng", "Chăm sóc khách hàng"] },
-    { title: "Tháng 3 - Đánh giá & chứng nhận", weeks: 2, status: "locked" as const, courses: ["Bài thi tổng hợp", "Phỏng vấn đánh giá"] },
+    { title: "Tuần 1 - Văn hoá thương hiệu & nội quy", weeks: 1, status: "done" as const, courses: ["Văn hoá Highlands Coffee", "Nội quy nhân viên cửa hàng", "Đồng phục & tác phong"] },
+    { title: "Tuần 2 - Quy trình pha chế chuẩn", weeks: 1, status: "doing" as const, courses: ["Pha chế Phin truyền thống", "Pha chế Espresso & Latte", "Pha chế Trà & Freeze", "Định lượng nguyên liệu", "Vệ sinh máy pha"] },
+    { title: "Tuần 3 - VSATTP & vận hành cửa hàng", weeks: 1, status: "locked" as const, courses: ["An toàn vệ sinh thực phẩm", "Vận hành máy POS", "Tiếp nhận order khách hàng"] },
+    { title: "Tuần 4 - Thực tập & đánh giá", weeks: 1, status: "locked" as const, courses: ["Thực tập tại cửa hàng", "Bài thi nghiệp vụ pha chế"] },
   ],
 };
 
