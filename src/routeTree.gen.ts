@@ -29,6 +29,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppBranchesRouteImport } from './routes/_app/branches'
 import { Route as AppAnalyticRouteImport } from './routes/_app/analytic'
 import { Route as SurveysIdSubmitRouteImport } from './routes/surveys.$id.submit'
+import { Route as AppStudentDashboardRouteImport } from './routes/_app/student/dashboard'
 import { Route as AppDepartmentsListRouteImport } from './routes/_app/departments.list'
 import { Route as AppDepartmentsIdRouteImport } from './routes/_app/departments.$id'
 import { Route as AppClassRoomSlugRouteImport } from './routes/_app/class-room.$slug'
@@ -184,6 +185,11 @@ const SurveysIdSubmitRoute = SurveysIdSubmitRouteImport.update({
   id: '/surveys/$id/submit',
   path: '/surveys/$id/submit',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
+  id: '/student/dashboard',
+  path: '/student/dashboard',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDepartmentsListRoute = AppDepartmentsListRouteImport.update({
   id: '/list',
@@ -526,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
@@ -603,6 +610,7 @@ export interface FileRoutesByTo {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
@@ -682,6 +690,7 @@ export interface FileRoutesById {
   '/_app/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/_app/departments/$id': typeof AppDepartmentsIdRoute
   '/_app/departments/list': typeof AppDepartmentsListRoute
+  '/_app/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/_app/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/_app/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
@@ -761,6 +770,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/student/dashboard'
     | '/surveys/$id/submit'
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
@@ -838,6 +848,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/student/dashboard'
     | '/surveys/$id/submit'
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
@@ -916,6 +927,7 @@ export interface FileRouteTypes {
     | '/_app/class-room/$slug'
     | '/_app/departments/$id'
     | '/_app/departments/list'
+    | '/_app/student/dashboard'
     | '/surveys/$id/submit'
     | '/_app/admin/assignments/$id'
     | '/_app/admin/assignments/assigned'
@@ -1113,6 +1125,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/surveys/$id/submit'
       preLoaderRoute: typeof SurveysIdSubmitRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/student/dashboard': {
+      id: '/_app/student/dashboard'
+      path: '/student/dashboard'
+      fullPath: '/student/dashboard'
+      preLoaderRoute: typeof AppStudentDashboardRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/departments/list': {
       id: '/_app/departments/list'
@@ -1820,6 +1839,7 @@ interface AppRouteChildren {
   AppAdminRolesRoute: typeof AppAdminRolesRouteWithChildren
   AppAdminSurveysRoute: typeof AppAdminSurveysRouteWithChildren
   AppClassRoomSlugRoute: typeof AppClassRoomSlugRouteWithChildren
+  AppStudentDashboardRoute: typeof AppStudentDashboardRoute
   AppAdminReportOverviewRoute: typeof AppAdminReportOverviewRoute
 }
 
@@ -1847,6 +1867,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminRolesRoute: AppAdminRolesRouteWithChildren,
   AppAdminSurveysRoute: AppAdminSurveysRouteWithChildren,
   AppClassRoomSlugRoute: AppClassRoomSlugRouteWithChildren,
+  AppStudentDashboardRoute: AppStudentDashboardRoute,
   AppAdminReportOverviewRoute: AppAdminReportOverviewRoute,
 }
 
@@ -1879,3 +1900,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
