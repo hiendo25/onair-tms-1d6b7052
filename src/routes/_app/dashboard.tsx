@@ -4,7 +4,9 @@ import {
   AlertCircle, BookOpen, ClipboardCheck, Trophy, Clock, Award, Star,
   Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
