@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertCircle, BookOpen, ClipboardCheck, Trophy, Clock, Award, Star,
-  Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal,
+  Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal, Sparkles,
 } from "lucide-react";
+import { AiSpinner } from "@/components/ai/AiSpinner";
+import { aiPersonalInsight } from "@/lib/ai-mock";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
