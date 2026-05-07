@@ -62,7 +62,7 @@ export const ADMIN_MENU: MenuItem[] = [
   { title: "Khảo sát", key: "surveys", path: "/admin/surveys", icon: FileText },
   { title: "Flashcard", key: "flashcards", path: "/admin/flashcards", icon: Layers },
   { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
-  { title: "Báo cáo", key: "analytic", path: "/analytic", icon: BarChart3 },
+  { title: "Báo cáo tổ chức", key: "analytic", path: "/analytic", icon: BarChart3 },
 ];
 
 export const STUDENT_MENU: MenuItem[] = [
