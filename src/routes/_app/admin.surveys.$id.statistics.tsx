@@ -23,7 +23,7 @@ function Stats() {
     setLoading(true);
     setError(null);
     try { setData(await aiSurveyInsight()); }
-    catch { setError("Không phân tích được. Vui lòng thử lại."); }
+    catch { setError("Có gì đó chưa đúng, thử lại nhé."); }
     finally { setLoading(false); }
   }
 
@@ -38,7 +38,7 @@ function Stats() {
       <div className="flex justify-end mb-3">
         <Button onClick={analyze} disabled={loading} className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white">
           <Sparkles className="h-4 w-4 mr-1.5" />
-          {loading ? "Đang phân tích..." : "Phân tích kết quả bằng AI"}
+          {loading ? "Để mình xem qua nhé..." : "Tóm tắt phản hồi từ khảo sát này"}
         </Button>
       </div>
 
@@ -49,7 +49,7 @@ function Stats() {
               <Sparkles className="h-4 w-4 text-violet-600" />
               <span className="font-semibold text-sm text-violet-900">Phân tích AI</span>
             </div>
-            {loading && <AiSpinner label="AI đang đọc phản hồi và tổng hợp..." />}
+            {loading && <AiSpinner label="Để mình xem qua nhé..." />}
             {error && !loading && (
               <div className="text-sm text-destructive flex items-center justify-between">
                 <span>{error}</span>

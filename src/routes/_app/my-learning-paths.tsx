@@ -34,7 +34,7 @@ function MyPaths() {
     setLoading(true);
     setError(null);
     try { setSuggestions(await aiSuggestLearningPaths()); }
-    catch { setError("Không tải được gợi ý."); }
+    catch { setError("Có gì đó chưa đúng, thử lại nhé."); }
     finally { setLoading(false); }
   }
   useEffect(() => { void load(); }, []);
@@ -60,9 +60,9 @@ function MyPaths() {
         <CardContent className="p-5 space-y-3">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4 text-violet-600" />
-            <h2 className="text-sm font-semibold text-slate-800">Gợi ý cho bạn</h2>
+            <h2 className="text-sm font-semibold text-slate-800">Có thể bạn sẽ thích những lộ trình này</h2>
           </div>
-          {loading && <AiSpinner label="Đang tìm lộ trình phù hợp..." />}
+          {loading && <AiSpinner label="Để mình xem qua nhé..." />}
           {error && !loading && (
             <div className="text-sm text-destructive flex items-center justify-between">
               <span>{error}</span>

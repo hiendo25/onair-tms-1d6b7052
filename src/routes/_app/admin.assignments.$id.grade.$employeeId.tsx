@@ -33,7 +33,7 @@ function GradePage() {
       const r = await aiGradeEssay(QUESTION, ANSWER);
       setAiResult(r);
     } catch {
-      toast.error("Không thể gọi AI. Vui lòng thử lại.");
+      toast.error("Có gì đó chưa đúng, thử lại nhé.");
     } finally {
       setLoading(false);
     }
@@ -71,14 +71,14 @@ function GradePage() {
                   className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
                 >
                   <Sparkles className="h-4 w-4 mr-1.5" />
-                  {loading ? "Đang gợi ý..." : "Gợi ý điểm bằng AI"}
+                  {loading ? "Để mình xem qua nhé..." : "Gợi ý điểm và nhận xét cho bài này"}
                 </Button>
               </div>
 
               {(loading || aiResult) && (
                 <Card className="mt-3 border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50">
                   <CardContent className="p-4">
-                    {loading && <AiSpinner label="AI đang phân tích bài làm..." />}
+                    {loading && <AiSpinner label="Để mình xem qua nhé..." />}
                     {aiResult && !loading && (
                       <div className="space-y-3">
                         <div className="flex items-center gap-2">

@@ -166,7 +166,7 @@ function ReportPage() {
             {/* Bars */}
             <div className="ml-2 h-full flex items-end justify-around gap-2 border-l border-b border-slate-200">
               {sortedChart.length === 0 ? (
-                <div className="flex-1 text-center text-sm text-muted-foreground self-center">Chưa có dữ liệu</div>
+                <div className="flex-1 text-center text-sm text-muted-foreground self-center">Chưa có đủ dữ liệu để đưa ra nhận xét, hãy tiếp tục học nhé</div>
               ) : sortedChart.map((b) => (
                 <div key={b.id} className="flex-1 flex flex-col items-center justify-end h-full pb-6 relative">
                   <span className={`text-xs font-semibold mb-1 ${b.completion < 50 ? "text-red-600" : "text-slate-700"}`}>{b.completion}%</span>
