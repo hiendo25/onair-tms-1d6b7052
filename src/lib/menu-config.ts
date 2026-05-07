@@ -37,22 +37,8 @@ export const ADMIN_MENU: MenuItem[] = [
       { title: "Vai trò & phân quyền", key: "roles", path: "/admin/roles" },
     ],
   },
-  {
-    title: "Kế hoạch đào tạo",
-    key: "plans",
-    icon: FolderKanban,
-    children: [
-      { title: "Danh sách kế hoạch", key: "plans-list", path: "/admin/plans" },
-    ],
-  },
-  {
-    title: "Lộ trình học tập",
-    key: "learning-paths",
-    icon: BookOpen,
-    children: [
-      { title: "Danh sách lộ trình", key: "lp-list", path: "/admin/learning-paths" },
-    ],
-  },
+  { title: "Kế hoạch đào tạo", key: "plans", path: "/admin/plans", icon: FolderKanban },
+  { title: "Lộ trình học tập", key: "learning-paths", path: "/admin/learning-paths", icon: BookOpen },
   {
     title: "Quản lý lớp học",
     key: "class-room",
@@ -72,30 +58,9 @@ export const ADMIN_MENU: MenuItem[] = [
       { title: "Bài KT đã gán", key: "as-assigned", path: "/admin/assignments/assigned" },
     ],
   },
-  {
-    title: "Quản lý chứng nhận",
-    key: "certificates",
-    icon: Award,
-    children: [
-      { title: "Danh sách", key: "cert-list", path: "/admin/certificates" },
-    ],
-  },
-  {
-    title: "Khảo sát",
-    key: "surveys",
-    icon: FileText,
-    children: [
-      { title: "Danh sách", key: "sv-list", path: "/admin/surveys" },
-    ],
-  },
-  {
-    title: "Flashcard",
-    key: "flashcards",
-    icon: Layers,
-    children: [
-      { title: "Danh sách", key: "fc-list", path: "/admin/flashcards" },
-    ],
-  },
+  { title: "Quản lý chứng nhận", key: "certificates", path: "/admin/certificates", icon: Award },
+  { title: "Khảo sát", key: "surveys", path: "/admin/surveys", icon: FileText },
+  { title: "Flashcard", key: "flashcards", path: "/admin/flashcards", icon: Layers },
   { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
   { title: "Báo cáo", key: "analytic", path: "/analytic", icon: BarChart3 },
 ];
