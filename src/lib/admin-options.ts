@@ -90,9 +90,27 @@ export const PLAN_TYPE = [
 
 export const PLAN_STATUS = [
   { value: "draft", label: "Bản nháp" },
-  { value: "active", label: "Đang triển khai" },
-  { value: "completed", label: "Hoàn thành" },
-  { value: "cancelled", label: "Đã huỷ" },
+  { value: "pending_survey", label: "Đang khảo sát" },
+  { value: "pending", label: "Chờ duyệt" },
+  { value: "approved", label: "Đã duyệt" },
+  { value: "rejected", label: "Từ chối" },
+];
+
+export const PLAN_TARGET_TYPE = [
+  { value: "all", label: "Tất cả" },
+  { value: "dept", label: "Phòng ban" },
+  { value: "branch", label: "Chi nhánh" },
+];
+
+export const SURVEY_QUESTION_TYPE = [
+  { value: "single", label: "Một đáp án" },
+  { value: "multiple", label: "Nhiều đáp án" },
+  { value: "yes_no", label: "Yes/No" },
+  { value: "rating", label: "Thang điểm" },
+  { value: "essay", label: "Tự luận" },
+  { value: "dropdown", label: "Dropdown" },
+  { value: "sorting", label: "Sắp xếp" },
+  { value: "vote", label: "Bỏ phiếu" },
 ];
 
 export const CODE_NOTE = "Mã chỉ từ 2 - 8 ký tự, không khoảng trắng, không ký tự đặc biệt (ngoại trừ -).";

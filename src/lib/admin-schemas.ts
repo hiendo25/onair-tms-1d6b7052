@@ -155,13 +155,32 @@ export type SurveyForm = z.infer<typeof surveySchema>;
 export const planSchema = z.object({
   code: codeSchema("kế hoạch"),
   title: z.string().min(1, "Tên kế hoạch không bỏ trống").max(200),
+  objective: optStr,
   description: optStr,
   type: z.enum(["training", "onboarding", "compliance", "development"]),
   start_date: z.string().optional().or(z.literal("")),
   end_date: z.string().optional().or(z.literal("")),
-  target_count: z.coerce.number().int().min(0),
-  status: z.enum(["draft", "active", "completed", "cancelled"]),
+  budget: z.coerce.number().min(0).default(0),
+  target_count: z.coerce.number().int().min(0).default(0),
+  status: z.enum(["draft", "pending_survey", "pending", "approved", "rejected"]).default("draft"),
 }).refine((d) => !d.start_date || !d.end_date || d.start_date <= d.end_date, {
   message: "Ngày bắt đầu phải nhỏ hơn ngày kết thúc.", path: ["end_date"],
 });
 export type PlanForm = z.infer<typeof planSchema>;
+
+export const programSchema = z.object({
+  name: z.string().min(1, "Tên chương trình không bỏ trống").max(200),
+  description: optStr,
+  start_date: z.string().optional().or(z.literal("")),
+  end_date: z.string().optional().or(z.literal("")),
+}).refine((d) => !d.start_date || !d.end_date || d.start_date <= d.end_date, {
+  message: "Ngày kết thúc phải sau ngày bắt đầu.", path: ["end_date"],
+});
+export type ProgramForm = z.infer<typeof programSchema>;
+
+export const topicSchema = z.object({
+  name: z.string().min(1, "Tên chủ đề không bỏ trống").max(200),
+  description: optStr,
+  program_id: z.string().optional(),
+});
+export type TopicForm = z.infer<typeof topicSchema>;

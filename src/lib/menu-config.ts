@@ -58,7 +58,15 @@ export const ADMIN_MENU: MenuItem[] = [
     ],
   },
   { title: "Quản lý chứng nhận", key: "certificates", path: "/admin/certificates", icon: Award },
-  { title: "Khảo sát", key: "surveys", path: "/admin/surveys", icon: FileText },
+  {
+    title: "Khảo sát",
+    key: "surveys",
+    icon: FileText,
+    children: [
+      { title: "Danh sách khảo sát", key: "surveys-list", path: "/admin/surveys" },
+      { title: "Kết quả khảo sát", key: "surveys-results", path: "/admin/surveys-results" },
+    ],
+  },
   {
     title: "Thi đua & xếp hạng",
     key: "compete",
