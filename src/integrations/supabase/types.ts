@@ -584,48 +584,415 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_path_audience: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          id: string
+          learning_path_id: string
+          org_id: string
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          learning_path_id: string
+          org_id: string
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          id?: string
+          learning_path_id?: string
+          org_id?: string
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_audience_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_enrollments: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deadline: string | null
+          enrolled_at: string
+          id: string
+          learning_path_id: string
+          org_id: string
+          progress: number
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          enrolled_at?: string
+          id?: string
+          learning_path_id: string
+          org_id: string
+          progress?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deadline?: string | null
+          enrolled_at?: string
+          id?: string
+          learning_path_id?: string
+          org_id?: string
+          progress?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_enrollments_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_settings: {
+        Row: {
+          allow_retake: boolean
+          completion_threshold: number
+          created_at: string
+          deadline_days: number | null
+          id: string
+          learning_path_id: string
+          org_id: string
+          sequential_mode: boolean
+          updated_at: string
+        }
+        Insert: {
+          allow_retake?: boolean
+          completion_threshold?: number
+          created_at?: string
+          deadline_days?: number | null
+          id?: string
+          learning_path_id: string
+          org_id: string
+          sequential_mode?: boolean
+          updated_at?: string
+        }
+        Update: {
+          allow_retake?: boolean
+          completion_threshold?: number
+          created_at?: string
+          deadline_days?: number | null
+          id?: string
+          learning_path_id?: string
+          org_id?: string
+          sequential_mode?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_settings_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: true
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_stage_assignments: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          org_id: string
+          required: boolean
+          stage_id: string
+          unlock_condition: string
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          required?: boolean
+          stage_id: string
+          unlock_condition?: string
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          required?: boolean
+          stage_id?: string
+          unlock_condition?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_stage_assignments_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_stage_assignments_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "learning_path_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_stage_courses: {
+        Row: {
+          course_id: string
+          course_order: number
+          created_at: string
+          id: string
+          org_id: string
+          stage_id: string
+        }
+        Insert: {
+          course_id: string
+          course_order?: number
+          created_at?: string
+          id?: string
+          org_id: string
+          stage_id: string
+        }
+        Update: {
+          course_id?: string
+          course_order?: number
+          created_at?: string
+          id?: string
+          org_id?: string
+          stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_stage_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_path_stage_courses_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "learning_path_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_stages: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          learning_path_id: string
+          name: string
+          org_id: string
+          stage_order: number
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          learning_path_id: string
+          name: string
+          org_id: string
+          stage_order?: number
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          learning_path_id?: string
+          name?: string
+          org_id?: string
+          stage_order?: number
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_stages_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_path_versions: {
+        Row: {
+          change_note: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          learning_path_id: string
+          org_id: string
+          snapshot: Json
+          version: number
+        }
+        Insert: {
+          change_note?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          learning_path_id: string
+          org_id: string
+          snapshot?: Json
+          version: number
+        }
+        Update: {
+          change_note?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          learning_path_id?: string
+          org_id?: string
+          snapshot?: Json
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_path_versions_learning_path_id_fkey"
+            columns: ["learning_path_id"]
+            isOneToOne: false
+            referencedRelation: "learning_paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       learning_paths: {
         Row: {
           category: string
           code: string
           courses_count: number
+          cover_url: string | null
           created_at: string
+          created_by: string | null
           description: string
           duration_hours: number
           id: string
           org_id: string
+          published_at: string | null
           status: string
           students_count: number
           title: string
           updated_at: string
+          version: number
         }
         Insert: {
           category?: string
           code: string
           courses_count?: number
+          cover_url?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string
           duration_hours?: number
           id?: string
           org_id: string
+          published_at?: string | null
           status?: string
           students_count?: number
           title: string
           updated_at?: string
+          version?: number
         }
         Update: {
           category?: string
           code?: string
           courses_count?: number
+          cover_url?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string
           duration_hours?: number
           id?: string
           org_id?: string
+          published_at?: string | null
           status?: string
           students_count?: number
           title?: string
           updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          id: string
+          org_id: string
+          read: boolean
+          ref_id: string | null
+          ref_type: string | null
+          sent_at: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          org_id: string
+          read?: boolean
+          ref_id?: string | null
+          ref_type?: string | null
+          sent_at?: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          read?: boolean
+          ref_id?: string | null
+          ref_type?: string | null
+          sent_at?: string
+          title?: string
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
