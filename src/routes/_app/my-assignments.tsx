@@ -9,11 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const ROWS = [
-  { id: "1", name: "Bài KT cuối khóa Onboarding", description: "Đánh giá kiến thức cuối khoá nhập môn", submitted_at: "12/05/2026 14:23", status: "submitted", result: "pass", score: 92, max: 100 },
-  { id: "2", name: "Quiz tuần 3 - Sales Excellence", description: "Kiểm tra kiến thức tuần 3", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
-  { id: "3", name: "Bài tự luận - Lãnh đạo", description: "Bài tự luận chủ đề lãnh đạo", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
-  { id: "4", name: "ATLĐ - Kiểm tra giữa kỳ", description: "Bài kiểm tra giữa kỳ", submitted_at: "15/04/2026 09:10", status: "graded", result: "pass", score: 85, max: 100 },
-  { id: "5", name: "Excel - bài tập tổng hợp", description: "Bài tập tổng hợp Excel", submitted_at: "02/04/2026 16:42", status: "graded", result: "fail", score: 48, max: 100 },
+  { id: "1", name: "Kiểm tra nghiệp vụ pha chế Q1/2025", description: "Đánh giá kỹ năng pha chế chuẩn Highlands", submitted_at: "12/03/2025 14:23", status: "graded", result: "pass", score: 92, max: 100 },
+  { id: "2", name: "Bài test VSATTP tháng 5/2025", description: "Bài kiểm tra định kỳ về vệ sinh an toàn thực phẩm", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
+  { id: "3", name: "Tình huống xử lý khiếu nại khách hàng", description: "Bài tự luận xử lý phàn nàn về đồ uống", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
+  { id: "4", name: "Kiểm tra vận hành máy POS", description: "Bài kiểm tra thao tác trên POS Highlands", submitted_at: "15/04/2025 09:10", status: "graded", result: "pass", score: 85, max: 100 },
+  { id: "5", name: "Đánh giá kỹ năng phục vụ khách hàng", description: "Bài đánh giá tổng hợp dịch vụ khách hàng", submitted_at: "02/04/2025 16:42", status: "graded", result: "fail", score: 48, max: 100 },
 ];
 
 const statusChip: Record<string, { label: string; cls: string }> = {
