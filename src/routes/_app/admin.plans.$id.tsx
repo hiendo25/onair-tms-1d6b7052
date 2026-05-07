@@ -81,7 +81,42 @@ function PlanDetail() {
     refresh();
   }
 
-  if (isLoading) return <PageContainer title="Đang tải..." breadcrumbs={[]}><Skeleton className="h-32" /></PageContainer>;
+  if (isLoading) {
+    return (
+      <PageContainer
+        title="Đang tải kế hoạch..."
+        breadcrumbs={[{ title: "Kế hoạch", path: "/admin/plans" }, { title: "Đang tải..." }]}
+      >
+        <div className="grid gap-3 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-5 w-32" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-6 w-24 rounded-full" />
+            </div>
+            <Skeleton className="h-9 w-32" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader><Skeleton className="h-5 w-40" /></CardHeader>
+          <CardContent className="space-y-2">
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
+  }
   if (!plan) return <PageContainer title="Không tìm thấy" breadcrumbs={[]}><p>Kế hoạch không tồn tại.</p></PageContainer>;
 
   const status = PLAN_STATUS_BADGE[plan.status];

@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check, ChevronLeft, ChevronRight, Plus, Trash2, AlertTriangle, Send, Save, Lock, CircleDot, Play, Search } from "lucide-react";
 import { PLAN_TYPE, PLAN_TARGET_TYPE } from "@/lib/admin-options";
@@ -35,6 +36,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   const [planId, setPlanId] = useState<string | undefined>(initialPlanId);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(!!initialPlanId);
 
   const [info, setInfo] = useState({
     code: "", title: "", objective: "", description: "",
@@ -73,38 +75,42 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   useEffect(() => {
     if (!initialPlanId) return;
     (async () => {
-      const { data: plan } = await supabase.from("plans").select("*").eq("id", initialPlanId).single();
-      if (plan) {
-        setInfo({
-          code: plan.code, title: plan.title, objective: plan.objective ?? "",
-          description: plan.description ?? "", type: plan.type,
-          start_date: plan.start_date ?? "", end_date: plan.end_date ?? "",
-          budget: Number(plan.budget) || 0,
-        });
-      }
-      const { data: ps } = await supabase.from("training_plan_programs").select("*").eq("plan_id", initialPlanId).order("order_index");
-      setPrograms((ps ?? []) as DBProgram[]);
-      const { data: ts } = await supabase.from("training_plan_topics").select("*").eq("plan_id", initialPlanId).order("order_index");
-      setTopics((ts ?? []) as DBTopic[]);
-      if (ps?.length) {
-        const { data: pc } = await supabase.from("training_plan_program_courses").select("program_id,course_id,course:online_courses(*)").in("program_id", ps.map((x: any) => x.id));
-        setProgramCourses((pc ?? []) as any);
-      }
-      if (ts?.length) {
-        const { data: tc } = await supabase.from("training_plan_topic_courses").select("topic_id,course_id,course:online_courses(*)").in("topic_id", ts.map((x: any) => x.id));
-        setTopicCourses((tc ?? []) as any);
-      }
-      const { data: tps } = await supabase.from("training_plan_surveys").select("*").eq("plan_id", initialPlanId).maybeSingle();
-      if (tps) {
-        setHasSurvey(true);
-        setSurvey({
-          survey_id: tps.survey_id,
-          start_date: tps.start_date ?? "",
-          end_date: tps.end_date ?? "",
-          target_type: (tps.target_type as "all" | "dept" | "branch") ?? "all",
-          target_unit_ids: (tps.target_unit_ids as string[]) ?? [],
-        });
-        setPlanSurvey(tps as unknown as DBPlanSurvey);
+      try {
+        const { data: plan } = await supabase.from("plans").select("*").eq("id", initialPlanId).single();
+        if (plan) {
+          setInfo({
+            code: plan.code, title: plan.title, objective: plan.objective ?? "",
+            description: plan.description ?? "", type: plan.type,
+            start_date: plan.start_date ?? "", end_date: plan.end_date ?? "",
+            budget: Number(plan.budget) || 0,
+          });
+        }
+        const { data: ps } = await supabase.from("training_plan_programs").select("*").eq("plan_id", initialPlanId).order("order_index");
+        setPrograms((ps ?? []) as DBProgram[]);
+        const { data: ts } = await supabase.from("training_plan_topics").select("*").eq("plan_id", initialPlanId).order("order_index");
+        setTopics((ts ?? []) as DBTopic[]);
+        if (ps?.length) {
+          const { data: pc } = await supabase.from("training_plan_program_courses").select("program_id,course_id,course:online_courses(*)").in("program_id", ps.map((x: any) => x.id));
+          setProgramCourses((pc ?? []) as any);
+        }
+        if (ts?.length) {
+          const { data: tc } = await supabase.from("training_plan_topic_courses").select("topic_id,course_id,course:online_courses(*)").in("topic_id", ts.map((x: any) => x.id));
+          setTopicCourses((tc ?? []) as any);
+        }
+        const { data: tps } = await supabase.from("training_plan_surveys").select("*").eq("plan_id", initialPlanId).maybeSingle();
+        if (tps) {
+          setHasSurvey(true);
+          setSurvey({
+            survey_id: tps.survey_id,
+            start_date: tps.start_date ?? "",
+            end_date: tps.end_date ?? "",
+            target_type: (tps.target_type as "all" | "dept" | "branch") ?? "all",
+            target_unit_ids: (tps.target_unit_ids as string[]) ?? [],
+          });
+          setPlanSurvey(tps as unknown as DBPlanSurvey);
+        }
+      } finally {
+        setLoadingPlan(false);
       }
     })();
   }, [initialPlanId]);
@@ -249,6 +255,32 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
 
   // ======================== Renderers ========================
   const progress = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
+
+  if (loadingPlan) {
+    return (
+      <PageContainer
+        title="Đang tải kế hoạch..."
+        breadcrumbs={[{ title: "Kế hoạch đào tạo", path: "/admin/plans" }, { title: "Chỉnh sửa" }]}
+      >
+        <div className="grid gap-6 md:grid-cols-[320px_1fr]">
+          <div className="space-y-3">
+            <Card><CardContent className="p-4 space-y-3"><Skeleton className="h-4 w-32" /><Skeleton className="h-1.5 w-full" /></CardContent></Card>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}><CardContent className="p-4 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /></CardContent></Card>
+            ))}
+          </div>
+          <div className="space-y-4">
+            <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <div className="grid grid-cols-2 gap-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
+            </CardContent></Card>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer
