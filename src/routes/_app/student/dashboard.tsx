@@ -69,6 +69,7 @@ function StudentDashboard() {
             stats={dash?.myStats ?? null}
             xp={dash?.myXp ?? 0}
           />
+          <TeamInsightsCard variant="student" title="Việc nên làm tiếp theo" />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
