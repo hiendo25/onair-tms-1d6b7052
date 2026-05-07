@@ -18,6 +18,9 @@ import { PageContainer } from "@/components/PageContainer";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { getUserRole } from "@/lib/roles";
+import { logLearningActivity } from "@/lib/log-activity";
+import { WeeklyLearningSummary } from "@/components/student/WeeklyLearningSummary";
+import { BranchRankingCard } from "@/components/student/BranchRankingCard";
 
 export const Route = createFileRoute("/_app/student/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — OnAir TMS" }] }),
@@ -69,12 +72,14 @@ function StudentDashboard() {
             stats={dash?.myStats ?? null}
             xp={dash?.myXp ?? 0}
           />
+          <WeeklyLearningSummary />
           <StudentInsightsLive orgId={orgId} xp={dash?.myXp ?? 0} todayTasks={dash?.todayTasks ?? []} activePath={dash?.activePath ?? null} />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
             stats={dash?.myStats ?? null}
           />
+          <BranchRankingCard branchName={dash?.branchName ?? "Chi nhánh của tôi"} />
           <AchievementSection
             xp={dash?.myXp ?? 0}
             leaderboard={dash?.leaderboard ?? []}
@@ -368,6 +373,15 @@ function useCompleteTask(orgId: string) {
           completed_lessons: completed, progress,
         }).eq("id", path.id);
       }
+
+      // 5) Log learning activity
+      await logLearningActivity({
+        orgId,
+        action: task.type === "quiz" ? "quiz_submit" : "lesson_complete",
+        targetType: task.type === "quiz" ? "assignment" : "lesson",
+        targetId: task.id,
+        metadata: { title: task.title, score },
+      });
 
       return { xpGain, score, redirect: task.path };
     },

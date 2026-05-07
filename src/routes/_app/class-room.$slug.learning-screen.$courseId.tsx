@@ -8,6 +8,7 @@ import { AiSpinner } from "@/components/ai/AiSpinner";
 import { aiSummarizeLesson, aiGenerateFlashcards, type AiFlashcard } from "@/lib/ai-mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { logLearningActivity } from "@/lib/log-activity";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -211,6 +212,16 @@ function LS() {
             disabled={!currentLessonId || lessons.findIndex((l) => l.id === currentLessonId) >= lessons.length - 1}
             onClick={() => {
               const i = lessons.findIndex((l) => l.id === currentLessonId);
+              if (i >= 0) {
+                const lesson = lessons[i];
+                logLearningActivity({
+                  orgId,
+                  action: "lesson_complete",
+                  targetType: "lesson",
+                  targetId: lesson.id,
+                  metadata: { course_id: courseId, title: lesson.title },
+                });
+              }
               if (i >= 0 && i < lessons.length - 1) setCurrentLessonId(lessons[i + 1].id);
             }}
           >

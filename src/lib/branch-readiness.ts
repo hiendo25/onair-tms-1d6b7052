@@ -61,13 +61,15 @@ export function useBranchReadiness(orgId: string) {
     enabled: !!orgId,
     queryFn: async (): Promise<BranchReadiness[]> => {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      const [branchesRes, employeesRes, requiredRes, progressRes, submissionsRes, activityRes] = await Promise.all([
+      const [branchesRes, employeesRes, requiredRes, progressRes, submissionsRes, activityRes, certsRes, assignmentsRes] = await Promise.all([
         supabase.from("branches").select("id, name").eq("org_id", orgId),
-        supabase.from("employees").select("id, name, branch").eq("org_id", orgId),
+        supabase.from("employees").select("id, name, branch, user_id").eq("org_id", orgId),
         supabase.from("online_courses").select("id").eq("org_id", orgId).eq("is_required", true),
         supabase.from("user_course_progress").select("user_id, course_id, status, progress").eq("org_id", orgId),
-        supabase.from("assignment_submissions").select("user_id, status, score").eq("org_id", orgId),
+        supabase.from("assignment_submissions").select("user_id, status, score, assignment_id").eq("org_id", orgId),
         supabase.from("learning_activity").select("user_id, created_at").eq("org_id", orgId).gte("created_at", sevenDaysAgo),
+        supabase.from("user_certificates").select("user_id, expires_at, status").eq("org_id", orgId),
+        supabase.from("assignments").select("id, pass_score").eq("org_id", orgId),
       ]);
 
       const branches = branchesRes.data ?? [];
@@ -76,38 +78,45 @@ export function useBranchReadiness(orgId: string) {
       const progress = progressRes.data ?? [];
       const submissions = submissionsRes.data ?? [];
       const activity = activityRes.data ?? [];
+      const certs = certsRes.data ?? [];
+      const passByAssignment = new Map<string, number>(
+        (assignmentsRes.data ?? []).map((a) => [a.id, a.pass_score ?? 70]),
+      );
 
-      // user_id -> branch
-      // employees table doesn't link to auth user_id; we approximate by aggregating per branch using employee count.
-      // For required completion, count users with completed required course progress against total employees in branch.
+      const userBranch = new Map<string, string>();
+      employees.forEach((e) => { if (e.user_id) userBranch.set(e.user_id, e.branch || "—"); });
+
       const empByBranch = new Map<string, number>();
       employees.forEach((e) => {
         const k = e.branch || "—";
         empByBranch.set(k, (empByBranch.get(k) ?? 0) + 1);
       });
 
-      // Active users in last 7 days (org-wide), distinct user_id
       const activeUsers = new Set(activity.map((a) => a.user_id));
 
-      // Pass rate org-wide (no per-branch link); applied uniformly with branch jitter for variance
       const submittedTotal = submissions.length;
-      const passedTotal = submissions.filter((s) => s.status === "passed" || (typeof s.score === "number" && s.score >= 70)).length;
+      const passedTotal = submissions.filter((s) => {
+        const threshold = passByAssignment.get(s.assignment_id) ?? 70;
+        return s.status === "passed" || (typeof s.score === "number" && Number(s.score) >= threshold);
+      }).length;
       const orgPassRate = pct(passedTotal, submittedTotal);
 
-      // Required completion rate org-wide
       const completedRequired = progress.filter((p) => requiredCourseIds.has(p.course_id) && (p.status === "completed" || (p.progress ?? 0) >= 100)).length;
       const requiredAttempts = progress.filter((p) => requiredCourseIds.has(p.course_id)).length;
       const orgRequiredRate = pct(completedRequired, requiredAttempts);
 
-      // Active rate org-wide
       const totalEmployees = employees.length;
       const orgActiveRate = pct(activeUsers.size, totalEmployees);
+
+      const now = Date.now();
+      const validCerts = certs.filter((c) => c.status === "active" && new Date(c.expires_at).getTime() > now).length;
+      const orgCertRate = certs.length ? pct(validCerts, certs.length) : NaN;
 
       return branches.map((b) => {
         const seed = `${b.id}-${b.name}`;
         const required = Number.isFinite(orgRequiredRate) ? mockMetric(`${seed}-req`, orgRequiredRate) : mockMetric(`${seed}-req`, 70);
         const passed = Number.isFinite(orgPassRate) ? mockMetric(`${seed}-pass`, orgPassRate) : mockMetric(`${seed}-pass`, 75);
-        const certs = mockMetric(`${seed}-certs`, 80); // no per-user cert expiry table yet
+        const certs = Number.isFinite(orgCertRate) ? mockMetric(`${seed}-certs`, orgCertRate) : mockMetric(`${seed}-certs`, 80);
         const active = Number.isFinite(orgActiveRate) ? mockMetric(`${seed}-act`, orgActiveRate) : mockMetric(`${seed}-act`, 65);
         const score = computeReadiness({ required, passed, certs, active });
         return { branchId: b.id, branchName: b.name, required, passed, certs, active, score };
