@@ -1,10 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, Circle, Lock, BookOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Circle, Lock, BookOpen, Sparkles, ArrowRight } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AiSpinner } from "@/components/ai/AiSpinner";
+import { aiSuggestLearningPaths, type AiPathSuggestion } from "@/lib/ai-mock";
 
 const MY_PATH = {
   title: "Onboarding nhân viên mới - Highlands Coffee",
@@ -19,7 +22,24 @@ const MY_PATH = {
 
 export const Route = createFileRoute("/_app/my-learning-paths")({
   head: () => ({ meta: [{ title: "Lộ trình của tôi — OnAir TMS" }] }),
-  component: () => (
+  component: MyPaths,
+});
+
+function MyPaths() {
+  const [suggestions, setSuggestions] = useState<AiPathSuggestion[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    setLoading(true);
+    setError(null);
+    try { setSuggestions(await aiSuggestLearningPaths()); }
+    catch { setError("Không tải được gợi ý."); }
+    finally { setLoading(false); }
+  }
+  useEffect(() => { void load(); }, []);
+
+  return (
     <PageContainer
       title={MY_PATH.title}
       description="Lộ trình học tập cá nhân hoá dành cho bạn"
@@ -35,14 +55,46 @@ export const Route = createFileRoute("/_app/my-learning-paths")({
         </div>
       </Card>
 
+      {/* AI suggestions */}
+      <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-fuchsia-50/40">
+        <CardContent className="p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-violet-600" />
+            <h2 className="text-sm font-semibold text-slate-800">Gợi ý cho bạn</h2>
+          </div>
+          {loading && <AiSpinner label="Đang tìm lộ trình phù hợp..." />}
+          {error && !loading && (
+            <div className="text-sm text-destructive flex items-center justify-between">
+              <span>{error}</span>
+              <Button size="sm" variant="outline" onClick={load}>Thử lại</Button>
+            </div>
+          )}
+          {suggestions && !loading && (
+            <div className="grid gap-3 md:grid-cols-3">
+              {suggestions.map((s, i) => (
+                <Card key={i} className="hover:shadow-md transition">
+                  <CardContent className="p-4 space-y-2">
+                    <div className="font-semibold text-sm">{s.title}</div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{s.reason}</p>
+                    <div className="flex items-center justify-between pt-2 text-xs">
+                      <span className="text-muted-foreground">{s.courses_count} khóa · {s.duration_weeks} tuần</span>
+                      <Button size="sm" variant="ghost" className="h-7 px-2 text-violet-600">
+                        Khám phá <ArrowRight className="h-3 w-3 ml-1" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="space-y-4">
         {MY_PATH.phases.map((p, i) => {
           const Icon = p.status === "done" ? CheckCircle2 : p.status === "doing" ? Circle : Lock;
-          const colors = p.status === "done"
-            ? "bg-emerald-100 text-emerald-700"
-            : p.status === "doing"
-              ? "bg-blue-100 text-blue-700"
-              : "bg-muted text-muted-foreground";
+          const colors = p.status === "done" ? "bg-emerald-100 text-emerald-700"
+            : p.status === "doing" ? "bg-blue-100 text-blue-700" : "bg-muted text-muted-foreground";
           return (
             <Card key={i} className={p.status === "locked" ? "opacity-60" : ""}>
               <CardContent className="p-5">
@@ -76,5 +128,5 @@ export const Route = createFileRoute("/_app/my-learning-paths")({
         })}
       </div>
     </PageContainer>
-  ),
-});
+  );
+}

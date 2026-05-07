@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiSummarizeLesson } from "@/lib/ai-mock";
+import { aiSummarizeLesson, aiGenerateFlashcards, type AiFlashcard } from "@/lib/ai-mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/class-room/$slug/learning-screen/$courseId")({
   head: () => ({ meta: [{ title: "Học — OnAir TMS" }] }),
@@ -82,6 +84,36 @@ function LS() {
     }
   }
 
+  // Flashcards
+  const [flashOpen, setFlashOpen] = useState(false);
+  const [flashLoading, setFlashLoading] = useState(false);
+  const [flashCards, setFlashCards] = useState<AiFlashcard[] | null>(null);
+  const [flippedIdx, setFlippedIdx] = useState<Record<number, boolean>>({});
+
+  async function genFlashcards() {
+    setFlashOpen(true);
+    setFlashCards(null);
+    setFlippedIdx({});
+    setFlashLoading(true);
+    try { setFlashCards(await aiGenerateFlashcards(lessonTitle)); }
+    catch { toast.error("Không sinh được flashcard."); }
+    finally { setFlashLoading(false); }
+  }
+
+  async function saveFlashcards() {
+    if (!flashCards || !orgId) return;
+    const code = `FC-${Date.now().toString(36).toUpperCase()}`;
+    const { error } = await supabase.from("flashcards").insert({
+      org_id: orgId, code, title: `Flashcard: ${lessonTitle}`,
+      description: `Sinh tự động bằng AI cho bài "${lessonTitle}"`,
+      category: "AI generated", cards_count: flashCards.length, status: "draft",
+    });
+    if (error) { toast.error("Lưu thất bại: " + error.message); return; }
+    toast.success(`Đã lưu ${flashCards.length} flashcard.`);
+    setFlashOpen(false);
+  }
+
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
       <aside className="w-80 border-r bg-card overflow-y-auto">
@@ -124,14 +156,19 @@ function LS() {
           <h1 className="text-xl font-semibold">
             {currentLesson ? `Bài học: ${currentLesson.title}` : "Chọn một bài học"}
           </h1>
-          <Button
-            onClick={runSummary}
-            disabled={loading || !currentLesson}
-            className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
-          >
-            <Sparkles className="h-4 w-4 mr-1.5" />
-            {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={genFlashcards} disabled={!currentLesson} variant="outline" className="border-violet-300 text-violet-700">
+              <Sparkles className="h-4 w-4 mr-1.5" /> Tạo flashcard
+            </Button>
+            <Button
+              onClick={runSummary}
+              disabled={loading || !currentLesson}
+              className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
+            >
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
+            </Button>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground whitespace-pre-line">
           {currentLesson?.content || "Chưa có mô tả cho bài học này."}
@@ -181,6 +218,45 @@ function LS() {
           </Button>
         </div>
       </main>
+
+      <Dialog open={flashOpen} onOpenChange={setFlashOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-600" />
+              Flashcard cho bài: {lessonTitle}
+            </DialogTitle>
+          </DialogHeader>
+          {flashLoading && <AiSpinner label="AI đang tạo flashcard..." />}
+          {flashCards && !flashLoading && (
+            <div className="grid gap-3 sm:grid-cols-2 max-h-[60vh] overflow-y-auto">
+              {flashCards.map((c, i) => {
+                const flipped = !!flippedIdx[i];
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setFlippedIdx((p) => ({ ...p, [i]: !p[i] }))}
+                    className={`min-h-[120px] rounded-lg border p-4 text-left text-sm transition ${
+                      flipped ? "bg-emerald-50 border-emerald-300" : "bg-violet-50 border-violet-200"
+                    }`}
+                  >
+                    <div className="text-[10px] uppercase font-semibold mb-1 text-muted-foreground">
+                      {flipped ? "Đáp án" : `Thẻ ${i + 1}`}
+                    </div>
+                    <div className="leading-relaxed">{flipped ? c.back : c.front}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFlashOpen(false)}>Hủy</Button>
+            <Button onClick={saveFlashcards} disabled={!flashCards || flashLoading}>
+              Lưu vào ngân hàng flashcard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

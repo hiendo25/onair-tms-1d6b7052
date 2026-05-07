@@ -15,6 +15,7 @@ import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDi
 import { courseSchema, type CourseForm } from "@/lib/admin-schemas";
 import { COURSE_LEVEL, COURSE_STATUS, CODE_NOTE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
+import { AiGenerateCourseButton } from "@/components/ai/AiGenerateCourseButton";
 
 export const Route = createFileRoute("/_app/admin/online-course")({
   head: () => ({ meta: [{ title: "Khoá học online — OnAir TMS" }] }),
@@ -85,6 +86,7 @@ function OnlineCoursePage() {
       actions={
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => exportCsv("online_courses.csv", rows)}><Download className="h-4 w-4" />Export</Button>
+          <AiGenerateCourseButton />
           <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Tạo khoá học</Button>
         </div>
       }
