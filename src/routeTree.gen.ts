@@ -25,6 +25,7 @@ import { Route as AppDepartmentsRouteImport } from './routes/_app/departments'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppBranchesRouteImport } from './routes/_app/branches'
 import { Route as AppAnalyticRouteImport } from './routes/_app/analytic'
+import { Route as SurveysIdSubmitRouteImport } from './routes/surveys.$id.submit'
 import { Route as AppDepartmentsListRouteImport } from './routes/_app/departments.list'
 import { Route as AppDepartmentsIdRouteImport } from './routes/_app/departments.$id'
 import { Route as AppClassRoomSlugRouteImport } from './routes/_app/class-room.$slug'
@@ -41,6 +42,8 @@ import { Route as AppAdminEmployeesRouteImport } from './routes/_app/admin.emplo
 import { Route as AppAdminClassRoomRouteImport } from './routes/_app/admin.class-room'
 import { Route as AppAdminCertificatesRouteImport } from './routes/_app/admin.certificates'
 import { Route as AppAdminAssignmentsRouteImport } from './routes/_app/admin.assignments'
+import { Route as SurveysIdSubmitThankYouRouteImport } from './routes/surveys.$id.submit.thank-you'
+import { Route as ClassRoomCdSlugSessionIdRouteImport } from './routes/class-room.cd.$slug.$sessionId'
 import { Route as AppMyLearningPathsPhaseIdRouteImport } from './routes/_app/my-learning-paths.phase.$id'
 import { Route as AppMyLearningPathsLearningScreenCourseIdRouteImport } from './routes/_app/my-learning-paths.learning-screen.$courseId'
 import { Route as AppAdminSurveysListRouteImport } from './routes/_app/admin.surveys.list'
@@ -65,6 +68,7 @@ import { Route as AppAdminAssignmentsQuestionBankRouteImport } from './routes/_a
 import { Route as AppAdminAssignmentsCreateRouteImport } from './routes/_app/admin.assignments.create'
 import { Route as AppAdminAssignmentsAssignedRouteImport } from './routes/_app/admin.assignments.assigned'
 import { Route as AppAdminAssignmentsIdRouteImport } from './routes/_app/admin.assignments.$id'
+import { Route as AppMyAssignmentsIdSubmitEmployeeIdRouteImport } from './routes/_app/my-assignments.$id.submit.$employeeId'
 import { Route as AppMyAssignmentsIdResultEmployeeIdRouteImport } from './routes/_app/my-assignments.$id.result.$employeeId'
 import { Route as AppClassRoomSlugLearningScreenCourseIdRouteImport } from './routes/_app/class-room.$slug.learning-screen.$courseId'
 import { Route as AppAdminSurveysIdThankYouRouteImport } from './routes/_app/admin.surveys.$id.thank-you'
@@ -168,6 +172,11 @@ const AppAnalyticRoute = AppAnalyticRouteImport.update({
   path: '/analytic',
   getParentRoute: () => AppRoute,
 } as any)
+const SurveysIdSubmitRoute = SurveysIdSubmitRouteImport.update({
+  id: '/surveys/$id/submit',
+  path: '/surveys/$id/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppDepartmentsListRoute = AppDepartmentsListRouteImport.update({
   id: '/list',
   path: '/list',
@@ -248,6 +257,17 @@ const AppAdminAssignmentsRoute = AppAdminAssignmentsRouteImport.update({
   path: '/admin/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const SurveysIdSubmitThankYouRoute = SurveysIdSubmitThankYouRouteImport.update({
+  id: '/thank-you',
+  path: '/thank-you',
+  getParentRoute: () => SurveysIdSubmitRoute,
+} as any)
+const ClassRoomCdSlugSessionIdRoute =
+  ClassRoomCdSlugSessionIdRouteImport.update({
+    id: '/class-room/cd/$slug/$sessionId',
+    path: '/class-room/cd/$slug/$sessionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppMyLearningPathsPhaseIdRoute =
   AppMyLearningPathsPhaseIdRouteImport.update({
     id: '/phase/$id',
@@ -378,6 +398,12 @@ const AppAdminAssignmentsIdRoute = AppAdminAssignmentsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppAdminAssignmentsRoute,
 } as any)
+const AppMyAssignmentsIdSubmitEmployeeIdRoute =
+  AppMyAssignmentsIdSubmitEmployeeIdRouteImport.update({
+    id: '/$id/submit/$employeeId',
+    path: '/$id/submit/$employeeId',
+    getParentRoute: () => AppMyAssignmentsRoute,
+  } as any)
 const AppMyAssignmentsIdResultEmployeeIdRoute =
   AppMyAssignmentsIdResultEmployeeIdRouteImport.update({
     id: '/$id/result/$employeeId',
@@ -545,6 +571,7 @@ export interface FileRoutesByFullPath {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/create': typeof AppAdminAssignmentsCreateRoute
@@ -569,6 +596,8 @@ export interface FileRoutesByFullPath {
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
+  '/class-room/cd/$slug/$sessionId': typeof ClassRoomCdSlugSessionIdRoute
+  '/surveys/$id/submit/thank-you': typeof SurveysIdSubmitThankYouRoute
   '/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
   '/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
@@ -588,6 +617,7 @@ export interface FileRoutesByFullPath {
   '/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/my-assignments/$id/submit/$employeeId': typeof AppMyAssignmentsIdSubmitEmployeeIdRoute
   '/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
@@ -625,6 +655,7 @@ export interface FileRoutesByTo {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/create': typeof AppAdminAssignmentsCreateRoute
@@ -649,6 +680,8 @@ export interface FileRoutesByTo {
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
+  '/class-room/cd/$slug/$sessionId': typeof ClassRoomCdSlugSessionIdRoute
+  '/surveys/$id/submit/thank-you': typeof SurveysIdSubmitThankYouRoute
   '/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
   '/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
@@ -668,6 +701,7 @@ export interface FileRoutesByTo {
   '/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/my-assignments/$id/submit/$employeeId': typeof AppMyAssignmentsIdSubmitEmployeeIdRoute
   '/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
@@ -707,6 +741,7 @@ export interface FileRoutesById {
   '/_app/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/_app/departments/$id': typeof AppDepartmentsIdRoute
   '/_app/departments/list': typeof AppDepartmentsListRoute
+  '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/_app/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/_app/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/_app/admin/assignments/create': typeof AppAdminAssignmentsCreateRoute
@@ -731,6 +766,8 @@ export interface FileRoutesById {
   '/_app/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/_app/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/_app/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
+  '/class-room/cd/$slug/$sessionId': typeof ClassRoomCdSlugSessionIdRoute
+  '/surveys/$id/submit/thank-you': typeof SurveysIdSubmitThankYouRoute
   '/_app/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
   '/_app/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/_app/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
@@ -750,6 +787,7 @@ export interface FileRoutesById {
   '/_app/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/_app/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/_app/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/_app/my-assignments/$id/submit/$employeeId': typeof AppMyAssignmentsIdSubmitEmployeeIdRoute
   '/_app/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/_app/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/_app/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
@@ -789,6 +827,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/surveys/$id/submit'
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
     | '/admin/assignments/create'
@@ -813,6 +852,8 @@ export interface FileRouteTypes {
     | '/admin/surveys/list'
     | '/my-learning-paths/learning-screen/$courseId'
     | '/my-learning-paths/phase/$id'
+    | '/class-room/cd/$slug/$sessionId'
+    | '/surveys/$id/submit/thank-you'
     | '/admin/assignments/$id/assign'
     | '/admin/assignments/$id/students'
     | '/admin/assignments/edit/$id'
@@ -832,6 +873,7 @@ export interface FileRouteTypes {
     | '/admin/surveys/$id/thank-you'
     | '/class-room/$slug/learning-screen/$courseId'
     | '/my-assignments/$id/result/$employeeId'
+    | '/my-assignments/$id/submit/$employeeId'
     | '/admin/assignments/$id/grade/$employeeId'
     | '/admin/assignments/$id/result/$employeeId'
     | '/admin/assignments/$id/submit/$employeeId'
@@ -869,6 +911,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/surveys/$id/submit'
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
     | '/admin/assignments/create'
@@ -893,6 +936,8 @@ export interface FileRouteTypes {
     | '/admin/surveys/list'
     | '/my-learning-paths/learning-screen/$courseId'
     | '/my-learning-paths/phase/$id'
+    | '/class-room/cd/$slug/$sessionId'
+    | '/surveys/$id/submit/thank-you'
     | '/admin/assignments/$id/assign'
     | '/admin/assignments/$id/students'
     | '/admin/assignments/edit/$id'
@@ -912,6 +957,7 @@ export interface FileRouteTypes {
     | '/admin/surveys/$id/thank-you'
     | '/class-room/$slug/learning-screen/$courseId'
     | '/my-assignments/$id/result/$employeeId'
+    | '/my-assignments/$id/submit/$employeeId'
     | '/admin/assignments/$id/grade/$employeeId'
     | '/admin/assignments/$id/result/$employeeId'
     | '/admin/assignments/$id/submit/$employeeId'
@@ -950,6 +996,7 @@ export interface FileRouteTypes {
     | '/_app/class-room/$slug'
     | '/_app/departments/$id'
     | '/_app/departments/list'
+    | '/surveys/$id/submit'
     | '/_app/admin/assignments/$id'
     | '/_app/admin/assignments/assigned'
     | '/_app/admin/assignments/create'
@@ -974,6 +1021,8 @@ export interface FileRouteTypes {
     | '/_app/admin/surveys/list'
     | '/_app/my-learning-paths/learning-screen/$courseId'
     | '/_app/my-learning-paths/phase/$id'
+    | '/class-room/cd/$slug/$sessionId'
+    | '/surveys/$id/submit/thank-you'
     | '/_app/admin/assignments/$id/assign'
     | '/_app/admin/assignments/$id/students'
     | '/_app/admin/assignments/edit/$id'
@@ -993,6 +1042,7 @@ export interface FileRouteTypes {
     | '/_app/admin/surveys/$id/thank-you'
     | '/_app/class-room/$slug/learning-screen/$courseId'
     | '/_app/my-assignments/$id/result/$employeeId'
+    | '/_app/my-assignments/$id/submit/$employeeId'
     | '/_app/admin/assignments/$id/grade/$employeeId'
     | '/_app/admin/assignments/$id/result/$employeeId'
     | '/_app/admin/assignments/$id/submit/$employeeId'
@@ -1008,6 +1058,8 @@ export interface RootRouteChildren {
   AuthErrorRoute: typeof AuthErrorRoute
   AuthSigninRoute: typeof AuthSigninRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  SurveysIdSubmitRoute: typeof SurveysIdSubmitRouteWithChildren
+  ClassRoomCdSlugSessionIdRoute: typeof ClassRoomCdSlugSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1124,6 +1176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAnalyticRouteImport
       parentRoute: typeof AppRoute
     }
+    '/surveys/$id/submit': {
+      id: '/surveys/$id/submit'
+      path: '/surveys/$id/submit'
+      fullPath: '/surveys/$id/submit'
+      preLoaderRoute: typeof SurveysIdSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/departments/list': {
       id: '/_app/departments/list'
       path: '/list'
@@ -1235,6 +1294,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/assignments'
       preLoaderRoute: typeof AppAdminAssignmentsRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/surveys/$id/submit/thank-you': {
+      id: '/surveys/$id/submit/thank-you'
+      path: '/thank-you'
+      fullPath: '/surveys/$id/submit/thank-you'
+      preLoaderRoute: typeof SurveysIdSubmitThankYouRouteImport
+      parentRoute: typeof SurveysIdSubmitRoute
+    }
+    '/class-room/cd/$slug/$sessionId': {
+      id: '/class-room/cd/$slug/$sessionId'
+      path: '/class-room/cd/$slug/$sessionId'
+      fullPath: '/class-room/cd/$slug/$sessionId'
+      preLoaderRoute: typeof ClassRoomCdSlugSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/my-learning-paths/phase/$id': {
       id: '/_app/my-learning-paths/phase/$id'
@@ -1403,6 +1476,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/assignments/$id'
       preLoaderRoute: typeof AppAdminAssignmentsIdRouteImport
       parentRoute: typeof AppAdminAssignmentsRoute
+    }
+    '/_app/my-assignments/$id/submit/$employeeId': {
+      id: '/_app/my-assignments/$id/submit/$employeeId'
+      path: '/$id/submit/$employeeId'
+      fullPath: '/my-assignments/$id/submit/$employeeId'
+      preLoaderRoute: typeof AppMyAssignmentsIdSubmitEmployeeIdRouteImport
+      parentRoute: typeof AppMyAssignmentsRoute
     }
     '/_app/my-assignments/$id/result/$employeeId': {
       id: '/_app/my-assignments/$id/result/$employeeId'
@@ -1598,11 +1678,14 @@ const AppDepartmentsRouteWithChildren = AppDepartmentsRoute._addFileChildren(
 
 interface AppMyAssignmentsRouteChildren {
   AppMyAssignmentsIdResultEmployeeIdRoute: typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  AppMyAssignmentsIdSubmitEmployeeIdRoute: typeof AppMyAssignmentsIdSubmitEmployeeIdRoute
 }
 
 const AppMyAssignmentsRouteChildren: AppMyAssignmentsRouteChildren = {
   AppMyAssignmentsIdResultEmployeeIdRoute:
     AppMyAssignmentsIdResultEmployeeIdRoute,
+  AppMyAssignmentsIdSubmitEmployeeIdRoute:
+    AppMyAssignmentsIdSubmitEmployeeIdRoute,
 }
 
 const AppMyAssignmentsRouteWithChildren =
@@ -1911,6 +1994,18 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface SurveysIdSubmitRouteChildren {
+  SurveysIdSubmitThankYouRoute: typeof SurveysIdSubmitThankYouRoute
+}
+
+const SurveysIdSubmitRouteChildren: SurveysIdSubmitRouteChildren = {
+  SurveysIdSubmitThankYouRoute: SurveysIdSubmitThankYouRoute,
+}
+
+const SurveysIdSubmitRouteWithChildren = SurveysIdSubmitRoute._addFileChildren(
+  SurveysIdSubmitRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R403Route: R403Route,
@@ -1920,17 +2015,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthErrorRoute: AuthErrorRoute,
   AuthSigninRoute: AuthSigninRoute,
   AuthSignupRoute: AuthSignupRoute,
+  SurveysIdSubmitRoute: SurveysIdSubmitRouteWithChildren,
+  ClassRoomCdSlugSessionIdRoute: ClassRoomCdSlugSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
