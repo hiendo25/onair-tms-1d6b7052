@@ -1,0 +1,1 @@
+ALTER TABLE public.question_bank ADD COLUMN IF NOT EXISTS explanation text NOT NULL DEFAULT '';
