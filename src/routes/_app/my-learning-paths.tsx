@@ -1,132 +1,176 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { CheckCircle2, Circle, Lock, BookOpen, Sparkles, ArrowRight } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { BookOpen, Clock, CheckCircle2, Lock, ArrowRight, Search } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiSuggestLearningPaths, type AiPathSuggestion } from "@/lib/ai-mock";
-
-const MY_PATH = {
-  title: "Onboarding nhân viên mới - Highlands Coffee",
-  progress: 42,
-  phases: [
-    { title: "Tuần 1 - Văn hoá thương hiệu & nội quy", weeks: 1, status: "done" as const, courses: ["Văn hoá Highlands Coffee", "Nội quy nhân viên cửa hàng", "Đồng phục & tác phong"] },
-    { title: "Tuần 2 - Quy trình pha chế chuẩn", weeks: 1, status: "doing" as const, courses: ["Pha chế Phin truyền thống", "Pha chế Espresso & Latte", "Pha chế Trà & Freeze", "Định lượng nguyên liệu", "Vệ sinh máy pha"] },
-    { title: "Tuần 3 - VSATTP & vận hành cửa hàng", weeks: 1, status: "locked" as const, courses: ["An toàn vệ sinh thực phẩm", "Vận hành máy POS", "Tiếp nhận order khách hàng"] },
-    { title: "Tuần 4 - Thực tập & đánh giá", weeks: 1, status: "locked" as const, courses: ["Thực tập tại cửa hàng", "Bài thi nghiệp vụ pha chế"] },
-  ],
-};
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
+import { useOrg } from "@/lib/org-context";
+import { LP_ENROLLMENT_STATUS } from "@/lib/admin-options";
+import type { DBLpEnrollment, DBLearningPath } from "@/lib/data-hooks";
 
 export const Route = createFileRoute("/_app/my-learning-paths")({
   head: () => ({ meta: [{ title: "Lộ trình của tôi — OnAir TMS" }] }),
   component: MyPaths,
 });
 
-function MyPaths() {
-  const [suggestions, setSuggestions] = useState<AiPathSuggestion[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+type EnrollmentWithPath = DBLpEnrollment & { learning_paths: DBLearningPath | null };
 
-  async function load() {
-    setLoading(true);
-    setError(null);
-    try { setSuggestions(await aiSuggestLearningPaths()); }
-    catch { setError("Có gì đó chưa đúng, thử lại nhé."); }
-    finally { setLoading(false); }
-  }
-  useEffect(() => { void load(); }, []);
+function statusBadge(s: DBLpEnrollment["status"]) {
+  const label = LP_ENROLLMENT_STATUS.find(o => o.value === s)?.label ?? s;
+  const cls = s === "completed" ? "bg-emerald-100 text-emerald-700"
+    : s === "in_progress" ? "bg-blue-100 text-blue-700"
+    : s === "overdue" ? "bg-red-100 text-red-700"
+    : "bg-slate-100 text-slate-700";
+  return <Badge className={cls}>{label}</Badge>;
+}
+
+function MyPaths() {
+  const { user } = useAuth();
+  const { orgId } = useOrg();
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState<"all" | DBLpEnrollment["status"]>("all");
+
+  const { data: enrollments = [], isLoading } = useQuery({
+    queryKey: ["my-enrollments", orgId, user?.id],
+    enabled: !!user?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("learning_path_enrollments")
+        .select("*, learning_paths(*)")
+        .eq("user_id", user!.id)
+        .eq("org_id", orgId)
+        .order("enrolled_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as EnrollmentWithPath[];
+    },
+  });
+
+  const filtered = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    return enrollments.filter(e => {
+      if (filter !== "all" && e.status !== filter) return false;
+      if (!ql) return true;
+      const lp = e.learning_paths;
+      return lp ? (lp.title.toLowerCase().includes(ql) || lp.code.toLowerCase().includes(ql)) : false;
+    });
+  }, [enrollments, q, filter]);
+
+  const stats = useMemo(() => {
+    const total = enrollments.length;
+    const done = enrollments.filter(e => e.status === "completed").length;
+    const doing = enrollments.filter(e => e.status === "in_progress").length;
+    const avg = total === 0 ? 0 : Math.round(enrollments.reduce((s, e) => s + e.progress, 0) / total);
+    return { total, done, doing, avg };
+  }, [enrollments]);
 
   return (
     <PageContainer
-      title={MY_PATH.title}
-      description="Lộ trình học tập cá nhân hoá dành cho bạn"
-      breadcrumbs={[{ title: "Học tập" }, { title: "Lộ trình" }]}
+      title="Lộ trình của tôi"
+      description="Các lộ trình học tập bạn đã được ghi danh"
+      breadcrumbs={[{ title: "Học tập" }, { title: "Lộ trình của tôi" }]}
     >
-      <Card className="p-5">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
-            <div className="text-sm font-medium">Tiến độ tổng</div>
-            <Progress value={MY_PATH.progress} className="mt-2 h-2" />
-          </div>
-          <div className="text-3xl font-bold text-primary">{MY_PATH.progress}%</div>
-        </div>
-      </Card>
+      <div className="grid gap-3 sm:grid-cols-4">
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Tổng lộ trình</div><div className="text-2xl font-bold">{stats.total}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Đang học</div><div className="text-2xl font-bold text-blue-600">{stats.doing}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Hoàn thành</div><div className="text-2xl font-bold text-emerald-600">{stats.done}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Tiến độ TB</div><div className="text-2xl font-bold">{stats.avg}%</div></CardContent></Card>
+      </div>
 
-      {/* AI suggestions */}
-      <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-fuchsia-50/40">
-        <CardContent className="p-5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-violet-600" />
-            <h2 className="text-sm font-semibold text-slate-800">Có thể bạn sẽ thích những lộ trình này</h2>
+      <Card>
+        <CardContent className="p-3 flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[220px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm lộ trình..." className="pl-9" />
           </div>
-          {loading && <AiSpinner label="Để mình xem qua nhé..." />}
-          {error && !loading && (
-            <div className="text-sm text-destructive flex items-center justify-between">
-              <span>{error}</span>
-              <Button size="sm" variant="outline" onClick={load}>Thử lại</Button>
-            </div>
-          )}
-          {suggestions && !loading && (
-            <div className="grid gap-3 md:grid-cols-3">
-              {suggestions.map((s, i) => (
-                <Card key={i} className="hover:shadow-md transition">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="font-semibold text-sm">{s.title}</div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{s.reason}</p>
-                    <div className="flex items-center justify-between pt-2 text-xs">
-                      <span className="text-muted-foreground">{s.courses_count} khóa · {s.duration_weeks} tuần</span>
-                      <Button size="sm" variant="ghost" className="h-7 px-2 text-violet-600">
-                        Khám phá <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <div className="flex gap-1 flex-wrap">
+            {[{ v: "all", l: "Tất cả" }, ...LP_ENROLLMENT_STATUS.map(o => ({ v: o.value, l: o.label }))].map(o => (
+              <Button key={o.v} size="sm" variant={filter === o.v ? "default" : "outline"} onClick={() => setFilter(o.v as typeof filter)}>{o.l}</Button>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        {MY_PATH.phases.map((p, i) => {
-          const Icon = p.status === "done" ? CheckCircle2 : p.status === "doing" ? Circle : Lock;
-          const colors = p.status === "done" ? "bg-emerald-100 text-emerald-700"
-            : p.status === "doing" ? "bg-blue-100 text-blue-700" : "bg-muted text-muted-foreground";
-          return (
-            <Card key={i} className={p.status === "locked" ? "opacity-60" : ""}>
-              <CardContent className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className={`flex h-10 w-10 items-center justify-center rounded-full ${colors}`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-[10px]">Giai đoạn {i + 1}</Badge>
-                        <span className="text-xs text-muted-foreground">{p.weeks} tuần</span>
-                      </div>
-                      <h3 className="mt-1 text-base font-semibold">{p.title}</h3>
-                    </div>
+      {isLoading ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-lg" />)}
+        </div>
+      ) : filtered.length === 0 ? (
+        <Card><CardContent className="p-12 text-center">
+          <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/40" />
+          <h3 className="mt-4 font-semibold">{enrollments.length === 0 ? "Bạn chưa được ghi danh lộ trình nào" : "Không có kết quả phù hợp"}</h3>
+          <p className="text-sm text-muted-foreground">{enrollments.length === 0 ? "Quản trị viên sẽ gán lộ trình học cho bạn." : "Thử thay đổi bộ lọc hoặc từ khoá tìm kiếm."}</p>
+        </CardContent></Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map(e => {
+            const lp = e.learning_paths;
+            if (!lp) return null;
+            const locked = lp.status === "locked";
+            const overdue = e.status === "overdue";
+            return (
+              <Card key={e.id} className={`overflow-hidden flex flex-col ${locked ? "opacity-60" : ""}`}>
+                <div className="relative h-32 bg-gradient-to-br from-primary/10 to-violet-200">
+                  {lp.cover_url ? (
+                    <img src={lp.cover_url} alt={lp.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-primary/30"><BookOpen className="h-12 w-12" /></div>
+                  )}
+                  <div className="absolute left-2 top-2">{statusBadge(e.status)}</div>
+                  {locked && <Badge className="absolute right-2 top-2 bg-amber-100 text-amber-700"><Lock className="h-3 w-3" /> Đã khoá</Badge>}
+                </div>
+                <CardContent className="flex-1 flex flex-col p-4 gap-2">
+                  <div>
+                    <Badge variant="outline" className="text-[10px]">{lp.code}</Badge>
+                    <h3 className="mt-1 font-semibold line-clamp-2">{lp.title}</h3>
                   </div>
-                  {p.status === "doing" && <Button size="sm">Tiếp tục</Button>}
-                  {p.status === "done" && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Hoàn thành</Badge>}
-                </div>
-                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                  {p.courses.map(c => (
-                    <div key={c} className="flex items-center gap-2 rounded-md border p-2 text-sm">
-                      <BookOpen className="h-3.5 w-3.5 text-muted-foreground" />
-                      {c}
+                  {lp.description && <p className="text-xs text-muted-foreground line-clamp-2">{lp.description}</p>}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Tiến độ</span>
+                      <span className="font-medium">{e.progress}%</span>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                    <Progress value={e.progress} className="h-1.5" />
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{lp.courses_count ?? 0} khoá</span>
+                    <span>·</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{lp.duration_hours ?? 0}h</span>
+                    {e.deadline && (
+                      <>
+                        <span>·</span>
+                        <span className={overdue ? "text-red-600 font-medium" : ""}>
+                          Hạn {new Date(e.deadline).toLocaleDateString("vi-VN")}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                  <div className="mt-auto pt-2">
+                    {e.status === "completed" ? (
+                      <Button asChild variant="outline" className="w-full" size="sm">
+                        <Link to="/admin/learning-paths/$id" params={{ id: lp.id }}><CheckCircle2 className="h-4 w-4" /> Xem lại</Link>
+                      </Button>
+                    ) : (
+                      <Button asChild className="w-full" size="sm" disabled={locked}>
+                        <Link to="/admin/learning-paths/$id" params={{ id: lp.id }}>
+                          {e.status === "not_started" ? "Bắt đầu" : "Tiếp tục"} <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </PageContainer>
   );
 }
