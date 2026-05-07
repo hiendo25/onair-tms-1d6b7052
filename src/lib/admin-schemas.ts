@@ -101,9 +101,27 @@ export const learningPathSchema = z.object({
   description: optStr,
   category: optStr,
   duration_hours: z.coerce.number().int().min(0, "Phải là số dương"),
-  status: z.enum(["draft", "published", "archived"]),
+  cover_url: optStr,
+  status: z.enum(["inactive", "active", "locked"]),
 });
 export type LearningPathForm = z.infer<typeof learningPathSchema>;
+
+export const lpStageSchema = z.object({
+  name: z.string().min(1, "Tên giai đoạn không bỏ trống").max(200),
+  description: optStr,
+  stage_order: z.coerce.number().int().min(0),
+  start_date: z.string().optional().or(z.literal("")),
+  end_date: z.string().optional().or(z.literal("")),
+});
+export type LpStageForm = z.infer<typeof lpStageSchema>;
+
+export const lpSettingsSchema = z.object({
+  sequential_mode: z.boolean(),
+  completion_threshold: z.coerce.number().int().min(80).max(100),
+  deadline_days: z.coerce.number().int().min(0).optional().nullable(),
+  allow_retake: z.boolean(),
+});
+export type LpSettingsForm = z.infer<typeof lpSettingsSchema>;
 
 export const assignmentSchema = z.object({
   code: codeSchema("bài kiểm tra"),
