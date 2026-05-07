@@ -218,6 +218,45 @@ function LS() {
           </Button>
         </div>
       </main>
+
+      <Dialog open={flashOpen} onOpenChange={setFlashOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-600" />
+              Flashcard cho bài: {lessonTitle}
+            </DialogTitle>
+          </DialogHeader>
+          {flashLoading && <AiSpinner label="AI đang tạo flashcard..." />}
+          {flashCards && !flashLoading && (
+            <div className="grid gap-3 sm:grid-cols-2 max-h-[60vh] overflow-y-auto">
+              {flashCards.map((c, i) => {
+                const flipped = !!flippedIdx[i];
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setFlippedIdx((p) => ({ ...p, [i]: !p[i] }))}
+                    className={`min-h-[120px] rounded-lg border p-4 text-left text-sm transition ${
+                      flipped ? "bg-emerald-50 border-emerald-300" : "bg-violet-50 border-violet-200"
+                    }`}
+                  >
+                    <div className="text-[10px] uppercase font-semibold mb-1 text-muted-foreground">
+                      {flipped ? "Đáp án" : `Thẻ ${i + 1}`}
+                    </div>
+                    <div className="leading-relaxed">{flipped ? c.back : c.front}</div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFlashOpen(false)}>Hủy</Button>
+            <Button onClick={saveFlashcards} disabled={!flashCards || flashLoading}>
+              Lưu vào ngân hàng flashcard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
