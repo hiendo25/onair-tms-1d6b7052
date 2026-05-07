@@ -13,6 +13,7 @@ import {
   Users,
   Trophy,
   Library,
+  BarChart3,
   type LucideIcon,
 } from "lucide-react";
 
@@ -103,6 +104,7 @@ export const ADMIN_MENU: MenuItem[] = [
     ],
   },
   { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
+  { title: "Báo cáo", key: "analytic", path: "/admin/analytic", icon: BarChart3 },
 ];
 
 export const STUDENT_MENU: MenuItem[] = [
