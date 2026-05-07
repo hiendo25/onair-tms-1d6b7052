@@ -12,7 +12,7 @@ import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
 import { roleSchema, type RoleForm } from "@/lib/admin-schemas";
-import { CODE_NOTE } from "@/lib/admin-options";
+
 
 export const Route = createFileRoute("/_app/admin/roles")({
   head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir TMS" }] }),
@@ -22,7 +22,7 @@ export const Route = createFileRoute("/_app/admin/roles")({
 const PAGE_SIZE = 10;
 const fields: FieldDef<RoleForm>[] = [
   { name: "name", label: "Tên vai trò", type: "text", required: true, placeholder: "VD: Quản trị viên" },
-  { name: "code", label: "Mã vai trò", type: "text", required: true, placeholder: "VD: ADMIN", note: CODE_NOTE },
+  { name: "code", label: "Mã vai trò", type: "text", required: true, placeholder: "VD: SUPER_ADMIN", note: "Mã từ 2 - 32 ký tự, chỉ chữ/số, dấu _ và -." },
   { name: "description", label: "Mô tả", type: "textarea", placeholder: "Mô tả phạm vi & quyền hạn", rows: 3 },
   { name: "is_admin", label: "Quyền Quản trị viên", type: "switch", help: "Toàn quyền quản lý hệ thống" },
   { name: "is_instructor", label: "Quyền Giảng viên", type: "switch", help: "Tạo lớp, khoá học, bài kiểm tra" },
