@@ -45,9 +45,11 @@ export const Route = createFileRoute("/_app/analytic")({
 });
 
 function ReportPage() {
+  const { orgId } = useOrg();
   const { data: branches = [] } = useBranches();
   const { data: departments = [] } = useDepartments();
   const { data: employees = [] } = useEmployees();
+  const { data: completionMap = {} } = useBranchCompletion(orgId);
 
   const [mode, setMode] = useState<"high" | "low">("high");
   const [search, setSearch] = useState("");
@@ -62,7 +64,7 @@ function ReportPage() {
     return branches.map((b: any) => {
       const deps = departments.filter((d: any) => d.branch === b.name);
       const learners = employees.filter((e: any) => e.branch === b.name).length;
-      const completion = Math.round(Math.random() * 40); // placeholder metric
+      const completion = completionMap[b.name] ?? 0;
       return {
         id: b.id,
         name: b.name,
@@ -72,7 +74,7 @@ function ReportPage() {
         completion,
       };
     });
-  }, [branches, departments, employees]);
+  }, [branches, departments, employees, completionMap]);
 
   const filtered = branchRows.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()));
   const total = filtered.length;
