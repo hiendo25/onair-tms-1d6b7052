@@ -5,9 +5,9 @@ export function exportCsv<T extends Record<string, unknown>>(
   rows: T[],
   columns?: { key: keyof T; label: string }[]
 ) {
-  const data = columns
+  const data: Record<string, unknown>[] = columns
     ? rows.map((r) => Object.fromEntries(columns.map((c) => [c.label, r[c.key] ?? ""])))
-    : rows;
+    : (rows as Record<string, unknown>[]);
   const csv = Papa.unparse(data, { quotes: true });
   // BOM for Excel UTF-8
   const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
