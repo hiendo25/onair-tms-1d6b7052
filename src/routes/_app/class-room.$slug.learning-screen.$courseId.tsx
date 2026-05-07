@@ -156,14 +156,19 @@ function LS() {
           <h1 className="text-xl font-semibold">
             {currentLesson ? `Bài học: ${currentLesson.title}` : "Chọn một bài học"}
           </h1>
-          <Button
-            onClick={runSummary}
-            disabled={loading || !currentLesson}
-            className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
-          >
-            <Sparkles className="h-4 w-4 mr-1.5" />
-            {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={genFlashcards} disabled={!currentLesson} variant="outline" className="border-violet-300 text-violet-700">
+              <Sparkles className="h-4 w-4 mr-1.5" /> Tạo flashcard
+            </Button>
+            <Button
+              onClick={runSummary}
+              disabled={loading || !currentLesson}
+              className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
+            >
+              <Sparkles className="h-4 w-4 mr-1.5" />
+              {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
+            </Button>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground whitespace-pre-line">
           {currentLesson?.content || "Chưa có mô tả cho bài học này."}
