@@ -28,7 +28,7 @@ const ROLE_LABEL = { admin: "Quản trị", teacher: "Giảng viên", student: "
 
 function EmployeeDetail() {
   const { employee: e } = Route.useLoaderData();
-  const initials = e.name.split(" ").slice(-2).map((n) => n[0]).join("");
+  const initials = e.name.split(" ").slice(-2).map((n: string) => n[0]).join("");
 
   return (
     <PageContainer
@@ -44,7 +44,7 @@ function EmployeeDetail() {
             </Avatar>
             <h2 className="mt-4 font-display text-xl font-semibold">{e.name}</h2>
             <p className="text-sm text-muted-foreground">{e.position}</p>
-            <Badge variant="secondary" className="mt-2">{ROLE_LABEL[e.role]}</Badge>
+            <Badge variant="secondary" className="mt-2">{ROLE_LABEL[e.role as keyof typeof ROLE_LABEL]}</Badge>
             <div className="mt-6 space-y-3 text-left text-sm">
               <Row icon={Mail} label={e.email} />
               <Row icon={Phone} label={e.phone} />

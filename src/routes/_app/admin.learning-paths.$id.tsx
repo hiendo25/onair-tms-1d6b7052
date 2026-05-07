@@ -19,8 +19,8 @@ export const Route = createFileRoute("/_app/admin/learning-paths/$id")({
 
 function LearningPathDetail() {
   const { path } = Route.useLoaderData();
-  const totalCourses = path.phases.reduce((s, p) => s + p.courses, 0);
-  const totalWeeks = path.phases.reduce((s, p) => s + p.weeks, 0);
+  const totalCourses = path.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0);
+  const totalWeeks = path.phases.reduce((s: number, p: { weeks: number }) => s + p.weeks, 0);
 
   return (
     <PageContainer
@@ -48,7 +48,7 @@ function LearningPathDetail() {
       </div>
 
       <div className="relative space-y-4 border-l-2 border-dashed border-border pl-8">
-        {path.phases.map((p, i) => (
+        {path.phases.map((p: { title: string; courses: number; weeks: number }, i: number) => (
           <div key={i} className="relative">
             <div className="absolute -left-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-vibrant text-xs font-semibold text-white shadow-elevated">
               {i + 1}
