@@ -16,7 +16,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useOrg } from "@/lib/org-context";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/admin/plans/$id")({
+export const Route = createFileRoute("/_app/admin/plans/$id/")({
   head: () => ({ meta: [{ title: "Chi tiết kế hoạch — OnAir TMS" }] }),
   component: PlanDetail,
 });
