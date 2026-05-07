@@ -304,7 +304,7 @@ function AchievementSection() {
             <Progress value={progressInRank} className="h-2 bg-purple-900" />
           </div>
           <Button asChild variant="secondary" className="w-full bg-white/15 hover:bg-white/25 text-white border-0">
-            <Link to="/gamification">
+            <Link to="/my-gamification">
               <Award className="h-4 w-4 mr-2" />
               Xem huy hiệu
             </Link>
@@ -391,7 +391,7 @@ function RecommendedSection() {
                   <Progress value={c.progress} className="h-1.5" />
                 </div>
                 <Button asChild size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
-                  <Link to="/my-online-courses">
+                  <Link to="/my-learning-paths">
                     {c.progress === 0 ? "Bắt đầu" : "Tiếp tục"}
                   </Link>
                 </Button>
