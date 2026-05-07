@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, UserPlus, Download, Search, MoreHorizontal } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
