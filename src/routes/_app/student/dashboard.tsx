@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
 import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
-import { aiPersonalInsight } from "@/lib/ai-mock";
+import { aiPersonalInsight, type ActionableInsight } from "@/lib/ai-mock";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -69,7 +69,7 @@ function StudentDashboard() {
             stats={dash?.myStats ?? null}
             xp={dash?.myXp ?? 0}
           />
-          <TeamInsightsCard variant="student" title="Việc nên làm tiếp theo" />
+          <StudentInsightsLive orgId={orgId} xp={dash?.myXp ?? 0} todayTasks={dash?.todayTasks ?? []} activePath={dash?.activePath ?? null} />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
@@ -638,5 +638,99 @@ function RecommendedSection({ courses }: { courses: any[] }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+// ─── Student insights computed from real data ──────────────────────────
+type Path = { path_title: string; total_lessons: number; completed_lessons: number } | null;
+
+function StudentInsightsLive({
+  orgId, xp, todayTasks, activePath,
+}: { orgId: string; xp: number; todayTasks: Task[]; activePath: Path }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["student-insights", orgId, xp, todayTasks.length, activePath?.completed_lessons ?? 0],
+    queryFn: async (): Promise<ActionableInsight[]> => {
+      const insights: ActionableInsight[] = [];
+
+      // 1) Bài kiểm tra/việc gấp chưa nộp
+      const urgent = todayTasks.filter((t) => t.urgent);
+      if (urgent.length > 0) {
+        const quizUrgent = urgent.find((t) => t.type === "quiz");
+        insights.push({
+          severity: "warning",
+          title: quizUrgent
+            ? `Bạn còn ${urgent.length} bài kiểm tra chưa nộp — hạn hôm nay`
+            : `Bạn còn ${urgent.length} việc cần hoàn thành hôm nay`,
+          detail: quizUrgent
+            ? `"${quizUrgent.title}" đến hạn hôm nay — nộp ngay để không mất điểm chuyên cần.`
+            : "Hoàn thành sớm để không bị trễ tiến độ học tuần này.",
+          ctaLabel: quizUrgent ? "Làm bài ngay" : "Xem việc cần làm",
+          to: quizUrgent ? "/my-assignments" : "/my-learning-paths",
+        });
+      }
+
+      // 2) Lộ trình còn bài chưa học
+      if (activePath && activePath.completed_lessons < activePath.total_lessons) {
+        const remaining = activePath.total_lessons - activePath.completed_lessons;
+        insights.push({
+          severity: "info",
+          title: `Lộ trình "${activePath.path_title}" còn ${remaining} bài chưa học`,
+          detail: "Tiếp tục để giữ đà học tập và mở khóa lộ trình tiếp theo.",
+          ctaLabel: "Tiếp tục học",
+          to: "/my-learning-paths",
+        });
+      }
+
+      // 3) XP — sắp lên hạng
+      const { current, next } = computeRank(xp);
+      if (next.min > current.min) {
+        const remainXp = next.min - xp;
+        if (remainXp > 0 && remainXp <= 300) {
+          insights.push({
+            severity: "info",
+            title: `Bạn sắp lên hạng ${next.name} — còn ${remainXp} XP nữa`,
+            detail: "Vài bài học nữa là bạn được nâng hạng và mở huy hiệu mới.",
+            ctaLabel: "Xem lộ trình thăng hạng",
+            to: "/my-gamification",
+          });
+        }
+      }
+
+      // 4) Chứng nhận sắp hết hạn (dựa vào certificates org-wide gần nhất)
+      const certs = await supabase
+        .from("certificates")
+        .select("title, valid_months, updated_at")
+        .eq("org_id", orgId)
+        .eq("status", "active")
+        .order("updated_at", { ascending: false })
+        .limit(1);
+      const c = certs.data?.[0];
+      if (c) {
+        const issued = new Date(c.updated_at as string);
+        const expire = new Date(issued);
+        expire.setMonth(expire.getMonth() + (c.valid_months ?? 12));
+        const daysLeft = Math.round((expire.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        if (daysLeft <= 30 && daysLeft > 0) {
+          insights.push({
+            severity: "warning",
+            title: `Chứng nhận ${c.title} sắp hết hạn sau ${daysLeft} ngày`,
+            detail: "Cần gia hạn để tiếp tục đứng quầy theo quy định nội bộ.",
+            ctaLabel: "Gia hạn ngay",
+            to: "/my-certificates",
+          });
+        }
+      }
+
+      return insights;
+    },
+  });
+
+  return (
+    <TeamInsightsCard
+      variant="student"
+      title="Việc nên làm tiếp theo"
+      insights={data ?? []}
+      loading={isLoading}
+    />
   );
 }

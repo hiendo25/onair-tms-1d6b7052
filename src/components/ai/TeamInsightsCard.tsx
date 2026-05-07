@@ -17,15 +17,21 @@ const SEVERITY_RANK = { warning: 0, info: 1, success: 2 } as const;
 export function TeamInsightsCard({
   title = "Điều cần chú ý tuần này",
   variant = "team",
+  insights,
+  loading: loadingProp,
 }: {
   title?: string;
   variant?: "team" | "student";
+  insights?: ActionableInsight[];
+  loading?: boolean;
 }) {
-  const [data, setData] = useState<ActionableInsight[] | null>(null);
+  const externalMode = insights !== undefined || loadingProp !== undefined;
+  const [data, setData] = useState<ActionableInsight[] | null>(externalMode ? null : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    if (externalMode) return;
     setLoading(true);
     setError(null);
     try {
@@ -39,9 +45,16 @@ export function TeamInsightsCard({
     }
   }
 
-  useEffect(() => { void load(); }, [variant]);
+  useEffect(() => { void load(); }, [variant, externalMode]);
 
-  const positive = !loading && data && data.every((i) => i.severity === "success");
+  const effLoading = externalMode ? !!loadingProp : loading;
+  const effData = externalMode
+    ? (insights
+        ? [...insights].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]).slice(0, 3)
+        : null)
+    : data;
+
+  const positive = !effLoading && effData && effData.every((i) => i.severity === "success");
 
   return (
     <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-fuchsia-50/40">
@@ -51,29 +64,35 @@ export function TeamInsightsCard({
             <Sparkles className="h-4 w-4 text-violet-600" />
             <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
           </div>
-          <Button size="sm" variant="ghost" onClick={() => void load()} disabled={loading}>
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          </Button>
+          {!externalMode && (
+            <Button size="sm" variant="ghost" onClick={() => void load()} disabled={loading}>
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            </Button>
+          )}
         </div>
 
-        {loading && <AiSpinner label="Để mình xem qua nhé..." />}
-        {error && !loading && (
+        {effLoading && <AiSpinner label="Để mình xem qua nhé..." />}
+        {error && !effLoading && (
           <div className="text-sm text-destructive flex items-center justify-between">
             <span>{error}</span>
             <Button size="sm" variant="outline" onClick={() => void load()}>Thử lại</Button>
           </div>
         )}
-        {!loading && data && data.length === 0 && (
-          <p className="text-sm text-muted-foreground">Chưa có đủ dữ liệu để đưa ra nhận xét, hãy tiếp tục học nhé.</p>
+        {!effLoading && effData && effData.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            {variant === "student"
+              ? "Mọi thứ đang trong tầm kiểm soát — hãy thử khóa nâng cao tiếp theo nhé!"
+              : "Chưa có đủ dữ liệu để đưa ra nhận xét."}
+          </p>
         )}
-        {!loading && data && data.length > 0 && (
+        {!effLoading && effData && effData.length > 0 && (
           <ul className="space-y-2">
             {positive && variant === "student" && (
               <li className="rounded-lg border bg-emerald-50/60 p-3 text-sm text-emerald-800">
                 Tuần này bạn đang làm rất tốt — hãy thử khóa nâng cao tiếp theo nhé!
               </li>
             )}
-            {data.map((it, i) => {
+            {effData.map((it, i) => {
               const { Icon, cls } = ICONS[it.severity];
               return (
                 <li key={i} className="flex flex-col gap-2 rounded-lg border bg-card p-3 sm:flex-row sm:items-center">
