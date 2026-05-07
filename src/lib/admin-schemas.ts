@@ -32,7 +32,11 @@ export const departmentSchema = z.object({
 export type DepartmentForm = z.infer<typeof departmentSchema>;
 
 export const roleSchema = z.object({
-  code: codeSchema("vai trò"),
+  code: z.string()
+    .min(2, "Mã vai trò từ 2 - 32 ký tự.")
+    .max(32, "Mã vai trò từ 2 - 32 ký tự.")
+    .regex(/^[A-Za-z0-9_-]+$/, "Chỉ cho phép chữ không dấu, số, dấu gạch dưới (_) và gạch ngang (-).")
+    .transform((v) => v.toUpperCase()),
   name: z.string().min(1, "Tên vai trò không bỏ trống").max(100, "Tên vai trò tối đa 100 ký tự"),
   description: optStr,
   is_admin: z.boolean(),
