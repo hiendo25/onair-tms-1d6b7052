@@ -205,13 +205,15 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
 
 export function StatusBadge({ value }: { value: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-500", published: "bg-emerald-500", upcoming: "bg-blue-500",
+    active: "bg-emerald-500", published: "bg-emerald-500", upcoming: "bg-blue-500", ongoing: "bg-blue-500",
     draft: "bg-muted text-muted-foreground", inactive: "bg-muted text-muted-foreground",
-    completed: "bg-purple-500",
+    completed: "bg-purple-500", cancelled: "bg-rose-500", closed: "bg-muted text-muted-foreground",
+    unpublished: "bg-muted text-muted-foreground", archived: "bg-muted text-muted-foreground",
   };
   const labels: Record<string, string> = {
-    active: "Hoạt động", published: "Đã xuất bản", upcoming: "Sắp diễn ra",
-    draft: "Nháp", inactive: "Ngưng", completed: "Hoàn thành",
+    active: "Hoạt động", published: "Đã xuất bản", upcoming: "Sắp diễn ra", ongoing: "Đang diễn ra",
+    draft: "Bản nháp", inactive: "Ngưng hoạt động", completed: "Hoàn thành", cancelled: "Đã huỷ",
+    closed: "Đã đóng", unpublished: "Chưa xuất bản", archived: "Đã lưu trữ",
   };
   return <Badge className={map[value] ?? "bg-muted text-muted-foreground"}>{labels[value] ?? value}</Badge>;
 }
