@@ -24,7 +24,7 @@ export type MenuItem = {
 };
 
 export const ADMIN_MENU: MenuItem[] = [
-  { title: "Dashboard", key: "dashboard", path: "/dashboard", icon: LayoutDashboard },
+  { title: "Dashboard", key: "dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
   {
     title: "Quản lý tổ chức",
     key: "manage-org",
