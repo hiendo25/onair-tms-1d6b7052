@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import type { ZodTypeAny } from "zod";
 import { Plus, Search, Upload, Download } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { ImportCsvDialog } from "@/components/admin/ImportCsvDialog";
+import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
 import { exportCsv } from "@/lib/csv";
 
 export type Field = {
@@ -47,12 +50,17 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
   onBulkInsert?: (rows: Partial<T>[]) => Promise<void> | void;
   csvHeaders?: string[];
   csvFilename?: string;
+  // Optional: when provided, the create/edit dialog uses RHF + zod validation
+  schema?: ZodTypeAny;
+  formFields?: FieldDef<any>[];
+  entityLabel?: string;
 }) {
   const [q, setQ] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>(
     Object.fromEntries((props.filters ?? []).map((f) => [f.key, "all"]))
   );
   const [editing, setEditing] = useState<Partial<T> | null>(null);
+  const [open, setOpen] = useState(false);
   const [delId, setDelId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
 
@@ -65,11 +73,18 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
     return true;
   }), [props.rows, q, filterValues, props.filters, props.searchKeys]);
 
-  const save = async () => {
+  const openCreate = () => { setEditing(null); setOpen(true); };
+  const openEdit = (row: T) => { setEditing(row); setOpen(true); };
+
+  const saveLegacy = async () => {
     if (!editing) return;
     if (editing.id) await props.onUpdate(editing as T);
     else await props.onCreate(editing);
-    setEditing(null);
+    setOpen(false);
+  };
+  const saveValidated = async (values: Record<string, unknown>) => {
+    if (editing?.id) await props.onUpdate({ ...(editing as T), ...values, id: editing.id } as T);
+    else await props.onCreate({ ...(props.emptyValues as Partial<T>), ...(values as Partial<T>) });
   };
 
   return (
@@ -84,7 +99,7 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
             const slim = props.rows.map((r) => Object.fromEntries(headers.map((h) => [h, (r as any)[h] ?? ""])));
             exportCsv(props.csvFilename ?? "export.csv", slim);
           }}><Download className="h-4 w-4" />Export</Button>
-          <Button size="sm" onClick={() => setEditing(props.emptyValues)}><Plus className="h-4 w-4" />Thêm mới</Button>
+          <Button size="sm" onClick={openCreate}><Plus className="h-4 w-4" />{props.entityLabel ? `Thêm ${props.entityLabel}` : "Thêm mới"}</Button>
         </div>
       }
     >
@@ -119,45 +134,60 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
                 {props.columns.map((c) => (
                   <TableCell key={c.key}>{c.render ? c.render(row) : (row[c.key] ?? "-")}</TableCell>
                 ))}
-                <TableCell><RowActions onEdit={() => setEditing(row)} onDelete={() => setDelId(row.id)} /></TableCell>
+                <TableCell><RowActions onEdit={() => openEdit(row)} onDelete={() => setDelId(row.id)} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
 
-      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editing?.id ? "Chỉnh sửa" : "Thêm mới"}</DialogTitle></DialogHeader>
-          {editing && (
-            <div className="grid gap-3">
-              {props.fields.map((f) => {
-                const val = (editing as any)[f.key];
-                const set = (v: any) => setEditing({ ...editing, [f.key]: v });
-                return (
-                  <div key={f.key} className="grid gap-1.5">
-                    <Label>{f.label}</Label>
-                    {f.type === "textarea" && <Textarea value={val ?? ""} onChange={(e) => set(e.target.value)} />}
-                    {f.type === "number" && <Input type="number" value={val ?? 0} onChange={(e) => set(Number(e.target.value))} />}
-                    {f.type === "select" && (
-                      <Select value={String(val ?? "")} onValueChange={set}>
-                        <SelectTrigger><SelectValue placeholder={f.placeholder} /></SelectTrigger>
-                        <SelectContent>{f.options!.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
-                      </Select>
-                    )}
-                    {f.type === "date" && <Input type="date" value={val ?? ""} onChange={(e) => set(e.target.value)} />}
-                    {(!f.type || f.type === "text") && <Input value={val ?? ""} onChange={(e) => set(e.target.value)} placeholder={f.placeholder} />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Huỷ</Button>
-            <Button onClick={save}>Lưu</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {props.schema && props.formFields ? (
+        <EntityFormDialog
+          open={open}
+          onOpenChange={setOpen}
+          title={editing?.id ? `Sửa ${props.entityLabel ?? ""}`.trim() : `Thêm ${props.entityLabel ?? "mới"}`.trim()}
+          schema={props.schema}
+          fields={props.formFields}
+          defaultValues={props.emptyValues as never}
+          initialValues={editing ?? undefined}
+          onSubmit={saveValidated}
+          size="md"
+        />
+      ) : (
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>{editing?.id ? "Chỉnh sửa" : "Thêm mới"}</DialogTitle></DialogHeader>
+            {open && (
+              <div className="grid gap-3">
+                {props.fields.map((f) => {
+                  const val = (editing as any)?.[f.key] ?? (props.emptyValues as any)[f.key];
+                  const set = (v: any) => setEditing({ ...(editing ?? props.emptyValues as Partial<T>), [f.key]: v });
+                  return (
+                    <div key={f.key} className="grid gap-1.5">
+                      <Label>{f.label}</Label>
+                      {f.type === "textarea" && <Textarea value={val ?? ""} onChange={(e) => set(e.target.value)} />}
+                      {f.type === "number" && <Input type="number" value={val ?? 0} onChange={(e) => set(Number(e.target.value))} />}
+                      {f.type === "switch" && <Switch checked={!!val} onCheckedChange={set} />}
+                      {f.type === "select" && (
+                        <Select value={String(val ?? "")} onValueChange={set}>
+                          <SelectTrigger><SelectValue placeholder={f.placeholder} /></SelectTrigger>
+                          <SelectContent>{f.options!.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                        </Select>
+                      )}
+                      {f.type === "date" && <Input type="date" value={val ?? ""} onChange={(e) => set(e.target.value)} />}
+                      {(!f.type || f.type === "text") && <Input value={val ?? ""} onChange={(e) => set(e.target.value)} placeholder={f.placeholder} />}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>Huỷ</Button>
+              <Button onClick={saveLegacy}>Lưu</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <ConfirmDelete open={!!delId} onOpenChange={(v) => !v && setDelId(null)} onConfirm={async () => { if (delId) { await props.onDelete(delId); setDelId(null); } }} />
 
@@ -175,13 +205,15 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
 
 export function StatusBadge({ value }: { value: string }) {
   const map: Record<string, string> = {
-    active: "bg-emerald-500", published: "bg-emerald-500", upcoming: "bg-blue-500",
+    active: "bg-emerald-500", published: "bg-emerald-500", upcoming: "bg-blue-500", ongoing: "bg-blue-500",
     draft: "bg-muted text-muted-foreground", inactive: "bg-muted text-muted-foreground",
-    completed: "bg-purple-500",
+    completed: "bg-purple-500", cancelled: "bg-rose-500", closed: "bg-muted text-muted-foreground",
+    unpublished: "bg-muted text-muted-foreground", archived: "bg-muted text-muted-foreground",
   };
   const labels: Record<string, string> = {
-    active: "Hoạt động", published: "Đã xuất bản", upcoming: "Sắp diễn ra",
-    draft: "Nháp", inactive: "Ngưng", completed: "Hoàn thành",
+    active: "Hoạt động", published: "Đã xuất bản", upcoming: "Sắp diễn ra", ongoing: "Đang diễn ra",
+    draft: "Bản nháp", inactive: "Ngưng hoạt động", completed: "Hoàn thành", cancelled: "Đã huỷ",
+    closed: "Đã đóng", unpublished: "Chưa xuất bản", archived: "Đã lưu trữ",
   };
   return <Badge className={map[value] ?? "bg-muted text-muted-foreground"}>{labels[value] ?? value}</Badge>;
 }

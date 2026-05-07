@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEmployees, useEmployeeMutations, useBranches, useDepartments, useRoles, type DBEmployee } from "@/lib/data-hooks";
 import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { employeeSchema, type EmployeeForm } from "@/lib/admin-schemas";
+import { EMPLOYEE_TYPE, STATUS_ACTIVE_INACTIVE } from "@/lib/admin-options";
+import type { FieldDef } from "@/components/admin/EntityFormDialog";
 
 export const Route = createFileRoute("/_app/admin/employees")({
   head: () => ({ meta: [{ title: "Quản lý nhân viên — OnAir TMS" }] }),
@@ -19,6 +22,21 @@ function EmployeesPage() {
   const deptOpts = departments.map((d) => ({ value: d.name, label: d.name }));
   const roleOpts = roles.map((r) => ({ value: r.name, label: r.name }));
 
+  const formFields: FieldDef<EmployeeForm>[] = [
+    { name: "name", label: "Họ và tên", type: "text", required: true, placeholder: "VD: Nguyễn Văn A" },
+    { name: "email", label: "Email", type: "email", required: true, placeholder: "name@company.vn" },
+    { name: "phone", label: "Số điện thoại", type: "tel", placeholder: "10-11 chữ số" },
+    { name: "employee_code", label: "Mã nhân viên", type: "text", placeholder: "VD: NV0001" },
+    { name: "branch", label: "Chi nhánh", type: "select", options: branchOpts, placeholder: "Chọn chi nhánh" },
+    { name: "department", label: "Phòng ban", type: "select", required: true, options: deptOpts, placeholder: "Chọn phòng ban" },
+    { name: "role", label: "Vai trò", type: "select", options: roleOpts, placeholder: "Chọn vai trò" },
+    { name: "position", label: "Chức vụ", type: "text", placeholder: "VD: Trưởng nhóm" },
+    { name: "type", label: "Loại nhân sự", type: "select", required: true, options: EMPLOYEE_TYPE },
+    { name: "joined_at", label: "Ngày vào làm", type: "date" },
+    { name: "status", label: "Trạng thái", type: "select", required: true, options: STATUS_ACTIVE_INACTIVE },
+  ];
+  const empty: Partial<DBEmployee> = { employee_code: "", name: "", email: "", phone: "", branch: "", department: "", role: "", position: "", type: "fulltime", status: "active", avatar_url: "", joined_at: "" };
+
   return (
     <SimpleEntityPage<DBEmployee>
       title="Danh sách nhân viên"
@@ -29,10 +47,10 @@ function EmployeesPage() {
         { key: "branch", placeholder: "Chi nhánh", options: branchOpts, match: (r, v) => r.branch === v },
         { key: "department", placeholder: "Phòng ban", options: deptOpts, match: (r, v) => r.department === v },
         { key: "role", placeholder: "Vai trò", options: roleOpts, match: (r, v) => r.role === v },
-        { key: "status", placeholder: "Trạng thái", options: [{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Ngưng" }], match: (r, v) => r.status === v },
+        { key: "status", placeholder: "Trạng thái", options: STATUS_ACTIVE_INACTIVE, match: (r, v) => r.status === v },
       ]}
       columns={[
-        { key: "employee_code", label: "Mã" },
+        { key: "employee_code", label: "Mã NV" },
         { key: "name", label: "Họ tên", render: (r) => (
           <div className="flex items-center gap-2"><Avatar className="h-7 w-7"><AvatarFallback className="text-xs">{r.name.split(" ").slice(-2).map((n) => n[0]).join("")}</AvatarFallback></Avatar><span className="font-medium">{r.name}</span></div>
         )},
@@ -42,19 +60,11 @@ function EmployeesPage() {
         { key: "position", label: "Chức vụ" },
         { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
       ]}
-      fields={[
-        { key: "employee_code", label: "Mã NV" },
-        { key: "name", label: "Họ tên" },
-        { key: "email", label: "Email" },
-        { key: "phone", label: "SĐT" },
-        { key: "branch", label: "Chi nhánh", type: "select", options: branchOpts },
-        { key: "department", label: "Phòng ban", type: "select", options: deptOpts },
-        { key: "role", label: "Vai trò", type: "select", options: roleOpts },
-        { key: "position", label: "Chức vụ" },
-        { key: "type", label: "Loại", type: "select", options: [{ value: "fulltime", label: "Toàn thời gian" }, { value: "parttime", label: "Bán thời gian" }] },
-        { key: "status", label: "Trạng thái", type: "select", options: [{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Ngưng" }] },
-      ]}
-      emptyValues={{ employee_code: "", name: "", email: "", phone: "", branch: "", department: "", role: "", position: "", type: "fulltime", status: "active", avatar_url: "" }}
+      fields={[]}
+      schema={employeeSchema}
+      formFields={formFields}
+      entityLabel="nhân viên"
+      emptyValues={empty}
       onCreate={(v) => m.create.mutateAsync(v)}
       onUpdate={(v) => m.update.mutateAsync(v)}
       onDelete={(id) => m.remove.mutateAsync(id)}

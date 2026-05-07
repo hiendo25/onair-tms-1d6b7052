@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { useRoles, useRoleMutations, type DBRole } from "@/lib/data-hooks";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
+import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
+import { roleSchema, type RoleForm } from "@/lib/admin-schemas";
+import { CODE_NOTE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 
 export const Route = createFileRoute("/_app/admin/roles")({
@@ -19,24 +19,29 @@ export const Route = createFileRoute("/_app/admin/roles")({
   component: RolesPage,
 });
 
-const empty: Partial<DBRole> = { code: "", name: "", description: "", permissions: 0, users: 0 };
+const fields: FieldDef<RoleForm>[] = [
+  { name: "name", label: "Tên vai trò", type: "text", required: true, placeholder: "VD: Quản trị viên" },
+  { name: "code", label: "Mã vai trò", type: "text", required: true, placeholder: "VD: ADMIN", note: CODE_NOTE },
+  { name: "description", label: "Mô tả", type: "textarea", placeholder: "Mô tả phạm vi & quyền hạn", rows: 3 },
+  { name: "permissions", label: "Số quyền", type: "number", required: true, placeholder: "0" },
+];
+const defaults: RoleForm = { code: "", name: "", description: "", permissions: 0 };
 
 function RolesPage() {
   const { data: roles = [], isLoading } = useRoles();
   const { create, update, remove } = useRoleMutations();
   const [q, setQ] = useState("");
-  const [editing, setEditing] = useState<Partial<DBRole> | null>(null);
+  const [editing, setEditing] = useState<DBRole | null>(null);
+  const [open, setOpen] = useState(false);
   const [delId, setDelId] = useState<string | null>(null);
 
   const filtered = useMemo(() => roles.filter((r) =>
     !q || [r.name, r.code, r.description].some((x) => x?.toLowerCase().includes(q.toLowerCase()))
   ), [roles, q]);
 
-  const save = async () => {
-    if (!editing) return;
-    if (editing.id) await update.mutateAsync(editing as DBRole);
-    else await create.mutateAsync(editing);
-    setEditing(null);
+  const submit = async (v: RoleForm) => {
+    if (editing?.id) await update.mutateAsync({ ...v, id: editing.id, users: editing.users } as DBRole);
+    else await create.mutateAsync({ ...v, users: 0 });
   };
 
   return (
@@ -46,7 +51,7 @@ function RolesPage() {
       actions={
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => exportCsv("roles.csv", roles)}><Download className="h-4 w-4" />Export</Button>
-          <Button size="sm" onClick={() => setEditing(empty)}><Plus className="h-4 w-4" />Tạo vai trò</Button>
+          <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Tạo vai trò</Button>
         </div>
       }
     >
@@ -65,7 +70,7 @@ function RolesPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Badge variant="outline" className="font-mono text-[10px]">{r.code}</Badge>
-                  <RowActions onEdit={() => setEditing(r)} onDelete={() => setDelId(r.id)} />
+                  <RowActions onEdit={() => { setEditing(r); setOpen(true); }} onDelete={() => setDelId(r.id)} />
                 </div>
               </div>
               <div>
@@ -81,23 +86,13 @@ function RolesPage() {
         ))}
       </div>
 
-      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>{editing?.id ? "Sửa vai trò" : "Tạo vai trò"}</DialogTitle></DialogHeader>
-          {editing && (
-            <div className="grid gap-3">
-              <div className="grid gap-1.5"><Label>Mã</Label><Input value={editing.code ?? ""} onChange={(e) => setEditing({ ...editing, code: e.target.value })} /></div>
-              <div className="grid gap-1.5"><Label>Tên</Label><Input value={editing.name ?? ""} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
-              <div className="grid gap-1.5"><Label>Mô tả</Label><Textarea value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} /></div>
-              <div className="grid gap-1.5"><Label>Số quyền</Label><Input type="number" value={editing.permissions ?? 0} onChange={(e) => setEditing({ ...editing, permissions: Number(e.target.value) })} /></div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditing(null)}>Huỷ</Button>
-            <Button onClick={save} disabled={create.isPending || update.isPending}>Lưu</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EntityFormDialog<RoleForm>
+        open={open} onOpenChange={setOpen}
+        title={editing ? "Sửa vai trò" : "Tạo vai trò"}
+        schema={roleSchema} fields={fields} defaultValues={defaults}
+        initialValues={editing ? { code: editing.code, name: editing.name, description: editing.description, permissions: editing.permissions } : undefined}
+        onSubmit={submit} submitting={create.isPending || update.isPending}
+      />
 
       <ConfirmDelete open={!!delId} onOpenChange={(v) => !v && setDelId(null)} onConfirm={async () => { if (delId) { await remove.mutateAsync(delId); setDelId(null); } }} />
     </PageContainer>
