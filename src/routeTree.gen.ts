@@ -55,6 +55,7 @@ import { Route as AppAdminPlansCreateRouteImport } from './routes/_app/admin.pla
 import { Route as AppAdminPlansIdRouteImport } from './routes/_app/admin.plans.$id'
 import { Route as AppAdminOnlineCourseListRouteImport } from './routes/_app/admin.online-course.list'
 import { Route as AppAdminOnlineCourseCreateRouteImport } from './routes/_app/admin.online-course.create'
+import { Route as AppAdminOnlineCourseIdRouteImport } from './routes/_app/admin.online-course.$id'
 import { Route as AppAdminLearningPathsCreateRouteImport } from './routes/_app/admin.learning-paths.create'
 import { Route as AppAdminLearningPathsIdRouteImport } from './routes/_app/admin.learning-paths.$id'
 import { Route as AppAdminFlashcardsCreateRouteImport } from './routes/_app/admin.flashcards.create'
@@ -327,6 +328,11 @@ const AppAdminOnlineCourseCreateRoute =
     path: '/create',
     getParentRoute: () => AppAdminOnlineCourseRoute,
   } as any)
+const AppAdminOnlineCourseIdRoute = AppAdminOnlineCourseIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAdminOnlineCourseRoute,
+} as any)
 const AppAdminLearningPathsCreateRoute =
   AppAdminLearningPathsCreateRouteImport.update({
     id: '/create',
@@ -446,9 +452,9 @@ const AppAdminPlansIdEditRoute = AppAdminPlansIdEditRouteImport.update({
 } as any)
 const AppAdminOnlineCourseIdEditRoute =
   AppAdminOnlineCourseIdEditRouteImport.update({
-    id: '/$id/edit',
-    path: '/$id/edit',
-    getParentRoute: () => AppAdminOnlineCourseRoute,
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AppAdminOnlineCourseIdRoute,
   } as any)
 const AppAdminLearningPathsEditIdRoute =
   AppAdminLearningPathsEditIdRouteImport.update({
@@ -585,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
+  '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/admin/online-course/create': typeof AppAdminOnlineCourseCreateRoute
   '/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
@@ -669,6 +676,7 @@ export interface FileRoutesByTo {
   '/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
+  '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/admin/online-course/create': typeof AppAdminOnlineCourseCreateRoute
   '/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
@@ -755,6 +763,7 @@ export interface FileRoutesById {
   '/_app/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/_app/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/_app/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
+  '/_app/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/_app/admin/online-course/create': typeof AppAdminOnlineCourseCreateRoute
   '/_app/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/_app/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
@@ -841,6 +850,7 @@ export interface FileRouteTypes {
     | '/admin/flashcards/create'
     | '/admin/learning-paths/$id'
     | '/admin/learning-paths/create'
+    | '/admin/online-course/$id'
     | '/admin/online-course/create'
     | '/admin/online-course/list'
     | '/admin/plans/$id'
@@ -925,6 +935,7 @@ export interface FileRouteTypes {
     | '/admin/flashcards/create'
     | '/admin/learning-paths/$id'
     | '/admin/learning-paths/create'
+    | '/admin/online-course/$id'
     | '/admin/online-course/create'
     | '/admin/online-course/list'
     | '/admin/plans/$id'
@@ -1010,6 +1021,7 @@ export interface FileRouteTypes {
     | '/_app/admin/flashcards/create'
     | '/_app/admin/learning-paths/$id'
     | '/_app/admin/learning-paths/create'
+    | '/_app/admin/online-course/$id'
     | '/_app/admin/online-course/create'
     | '/_app/admin/online-course/list'
     | '/_app/admin/plans/$id'
@@ -1386,6 +1398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminOnlineCourseCreateRouteImport
       parentRoute: typeof AppAdminOnlineCourseRoute
     }
+    '/_app/admin/online-course/$id': {
+      id: '/_app/admin/online-course/$id'
+      path: '/$id'
+      fullPath: '/admin/online-course/$id'
+      preLoaderRoute: typeof AppAdminOnlineCourseIdRouteImport
+      parentRoute: typeof AppAdminOnlineCourseRoute
+    }
     '/_app/admin/learning-paths/create': {
       id: '/_app/admin/learning-paths/create'
       path: '/create'
@@ -1535,10 +1554,10 @@ declare module '@tanstack/react-router' {
     }
     '/_app/admin/online-course/$id/edit': {
       id: '/_app/admin/online-course/$id/edit'
-      path: '/$id/edit'
+      path: '/edit'
       fullPath: '/admin/online-course/$id/edit'
       preLoaderRoute: typeof AppAdminOnlineCourseIdEditRouteImport
-      parentRoute: typeof AppAdminOnlineCourseRoute
+      parentRoute: typeof AppAdminOnlineCourseIdRoute
     }
     '/_app/admin/learning-paths/edit/$id': {
       id: '/_app/admin/learning-paths/edit/$id'
@@ -1855,16 +1874,30 @@ const AppAdminLearningPathsRouteWithChildren =
     AppAdminLearningPathsRouteChildren,
   )
 
-interface AppAdminOnlineCourseRouteChildren {
-  AppAdminOnlineCourseCreateRoute: typeof AppAdminOnlineCourseCreateRoute
-  AppAdminOnlineCourseListRoute: typeof AppAdminOnlineCourseListRoute
+interface AppAdminOnlineCourseIdRouteChildren {
   AppAdminOnlineCourseIdEditRoute: typeof AppAdminOnlineCourseIdEditRoute
 }
 
+const AppAdminOnlineCourseIdRouteChildren: AppAdminOnlineCourseIdRouteChildren =
+  {
+    AppAdminOnlineCourseIdEditRoute: AppAdminOnlineCourseIdEditRoute,
+  }
+
+const AppAdminOnlineCourseIdRouteWithChildren =
+  AppAdminOnlineCourseIdRoute._addFileChildren(
+    AppAdminOnlineCourseIdRouteChildren,
+  )
+
+interface AppAdminOnlineCourseRouteChildren {
+  AppAdminOnlineCourseIdRoute: typeof AppAdminOnlineCourseIdRouteWithChildren
+  AppAdminOnlineCourseCreateRoute: typeof AppAdminOnlineCourseCreateRoute
+  AppAdminOnlineCourseListRoute: typeof AppAdminOnlineCourseListRoute
+}
+
 const AppAdminOnlineCourseRouteChildren: AppAdminOnlineCourseRouteChildren = {
+  AppAdminOnlineCourseIdRoute: AppAdminOnlineCourseIdRouteWithChildren,
   AppAdminOnlineCourseCreateRoute: AppAdminOnlineCourseCreateRoute,
   AppAdminOnlineCourseListRoute: AppAdminOnlineCourseListRoute,
-  AppAdminOnlineCourseIdEditRoute: AppAdminOnlineCourseIdEditRoute,
 }
 
 const AppAdminOnlineCourseRouteWithChildren =
