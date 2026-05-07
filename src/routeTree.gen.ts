@@ -38,18 +38,27 @@ import { Route as AppAdminAssignmentsRouteImport } from './routes/_app/admin.ass
 import { Route as AppAdminAnalyticRouteImport } from './routes/_app/admin.analytic'
 import { Route as AppMyAssignmentsIdSubmitRouteImport } from './routes/_app/my-assignments.$id.submit'
 import { Route as AppAdminSurveysCreateRouteImport } from './routes/_app/admin.surveys.create'
+import { Route as AppAdminRolesCreateRouteImport } from './routes/_app/admin.roles.create'
+import { Route as AppAdminRolesCodeRouteImport } from './routes/_app/admin.roles.$code'
 import { Route as AppAdminPlansCreateRouteImport } from './routes/_app/admin.plans.create'
+import { Route as AppAdminPlansIdRouteImport } from './routes/_app/admin.plans.$id'
 import { Route as AppAdminOnlineCourseIdRouteImport } from './routes/_app/admin.online-course.$id'
 import { Route as AppAdminLearningPathsCreateRouteImport } from './routes/_app/admin.learning-paths.create'
 import { Route as AppAdminLearningPathsIdRouteImport } from './routes/_app/admin.learning-paths.$id'
 import { Route as AppAdminFlashcardsCreateRouteImport } from './routes/_app/admin.flashcards.create'
+import { Route as AppAdminEmployeesImportRouteImport } from './routes/_app/admin.employees.import'
+import { Route as AppAdminEmployeesCreateRouteImport } from './routes/_app/admin.employees.create'
 import { Route as AppAdminEmployeesIdRouteImport } from './routes/_app/admin.employees.$id'
+import { Route as AppAdminDepartmentsIdRouteImport } from './routes/_app/admin.departments.$id'
 import { Route as AppAdminClassRoomCreateRouteImport } from './routes/_app/admin.class-room.create'
 import { Route as AppAdminClassRoomIdRouteImport } from './routes/_app/admin.class-room.$id'
 import { Route as AppAdminCertificatesCreateRouteImport } from './routes/_app/admin.certificates.create'
+import { Route as AppAdminBranchesIdRouteImport } from './routes/_app/admin.branches.$id'
 import { Route as AppAdminAssignmentsQuestionBankRouteImport } from './routes/_app/admin.assignments.question-bank'
 import { Route as AppAdminAssignmentsAssignedRouteImport } from './routes/_app/admin.assignments.assigned'
 import { Route as AppAdminAssignmentsIdRouteImport } from './routes/_app/admin.assignments.$id'
+import { Route as AppAdminPlansIdEditRouteImport } from './routes/_app/admin.plans.$id.edit'
+import { Route as AppAdminEmployeesIdEditRouteImport } from './routes/_app/admin.employees.$id.edit'
 import { Route as AppAdminClassRoomIdStudentsRouteImport } from './routes/_app/admin.class-room.$id.students'
 import { Route as AppAdminAssignmentsIdGradeRouteImport } from './routes/_app/admin.assignments.$id.grade'
 
@@ -198,9 +207,24 @@ const AppAdminSurveysCreateRoute = AppAdminSurveysCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AppAdminSurveysRoute,
 } as any)
+const AppAdminRolesCreateRoute = AppAdminRolesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AppAdminRolesRoute,
+} as any)
+const AppAdminRolesCodeRoute = AppAdminRolesCodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
+  getParentRoute: () => AppAdminRolesRoute,
+} as any)
 const AppAdminPlansCreateRoute = AppAdminPlansCreateRouteImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => AppAdminPlansRoute,
+} as any)
+const AppAdminPlansIdRoute = AppAdminPlansIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
   getParentRoute: () => AppAdminPlansRoute,
 } as any)
 const AppAdminOnlineCourseIdRoute = AppAdminOnlineCourseIdRouteImport.update({
@@ -225,10 +249,25 @@ const AppAdminFlashcardsCreateRoute =
     path: '/create',
     getParentRoute: () => AppAdminFlashcardsRoute,
   } as any)
+const AppAdminEmployeesImportRoute = AppAdminEmployeesImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AppAdminEmployeesRoute,
+} as any)
+const AppAdminEmployeesCreateRoute = AppAdminEmployeesCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => AppAdminEmployeesRoute,
+} as any)
 const AppAdminEmployeesIdRoute = AppAdminEmployeesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AppAdminEmployeesRoute,
+} as any)
+const AppAdminDepartmentsIdRoute = AppAdminDepartmentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAdminDepartmentsRoute,
 } as any)
 const AppAdminClassRoomCreateRoute = AppAdminClassRoomCreateRouteImport.update({
   id: '/create',
@@ -246,6 +285,11 @@ const AppAdminCertificatesCreateRoute =
     path: '/create',
     getParentRoute: () => AppAdminCertificatesRoute,
   } as any)
+const AppAdminBranchesIdRoute = AppAdminBranchesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppAdminBranchesRoute,
+} as any)
 const AppAdminAssignmentsQuestionBankRoute =
   AppAdminAssignmentsQuestionBankRouteImport.update({
     id: '/question-bank',
@@ -262,6 +306,16 @@ const AppAdminAssignmentsIdRoute = AppAdminAssignmentsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AppAdminAssignmentsRoute,
+} as any)
+const AppAdminPlansIdEditRoute = AppAdminPlansIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AppAdminPlansIdRoute,
+} as any)
+const AppAdminEmployeesIdEditRoute = AppAdminEmployeesIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AppAdminEmployeesIdRoute,
 } as any)
 const AppAdminClassRoomIdStudentsRoute =
   AppAdminClassRoomIdStudentsRouteImport.update({
@@ -290,35 +344,44 @@ export interface FileRoutesByFullPath {
   '/surveys/submit': typeof SurveysSubmitRoute
   '/admin/analytic': typeof AppAdminAnalyticRoute
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
-  '/admin/branches': typeof AppAdminBranchesRoute
+  '/admin/branches': typeof AppAdminBranchesRouteWithChildren
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
-  '/admin/departments': typeof AppAdminDepartmentsRoute
+  '/admin/departments': typeof AppAdminDepartmentsRouteWithChildren
   '/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/admin/gamifications': typeof AppAdminGamificationsRoute
   '/admin/learning-paths': typeof AppAdminLearningPathsRouteWithChildren
   '/admin/online-course': typeof AppAdminOnlineCourseRouteWithChildren
   '/admin/plans': typeof AppAdminPlansRouteWithChildren
-  '/admin/roles': typeof AppAdminRolesRoute
+  '/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/admin/surveys': typeof AppAdminSurveysRouteWithChildren
   '/my-class/$id': typeof AppMyClassIdRoute
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRoute
+  '/admin/branches/$id': typeof AppAdminBranchesIdRoute
   '/admin/certificates/create': typeof AppAdminCertificatesCreateRoute
   '/admin/class-room/$id': typeof AppAdminClassRoomIdRouteWithChildren
   '/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
-  '/admin/employees/$id': typeof AppAdminEmployeesIdRoute
+  '/admin/departments/$id': typeof AppAdminDepartmentsIdRoute
+  '/admin/employees/$id': typeof AppAdminEmployeesIdRouteWithChildren
+  '/admin/employees/create': typeof AppAdminEmployeesCreateRoute
+  '/admin/employees/import': typeof AppAdminEmployeesImportRoute
   '/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
   '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRoute
+  '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
   '/admin/plans/create': typeof AppAdminPlansCreateRoute
+  '/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/admin/roles/create': typeof AppAdminRolesCreateRoute
   '/admin/surveys/create': typeof AppAdminSurveysCreateRoute
   '/my-assignments/$id/submit': typeof AppMyAssignmentsIdSubmitRoute
   '/admin/assignments/$id/grade': typeof AppAdminAssignmentsIdGradeRoute
   '/admin/class-room/$id/students': typeof AppAdminClassRoomIdStudentsRoute
+  '/admin/employees/$id/edit': typeof AppAdminEmployeesIdEditRoute
+  '/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -334,35 +397,44 @@ export interface FileRoutesByTo {
   '/surveys/submit': typeof SurveysSubmitRoute
   '/admin/analytic': typeof AppAdminAnalyticRoute
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
-  '/admin/branches': typeof AppAdminBranchesRoute
+  '/admin/branches': typeof AppAdminBranchesRouteWithChildren
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
-  '/admin/departments': typeof AppAdminDepartmentsRoute
+  '/admin/departments': typeof AppAdminDepartmentsRouteWithChildren
   '/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/admin/gamifications': typeof AppAdminGamificationsRoute
   '/admin/learning-paths': typeof AppAdminLearningPathsRouteWithChildren
   '/admin/online-course': typeof AppAdminOnlineCourseRouteWithChildren
   '/admin/plans': typeof AppAdminPlansRouteWithChildren
-  '/admin/roles': typeof AppAdminRolesRoute
+  '/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/admin/surveys': typeof AppAdminSurveysRouteWithChildren
   '/my-class/$id': typeof AppMyClassIdRoute
   '/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRoute
+  '/admin/branches/$id': typeof AppAdminBranchesIdRoute
   '/admin/certificates/create': typeof AppAdminCertificatesCreateRoute
   '/admin/class-room/$id': typeof AppAdminClassRoomIdRouteWithChildren
   '/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
-  '/admin/employees/$id': typeof AppAdminEmployeesIdRoute
+  '/admin/departments/$id': typeof AppAdminDepartmentsIdRoute
+  '/admin/employees/$id': typeof AppAdminEmployeesIdRouteWithChildren
+  '/admin/employees/create': typeof AppAdminEmployeesCreateRoute
+  '/admin/employees/import': typeof AppAdminEmployeesImportRoute
   '/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
   '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRoute
+  '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
   '/admin/plans/create': typeof AppAdminPlansCreateRoute
+  '/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/admin/roles/create': typeof AppAdminRolesCreateRoute
   '/admin/surveys/create': typeof AppAdminSurveysCreateRoute
   '/my-assignments/$id/submit': typeof AppMyAssignmentsIdSubmitRoute
   '/admin/assignments/$id/grade': typeof AppAdminAssignmentsIdGradeRoute
   '/admin/class-room/$id/students': typeof AppAdminClassRoomIdStudentsRoute
+  '/admin/employees/$id/edit': typeof AppAdminEmployeesIdEditRoute
+  '/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -380,35 +452,44 @@ export interface FileRoutesById {
   '/surveys/submit': typeof SurveysSubmitRoute
   '/_app/admin/analytic': typeof AppAdminAnalyticRoute
   '/_app/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
-  '/_app/admin/branches': typeof AppAdminBranchesRoute
+  '/_app/admin/branches': typeof AppAdminBranchesRouteWithChildren
   '/_app/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/_app/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
-  '/_app/admin/departments': typeof AppAdminDepartmentsRoute
+  '/_app/admin/departments': typeof AppAdminDepartmentsRouteWithChildren
   '/_app/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/_app/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/_app/admin/gamifications': typeof AppAdminGamificationsRoute
   '/_app/admin/learning-paths': typeof AppAdminLearningPathsRouteWithChildren
   '/_app/admin/online-course': typeof AppAdminOnlineCourseRouteWithChildren
   '/_app/admin/plans': typeof AppAdminPlansRouteWithChildren
-  '/_app/admin/roles': typeof AppAdminRolesRoute
+  '/_app/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/_app/admin/surveys': typeof AppAdminSurveysRouteWithChildren
   '/_app/my-class/$id': typeof AppMyClassIdRoute
   '/_app/admin/assignments/$id': typeof AppAdminAssignmentsIdRouteWithChildren
   '/_app/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/_app/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRoute
+  '/_app/admin/branches/$id': typeof AppAdminBranchesIdRoute
   '/_app/admin/certificates/create': typeof AppAdminCertificatesCreateRoute
   '/_app/admin/class-room/$id': typeof AppAdminClassRoomIdRouteWithChildren
   '/_app/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
-  '/_app/admin/employees/$id': typeof AppAdminEmployeesIdRoute
+  '/_app/admin/departments/$id': typeof AppAdminDepartmentsIdRoute
+  '/_app/admin/employees/$id': typeof AppAdminEmployeesIdRouteWithChildren
+  '/_app/admin/employees/create': typeof AppAdminEmployeesCreateRoute
+  '/_app/admin/employees/import': typeof AppAdminEmployeesImportRoute
   '/_app/admin/flashcards/create': typeof AppAdminFlashcardsCreateRoute
   '/_app/admin/learning-paths/$id': typeof AppAdminLearningPathsIdRoute
   '/_app/admin/learning-paths/create': typeof AppAdminLearningPathsCreateRoute
   '/_app/admin/online-course/$id': typeof AppAdminOnlineCourseIdRoute
+  '/_app/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
   '/_app/admin/plans/create': typeof AppAdminPlansCreateRoute
+  '/_app/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/_app/admin/roles/create': typeof AppAdminRolesCreateRoute
   '/_app/admin/surveys/create': typeof AppAdminSurveysCreateRoute
   '/_app/my-assignments/$id/submit': typeof AppMyAssignmentsIdSubmitRoute
   '/_app/admin/assignments/$id/grade': typeof AppAdminAssignmentsIdGradeRoute
   '/_app/admin/class-room/$id/students': typeof AppAdminClassRoomIdStudentsRoute
+  '/_app/admin/employees/$id/edit': typeof AppAdminEmployeesIdEditRoute
+  '/_app/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -442,19 +523,28 @@ export interface FileRouteTypes {
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
     | '/admin/assignments/question-bank'
+    | '/admin/branches/$id'
     | '/admin/certificates/create'
     | '/admin/class-room/$id'
     | '/admin/class-room/create'
+    | '/admin/departments/$id'
     | '/admin/employees/$id'
+    | '/admin/employees/create'
+    | '/admin/employees/import'
     | '/admin/flashcards/create'
     | '/admin/learning-paths/$id'
     | '/admin/learning-paths/create'
     | '/admin/online-course/$id'
+    | '/admin/plans/$id'
     | '/admin/plans/create'
+    | '/admin/roles/$code'
+    | '/admin/roles/create'
     | '/admin/surveys/create'
     | '/my-assignments/$id/submit'
     | '/admin/assignments/$id/grade'
     | '/admin/class-room/$id/students'
+    | '/admin/employees/$id/edit'
+    | '/admin/plans/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -486,19 +576,28 @@ export interface FileRouteTypes {
     | '/admin/assignments/$id'
     | '/admin/assignments/assigned'
     | '/admin/assignments/question-bank'
+    | '/admin/branches/$id'
     | '/admin/certificates/create'
     | '/admin/class-room/$id'
     | '/admin/class-room/create'
+    | '/admin/departments/$id'
     | '/admin/employees/$id'
+    | '/admin/employees/create'
+    | '/admin/employees/import'
     | '/admin/flashcards/create'
     | '/admin/learning-paths/$id'
     | '/admin/learning-paths/create'
     | '/admin/online-course/$id'
+    | '/admin/plans/$id'
     | '/admin/plans/create'
+    | '/admin/roles/$code'
+    | '/admin/roles/create'
     | '/admin/surveys/create'
     | '/my-assignments/$id/submit'
     | '/admin/assignments/$id/grade'
     | '/admin/class-room/$id/students'
+    | '/admin/employees/$id/edit'
+    | '/admin/plans/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -531,19 +630,28 @@ export interface FileRouteTypes {
     | '/_app/admin/assignments/$id'
     | '/_app/admin/assignments/assigned'
     | '/_app/admin/assignments/question-bank'
+    | '/_app/admin/branches/$id'
     | '/_app/admin/certificates/create'
     | '/_app/admin/class-room/$id'
     | '/_app/admin/class-room/create'
+    | '/_app/admin/departments/$id'
     | '/_app/admin/employees/$id'
+    | '/_app/admin/employees/create'
+    | '/_app/admin/employees/import'
     | '/_app/admin/flashcards/create'
     | '/_app/admin/learning-paths/$id'
     | '/_app/admin/learning-paths/create'
     | '/_app/admin/online-course/$id'
+    | '/_app/admin/plans/$id'
     | '/_app/admin/plans/create'
+    | '/_app/admin/roles/$code'
+    | '/_app/admin/roles/create'
     | '/_app/admin/surveys/create'
     | '/_app/my-assignments/$id/submit'
     | '/_app/admin/assignments/$id/grade'
     | '/_app/admin/class-room/$id/students'
+    | '/_app/admin/employees/$id/edit'
+    | '/_app/admin/plans/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -760,11 +868,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminSurveysCreateRouteImport
       parentRoute: typeof AppAdminSurveysRoute
     }
+    '/_app/admin/roles/create': {
+      id: '/_app/admin/roles/create'
+      path: '/create'
+      fullPath: '/admin/roles/create'
+      preLoaderRoute: typeof AppAdminRolesCreateRouteImport
+      parentRoute: typeof AppAdminRolesRoute
+    }
+    '/_app/admin/roles/$code': {
+      id: '/_app/admin/roles/$code'
+      path: '/$code'
+      fullPath: '/admin/roles/$code'
+      preLoaderRoute: typeof AppAdminRolesCodeRouteImport
+      parentRoute: typeof AppAdminRolesRoute
+    }
     '/_app/admin/plans/create': {
       id: '/_app/admin/plans/create'
       path: '/create'
       fullPath: '/admin/plans/create'
       preLoaderRoute: typeof AppAdminPlansCreateRouteImport
+      parentRoute: typeof AppAdminPlansRoute
+    }
+    '/_app/admin/plans/$id': {
+      id: '/_app/admin/plans/$id'
+      path: '/$id'
+      fullPath: '/admin/plans/$id'
+      preLoaderRoute: typeof AppAdminPlansIdRouteImport
       parentRoute: typeof AppAdminPlansRoute
     }
     '/_app/admin/online-course/$id': {
@@ -795,12 +924,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminFlashcardsCreateRouteImport
       parentRoute: typeof AppAdminFlashcardsRoute
     }
+    '/_app/admin/employees/import': {
+      id: '/_app/admin/employees/import'
+      path: '/import'
+      fullPath: '/admin/employees/import'
+      preLoaderRoute: typeof AppAdminEmployeesImportRouteImport
+      parentRoute: typeof AppAdminEmployeesRoute
+    }
+    '/_app/admin/employees/create': {
+      id: '/_app/admin/employees/create'
+      path: '/create'
+      fullPath: '/admin/employees/create'
+      preLoaderRoute: typeof AppAdminEmployeesCreateRouteImport
+      parentRoute: typeof AppAdminEmployeesRoute
+    }
     '/_app/admin/employees/$id': {
       id: '/_app/admin/employees/$id'
       path: '/$id'
       fullPath: '/admin/employees/$id'
       preLoaderRoute: typeof AppAdminEmployeesIdRouteImport
       parentRoute: typeof AppAdminEmployeesRoute
+    }
+    '/_app/admin/departments/$id': {
+      id: '/_app/admin/departments/$id'
+      path: '/$id'
+      fullPath: '/admin/departments/$id'
+      preLoaderRoute: typeof AppAdminDepartmentsIdRouteImport
+      parentRoute: typeof AppAdminDepartmentsRoute
     }
     '/_app/admin/class-room/create': {
       id: '/_app/admin/class-room/create'
@@ -823,6 +973,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminCertificatesCreateRouteImport
       parentRoute: typeof AppAdminCertificatesRoute
     }
+    '/_app/admin/branches/$id': {
+      id: '/_app/admin/branches/$id'
+      path: '/$id'
+      fullPath: '/admin/branches/$id'
+      preLoaderRoute: typeof AppAdminBranchesIdRouteImport
+      parentRoute: typeof AppAdminBranchesRoute
+    }
     '/_app/admin/assignments/question-bank': {
       id: '/_app/admin/assignments/question-bank'
       path: '/question-bank'
@@ -843,6 +1000,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/assignments/$id'
       preLoaderRoute: typeof AppAdminAssignmentsIdRouteImport
       parentRoute: typeof AppAdminAssignmentsRoute
+    }
+    '/_app/admin/plans/$id/edit': {
+      id: '/_app/admin/plans/$id/edit'
+      path: '/edit'
+      fullPath: '/admin/plans/$id/edit'
+      preLoaderRoute: typeof AppAdminPlansIdEditRouteImport
+      parentRoute: typeof AppAdminPlansIdRoute
+    }
+    '/_app/admin/employees/$id/edit': {
+      id: '/_app/admin/employees/$id/edit'
+      path: '/edit'
+      fullPath: '/admin/employees/$id/edit'
+      preLoaderRoute: typeof AppAdminEmployeesIdEditRouteImport
+      parentRoute: typeof AppAdminEmployeesIdRoute
     }
     '/_app/admin/class-room/$id/students': {
       id: '/_app/admin/class-room/$id/students'
@@ -912,6 +1083,17 @@ const AppAdminAssignmentsRouteChildren: AppAdminAssignmentsRouteChildren = {
 const AppAdminAssignmentsRouteWithChildren =
   AppAdminAssignmentsRoute._addFileChildren(AppAdminAssignmentsRouteChildren)
 
+interface AppAdminBranchesRouteChildren {
+  AppAdminBranchesIdRoute: typeof AppAdminBranchesIdRoute
+}
+
+const AppAdminBranchesRouteChildren: AppAdminBranchesRouteChildren = {
+  AppAdminBranchesIdRoute: AppAdminBranchesIdRoute,
+}
+
+const AppAdminBranchesRouteWithChildren =
+  AppAdminBranchesRoute._addFileChildren(AppAdminBranchesRouteChildren)
+
 interface AppAdminCertificatesRouteChildren {
   AppAdminCertificatesCreateRoute: typeof AppAdminCertificatesCreateRoute
 }
@@ -947,12 +1129,38 @@ const AppAdminClassRoomRouteChildren: AppAdminClassRoomRouteChildren = {
 const AppAdminClassRoomRouteWithChildren =
   AppAdminClassRoomRoute._addFileChildren(AppAdminClassRoomRouteChildren)
 
+interface AppAdminDepartmentsRouteChildren {
+  AppAdminDepartmentsIdRoute: typeof AppAdminDepartmentsIdRoute
+}
+
+const AppAdminDepartmentsRouteChildren: AppAdminDepartmentsRouteChildren = {
+  AppAdminDepartmentsIdRoute: AppAdminDepartmentsIdRoute,
+}
+
+const AppAdminDepartmentsRouteWithChildren =
+  AppAdminDepartmentsRoute._addFileChildren(AppAdminDepartmentsRouteChildren)
+
+interface AppAdminEmployeesIdRouteChildren {
+  AppAdminEmployeesIdEditRoute: typeof AppAdminEmployeesIdEditRoute
+}
+
+const AppAdminEmployeesIdRouteChildren: AppAdminEmployeesIdRouteChildren = {
+  AppAdminEmployeesIdEditRoute: AppAdminEmployeesIdEditRoute,
+}
+
+const AppAdminEmployeesIdRouteWithChildren =
+  AppAdminEmployeesIdRoute._addFileChildren(AppAdminEmployeesIdRouteChildren)
+
 interface AppAdminEmployeesRouteChildren {
-  AppAdminEmployeesIdRoute: typeof AppAdminEmployeesIdRoute
+  AppAdminEmployeesIdRoute: typeof AppAdminEmployeesIdRouteWithChildren
+  AppAdminEmployeesCreateRoute: typeof AppAdminEmployeesCreateRoute
+  AppAdminEmployeesImportRoute: typeof AppAdminEmployeesImportRoute
 }
 
 const AppAdminEmployeesRouteChildren: AppAdminEmployeesRouteChildren = {
-  AppAdminEmployeesIdRoute: AppAdminEmployeesIdRoute,
+  AppAdminEmployeesIdRoute: AppAdminEmployeesIdRouteWithChildren,
+  AppAdminEmployeesCreateRoute: AppAdminEmployeesCreateRoute,
+  AppAdminEmployeesImportRoute: AppAdminEmployeesImportRoute,
 }
 
 const AppAdminEmployeesRouteWithChildren =
@@ -995,16 +1203,44 @@ const AppAdminOnlineCourseRouteChildren: AppAdminOnlineCourseRouteChildren = {
 const AppAdminOnlineCourseRouteWithChildren =
   AppAdminOnlineCourseRoute._addFileChildren(AppAdminOnlineCourseRouteChildren)
 
+interface AppAdminPlansIdRouteChildren {
+  AppAdminPlansIdEditRoute: typeof AppAdminPlansIdEditRoute
+}
+
+const AppAdminPlansIdRouteChildren: AppAdminPlansIdRouteChildren = {
+  AppAdminPlansIdEditRoute: AppAdminPlansIdEditRoute,
+}
+
+const AppAdminPlansIdRouteWithChildren = AppAdminPlansIdRoute._addFileChildren(
+  AppAdminPlansIdRouteChildren,
+)
+
 interface AppAdminPlansRouteChildren {
+  AppAdminPlansIdRoute: typeof AppAdminPlansIdRouteWithChildren
   AppAdminPlansCreateRoute: typeof AppAdminPlansCreateRoute
 }
 
 const AppAdminPlansRouteChildren: AppAdminPlansRouteChildren = {
+  AppAdminPlansIdRoute: AppAdminPlansIdRouteWithChildren,
   AppAdminPlansCreateRoute: AppAdminPlansCreateRoute,
 }
 
 const AppAdminPlansRouteWithChildren = AppAdminPlansRoute._addFileChildren(
   AppAdminPlansRouteChildren,
+)
+
+interface AppAdminRolesRouteChildren {
+  AppAdminRolesCodeRoute: typeof AppAdminRolesCodeRoute
+  AppAdminRolesCreateRoute: typeof AppAdminRolesCreateRoute
+}
+
+const AppAdminRolesRouteChildren: AppAdminRolesRouteChildren = {
+  AppAdminRolesCodeRoute: AppAdminRolesCodeRoute,
+  AppAdminRolesCreateRoute: AppAdminRolesCreateRoute,
+}
+
+const AppAdminRolesRouteWithChildren = AppAdminRolesRoute._addFileChildren(
+  AppAdminRolesRouteChildren,
 )
 
 interface AppAdminSurveysRouteChildren {
@@ -1028,17 +1264,17 @@ interface AppRouteChildren {
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRoute
   AppAdminAnalyticRoute: typeof AppAdminAnalyticRoute
   AppAdminAssignmentsRoute: typeof AppAdminAssignmentsRouteWithChildren
-  AppAdminBranchesRoute: typeof AppAdminBranchesRoute
+  AppAdminBranchesRoute: typeof AppAdminBranchesRouteWithChildren
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
   AppAdminClassRoomRoute: typeof AppAdminClassRoomRouteWithChildren
-  AppAdminDepartmentsRoute: typeof AppAdminDepartmentsRoute
+  AppAdminDepartmentsRoute: typeof AppAdminDepartmentsRouteWithChildren
   AppAdminEmployeesRoute: typeof AppAdminEmployeesRouteWithChildren
   AppAdminFlashcardsRoute: typeof AppAdminFlashcardsRouteWithChildren
   AppAdminGamificationsRoute: typeof AppAdminGamificationsRoute
   AppAdminLearningPathsRoute: typeof AppAdminLearningPathsRouteWithChildren
   AppAdminOnlineCourseRoute: typeof AppAdminOnlineCourseRouteWithChildren
   AppAdminPlansRoute: typeof AppAdminPlansRouteWithChildren
-  AppAdminRolesRoute: typeof AppAdminRolesRoute
+  AppAdminRolesRoute: typeof AppAdminRolesRouteWithChildren
   AppAdminSurveysRoute: typeof AppAdminSurveysRouteWithChildren
 }
 
@@ -1051,17 +1287,17 @@ const AppRouteChildren: AppRouteChildren = {
   AppMyLearningPathsRoute: AppMyLearningPathsRoute,
   AppAdminAnalyticRoute: AppAdminAnalyticRoute,
   AppAdminAssignmentsRoute: AppAdminAssignmentsRouteWithChildren,
-  AppAdminBranchesRoute: AppAdminBranchesRoute,
+  AppAdminBranchesRoute: AppAdminBranchesRouteWithChildren,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
   AppAdminClassRoomRoute: AppAdminClassRoomRouteWithChildren,
-  AppAdminDepartmentsRoute: AppAdminDepartmentsRoute,
+  AppAdminDepartmentsRoute: AppAdminDepartmentsRouteWithChildren,
   AppAdminEmployeesRoute: AppAdminEmployeesRouteWithChildren,
   AppAdminFlashcardsRoute: AppAdminFlashcardsRouteWithChildren,
   AppAdminGamificationsRoute: AppAdminGamificationsRoute,
   AppAdminLearningPathsRoute: AppAdminLearningPathsRouteWithChildren,
   AppAdminOnlineCourseRoute: AppAdminOnlineCourseRouteWithChildren,
   AppAdminPlansRoute: AppAdminPlansRouteWithChildren,
-  AppAdminRolesRoute: AppAdminRolesRoute,
+  AppAdminRolesRoute: AppAdminRolesRouteWithChildren,
   AppAdminSurveysRoute: AppAdminSurveysRouteWithChildren,
 }
 
