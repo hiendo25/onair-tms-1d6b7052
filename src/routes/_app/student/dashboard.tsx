@@ -372,6 +372,15 @@ function useCompleteTask(orgId: string) {
         }).eq("id", path.id);
       }
 
+      // 5) Log learning activity
+      await logLearningActivity({
+        orgId,
+        action: task.type === "quiz" ? "quiz_submit" : "lesson_complete",
+        targetType: task.type === "quiz" ? "assignment" : "lesson",
+        targetId: task.id,
+        metadata: { title: task.title, score },
+      });
+
       return { xpGain, score, redirect: task.path };
     },
     onSuccess: (res) => {
