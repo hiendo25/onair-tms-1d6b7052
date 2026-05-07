@@ -61,7 +61,7 @@ const lowCourses = [
 
 function Dashboard() {
   const [range, setRange] = useState("year");
-  const completion = { completed: 360, total: 480 };
+  const completion = { completed: 1078, total: 1240 };
   const completionPct = Math.round((completion.completed / completion.total) * 100);
 
   return (
