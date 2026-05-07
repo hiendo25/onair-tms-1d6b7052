@@ -28,7 +28,7 @@ function AnalyticPage() {
   const TOP_COURSES = sortedCourses.map(c => ({ name: c.title, learners: c.enrolled, share: Math.round((c.enrolled / topEnroll) * 100) }));
 
   const TOP_LEARNERS = data.employees.slice(0, 5).map((e, i) => ({
-    name: `${e.fullName} - ${e.position}`,
+    name: `${e.name} - ${e.position}`,
     xp: 2500 - i * 230,
     badge: ["🥇","🥈","🥉","4","5"][i],
   }));
