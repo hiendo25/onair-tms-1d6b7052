@@ -103,10 +103,10 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
           survey_id: tps.survey_id,
           start_date: tps.start_date ?? "",
           end_date: tps.end_date ?? "",
-          target_type: tps.target_type,
+          target_type: (tps.target_type as "all" | "dept" | "branch") ?? "all",
           target_unit_ids: (tps.target_unit_ids as string[]) ?? [],
         });
-        setPlanSurvey(tps as DBPlanSurvey);
+        setPlanSurvey(tps as unknown as DBPlanSurvey);
       }
     })();
   }, [initialPlanId]);
