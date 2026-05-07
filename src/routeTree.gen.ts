@@ -87,6 +87,7 @@ import { Route as AppAdminAssignmentsIdAssignRouteImport } from './routes/_app/a
 import { Route as AppAdminAssignmentsQuestionBankIdEditRouteImport } from './routes/_app/admin.assignments.question-bank.$id.edit'
 import { Route as AppAdminAssignmentsIdSubmitEmployeeIdRouteImport } from './routes/_app/admin.assignments.$id.submit.$employeeId'
 import { Route as AppAdminAssignmentsIdResultEmployeeIdRouteImport } from './routes/_app/admin.assignments.$id.result.$employeeId'
+import { Route as AppAdminAssignmentsIdGradeEmployeeIdRouteImport } from './routes/_app/admin.assignments.$id.grade.$employeeId'
 
 const OrganizationsRoute = OrganizationsRouteImport.update({
   id: '/organizations',
@@ -505,6 +506,12 @@ const AppAdminAssignmentsIdResultEmployeeIdRoute =
     path: '/result/$employeeId',
     getParentRoute: () => AppAdminAssignmentsIdRoute,
   } as any)
+const AppAdminAssignmentsIdGradeEmployeeIdRoute =
+  AppAdminAssignmentsIdGradeEmployeeIdRouteImport.update({
+    id: '/grade/$employeeId',
+    path: '/grade/$employeeId',
+    getParentRoute: () => AppAdminAssignmentsIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -581,6 +588,7 @@ export interface FileRoutesByFullPath {
   '/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
   '/admin/assignments/question-bank/$id/edit': typeof AppAdminAssignmentsQuestionBankIdEditRoute
@@ -660,6 +668,7 @@ export interface FileRoutesByTo {
   '/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
   '/admin/assignments/question-bank/$id/edit': typeof AppAdminAssignmentsQuestionBankIdEditRoute
@@ -741,6 +750,7 @@ export interface FileRoutesById {
   '/_app/admin/surveys/$id/thank-you': typeof AppAdminSurveysIdThankYouRoute
   '/_app/class-room/$slug/learning-screen/$courseId': typeof AppClassRoomSlugLearningScreenCourseIdRoute
   '/_app/my-assignments/$id/result/$employeeId': typeof AppMyAssignmentsIdResultEmployeeIdRoute
+  '/_app/admin/assignments/$id/grade/$employeeId': typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   '/_app/admin/assignments/$id/result/$employeeId': typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   '/_app/admin/assignments/$id/submit/$employeeId': typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
   '/_app/admin/assignments/question-bank/$id/edit': typeof AppAdminAssignmentsQuestionBankIdEditRoute
@@ -822,6 +832,7 @@ export interface FileRouteTypes {
     | '/admin/surveys/$id/thank-you'
     | '/class-room/$slug/learning-screen/$courseId'
     | '/my-assignments/$id/result/$employeeId'
+    | '/admin/assignments/$id/grade/$employeeId'
     | '/admin/assignments/$id/result/$employeeId'
     | '/admin/assignments/$id/submit/$employeeId'
     | '/admin/assignments/question-bank/$id/edit'
@@ -901,6 +912,7 @@ export interface FileRouteTypes {
     | '/admin/surveys/$id/thank-you'
     | '/class-room/$slug/learning-screen/$courseId'
     | '/my-assignments/$id/result/$employeeId'
+    | '/admin/assignments/$id/grade/$employeeId'
     | '/admin/assignments/$id/result/$employeeId'
     | '/admin/assignments/$id/submit/$employeeId'
     | '/admin/assignments/question-bank/$id/edit'
@@ -981,6 +993,7 @@ export interface FileRouteTypes {
     | '/_app/admin/surveys/$id/thank-you'
     | '/_app/class-room/$slug/learning-screen/$courseId'
     | '/_app/my-assignments/$id/result/$employeeId'
+    | '/_app/admin/assignments/$id/grade/$employeeId'
     | '/_app/admin/assignments/$id/result/$employeeId'
     | '/_app/admin/assignments/$id/submit/$employeeId'
     | '/_app/admin/assignments/question-bank/$id/edit'
@@ -1545,6 +1558,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAssignmentsIdResultEmployeeIdRouteImport
       parentRoute: typeof AppAdminAssignmentsIdRoute
     }
+    '/_app/admin/assignments/$id/grade/$employeeId': {
+      id: '/_app/admin/assignments/$id/grade/$employeeId'
+      path: '/grade/$employeeId'
+      fullPath: '/admin/assignments/$id/grade/$employeeId'
+      preLoaderRoute: typeof AppAdminAssignmentsIdGradeEmployeeIdRouteImport
+      parentRoute: typeof AppAdminAssignmentsIdRoute
+    }
   }
 }
 
@@ -1605,6 +1625,7 @@ const AppMyLearningPathsRouteWithChildren =
 interface AppAdminAssignmentsIdRouteChildren {
   AppAdminAssignmentsIdAssignRoute: typeof AppAdminAssignmentsIdAssignRoute
   AppAdminAssignmentsIdStudentsRoute: typeof AppAdminAssignmentsIdStudentsRoute
+  AppAdminAssignmentsIdGradeEmployeeIdRoute: typeof AppAdminAssignmentsIdGradeEmployeeIdRoute
   AppAdminAssignmentsIdResultEmployeeIdRoute: typeof AppAdminAssignmentsIdResultEmployeeIdRoute
   AppAdminAssignmentsIdSubmitEmployeeIdRoute: typeof AppAdminAssignmentsIdSubmitEmployeeIdRoute
 }
@@ -1612,6 +1633,8 @@ interface AppAdminAssignmentsIdRouteChildren {
 const AppAdminAssignmentsIdRouteChildren: AppAdminAssignmentsIdRouteChildren = {
   AppAdminAssignmentsIdAssignRoute: AppAdminAssignmentsIdAssignRoute,
   AppAdminAssignmentsIdStudentsRoute: AppAdminAssignmentsIdStudentsRoute,
+  AppAdminAssignmentsIdGradeEmployeeIdRoute:
+    AppAdminAssignmentsIdGradeEmployeeIdRoute,
   AppAdminAssignmentsIdResultEmployeeIdRoute:
     AppAdminAssignmentsIdResultEmployeeIdRoute,
   AppAdminAssignmentsIdSubmitEmployeeIdRoute:
@@ -1901,3 +1924,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
