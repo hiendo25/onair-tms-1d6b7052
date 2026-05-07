@@ -153,10 +153,33 @@ function BranchesPage() {
         title="Import chi nhánh từ CSV"
         sampleHeaders={["code", "name", "address", "phone", "manager", "status"]}
         onImport={async (rows) => {
-          await bulkInsert.mutateAsync(rows.map((r) => ({
-            code: r.code, name: r.name, address: r.address ?? "", phone: r.phone ?? "",
-            manager: r.manager ?? "", status: r.status || "active", employees: Number(r.employees) || 0,
-          })));
+          const byCode = new Map(branches.map((b) => [b.code, b]));
+          const toUpdate: { existing: DBBranch; row: typeof rows[number] }[] = [];
+          const toInsert: typeof rows = [];
+          for (const r of rows) {
+            if (!r.code) continue;
+            const existing = byCode.get(r.code);
+            if (existing) toUpdate.push({ existing, row: r });
+            else toInsert.push(r);
+          }
+          for (const { existing, row: r } of toUpdate) {
+            await update.mutateAsync({
+              id: existing.id,
+              code: r.code,
+              name: r.name ?? existing.name,
+              address: r.address ?? existing.address,
+              phone: r.phone ?? existing.phone,
+              manager: r.manager ?? existing.manager,
+              status: r.status || existing.status,
+              employees: Number(r.employees) || existing.employees,
+            } as DBBranch);
+          }
+          if (toInsert.length) {
+            await bulkInsert.mutateAsync(toInsert.map((r) => ({
+              code: r.code, name: r.name, address: r.address ?? "", phone: r.phone ?? "",
+              manager: r.manager ?? "", status: r.status || "active", employees: Number(r.employees) || 0,
+            })));
+          }
         }}
       />
     </PageContainer>
