@@ -14,38 +14,31 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ADMIN_MENU, STUDENT_MENU, type MenuItem } from "@/lib/menu-config";
 import { useOrg } from "@/lib/org-context";
 import { useAuth } from "@/lib/auth-context";
-import { supabase } from "@/integrations/supabase/client";
-
-type Role = "admin" | "student";
-
-const ADMIN_ROLES = new Set(["admin", "tenant_admin", "administrator_type"]);
+import { getUserRole, type AppRole } from "@/lib/roles";
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { user } = useAuth();
-  const [role, setRole] = useState<Role>("student");
+  const [role, setRole] = useState<AppRole | null>(null);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { org } = useOrg();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setRole(null);
+      return;
+    }
     let cancelled = false;
-    supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id)
-      .then(({ data }) => {
-        if (cancelled) return;
-        const isAdmin = (data ?? []).some((r) => ADMIN_ROLES.has(r.role as string));
-        setRole(isAdmin ? "admin" : "student");
-      });
+    getUserRole().then(({ role }) => {
+      if (!cancelled) setRole(role);
+    });
     return () => {
       cancelled = true;
     };
   }, [user]);
 
-  const items = role === "admin" ? ADMIN_MENU : STUDENT_MENU;
+  const items = role === "admin" ? ADMIN_MENU : role === "student" ? STUDENT_MENU : [];
   const isActive = (path?: string) => !!path && pathname === path;
   const isChildActive = (item: MenuItem) => item.children?.some((c) => isActive(c.path)) ?? false;
 
