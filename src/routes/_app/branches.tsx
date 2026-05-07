@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Upload, Download } from "lucide-react";
+import { Plus, Search, Upload, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useBranches, useBranchMutations, type DBBranch } from "@/lib/data-hooks";
+import { useBranches, useBranchMutations, useEmployees, type DBBranch } from "@/lib/data-hooks";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { ImportCsvDialog } from "@/components/admin/ImportCsvDialog";
@@ -22,21 +22,16 @@ export const Route = createFileRoute("/_app/branches")({
   component: BranchesPage,
 });
 
-const fields: FieldDef<BranchForm>[] = [
-  { name: "name", label: "Tên chi nhánh", type: "text", required: true, placeholder: "Tên chi nhánh" },
-  { name: "code", label: "Mã chi nhánh", type: "text", required: true, placeholder: "VD: HCM-01", note: CODE_NOTE },
-  { name: "manager", label: "Người quản lý", type: "text", placeholder: "Họ tên người quản lý" },
-  { name: "phone", label: "Số điện thoại", type: "tel", placeholder: "VD: 0901234567" },
-  { name: "address", label: "Địa chỉ", type: "textarea", placeholder: "Địa chỉ chi nhánh", rows: 2 },
-  { name: "status", label: "Trạng thái", type: "select", required: true, options: STATUS_ACTIVE_INACTIVE },
-];
+const PAGE_SIZE = 10;
 const defaults: BranchForm = { code: "", name: "", manager: "", phone: "", address: "", status: "active" };
 
 function BranchesPage() {
   const { data: branches = [], isLoading } = useBranches();
+  const { data: employees = [] } = useEmployees();
   const { create, update, remove, bulkInsert } = useBranchMutations();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<DBBranch | null>(null);
   const [open, setOpen] = useState(false);
   const [delId, setDelId] = useState<string | null>(null);
@@ -47,6 +42,24 @@ function BranchesPage() {
     const s = status === "all" || b.status === status;
     return m && s;
   }), [branches, q, status]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const fields: FieldDef<BranchForm>[] = useMemo(() => [
+    { name: "name", label: "Tên chi nhánh", type: "text", required: true, placeholder: "Tên chi nhánh" },
+    { name: "code", label: "Mã chi nhánh", type: "text", required: true, placeholder: "VD: HCM-01", note: CODE_NOTE },
+    {
+      name: "manager",
+      label: "Người quản lý",
+      type: "select",
+      placeholder: "Chọn người quản lý",
+      options: [{ value: "", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
+    },
+    { name: "phone", label: "Số điện thoại", type: "tel", placeholder: "VD: 0901234567" },
+    { name: "address", label: "Địa chỉ", type: "textarea", placeholder: "Địa chỉ chi nhánh", rows: 2 },
+    { name: "status", label: "Trạng thái", type: "select", required: true, options: STATUS_ACTIVE_INACTIVE },
+  ], [employees]);
 
   const submit = async (v: BranchForm) => {
     if (editing?.id) await update.mutateAsync({ ...v, id: editing.id, employees: editing.employees } as DBBranch);
@@ -61,7 +74,7 @@ function BranchesPage() {
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => setImporting(true)}><Upload className="h-4 w-4" />Import</Button>
           <Button size="sm" variant="outline" onClick={() => exportCsv("branches.csv", branches)}><Download className="h-4 w-4" />Export</Button>
-          <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Thêm chi nhánh</Button>
+          <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Tạo chi nhánh</Button>
         </div>
       }
     >
@@ -69,10 +82,10 @@ function BranchesPage() {
         <div className="mb-4 flex flex-wrap gap-2">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Tìm tên, mã, địa chỉ..." value={q} onChange={(e) => setQ(e.target.value)} />
+            <Input className="pl-9" placeholder="Tìm theo tên, mã, địa chỉ, quản lý..." value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
           </div>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <Select value={status} onValueChange={(v) => { setStatus(v); setPage(1); }}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
               <SelectItem value="active">Hoạt động</SelectItem>
@@ -83,20 +96,21 @@ function BranchesPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">STT</TableHead>
               <TableHead>Tên chi nhánh</TableHead>
               <TableHead>Mã</TableHead>
               <TableHead>Trạng thái</TableHead>
-              <TableHead>Địa chỉ</TableHead>
-              <TableHead>Quản lý</TableHead>
-              <TableHead>NV</TableHead>
+              <TableHead>Địa điểm</TableHead>
+              <TableHead>Người quản lý</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>}
-            {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Không có dữ liệu</TableCell></TableRow>}
-            {filtered.map((b) => (
+            {!isLoading && pageRows.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Không có dữ liệu</TableCell></TableRow>}
+            {pageRows.map((b, i) => (
               <TableRow key={b.id}>
+                <TableCell className="text-muted-foreground">{(page - 1) * PAGE_SIZE + i + 1}</TableCell>
                 <TableCell className="font-medium">{b.name}</TableCell>
                 <TableCell><Badge variant="outline">{b.code}</Badge></TableCell>
                 <TableCell>
@@ -106,17 +120,26 @@ function BranchesPage() {
                 </TableCell>
                 <TableCell>{b.address || "-"}</TableCell>
                 <TableCell>{b.manager || "-"}</TableCell>
-                <TableCell>{b.employees}</TableCell>
                 <TableCell><RowActions onEdit={() => { setEditing(b); setOpen(true); }} onDelete={() => setDelId(b.id)} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
+        {filtered.length > PAGE_SIZE && (
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">Hiển thị {(page - 1) * PAGE_SIZE + 1}-{Math.min(page * PAGE_SIZE, filtered.length)} / {filtered.length}</span>
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="outline" disabled={page === 1} onClick={() => setPage((p) => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <span className="px-3">Trang {page}/{totalPages}</span>
+              <Button size="sm" variant="outline" disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <EntityFormDialog<BranchForm>
         open={open} onOpenChange={setOpen}
-        title={editing ? "Sửa chi nhánh" : "Thêm chi nhánh"}
+        title={editing ? "Cập nhật chi nhánh" : "Tạo chi nhánh"}
         schema={branchSchema} fields={fields} defaultValues={defaults}
         initialValues={editing ? { code: editing.code, name: editing.name, address: editing.address, phone: editing.phone, manager: editing.manager, status: editing.status as "active" | "inactive" } : undefined}
         onSubmit={submit} submitting={create.isPending || update.isPending}
