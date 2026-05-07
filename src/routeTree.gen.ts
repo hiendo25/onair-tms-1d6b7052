@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SurveysSubmitRouteImport } from './routes/surveys.submit'
+import { Route as ClassRoomCdRouteImport } from './routes/class-room.cd'
+import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthSigninRouteImport } from './routes/auth.signin'
 import { Route as AppMyLearningPathsRouteImport } from './routes/_app/my-learning-paths'
 import { Route as AppMyGamificationRouteImport } from './routes/_app/my-gamification'
 import { Route as AppMyClassRouteImport } from './routes/_app/my-class'
@@ -30,6 +34,7 @@ import { Route as AppAdminClassRoomRouteImport } from './routes/_app/admin.class
 import { Route as AppAdminCertificatesRouteImport } from './routes/_app/admin.certificates'
 import { Route as AppAdminBranchesRouteImport } from './routes/_app/admin.branches'
 import { Route as AppAdminAssignmentsRouteImport } from './routes/_app/admin.assignments'
+import { Route as AppAdminAnalyticRouteImport } from './routes/_app/admin.analytic'
 import { Route as AppAdminSurveysCreateRouteImport } from './routes/_app/admin.surveys.create'
 import { Route as AppAdminPlansCreateRouteImport } from './routes/_app/admin.plans.create'
 import { Route as AppAdminLearningPathsCreateRouteImport } from './routes/_app/admin.learning-paths.create'
@@ -46,6 +51,26 @@ const AppRoute = AppRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SurveysSubmitRoute = SurveysSubmitRouteImport.update({
+  id: '/surveys/submit',
+  path: '/surveys/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClassRoomCdRoute = ClassRoomCdRouteImport.update({
+  id: '/class-room/cd',
+  path: '/class-room/cd',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSigninRoute = AuthSigninRouteImport.update({
+  id: '/auth/signin',
+  path: '/auth/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppMyLearningPathsRoute = AppMyLearningPathsRouteImport.update({
@@ -143,6 +168,11 @@ const AppAdminAssignmentsRoute = AppAdminAssignmentsRouteImport.update({
   path: '/admin/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminAnalyticRoute = AppAdminAnalyticRouteImport.update({
+  id: '/admin/analytic',
+  path: '/admin/analytic',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminSurveysCreateRoute = AppAdminSurveysCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -197,6 +227,11 @@ export interface FileRoutesByFullPath {
   '/my-class': typeof AppMyClassRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/class-room/cd': typeof ClassRoomCdRoute
+  '/surveys/submit': typeof SurveysSubmitRoute
+  '/admin/analytic': typeof AppAdminAnalyticRoute
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/admin/branches': typeof AppAdminBranchesRoute
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
@@ -227,6 +262,11 @@ export interface FileRoutesByTo {
   '/my-class': typeof AppMyClassRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/class-room/cd': typeof ClassRoomCdRoute
+  '/surveys/submit': typeof SurveysSubmitRoute
+  '/admin/analytic': typeof AppAdminAnalyticRoute
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/admin/branches': typeof AppAdminBranchesRoute
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
@@ -259,6 +299,11 @@ export interface FileRoutesById {
   '/_app/my-class': typeof AppMyClassRoute
   '/_app/my-gamification': typeof AppMyGamificationRoute
   '/_app/my-learning-paths': typeof AppMyLearningPathsRoute
+  '/auth/signin': typeof AuthSigninRoute
+  '/auth/signup': typeof AuthSignupRoute
+  '/class-room/cd': typeof ClassRoomCdRoute
+  '/surveys/submit': typeof SurveysSubmitRoute
+  '/_app/admin/analytic': typeof AppAdminAnalyticRoute
   '/_app/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/_app/admin/branches': typeof AppAdminBranchesRoute
   '/_app/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
@@ -291,6 +336,11 @@ export interface FileRouteTypes {
     | '/my-class'
     | '/my-gamification'
     | '/my-learning-paths'
+    | '/auth/signin'
+    | '/auth/signup'
+    | '/class-room/cd'
+    | '/surveys/submit'
+    | '/admin/analytic'
     | '/admin/assignments'
     | '/admin/branches'
     | '/admin/certificates'
@@ -321,6 +371,11 @@ export interface FileRouteTypes {
     | '/my-class'
     | '/my-gamification'
     | '/my-learning-paths'
+    | '/auth/signin'
+    | '/auth/signup'
+    | '/class-room/cd'
+    | '/surveys/submit'
+    | '/admin/analytic'
     | '/admin/assignments'
     | '/admin/branches'
     | '/admin/certificates'
@@ -352,6 +407,11 @@ export interface FileRouteTypes {
     | '/_app/my-class'
     | '/_app/my-gamification'
     | '/_app/my-learning-paths'
+    | '/auth/signin'
+    | '/auth/signup'
+    | '/class-room/cd'
+    | '/surveys/submit'
+    | '/_app/admin/analytic'
     | '/_app/admin/assignments'
     | '/_app/admin/branches'
     | '/_app/admin/certificates'
@@ -378,6 +438,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  AuthSigninRoute: typeof AuthSigninRoute
+  AuthSignupRoute: typeof AuthSignupRoute
+  ClassRoomCdRoute: typeof ClassRoomCdRoute
+  SurveysSubmitRoute: typeof SurveysSubmitRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -394,6 +458,34 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/surveys/submit': {
+      id: '/surveys/submit'
+      path: '/surveys/submit'
+      fullPath: '/surveys/submit'
+      preLoaderRoute: typeof SurveysSubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/class-room/cd': {
+      id: '/class-room/cd'
+      path: '/class-room/cd'
+      fullPath: '/class-room/cd'
+      preLoaderRoute: typeof ClassRoomCdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/signin': {
+      id: '/auth/signin'
+      path: '/auth/signin'
+      fullPath: '/auth/signin'
+      preLoaderRoute: typeof AuthSigninRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/my-learning-paths': {
@@ -527,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/assignments'
       fullPath: '/admin/assignments'
       preLoaderRoute: typeof AppAdminAssignmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/analytic': {
+      id: '/_app/admin/analytic'
+      path: '/admin/analytic'
+      fullPath: '/admin/analytic'
+      preLoaderRoute: typeof AppAdminAnalyticRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/surveys/create': {
@@ -678,6 +777,7 @@ interface AppRouteChildren {
   AppMyClassRoute: typeof AppMyClassRoute
   AppMyGamificationRoute: typeof AppMyGamificationRoute
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRoute
+  AppAdminAnalyticRoute: typeof AppAdminAnalyticRoute
   AppAdminAssignmentsRoute: typeof AppAdminAssignmentsRouteWithChildren
   AppAdminBranchesRoute: typeof AppAdminBranchesRoute
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
@@ -700,6 +800,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMyClassRoute: AppMyClassRoute,
   AppMyGamificationRoute: AppMyGamificationRoute,
   AppMyLearningPathsRoute: AppMyLearningPathsRoute,
+  AppAdminAnalyticRoute: AppAdminAnalyticRoute,
   AppAdminAssignmentsRoute: AppAdminAssignmentsRouteWithChildren,
   AppAdminBranchesRoute: AppAdminBranchesRoute,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
@@ -720,6 +821,10 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  AuthSigninRoute: AuthSigninRoute,
+  AuthSignupRoute: AuthSignupRoute,
+  ClassRoomCdRoute: ClassRoomCdRoute,
+  SurveysSubmitRoute: SurveysSubmitRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
