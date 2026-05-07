@@ -12,7 +12,7 @@ import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
 import { roleSchema, type RoleForm } from "@/lib/admin-schemas";
-import { CODE_NOTE } from "@/lib/admin-options";
+
 
 export const Route = createFileRoute("/_app/admin/roles")({
   head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir TMS" }] }),
