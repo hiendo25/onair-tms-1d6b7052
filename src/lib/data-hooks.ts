@@ -73,7 +73,7 @@ export const useDepartments = departmentsCrud.useList;
 export const useDepartmentMutations = departmentsCrud.useMutations;
 
 // ===== Roles =====
-export type DBRole = { id: string; org_id: string; code: string; name: string; description: string; permissions: number; users: number; };
+export type DBRole = { id: string; org_id: string; code: string; name: string; description: string; permissions: number; users: number; is_admin: boolean; is_instructor: boolean; is_student: boolean; };
 const rolesCrud = createOrgCrud<DBRole>("org_roles", "vai trò");
 export const useRoles = rolesCrud.useList;
 export const useRoleMutations = rolesCrud.useMutations;

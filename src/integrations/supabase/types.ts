@@ -536,6 +536,9 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_admin: boolean
+          is_instructor: boolean
+          is_student: boolean
           name: string
           org_id: string
           permissions: number
@@ -547,6 +550,9 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_admin?: boolean
+          is_instructor?: boolean
+          is_student?: boolean
           name: string
           org_id: string
           permissions?: number
@@ -558,6 +564,9 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_admin?: boolean
+          is_instructor?: boolean
+          is_student?: boolean
           name?: string
           org_id?: string
           permissions?: number

@@ -35,7 +35,9 @@ export const roleSchema = z.object({
   code: codeSchema("vai trò"),
   name: z.string().min(1, "Tên vai trò không bỏ trống").max(100, "Tên vai trò tối đa 100 ký tự"),
   description: optStr,
-  permissions: z.coerce.number().int().min(0, "Phải là số dương"),
+  is_admin: z.boolean(),
+  is_instructor: z.boolean(),
+  is_student: z.boolean(),
 });
 export type RoleForm = z.infer<typeof roleSchema>;
 
