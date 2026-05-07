@@ -6,7 +6,7 @@ import { classroomSchema, type ClassroomForm } from "@/lib/admin-schemas";
 import { CLASSROOM_TYPE, CLASSROOM_STATUS, CODE_NOTE } from "@/lib/admin-options";
 import type { FieldDef } from "@/components/admin/EntityFormDialog";
 
-export const Route = createFileRoute("/_app/admin/class-room")({
+export const Route = createFileRoute("/_app/admin/class-room/")({
   head: () => ({ meta: [{ title: "Lớp học — OnAir TMS" }] }),
   component: ClassroomPage,
 });

@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/admin/online-course/$id")({
+export const Route = createFileRoute("/_app/admin/online-course/$id/")({
   head: () => ({ meta: [{ title: "Chi tiết khoá học — OnAir TMS" }] }),
   component: CourseDetail,
 });

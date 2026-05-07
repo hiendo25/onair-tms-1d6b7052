@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { exportCsv } from "@/lib/csv";
 
-export const Route = createFileRoute("/_app/admin/surveys-results")({
+export const Route = createFileRoute("/_app/admin/surveys-results/")({
   head: () => ({ meta: [{ title: "Kết quả khảo sát — OnAir TMS" }] }),
   component: Page,
 });

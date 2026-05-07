@@ -18,7 +18,7 @@ import { employeeSchema, type EmployeeForm } from "@/lib/admin-schemas";
 import { EMPLOYEE_TYPE, STATUS_ACTIVE_INACTIVE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 
-export const Route = createFileRoute("/_app/admin/employees")({
+export const Route = createFileRoute("/_app/admin/employees/")({
   head: () => ({ meta: [{ title: "Quản lý nhân viên — OnAir TMS" }] }),
   component: EmployeesPage,
 });

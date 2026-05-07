@@ -6,7 +6,7 @@ import { assignmentSchema, type AssignmentForm } from "@/lib/admin-schemas";
 import { ASSIGNMENT_TYPE, ASSIGNMENT_STATUS, CODE_NOTE } from "@/lib/admin-options";
 import type { FieldDef } from "@/components/admin/EntityFormDialog";
 
-export const Route = createFileRoute("/_app/admin/assignments")({
+export const Route = createFileRoute("/_app/admin/assignments/")({
   head: () => ({ meta: [{ title: "Bài tập — OnAir TMS" }] }),
   component: Page,
 });

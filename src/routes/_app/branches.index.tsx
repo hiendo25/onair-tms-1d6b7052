@@ -17,7 +17,7 @@ import { branchSchema, type BranchForm } from "@/lib/admin-schemas";
 import { STATUS_ACTIVE_INACTIVE, CODE_NOTE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 
-export const Route = createFileRoute("/_app/branches")({
+export const Route = createFileRoute("/_app/branches/")({
   head: () => ({ meta: [{ title: "Chi nhánh — OnAir TMS" }] }),
   component: BranchesPage,
 });

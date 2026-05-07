@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useOrgData } from "@/lib/org-context";
 
-export const Route = createFileRoute("/_app/admin/assignments/$id")({
+export const Route = createFileRoute("/_app/admin/assignments/$id/")({
   notFoundComponent: () => <PageContainer title="Không tìm thấy bài kiểm tra"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: AssignmentDetail,
 });
