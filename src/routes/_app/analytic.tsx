@@ -10,37 +10,37 @@ export const Route = createFileRoute("/_app/analytic")({
 });
 
 const MONTHLY = [
-  { m: "T1", learners: 120, completed: 78 },
-  { m: "T2", learners: 145, completed: 92 },
-  { m: "T3", learners: 187, completed: 124 },
-  { m: "T4", learners: 210, completed: 156 },
-  { m: "T5", learners: 245, completed: 188 },
-  { m: "T6", learners: 268, completed: 201 },
+  { m: "T1", learners: 920, completed: 712 },
+  { m: "T2", learners: 1045, completed: 824 },
+  { m: "T3", learners: 1187, completed: 956 },
+  { m: "T4", learners: 1210, completed: 1042 },
+  { m: "T5", learners: 1240, completed: 1078 },
+  { m: "T6", learners: 1268, completed: 1120 },
 ];
 const MAX = Math.max(...MONTHLY.map(d => d.learners));
 
 const TOP_COURSES = [
-  { name: "Tiếng Anh thương mại", learners: 432, share: 95 },
-  { name: "Excel nâng cao", learners: 189, share: 70 },
-  { name: "Sales Excellence 2026", learners: 22, share: 12 },
-  { name: "Onboarding nhân viên", learners: 128, share: 55 },
-  { name: "ATLĐ cơ bản", learners: 56, share: 28 },
+  { name: "An toàn vệ sinh thực phẩm (VSATTP)", learners: 1240, share: 100 },
+  { name: "Văn hoá thương hiệu Highlands", learners: 1156, share: 93 },
+  { name: "Kỹ năng phục vụ khách hàng", learners: 1124, share: 90 },
+  { name: "Vận hành máy POS & thanh toán", learners: 932, share: 75 },
+  { name: "Quy trình pha chế chuẩn Highlands", learners: 842, share: 67 },
 ];
 
 const TOP_LEARNERS = [
-  { name: "Lê Hoàng Cường", xp: 2480, badge: "🥇" },
-  { name: "Phạm Thuỳ Dung", xp: 2210, badge: "🥈" },
-  { name: "Hoàng Thị Hà", xp: 1985, badge: "🥉" },
-  { name: "Bùi Thị Lan", xp: 1742, badge: "4" },
-  { name: "Ngô Văn Minh", xp: 1620, badge: "5" },
+  { name: "Lê Hoàng Cường - Pha chế HCM", xp: 2480, badge: "🥇" },
+  { name: "Phạm Thuỳ Dung - Thu ngân HCM", xp: 2210, badge: "🥈" },
+  { name: "Hoàng Thị Hà - Trưởng ca HN", xp: 1985, badge: "🥉" },
+  { name: "Bùi Thị Lan - QLCH Đà Nẵng", xp: 1742, badge: "4" },
+  { name: "Ngô Văn Minh - Pha chế HN", xp: 1620, badge: "5" },
 ];
 
 function AnalyticPage() {
   const stats = [
-    { label: "Học viên hoạt động", value: "847", icon: Users, color: "text-blue-600 bg-blue-100" },
-    { label: "Khoá hoàn thành", value: "1,284", icon: GraduationCap, color: "text-emerald-600 bg-emerald-100" },
-    { label: "Bài học đã hoàn thành", value: "12,450", icon: BookOpen, color: "text-amber-600 bg-amber-100" },
-    { label: "Giờ học tích luỹ", value: "8,912h", icon: Trophy, color: "text-violet-600 bg-violet-100" },
+    { label: "Nhân viên hoạt động", value: "1,240", icon: Users, color: "text-blue-600 bg-blue-100" },
+    { label: "Khoá hoàn thành tháng này", value: "1,078", icon: GraduationCap, color: "text-emerald-600 bg-emerald-100" },
+    { label: "Chứng chỉ cấp tháng này", value: "156", icon: BookOpen, color: "text-amber-600 bg-amber-100" },
+    { label: "Giờ học tích luỹ", value: "18,420h", icon: Trophy, color: "text-violet-600 bg-violet-100" },
   ];
 
   return (
