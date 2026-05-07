@@ -84,7 +84,7 @@ function PlanDetail() {
   if (isLoading) {
     return (
       <PageContainer
-        title={<Skeleton className="h-7 w-64" />}
+        title="Đang tải kế hoạch..."
         breadcrumbs={[{ title: "Kế hoạch", path: "/admin/plans" }, { title: "Đang tải..." }]}
       >
         <div className="grid gap-3 md:grid-cols-4">
