@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignments: {
+        Row: {
+          assigned_count: number
+          code: string
+          completed_count: number
+          created_at: string
+          deadline: string | null
+          description: string
+          id: string
+          org_id: string
+          status: string
+          title: string
+          total_questions: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_count?: number
+          code: string
+          completed_count?: number
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          org_id: string
+          status?: string
+          title: string
+          total_questions?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_count?: number
+          code?: string
+          completed_count?: number
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          id?: string
+          org_id?: string
+          status?: string
+          title?: string
+          total_questions?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           address: string
@@ -64,6 +112,102 @@ export type Database = {
           },
         ]
       }
+      certificates: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          issued_count: number
+          org_id: string
+          status: string
+          template_url: string
+          title: string
+          updated_at: string
+          valid_months: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string
+          id?: string
+          issued_count?: number
+          org_id: string
+          status?: string
+          template_url?: string
+          title: string
+          updated_at?: string
+          valid_months?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          issued_count?: number
+          org_id?: string
+          status?: string
+          template_url?: string
+          title?: string
+          updated_at?: string
+          valid_months?: number
+        }
+        Relationships: []
+      }
+      classrooms: {
+        Row: {
+          capacity: number
+          code: string
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          instructor: string
+          location: string
+          org_id: string
+          start_date: string | null
+          status: string
+          students_count: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          code: string
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          instructor?: string
+          location?: string
+          org_id: string
+          start_date?: string | null
+          status?: string
+          students_count?: number
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          code?: string
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          instructor?: string
+          location?: string
+          org_id?: string
+          start_date?: string | null
+          status?: string
+          students_count?: number
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       departments: {
         Row: {
           branch: string
@@ -107,6 +251,249 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      employees: {
+        Row: {
+          avatar_url: string
+          branch: string
+          created_at: string
+          department: string
+          email: string
+          employee_code: string
+          id: string
+          joined_at: string | null
+          name: string
+          org_id: string
+          phone: string
+          position: string
+          role: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string
+          branch?: string
+          created_at?: string
+          department?: string
+          email?: string
+          employee_code?: string
+          id?: string
+          joined_at?: string | null
+          name: string
+          org_id: string
+          phone?: string
+          position?: string
+          role?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string
+          branch?: string
+          created_at?: string
+          department?: string
+          email?: string
+          employee_code?: string
+          id?: string
+          joined_at?: string | null
+          name?: string
+          org_id?: string
+          phone?: string
+          position?: string
+          role?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      flashcards: {
+        Row: {
+          cards_count: number
+          category: string
+          code: string
+          created_at: string
+          description: string
+          id: string
+          org_id: string
+          status: string
+          students_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cards_count?: number
+          category?: string
+          code: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id: string
+          status?: string
+          students_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cards_count?: number
+          category?: string
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id?: string
+          status?: string
+          students_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      gamifications: {
+        Row: {
+          active: boolean
+          badge_url: string
+          code: string
+          condition: string
+          created_at: string
+          description: string
+          id: string
+          org_id: string
+          points: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          badge_url?: string
+          code: string
+          condition?: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id: string
+          points?: number
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          badge_url?: string
+          code?: string
+          condition?: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id?: string
+          points?: number
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      learning_paths: {
+        Row: {
+          category: string
+          code: string
+          courses_count: number
+          created_at: string
+          description: string
+          duration_hours: number
+          id: string
+          org_id: string
+          status: string
+          students_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          courses_count?: number
+          created_at?: string
+          description?: string
+          duration_hours?: number
+          id?: string
+          org_id: string
+          status?: string
+          students_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          courses_count?: number
+          created_at?: string
+          description?: string
+          duration_hours?: number
+          id?: string
+          org_id?: string
+          status?: string
+          students_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      online_courses: {
+        Row: {
+          category: string
+          code: string
+          cover_url: string
+          created_at: string
+          description: string
+          duration_minutes: number
+          id: string
+          instructor: string
+          lessons_count: number
+          level: string
+          org_id: string
+          status: string
+          students_count: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          code: string
+          cover_url?: string
+          created_at?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          instructor?: string
+          lessons_count?: number
+          level?: string
+          org_id: string
+          status?: string
+          students_count?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          code?: string
+          cover_url?: string
+          created_at?: string
+          description?: string
+          duration_minutes?: number
+          id?: string
+          instructor?: string
+          lessons_count?: number
+          level?: string
+          org_id?: string
+          status?: string
+          students_count?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       org_members: {
         Row: {
@@ -214,6 +601,54 @@ export type Database = {
         }
         Relationships: []
       }
+      plans: {
+        Row: {
+          code: string
+          completed_count: number
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          org_id: string
+          start_date: string | null
+          status: string
+          target_count: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          completed_count?: number
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          org_id: string
+          start_date?: string | null
+          status?: string
+          target_count?: number
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          completed_count?: number
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          org_id?: string
+          start_date?: string | null
+          status?: string
+          target_count?: number
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -234,6 +669,102 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      question_bank: {
+        Row: {
+          category: string
+          correct_answer: string
+          created_at: string
+          difficulty: string
+          id: string
+          options: Json
+          org_id: string
+          points: number
+          question: string
+          tags: string[]
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string
+          id?: string
+          options?: Json
+          org_id: string
+          points?: number
+          question: string
+          tags?: string[]
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          correct_answer?: string
+          created_at?: string
+          difficulty?: string
+          id?: string
+          options?: Json
+          org_id?: string
+          points?: number
+          question?: string
+          tags?: string[]
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      surveys: {
+        Row: {
+          anonymous: boolean
+          code: string
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          org_id: string
+          responses_count: number
+          start_date: string | null
+          status: string
+          target_count: number
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          anonymous?: boolean
+          code: string
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          org_id: string
+          responses_count?: number
+          start_date?: string | null
+          status?: string
+          target_count?: number
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          anonymous?: boolean
+          code?: string
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          org_id?: string
+          responses_count?: number
+          start_date?: string | null
+          status?: string
+          target_count?: number
+          title?: string
+          type?: string
           updated_at?: string
         }
         Relationships: []
