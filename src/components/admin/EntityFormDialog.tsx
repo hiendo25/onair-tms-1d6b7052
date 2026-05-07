@@ -1,7 +1,7 @@
 import { useEffect, type ReactNode } from "react";
 import { useForm, FormProvider, Controller, type DefaultValues, type FieldValues, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { ZodType } from "zod";
+import type { ZodTypeAny } from "zod";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ interface Props<T extends FieldValues> {
   onOpenChange: (v: boolean) => void;
   title: string;
   description?: string;
-  schema: ZodType<T>;
+  schema: ZodTypeAny;
   fields: FieldDef<T>[];
   defaultValues: DefaultValues<T>;
   initialValues?: Partial<T>;
@@ -35,7 +35,7 @@ interface Props<T extends FieldValues> {
 export function EntityFormDialog<T extends FieldValues>({
   open, onOpenChange, title, description, schema, fields, defaultValues, initialValues, onSubmit, submitting, submitLabel, size = "md",
 }: Props<T>) {
-  const methods = useForm<T>({ resolver: zodResolver(schema) as never, defaultValues });
+  const methods = useForm<T>({ resolver: zodResolver(schema as never) as never, defaultValues });
   const { control, handleSubmit, reset, formState: { errors } } = methods;
 
   useEffect(() => {
