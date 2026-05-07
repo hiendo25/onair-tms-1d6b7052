@@ -97,10 +97,80 @@ export const useClassrooms = classroomsCrud.useList;
 export const useClassroomMutations = classroomsCrud.useMutations;
 
 // ===== Learning paths =====
-export type DBLearningPath = { id: string; org_id: string; code: string; title: string; description: string; category: string; courses_count: number; duration_hours: number; students_count: number; status: string; };
+export type DBLearningPath = {
+  id: string; org_id: string; code: string; title: string; description: string;
+  category: string; courses_count: number; duration_hours: number; students_count: number;
+  status: "inactive" | "active" | "locked";
+  cover_url: string; version: number; published_at: string | null; created_by: string | null;
+  created_at: string;
+};
 const learningPathsCrud = createOrgCrud<DBLearningPath>("learning_paths", "lộ trình");
 export const useLearningPaths = learningPathsCrud.useList;
 export const useLearningPathMutations = learningPathsCrud.useMutations;
+
+export type DBLpStage = { id: string; org_id: string; learning_path_id: string; name: string; description: string; stage_order: number; start_date: string | null; end_date: string | null; created_at: string; updated_at: string };
+export type DBLpStageCourse = { id: string; org_id: string; stage_id: string; course_id: string; course_order: number; created_at: string };
+export type DBLpStageAssignment = { id: string; org_id: string; stage_id: string; assignment_id: string; unlock_condition: string; required: boolean; created_at: string };
+export type DBLpSettings = { id: string; org_id: string; learning_path_id: string; sequential_mode: boolean; completion_threshold: number; deadline_days: number | null; allow_retake: boolean; created_at: string; updated_at: string };
+export type DBLpAudience = { id: string; org_id: string; learning_path_id: string; target_type: "all" | "user" | "department" | "branch"; target_id: string | null; assigned_at: string; assigned_by: string | null };
+export type DBLpEnrollment = { id: string; org_id: string; learning_path_id: string; user_id: string; enrolled_at: string; started_at: string | null; completed_at: string | null; deadline: string | null; status: "not_started" | "in_progress" | "completed" | "overdue"; progress: number; created_at: string; updated_at: string };
+export type DBLpVersion = { id: string; org_id: string; learning_path_id: string; version: number; snapshot: unknown; changed_by: string | null; changed_at: string; change_note: string };
+export type DBNotification = { id: string; org_id: string; user_id: string; type: string; title: string; body: string; channel: string; read: boolean; sent_at: string; ref_type: string | null; ref_id: string | null; created_at: string };
+
+function useLpChild<T extends AnyRow>(table: string, learningPathId: string | undefined) {
+  return useQuery({
+    queryKey: [table, learningPathId],
+    enabled: !!learningPathId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from(table as never).select("*").eq("learning_path_id", learningPathId as string).order("created_at");
+      if (error) throw error;
+      return (data ?? []) as unknown as T[];
+    },
+  });
+}
+function useStageChild<T extends AnyRow>(table: string, stageIds: string[]) {
+  return useQuery({
+    queryKey: [table, stageIds.join(",")],
+    enabled: stageIds.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from(table as never).select("*").in("stage_id", stageIds);
+      if (error) throw error;
+      return (data ?? []) as unknown as T[];
+    },
+  });
+}
+
+export const useLpStages = (lpId: string | undefined) => {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["learning_path_stages", orgId, lpId],
+    enabled: !!lpId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("learning_path_stages").select("*").eq("learning_path_id", lpId as string).order("stage_order");
+      if (error) throw error;
+      return (data ?? []) as unknown as DBLpStage[];
+    },
+  });
+};
+export const useLpStageCourses = (stageIds: string[]) => useStageChild<DBLpStageCourse>("learning_path_stage_courses", stageIds);
+export const useLpStageAssignments = (stageIds: string[]) => useStageChild<DBLpStageAssignment>("learning_path_stage_assignments", stageIds);
+export const useLpSettings = (lpId: string | undefined) => useLpChild<DBLpSettings>("learning_path_settings", lpId);
+export const useLpAudience = (lpId: string | undefined) => useLpChild<DBLpAudience>("learning_path_audience", lpId);
+export const useLpEnrollments = (lpId: string | undefined) => useLpChild<DBLpEnrollment>("learning_path_enrollments", lpId);
+export const useLpVersions = (lpId: string | undefined) => useLpChild<DBLpVersion>("learning_path_versions", lpId);
+
+export function useLpInvalidate() {
+  const qc = useQueryClient();
+  return (lpId?: string) => {
+    qc.invalidateQueries({ queryKey: ["learning_paths"] });
+    if (lpId) {
+      ["learning_path_stages", "learning_path_settings", "learning_path_audience", "learning_path_enrollments", "learning_path_versions"].forEach(t =>
+        qc.invalidateQueries({ queryKey: [t, undefined, lpId] }));
+    }
+    qc.invalidateQueries(); // simple broad invalidate
+  };
+}
+
 
 // ===== Assignments =====
 export type DBAssignment = { id: string; org_id: string; code: string; title: string; description: string; type: string; deadline: string | null; total_questions: number; assigned_count: number; completed_count: number; status: string; };

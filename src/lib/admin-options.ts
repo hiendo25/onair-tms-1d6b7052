@@ -37,9 +37,28 @@ export const COURSE_STATUS = [
 ];
 
 export const PATH_STATUS = [
-  { value: "draft", label: "Bản nháp" },
-  { value: "published", label: "Đã xuất bản" },
-  { value: "archived", label: "Đã lưu trữ" },
+  { value: "inactive", label: "Chưa kích hoạt" },
+  { value: "active", label: "Đang hoạt động" },
+  { value: "locked", label: "Đã khoá" },
+];
+
+export const LP_AUDIENCE_TYPE = [
+  { value: "all", label: "Tất cả" },
+  { value: "branch", label: "Chi nhánh" },
+  { value: "department", label: "Phòng ban" },
+  { value: "user", label: "Cá nhân" },
+];
+
+export const LP_UNLOCK_CONDITION = [
+  { value: "after_all_courses", label: "Sau khi hoàn thành tất cả khoá" },
+  { value: "always", label: "Luôn mở" },
+];
+
+export const LP_ENROLLMENT_STATUS = [
+  { value: "not_started", label: "Chưa bắt đầu" },
+  { value: "in_progress", label: "Đang học" },
+  { value: "completed", label: "Hoàn thành" },
+  { value: "overdue", label: "Quá hạn" },
 ];
 
 export const ASSIGNMENT_TYPE = [
