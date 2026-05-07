@@ -45,8 +45,8 @@ function AnalyticPage() {
 
   return (
     <PageContainer
-      title="Báo cáo & phân tích"
-      breadcrumbs={[{ title: "Báo cáo" }, { title: "Tổng quan" }]}
+      title="Analytic"
+      breadcrumbs={[{ title: "Báo cáo" }, { title: "Analytic" }]}
     >
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map(s => {
