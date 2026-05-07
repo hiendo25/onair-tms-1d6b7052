@@ -218,6 +218,7 @@ export type Database = {
           id: string
           name: string
           org_id: string
+          status: string
           updated_at: string
         }
         Insert: {
@@ -229,6 +230,7 @@ export type Database = {
           id?: string
           name: string
           org_id: string
+          status?: string
           updated_at?: string
         }
         Update: {
@@ -240,6 +242,7 @@ export type Database = {
           id?: string
           name?: string
           org_id?: string
+          status?: string
           updated_at?: string
         }
         Relationships: [
