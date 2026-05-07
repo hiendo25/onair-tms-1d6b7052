@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useBranches, useDepartments, useEmployees } from "@/lib/data-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { useBranchReadiness, levelOf, levelLabel, levelClasses, scoreColor } from "@/lib/branch-readiness";
+import { Badge } from "@/components/ui/badge";
 
 function useBranchCompletion(orgId: string) {
   return useQuery({
