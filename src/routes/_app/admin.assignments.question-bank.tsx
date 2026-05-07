@@ -219,10 +219,21 @@ function Page() {
         { title: "Ngân hàng câu hỏi" },
       ]}
       actions={
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Tạo câu hỏi
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setAiOpen(true)}
+            className="border-violet-300 text-violet-700 hover:bg-violet-50"
+          >
+            <Sparkles className="h-4 w-4" />
+            Sinh câu hỏi bằng AI
+          </Button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Tạo câu hỏi
+          </Button>
+        </div>
       }
     >
       <Card className="p-4">
