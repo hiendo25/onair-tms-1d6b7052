@@ -80,6 +80,60 @@ function Page() {
   const [delId, setDelId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // AI generation state
+  const [aiOpen, setAiOpen] = useState(false);
+  const [aiSource, setAiSource] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiResults, setAiResults] = useState<AiQuestion[] | null>(null);
+  const [aiSelected, setAiSelected] = useState<Set<number>>(new Set());
+  const [aiSaving, setAiSaving] = useState(false);
+
+  async function runAi() {
+    if (!aiSource.trim()) {
+      toast.error("Vui lòng nhập nội dung tham khảo");
+      return;
+    }
+    setAiLoading(true);
+    setAiResults(null);
+    try {
+      const out = await aiGenerateQuestions(aiSource, 10);
+      setAiResults(out);
+      setAiSelected(new Set(out.map((_, i) => i)));
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function saveSelected() {
+    if (!aiResults) return;
+    setAiSaving(true);
+    try {
+      const picks = aiResults.filter((_, i) => aiSelected.has(i));
+      for (const q of picks) {
+        await m.create.mutateAsync({
+          question: q.question,
+          type: "single",
+          category: "AI tạo",
+          difficulty: "medium",
+          points: 1,
+          options: q.options,
+          correct_answer: String(q.correct_index),
+          explanation: q.explanation,
+          tags: ["ai-generated"],
+        });
+      }
+      toast.success(`Đã thêm ${picks.length} câu hỏi vào ngân hàng`);
+      setAiOpen(false);
+      setAiResults(null);
+      setAiSource("");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Có lỗi xảy ra");
+    } finally {
+      setAiSaving(false);
+    }
+  }
+
+
   const categories = useMemo(
     () => Array.from(new Set(rows.map((r) => r.category).filter(Boolean))),
     [rows]
