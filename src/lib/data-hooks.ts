@@ -67,7 +67,7 @@ export const useBranches = branchesCrud.useList;
 export const useBranchMutations = branchesCrud.useMutations;
 
 // ===== Departments =====
-export type DBDepartment = { id: string; org_id: string; code: string; name: string; branch: string; head: string; employees: number; };
+export type DBDepartment = { id: string; org_id: string; code: string; name: string; branch: string; head: string; employees: number; status: string; };
 const departmentsCrud = createOrgCrud<DBDepartment>("departments", "phòng ban");
 export const useDepartments = departmentsCrud.useList;
 export const useDepartmentMutations = departmentsCrud.useMutations;
