@@ -1,82 +1,37 @@
-import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Search, MoreVertical, Eye, Pencil, Trash2 } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useOrgData } from "@/lib/org-context";
+import { createFileRoute } from "@tanstack/react-router";
+import { useLearningPaths, useLearningPathMutations, type DBLearningPath } from "@/lib/data-hooks";
+import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_app/admin/learning-paths")({
-  head: () => ({ meta: [{ title: "Lộ trình học tập — OnAir TMS" }] }),
-  component: LearningPathsPage,
+  head: () => ({ meta: [{ title: "Lộ trình học — OnAir TMS" }] }),
+  component: Page,
 });
+const STATUS = [{ value: "draft", label: "Nháp" }, { value: "published", label: "Đã xuất bản" }];
 
-function LearningPathsPage() {
-  const data = useOrgData();
-  const [search, setSearch] = useState("");
-
+function Page() {
+  const { data: rows = [], isLoading } = useLearningPaths();
+  const m = useLearningPathMutations();
   return (
-    <PageContainer
-      title="Lộ trình học tập"
-      breadcrumbs={[{ title: "Lộ trình học tập" }]}
-      actions={
-        <Button asChild size="sm">
-          <Link to="/admin/learning-paths/create"><Plus className="h-4 w-4" />Tạo lộ trình học tập</Link>
-        </Button>
-      }
-    >
-      <Card className="p-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm kiếm lộ trình học tập..." className="pl-9" />
-        </div>
-      </Card>
-
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tên lộ trình</TableHead>
-              <TableHead className="text-center">Số giai đoạn</TableHead>
-              <TableHead className="text-center">Số môn học</TableHead>
-              <TableHead className="text-center">Học viên</TableHead>
-              <TableHead>Ngày tạo</TableHead>
-              <TableHead className="w-24 text-center">Hành động</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.learningPaths.filter(lp => !search || lp.title.toLowerCase().includes(search.toLowerCase())).map(lp => (
-              <TableRow key={lp.id}>
-                <TableCell>
-                  <Link to="/admin/learning-paths/$id" params={{ id: lp.id }} className="font-medium hover:underline">
-                    {lp.title}
-                  </Link>
-                  <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{lp.description}</div>
-                </TableCell>
-                <TableCell className="text-center">{lp.phases.length}</TableCell>
-                <TableCell className="text-center">{lp.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0)}</TableCell>
-                <TableCell className="text-center">{lp.enrolled}</TableCell>
-                <TableCell className="text-sm text-muted-foreground">2026-01-15</TableCell>
-                <TableCell className="text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/$id" params={{ id: lp.id }}><Eye className="h-4 w-4" />Chi tiết</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/edit/$id" params={{ id: lp.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive"><Trash2 className="h-4 w-4" />Xóa</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-    </PageContainer>
+    <SimpleEntityPage<DBLearningPath>
+      title="Quản lý lộ trình học" breadcrumbs={[{ title: "Đào tạo" }, { title: "Lộ trình học" }]}
+      rows={rows} isLoading={isLoading} searchKeys={["title", "code", "category"]}
+      filters={[{ key: "status", placeholder: "Trạng thái", options: STATUS, match: (r, v) => r.status === v }]}
+      columns={[
+        { key: "code", label: "Mã", render: (r) => <Badge variant="outline">{r.code}</Badge> },
+        { key: "title", label: "Tên" }, { key: "category", label: "Danh mục" },
+        { key: "courses_count", label: "Khoá" }, { key: "duration_hours", label: "Giờ" },
+        { key: "students_count", label: "HV" }, { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
+      ]}
+      fields={[
+        { key: "code", label: "Mã" }, { key: "title", label: "Tên" }, { key: "description", label: "Mô tả", type: "textarea" },
+        { key: "category", label: "Danh mục" }, { key: "courses_count", label: "Số khoá", type: "number" },
+        { key: "duration_hours", label: "Giờ học", type: "number" }, { key: "status", label: "Trạng thái", type: "select", options: STATUS },
+      ]}
+      emptyValues={{ code: "", title: "", description: "", category: "", courses_count: 0, duration_hours: 0, students_count: 0, status: "draft" }}
+      onCreate={(v) => m.create.mutateAsync(v)} onUpdate={(v) => m.update.mutateAsync(v)} onDelete={(id) => m.remove.mutateAsync(id)}
+      onBulkInsert={(rs) => m.bulkInsert.mutateAsync(rs.map((r: any) => ({ ...r, courses_count: Number(r.courses_count) || 0, duration_hours: Number(r.duration_hours) || 0, students_count: 0, status: r.status || "draft" })))}
+      csvFilename="learning_paths.csv"
+    />
   );
 }
