@@ -11,6 +11,9 @@ import {
   Users,
   Trophy,
   BarChart3,
+  Library,
+  Layers,
+  Heart,
   type LucideIcon,
 } from "lucide-react";
 
