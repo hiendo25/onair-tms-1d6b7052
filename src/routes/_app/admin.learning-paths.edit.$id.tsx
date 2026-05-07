@@ -183,14 +183,14 @@ function EditLP() {
         const stageId = (stIns as { id: string }).id;
         if (st.courses.length > 0) {
           const { error } = await supabase.from("learning_path_stage_courses").insert(
-            st.courses.map((c, ci) => ({ org_id: orgId, stage_id: stageId, course_id: c.course_id, course_order: ci }))
-          as never);
+            st.courses.map((c, ci) => ({ org_id: orgId, stage_id: stageId, course_id: c.course_id, course_order: ci })) as never
+          );
           if (error) throw error;
         }
         if (st.assignments.length > 0) {
           const { error } = await supabase.from("learning_path_stage_assignments").insert(
-            st.assignments.map(a => ({ org_id: orgId, stage_id: stageId, assignment_id: a.assignment_id, unlock_condition: a.unlock_condition, required: a.required }))
-          as never);
+            st.assignments.map(a => ({ org_id: orgId, stage_id: stageId, assignment_id: a.assignment_id, unlock_condition: a.unlock_condition, required: a.required })) as never
+          );
           if (error) throw error;
         }
       }
@@ -212,8 +212,8 @@ function EditLP() {
       }
       if (audience.length > 0) {
         const { error } = await supabase.from("learning_path_audience").insert(
-          audience.map(a => ({ org_id: orgId, learning_path_id: lpId, target_type: a.target_type, target_id: a.target_type === "all" ? null : a.target_id }))
-        as never);
+          audience.map(a => ({ org_id: orgId, learning_path_id: lpId, target_type: a.target_type, target_id: a.target_type === "all" ? null : a.target_id })) as never
+        );
         if (error) throw error;
       }
 
