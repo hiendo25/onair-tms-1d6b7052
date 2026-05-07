@@ -8,6 +8,7 @@ import { AiSpinner } from "@/components/ai/AiSpinner";
 import { aiSummarizeLesson, aiGenerateFlashcards, type AiFlashcard } from "@/lib/ai-mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { logLearningActivity } from "@/lib/log-activity";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
