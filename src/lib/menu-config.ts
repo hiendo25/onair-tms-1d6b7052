@@ -40,11 +40,11 @@ export const ADMIN_MENU: MenuItem[] = [
   { title: "Kế hoạch đào tạo", key: "plans", path: "/admin/plans", icon: FolderKanban },
   { title: "Lộ trình học tập", key: "learning-paths", path: "/admin/learning-paths", icon: BookOpen },
   {
-    title: "Quản lý lớp học",
+    title: "Nội dung học tập",
     key: "class-room",
     icon: Monitor,
     children: [
-      { title: "Danh sách lớp học", key: "cr-list", path: "/admin/class-room" },
+      { title: "Lớp học", key: "cr-list", path: "/admin/class-room" },
       { title: "Khóa học", key: "courses", path: "/admin/online-course" },
     ],
   },
