@@ -1,31 +1,82 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
 import { aiSummarizeLesson } from "@/lib/ai-mock";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrg } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/class-room/$slug/learning-screen/$courseId")({
   head: () => ({ meta: [{ title: "Học — OnAir TMS" }] }),
   component: LS,
 });
 
+type LessonRow = { id: string; title: string; section_id: string; sort_order: number; content: string };
+type SectionRow = { id: string; title: string; sort_order: number };
+type CourseData = {
+  course: { id: string; title: string } | null;
+  sections: SectionRow[];
+  lessons: LessonRow[];
+};
+
+function useCourseData(orgId: string, courseId: string) {
+  return useQuery<CourseData>({
+    queryKey: ["learning-screen", orgId, courseId],
+    enabled: !!courseId,
+    queryFn: async () => {
+      const [{ data: course }, { data: sections }, { data: lessons }] = await Promise.all([
+        supabase.from("online_courses").select("id, title").eq("id", courseId).maybeSingle(),
+        supabase.from("course_sections").select("id, title, sort_order")
+          .eq("course_id", courseId).eq("org_id", orgId).order("sort_order", { ascending: true }),
+        supabase.from("course_lessons").select("id, title, section_id, sort_order, content")
+          .eq("course_id", courseId).eq("org_id", orgId).order("sort_order", { ascending: true }),
+      ]);
+      return {
+        course: course ?? null,
+        sections: (sections ?? []) as SectionRow[],
+        lessons: (lessons ?? []) as LessonRow[],
+      };
+    },
+  });
+}
+
 function LS() {
   const { slug, courseId } = Route.useParams();
-  const lessonTitle = "Component";
+  const { orgId } = useOrg();
+  const { data, isLoading } = useCourseData(orgId, courseId);
 
-  // Cache summaries per lesson title
+  const lessons = data?.lessons ?? [];
+  const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
+
+  // Pick first lesson once data arrives
+  useEffect(() => {
+    if (!currentLessonId && lessons.length > 0) {
+      setCurrentLessonId(lessons[0].id);
+    }
+  }, [lessons, currentLessonId]);
+
+  const currentLesson = useMemo(
+    () => lessons.find((l) => l.id === currentLessonId) ?? null,
+    [lessons, currentLessonId],
+  );
+  const lessonTitle = currentLesson?.title ?? data?.course?.title ?? "";
+  const courseTitle = data?.course?.title ?? "Khóa học";
+
+  // Cache summaries per lesson id
   const [summaries, setSummaries] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
-  const current = summaries[lessonTitle];
+  const cacheKey = currentLessonId ?? "";
+  const current = summaries[cacheKey];
 
   async function runSummary() {
-    if (current || loading) return;
+    if (!cacheKey || !lessonTitle || current || loading) return;
     setLoading(true);
     try {
       const bullets = await aiSummarizeLesson(lessonTitle);
-      setSummaries((prev) => ({ ...prev, [lessonTitle]: bullets }));
+      setSummaries((prev) => ({ ...prev, [cacheKey]: bullets }));
     } finally {
       setLoading(false);
     }
@@ -35,33 +86,56 @@ function LS() {
     <div className="flex h-[calc(100vh-3.5rem)]">
       <aside className="w-80 border-r bg-card overflow-y-auto">
         <div className="p-4 border-b">
-          <Button variant="ghost" size="sm" asChild className="mb-2"><Link to="/class-room/$slug" params={{ slug }}><ChevronLeft className="h-4 w-4" />Quay lại</Link></Button>
-          <div className="font-semibold">React Cơ bản</div>
-          <div className="text-xs text-muted-foreground">Khóa #{courseId}</div>
+          <Button variant="ghost" size="sm" asChild className="mb-2">
+            <Link to="/class-room/$slug" params={{ slug }}><ChevronLeft className="h-4 w-4" />Quay lại</Link>
+          </Button>
+          <div className="font-semibold line-clamp-2">{courseTitle}</div>
+          <div className="text-xs text-muted-foreground">{lessons.length} bài học</div>
         </div>
         <div className="p-2 space-y-1">
-          {[["Giới thiệu", true], ["JSX", true], ["Component", false], ["Props & State", false], ["Hooks", false]].map(([t, done], i) => (
-            <button key={i} className="w-full flex items-center gap-2 p-2 rounded hover:bg-muted text-left text-sm">
-              {done ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <PlayCircle className="h-4 w-4 text-muted-foreground" />}
-              <span className={done ? "text-muted-foreground" : ""}>{t as string}</span>
-            </button>
-          ))}
+          {isLoading && <div className="p-3 text-sm text-muted-foreground">Đang tải bài học...</div>}
+          {!isLoading && lessons.length === 0 && (
+            <div className="p-3 text-sm text-muted-foreground">Khóa học chưa có bài học.</div>
+          )}
+          {lessons.map((l) => {
+            const active = l.id === currentLessonId;
+            return (
+              <button
+                key={l.id}
+                onClick={() => setCurrentLessonId(l.id)}
+                className={`w-full flex items-center gap-2 p-2 rounded text-left text-sm transition ${
+                  active ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"
+                }`}
+              >
+                <PlayCircle className={`h-4 w-4 ${active ? "text-primary" : "text-muted-foreground"}`} />
+                <span className="truncate">{l.title}</span>
+              </button>
+            );
+          })}
         </div>
       </aside>
       <main className="flex-1 overflow-y-auto p-6 space-y-4">
-        <Card><CardContent className="p-0 aspect-video bg-black flex items-center justify-center text-white">Video player</CardContent></Card>
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-xl font-semibold">Bài học: {lessonTitle}</h1>
+        <Card>
+          <CardContent className="p-0 aspect-video bg-black flex items-center justify-center text-white">
+            Video player
+          </CardContent>
+        </Card>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <h1 className="text-xl font-semibold">
+            {currentLesson ? `Bài học: ${currentLesson.title}` : "Chọn một bài học"}
+          </h1>
           <Button
             onClick={runSummary}
-            disabled={loading}
+            disabled={loading || !currentLesson}
             className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
           >
             <Sparkles className="h-4 w-4 mr-1.5" />
             {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground">Mô tả bài học và tài liệu đính kèm.</p>
+        <p className="text-sm text-muted-foreground whitespace-pre-line">
+          {currentLesson?.content || "Chưa có mô tả cho bài học này."}
+        </p>
 
         {(loading || current) && (
           <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50">
@@ -86,10 +160,30 @@ function LS() {
         )}
 
         <div className="flex justify-between mt-6">
-          <Button variant="outline">Bài trước</Button>
-          <Button>Đánh dấu hoàn thành</Button>
+          <Button
+            variant="outline"
+            disabled={!currentLessonId || lessons.findIndex((l) => l.id === currentLessonId) <= 0}
+            onClick={() => {
+              const i = lessons.findIndex((l) => l.id === currentLessonId);
+              if (i > 0) setCurrentLessonId(lessons[i - 1].id);
+            }}
+          >
+            Bài trước
+          </Button>
+          <Button
+            disabled={!currentLessonId || lessons.findIndex((l) => l.id === currentLessonId) >= lessons.length - 1}
+            onClick={() => {
+              const i = lessons.findIndex((l) => l.id === currentLessonId);
+              if (i >= 0 && i < lessons.length - 1) setCurrentLessonId(lessons[i + 1].id);
+            }}
+          >
+            Bài tiếp theo
+          </Button>
         </div>
       </main>
     </div>
   );
 }
+
+// Suppress unused warning for sections (kept for future grouping UI)
+void ({} as SectionRow);
