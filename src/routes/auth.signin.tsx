@@ -63,7 +63,7 @@ function SignInPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-slate-900">Đăng nhập</h1>
         <p className="mt-2 text-sm text-slate-500">
-          Truy cập vào OnAir TMS để bắt đầu hành trình học tập
+          Truy cập vào OnAir LMS để bắt đầu hành trình học tập và phát triển của bạn
         </p>
       </div>
       <form className="space-y-5" onSubmit={handleSubmit}>
