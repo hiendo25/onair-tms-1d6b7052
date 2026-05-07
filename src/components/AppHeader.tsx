@@ -1,4 +1,5 @@
-import { Bell, Settings, ChevronDown } from "lucide-react";
+import { Bell, Settings, ChevronDown, LogOut, Check } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,10 +12,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useOrg } from "@/lib/org-context";
-import { Check } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 export function AppHeader() {
   const { org, orgs, orgId, setOrg } = useOrg();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/auth/signin" });
+  };
+  const initials = (user?.user_metadata?.full_name || user?.email || "U")
+    .split(" ")
+    .map((s: string) => s[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
       <SidebarTrigger />
@@ -68,18 +81,22 @@ export function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 gap-2 px-2">
               <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">AD</AvatarFallback>
+                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
-              <span className="hidden text-sm sm:inline">Admin</span>
+              <span className="hidden max-w-[140px] truncate text-sm sm:inline">
+                {user?.user_metadata?.full_name || user?.email}
+              </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Hồ sơ</DropdownMenuItem>
             <DropdownMenuItem>Cài đặt</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Đăng xuất</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleSignOut} className="text-destructive">
+              <LogOut className="h-4 w-4" /> Đăng xuất
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
