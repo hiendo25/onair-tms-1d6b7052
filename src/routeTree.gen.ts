@@ -54,6 +54,7 @@ import { Route as AppMyLearningPathsLearningScreenCourseIdRouteImport } from './
 import { Route as AppAdminSurveysListRouteImport } from './routes/_app/admin.surveys.list'
 import { Route as AppAdminRolesCodeRouteImport } from './routes/_app/admin.roles.$code'
 import { Route as AppAdminReportOverviewRouteImport } from './routes/_app/admin.report.overview'
+import { Route as AppAdminPlansNewRouteImport } from './routes/_app/admin.plans.new'
 import { Route as AppAdminPlansIdRouteImport } from './routes/_app/admin.plans.$id'
 import { Route as AppAdminOnlineCourseListRouteImport } from './routes/_app/admin.online-course.list'
 import { Route as AppAdminOnlineCourseIdRouteImport } from './routes/_app/admin.online-course.$id'
@@ -315,6 +316,11 @@ const AppAdminReportOverviewRoute = AppAdminReportOverviewRouteImport.update({
   path: '/admin/report/overview',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminPlansNewRoute = AppAdminPlansNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppAdminPlansRoute,
+} as any)
 const AppAdminPlansIdRoute = AppAdminPlansIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -551,6 +557,7 @@ export interface FileRoutesByFullPath {
   '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
+  '/admin/plans/new': typeof AppAdminPlansNewRoute
   '/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/admin/roles/$code': typeof AppAdminRolesCodeRoute
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
@@ -630,6 +637,7 @@ export interface FileRoutesByTo {
   '/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
+  '/admin/plans/new': typeof AppAdminPlansNewRoute
   '/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/admin/roles/$code': typeof AppAdminRolesCodeRoute
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
@@ -711,6 +719,7 @@ export interface FileRoutesById {
   '/_app/admin/online-course/$id': typeof AppAdminOnlineCourseIdRouteWithChildren
   '/_app/admin/online-course/list': typeof AppAdminOnlineCourseListRoute
   '/_app/admin/plans/$id': typeof AppAdminPlansIdRouteWithChildren
+  '/_app/admin/plans/new': typeof AppAdminPlansNewRoute
   '/_app/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/_app/admin/roles/$code': typeof AppAdminRolesCodeRoute
   '/_app/admin/surveys/list': typeof AppAdminSurveysListRoute
@@ -792,6 +801,7 @@ export interface FileRouteTypes {
     | '/admin/online-course/$id'
     | '/admin/online-course/list'
     | '/admin/plans/$id'
+    | '/admin/plans/new'
     | '/admin/report/overview'
     | '/admin/roles/$code'
     | '/admin/surveys/list'
@@ -871,6 +881,7 @@ export interface FileRouteTypes {
     | '/admin/online-course/$id'
     | '/admin/online-course/list'
     | '/admin/plans/$id'
+    | '/admin/plans/new'
     | '/admin/report/overview'
     | '/admin/roles/$code'
     | '/admin/surveys/list'
@@ -951,6 +962,7 @@ export interface FileRouteTypes {
     | '/_app/admin/online-course/$id'
     | '/_app/admin/online-course/list'
     | '/_app/admin/plans/$id'
+    | '/_app/admin/plans/new'
     | '/_app/admin/report/overview'
     | '/_app/admin/roles/$code'
     | '/_app/admin/surveys/list'
@@ -1312,6 +1324,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/report/overview'
       preLoaderRoute: typeof AppAdminReportOverviewRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/admin/plans/new': {
+      id: '/_app/admin/plans/new'
+      path: '/new'
+      fullPath: '/admin/plans/new'
+      preLoaderRoute: typeof AppAdminPlansNewRouteImport
+      parentRoute: typeof AppAdminPlansRoute
     }
     '/_app/admin/plans/$id': {
       id: '/_app/admin/plans/$id'
@@ -1780,10 +1799,12 @@ const AppAdminPlansIdRouteWithChildren = AppAdminPlansIdRoute._addFileChildren(
 
 interface AppAdminPlansRouteChildren {
   AppAdminPlansIdRoute: typeof AppAdminPlansIdRouteWithChildren
+  AppAdminPlansNewRoute: typeof AppAdminPlansNewRoute
 }
 
 const AppAdminPlansRouteChildren: AppAdminPlansRouteChildren = {
   AppAdminPlansIdRoute: AppAdminPlansIdRouteWithChildren,
+  AppAdminPlansNewRoute: AppAdminPlansNewRoute,
 }
 
 const AppAdminPlansRouteWithChildren = AppAdminPlansRoute._addFileChildren(
