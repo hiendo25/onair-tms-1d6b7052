@@ -256,6 +256,32 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   // ======================== Renderers ========================
   const progress = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
 
+  if (loadingPlan) {
+    return (
+      <PageContainer
+        title="Đang tải kế hoạch..."
+        breadcrumbs={[{ title: "Kế hoạch đào tạo", path: "/admin/plans" }, { title: "Chỉnh sửa" }]}
+      >
+        <div className="grid gap-6 md:grid-cols-[320px_1fr]">
+          <div className="space-y-3">
+            <Card><CardContent className="p-4 space-y-3"><Skeleton className="h-4 w-32" /><Skeleton className="h-1.5 w-full" /></CardContent></Card>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Card key={i}><CardContent className="p-4 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /></CardContent></Card>
+            ))}
+          </div>
+          <div className="space-y-4">
+            <Card><CardHeader><Skeleton className="h-6 w-48" /></CardHeader><CardContent className="space-y-3">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-24 w-full" />
+              <div className="grid grid-cols-2 gap-3"><Skeleton className="h-10 w-full" /><Skeleton className="h-10 w-full" /></div>
+            </CardContent></Card>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer
       title="Tạo kế hoạch đào tạo"
