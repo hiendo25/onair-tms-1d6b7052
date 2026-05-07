@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
+import type { ZodTypeAny } from "zod";
 import { Plus, Search, Upload, Download } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
@@ -7,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { ImportCsvDialog } from "@/components/admin/ImportCsvDialog";
+import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
 import { exportCsv } from "@/lib/csv";
 
 export type Field = {
@@ -47,6 +50,10 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
   onBulkInsert?: (rows: Partial<T>[]) => Promise<void> | void;
   csvHeaders?: string[];
   csvFilename?: string;
+  // Optional: when provided, the create/edit dialog uses RHF + zod validation
+  schema?: ZodTypeAny;
+  formFields?: FieldDef<any>[];
+  entityLabel?: string;
 }) {
   const [q, setQ] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>(
