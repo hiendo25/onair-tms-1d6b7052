@@ -45,7 +45,7 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: Monitor,
     children: [
       { title: "Danh sách lớp học", key: "cr-list", path: "/admin/class-room" },
-      { title: "Môn học", key: "courses", path: "/admin/online-course" },
+      { title: "Khóa học", key: "courses", path: "/admin/online-course" },
     ],
   },
   {
