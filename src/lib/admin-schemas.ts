@@ -119,6 +119,8 @@ export const questionSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]),
   points: z.coerce.number().min(0.1, "Điểm phải lớn hơn 0."),
   correct_answer: optStr,
+  explanation: optStr,
+  options: z.array(z.string()).optional(),
 });
 export type QuestionForm = z.infer<typeof questionSchema>;
 

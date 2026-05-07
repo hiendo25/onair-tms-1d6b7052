@@ -795,6 +795,7 @@ export type Database = {
           correct_answer: string
           created_at: string
           difficulty: string
+          explanation: string
           id: string
           options: Json
           org_id: string
@@ -809,6 +810,7 @@ export type Database = {
           correct_answer?: string
           created_at?: string
           difficulty?: string
+          explanation?: string
           id?: string
           options?: Json
           org_id: string
@@ -823,6 +825,7 @@ export type Database = {
           correct_answer?: string
           created_at?: string
           difficulty?: string
+          explanation?: string
           id?: string
           options?: Json
           org_id?: string
