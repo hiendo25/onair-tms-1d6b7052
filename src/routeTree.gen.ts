@@ -35,6 +35,7 @@ import { Route as AppDepartmentsIdRouteImport } from './routes/_app/departments.
 import { Route as AppClassRoomSlugRouteImport } from './routes/_app/class-room.$slug'
 import { Route as AppBranchesListRouteImport } from './routes/_app/branches.list'
 import { Route as AppBranchesIdRouteImport } from './routes/_app/branches.$id'
+import { Route as AppAdminSurveysResultsRouteImport } from './routes/_app/admin.surveys-results'
 import { Route as AppAdminSurveysRouteImport } from './routes/_app/admin.surveys'
 import { Route as AppAdminRolesRouteImport } from './routes/_app/admin.roles'
 import { Route as AppAdminPlansRouteImport } from './routes/_app/admin.plans'
@@ -52,6 +53,7 @@ import { Route as ClassRoomCdSlugSessionIdRouteImport } from './routes/class-roo
 import { Route as AppMyLearningPathsPhaseIdRouteImport } from './routes/_app/my-learning-paths.phase.$id'
 import { Route as AppMyLearningPathsLearningScreenCourseIdRouteImport } from './routes/_app/my-learning-paths.learning-screen.$courseId'
 import { Route as AppAdminSurveysListRouteImport } from './routes/_app/admin.surveys.list'
+import { Route as AppAdminSurveysResultsIdRouteImport } from './routes/_app/admin.surveys-results.$id'
 import { Route as AppAdminRolesCodeRouteImport } from './routes/_app/admin.roles.$code'
 import { Route as AppAdminReportOverviewRouteImport } from './routes/_app/admin.report.overview'
 import { Route as AppAdminPlansNewRouteImport } from './routes/_app/admin.plans.new'
@@ -218,6 +220,11 @@ const AppBranchesIdRoute = AppBranchesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppBranchesRoute,
 } as any)
+const AppAdminSurveysResultsRoute = AppAdminSurveysResultsRouteImport.update({
+  id: '/admin/surveys-results',
+  path: '/admin/surveys-results',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAdminSurveysRoute = AppAdminSurveysRouteImport.update({
   id: '/admin/surveys',
   path: '/admin/surveys',
@@ -306,6 +313,12 @@ const AppAdminSurveysListRoute = AppAdminSurveysListRouteImport.update({
   path: '/list',
   getParentRoute: () => AppAdminSurveysRoute,
 } as any)
+const AppAdminSurveysResultsIdRoute =
+  AppAdminSurveysResultsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AppAdminSurveysResultsRoute,
+  } as any)
 const AppAdminRolesCodeRoute = AppAdminRolesCodeRouteImport.update({
   id: '/$code',
   path: '/$code',
@@ -540,6 +553,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans': typeof AppAdminPlansRouteWithChildren
   '/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/admin/surveys': typeof AppAdminSurveysRouteWithChildren
+  '/admin/surveys-results': typeof AppAdminSurveysResultsRouteWithChildren
   '/branches/$id': typeof AppBranchesIdRoute
   '/branches/list': typeof AppBranchesListRoute
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
@@ -560,6 +574,7 @@ export interface FileRoutesByFullPath {
   '/admin/plans/new': typeof AppAdminPlansNewRoute
   '/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/admin/surveys-results/$id': typeof AppAdminSurveysResultsIdRoute
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
@@ -620,6 +635,7 @@ export interface FileRoutesByTo {
   '/admin/plans': typeof AppAdminPlansRouteWithChildren
   '/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/admin/surveys': typeof AppAdminSurveysRouteWithChildren
+  '/admin/surveys-results': typeof AppAdminSurveysResultsRouteWithChildren
   '/branches/$id': typeof AppBranchesIdRoute
   '/branches/list': typeof AppBranchesListRoute
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
@@ -640,6 +656,7 @@ export interface FileRoutesByTo {
   '/admin/plans/new': typeof AppAdminPlansNewRoute
   '/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/admin/surveys-results/$id': typeof AppAdminSurveysResultsIdRoute
   '/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
@@ -702,6 +719,7 @@ export interface FileRoutesById {
   '/_app/admin/plans': typeof AppAdminPlansRouteWithChildren
   '/_app/admin/roles': typeof AppAdminRolesRouteWithChildren
   '/_app/admin/surveys': typeof AppAdminSurveysRouteWithChildren
+  '/_app/admin/surveys-results': typeof AppAdminSurveysResultsRouteWithChildren
   '/_app/branches/$id': typeof AppBranchesIdRoute
   '/_app/branches/list': typeof AppBranchesListRoute
   '/_app/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
@@ -722,6 +740,7 @@ export interface FileRoutesById {
   '/_app/admin/plans/new': typeof AppAdminPlansNewRoute
   '/_app/admin/report/overview': typeof AppAdminReportOverviewRoute
   '/_app/admin/roles/$code': typeof AppAdminRolesCodeRoute
+  '/_app/admin/surveys-results/$id': typeof AppAdminSurveysResultsIdRoute
   '/_app/admin/surveys/list': typeof AppAdminSurveysListRoute
   '/_app/my-learning-paths/learning-screen/$courseId': typeof AppMyLearningPathsLearningScreenCourseIdRoute
   '/_app/my-learning-paths/phase/$id': typeof AppMyLearningPathsPhaseIdRoute
@@ -784,6 +803,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/roles'
     | '/admin/surveys'
+    | '/admin/surveys-results'
     | '/branches/$id'
     | '/branches/list'
     | '/class-room/$slug'
@@ -804,6 +824,7 @@ export interface FileRouteTypes {
     | '/admin/plans/new'
     | '/admin/report/overview'
     | '/admin/roles/$code'
+    | '/admin/surveys-results/$id'
     | '/admin/surveys/list'
     | '/my-learning-paths/learning-screen/$courseId'
     | '/my-learning-paths/phase/$id'
@@ -864,6 +885,7 @@ export interface FileRouteTypes {
     | '/admin/plans'
     | '/admin/roles'
     | '/admin/surveys'
+    | '/admin/surveys-results'
     | '/branches/$id'
     | '/branches/list'
     | '/class-room/$slug'
@@ -884,6 +906,7 @@ export interface FileRouteTypes {
     | '/admin/plans/new'
     | '/admin/report/overview'
     | '/admin/roles/$code'
+    | '/admin/surveys-results/$id'
     | '/admin/surveys/list'
     | '/my-learning-paths/learning-screen/$courseId'
     | '/my-learning-paths/phase/$id'
@@ -945,6 +968,7 @@ export interface FileRouteTypes {
     | '/_app/admin/plans'
     | '/_app/admin/roles'
     | '/_app/admin/surveys'
+    | '/_app/admin/surveys-results'
     | '/_app/branches/$id'
     | '/_app/branches/list'
     | '/_app/class-room/$slug'
@@ -965,6 +989,7 @@ export interface FileRouteTypes {
     | '/_app/admin/plans/new'
     | '/_app/admin/report/overview'
     | '/_app/admin/roles/$code'
+    | '/_app/admin/surveys-results/$id'
     | '/_app/admin/surveys/list'
     | '/_app/my-learning-paths/learning-screen/$courseId'
     | '/_app/my-learning-paths/phase/$id'
@@ -1192,6 +1217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBranchesIdRouteImport
       parentRoute: typeof AppBranchesRoute
     }
+    '/_app/admin/surveys-results': {
+      id: '/_app/admin/surveys-results'
+      path: '/admin/surveys-results'
+      fullPath: '/admin/surveys-results'
+      preLoaderRoute: typeof AppAdminSurveysResultsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/surveys': {
       id: '/_app/admin/surveys'
       path: '/admin/surveys'
@@ -1310,6 +1342,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/surveys/list'
       preLoaderRoute: typeof AppAdminSurveysListRouteImport
       parentRoute: typeof AppAdminSurveysRoute
+    }
+    '/_app/admin/surveys-results/$id': {
+      id: '/_app/admin/surveys-results/$id'
+      path: '/$id'
+      fullPath: '/admin/surveys-results/$id'
+      preLoaderRoute: typeof AppAdminSurveysResultsIdRouteImport
+      parentRoute: typeof AppAdminSurveysResultsRoute
     }
     '/_app/admin/roles/$code': {
       id: '/_app/admin/roles/$code'
@@ -1843,6 +1882,20 @@ const AppAdminSurveysRouteWithChildren = AppAdminSurveysRoute._addFileChildren(
   AppAdminSurveysRouteChildren,
 )
 
+interface AppAdminSurveysResultsRouteChildren {
+  AppAdminSurveysResultsIdRoute: typeof AppAdminSurveysResultsIdRoute
+}
+
+const AppAdminSurveysResultsRouteChildren: AppAdminSurveysResultsRouteChildren =
+  {
+    AppAdminSurveysResultsIdRoute: AppAdminSurveysResultsIdRoute,
+  }
+
+const AppAdminSurveysResultsRouteWithChildren =
+  AppAdminSurveysResultsRoute._addFileChildren(
+    AppAdminSurveysResultsRouteChildren,
+  )
+
 interface AppClassRoomSlugRouteChildren {
   AppClassRoomSlugLearningScreenCourseIdRoute: typeof AppClassRoomSlugLearningScreenCourseIdRoute
 }
@@ -1879,6 +1932,7 @@ interface AppRouteChildren {
   AppAdminPlansRoute: typeof AppAdminPlansRouteWithChildren
   AppAdminRolesRoute: typeof AppAdminRolesRouteWithChildren
   AppAdminSurveysRoute: typeof AppAdminSurveysRouteWithChildren
+  AppAdminSurveysResultsRoute: typeof AppAdminSurveysResultsRouteWithChildren
   AppClassRoomSlugRoute: typeof AppClassRoomSlugRouteWithChildren
   AppStudentDashboardRoute: typeof AppStudentDashboardRoute
   AppAdminReportOverviewRoute: typeof AppAdminReportOverviewRoute
@@ -1908,6 +1962,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminPlansRoute: AppAdminPlansRouteWithChildren,
   AppAdminRolesRoute: AppAdminRolesRouteWithChildren,
   AppAdminSurveysRoute: AppAdminSurveysRouteWithChildren,
+  AppAdminSurveysResultsRoute: AppAdminSurveysResultsRouteWithChildren,
   AppClassRoomSlugRoute: AppClassRoomSlugRouteWithChildren,
   AppStudentDashboardRoute: AppStudentDashboardRoute,
   AppAdminReportOverviewRoute: AppAdminReportOverviewRoute,
