@@ -53,6 +53,12 @@ function ReportPage() {
   const { data: departments = [] } = useDepartments();
   const { data: employees = [] } = useEmployees();
   const { data: completionMap = {} } = useBranchCompletion(orgId);
+  const { data: readiness = [] } = useBranchReadiness(orgId);
+  const readinessByName = useMemo(() => {
+    const m = new Map<string, number>();
+    readiness.forEach((r) => m.set(r.branchName, r.score));
+    return m;
+  }, [readiness]);
 
   const [mode, setMode] = useState<"high" | "low">("high");
   const [search, setSearch] = useState("");
