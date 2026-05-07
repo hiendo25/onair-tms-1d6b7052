@@ -79,13 +79,10 @@ export function AppHeader() {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 gap-2 px-2">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs bg-slate-200">{initials}</AvatarFallback>
               </Avatar>
-              <span className="hidden max-w-[140px] truncate text-sm sm:inline">
-                {user?.user_metadata?.full_name || user?.email}
-              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
