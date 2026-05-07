@@ -39,10 +39,10 @@ const recentAssignments = [
 function Dashboard() {
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Tổng quan hoạt động đào tạo trong tổ chức.
+      <div className="rounded-2xl bg-gradient-hero p-6 text-white shadow-elevated">
+        <h1 className="font-display text-3xl font-semibold tracking-tight">Chào mừng trở lại 👋</h1>
+        <p className="mt-1 text-sm text-white/80">
+          Tổng quan hoạt động đào tạo trong tổ chức của bạn.
         </p>
       </div>
 

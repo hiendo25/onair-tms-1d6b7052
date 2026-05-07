@@ -38,13 +38,13 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b">
         <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-vibrant text-primary-foreground shadow-elevated">
             <GraduationCap className="h-5 w-5" />
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold">OnAir LMS</span>
-              <span className="text-xs text-muted-foreground">Hệ thống đào tạo</span>
+              <span className="font-display text-base font-semibold tracking-tight">OnAir LMS</span>
+              <span className="text-[11px] text-sidebar-foreground/60">Hệ thống đào tạo</span>
             </div>
           )}
         </div>
