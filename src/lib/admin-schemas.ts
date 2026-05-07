@@ -85,6 +85,8 @@ export const courseSchema = z.object({
   level: z.enum(["beginner", "intermediate", "advanced"]),
   duration_minutes: z.coerce.number().int().min(0, "Phải là số dương"),
   instructor: optStr,
+  cover_url: optStr,
+  is_required: z.boolean(),
   status: z.enum(["draft", "published", "unpublished"]),
 });
 export type CourseForm = z.infer<typeof courseSchema>;
