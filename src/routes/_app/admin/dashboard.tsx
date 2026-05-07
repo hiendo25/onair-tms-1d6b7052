@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Users, BookOpen, GraduationCap, Building2, ArrowRight, ClipboardCheck } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
@@ -11,6 +11,17 @@ import { useOrg } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard quản trị — OnAir TMS" }] }),
+  beforeLoad: async () => {
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) return;
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    const isAdmin = (roles ?? []).some((r) => {
+      const role = r.role as string;
+      return role === "admin" || role === "tenant_admin";
+    });
+    if (!isAdmin) throw redirect({ to: "/student/dashboard" });
+  },
   component: AdminDashboard,
 });
 
