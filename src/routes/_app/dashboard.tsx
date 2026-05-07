@@ -57,6 +57,10 @@ function StudentDashboard() {
         <div className="py-12 text-center text-muted-foreground text-sm">Đang tải dữ liệu...</div>
       ) : (
         <>
+          <AiInsightCard
+            stats={dash?.myStats ?? null}
+            xp={dash?.myXp ?? 0}
+          />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
@@ -72,6 +76,49 @@ function StudentDashboard() {
         </>
       )}
     </PageContainer>
+  );
+}
+
+// ─── AI Insight ────────────────────────────────────────────────────────
+function AiInsightCard({ stats, xp }: { stats: any; xp: number }) {
+  const [insight, setInsight] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const key = `${stats?.user_id ?? "me"}-${xp}-${stats?.completed_courses ?? 0}-${stats?.quizzes_taken ?? 0}`;
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setInsight(null);
+    aiPersonalInsight({
+      completed_courses: stats?.completed_courses ?? 0,
+      quizzes_taken: stats?.quizzes_taken ?? 0,
+      average_score: Number(stats?.average_score ?? 0),
+      hours_learned: stats?.hours_learned ?? 0,
+      rank: computeRank(xp).current.name,
+    }).then((text) => {
+      if (!cancelled) { setInsight(text); setLoading(false); }
+    });
+    return () => { cancelled = true; };
+  }, [key]);
+
+  return (
+    <Card className="border-violet-200 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-pink-50">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2 text-violet-900">
+          <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white">
+            <Sparkles className="h-4 w-4" />
+          </span>
+          AI nhận xét cho bạn
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <AiSpinner label="AI đang phân tích tiến độ của bạn..." />
+        ) : (
+          <p className="text-sm leading-relaxed text-slate-800">{insight}</p>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
