@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { MOCK_BRANCHES } from "@/lib/mock-data";
 
-export const Route = createFileRoute("/_app/admin/branches/$id")({
+export const Route = createFileRoute("/_app/branches/$id")({
   head: () => ({ meta: [{ title: "Chi tiết chi nhánh — OnAir LMS" }] }),
   component: BranchDetail,
 });

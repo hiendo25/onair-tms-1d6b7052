@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 
-export const Route = createFileRoute("/_app/admin/departments/$id")({
+export const Route = createFileRoute("/_app/departments/$id")({
   head: () => ({ meta: [{ title: "Chi tiết phòng ban — OnAir LMS" }] }),
   component: DepartmentDetail,
 });

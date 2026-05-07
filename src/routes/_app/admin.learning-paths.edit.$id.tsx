@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-export const Route = createFileRoute("/_app/admin/learning-paths/$id/edit")({
+export const Route = createFileRoute("/_app/admin/learning-paths/edit/$id")({
   head: () => ({ meta: [{ title: "Chỉnh sửa lộ trình — OnAir LMS" }] }),
   component: EditLP,
 });
