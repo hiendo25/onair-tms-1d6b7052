@@ -11,6 +11,7 @@ import {
   Users,
   Trophy,
   BarChart3,
+  Library,
   type LucideIcon,
 } from "lucide-react";
 
@@ -76,4 +77,14 @@ export const STUDENT_MENU: MenuItem[] = [
   { title: "Lớp học", key: "my-class", path: "/my-class", icon: Users },
   { title: "Bài kiểm tra", key: "my-as", path: "/my-assignments", icon: ClipboardList },
   { title: "Thưởng học tập", key: "my-gam", path: "/my-gamification", icon: Trophy },
+  {
+    title: "Thư viện",
+    key: "my-library",
+    icon: Library,
+    children: [
+      { title: "Chứng nhận", key: "my-certs", path: "/my-certificates" },
+      { title: "Flashcard", key: "my-fc", path: "/my-flashcards" },
+      { title: "Mục yêu thích", key: "my-fav", path: "/my-favorites" },
+    ],
+  },
 ];
