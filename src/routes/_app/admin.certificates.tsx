@@ -8,7 +8,12 @@ import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/certificates")({
   head: () => ({ meta: [{ title: "Chứng nhận — OnAir LMS" }] }),
-  component: () => (
+  component: CertificatesPage,
+});
+
+function CertificatesPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Quản lý chứng nhận"
       breadcrumbs={[{ title: "Chứng nhận" }]}
@@ -51,5 +56,6 @@ export const Route = createFileRoute("/_app/admin/certificates")({
         ))}
       </div>
     </PageContainer>
-  ),
-});
+  );
+}
+

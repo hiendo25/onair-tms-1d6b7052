@@ -9,7 +9,12 @@ import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/departments")({
   head: () => ({ meta: [{ title: "Phòng ban — OnAir LMS" }] }),
-  component: () => (
+  component: DepartmentsPage,
+});
+
+function DepartmentsPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Quản lý phòng ban"
       breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Phòng ban" }]}
@@ -42,5 +47,6 @@ export const Route = createFileRoute("/_app/departments")({
         </Table>
       </Card>
     </PageContainer>
-  ),
-});
+  );
+}
+

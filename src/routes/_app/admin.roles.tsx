@@ -8,7 +8,12 @@ import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/roles")({
   head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir LMS" }] }),
-  component: () => (
+  component: RolesPage,
+});
+
+function RolesPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Vai trò & phân quyền"
       breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Vai trò" }]}
@@ -37,5 +42,6 @@ export const Route = createFileRoute("/_app/admin/roles")({
         ))}
       </div>
     </PageContainer>
-  ),
-});
+  );
+}
+

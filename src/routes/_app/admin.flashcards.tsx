@@ -10,7 +10,12 @@ import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/flashcards")({
   head: () => ({ meta: [{ title: "Flashcard — OnAir LMS" }] }),
-  component: () => (
+  component: FlashcardsPage,
+});
+
+function FlashcardsPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Flashcard"
       breadcrumbs={[{ title: "Flashcard" }]}
@@ -50,5 +55,6 @@ export const Route = createFileRoute("/_app/admin/flashcards")({
         ))}
       </div>
     </PageContainer>
-  ),
-});
+  );
+}
+
