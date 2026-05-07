@@ -21,7 +21,19 @@ const QUESTIONS = [
 ];
 
 function SubmitPage() {
-  const { id } = Route.useParams();
+  const { id, employeeId } = Route.useParams();
+  const { orgId } = useOrg();
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    await logLearningActivity({
+      orgId,
+      action: "quiz_submit",
+      targetType: "assignment",
+      targetId: id,
+    });
+    navigate({ to: "/my-assignments/$id/result/$employeeId", params: { id, employeeId } });
+  };
   return (
     <PageContainer
       title="Làm bài kiểm tra"
