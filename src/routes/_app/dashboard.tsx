@@ -4,7 +4,9 @@ import {
   AlertCircle, BookOpen, ClipboardCheck, Trophy, Clock, Award, Star,
   Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -251,7 +253,84 @@ function useSeedCurrentUser(orgId: string) {
 
 // ─── Section 1: Today's tasks ──────────────────────────────────────────
 type Task = { id: string; title: string; type: string; deadline: string; urgent: boolean; path: string };
+
+function useCompleteTask(orgId: string) {
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  return useMutation({
+    mutationFn: async (task: Task) => {
+      const { data: u } = await supabase.auth.getUser();
+      const uid = u.user?.id;
+      if (!uid) throw new Error("Bạn cần đăng nhập");
+
+      // 1) Mark submission completed
+      const score = task.type === "quiz" ? Math.round((7 + Math.random() * 3) * 10) / 10 : null;
+      await supabase.from("assignment_submissions").update({
+        status: "completed",
+        submitted_at: new Date().toISOString(),
+        score,
+      }).eq("id", task.id).eq("user_id", uid);
+
+      // 2) Bump XP (+50 lesson, +100 quiz)
+      const xpGain = task.type === "quiz" ? 100 : 50;
+      const { data: xpRow } = await supabase
+        .from("user_xp").select("xp").eq("user_id", uid).eq("org_id", orgId).maybeSingle();
+      const newXp = (xpRow?.xp ?? 0) + xpGain;
+      const rank = newXp >= 3000 ? "Huyền thoại" : newXp >= 1500 ? "Cao thủ" : newXp >= 500 ? "Cần mẫn" : "Tân binh";
+      if (xpRow) {
+        await supabase.from("user_xp").update({ xp: newXp, rank })
+          .eq("user_id", uid).eq("org_id", orgId);
+      } else {
+        await supabase.from("user_xp").insert({ user_id: uid, org_id: orgId, xp: newXp, rank });
+      }
+
+      // 3) Bump stats
+      const { data: stats } = await supabase
+        .from("user_stats").select("*").eq("user_id", uid).eq("org_id", orgId).maybeSingle();
+      if (stats) {
+        const patch: any = { hours_learned: (stats.hours_learned ?? 0) + 1 };
+        if (task.type === "quiz") {
+          const newCount = (stats.quizzes_taken ?? 0) + 1;
+          const newAvg = Math.round((((stats.average_score ?? 0) * (stats.quizzes_taken ?? 0)) + (score ?? 0)) / newCount * 10) / 10;
+          patch.quizzes_taken = newCount;
+          patch.average_score = newAvg;
+        } else {
+          patch.completed_courses = (stats.completed_courses ?? 0) + 1;
+        }
+        await supabase.from("user_stats").update(patch).eq("user_id", uid).eq("org_id", orgId);
+      }
+
+      // 4) Bump active learning path
+      const { data: path } = await supabase
+        .from("user_learning_path_progress")
+        .select("*").eq("user_id", uid).eq("org_id", orgId).eq("is_active", true)
+        .order("updated_at", { ascending: false }).limit(1).maybeSingle();
+      if (path && path.completed_lessons < path.total_lessons) {
+        const completed = path.completed_lessons + 1;
+        const progress = Math.min(100, Math.round((completed / path.total_lessons) * 100));
+        await supabase.from("user_learning_path_progress").update({
+          completed_lessons: completed, progress,
+        }).eq("id", path.id);
+      }
+
+      return { xpGain, score, redirect: task.path };
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["student-dashboard"] });
+      const msg = res.score != null
+        ? `Hoàn thành! +${res.xpGain} XP · Điểm: ${res.score}/10`
+        : `Hoàn thành! +${res.xpGain} XP`;
+      toast.success(msg);
+      // Navigate to actual learning/quiz screen
+      setTimeout(() => navigate({ to: res.redirect }), 400);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
 function TodayTasksSection({ tasks }: { tasks: Task[] }) {
+  const { orgId } = useOrg();
+  const complete = useCompleteTask(orgId);
   const hasTasks = tasks.length > 0;
   const hasUrgent = tasks.some((t) => t.urgent);
 
@@ -277,6 +356,7 @@ function TodayTasksSection({ tasks }: { tasks: Task[] }) {
           <div className="space-y-2">
             {tasks.map((task) => {
               const Icon = task.type === "quiz" ? ClipboardCheck : BookOpen;
+              const isPending = complete.isPending && complete.variables?.id === task.id;
               return (
                 <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${task.urgent ? "border-orange-200 bg-white" : "border-slate-200 bg-white"}`}>
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${task.urgent ? "bg-orange-100 text-orange-600" : "bg-slate-100 text-slate-600"}`}>
@@ -289,8 +369,13 @@ function TodayTasksSection({ tasks }: { tasks: Task[] }) {
                       {task.deadline}
                     </p>
                   </div>
-                  <Button asChild size="sm" className={task.urgent ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}>
-                    <Link to={task.path}>{task.type === "quiz" ? "Làm bài" : "Học ngay"}</Link>
+                  <Button
+                    size="sm"
+                    disabled={isPending || complete.isPending}
+                    onClick={() => complete.mutate(task)}
+                    className={task.urgent ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
+                  >
+                    {isPending ? "Đang lưu..." : task.type === "quiz" ? "Làm bài" : "Học ngay"}
                   </Button>
                 </div>
               );
