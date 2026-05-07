@@ -132,16 +132,35 @@ export async function aiGradeEssay(question: string, answer: string): Promise<Ai
 }
 
 // ===== #7 AI Insight đội ngũ =====
-export type TeamInsight = { severity: "warning" | "info" | "success"; title: string; detail: string };
+export type ActionableInsight = {
+  severity: "warning" | "info" | "success";
+  title: string;
+  detail: string;
+  ctaLabel: string;
+  to: string;
+  search?: Record<string, string>;
+};
+// Backwards-compat alias
+export type TeamInsight = ActionableInsight;
 
-export async function aiTeamInsights(): Promise<TeamInsight[]> {
+export async function aiTeamInsights(): Promise<ActionableInsight[]> {
   await sleep(1500);
   return [
-    { severity: "warning", title: "Chi nhánh Quận 7 đang tụt hậu", detail: "Tỷ lệ hoàn thành khóa bắt buộc chỉ đạt 48%, thấp hơn trung bình toàn hệ thống 22%. Đề xuất nhắc nhở quản lý chi nhánh và mở phiên đào tạo bổ trợ tuần này." },
-    { severity: "warning", title: "Khóa 'VSATTP nâng cao' có completion rate thấp", detail: "Chỉ 38% học viên hoàn thành. Có thể nội dung quá dài hoặc chưa hấp dẫn — nên tách thành 2 phần ngắn hoặc bổ sung video minh họa." },
-    { severity: "info", title: "12 nhân viên có nguy cơ trượt deadline", detail: "Các nhân viên này chưa hoàn thành bài kiểm tra bắt buộc còn 3 ngày. Hệ thống đề xuất gửi email nhắc nhở tự động." },
-    { severity: "success", title: "Chi nhánh Hà Nội dẫn đầu", detail: "Đạt 94% completion rate và điểm trung bình 8.7/10. Có thể nhân rộng cách quản lý đào tạo của chi nhánh này sang các chi nhánh khác." },
-    { severity: "info", title: "Xu hướng học tập tăng vào buổi tối", detail: "65% lượt học diễn ra trong khung 19h-22h. Cân nhắc lên lịch live training và push notification trong khung giờ này để tăng tương tác." },
+    { severity: "warning", title: "5 nhân viên chưa hoàn thành VSATTP", detail: "Khóa bắt buộc, hạn còn 3 ngày. Cần nhắc nhở để tránh ảnh hưởng đánh giá chi nhánh.", ctaLabel: "Xem danh sách", to: "/admin/employees", search: { status: "pending" } },
+    { severity: "warning", title: "Chi nhánh HCM completion giảm 12%", detail: "Tỷ lệ hoàn thành tuần này thấp hơn trung bình hệ thống — cần can thiệp sớm.", ctaLabel: "Xem chi nhánh", to: "/analytic", search: { branch: "hcm" } },
+    { severity: "info", title: "Khóa 'VSATTP nâng cao' completion 38%", detail: "Nội dung có thể quá dài — cân nhắc tách module hoặc bổ sung video.", ctaLabel: "Mở khóa học", to: "/admin/online-course" },
+    { severity: "success", title: "Chi nhánh Hà Nội dẫn đầu", detail: "94% completion và điểm TB 8.7/10 — có thể nhân rộng cách làm.", ctaLabel: "Xem báo cáo", to: "/admin/report/overview" },
+  ];
+}
+
+// ===== Student actionable insights =====
+export async function aiStudentActionInsights(): Promise<ActionableInsight[]> {
+  await sleep(1200);
+  return [
+    { severity: "warning", title: "Bạn còn 1 bài kiểm tra chưa nộp", detail: "Hạn nộp là hôm nay — nộp ngay để không mất điểm chuyên cần.", ctaLabel: "Làm bài ngay", to: "/my-assignments" },
+    { severity: "info", title: "Lộ trình Onboarding còn 3 bài chưa học", detail: "Hoàn thành sớm để mở khóa lộ trình nâng cao tiếp theo.", ctaLabel: "Tiếp tục học", to: "/my-learning-paths" },
+    { severity: "info", title: "Bạn sắp lên hạng Cao thủ — còn 150 XP nữa", detail: "Chỉ vài bài học nữa là bạn được nâng hạng và mở huy hiệu mới.", ctaLabel: "Xem lộ trình thăng hạng", to: "/my-gamification" },
+    { severity: "warning", title: "Chứng nhận VSATTP sắp hết hạn sau 7 ngày", detail: "Cần gia hạn để tiếp tục đứng quầy theo quy định nội bộ.", ctaLabel: "Gia hạn ngay", to: "/my-certificates" },
   ];
 }
 

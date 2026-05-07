@@ -5,6 +5,7 @@ import {
   Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal, Sparkles,
 } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
+import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
 import { aiPersonalInsight } from "@/lib/ai-mock";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -68,6 +69,7 @@ function StudentDashboard() {
             stats={dash?.myStats ?? null}
             xp={dash?.myXp ?? 0}
           />
+          <TeamInsightsCard variant="student" title="Việc nên làm tiếp theo" />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
