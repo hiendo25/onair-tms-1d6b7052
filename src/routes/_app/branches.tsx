@@ -62,8 +62,9 @@ function BranchesPage() {
   ], [employees]);
 
   const submit = async (v: BranchForm) => {
-    if (editing?.id) await update.mutateAsync({ ...v, id: editing.id, employees: editing.employees } as DBBranch);
-    else await create.mutateAsync({ ...v, employees: 0 });
+    const payload = { ...v, manager: v.manager === "__none__" ? "" : v.manager };
+    if (editing?.id) await update.mutateAsync({ ...payload, id: editing.id, employees: editing.employees } as DBBranch);
+    else await create.mutateAsync({ ...payload, employees: 0 });
   };
 
   return (
