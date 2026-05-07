@@ -28,7 +28,7 @@ const formFields: FieldDef<CertificateForm>[] = [
 ];
 
 const empty: CertificateForm = {
-  code: "", title: "", description: "", template_url: "", valid_months: 12, status: "active",
+  code: "", title: "", description: "", valid_months: 12, status: "active",
 };
 
 function CertificatePreview({ title }: { title: string }) {
