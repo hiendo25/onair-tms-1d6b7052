@@ -78,7 +78,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: Award,
     children: [
       { title: "Danh sách", key: "cert-list", path: "/admin/certificates" },
-      { title: "Tạo chứng nhận", key: "cert-create", path: "/admin/certificates/create" },
     ],
   },
   {
@@ -87,7 +86,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: FileText,
     children: [
       { title: "Danh sách", key: "sv-list", path: "/admin/surveys" },
-      { title: "Tạo khảo sát", key: "sv-create", path: "/admin/surveys/create" },
     ],
   },
   {
@@ -96,7 +94,6 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: Layers,
     children: [
       { title: "Danh sách", key: "fc-list", path: "/admin/flashcards" },
-      { title: "Tạo Flashcard", key: "fc-create", path: "/admin/flashcards/create" },
     ],
   },
   { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
