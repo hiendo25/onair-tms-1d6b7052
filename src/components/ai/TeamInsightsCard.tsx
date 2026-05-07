@@ -17,15 +17,21 @@ const SEVERITY_RANK = { warning: 0, info: 1, success: 2 } as const;
 export function TeamInsightsCard({
   title = "Điều cần chú ý tuần này",
   variant = "team",
+  insights,
+  loading: loadingProp,
 }: {
   title?: string;
   variant?: "team" | "student";
+  insights?: ActionableInsight[];
+  loading?: boolean;
 }) {
-  const [data, setData] = useState<ActionableInsight[] | null>(null);
+  const externalMode = insights !== undefined || loadingProp !== undefined;
+  const [data, setData] = useState<ActionableInsight[] | null>(externalMode ? null : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
+    if (externalMode) return;
     setLoading(true);
     setError(null);
     try {
@@ -39,7 +45,14 @@ export function TeamInsightsCard({
     }
   }
 
-  useEffect(() => { void load(); }, [variant]);
+  useEffect(() => { void load(); }, [variant, externalMode]);
+
+  const effLoading = externalMode ? !!loadingProp : loading;
+  const effData = externalMode
+    ? (insights
+        ? [...insights].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]).slice(0, 3)
+        : null)
+    : data;
 
   const positive = !loading && data && data.every((i) => i.severity === "success");
 
