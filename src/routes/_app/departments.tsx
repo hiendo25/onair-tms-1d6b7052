@@ -48,7 +48,7 @@ function DepartmentsPage() {
     },
     {
       name: "head", label: "Người quản lý", type: "select", placeholder: "Chọn người quản lý",
-      options: [{ value: "", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
+      options: [{ value: "__none__", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
     },
     { name: "status", label: "Trạng thái", type: "select", required: true, options: STATUS_ACTIVE_INACTIVE },
   ], [branches, employees]);
@@ -64,8 +64,9 @@ function DepartmentsPage() {
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const submit = async (v: DepartmentForm) => {
-    if (editing?.id) await update.mutateAsync({ ...v, id: editing.id, employees: editing.employees } as DBDepartment);
-    else await create.mutateAsync({ ...v, employees: 0 });
+    const payload = { ...v, head: v.head === "__none__" ? "" : v.head };
+    if (editing?.id) await update.mutateAsync({ ...payload, id: editing.id, employees: editing.employees } as DBDepartment);
+    else await create.mutateAsync({ ...payload, employees: 0 });
   };
 
   return (
