@@ -86,6 +86,7 @@ function OnlineCoursePage() {
       actions={
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => exportCsv("online_courses.csv", rows)}><Download className="h-4 w-4" />Export</Button>
+          <AiGenerateCourseButton />
           <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Tạo khoá học</Button>
         </div>
       }
