@@ -1,75 +1,91 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Clock, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { Search, MoreVertical } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const MY_ASSIGNMENTS = [
-  { id: "1", title: "Bài KT cuối khóa Onboarding", duration: 45, due: "2026-05-12 23:59", status: "todo", score: null },
-  { id: "2", title: "Quiz tuần 3 - Sales Excellence", duration: 20, due: "2026-05-08 18:00", status: "todo", score: null },
-  { id: "3", title: "Bài tự luận - Lãnh đạo", duration: 90, due: "2026-04-30 23:59", status: "doing", score: null },
-  { id: "4", title: "ATLĐ - Kiểm tra giữa kỳ", duration: 60, due: "2026-04-15", status: "done", score: 92 },
-  { id: "5", title: "Excel - bài tập tổng hợp", duration: 60, due: "2026-04-02", status: "done", score: 78 },
+const ROWS = [
+  { id: "1", name: "Bài KT cuối khóa Onboarding", description: "Đánh giá kiến thức cuối khoá nhập môn", submitted_at: "12/05/2026 14:23", status: "submitted", result: "pass", score: 92, max: 100 },
+  { id: "2", name: "Quiz tuần 3 - Sales Excellence", description: "Kiểm tra kiến thức tuần 3", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
+  { id: "3", name: "Bài tự luận - Lãnh đạo", description: "Bài tự luận chủ đề lãnh đạo", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
+  { id: "4", name: "ATLĐ - Kiểm tra giữa kỳ", description: "Bài kiểm tra giữa kỳ", submitted_at: "15/04/2026 09:10", status: "graded", result: "pass", score: 85, max: 100 },
+  { id: "5", name: "Excel - bài tập tổng hợp", description: "Bài tập tổng hợp Excel", submitted_at: "02/04/2026 16:42", status: "graded", result: "fail", score: 48, max: 100 },
 ];
+
+const statusChip: Record<string, { label: string; cls: string }> = {
+  in_progress: { label: "Chưa nộp", cls: "bg-amber-100 text-amber-700" },
+  submitted: { label: "Đã nộp", cls: "bg-blue-100 text-blue-700" },
+  graded: { label: "Đã chấm", cls: "bg-emerald-100 text-emerald-700" },
+};
+
+const resultChip: Record<string, { label: string; cls: string }> = {
+  pass: { label: "Đạt", cls: "bg-emerald-100 text-emerald-700" },
+  fail: { label: "Không đạt", cls: "bg-amber-100 text-amber-700" },
+  late: { label: "Nộp trễ", cls: "bg-red-100 text-red-700" },
+};
 
 export const Route = createFileRoute("/_app/my-assignments")({
   head: () => ({ meta: [{ title: "Bài kiểm tra của tôi — OnAir LMS" }] }),
   component: () => (
     <PageContainer
       title="Bài kiểm tra của tôi"
-      breadcrumbs={[{ title: "Học tập" }, { title: "Bài kiểm tra" }]}
+      breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}
     >
-      <Tabs defaultValue="todo">
-        <TabsList>
-          <TabsTrigger value="todo">Cần làm</TabsTrigger>
-          <TabsTrigger value="doing">Đang làm</TabsTrigger>
-          <TabsTrigger value="done">Đã hoàn thành</TabsTrigger>
-        </TabsList>
-
-        {(["todo", "doing", "done"] as const).map(s => (
-          <TabsContent key={s} value={s}>
-            <div className="space-y-3">
-              {MY_ASSIGNMENTS.filter(a => a.status === s).map(a => (
-                <Card key={a.id} className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3">
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                        a.status === "done" ? "bg-emerald-100 text-emerald-700" :
-                        a.status === "doing" ? "bg-amber-100 text-amber-700" :
-                        "bg-blue-100 text-blue-700"
-                      }`}>
-                        {a.status === "done" ? <CheckCircle2 className="h-5 w-5" /> :
-                         a.status === "doing" ? <AlertCircle className="h-5 w-5" /> :
-                         <FileText className="h-5 w-5" />}
-                      </div>
-                      <div>
-                        <h3 className="font-medium">{a.title}</h3>
-                        <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{a.duration} phút</span>
-                          <span>Hạn: {a.due}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {a.score !== null && (
-                        <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">{a.score} điểm</Badge>
-                      )}
-                      <Button size="sm" variant={a.status === "done" ? "outline" : "default"}>
-                        {a.status === "done" ? "Xem kết quả" : a.status === "doing" ? "Tiếp tục làm" : "Bắt đầu"}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
-              {MY_ASSIGNMENTS.filter(a => a.status === s).length === 0 && (
-                <Card className="p-8 text-center text-sm text-muted-foreground">Không có bài kiểm tra nào.</Card>
-              )}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+      <Card className="p-6">
+        <h2 className="mb-4 text-lg font-semibold">Danh sách bài kiểm tra được giao</h2>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="relative w-full max-w-[300px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Tìm kiếm bài kiểm tra..." className="pl-9" />
+          </div>
+          <Select defaultValue="all">
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="in_progress">Chưa nộp</SelectItem>
+              <SelectItem value="submitted">Đã nộp</SelectItem>
+              <SelectItem value="graded">Đã chấm</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Tên bài kiểm tra</TableHead>
+              <TableHead>Mô tả</TableHead>
+              <TableHead>Ngày nộp</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Kết quả</TableHead>
+              <TableHead>Điểm</TableHead>
+              <TableHead className="text-right">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {ROWS.map(r => (
+              <TableRow key={r.id}>
+                <TableCell className="font-medium">{r.name}</TableCell>
+                <TableCell className="max-w-[280px] truncate text-sm text-muted-foreground">{r.description}</TableCell>
+                <TableCell className="text-sm">{r.submitted_at}</TableCell>
+                <TableCell><Badge className={`${statusChip[r.status].cls} hover:${statusChip[r.status].cls}`}>{statusChip[r.status].label}</Badge></TableCell>
+                <TableCell>
+                  {r.result === "none" ? <span className="text-sm text-muted-foreground">-</span> :
+                    <Badge className={`${resultChip[r.result].cls} hover:${resultChip[r.result].cls}`}>{resultChip[r.result].label}</Badge>}
+                </TableCell>
+                <TableCell className="text-sm font-medium">
+                  {r.status === "graded" && r.score !== null ? `${r.score}/${r.max}` : <span className="text-muted-foreground">-</span>}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button size="icon" variant="ghost" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
     </PageContainer>
   ),
 });
