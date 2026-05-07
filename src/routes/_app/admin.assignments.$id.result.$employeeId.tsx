@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/result/$employeeId")({
-  head: () => ({ meta: [{ title: "Kết quả bài KT — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Kết quả bài KT — OnAir TMS" }] }),
   component: Result,
 });
 function Result() {

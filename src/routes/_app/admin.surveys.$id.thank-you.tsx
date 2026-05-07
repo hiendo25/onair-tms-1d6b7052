@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/admin/surveys/$id/thank-you")({
-  head: () => ({ meta: [{ title: "Cảm ơn — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Cảm ơn — OnAir TMS" }] }),
   component: () => (
     <div className="min-h-[60vh] flex items-center justify-center p-6">
       <Card className="max-w-md w-full"><CardContent className="p-10 text-center space-y-4">

@@ -18,7 +18,7 @@ const MY_PATH = {
 };
 
 export const Route = createFileRoute("/_app/my-learning-paths")({
-  head: () => ({ meta: [{ title: "Lộ trình của tôi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Lộ trình của tôi — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title={MY_PATH.title}

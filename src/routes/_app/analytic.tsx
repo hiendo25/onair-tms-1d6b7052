@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/analytic")({
-  head: () => ({ meta: [{ title: "Báo cáo & phân tích — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Báo cáo & phân tích — OnAir TMS" }] }),
   component: AnalyticPage,
 });
 

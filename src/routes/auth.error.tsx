@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/auth/error")({
-  head: () => ({ meta: [{ title: "Lỗi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Lỗi — OnAir TMS" }] }),
   component: () => (
     <div className="min-h-screen flex items-center justify-center p-6">
       <Card className="max-w-md w-full"><CardContent className="p-10 text-center space-y-4">

@@ -43,7 +43,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="font-display text-base font-semibold tracking-tight">OnAir LMS</span>
+              <span className="font-display text-base font-semibold tracking-tight">OnAir TMS</span>
               <span className="text-[11px] text-sidebar-foreground/60">Hệ thống đào tạo</span>
             </div>
           )}

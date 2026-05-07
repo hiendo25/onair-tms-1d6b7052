@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/admin/roles/$code")({
-  head: () => ({ meta: [{ title: "Chi tiết vai trò — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chi tiết vai trò — OnAir TMS" }] }),
   component: RoleDetail,
 });
 

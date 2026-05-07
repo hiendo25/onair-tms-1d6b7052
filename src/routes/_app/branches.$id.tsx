@@ -8,7 +8,7 @@ import { Edit } from "lucide-react";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/branches/$id")({
-  head: () => ({ meta: [{ title: "Chi tiết chi nhánh — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chi tiết chi nhánh — OnAir TMS" }] }),
   component: BranchDetail,
 });
 

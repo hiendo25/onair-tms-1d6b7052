@@ -16,7 +16,7 @@ const TABS = [
 ];
 
 export const Route = createFileRoute("/_app/my-class")({
-  head: () => ({ meta: [{ title: "Lớp học của tôi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Lớp học của tôi — OnAir TMS" }] }),
   component: () => {
     const data = useOrgData();
     const myClasses = data.classrooms.slice(0, 6);

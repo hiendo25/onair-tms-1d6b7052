@@ -13,7 +13,7 @@ import {
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments")({
-  head: () => ({ meta: [{ title: "Bài kiểm tra — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Bài kiểm tra — OnAir TMS" }] }),
   component: AssignmentsPage,
 });
 

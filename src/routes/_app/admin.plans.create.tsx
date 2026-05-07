@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_app/admin/plans/create")({
-  head: () => ({ meta: [{ title: "Tạo kế hoạch — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo kế hoạch — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Tạo kế hoạch đào tạo"

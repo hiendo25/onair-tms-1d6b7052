@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/_app/admin/roles/create")({
-  head: () => ({ meta: [{ title: "Tạo vai trò — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo vai trò — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Tạo vai trò mới"

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/admin/surveys/$id/edit")({
-  head: () => ({ meta: [{ title: "Sửa khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Sửa khảo sát — OnAir TMS" }] }),
   component: EditS,
 });
 function EditS() {

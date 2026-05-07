@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_app/admin/certificates/edit/$id")({
-  head: () => ({ meta: [{ title: "Sửa chứng nhận — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Sửa chứng nhận — OnAir TMS" }] }),
   component: EC,
 });
 function EC() {

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/_app/my-learning-paths/phase/$id")({
-  head: () => ({ meta: [{ title: "Giai đoạn lộ trình — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Giai đoạn lộ trình — OnAir TMS" }] }),
   component: Phase,
 });
 function Phase() {

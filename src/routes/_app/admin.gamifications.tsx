@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/_app/admin/gamifications")({
-  head: () => ({ meta: [{ title: "Gamification — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Gamification — OnAir TMS" }] }),
   component: GamificationsPage,
 });
 

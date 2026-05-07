@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/surveys/$id/submit/thank-you")({
-  head: () => ({ meta: [{ title: "Cảm ơn — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Cảm ơn — OnAir TMS" }] }),
   component: () => (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
       <Card className="w-full max-w-md p-8 text-center">

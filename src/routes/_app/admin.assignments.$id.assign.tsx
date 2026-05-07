@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/assign")({
-  head: () => ({ meta: [{ title: "Gán bài kiểm tra — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Gán bài kiểm tra — OnAir TMS" }] }),
   component: AssignA,
 });
 function AssignA() {

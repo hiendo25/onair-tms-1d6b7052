@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
-  head: () => ({ meta: [{ title: "Ngân hàng câu hỏi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Ngân hàng câu hỏi — OnAir TMS" }] }),
   component: QuestionBankPage,
 });
 

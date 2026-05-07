@@ -18,7 +18,7 @@ import {
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/class-room")({
-  head: () => ({ meta: [{ title: "Quản lý lớp học — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Quản lý lớp học — OnAir TMS" }] }),
   component: ClassRoomPage,
 });
 

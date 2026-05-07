@@ -23,7 +23,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/employees")({
-  head: () => ({ meta: [{ title: "Quản lý người dùng — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Quản lý người dùng — OnAir TMS" }] }),
   component: EmployeesPage,
 });
 

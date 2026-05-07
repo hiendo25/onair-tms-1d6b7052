@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, Download } from "lucide-react";
 
 export const Route = createFileRoute("/_app/admin/employees/import")({
-  head: () => ({ meta: [{ title: "Import người dùng — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Import người dùng — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Import người dùng"

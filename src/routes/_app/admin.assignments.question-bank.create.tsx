@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank/create")({
-  head: () => ({ meta: [{ title: "Tạo câu hỏi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo câu hỏi — OnAir TMS" }] }),
   component: () => (
     <PageContainer title="Tạo câu hỏi" breadcrumbs={[{ title: "Ngân hàng câu hỏi", path: "/admin/assignments/question-bank" }, { title: "Tạo mới" }]}>
       <Card><CardHeader><CardTitle>Nội dung câu hỏi</CardTitle></CardHeader>

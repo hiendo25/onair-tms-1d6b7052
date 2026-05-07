@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_app/admin/learning-paths/create")({
-  head: () => ({ meta: [{ title: "Tạo lộ trình — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo lộ trình — OnAir TMS" }] }),
   component: CreateLP,
 });
 

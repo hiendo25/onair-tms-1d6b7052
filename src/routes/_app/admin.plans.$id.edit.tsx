@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/admin/plans/$id/edit")({
-  head: () => ({ meta: [{ title: "Chỉnh sửa kế hoạch — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chỉnh sửa kế hoạch — OnAir TMS" }] }),
   component: EditPlan,
 });
 

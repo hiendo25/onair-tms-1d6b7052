@@ -29,7 +29,7 @@ const resultChip: Record<string, { label: string; cls: string }> = {
 };
 
 export const Route = createFileRoute("/_app/my-assignments")({
-  head: () => ({ meta: [{ title: "Bài kiểm tra của tôi — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Bài kiểm tra của tôi — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Bài kiểm tra của tôi"

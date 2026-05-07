@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ShieldOff } from "lucide-react";
 
 export const Route = createFileRoute("/403")({
-  head: () => ({ meta: [{ title: "403 — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "403 — OnAir TMS" }] }),
   component: () => (
     <div className="min-h-screen flex items-center justify-center p-6">
       <Card className="max-w-md w-full"><CardContent className="p-10 text-center space-y-4">

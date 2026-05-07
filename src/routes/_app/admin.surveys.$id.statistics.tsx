@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/_app/admin/surveys/$id/statistics")({
-  head: () => ({ meta: [{ title: "Thống kê khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Thống kê khảo sát — OnAir TMS" }] }),
   component: Stats,
 });
 function Stats() {

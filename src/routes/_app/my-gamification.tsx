@@ -21,7 +21,7 @@ const LEVELS = [
 ];
 
 export const Route = createFileRoute("/_app/my-gamification")({
-  head: () => ({ meta: [{ title: "Điểm thưởng — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Điểm thưởng — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Điểm thưởng của bạn"

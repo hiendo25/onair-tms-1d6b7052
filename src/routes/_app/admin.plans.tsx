@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/plans")({
-  head: () => ({ meta: [{ title: "Kế hoạch đào tạo — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Kế hoạch đào tạo — OnAir TMS" }] }),
   component: PlansPage,
 });
 
