@@ -10,18 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id")({
-  loader: ({ params }) => {
-    const a = data.assignments.find((x) => x.id === params.id);
-    if (!a) throw notFound();
-    return { assignment: a };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy bài kiểm tra"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: AssignmentDetail,
 });
 
 function AssignmentDetail() {
   const data = useOrgData();
-  const { assignment: a } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const a = data.assignments.find((x) => x.id === id);
+  if (!a) return null;
   const submissions = data.employees.filter((e) => e.role === "student").slice(0, 6);
 
   return (

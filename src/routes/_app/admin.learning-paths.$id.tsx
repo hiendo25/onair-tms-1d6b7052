@@ -8,18 +8,15 @@ import { Progress } from "@/components/ui/progress";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/learning-paths/$id")({
-  loader: ({ params }) => {
-    const path = data.learningPaths.find((p) => p.id === params.id);
-    if (!path) throw notFound();
-    return { path };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy lộ trình"><Button asChild variant="outline"><Link to="/admin/learning-paths"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: LearningPathDetail,
 });
 
 function LearningPathDetail() {
   const data = useOrgData();
-  const { path } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const path = data.learningPaths.find((p) => p.id === id);
+  if (!path) return null;
   const totalCourses = path.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0);
   const totalWeeks = path.phases.reduce((s: number, p: { weeks: number }) => s + p.weeks, 0);
 

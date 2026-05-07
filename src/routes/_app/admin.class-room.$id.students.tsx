@@ -12,18 +12,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/class-room/$id/students")({
-  loader: ({ params }) => {
-    const classroom = data.classrooms.find((c) => c.id === params.id);
-    if (!classroom) throw notFound();
-    return { classroom };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy lớp"><Button asChild variant="outline"><Link to="/admin/class-room"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: ClassroomStudents,
 });
 
 function ClassroomStudents() {
   const data = useOrgData();
-  const { classroom: c } = Route.useLoaderData();
+  const { id } = Route.useParams();
+  const c = data.classrooms.find((x) => x.id === id);
+  if (!c) return null;
   const students = data.employees.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
 
   return (
