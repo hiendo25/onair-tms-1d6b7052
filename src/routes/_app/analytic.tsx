@@ -4,6 +4,7 @@ import { Building2, LayoutGrid, Users, User, Search, Calendar, Download, Shield,
 import { useQuery } from "@tanstack/react-query";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
+import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
