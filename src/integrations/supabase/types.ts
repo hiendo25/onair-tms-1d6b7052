@@ -208,6 +208,107 @@ export type Database = {
         }
         Relationships: []
       }
+      course_lessons: {
+        Row: {
+          content: string
+          course_id: string
+          created_at: string
+          id: string
+          lesson_type: string
+          org_id: string
+          section_id: string
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_type?: string
+          org_id: string
+          section_id: string
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_type?: string
+          org_id?: string
+          section_id?: string
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_lessons_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "course_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_sections: {
+        Row: {
+          course_id: string
+          created_at: string
+          description: string
+          id: string
+          org_id: string
+          sort_order: number
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id: string
+          sort_order?: number
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          org_id?: string
+          sort_order?: number
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_sections_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           branch: string
@@ -454,6 +555,7 @@ export type Database = {
           duration_minutes: number
           id: string
           instructor: string
+          is_required: boolean
           lessons_count: number
           level: string
           org_id: string
@@ -471,6 +573,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           instructor?: string
+          is_required?: boolean
           lessons_count?: number
           level?: string
           org_id: string
@@ -488,6 +591,7 @@ export type Database = {
           duration_minutes?: number
           id?: string
           instructor?: string
+          is_required?: boolean
           lessons_count?: number
           level?: string
           org_id?: string
