@@ -25,13 +25,16 @@ function AppLayout() {
   return (
     <OrgProvider>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen w-full bg-white">
           <AppSidebar />
-          <SidebarInset className="flex flex-1 flex-col">
+          <SidebarInset className="flex flex-1 flex-col bg-white">
             <AppHeader />
-            <main className="flex-1 overflow-auto bg-muted/30">
+            <main className="flex-1 overflow-auto bg-white">
               <Outlet />
             </main>
+            <footer className="border-t border-slate-200 bg-white py-3 text-center text-xs text-slate-500">
+              Powered by Onair TMS
+            </footer>
           </SidebarInset>
         </div>
       </SidebarProvider>

@@ -29,19 +29,19 @@ export function AppHeader() {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4">
       <SidebarTrigger />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 gap-2">
+          <Button variant="ghost" size="sm" className="h-8 gap-2 px-2">
             <span
-              className="flex h-5 w-5 items-center justify-center rounded text-[10px] font-semibold text-white"
+              className="flex h-6 w-6 items-center justify-center rounded text-[11px] font-semibold text-white"
               style={{ background: org.brandColor }}
             >
-              {org.short}
+              {org.short.slice(0, 1)}
             </span>
-            <span className="text-sm">{org.name}</span>
+            <span className="text-sm font-medium">{org.name}</span>
             <ChevronDown className="h-3 w-3 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
@@ -79,13 +79,10 @@ export function AppHeader() {
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 gap-2 px-2">
-              <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+            <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="text-xs bg-slate-200">{initials}</AvatarFallback>
               </Avatar>
-              <span className="hidden max-w-[140px] truncate text-sm sm:inline">
-                {user?.user_metadata?.full_name || user?.email}
-              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
