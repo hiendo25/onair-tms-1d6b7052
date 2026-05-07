@@ -5,9 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiSummarizeLesson } from "@/lib/ai-mock";
+import { aiSummarizeLesson, aiGenerateFlashcards, type AiFlashcard } from "@/lib/ai-mock";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/class-room/$slug/learning-screen/$courseId")({
   head: () => ({ meta: [{ title: "Học — OnAir TMS" }] }),
