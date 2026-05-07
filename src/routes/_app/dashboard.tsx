@@ -13,7 +13,10 @@ export const Route = createFileRoute("/_app/dashboard")({
       .select("role")
       .eq("user_id", uid);
 
-    const isAdmin = (roles ?? []).some((r) => r.role === "admin" || r.role === "tenant_admin");
+    const isAdmin = (roles ?? []).some((r) => {
+      const role = r.role as string;
+      return role === "admin" || role === "tenant_admin";
+    });
     throw redirect({ to: isAdmin ? "/admin/dashboard" : "/student/dashboard" });
   },
   component: () => null,
