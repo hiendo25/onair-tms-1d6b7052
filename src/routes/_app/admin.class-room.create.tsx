@@ -53,7 +53,7 @@ function CreateClassRoom() {
                 <Label>Giảng viên</Label>
                 <Select><SelectTrigger><SelectValue placeholder="Chọn giảng viên..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="bich">Trần Thị Bích</SelectItem>
+                    <SelectItem value="mai">Trần Thị Mai</SelectItem>
                     <SelectItem value="duc">Vũ Minh Đức</SelectItem>
                     <SelectItem value="ngoc">Lý Thị Ngọc</SelectItem>
                   </SelectContent></Select>
