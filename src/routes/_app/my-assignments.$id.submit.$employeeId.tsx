@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Clock } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { logLearningActivity } from "@/lib/log-activity";
+import { useOrg } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/my-assignments/$id/submit/$employeeId")({
   head: () => ({ meta: [{ title: "Làm bài kiểm tra — OnAir TMS" }] }),
