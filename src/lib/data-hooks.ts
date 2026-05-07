@@ -28,7 +28,7 @@ export function useBranchMutations() {
 
   const create = useMutation({
     mutationFn: async (payload: Partial<DBBranch>) => {
-      const { error } = await supabase.from("branches").insert({ ...payload, org_id: orgId });
+      const { error } = await supabase.from("branches").insert({ ...payload, org_id: orgId } as never);
       if (error) throw error;
     },
     onSuccess: () => { invalidate(); toast.success("Đã tạo chi nhánh"); },
@@ -55,7 +55,7 @@ export function useBranchMutations() {
 
   const bulkInsert = useMutation({
     mutationFn: async (rows: Partial<DBBranch>[]) => {
-      const { error } = await supabase.from("branches").insert(rows.map((r) => ({ ...r, org_id: orgId })));
+      const { error } = await supabase.from("branches").insert(rows.map((r) => ({ ...r, org_id: orgId })) as never);
       if (error) throw error;
     },
     onSuccess: () => invalidate(),
@@ -89,7 +89,7 @@ export function useDepartmentMutations() {
   return {
     create: useMutation({
       mutationFn: async (p: Partial<DBDepartment>) => {
-        const { error } = await supabase.from("departments").insert({ ...p, org_id: orgId });
+        const { error } = await supabase.from("departments").insert({ ...p, org_id: orgId } as never);
         if (error) throw error;
       },
       onSuccess: () => { invalidate(); toast.success("Đã tạo phòng ban"); },
@@ -113,7 +113,7 @@ export function useDepartmentMutations() {
     }),
     bulkInsert: useMutation({
       mutationFn: async (rows: Partial<DBDepartment>[]) => {
-        const { error } = await supabase.from("departments").insert(rows.map((r) => ({ ...r, org_id: orgId })));
+        const { error } = await supabase.from("departments").insert(rows.map((r) => ({ ...r, org_id: orgId })) as never);
         if (error) throw error;
       },
       onSuccess: () => invalidate(),
@@ -146,7 +146,7 @@ export function useRoleMutations() {
   return {
     create: useMutation({
       mutationFn: async (p: Partial<DBRole>) => {
-        const { error } = await supabase.from("org_roles").insert({ ...p, org_id: orgId });
+        const { error } = await supabase.from("org_roles").insert({ ...p, org_id: orgId } as never);
         if (error) throw error;
       },
       onSuccess: () => { invalidate(); toast.success("Đã tạo vai trò"); },
