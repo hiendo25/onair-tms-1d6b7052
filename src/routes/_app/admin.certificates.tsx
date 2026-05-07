@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/certificates")({
-  head: () => ({ meta: [{ title: "Chứng nhận — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chứng nhận — OnAir TMS" }] }),
   component: CertificatesPage,
 });
 

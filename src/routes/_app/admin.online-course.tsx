@@ -12,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/online-course")({
-  head: () => ({ meta: [{ title: "Môn học — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Môn học — OnAir TMS" }] }),
   component: CoursesPage,
 });
 

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/no-organization")({
-  head: () => ({ meta: [{ title: "Chưa có tổ chức — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chưa có tổ chức — OnAir TMS" }] }),
   component: () => (
     <div className="min-h-screen flex items-center justify-center p-6">
       <Card className="max-w-md w-full"><CardContent className="p-10 text-center space-y-4">

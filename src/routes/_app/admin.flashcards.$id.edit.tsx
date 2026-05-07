@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/admin/flashcards/$id/edit")({
-  head: () => ({ meta: [{ title: "Sửa Flashcard — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Sửa Flashcard — OnAir TMS" }] }),
   component: EditFC,
 });
 function EditFC() {

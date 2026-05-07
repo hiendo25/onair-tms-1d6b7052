@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/surveys")({
-  head: () => ({ meta: [{ title: "Khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Khảo sát — OnAir TMS" }] }),
   component: SurveysPage,
 });
 

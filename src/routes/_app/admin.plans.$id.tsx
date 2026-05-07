@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Edit } from "lucide-react";
 
 export const Route = createFileRoute("/_app/admin/plans/$id")({
-  head: () => ({ meta: [{ title: "Chi tiết kế hoạch — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chi tiết kế hoạch — OnAir TMS" }] }),
   component: PlanDetail,
 });
 

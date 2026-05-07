@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Building2 } from "lucide-react";
 
 export const Route = createFileRoute("/organizations")({
-  head: () => ({ meta: [{ title: "Chọn tổ chức — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chọn tổ chức — OnAir TMS" }] }),
   component: () => (
     <div className="min-h-screen flex items-center justify-center p-6 bg-muted/30">
       <div className="max-w-2xl w-full">

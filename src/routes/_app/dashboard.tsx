@@ -20,7 +20,7 @@ import {
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — OnAir TMS" }] }),
   component: Dashboard,
 });
 

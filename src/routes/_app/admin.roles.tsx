@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/roles")({
-  head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir TMS" }] }),
   component: RolesPage,
 });
 

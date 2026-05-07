@@ -17,7 +17,7 @@ export const Route = createFileRoute("/auth/signin")({
           </div>
           <h1 className="text-2xl font-semibold">Đăng nhập</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Truy cập vào OnAir LMS để bắt đầu hành trình học tập và phát triển của bạn
+            Truy cập vào OnAir TMS để bắt đầu hành trình học tập và phát triển của bạn
           </p>
         </div>
         <form className="space-y-4">

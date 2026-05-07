@@ -14,7 +14,7 @@ const QUESTIONS = [
 ];
 
 export const Route = createFileRoute("/surveys/$id/submit")({
-  head: () => ({ meta: [{ title: "Khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Khảo sát — OnAir TMS" }] }),
   component: SubmitPage,
 });
 

@@ -24,7 +24,7 @@ import heroDashboard from "@/assets/landing-hero-dashboard.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "OnAir LMS — Nền tảng đào tạo cho chuỗi doanh nghiệp Việt" },
+      { title: "OnAir TMS — Nền tảng đào tạo cho chuỗi doanh nghiệp Việt" },
       {
         name: "description",
         content:
@@ -110,7 +110,7 @@ const STEPS = [
 const TESTIMONIALS = [
   {
     quote:
-      "OnAir LMS giúp chúng tôi triển khai chương trình VSATTP cho 200+ cửa hàng chỉ trong 2 tuần. Tỷ lệ hoàn thành đạt 94%, trước đây phải mất 3 tháng.",
+      "OnAir TMS giúp chúng tôi triển khai chương trình VSATTP cho 200+ cửa hàng chỉ trong 2 tuần. Tỷ lệ hoàn thành đạt 94%, trước đây phải mất 3 tháng.",
     name: "Nguyễn Thị Hương",
     role: "Trưởng phòng Đào tạo",
     org: "Highlands Coffee",
@@ -191,7 +191,7 @@ function Landing() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-500 shadow-lg shadow-violet-500/30">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold tracking-tight">OnAir LMS</span>
+            <span className="text-lg font-bold tracking-tight">OnAir TMS</span>
           </Link>
           <nav className="hidden items-center gap-8 md:flex">
             {NAV.map((n) => (
@@ -309,7 +309,7 @@ function Landing() {
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-violet-500/20 ring-1 ring-slate-900/5">
               <img
                 src={heroDashboard}
-                alt="OnAir LMS dashboard"
+                alt="OnAir TMS dashboard"
                 width={1920}
                 height={1080}
                 className="w-full"
@@ -664,7 +664,7 @@ function Landing() {
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-500">
                   <GraduationCap className="h-4 w-4 text-white" />
                 </div>
-                <span className="font-bold">OnAir LMS</span>
+                <span className="font-bold">OnAir TMS</span>
               </Link>
               <p className="mt-3 text-sm text-slate-600">
                 Nền tảng đào tạo cho chuỗi doanh nghiệp Việt Nam.
@@ -690,7 +690,7 @@ function Landing() {
             ))}
           </div>
           <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-slate-200 pt-6 text-xs text-slate-500 sm:flex-row">
-            <span>© 2026 OnAir LMS. All rights reserved.</span>
+            <span>© 2026 OnAir TMS. All rights reserved.</span>
             <div className="flex gap-5">
               <a href="#" className="hover:text-slate-900">Điều khoản</a>
               <a href="#" className="hover:text-slate-900">Bảo mật</a>

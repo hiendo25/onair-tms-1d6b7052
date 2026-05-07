@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_app/admin/certificates/create")({
-  head: () => ({ meta: [{ title: "Tạo chứng nhận — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo chứng nhận — OnAir TMS" }] }),
   component: () => (
     <PageContainer
       title="Tạo chứng nhận"

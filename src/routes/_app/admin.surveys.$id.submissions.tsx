@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_app/admin/surveys/$id/submissions")({
-  head: () => ({ meta: [{ title: "Trả lời khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Trả lời khảo sát — OnAir TMS" }] }),
   component: Submission,
 });
 function Submission() {

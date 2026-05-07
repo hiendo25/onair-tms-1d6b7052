@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/students")({
-  head: () => ({ meta: [{ title: "Học viên bài KT — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Học viên bài KT — OnAir TMS" }] }),
   component: AS,
 });
 function AS() {

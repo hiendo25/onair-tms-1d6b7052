@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_app/class-room/$slug")({
-  head: () => ({ meta: [{ title: "Chi tiết lớp học — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chi tiết lớp học — OnAir TMS" }] }),
   component: CRDetail,
 });
 function CRDetail() {

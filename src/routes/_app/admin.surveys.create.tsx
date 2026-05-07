@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_app/admin/surveys/create")({
-  head: () => ({ meta: [{ title: "Tạo khảo sát — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo khảo sát — OnAir TMS" }] }),
   component: CreateSurvey,
 });
 

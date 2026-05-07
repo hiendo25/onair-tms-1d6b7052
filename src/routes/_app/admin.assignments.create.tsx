@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/admin/assignments/create")({
-  head: () => ({ meta: [{ title: "Tạo bài kiểm tra — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo bài kiểm tra — OnAir TMS" }] }),
   component: () => (
     <PageContainer title="Tạo bài kiểm tra" breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: "Tạo mới" }]}>
       <div className="grid gap-4 lg:grid-cols-3">

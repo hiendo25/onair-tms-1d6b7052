@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 
 export const Route = createFileRoute("/_app/departments/$id")({
-  head: () => ({ meta: [{ title: "Chi tiết phòng ban — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chi tiết phòng ban — OnAir TMS" }] }),
   component: DepartmentDetail,
 });
 

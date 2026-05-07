@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/grade/$employeeId")({
-  head: () => ({ meta: [{ title: "Chấm bài — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Chấm bài — OnAir TMS" }] }),
   component: GradePage,
 });
 

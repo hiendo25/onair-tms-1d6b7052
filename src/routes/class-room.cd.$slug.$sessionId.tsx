@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/class-room/cd/$slug/$sessionId")({
-  head: () => ({ meta: [{ title: "Lớp học trực tiếp — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Lớp học trực tiếp — OnAir TMS" }] }),
   component: KioskPage,
 });
 

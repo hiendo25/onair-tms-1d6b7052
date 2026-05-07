@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_app/admin/flashcards/create")({
-  head: () => ({ meta: [{ title: "Tạo Flashcard — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo Flashcard — OnAir TMS" }] }),
   component: CreateFlashcard,
 });
 

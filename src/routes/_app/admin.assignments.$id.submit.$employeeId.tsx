@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/submit/$employeeId")({
-  head: () => ({ meta: [{ title: "Nộp bài KT — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Nộp bài KT — OnAir TMS" }] }),
   component: Submit,
 });
 function Submit() {

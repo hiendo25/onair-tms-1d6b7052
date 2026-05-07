@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle2, PlayCircle } from "lucide-react";
 
 export const Route = createFileRoute("/_app/class-room/$slug/learning-screen/$courseId")({
-  head: () => ({ meta: [{ title: "Học — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Học — OnAir TMS" }] }),
   component: LS,
 });
 function LS() {

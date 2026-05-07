@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_app/admin/online-course/create")({
-  head: () => ({ meta: [{ title: "Tạo môn học — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Tạo môn học — OnAir TMS" }] }),
   component: () => (
     <PageContainer title="Tạo môn học mới" breadcrumbs={[{ title: "Môn học", path: "/admin/online-course" }, { title: "Tạo mới" }]}>
       <Tabs defaultValue="info">

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export const Route = createFileRoute("/_app/my-assignments/$id/submit/$employeeId")({
-  head: () => ({ meta: [{ title: "Làm bài kiểm tra — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Làm bài kiểm tra — OnAir TMS" }] }),
   component: SubmitPage,
 });
 

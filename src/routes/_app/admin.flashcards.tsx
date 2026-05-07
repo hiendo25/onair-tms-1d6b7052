@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/flashcards")({
-  head: () => ({ meta: [{ title: "Flashcard — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Flashcard — OnAir TMS" }] }),
   component: FlashcardsPage,
 });
 

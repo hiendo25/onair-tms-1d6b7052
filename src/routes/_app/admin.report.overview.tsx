@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/admin/report/overview")({
-  head: () => ({ meta: [{ title: "Báo cáo tổng quan — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Báo cáo tổng quan — OnAir TMS" }] }),
   component: () => (
     <PageContainer title="Báo cáo tổng quan" breadcrumbs={[{ title: "Báo cáo" }, { title: "Tổng quan" }]}>
       <Card>

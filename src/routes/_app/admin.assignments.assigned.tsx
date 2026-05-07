@@ -3,7 +3,7 @@ import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
 
 export const Route = createFileRoute("/_app/admin/assignments/assigned")({
-  head: () => ({ meta: [{ title: "Bài KT đã gán — OnAir LMS" }] }),
+  head: () => ({ meta: [{ title: "Bài KT đã gán — OnAir TMS" }] }),
   component: () => (
     <PageContainer title="Bài kiểm tra đã gán" breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Đã gán" }]}>
       <Card className="p-8 text-center text-sm text-muted-foreground">
