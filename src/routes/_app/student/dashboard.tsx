@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
 import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
-import { aiPersonalInsight } from "@/lib/ai-mock";
+import { aiPersonalInsight, type ActionableInsight } from "@/lib/ai-mock";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
