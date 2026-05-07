@@ -109,7 +109,7 @@ export const useAssignments = assignmentsCrud.useList;
 export const useAssignmentMutations = assignmentsCrud.useMutations;
 
 // ===== Question bank =====
-export type DBQuestion = { id: string; org_id: string; question: string; type: string; category: string; difficulty: string; options: unknown; correct_answer: string; points: number; tags: string[]; };
+export type DBQuestion = { id: string; org_id: string; question: string; type: string; category: string; difficulty: string; options: unknown; correct_answer: string; explanation: string; points: number; tags: string[]; };
 const questionsCrud = createOrgCrud<DBQuestion>("question_bank", "câu hỏi");
 export const useQuestions = questionsCrud.useList;
 export const useQuestionMutations = questionsCrud.useMutations;
