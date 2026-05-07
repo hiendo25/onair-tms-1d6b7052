@@ -645,6 +645,7 @@ export type Database = {
           org_id: string
           status: string
           students_count: number
+          tags: string[]
           title: string
           updated_at: string
         }
@@ -663,6 +664,7 @@ export type Database = {
           org_id: string
           status?: string
           students_count?: number
+          tags?: string[]
           title: string
           updated_at?: string
         }
@@ -681,6 +683,7 @@ export type Database = {
           org_id?: string
           status?: string
           students_count?: number
+          tags?: string[]
           title?: string
           updated_at?: string
         }
@@ -803,13 +806,18 @@ export type Database = {
       }
       plans: {
         Row: {
+          approved_by: string | null
+          budget: number | null
           code: string
           completed_count: number
           created_at: string
+          created_by: string | null
           description: string
           end_date: string | null
           id: string
+          objective: string | null
           org_id: string
+          rejection_reason: string | null
           start_date: string | null
           status: string
           target_count: number
@@ -818,13 +826,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved_by?: string | null
+          budget?: number | null
           code: string
           completed_count?: number
           created_at?: string
+          created_by?: string | null
           description?: string
           end_date?: string | null
           id?: string
+          objective?: string | null
           org_id: string
+          rejection_reason?: string | null
           start_date?: string | null
           status?: string
           target_count?: number
@@ -833,13 +846,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved_by?: string | null
+          budget?: number | null
           code?: string
           completed_count?: number
           created_at?: string
+          created_by?: string | null
           description?: string
           end_date?: string | null
           id?: string
+          objective?: string | null
           org_id?: string
+          rejection_reason?: string | null
           start_date?: string | null
           status?: string
           target_count?: number
@@ -921,6 +939,130 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_answers: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          question_id: string
+          response_id: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          question_id: string
+          response_id: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          question_id?: string
+          response_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "survey_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "survey_answers_response_id_fkey"
+            columns: ["response_id"]
+            isOneToOne: false
+            referencedRelation: "survey_responses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_questions: {
+        Row: {
+          content: string
+          correct_answer: Json | null
+          created_at: string
+          id: string
+          options: Json
+          order_index: number
+          org_id: string
+          required: boolean
+          survey_id: string
+          type: string
+        }
+        Insert: {
+          content: string
+          correct_answer?: Json | null
+          created_at?: string
+          id?: string
+          options?: Json
+          order_index?: number
+          org_id: string
+          required?: boolean
+          survey_id: string
+          type: string
+        }
+        Update: {
+          content?: string
+          correct_answer?: Json | null
+          created_at?: string
+          id?: string
+          options?: Json
+          order_index?: number
+          org_id?: string
+          required?: boolean
+          survey_id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_questions_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          submitted_at: string
+          survey_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          submitted_at?: string
+          survey_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          submitted_at?: string
+          survey_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       surveys: {
         Row: {
           anonymous: boolean
@@ -971,6 +1113,242 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      training_plan_program_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          org_id: string
+          program_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          program_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          program_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_program_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_program_courses_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_programs: {
+        Row: {
+          created_at: string
+          description: string
+          end_date: string | null
+          id: string
+          name: string
+          order_index: number
+          org_id: string
+          plan_id: string
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          org_id: string
+          plan_id: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          org_id?: string
+          plan_id?: string
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_programs_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_surveys: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          org_id: string
+          plan_id: string
+          result_summary: Json
+          start_date: string | null
+          status: string
+          survey_id: string
+          target_type: string
+          target_unit_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          org_id: string
+          plan_id: string
+          result_summary?: Json
+          start_date?: string | null
+          status?: string
+          survey_id: string
+          target_type?: string
+          target_unit_ids?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          org_id?: string
+          plan_id?: string
+          result_summary?: Json
+          start_date?: string | null
+          status?: string
+          survey_id?: string
+          target_type?: string
+          target_unit_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_surveys_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_surveys_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_topic_courses: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          org_id: string
+          topic_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          topic_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_topic_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "online_courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_topic_courses_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_plan_topics: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          name: string
+          order_index: number
+          org_id: string
+          plan_id: string
+          program_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          name: string
+          order_index?: number
+          org_id: string
+          plan_id: string
+          program_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          name?: string
+          order_index?: number
+          org_id?: string
+          plan_id?: string
+          program_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_plan_topics_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_plan_topics_program_id_fkey"
+            columns: ["program_id"]
+            isOneToOne: false
+            referencedRelation: "training_plan_programs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_certificates: {
         Row: {

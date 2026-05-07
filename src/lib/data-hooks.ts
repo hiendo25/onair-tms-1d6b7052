@@ -139,7 +139,15 @@ export const useGamifications = gamificationsCrud.useList;
 export const useGamificationMutations = gamificationsCrud.useMutations;
 
 // ===== Plans =====
-export type DBPlan = { id: string; org_id: string; code: string; title: string; description: string; type: string; start_date: string | null; end_date: string | null; target_count: number; completed_count: number; status: string; };
+export type DBPlan = {
+  id: string; org_id: string; code: string; title: string;
+  objective: string; description: string; type: string;
+  start_date: string | null; end_date: string | null;
+  budget: number; target_count: number; completed_count: number;
+  status: "draft" | "pending_survey" | "pending" | "approved" | "rejected";
+  created_by: string | null; approved_by: string | null;
+  rejection_reason: string; created_at: string;
+};
 const plansCrud = createOrgCrud<DBPlan>("plans", "kế hoạch");
 export const usePlans = plansCrud.useList;
 export const usePlanMutations = plansCrud.useMutations;
