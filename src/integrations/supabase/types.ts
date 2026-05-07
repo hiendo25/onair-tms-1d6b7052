@@ -69,6 +69,7 @@ export type Database = {
           description: string
           id: string
           org_id: string
+          pass_score: number
           status: string
           title: string
           total_questions: number
@@ -84,6 +85,7 @@ export type Database = {
           description?: string
           id?: string
           org_id: string
+          pass_score?: number
           status?: string
           title: string
           total_questions?: number
@@ -99,6 +101,7 @@ export type Database = {
           description?: string
           id?: string
           org_id?: string
+          pass_score?: number
           status?: string
           title?: string
           total_questions?: number
@@ -419,6 +422,7 @@ export type Database = {
           status: string
           type: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           avatar_url?: string
@@ -437,6 +441,7 @@ export type Database = {
           status?: string
           type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           avatar_url?: string
@@ -455,6 +460,7 @@ export type Database = {
           status?: string
           type?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -966,6 +972,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_certificates: {
+        Row: {
+          certificate_id: string
+          certificate_title: string
+          created_at: string
+          expires_at: string
+          id: string
+          issued_at: string
+          org_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          certificate_id: string
+          certificate_title?: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          issued_at?: string
+          org_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          certificate_id?: string
+          certificate_title?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          issued_at?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_course_progress: {
         Row: {
           course_id: string
@@ -1034,6 +1079,7 @@ export type Database = {
       }
       user_learning_path_progress: {
         Row: {
+          completed_at: string | null
           completed_lessons: number
           created_at: string
           id: string
@@ -1047,6 +1093,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          completed_at?: string | null
           completed_lessons?: number
           created_at?: string
           id?: string
@@ -1060,6 +1107,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          completed_at?: string | null
           completed_lessons?: number
           created_at?: string
           id?: string
