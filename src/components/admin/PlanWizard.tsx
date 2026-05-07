@@ -35,6 +35,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   const [planId, setPlanId] = useState<string | undefined>(initialPlanId);
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(!!initialPlanId);
 
   const [info, setInfo] = useState({
     code: "", title: "", objective: "", description: "",
