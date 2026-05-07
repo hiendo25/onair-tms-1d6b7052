@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useRouter } from "@tanstack/react-router";
+import { toast } from "sonner";
 import { AlertTriangle, Info, CheckCircle2, Sparkles, RefreshCw, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,11 @@ export function TeamInsightsCard({
   insights?: ActionableInsight[];
   loading?: boolean;
 }) {
+  const router = useRouter();
+  const knownPaths = useMemo(() => {
+    const rbp = (router as unknown as { routesByPath?: Record<string, unknown> }).routesByPath ?? {};
+    return new Set(Object.keys(rbp));
+  }, [router]);
   const externalMode = insights !== undefined || loadingProp !== undefined;
   const [data, setData] = useState<ActionableInsight[] | null>(externalMode ? null : null);
   const [loading, setLoading] = useState(false);
@@ -105,7 +111,18 @@ export function TeamInsightsCard({
                   </div>
                   <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shrink-0">
                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                    <Link to={it.to as any} search={it.search as any}>
+                    <Link
+                      to={it.to as any}
+                      search={it.search as any}
+                      onClick={(e) => {
+                        if (!knownPaths.has(it.to)) {
+                          e.preventDefault();
+                          toast.error("Trang này chưa có sẵn, mình sẽ bổ sung sau nhé.");
+                          // eslint-disable-next-line no-console
+                          console.warn("[TeamInsightsCard] Missing route:", it.to);
+                        }
+                      }}
+                    >
                       {it.ctaLabel}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
