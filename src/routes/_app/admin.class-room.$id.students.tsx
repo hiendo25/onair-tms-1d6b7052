@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, UserPlus, Download, Search, MoreHorizontal } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
@@ -9,21 +9,19 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MOCK_CLASSROOMS, MOCK_EMPLOYEES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/class-room/$id/students")({
-  loader: ({ params }) => {
-    const classroom = MOCK_CLASSROOMS.find((c) => c.id === params.id);
-    if (!classroom) throw notFound();
-    return { classroom };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy lớp"><Button asChild variant="outline"><Link to="/admin/class-room"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: ClassroomStudents,
 });
 
 function ClassroomStudents() {
-  const { classroom: c } = Route.useLoaderData();
-  const students = MOCK_EMPLOYEES.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
+  const data = useOrgData();
+  const { id } = Route.useParams();
+  const c = data.classrooms.find((x) => x.id === id);
+  if (!c) return null;
+  const students = data.employees.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
 
   return (
     <PageContainer

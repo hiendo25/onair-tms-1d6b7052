@@ -3,44 +3,41 @@ import { Users, BookOpen, GraduationCap, Trophy } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/analytic")({
   head: () => ({ meta: [{ title: "Báo cáo & phân tích — OnAir LMS" }] }),
   component: AnalyticPage,
 });
 
-const MONTHLY = [
-  { m: "T1", learners: 920, completed: 712 },
-  { m: "T2", learners: 1045, completed: 824 },
-  { m: "T3", learners: 1187, completed: 956 },
-  { m: "T4", learners: 1210, completed: 1042 },
-  { m: "T5", learners: 1240, completed: 1078 },
-  { m: "T6", learners: 1268, completed: 1120 },
-];
-const MAX = Math.max(...MONTHLY.map(d => d.learners));
-
-const TOP_COURSES = [
-  { name: "An toàn vệ sinh thực phẩm (VSATTP)", learners: 1240, share: 100 },
-  { name: "Văn hoá thương hiệu Highlands", learners: 1156, share: 93 },
-  { name: "Kỹ năng phục vụ khách hàng", learners: 1124, share: 90 },
-  { name: "Vận hành máy POS & thanh toán", learners: 932, share: 75 },
-  { name: "Quy trình pha chế chuẩn Highlands", learners: 842, share: 67 },
-];
-
-const TOP_LEARNERS = [
-  { name: "Lê Hoàng Cường - Pha chế HCM", xp: 2480, badge: "🥇" },
-  { name: "Phạm Thuỳ Dung - Thu ngân HCM", xp: 2210, badge: "🥈" },
-  { name: "Hoàng Thị Hà - Trưởng ca HN", xp: 1985, badge: "🥉" },
-  { name: "Bùi Thị Lan - QLCH Đà Nẵng", xp: 1742, badge: "4" },
-  { name: "Ngô Văn Minh - Pha chế HN", xp: 1620, badge: "5" },
-];
-
 function AnalyticPage() {
+  const data = useOrgData();
+  const s = data.stats;
+  const base = s.totalEmployees;
+  const factors = [0.74, 0.84, 0.95, 0.97, 1.0, 1.02];
+  const compFactor = s.completionRate / 100;
+  const MONTHLY = ["T1","T2","T3","T4","T5","T6"].map((m, i) => ({
+    m,
+    learners: Math.round(base * factors[i]),
+    completed: Math.round(base * factors[i] * compFactor),
+  }));
+  const MAX = Math.max(...MONTHLY.map(d => d.learners));
+
+  const sortedCourses = [...data.courses].sort((a, b) => b.enrolled - a.enrolled).slice(0, 5);
+  const topEnroll = sortedCourses[0]?.enrolled || 1;
+  const TOP_COURSES = sortedCourses.map(c => ({ name: c.title, learners: c.enrolled, share: Math.round((c.enrolled / topEnroll) * 100) }));
+
+  const TOP_LEARNERS = data.employees.slice(0, 5).map((e, i) => ({
+    name: `${e.name} - ${e.position}`,
+    xp: 2500 - i * 230,
+    badge: ["🥇","🥈","🥉","4","5"][i],
+  }));
+
   const stats = [
-    { label: "Nhân viên hoạt động", value: "1,240", icon: Users, color: "text-blue-600 bg-blue-100" },
-    { label: "Khoá hoàn thành tháng này", value: "1,078", icon: GraduationCap, color: "text-emerald-600 bg-emerald-100" },
-    { label: "Chứng chỉ cấp tháng này", value: "156", icon: BookOpen, color: "text-amber-600 bg-amber-100" },
-    { label: "Giờ học tích luỹ", value: "18,420h", icon: Trophy, color: "text-violet-600 bg-violet-100" },
+    { label: "Nhân viên hoạt động", value: s.totalEmployees.toLocaleString("vi-VN"), icon: Users, color: "text-blue-600 bg-blue-100" },
+    { label: "Khoá hoàn thành tháng này", value: Math.round(s.totalEmployees * compFactor).toLocaleString("vi-VN"), icon: GraduationCap, color: "text-emerald-600 bg-emerald-100" },
+    { label: "Chứng chỉ cấp tháng này", value: String(s.certsThisMonth), icon: BookOpen, color: "text-amber-600 bg-amber-100" },
+    { label: "Giờ học tích luỹ", value: s.totalHours, icon: Trophy, color: "text-violet-600 bg-violet-100" },
   ];
 
   return (

@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MOCK_QUESTIONS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
   head: () => ({ meta: [{ title: "Ngân hàng câu hỏi — OnAir LMS" }] }),
@@ -17,10 +17,11 @@ export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
 const TYPE_LABEL = { single: "Một đáp án", multiple: "Nhiều đáp án", essay: "Tự luận" } as const;
 
 function QuestionBankPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("all");
-  const cats = Array.from(new Set(MOCK_QUESTIONS.map(q => q.category)));
-  const filtered = MOCK_QUESTIONS.filter(q =>
+  const cats = Array.from(new Set(data.questions.map(q => q.category)));
+  const filtered = data.questions.filter(q =>
     (!search || q.content.toLowerCase().includes(search.toLowerCase())) &&
     (cat === "all" || q.category === cat)
   );

@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_BRANCHES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/branches")({
   head: () => ({ meta: [{ title: "Chi nhánh — OnAir LMS" }] }),
-  component: () => (
+  component: BranchesPage,
+});
+
+function BranchesPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Quản lý chi nhánh"
       breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Chi nhánh" }]}
@@ -28,7 +33,7 @@ export const Route = createFileRoute("/_app/branches")({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_BRANCHES.map(b => (
+            {data.branches.map(b => (
               <TableRow key={b.id}>
                 <TableCell className="font-medium">{b.name}</TableCell>
                 <TableCell><Badge>{b.code}</Badge></TableCell>
@@ -42,5 +47,6 @@ export const Route = createFileRoute("/_app/branches")({
         </Table>
       </Card>
     </PageContainer>
-  ),
-});
+  );
+}
+

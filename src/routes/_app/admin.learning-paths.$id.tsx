@@ -1,24 +1,22 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Users, BookOpen, Clock, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { MOCK_LEARNING_PATHS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/learning-paths/$id")({
-  loader: ({ params }) => {
-    const path = MOCK_LEARNING_PATHS.find((p) => p.id === params.id);
-    if (!path) throw notFound();
-    return { path };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy lộ trình"><Button asChild variant="outline"><Link to="/admin/learning-paths"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: LearningPathDetail,
 });
 
 function LearningPathDetail() {
-  const { path } = Route.useLoaderData();
+  const data = useOrgData();
+  const { id } = Route.useParams();
+  const path = data.learningPaths.find((p) => p.id === id);
+  if (!path) return null;
   const totalCourses = path.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0);
   const totalWeeks = path.phases.reduce((s: number, p: { weeks: number }) => s + p.weeks, 0);
 

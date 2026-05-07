@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_DEPARTMENTS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/departments")({
   head: () => ({ meta: [{ title: "Phòng ban — OnAir LMS" }] }),
-  component: () => (
+  component: DepartmentsPage,
+});
+
+function DepartmentsPage() {
+  const data = useOrgData();
+  return (
     <PageContainer
       title="Quản lý phòng ban"
       breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Phòng ban" }]}
@@ -28,7 +33,7 @@ export const Route = createFileRoute("/_app/departments")({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_DEPARTMENTS.map(d => (
+            {data.departments.map(d => (
               <TableRow key={d.id}>
                 <TableCell className="font-medium">{d.name}</TableCell>
                 <TableCell><Badge>{d.code}</Badge></TableCell>
@@ -42,5 +47,6 @@ export const Route = createFileRoute("/_app/departments")({
         </Table>
       </Card>
     </PageContainer>
-  ),
-});
+  );
+}
+

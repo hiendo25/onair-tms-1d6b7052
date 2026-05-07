@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MOCK_COURSES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/online-course")({
   head: () => ({ meta: [{ title: "Môn học — OnAir LMS" }] }),
@@ -24,10 +24,11 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 function CoursesPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 
-  const filtered = useMemo(() => MOCK_COURSES.filter(c =>
+  const filtered = useMemo(() => data.courses.filter(c =>
     (!search || c.title.toLowerCase().includes(search.toLowerCase()))
   ), [search]);
 

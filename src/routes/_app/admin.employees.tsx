@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MOCK_EMPLOYEES, BRANCHES, DEPARTMENTS, POSITIONS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/employees")({
   head: () => ({ meta: [{ title: "Quản lý người dùng — OnAir LMS" }] }),
@@ -30,13 +30,14 @@ export const Route = createFileRoute("/_app/admin/employees")({
 const ROLE_LABEL = { admin: "Quản trị viên", teacher: "Giảng viên", student: "Học sinh" } as const;
 
 function EmployeesPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [branch, setBranch] = useState("all");
   const [role, setRole] = useState("all");
   const [open, setOpen] = useState(false);
 
   const filtered = useMemo(() => {
-    return MOCK_EMPLOYEES.filter((e) => {
+    return data.employees.filter((e) => {
       if (search && !`${e.name} ${e.email} ${e.code}`.toLowerCase().includes(search.toLowerCase())) return false;
       if (branch !== "all" && e.branch !== branch) return false;
       if (role !== "all" && e.role !== role) return false;
@@ -71,7 +72,7 @@ function EmployeesPage() {
             <SelectTrigger className="w-44"><SelectValue placeholder="Chi nhánh" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tất cả chi nhánh</SelectItem>
-              {BRANCHES.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
+              {data.branchNames.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={role} onValueChange={setRole}>
@@ -140,7 +141,7 @@ function EmployeesPage() {
           </TableBody>
         </Table>
         <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-muted-foreground">
-          <span>Hiển thị {filtered.length} / {MOCK_EMPLOYEES.length} người dùng</span>
+          <span>Hiển thị {filtered.length} / {data.employees.length} người dùng</span>
           <div className="flex gap-1">
             <Button variant="outline" size="sm" disabled>Trước</Button>
             <Button variant="outline" size="sm" disabled>Sau</Button>
@@ -152,6 +153,7 @@ function EmployeesPage() {
 }
 
 function CreateEmployeeDialog({ onClose }: { onClose: () => void }) {
+  const data = useOrgData();
   return (
     <DialogContent className="sm:max-w-lg">
       <DialogHeader>
@@ -171,17 +173,17 @@ function CreateEmployeeDialog({ onClose }: { onClose: () => void }) {
           <div className="space-y-1.5">
             <Label>Chi nhánh</Label>
             <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{BRANCHES.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
+              <SelectContent>{data.branchNames.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
           </div>
           <div className="space-y-1.5">
             <Label>Phòng ban</Label>
             <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{DEPARTMENTS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
+              <SelectContent>{data.departmentNames.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
           </div>
           <div className="space-y-1.5">
             <Label>Chức vụ</Label>
             <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{POSITIONS.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
+              <SelectContent>{data.positions.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
           </div>
         </div>
         <div className="space-y-1.5">

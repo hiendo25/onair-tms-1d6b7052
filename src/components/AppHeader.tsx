@@ -10,8 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useOrg } from "@/lib/org-context";
+import { Check } from "lucide-react";
 
 export function AppHeader() {
+  const { org, orgs, orgId, setOrg } = useOrg();
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
       <SidebarTrigger />
@@ -19,18 +22,38 @@ export function AppHeader() {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="h-8 gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded bg-primary text-[10px] font-semibold text-primary-foreground">
-              OA
+            <span
+              className="flex h-5 w-5 items-center justify-center rounded text-[10px] font-semibold text-white"
+              style={{ background: org.brandColor }}
+            >
+              {org.short}
             </span>
-            <span className="text-sm">OnAir Org</span>
+            <span className="text-sm">{org.name}</span>
             <ChevronDown className="h-3 w-3 opacity-50" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Tổ chức</DropdownMenuLabel>
+        <DropdownMenuContent align="start" className="w-72">
+          <DropdownMenuLabel>Chuyển tổ chức</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>OnAir Org</DropdownMenuItem>
-          <DropdownMenuItem>Demo Org</DropdownMenuItem>
+          {orgs.map((o) => (
+            <DropdownMenuItem
+              key={o.id}
+              onSelect={() => setOrg(o.id)}
+              className="gap-2"
+            >
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded text-[10px] font-semibold text-white"
+                style={{ background: o.brandColor }}
+              >
+                {o.short}
+              </span>
+              <div className="flex flex-col">
+                <span className="text-sm">{o.name}</span>
+                <span className="text-[11px] text-muted-foreground">{o.industry}</span>
+              </div>
+              {o.id === orgId && <Check className="ml-auto h-4 w-4" />}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuContent>
       </DropdownMenu>
 

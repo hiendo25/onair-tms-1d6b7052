@@ -1,4 +1,4 @@
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Pencil, Clock, ListChecks, RefreshCw, Users, FileCheck2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,21 +7,19 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_ASSIGNMENTS, MOCK_EMPLOYEES, MOCK_QUESTIONS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id")({
-  loader: ({ params }) => {
-    const a = MOCK_ASSIGNMENTS.find((x) => x.id === params.id);
-    if (!a) throw notFound();
-    return { assignment: a };
-  },
   notFoundComponent: () => <PageContainer title="Không tìm thấy bài kiểm tra"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
   component: AssignmentDetail,
 });
 
 function AssignmentDetail() {
-  const { assignment: a } = Route.useLoaderData();
-  const submissions = MOCK_EMPLOYEES.filter((e) => e.role === "student").slice(0, 6);
+  const data = useOrgData();
+  const { id } = Route.useParams();
+  const a = data.assignments.find((x) => x.id === id);
+  if (!a) return null;
+  const submissions = data.employees.filter((e) => e.role === "student").slice(0, 6);
 
   return (
     <PageContainer
@@ -68,7 +66,7 @@ function AssignmentDetail() {
         <TabsContent value="questions">
           <Card>
             <div className="divide-y">
-              {MOCK_QUESTIONS.slice(0, 5).map((q, i) => (
+              {data.questions.slice(0, 5).map((q, i) => (
                 <div key={q.id} className="p-4">
                   <div className="flex items-start gap-3">
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
