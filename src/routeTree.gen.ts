@@ -19,7 +19,10 @@ import { Route as AuthSigninRouteImport } from './routes/auth.signin'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
 import { Route as AppMyLearningPathsRouteImport } from './routes/_app/my-learning-paths'
 import { Route as AppMyGamificationRouteImport } from './routes/_app/my-gamification'
+import { Route as AppMyFlashcardsRouteImport } from './routes/_app/my-flashcards'
+import { Route as AppMyFavoritesRouteImport } from './routes/_app/my-favorites'
 import { Route as AppMyClassRouteImport } from './routes/_app/my-class'
+import { Route as AppMyCertificatesRouteImport } from './routes/_app/my-certificates'
 import { Route as AppMyAssignmentsRouteImport } from './routes/_app/my-assignments'
 import { Route as AppDepartmentsRouteImport } from './routes/_app/departments'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -132,9 +135,24 @@ const AppMyGamificationRoute = AppMyGamificationRouteImport.update({
   path: '/my-gamification',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMyFlashcardsRoute = AppMyFlashcardsRouteImport.update({
+  id: '/my-flashcards',
+  path: '/my-flashcards',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyFavoritesRoute = AppMyFavoritesRouteImport.update({
+  id: '/my-favorites',
+  path: '/my-favorites',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyClassRoute = AppMyClassRouteImport.update({
   id: '/my-class',
   path: '/my-class',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyCertificatesRoute = AppMyCertificatesRouteImport.update({
+  id: '/my-certificates',
+  path: '/my-certificates',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMyAssignmentsRoute = AppMyAssignmentsRouteImport.update({
@@ -483,7 +501,10 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/departments': typeof AppDepartmentsRouteWithChildren
   '/my-assignments': typeof AppMyAssignmentsRouteWithChildren
+  '/my-certificates': typeof AppMyCertificatesRoute
   '/my-class': typeof AppMyClassRoute
+  '/my-favorites': typeof AppMyFavoritesRoute
+  '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/auth/error': typeof AuthErrorRoute
@@ -557,7 +578,10 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/departments': typeof AppDepartmentsRouteWithChildren
   '/my-assignments': typeof AppMyAssignmentsRouteWithChildren
+  '/my-certificates': typeof AppMyCertificatesRoute
   '/my-class': typeof AppMyClassRoute
+  '/my-favorites': typeof AppMyFavoritesRoute
+  '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/auth/error': typeof AuthErrorRoute
@@ -633,7 +657,10 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/departments': typeof AppDepartmentsRouteWithChildren
   '/_app/my-assignments': typeof AppMyAssignmentsRouteWithChildren
+  '/_app/my-certificates': typeof AppMyCertificatesRoute
   '/_app/my-class': typeof AppMyClassRoute
+  '/_app/my-favorites': typeof AppMyFavoritesRoute
+  '/_app/my-flashcards': typeof AppMyFlashcardsRoute
   '/_app/my-gamification': typeof AppMyGamificationRoute
   '/_app/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/auth/error': typeof AuthErrorRoute
@@ -709,7 +736,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/departments'
     | '/my-assignments'
+    | '/my-certificates'
     | '/my-class'
+    | '/my-favorites'
+    | '/my-flashcards'
     | '/my-gamification'
     | '/my-learning-paths'
     | '/auth/error'
@@ -783,7 +813,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/departments'
     | '/my-assignments'
+    | '/my-certificates'
     | '/my-class'
+    | '/my-favorites'
+    | '/my-flashcards'
     | '/my-gamification'
     | '/my-learning-paths'
     | '/auth/error'
@@ -858,7 +891,10 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/departments'
     | '/_app/my-assignments'
+    | '/_app/my-certificates'
     | '/_app/my-class'
+    | '/_app/my-favorites'
+    | '/_app/my-flashcards'
     | '/_app/my-gamification'
     | '/_app/my-learning-paths'
     | '/auth/error'
@@ -1008,11 +1044,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMyGamificationRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/my-flashcards': {
+      id: '/_app/my-flashcards'
+      path: '/my-flashcards'
+      fullPath: '/my-flashcards'
+      preLoaderRoute: typeof AppMyFlashcardsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-favorites': {
+      id: '/_app/my-favorites'
+      path: '/my-favorites'
+      fullPath: '/my-favorites'
+      preLoaderRoute: typeof AppMyFavoritesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/my-class': {
       id: '/_app/my-class'
       path: '/my-class'
       fullPath: '/my-class'
       preLoaderRoute: typeof AppMyClassRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-certificates': {
+      id: '/_app/my-certificates'
+      path: '/my-certificates'
+      fullPath: '/my-certificates'
+      preLoaderRoute: typeof AppMyCertificatesRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/my-assignments': {
@@ -1745,7 +1802,10 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppDepartmentsRoute: typeof AppDepartmentsRouteWithChildren
   AppMyAssignmentsRoute: typeof AppMyAssignmentsRouteWithChildren
+  AppMyCertificatesRoute: typeof AppMyCertificatesRoute
   AppMyClassRoute: typeof AppMyClassRoute
+  AppMyFavoritesRoute: typeof AppMyFavoritesRoute
+  AppMyFlashcardsRoute: typeof AppMyFlashcardsRoute
   AppMyGamificationRoute: typeof AppMyGamificationRoute
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRouteWithChildren
   AppAdminAssignmentsRoute: typeof AppAdminAssignmentsRouteWithChildren
@@ -1769,7 +1829,10 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppDepartmentsRoute: AppDepartmentsRouteWithChildren,
   AppMyAssignmentsRoute: AppMyAssignmentsRouteWithChildren,
+  AppMyCertificatesRoute: AppMyCertificatesRoute,
   AppMyClassRoute: AppMyClassRoute,
+  AppMyFavoritesRoute: AppMyFavoritesRoute,
+  AppMyFlashcardsRoute: AppMyFlashcardsRoute,
   AppMyGamificationRoute: AppMyGamificationRoute,
   AppMyLearningPathsRoute: AppMyLearningPathsRouteWithChildren,
   AppAdminAssignmentsRoute: AppAdminAssignmentsRouteWithChildren,
