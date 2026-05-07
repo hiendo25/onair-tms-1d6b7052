@@ -54,7 +54,7 @@ function BranchesPage() {
       label: "Người quản lý",
       type: "select",
       placeholder: "Chọn người quản lý",
-      options: [{ value: "", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
+      options: [{ value: "__none__", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
     },
     { name: "phone", label: "Số điện thoại", type: "tel", placeholder: "VD: 0901234567" },
     { name: "address", label: "Địa chỉ", type: "textarea", placeholder: "Địa chỉ chi nhánh", rows: 2 },
@@ -62,8 +62,9 @@ function BranchesPage() {
   ], [employees]);
 
   const submit = async (v: BranchForm) => {
-    if (editing?.id) await update.mutateAsync({ ...v, id: editing.id, employees: editing.employees } as DBBranch);
-    else await create.mutateAsync({ ...v, employees: 0 });
+    const payload = { ...v, manager: v.manager === "__none__" ? "" : v.manager };
+    if (editing?.id) await update.mutateAsync({ ...payload, id: editing.id, employees: editing.employees } as DBBranch);
+    else await create.mutateAsync({ ...payload, employees: 0 });
   };
 
   return (
