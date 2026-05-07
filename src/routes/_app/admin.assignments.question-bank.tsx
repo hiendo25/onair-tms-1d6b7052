@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search, Trash2, Sparkles } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,12 +17,15 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { useQuestions, useQuestionMutations, type DBQuestion } from "@/lib/data-hooks";
 import { QUESTION_TYPE, DIFFICULTY } from "@/lib/admin-options";
+import { AiSpinner } from "@/components/ai/AiSpinner";
+import { aiGenerateQuestions, type AiQuestion } from "@/lib/ai-mock";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
   head: () => ({ meta: [{ title: "Ngân hàng câu hỏi — OnAir TMS" }] }),
