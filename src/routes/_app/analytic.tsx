@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useBranches, useDepartments, useEmployees } from "@/lib/data-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
+import { useBranchReadiness, levelOf, levelLabel, levelClasses, scoreColor } from "@/lib/branch-readiness";
+import { Badge } from "@/components/ui/badge";
 
 function useBranchCompletion(orgId: string) {
   return useQuery({
@@ -51,6 +53,12 @@ function ReportPage() {
   const { data: departments = [] } = useDepartments();
   const { data: employees = [] } = useEmployees();
   const { data: completionMap = {} } = useBranchCompletion(orgId);
+  const { data: readiness = [] } = useBranchReadiness(orgId);
+  const readinessByName = useMemo(() => {
+    const m = new Map<string, number>();
+    readiness.forEach((r) => m.set(r.branchName, r.score));
+    return m;
+  }, [readiness]);
 
   const [mode, setMode] = useState<"high" | "low">("high");
   const [search, setSearch] = useState("");
@@ -209,20 +217,38 @@ function ReportPage() {
                 <TableHead>Đội nhóm</TableHead>
                 <TableHead>Học viên</TableHead>
                 <TableHead>Tỉ lệ hoàn thành (%)</TableHead>
+                <TableHead>Readiness Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paged.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Không có dữ liệu</TableCell></TableRow>
-              ) : paged.map((b) => (
-                <TableRow key={b.id}>
-                  <TableCell className="font-medium">{b.name}</TableCell>
-                  <TableCell>{b.departments}</TableCell>
-                  <TableCell>{b.teams}</TableCell>
-                  <TableCell>{b.learners}</TableCell>
-                  <TableCell className={b.completion < 50 ? "text-red-600 font-medium" : ""}>{b.completion}%</TableCell>
-                </TableRow>
-              ))}
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Không có dữ liệu</TableCell></TableRow>
+              ) : paged.map((b) => {
+                const score = readinessByName.get(b.name);
+                const lv = score != null ? levelOf(score) : null;
+                return (
+                  <TableRow key={b.id}>
+                    <TableCell className="font-medium">{b.name}</TableCell>
+                    <TableCell>{b.departments}</TableCell>
+                    <TableCell>{b.teams}</TableCell>
+                    <TableCell>{b.learners}</TableCell>
+                    <TableCell className={b.completion < 50 ? "text-red-600 font-medium" : ""}>{b.completion}%</TableCell>
+                    <TableCell>
+                      {score == null ? (
+                        <span className="text-muted-foreground">—</span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold tabular-nums w-9">{score}%</span>
+                          <div className="h-1.5 w-16 rounded-full bg-muted overflow-hidden">
+                            <div className={`h-full ${scoreColor(score)}`} style={{ width: `${score}%` }} />
+                          </div>
+                          {lv && <Badge variant="outline" className={`${levelClasses(lv)} text-[10px]`}>{levelLabel(lv)}</Badge>}
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
 

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
+import { BranchReadinessSection } from "@/components/admin/BranchReadinessSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
 import { getUserRole } from "@/lib/roles";
@@ -86,6 +87,8 @@ function AdminDashboard() {
           </Card>
         ))}
       </div>
+
+      <BranchReadinessSection />
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card>
