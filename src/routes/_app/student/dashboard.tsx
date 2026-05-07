@@ -72,12 +72,14 @@ function StudentDashboard() {
             stats={dash?.myStats ?? null}
             xp={dash?.myXp ?? 0}
           />
+          <WeeklyLearningSummary />
           <StudentInsightsLive orgId={orgId} xp={dash?.myXp ?? 0} todayTasks={dash?.todayTasks ?? []} activePath={dash?.activePath ?? null} />
           <TodayTasksSection tasks={dash?.todayTasks ?? []} />
           <ProgressSection
             path={dash?.activePath ?? null}
             stats={dash?.myStats ?? null}
           />
+          <BranchRankingCard branchName={dash?.branchName ?? "Chi nhánh của tôi"} />
           <AchievementSection
             xp={dash?.myXp ?? 0}
             leaderboard={dash?.leaderboard ?? []}
