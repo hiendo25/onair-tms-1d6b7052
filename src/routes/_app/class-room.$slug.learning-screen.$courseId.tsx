@@ -212,6 +212,16 @@ function LS() {
             disabled={!currentLessonId || lessons.findIndex((l) => l.id === currentLessonId) >= lessons.length - 1}
             onClick={() => {
               const i = lessons.findIndex((l) => l.id === currentLessonId);
+              if (i >= 0) {
+                const lesson = lessons[i];
+                logLearningActivity({
+                  orgId,
+                  action: "lesson_complete",
+                  targetType: "lesson",
+                  targetId: lesson.id,
+                  metadata: { course_id: courseId, title: lesson.title },
+                });
+              }
               if (i >= 0 && i < lessons.length - 1) setCurrentLessonId(lessons[i + 1].id);
             }}
           >
