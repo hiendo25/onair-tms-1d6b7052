@@ -545,6 +545,39 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_activity: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json
+          org_id: string
+          target_id: string | null
+          target_type: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          org_id: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          org_id?: string
+          target_id?: string | null
+          target_type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       learning_paths: {
         Row: {
           category: string

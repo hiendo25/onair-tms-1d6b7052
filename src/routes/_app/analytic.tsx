@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Building2, LayoutGrid, Users, User, Search, Calendar, Download, Shield, GraduationCap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,35 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useBranches, useDepartments, useEmployees } from "@/lib/data-hooks";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrg } from "@/lib/org-context";
+
+function useBranchCompletion(orgId: string) {
+  return useQuery({
+    queryKey: ["branch-completion", orgId],
+    queryFn: async () => {
+      // Fetch all user_stats + employees for org, then group avg progress by branch
+      const [{ data: stats }, { data: progress }] = await Promise.all([
+        supabase.from("user_stats").select("user_id, branch").eq("org_id", orgId),
+        supabase.from("user_course_progress").select("user_id, progress").eq("org_id", orgId),
+      ]);
+      const userBranch = new Map<string, string>();
+      (stats ?? []).forEach((s: any) => userBranch.set(s.user_id, s.branch || ""));
+      const branchAgg = new Map<string, { sum: number; n: number }>();
+      (progress ?? []).forEach((p: any) => {
+        const b = userBranch.get(p.user_id);
+        if (!b) return;
+        const cur = branchAgg.get(b) ?? { sum: 0, n: 0 };
+        cur.sum += p.progress ?? 0;
+        cur.n += 1;
+        branchAgg.set(b, cur);
+      });
+      const map: Record<string, number> = {};
+      branchAgg.forEach((v, k) => { map[k] = v.n ? Math.round(v.sum / v.n) : 0; });
+      return map;
+    },
+  });
+}
 
 export const Route = createFileRoute("/_app/analytic")({
   head: () => ({ meta: [{ title: "Báo cáo tổ chức — OnAir TMS" }] }),
@@ -15,9 +45,11 @@ export const Route = createFileRoute("/_app/analytic")({
 });
 
 function ReportPage() {
+  const { orgId } = useOrg();
   const { data: branches = [] } = useBranches();
   const { data: departments = [] } = useDepartments();
   const { data: employees = [] } = useEmployees();
+  const { data: completionMap = {} } = useBranchCompletion(orgId);
 
   const [mode, setMode] = useState<"high" | "low">("high");
   const [search, setSearch] = useState("");
@@ -32,7 +64,7 @@ function ReportPage() {
     return branches.map((b: any) => {
       const deps = departments.filter((d: any) => d.branch === b.name);
       const learners = employees.filter((e: any) => e.branch === b.name).length;
-      const completion = Math.round(Math.random() * 40); // placeholder metric
+      const completion = completionMap[b.name] ?? 0;
       return {
         id: b.id,
         name: b.name,
@@ -42,7 +74,7 @@ function ReportPage() {
         completion,
       };
     });
-  }, [branches, departments, employees]);
+  }, [branches, departments, employees, completionMap]);
 
   const filtered = branchRows.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()));
   const total = filtered.length;
