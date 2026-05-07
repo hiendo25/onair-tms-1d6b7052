@@ -54,7 +54,7 @@ function BranchesPage() {
       label: "Người quản lý",
       type: "select",
       placeholder: "Chọn người quản lý",
-      options: [{ value: "", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
+      options: [{ value: "__none__", label: "— Chưa chọn —" }, ...employees.map((e) => ({ value: e.name, label: e.name }))],
     },
     { name: "phone", label: "Số điện thoại", type: "tel", placeholder: "VD: 0901234567" },
     { name: "address", label: "Địa chỉ", type: "textarea", placeholder: "Địa chỉ chi nhánh", rows: 2 },
