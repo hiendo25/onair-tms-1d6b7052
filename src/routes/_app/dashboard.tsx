@@ -82,9 +82,9 @@ function ClassesThisMonth({ data }: { data: ReturnType<typeof useOrgData> }) {
       <CardHeader className="flex flex-row items-center justify-between gap-2">
         <CardTitle className="text-base">Lớp học trong tháng</CardTitle>
         <div className="flex flex-wrap gap-2">
-          <Button asChild size="sm" variant="outline"><Link to="/admin/surveys/create">Tạo khảo sát</Link></Button>
-          <Button asChild size="sm" variant="outline"><Link to="/admin/online-course/create">Tạo môn học</Link></Button>
-          <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white"><Link to="/admin/class-room/create">Tạo lớp học</Link></Button>
+          <Button asChild size="sm" variant="outline"><Link to="/admin/surveys">Khảo sát</Link></Button>
+          <Button asChild size="sm" variant="outline"><Link to="/admin/online-course">Môn học</Link></Button>
+          <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white"><Link to="/admin/class-room">Lớp học</Link></Button>
         </div>
       </CardHeader>
       <CardContent>
