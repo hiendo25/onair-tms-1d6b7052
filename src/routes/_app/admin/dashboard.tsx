@@ -88,6 +88,8 @@ function AdminDashboard() {
         ))}
       </div>
 
+      <BranchReadinessSection />
+
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between gap-2">
