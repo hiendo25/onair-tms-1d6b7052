@@ -85,7 +85,7 @@ export const useEmployees = employeesCrud.useList;
 export const useEmployeeMutations = employeesCrud.useMutations;
 
 // ===== Online courses =====
-export type DBOnlineCourse = { id: string; org_id: string; code: string; title: string; description: string; category: string; level: string; duration_minutes: number; instructor: string; students_count: number; lessons_count: number; status: string; cover_url: string; };
+export type DBOnlineCourse = { id: string; org_id: string; code: string; title: string; description: string; category: string; level: string; duration_minutes: number; instructor: string; students_count: number; lessons_count: number; status: string; cover_url: string; is_required: boolean; };
 const onlineCoursesCrud = createOrgCrud<DBOnlineCourse>("online_courses", "khoá học");
 export const useOnlineCourses = onlineCoursesCrud.useList;
 export const useOnlineCourseMutations = onlineCoursesCrud.useMutations;
