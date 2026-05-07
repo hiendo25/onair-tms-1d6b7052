@@ -14,7 +14,7 @@ import { useLearningPaths, useLearningPathMutations, type DBLearningPath } from 
 import { PATH_STATUS } from "@/lib/admin-options";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_app/admin/learning-paths")({
+export const Route = createFileRoute("/_app/admin/learning-paths/")({
   head: () => ({ meta: [{ title: "Lộ trình học — OnAir TMS" }] }),
   component: Page,
 });

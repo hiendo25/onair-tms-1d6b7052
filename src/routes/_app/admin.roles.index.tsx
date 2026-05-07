@@ -14,7 +14,7 @@ import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDi
 import { roleSchema, type RoleForm } from "@/lib/admin-schemas";
 
 
-export const Route = createFileRoute("/_app/admin/roles")({
+export const Route = createFileRoute("/_app/admin/roles/")({
   head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir TMS" }] }),
   component: RolesPage,
 });

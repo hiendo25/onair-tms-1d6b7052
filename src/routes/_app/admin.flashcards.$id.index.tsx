@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 
-export const Route = createFileRoute("/_app/admin/flashcards/$id")({
+export const Route = createFileRoute("/_app/admin/flashcards/$id/")({
   head: () => ({ meta: [{ title: "Chi tiết Flashcard — OnAir TMS" }] }),
   component: FCDetail,
 });

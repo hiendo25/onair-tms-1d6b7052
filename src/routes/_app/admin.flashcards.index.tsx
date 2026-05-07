@@ -3,7 +3,7 @@ import { useFlashcards, useFlashcardMutations, type DBFlashcard } from "@/lib/da
 import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/_app/admin/flashcards")({
+export const Route = createFileRoute("/_app/admin/flashcards/")({
   head: () => ({ meta: [{ title: "Flashcards — OnAir TMS" }] }),
   component: Page,
 });

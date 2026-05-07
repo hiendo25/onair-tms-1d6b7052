@@ -6,7 +6,7 @@ import { surveySchema, type SurveyForm } from "@/lib/admin-schemas";
 import { SURVEY_TYPE, SURVEY_STATUS, CODE_NOTE } from "@/lib/admin-options";
 import type { FieldDef } from "@/components/admin/EntityFormDialog";
 
-export const Route = createFileRoute("/_app/admin/surveys")({
+export const Route = createFileRoute("/_app/admin/surveys/")({
   head: () => ({ meta: [{ title: "Khảo sát — OnAir TMS" }] }),
   component: Page,
 });

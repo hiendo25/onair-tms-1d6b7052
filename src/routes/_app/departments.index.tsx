@@ -17,7 +17,7 @@ import { departmentSchema, type DepartmentForm } from "@/lib/admin-schemas";
 import { CODE_NOTE, STATUS_ACTIVE_INACTIVE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 
-export const Route = createFileRoute("/_app/departments")({
+export const Route = createFileRoute("/_app/departments/")({
   head: () => ({ meta: [{ title: "Phòng ban — OnAir TMS" }] }),
   component: DepartmentsPage,
 });
