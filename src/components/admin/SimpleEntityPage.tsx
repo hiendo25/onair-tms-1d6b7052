@@ -79,7 +79,11 @@ export function SimpleEntityPage<T extends { id: string; [k: string]: any }>(pro
       actions={
         <div className="flex gap-2">
           {props.onBulkInsert && <Button size="sm" variant="outline" onClick={() => setImporting(true)}><Upload className="h-4 w-4" />Import</Button>}
-          <Button size="sm" variant="outline" onClick={() => exportCsv(props.csvFilename ?? "export.csv", props.rows)}><Download className="h-4 w-4" />Export</Button>
+          <Button size="sm" variant="outline" onClick={() => {
+            const headers = props.csvHeaders ?? props.fields.map((f) => f.key);
+            const slim = props.rows.map((r) => Object.fromEntries(headers.map((h) => [h, (r as any)[h] ?? ""])));
+            exportCsv(props.csvFilename ?? "export.csv", slim);
+          }}><Download className="h-4 w-4" />Export</Button>
           <Button size="sm" onClick={() => setEditing(props.emptyValues)}><Plus className="h-4 w-4" />Thêm mới</Button>
         </div>
       }
