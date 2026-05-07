@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_app/admin/employees")({
   component: EmployeesPage,
 });
 
-const ROLE_LABEL = { admin: "Quản trị", teacher: "Giảng viên", student: "Học viên" } as const;
+const ROLE_LABEL = { admin: "Quản trị viên", teacher: "Giảng viên", student: "Học sinh" } as const;
 
 function EmployeesPage() {
   const [search, setSearch] = useState("");
@@ -90,44 +90,38 @@ function EmployeesPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Người dùng</TableHead>
-              <TableHead>Mã NV</TableHead>
-              <TableHead>Chi nhánh</TableHead>
+              <TableHead>Mã</TableHead>
+              <TableHead>Họ và tên</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Loại người dùng</TableHead>
+              <TableHead>Chức danh</TableHead>
               <TableHead>Phòng ban</TableHead>
-              <TableHead>Vai trò</TableHead>
+              <TableHead>Chi nhánh</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((e, i) => (
+            {filtered.map((e) => (
               <TableRow key={e.id}>
-                <TableCell className="text-muted-foreground">{i + 1}</TableCell>
+                <TableCell className="font-mono text-xs">{e.code}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback className="text-xs">{e.name.split(" ").slice(-2).map(n => n[0]).join("")}</AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="font-medium">{e.name}</div>
-                      <div className="text-xs text-muted-foreground">{e.email}</div>
-                    </div>
+                    <span className="font-medium">{e.name}</span>
                   </div>
                 </TableCell>
-                <TableCell className="font-mono text-xs">{e.code}</TableCell>
-                <TableCell>{e.branch}</TableCell>
+                <TableCell className="text-muted-foreground">{e.email}</TableCell>
+                <TableCell>{ROLE_LABEL[e.role]}</TableCell>
+                <TableCell>{(e as any).position ?? "--"}</TableCell>
                 <TableCell>{e.department}</TableCell>
+                <TableCell>{e.branch}</TableCell>
                 <TableCell>
-                  <Badge variant={e.role === "admin" ? "default" : e.role === "teacher" ? "secondary" : "outline"}>
-                    {ROLE_LABEL[e.role]}
+                  <Badge variant={e.status === "active" ? "default" : "destructive"}>
+                    {e.status === "active" ? "Hoạt động" : "Không hoạt động"}
                   </Badge>
-                </TableCell>
-                <TableCell>
-                  <span className={`inline-flex items-center gap-1.5 text-xs ${e.status === "active" ? "text-emerald-600" : "text-muted-foreground"}`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${e.status === "active" ? "bg-emerald-500" : "bg-muted-foreground"}`} />
-                    {e.status === "active" ? "Đang hoạt động" : "Ngưng hoạt động"}
-                  </span>
                 </TableCell>
                 <TableCell>
                   <DropdownMenu>
@@ -141,7 +135,7 @@ function EmployeesPage() {
               </TableRow>
             ))}
             {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="h-32 text-center text-muted-foreground">Không có người dùng nào</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="h-32 text-center text-muted-foreground">Không có người dùng nào</TableCell></TableRow>
             )}
           </TableBody>
         </Table>

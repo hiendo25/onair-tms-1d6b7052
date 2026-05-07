@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, BookOpen, Users, Calendar, MoreHorizontal } from "lucide-react";
+import { Plus, Search, MoreVertical, Eye, Pencil, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { MOCK_LEARNING_PATHS } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_app/admin/learning-paths")({
@@ -12,61 +17,65 @@ export const Route = createFileRoute("/_app/admin/learning-paths")({
 });
 
 function LearningPathsPage() {
+  const [search, setSearch] = useState("");
+
   return (
     <PageContainer
       title="Lộ trình học tập"
       breadcrumbs={[{ title: "Lộ trình học tập" }]}
       actions={
         <Button asChild size="sm">
-          <Link to="/admin/learning-paths/create"><Plus className="h-4 w-4" />Tạo lộ trình</Link>
+          <Link to="/admin/learning-paths/create"><Plus className="h-4 w-4" />Tạo lộ trình học tập</Link>
         </Button>
       }
     >
-      <div className="space-y-5">
-        {MOCK_LEARNING_PATHS.map((lp) => (
-          <Card key={lp.id}>
-            <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <CardTitle className="text-lg">{lp.title}</CardTitle>
-                  <Badge variant={lp.status === "published" ? "default" : "outline"}>
-                    {lp.status === "published" ? "Đã xuất bản" : "Nháp"}
-                  </Badge>
-                </div>
-                <p className="mt-1.5 text-sm text-muted-foreground">{lp.description}</p>
-                <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Users className="h-3.5 w-3.5" />{lp.enrolled} học viên</span>
-                  <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" />{lp.phases.length} giai đoạn</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{lp.phases.reduce((s, p) => s + p.weeks, 0)} tuần</span>
-                </div>
-              </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button>
-            </CardHeader>
-            <CardContent>
-              <div className="relative">
-                <div className="absolute left-4 top-4 bottom-4 w-px bg-border md:left-1/2" />
-                <div className="space-y-4">
-                  {lp.phases.map((p, i) => (
-                    <div key={i} className={`relative flex flex-col gap-3 md:flex-row ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}>
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground md:absolute md:left-1/2 md:-translate-x-1/2">
-                        {i + 1}
-                      </div>
-                      <div className={`ml-12 flex-1 rounded-md border bg-card p-3 md:ml-0 md:max-w-[calc(50%-2rem)] ${i % 2 === 0 ? "md:mr-auto md:pr-4" : "md:ml-auto md:pl-4"}`}>
-                        <div className="font-medium text-sm">{p.title}</div>
-                        <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
-                          <span>{p.courses} môn học</span>
-                          <span>·</span>
-                          <span>{p.weeks} tuần</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card className="p-4">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm kiếm lộ trình học tập..." className="pl-9" />
+        </div>
+      </Card>
+
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Tên lộ trình</TableHead>
+              <TableHead className="text-center">Số giai đoạn</TableHead>
+              <TableHead className="text-center">Số môn học</TableHead>
+              <TableHead className="text-center">Học viên</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="w-24 text-center">Hành động</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {MOCK_LEARNING_PATHS.filter(lp => !search || lp.title.toLowerCase().includes(search.toLowerCase())).map(lp => (
+              <TableRow key={lp.id}>
+                <TableCell>
+                  <Link to="/admin/learning-paths/$id" params={{ id: lp.id }} className="font-medium hover:underline">
+                    {lp.title}
+                  </Link>
+                  <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{lp.description}</div>
+                </TableCell>
+                <TableCell className="text-center">{lp.phases.length}</TableCell>
+                <TableCell className="text-center">{lp.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0)}</TableCell>
+                <TableCell className="text-center">{lp.enrolled}</TableCell>
+                <TableCell className="text-sm text-muted-foreground">2026-01-15</TableCell>
+                <TableCell className="text-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/$id" params={{ id: lp.id }}><Eye className="h-4 w-4" />Chi tiết</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/$id/edit" params={{ id: lp.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive"><Trash2 className="h-4 w-4" />Xóa</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
     </PageContainer>
   );
 }

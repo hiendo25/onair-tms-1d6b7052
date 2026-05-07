@@ -19,22 +19,22 @@ export const Route = createFileRoute("/_app/admin/departments")({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã</TableHead>
               <TableHead>Tên phòng ban</TableHead>
+              <TableHead>Mã</TableHead>
               <TableHead>Chi nhánh</TableHead>
-              <TableHead>Trưởng phòng</TableHead>
-              <TableHead className="text-right">Nhân sự</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Người quản lý</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {MOCK_DEPARTMENTS.map(d => (
               <TableRow key={d.id}>
-                <TableCell className="font-mono text-xs">{d.code}</TableCell>
                 <TableCell className="font-medium">{d.name}</TableCell>
-                <TableCell><Badge variant="secondary">{d.branch}</Badge></TableCell>
-                <TableCell>{d.head}</TableCell>
-                <TableCell className="text-right">{d.employees}</TableCell>
+                <TableCell><Badge>{d.code}</Badge></TableCell>
+                <TableCell>{d.branch}</TableCell>
+                <TableCell><Badge className="bg-emerald-500">Hoạt động</Badge></TableCell>
+                <TableCell>{d.head || "-"}</TableCell>
                 <TableCell><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></TableCell>
               </TableRow>
             ))}

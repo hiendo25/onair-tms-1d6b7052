@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Search, Star, Users, Clock, BookOpen } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus, Search, MoreVertical } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MOCK_COURSES } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/_app/admin/online-course")({
@@ -14,66 +16,89 @@ export const Route = createFileRoute("/_app/admin/online-course")({
   component: CoursesPage,
 });
 
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  published: { label: "Đã xuất bản", color: "bg-emerald-500" },
+  draft: { label: "Bản nháp", color: "bg-amber-500" },
+  pending: { label: "Chờ duyệt", color: "bg-blue-500" },
+  unpublished: { label: "Đã hủy xuất bản", color: "bg-slate-500" },
+};
+
 function CoursesPage() {
   const [search, setSearch] = useState("");
-  const [level, setLevel] = useState("all");
+  const [status, setStatus] = useState("all");
 
   const filtered = useMemo(() => MOCK_COURSES.filter(c =>
-    (!search || c.title.toLowerCase().includes(search.toLowerCase())) &&
-    (level === "all" || c.level === level)
-  ), [search, level]);
+    (!search || c.title.toLowerCase().includes(search.toLowerCase()))
+  ), [search]);
 
   return (
     <PageContainer
       title="Danh sách môn học"
       breadcrumbs={[{ title: "Quản lý lớp học" }, { title: "Môn học" }]}
-      actions={<Button size="sm"><Plus className="h-4 w-4" />Tạo môn học</Button>}
+      actions={
+        <Button asChild size="sm">
+          <Link to="/admin/online-course/create"><Plus className="h-4 w-4" />Tạo môn học</Link>
+        </Button>
+      }
     >
-      <div className="flex flex-wrap gap-3">
-        <div className="relative flex-1 min-w-64">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm môn học..." className="pl-9 bg-background" />
+      <Card className="p-4">
+        <div className="flex flex-wrap gap-3">
+          <div className="relative flex-1 min-w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm môn học..." className="pl-9" />
+          </div>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-44"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              <SelectItem value="published">Đã xuất bản</SelectItem>
+              <SelectItem value="draft">Bản nháp</SelectItem>
+              <SelectItem value="pending">Chờ duyệt</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={level} onValueChange={setLevel}>
-          <SelectTrigger className="w-44 bg-background"><SelectValue placeholder="Cấp độ" /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả cấp độ</SelectItem>
-            <SelectItem value="Cơ bản">Cơ bản</SelectItem>
-            <SelectItem value="Trung cấp">Trung cấp</SelectItem>
-            <SelectItem value="Nâng cao">Nâng cao</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      </Card>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {filtered.map((c) => (
-          <Card key={c.id} className="overflow-hidden p-0 transition-shadow hover:shadow-md">
-            <div className="relative h-32" style={{ background: c.cover }}>
-              <Badge variant="secondary" className="absolute left-3 top-3 bg-white/85 text-xs backdrop-blur">{c.category}</Badge>
-            </div>
-            <CardContent className="space-y-3 p-4">
-              <div className="space-y-1">
-                <div className="text-[10px] font-mono text-muted-foreground">{c.code}</div>
-                <h3 className="font-semibold leading-snug line-clamp-2 min-h-[2.5em]">{c.title}</h3>
-              </div>
-              <p className="text-xs text-muted-foreground line-clamp-2">{c.description}</p>
-              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" />{c.lessons} bài</span>
-                <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{c.duration}</span>
-              </div>
-              <div className="flex items-center justify-between border-t pt-3 text-xs">
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Users className="h-3.5 w-3.5" />{c.enrolled}
-                </span>
-                <span className="flex items-center gap-1 font-medium">
-                  <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />{c.rating}
-                </span>
-                <Badge variant="outline" className="text-[10px]">{c.level}</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-16 text-center">STT</TableHead>
+              <TableHead>Tên môn học</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead className="w-20 text-center">Hành động</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.map((c, i) => {
+              const s = STATUS_LABEL.published;
+              return (
+                <TableRow key={c.id}>
+                  <TableCell className="text-center text-muted-foreground">{i + 1}</TableCell>
+                  <TableCell>
+                    <Link to="/admin/online-course/$id" params={{ id: c.id }} className="font-medium hover:underline">
+                      {c.title}
+                    </Link>
+                    <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.description}</div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={s.color}>{s.label}</Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild><Link to="/admin/online-course/$id/edit" params={{ id: c.id }}>Chỉnh sửa</Link></DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">Xóa</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </Card>
     </PageContainer>
   );
 }
