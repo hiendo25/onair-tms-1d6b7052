@@ -85,7 +85,8 @@ export function TeamInsightsCard({
                     <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{it.detail}</p>
                   </div>
                   <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700 text-white shrink-0">
-                    <Link to={it.to as string} search={it.search as never}>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <Link to={it.to as any} search={it.search as any}>
                       {it.ctaLabel}
                       <ArrowRight className="h-3.5 w-3.5" />
                     </Link>
