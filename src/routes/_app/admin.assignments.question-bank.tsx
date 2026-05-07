@@ -582,6 +582,95 @@ function Page() {
           }
         }}
       />
+
+      {/* AI generation dialog */}
+      <Dialog open={aiOpen} onOpenChange={(v) => { setAiOpen(v); if (!v) { setAiResults(null); } }}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              Sinh câu hỏi bằng AI
+            </DialogTitle>
+            <DialogDescription>
+              Dán nội dung tài liệu / SOP. AI sẽ tạo 10 câu trắc nghiệm — bạn chọn câu muốn lưu.
+            </DialogDescription>
+          </DialogHeader>
+
+          {!aiResults && !aiLoading && (
+            <div className="grid gap-3">
+              <Label>Nội dung tham khảo</Label>
+              <Textarea
+                rows={8}
+                placeholder="Dán SOP, mô tả khóa học, hoặc nội dung bài học vào đây..."
+                value={aiSource}
+                onChange={(e) => setAiSource(e.target.value)}
+              />
+            </div>
+          )}
+
+          {aiLoading && <AiSpinner label="AI đang tạo 10 câu hỏi..." />}
+
+          {aiResults && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  AI đã tạo {aiResults.length} câu — đã chọn {aiSelected.size}
+                </p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="ghost" onClick={() => setAiSelected(new Set(aiResults.map((_, i) => i)))}>Chọn tất cả</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setAiSelected(new Set())}>Bỏ chọn</Button>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
+                {aiResults.map((q, i) => {
+                  const checked = aiSelected.has(i);
+                  return (
+                    <div key={i} className={`rounded-lg border p-3 ${checked ? "border-violet-300 bg-violet-50/50" : "border-slate-200"}`}>
+                      <div className="flex gap-3">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(v) => {
+                            const next = new Set(aiSelected);
+                            if (v) next.add(i); else next.delete(i);
+                            setAiSelected(next);
+                          }}
+                          className="mt-1"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{i + 1}. {q.question}</p>
+                          <ul className="mt-2 space-y-0.5 text-sm">
+                            {q.options.map((o, j) => (
+                              <li key={j} className={j === q.correct_index ? "text-emerald-700 font-medium" : "text-slate-600"}>
+                                {String.fromCharCode(65 + j)}. {o} {j === q.correct_index && "✓"}
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="mt-2 text-xs text-muted-foreground italic">💡 {q.explanation}</p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAiOpen(false)}>Đóng</Button>
+            {!aiResults && (
+              <Button onClick={runAi} disabled={aiLoading} className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white">
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                {aiLoading ? "Đang tạo..." : "Tạo câu hỏi"}
+              </Button>
+            )}
+            {aiResults && (
+              <Button onClick={saveSelected} disabled={aiSaving || aiSelected.size === 0}>
+                {aiSaving ? "Đang lưu..." : `Lưu ${aiSelected.size} câu vào ngân hàng`}
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
