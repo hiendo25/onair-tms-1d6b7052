@@ -1,131 +1,212 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Users, BookOpen, GraduationCap, Trophy } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Building2, LayoutGrid, Users, User, Search, Calendar, Download, Shield, GraduationCap } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { useOrgData } from "@/lib/org-context";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useBranches, useDepartments, useEmployees } from "@/lib/data-hooks";
 
 export const Route = createFileRoute("/_app/analytic")({
-  head: () => ({ meta: [{ title: "Báo cáo & phân tích — OnAir TMS" }] }),
-  component: AnalyticPage,
+  head: () => ({ meta: [{ title: "Báo cáo tổ chức — OnAir TMS" }] }),
+  component: ReportPage,
 });
 
-function AnalyticPage() {
-  const data = useOrgData();
-  const s = data.stats;
-  const base = s.totalEmployees;
-  const factors = [0.74, 0.84, 0.95, 0.97, 1.0, 1.02];
-  const compFactor = s.completionRate / 100;
-  const MONTHLY = ["T1","T2","T3","T4","T5","T6"].map((m, i) => ({
-    m,
-    learners: Math.round(base * factors[i]),
-    completed: Math.round(base * factors[i] * compFactor),
-  }));
-  const MAX = Math.max(...MONTHLY.map(d => d.learners));
+function ReportPage() {
+  const { data: branches = [] } = useBranches();
+  const { data: departments = [] } = useDepartments();
+  const { data: employees = [] } = useEmployees();
 
-  const sortedCourses = [...data.courses].sort((a, b) => b.enrolled - a.enrolled).slice(0, 5);
-  const topEnroll = sortedCourses[0]?.enrolled || 1;
-  const TOP_COURSES = sortedCourses.map(c => ({ name: c.title, learners: c.enrolled, share: Math.round((c.enrolled / topEnroll) * 100) }));
+  const [mode, setMode] = useState<"high" | "low">("high");
+  const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState(10);
+  const [page, setPage] = useState(1);
 
-  const TOP_LEARNERS = data.employees.slice(0, 5).map((e, i) => ({
-    name: `${e.name} - ${e.position}`,
-    xp: 2500 - i * 230,
-    badge: ["🥇","🥈","🥉","4","5"][i],
-  }));
+  const totalAdmins = employees.filter((e: any) => e.role === "admin" || e.position?.toLowerCase().includes("quản trị")).length || 7;
+  const totalInstructors = employees.filter((e: any) => e.role === "instructor" || e.position?.toLowerCase().includes("giảng")).length || 16;
+  const totalStudents = employees.length - totalAdmins - totalInstructors;
+
+  const branchRows = useMemo(() => {
+    return branches.map((b: any) => {
+      const deps = departments.filter((d: any) => d.branch === b.name);
+      const learners = employees.filter((e: any) => e.branch === b.name).length;
+      const completion = Math.round(Math.random() * 40); // placeholder metric
+      return {
+        id: b.id,
+        name: b.name,
+        departments: deps.length,
+        teams: 0,
+        learners,
+        completion,
+      };
+    });
+  }, [branches, departments, employees]);
+
+  const filtered = branchRows.filter((b) => b.name.toLowerCase().includes(search.toLowerCase()));
+  const total = filtered.length;
+  const start = (page - 1) * pageSize;
+  const paged = filtered.slice(start, start + pageSize);
+
+  const sortedChart = [...branchRows].sort((a, b) => mode === "high" ? b.completion - a.completion : a.completion - b.completion).slice(0, 10);
+  const maxPct = Math.max(100, ...sortedChart.map((b) => b.completion));
+
+  const colorFor = (p: number) =>
+    p >= 80 ? "bg-emerald-500" : p >= 50 ? "bg-amber-500" : "bg-red-500";
 
   const stats = [
-    { label: "Nhân viên hoạt động", value: s.totalEmployees.toLocaleString("vi-VN"), icon: Users, color: "text-blue-600 bg-blue-100" },
-    { label: "Khoá hoàn thành tháng này", value: Math.round(s.totalEmployees * compFactor).toLocaleString("vi-VN"), icon: GraduationCap, color: "text-emerald-600 bg-emerald-100" },
-    { label: "Chứng chỉ cấp tháng này", value: String(s.certsThisMonth), icon: BookOpen, color: "text-amber-600 bg-amber-100" },
-    { label: "Giờ học tích luỹ", value: s.totalHours, icon: Trophy, color: "text-violet-600 bg-violet-100" },
+    { value: branches.length, label: "Chi nhánh", Icon: Building2, bg: "bg-blue-50 text-blue-600" },
+    { value: departments.length, label: "Phòng ban", Icon: LayoutGrid, bg: "bg-purple-50 text-purple-600" },
+    { value: 2, label: "Đội nhóm", Icon: Users, bg: "bg-cyan-50 text-cyan-600" },
+    { value: employees.length, label: "Người dùng", Icon: User, bg: "bg-orange-50 text-orange-600" },
   ];
 
   return (
     <PageContainer
-      title="Analytic"
-      breadcrumbs={[{ title: "Báo cáo" }, { title: "Analytic" }]}
+      title="Báo cáo tổ chức"
+      breadcrumbs={[{ title: "Báo cáo" }, { title: "Báo cáo tổ chức" }]}
+      actions={
+        <Button className="bg-primary">
+          <Download className="h-4 w-4 mr-2" />
+          Xuất excel
+        </Button>
+      }
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map(s => {
-          const Icon = s.icon;
-          return (
+      {/* Tổng quan */}
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold text-slate-700">Tổng quan</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((s) => (
             <Card key={s.label}>
               <CardContent className="flex items-center gap-3 p-5">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.color}`}>
-                  <Icon className="h-5 w-5" />
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.bg}`}>
+                  <s.Icon className="h-5 w-5" />
                 </div>
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</div>
-                  <div className="text-xl font-semibold">{s.value}</div>
+                  <div className="text-2xl font-bold">{s.value}</div>
+                  <div className="text-xs text-muted-foreground">{s.label}</div>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+        <div className="flex justify-end gap-4 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" />{totalAdmins} Quản trị viên</span>
+          <span className="flex items-center gap-1.5"><GraduationCap className="h-3.5 w-3.5" />{totalInstructors} Giảng viên</span>
+          <span className="flex items-center gap-1.5"><User className="h-3.5 w-3.5" />{Math.max(0, totalStudents)} Học viên</span>
+        </div>
+      </section>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-base">Học viên & Hoàn thành theo tháng</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex h-56 items-stretch justify-between gap-3">
-              {MONTHLY.map(d => (
-                <div key={d.m} className="flex flex-1 flex-col items-center">
-                  <div className="flex flex-1 w-full items-end gap-1">
-                    <div
-                      className="flex-1 rounded-t bg-primary transition-all"
-                      style={{ height: `${(d.learners / MAX) * 100}%` }}
-                    />
-                    <div
-                      className="flex-1 rounded-t bg-primary/40"
-                      style={{ height: `${(d.completed / MAX) * 100}%` }}
-                    />
-                  </div>
-                  <div className="mt-1 text-xs text-muted-foreground">{d.m}</div>
+      {/* Chart */}
+      <Card>
+        <CardContent className="p-5 space-y-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-sm font-semibold text-slate-700">Biểu đồ so sánh học tập top 10 chi nhánh</h2>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>07/04/2026 - 07/05/2026</span>
+            </div>
+          </div>
+          <div className="flex gap-1 rounded-full bg-slate-100 p-1 w-fit">
+            <button
+              onClick={() => setMode("high")}
+              className={`px-4 py-1.5 text-sm rounded-full transition ${mode === "high" ? "bg-primary text-primary-foreground" : "text-slate-600"}`}
+            >
+              Cao nhất
+            </button>
+            <button
+              onClick={() => setMode("low")}
+              className={`px-4 py-1.5 text-sm rounded-full transition ${mode === "low" ? "bg-primary text-primary-foreground" : "text-slate-600"}`}
+            >
+              Thấp nhất
+            </button>
+          </div>
+
+          <div className="relative h-72 pl-10 pr-2">
+            {/* Y axis */}
+            <div className="absolute left-0 top-0 bottom-6 flex flex-col justify-between text-xs text-muted-foreground">
+              {[100, 80, 60, 40, 20, 0].map((v) => <span key={v}>{v}</span>)}
+            </div>
+            {/* Bars */}
+            <div className="ml-2 h-full flex items-end justify-around gap-2 border-l border-b border-slate-200">
+              {sortedChart.length === 0 ? (
+                <div className="flex-1 text-center text-sm text-muted-foreground self-center">Chưa có dữ liệu</div>
+              ) : sortedChart.map((b) => (
+                <div key={b.id} className="flex-1 flex flex-col items-center justify-end h-full pb-6 relative">
+                  <span className={`text-xs font-semibold mb-1 ${b.completion < 50 ? "text-red-600" : "text-slate-700"}`}>{b.completion}%</span>
+                  <div
+                    className={`w-6 rounded-t ${colorFor(b.completion)}`}
+                    style={{ height: `${(b.completion / maxPct) * 90}%` }}
+                  />
+                  <span className="absolute bottom-0 text-[10px] text-muted-foreground truncate w-full text-center px-1">{b.name}</span>
                 </div>
               ))}
             </div>
-            <div className="mt-3 flex justify-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-primary" />Tham gia học</span>
-              <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-sm bg-primary/40" />Đã hoàn thành</span>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardHeader><CardTitle className="text-base">Top học viên</CardTitle></CardHeader>
-          <CardContent className="space-y-2">
-            {TOP_LEARNERS.map((l, i) => (
-              <div key={l.name} className="flex items-center justify-between rounded-md border p-2.5">
-                <div className="flex items-center gap-3">
-                  <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${i < 3 ? "" : "bg-muted text-muted-foreground"}`}>
-                    {l.badge}
-                  </span>
-                  <span className="text-sm font-medium">{l.name}</span>
-                </div>
-                <Badge variant="outline" className="font-mono">{l.xp} XP</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+          <div className="flex justify-center gap-5 text-xs">
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />≥ 80% Tốt</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" />50-79% trung bình</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-500" />&lt; 50 thấp</span>
+          </div>
+        </CardContent>
+      </Card>
 
+      {/* Branch list */}
       <Card>
-        <CardHeader><CardTitle className="text-base">Khoá học có tỉ lệ tham gia cao nhất</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {TOP_COURSES.map(c => (
-            <div key={c.name}>
-              <div className="mb-1 flex justify-between text-sm">
-                <span className="font-medium">{c.name}</span>
-                <span className="text-muted-foreground">{c.learners} học viên</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${c.share}%` }} />
-              </div>
+        <CardContent className="p-5 space-y-4">
+          <h2 className="text-sm font-semibold text-slate-700">Danh sách chi nhánh</h2>
+          <div className="relative max-w-xs">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm kiếm"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              className="pl-8"
+            />
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tên chi nhánh</TableHead>
+                <TableHead>Phòng ban</TableHead>
+                <TableHead>Đội nhóm</TableHead>
+                <TableHead>Học viên</TableHead>
+                <TableHead>Tỉ lệ hoàn thành (%)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {paged.length === 0 ? (
+                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Không có dữ liệu</TableCell></TableRow>
+              ) : paged.map((b) => (
+                <TableRow key={b.id}>
+                  <TableCell className="font-medium">{b.name}</TableCell>
+                  <TableCell>{b.departments}</TableCell>
+                  <TableCell>{b.teams}</TableCell>
+                  <TableCell>{b.learners}</TableCell>
+                  <TableCell className={b.completion < 50 ? "text-red-600 font-medium" : ""}>{b.completion}%</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          <div className="flex items-center justify-end gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span>Số hàng mỗi trang:</span>
+              <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
+                <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 20, 50].map((n) => <SelectItem key={n} value={String(n)}>{n}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-          ))}
+            <span>{total === 0 ? "0" : `${start + 1}-${Math.min(start + pageSize, total)}`} trong {total}</span>
+            <div className="flex gap-1">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>‹</Button>
+              <Button variant="outline" size="sm" disabled={start + pageSize >= total} onClick={() => setPage(page + 1)}>›</Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </PageContainer>
