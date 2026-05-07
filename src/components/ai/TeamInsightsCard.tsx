@@ -26,6 +26,11 @@ export function TeamInsightsCard({
   insights?: ActionableInsight[];
   loading?: boolean;
 }) {
+  const router = useRouter();
+  const knownPaths = useMemo(() => {
+    const rbp = (router as unknown as { routesByPath?: Record<string, unknown> }).routesByPath ?? {};
+    return new Set(Object.keys(rbp));
+  }, [router]);
   const externalMode = insights !== undefined || loadingProp !== undefined;
   const [data, setData] = useState<ActionableInsight[] | null>(externalMode ? null : null);
   const [loading, setLoading] = useState(false);
