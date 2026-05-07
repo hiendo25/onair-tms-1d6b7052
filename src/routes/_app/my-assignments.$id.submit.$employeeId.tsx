@@ -60,7 +60,7 @@ function SubmitPage() {
           ))}
           <div className="flex justify-between">
             <Button asChild variant="outline"><Link to="/my-assignments">Huỷ</Link></Button>
-            <Button asChild><Link to="/my-assignments/$id/result/$employeeId" params={{ id, employeeId: Route.useParams().employeeId }}>Nộp bài</Link></Button>
+            <Button onClick={handleSubmit}>Nộp bài</Button>
           </div>
         </div>
         <Card className="h-fit p-4">
