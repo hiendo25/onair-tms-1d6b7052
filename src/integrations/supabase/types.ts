@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_submissions: {
+        Row: {
+          assignment_id: string
+          assignment_title: string
+          assignment_type: string
+          created_at: string
+          deadline: string | null
+          id: string
+          org_id: string
+          score: number | null
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assignment_id: string
+          assignment_title?: string
+          assignment_type?: string
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          org_id: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assignment_id?: string
+          assignment_title?: string
+          assignment_type?: string
+          created_at?: string
+          deadline?: string | null
+          id?: string
+          org_id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       assignments: {
         Row: {
           assigned_count: number
@@ -888,6 +933,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_course_progress: {
+        Row: {
+          course_id: string
+          course_title: string
+          created_at: string
+          id: string
+          org_id: string
+          progress: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          course_title?: string
+          created_at?: string
+          id?: string
+          org_id: string
+          progress?: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          course_title?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          progress?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_favorites: {
         Row: {
           created_at: string
@@ -918,6 +999,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_learning_path_progress: {
+        Row: {
+          completed_lessons: number
+          created_at: string
+          id: string
+          is_active: boolean
+          org_id: string
+          path_id: string
+          path_title: string
+          progress: number
+          total_lessons: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_lessons?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          org_id: string
+          path_id: string
+          path_title?: string
+          progress?: number
+          total_lessons?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_lessons?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          org_id?: string
+          path_id?: string
+          path_title?: string
+          progress?: number
+          total_lessons?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -936,6 +1059,78 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_stats: {
+        Row: {
+          average_score: number
+          branch: string
+          completed_courses: number
+          created_at: string
+          display_name: string
+          hours_learned: number
+          id: string
+          org_id: string
+          quizzes_taken: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_score?: number
+          branch?: string
+          completed_courses?: number
+          created_at?: string
+          display_name?: string
+          hours_learned?: number
+          id?: string
+          org_id: string
+          quizzes_taken?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_score?: number
+          branch?: string
+          completed_courses?: number
+          created_at?: string
+          display_name?: string
+          hours_learned?: number
+          id?: string
+          org_id?: string
+          quizzes_taken?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_xp: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          rank: string
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          rank?: string
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          rank?: string
+          updated_at?: string
+          user_id?: string
+          xp?: number
         }
         Relationships: []
       }
