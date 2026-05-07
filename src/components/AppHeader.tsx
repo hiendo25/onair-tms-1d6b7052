@@ -81,13 +81,6 @@ export function AppHeader() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 gap-2 px-2">
               <Avatar className="h-7 w-7">
-                <AvatarFallback className="text-xs">AD</AvatarFallback>
-              </Avatar>
-              <span className="hidden text-sm sm:inline">Admin</span>
-            </Button>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 gap-2 px-2">
-              <Avatar className="h-7 w-7">
                 <AvatarFallback className="text-xs">{initials}</AvatarFallback>
               </Avatar>
               <span className="hidden max-w-[140px] truncate text-sm sm:inline">
