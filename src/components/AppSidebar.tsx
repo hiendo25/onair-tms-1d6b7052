@@ -1,10 +1,9 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ChevronDown } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -13,17 +12,38 @@ import {
 } from "@/components/ui/sidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ADMIN_MENU, STUDENT_MENU, type MenuItem } from "@/lib/menu-config";
-import { Button } from "@/components/ui/button";
 import { useOrg } from "@/lib/org-context";
+import { useAuth } from "@/lib/auth-context";
+import { supabase } from "@/integrations/supabase/client";
 
 type Role = "admin" | "student";
+
+const ADMIN_ROLES = new Set(["admin", "tenant_admin", "administrator_type"]);
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const [role, setRole] = useState<Role>("admin");
+  const { user } = useAuth();
+  const [role, setRole] = useState<Role>("student");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { org } = useOrg();
+
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const isAdmin = (data ?? []).some((r) => ADMIN_ROLES.has(r.role as string));
+        setRole(isAdmin ? "admin" : "student");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   const items = role === "admin" ? ADMIN_MENU : STUDENT_MENU;
   const isActive = (path?: string) => !!path && pathname === path;
@@ -121,32 +141,6 @@ export function AppSidebar() {
           })}
         </SidebarMenu>
       </SidebarContent>
-
-      {!collapsed && (
-        <SidebarFooter className="border-t border-slate-200 bg-white">
-          <div className="flex flex-col gap-2 p-2">
-            <span className="text-[10px] uppercase tracking-wider text-slate-400">Chế độ xem</span>
-            <div className="flex gap-1">
-              <Button
-                size="sm"
-                variant={role === "admin" ? "default" : "outline"}
-                className="flex-1 h-7 text-xs"
-                onClick={() => setRole("admin")}
-              >
-                Admin
-              </Button>
-              <Button
-                size="sm"
-                variant={role === "student" ? "default" : "outline"}
-                className="flex-1 h-7 text-xs"
-                onClick={() => setRole("student")}
-              >
-                Học viên
-              </Button>
-            </div>
-          </div>
-        </SidebarFooter>
-      )}
     </Sidebar>
   );
 }
