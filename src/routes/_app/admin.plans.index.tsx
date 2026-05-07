@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOrg } from "@/lib/org-context";
 
-export const Route = createFileRoute("/_app/admin/plans")({
+export const Route = createFileRoute("/_app/admin/plans/")({
   head: () => ({ meta: [{ title: "Kế hoạch đào tạo — OnAir TMS" }] }),
   component: Page,
 });
