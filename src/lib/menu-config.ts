@@ -7,8 +7,6 @@ import {
   ClipboardList,
   Award,
   FileText,
-  Layers,
-  Star,
   GraduationCap,
   Users,
   Trophy,
@@ -60,8 +58,15 @@ export const ADMIN_MENU: MenuItem[] = [
   },
   { title: "Quản lý chứng nhận", key: "certificates", path: "/admin/certificates", icon: Award },
   { title: "Khảo sát", key: "surveys", path: "/admin/surveys", icon: FileText },
-  { title: "Flashcard", key: "flashcards", path: "/admin/flashcards", icon: Layers },
-  { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
+  {
+    title: "Thi đua & xếp hạng",
+    key: "compete",
+    icon: Trophy,
+    children: [
+      { title: "Flashcard", key: "flashcards", path: "/admin/flashcards" },
+      { title: "Gamification", key: "gamifications", path: "/admin/gamifications" },
+    ],
+  },
   { title: "Báo cáo tổ chức", key: "analytic", path: "/analytic", icon: BarChart3 },
 ];
 
