@@ -131,6 +131,8 @@ function ReportPage() {
         </div>
       </section>
 
+      <TeamInsightsCard />
+
       {/* Chart */}
       <Card>
         <CardContent className="p-5 space-y-4">
