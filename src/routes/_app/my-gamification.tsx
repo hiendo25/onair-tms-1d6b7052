@@ -6,11 +6,11 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const LEADERBOARD = [
-  { rank: 1, name: "Nguyễn Văn An", email: "an.nv@onair.com", xp: 2480, progress: 95, me: false },
-  { rank: 2, name: "Trần Thị Bích", email: "bich.tt@onair.com", xp: 2210, progress: 88, me: false },
-  { rank: 3, name: "Lê Hoàng Cường", email: "cuong.lh@onair.com", xp: 1985, progress: 80, me: true },
-  { rank: 4, name: "Phạm Thuỳ Dung", email: "dung.pt@onair.com", xp: 1742, progress: 72, me: false },
-  { rank: 5, name: "Hoàng Thị Hà", email: "ha.ht@onair.com", xp: 1620, progress: 65, me: false },
+  { rank: 1, name: "Nguyễn Văn An", email: "an.nv@highlandscoffee.vn", xp: 2480, progress: 95, me: false },
+  { rank: 2, name: "Trần Thị Mai", email: "mai.tt@highlandscoffee.vn", xp: 2210, progress: 88, me: false },
+  { rank: 3, name: "Lê Hoàng Cường", email: "cuong.lh@highlandscoffee.vn", xp: 1985, progress: 80, me: true },
+  { rank: 4, name: "Phạm Thuỳ Dung", email: "dung.pt@highlandscoffee.vn", xp: 1742, progress: 72, me: false },
+  { rank: 5, name: "Hoàng Thị Hà", email: "ha.ht@highlandscoffee.vn", xp: 1620, progress: 65, me: false },
 ];
 
 const LEVELS = [
