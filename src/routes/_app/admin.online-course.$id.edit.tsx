@@ -54,7 +54,7 @@ function EditCourse() {
                 className="border-violet-300 text-violet-700 hover:bg-violet-50"
               >
                 <Sparkles className={`h-3.5 w-3.5 mr-1 ${aiLoading ? "animate-pulse" : ""}`} />
-                {aiLoading ? "AI đang viết..." : "Viết mô tả bằng AI"}
+                {aiLoading ? "Để mình xem qua nhé..." : "Giúp tôi viết mô tả"}
               </Button>
             </div>
             <Textarea

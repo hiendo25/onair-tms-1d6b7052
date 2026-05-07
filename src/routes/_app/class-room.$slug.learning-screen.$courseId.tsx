@@ -158,7 +158,7 @@ function LS() {
           </h1>
           <div className="flex gap-2 flex-wrap">
             <Button onClick={genFlashcards} disabled={!currentLesson} variant="outline" className="border-violet-300 text-violet-700">
-              <Sparkles className="h-4 w-4 mr-1.5" /> Tạo flashcard
+              <Sparkles className="h-4 w-4 mr-1.5" /> Tạo flashcard từ bài học này
             </Button>
             <Button
               onClick={runSummary}
@@ -166,7 +166,7 @@ function LS() {
               className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
             >
               <Sparkles className="h-4 w-4 mr-1.5" />
-              {current ? "Đã tóm tắt" : "Tóm tắt bằng AI"}
+              {current ? "Đã tóm tắt xong" : "Tóm tắt bài học này cho tôi"}
             </Button>
           </div>
         </div>
@@ -181,7 +181,7 @@ function LS() {
                 <Sparkles className="h-4 w-4 text-violet-600" />
                 <span className="font-semibold text-sm text-violet-900">AI tóm tắt bài học</span>
               </div>
-              {loading && <AiSpinner label="AI đang đọc nội dung và tóm tắt..." />}
+              {loading && <AiSpinner label="Để mình xem qua nhé..." />}
               {current && (
                 <ul className="space-y-2">
                   {current.map((b, i) => (
@@ -227,7 +227,7 @@ function LS() {
               Flashcard cho bài: {lessonTitle}
             </DialogTitle>
           </DialogHeader>
-          {flashLoading && <AiSpinner label="AI đang tạo flashcard..." />}
+          {flashLoading && <AiSpinner label="Để mình xem qua nhé..." />}
           {flashCards && !flashLoading && (
             <div className="grid gap-3 sm:grid-cols-2 max-h-[60vh] overflow-y-auto">
               {flashCards.map((c, i) => {

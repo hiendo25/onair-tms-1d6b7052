@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 
-export function AiSpinner({ label = "AI đang xử lý..." }: { label?: string }) {
+export function AiSpinner({ label = "Để mình xem qua nhé..." }: { label?: string }) {
   return (
     <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
       <span className="relative inline-flex h-5 w-5 items-center justify-center">

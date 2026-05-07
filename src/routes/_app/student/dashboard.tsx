@@ -121,12 +121,12 @@ function AiInsightCard({ stats, xp }: { stats: any; xp: number }) {
           <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white">
             <Sparkles className="h-4 w-4" />
           </span>
-          AI nhận xét cho bạn
+          Đây là nhận xét về quá trình học của bạn tuần này
         </CardTitle>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <AiSpinner label="AI đang phân tích tiến độ của bạn..." />
+          <AiSpinner label="Để mình xem qua nhé..." />
         ) : (
           <p className="text-sm leading-relaxed text-slate-800">{insight}</p>
         )}
@@ -574,7 +574,7 @@ function AchievementSection({
         </CardHeader>
         <CardContent>
           {leaderboard.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Chưa có dữ liệu xếp hạng.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">Chưa có đủ dữ liệu để đưa ra nhận xét, hãy tiếp tục học nhé.</p>
           ) : (
             <div className="space-y-1.5">
               {leaderboard.map((u) => (

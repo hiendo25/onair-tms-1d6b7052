@@ -80,7 +80,7 @@ export function AiGenerateCourseButton() {
     <>
       <Button size="sm" variant="outline" onClick={() => { reset(); setOpen(true); }}
         className="border-violet-300 text-violet-700">
-        <Sparkles className="h-4 w-4" /> Tạo bằng AI
+        <Sparkles className="h-4 w-4" /> Giúp tôi tạo nội dung
       </Button>
 
       <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
@@ -117,7 +117,7 @@ export function AiGenerateCourseButton() {
             </div>
           )}
 
-          {loading && <AiSpinner label="AI đang thiết kế khóa học..." />}
+          {loading && <AiSpinner label="Để mình xem qua nhé..." />}
 
           {outline && !loading && (
             <div className="space-y-4 max-h-[60vh] overflow-y-auto">

@@ -127,7 +127,7 @@ function Page() {
       setAiResults(null);
       setAiSource("");
     } catch (e: any) {
-      toast.error(e?.message ?? "Có lỗi xảy ra");
+      toast.error(e?.message ?? "Có gì đó chưa đúng, thử lại nhé.");
     } finally {
       setAiSaving(false);
     }
@@ -227,7 +227,7 @@ function Page() {
             className="border-violet-300 text-violet-700 hover:bg-violet-50"
           >
             <Sparkles className="h-4 w-4" />
-            Sinh câu hỏi bằng AI
+            Gợi ý câu hỏi từ nội dung này
           </Button>
           <Button size="sm" onClick={openCreate}>
             <Plus className="h-4 w-4" />
@@ -589,7 +589,7 @@ function Page() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-violet-600" />
-              Sinh câu hỏi bằng AI
+              Gợi ý câu hỏi từ nội dung này
             </DialogTitle>
             <DialogDescription>
               Dán nội dung tài liệu / SOP. AI sẽ tạo 10 câu trắc nghiệm — bạn chọn câu muốn lưu.
@@ -608,7 +608,7 @@ function Page() {
             </div>
           )}
 
-          {aiLoading && <AiSpinner label="AI đang tạo 10 câu hỏi..." />}
+          {aiLoading && <AiSpinner label="Để mình xem qua nhé..." />}
 
           {aiResults && (
             <div className="space-y-3">

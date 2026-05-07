@@ -11,7 +11,7 @@ const ICONS = {
   success: { Icon: CheckCircle2, cls: "bg-emerald-100 text-emerald-700" },
 } as const;
 
-export function TeamInsightsCard({ title = "Insights" }: { title?: string }) {
+export function TeamInsightsCard({ title = "Điều cần chú ý tuần này" }: { title?: string }) {
   const [data, setData] = useState<TeamInsight[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export function TeamInsightsCard({ title = "Insights" }: { title?: string }) {
       const r = await aiTeamInsights();
       setData(r);
     } catch {
-      setError("Không tải được insights. Vui lòng thử lại.");
+      setError("Có gì đó chưa đúng, thử lại nhé.");
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export function TeamInsightsCard({ title = "Insights" }: { title?: string }) {
           </Button>
         </div>
 
-        {loading && <AiSpinner label="Đang phân tích dữ liệu đội ngũ..." />}
+        {loading && <AiSpinner label="Để mình xem qua nhé..." />}
         {error && !loading && (
           <div className="text-sm text-destructive flex items-center justify-between">
             <span>{error}</span>
