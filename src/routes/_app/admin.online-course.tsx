@@ -15,6 +15,7 @@ import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDi
 import { courseSchema, type CourseForm } from "@/lib/admin-schemas";
 import { COURSE_LEVEL, COURSE_STATUS, CODE_NOTE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
+import { AiGenerateCourseButton } from "@/components/ai/AiGenerateCourseButton";
 
 export const Route = createFileRoute("/_app/admin/online-course")({
   head: () => ({ meta: [{ title: "Khoá học online — OnAir TMS" }] }),
