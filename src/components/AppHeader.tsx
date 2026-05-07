@@ -29,7 +29,7 @@ export function AppHeader() {
     .slice(0, 2)
     .toUpperCase();
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white px-4 shadow-sm">
       <SidebarTrigger />
 
       <DropdownMenu>
