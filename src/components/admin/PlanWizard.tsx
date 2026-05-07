@@ -11,20 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Check, ChevronLeft, ChevronRight, Plus, Trash2, AlertTriangle, Send, Save } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Check, ChevronLeft, ChevronRight, Plus, Trash2, AlertTriangle, Send, Save, Lock, CircleDot, Play, Search } from "lucide-react";
 import { PLAN_TYPE, PLAN_TARGET_TYPE } from "@/lib/admin-options";
 import { toast } from "sonner";
 import type { DBProgram, DBTopic, DBPlanSurvey } from "@/lib/plan-helpers";
 
 const STEPS = [
-  { n: 1, label: "Thông tin & khảo sát" },
-  { n: 2, label: "Chương trình" },
-  { n: 3, label: "Chủ đề" },
-  { n: 4, label: "Môn học" },
-  { n: 5, label: "Duyệt & gửi" },
+  { n: 1, label: "Thông tin kế hoạch", sub: "Mục tiêu, thời gian và ngân sách", required: true },
+  { n: 2, label: "Chương trình đào tạo", sub: "Chương trình đào tạo của bạn", required: true },
+  { n: 3, label: "Chủ đề", sub: "Chương trình đào tạo của bạn", required: true },
+  { n: 4, label: "Gán môn học (tùy chọn)", sub: "Gán môn học cho chương trình và chủ đề khi cần", required: false },
+  { n: 5, label: "Gửi duyệt đề xuất", sub: "Kiểm tra và gửi kế hoạch để phê duyệt", required: true },
 ];
 
 export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
@@ -36,7 +36,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
 
-  // Step 1 form
   const [info, setInfo] = useState({
     code: "", title: "", objective: "", description: "",
     type: "training", start_date: "", end_date: "", budget: 0,
@@ -46,6 +45,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     survey_id: "", start_date: "", end_date: "", target_type: "all" as "all" | "dept" | "branch",
     target_unit_ids: [] as string[],
   });
+  const [surveyDialogOpen, setSurveyDialogOpen] = useState(false);
 
   const [programs, setPrograms] = useState<DBProgram[]>([]);
   const [topics, setTopics] = useState<DBTopic[]>([]);
@@ -53,7 +53,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   const [programCourses, setProgramCourses] = useState<{ program_id: string; course_id: string; course?: any }[]>([]);
   const [planSurvey, setPlanSurvey] = useState<DBPlanSurvey | null>(null);
 
-  // Lookup lists
   const { data: surveys = [] } = useQuery({
     queryKey: ["surveys-lookup", orgId],
     queryFn: async () => (await supabase.from("surveys").select("id,title,code,status").eq("org_id", orgId)).data ?? [],
@@ -71,7 +70,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     queryFn: async () => (await supabase.from("departments").select("id,name").eq("org_id", orgId)).data ?? [],
   });
 
-  // Load existing plan if editing
   useEffect(() => {
     if (!initialPlanId) return;
     (async () => {
@@ -113,7 +111,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
 
   const surveyLocked = hasSurvey && planSurvey?.status !== "completed";
 
-  // ======================== Save helpers ========================
+  // ======================== Persist ========================
   async function persistDraft(targetStep: number) {
     setSaving(true);
     try {
@@ -124,6 +122,8 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
         start_date: info.start_date || null, end_date: info.end_date || null,
         created_by: user?.id ?? null,
       };
+      // Auto-generate code if blank
+      if (!payload.code) payload.code = `KH${Date.now().toString().slice(-6)}`;
       if (!pid) {
         const { data, error } = await supabase.from("plans").insert(payload).select("id").single();
         if (error) throw error;
@@ -135,7 +135,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
         if (error) throw error;
       }
 
-      // Save survey link
       if (hasSurvey && survey.survey_id) {
         const surveyRow = {
           plan_id: pid, org_id: orgId, survey_id: survey.survey_id,
@@ -149,7 +148,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
           const { data } = await supabase.from("training_plan_surveys").insert(surveyRow).select("*").single();
           if (data) setPlanSurvey(data as DBPlanSurvey);
         }
-        // If survey not yet completed, lock plan
         if (planSurvey?.status !== "completed") {
           await supabase.from("plans").update({ status: "pending_survey" }).eq("id", pid);
         }
@@ -160,6 +158,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
 
       setStep(targetStep);
       qc.invalidateQueries({ queryKey: ["plans", orgId] });
+      toast.success("Đã lưu");
     } catch (e: any) {
       toast.error(e.message ?? "Lỗi lưu kế hoạch");
     } finally {
@@ -167,84 +166,9 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     }
   }
 
-  // ======================== Step 1 ========================
-  function Step1() {
-    return (
-      <div className="space-y-4">
-        <Card>
-          <CardHeader><CardTitle>Thông tin kế hoạch</CardTitle></CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div><Label>Mã kế hoạch *</Label><Input value={info.code} onChange={(e) => setInfo({ ...info, code: e.target.value })} /></div>
-            <div><Label>Tên kế hoạch *</Label><Input value={info.title} onChange={(e) => setInfo({ ...info, title: e.target.value })} /></div>
-            <div><Label>Loại *</Label>
-              <Select value={info.type} onValueChange={(v) => setInfo({ ...info, type: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{PLAN_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div><Label>Ngân sách (VNĐ)</Label><Input type="number" value={info.budget} onChange={(e) => setInfo({ ...info, budget: Number(e.target.value) })} /></div>
-            <div><Label>Ngày bắt đầu *</Label><Input type="date" value={info.start_date} onChange={(e) => setInfo({ ...info, start_date: e.target.value })} /></div>
-            <div><Label>Ngày kết thúc *</Label><Input type="date" value={info.end_date} onChange={(e) => setInfo({ ...info, end_date: e.target.value })} /></div>
-            <div className="md:col-span-2"><Label>Mục tiêu</Label><Textarea rows={3} value={info.objective} onChange={(e) => setInfo({ ...info, objective: e.target.value })} /></div>
-            <div className="md:col-span-2"><Label>Mô tả</Label><Textarea rows={2} value={info.description} onChange={(e) => setInfo({ ...info, description: e.target.value })} /></div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="flex items-center justify-between">Khảo sát nhu cầu đào tạo
-            <div className="flex items-center gap-2 text-sm font-normal"><Switch checked={hasSurvey} onCheckedChange={setHasSurvey} /> Gắn khảo sát</div>
-          </CardTitle></CardHeader>
-          {hasSurvey && (
-            <CardContent className="space-y-4">
-              <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 flex gap-2"><AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />Bước 2-3 sẽ bị khoá cho đến khi khảo sát hoàn thành.</div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="md:col-span-2"><Label>Chọn khảo sát *</Label>
-                  <Select value={survey.survey_id} onValueChange={(v) => setSurvey({ ...survey, survey_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="-- Chọn khảo sát --" /></SelectTrigger>
-                    <SelectContent>{surveys.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.code} — {s.title}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div><Label>Bắt đầu *</Label><Input type="date" value={survey.start_date} onChange={(e) => setSurvey({ ...survey, start_date: e.target.value })} /></div>
-                <div><Label>Kết thúc *</Label><Input type="date" value={survey.end_date} onChange={(e) => setSurvey({ ...survey, end_date: e.target.value })} /></div>
-                <div><Label>Đối tượng *</Label>
-                  <Select value={survey.target_type} onValueChange={(v: any) => setSurvey({ ...survey, target_type: v, target_unit_ids: [] })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{PLAN_TARGET_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                {(survey.target_type === "dept" || survey.target_type === "branch") && (
-                  <div><Label>{survey.target_type === "dept" ? "Phòng ban" : "Chi nhánh"} *</Label>
-                    <div className="border rounded-md p-2 max-h-40 overflow-auto space-y-1">
-                      {(survey.target_type === "dept" ? departments : branches).map((u: any) => (
-                        <label key={u.id} className="flex items-center gap-2 text-sm">
-                          <input type="checkbox" checked={survey.target_unit_ids.includes(u.id)} onChange={(e) => {
-                            setSurvey({ ...survey, target_unit_ids: e.target.checked
-                              ? [...survey.target_unit_ids, u.id]
-                              : survey.target_unit_ids.filter((x) => x !== u.id) });
-                          }} />
-                          {u.name}
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-              {planSurvey && (
-                <div className="rounded-md bg-slate-50 border p-3 text-sm">
-                  Trạng thái khảo sát: <Badge>{planSurvey.status}</Badge>
-                  {planSurvey.status !== "completed" && <span className="text-slate-600 ml-2">— phải hoàn tất khảo sát trước khi tiếp tục.</span>}
-                </div>
-              )}
-            </CardContent>
-          )}
-        </Card>
-      </div>
-    );
-  }
-
-  // ======================== Step 2 — Programs ========================
+  // ======================== Programs ========================
   async function addProgram() {
-    if (!planId) { toast.error("Lưu bước 1 trước"); return; }
+    if (!planId) { toast.error("Vui lòng lưu bước 1 trước."); return; }
     const { data, error } = await supabase.from("training_plan_programs").insert({
       plan_id: planId, org_id: orgId, name: "Chương trình mới",
       description: "", order_index: programs.length,
@@ -262,33 +186,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     setTopics(topics.filter((t) => t.program_id !== id));
   }
 
-  function Step2() {
-    return (
-      <Card>
-        <CardHeader><CardTitle className="flex justify-between">Chương trình đào tạo
-          <Button size="sm" onClick={addProgram}><Plus className="h-4 w-4 mr-1" />Thêm chương trình</Button>
-        </CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {programs.length === 0 && <p className="text-sm text-slate-500">Chưa có chương trình. Cần ít nhất 1 chương trình.</p>}
-          {programs.map((p) => (
-            <div key={p.id} className="border rounded-md p-3 space-y-2">
-              <div className="grid gap-2 md:grid-cols-2">
-                <Input placeholder="Tên chương trình *" value={p.name} onChange={(e) => updateProgram(p.id, { name: e.target.value })} />
-                <div className="flex gap-2">
-                  <Input type="date" value={p.start_date ?? ""} onChange={(e) => updateProgram(p.id, { start_date: e.target.value })} />
-                  <Input type="date" value={p.end_date ?? ""} onChange={(e) => updateProgram(p.id, { end_date: e.target.value })} />
-                  <Button variant="ghost" size="icon" onClick={() => removeProgram(p.id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
-                </div>
-              </div>
-              <Textarea placeholder="Mô tả" rows={2} value={p.description} onChange={(e) => updateProgram(p.id, { description: e.target.value })} />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // ======================== Step 3 — Topics ========================
+  // ======================== Topics ========================
   async function addTopic(programId: string | null) {
     if (!planId) return;
     const { data, error } = await supabase.from("training_plan_topics").insert({
@@ -307,47 +205,11 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     setTopics(topics.filter((t) => t.id !== id));
   }
 
-  function TopicGroup({ programId, label }: { programId: string | null; label: string }) {
-    const list = topics.filter((t) => t.program_id === programId);
-    return (
-      <div className="border rounded-md p-3 space-y-2">
-        <div className="flex justify-between items-center">
-          <h4 className="font-medium text-sm">{label}</h4>
-          <Button size="sm" variant="outline" onClick={() => addTopic(programId)}><Plus className="h-3 w-3 mr-1" />Chủ đề</Button>
-        </div>
-        {list.length === 0 ? <p className="text-xs text-slate-400">Chưa có chủ đề</p> :
-          list.map((t) => (
-            <div key={t.id} className="space-y-1 pl-2 border-l-2 border-slate-200">
-              <div className="flex gap-2">
-                <Input placeholder="Tên chủ đề" value={t.name} onChange={(e) => updateTopic(t.id, { name: e.target.value })} />
-                <Button variant="ghost" size="icon" onClick={() => removeTopic(t.id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
-              </div>
-              <Textarea placeholder="Mô tả" rows={1} value={t.description} onChange={(e) => updateTopic(t.id, { description: e.target.value })} />
-            </div>
-          ))}
-      </div>
-    );
-  }
-
-  function Step3() {
-    return (
-      <Card>
-        <CardHeader><CardTitle>Chủ đề đào tạo</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          {programs.map((p) => <TopicGroup key={p.id} programId={p.id} label={p.name} />)}
-          <TopicGroup programId={null} label="Chủ đề độc lập (không thuộc chương trình)" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // ======================== Step 4 — Courses ========================
+  // ======================== Courses ========================
   async function assignCourseToTopic(topicId: string, courseId: string) {
-    const exists = topicCourses.some((tc) => tc.topic_id === topicId && tc.course_id === courseId);
-    if (exists) { toast.warning("Môn học này đã tồn tại trong chủ đề."); return; }
-    const { data, error } = await supabase.from("training_plan_topic_courses").insert({
-      topic_id: topicId, course_id: courseId, org_id: orgId,
-    }).select("*, course:online_courses(*)").single();
+    if (topicCourses.some((tc) => tc.topic_id === topicId && tc.course_id === courseId)) { toast.warning("Đã gán."); return; }
+    const { data, error } = await supabase.from("training_plan_topic_courses").insert({ topic_id: topicId, course_id: courseId, org_id: orgId })
+      .select("*, course:online_courses(*)").single();
     if (error) { toast.error(error.message); return; }
     setTopicCourses([...topicCourses, data as any]);
   }
@@ -356,11 +218,9 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     setTopicCourses(topicCourses.filter((tc) => !(tc.topic_id === topicId && tc.course_id === courseId)));
   }
   async function assignCourseToProgram(programId: string, courseId: string) {
-    const exists = programCourses.some((pc) => pc.program_id === programId && pc.course_id === courseId);
-    if (exists) { toast.warning("Môn học này đã tồn tại trong chương trình."); return; }
-    const { data, error } = await supabase.from("training_plan_program_courses").insert({
-      program_id: programId, course_id: courseId, org_id: orgId,
-    }).select("*, course:online_courses(*)").single();
+    if (programCourses.some((pc) => pc.program_id === programId && pc.course_id === courseId)) { toast.warning("Đã gán."); return; }
+    const { data, error } = await supabase.from("training_plan_program_courses").insert({ program_id: programId, course_id: courseId, org_id: orgId })
+      .select("*, course:online_courses(*)").single();
     if (error) { toast.error(error.message); return; }
     setProgramCourses([...programCourses, data as any]);
   }
@@ -378,91 +238,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     return data.id;
   }
 
-  function CourseAssigner({ kind, parentId, currentCourseIds }: { kind: "topic" | "program"; parentId: string; currentCourseIds: string[] }) {
-    const [pickerOpen, setPickerOpen] = useState(false);
-    const [newName, setNewName] = useState("");
-    return (
-      <div className="space-y-2">
-        <div className="flex flex-wrap gap-2">
-          {currentCourseIds.map((cid) => {
-            const c = courses.find((x: any) => x.id === cid);
-            return (
-              <Badge key={cid} variant="secondary" className="gap-1">
-                {c?.title ?? cid}
-                <button onClick={() => kind === "topic" ? unassignTopicCourse(parentId, cid) : unassignProgramCourse(parentId, cid)} className="ml-1">×</button>
-              </Badge>
-            );
-          })}
-          <Button size="sm" variant="outline" onClick={() => setPickerOpen(!pickerOpen)}><Plus className="h-3 w-3 mr-1" />Gán môn học</Button>
-        </div>
-        {pickerOpen && (
-          <div className="border rounded-md p-2 space-y-2 bg-slate-50">
-            <div className="max-h-40 overflow-auto space-y-1">
-              {courses.map((c: any) => {
-                const taken = currentCourseIds.includes(c.id);
-                return (
-                  <button key={c.id} disabled={taken} onClick={() => kind === "topic" ? assignCourseToTopic(parentId, c.id) : assignCourseToProgram(parentId, c.id)}
-                    className={`block w-full text-left text-sm px-2 py-1 rounded ${taken ? "bg-amber-100 text-amber-700" : "hover:bg-white"}`}>
-                    {c.code} — {c.title} {taken && "(đã gán)"}
-                  </button>
-                );
-              })}
-            </div>
-            <Separator />
-            <div className="flex gap-2">
-              <Input placeholder="Tạo môn học mới..." value={newName} onChange={(e) => setNewName(e.target.value)} />
-              <Button size="sm" onClick={async () => {
-                if (!newName.trim()) return;
-                const cid = await createCourse(newName.trim());
-                if (cid) {
-                  if (kind === "topic") await assignCourseToTopic(parentId, cid);
-                  else await assignCourseToProgram(parentId, cid);
-                  setNewName("");
-                }
-              }}>Tạo</Button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function Step4() {
-    return (
-      <Card>
-        <CardHeader><CardTitle>Gán môn học</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          {programs.map((p) => {
-            const topicsOfProgram = topics.filter((t) => t.program_id === p.id);
-            return (
-              <div key={p.id} className="border rounded-md p-3 space-y-3">
-                <div className="font-medium">{p.name}</div>
-                {topicsOfProgram.length === 0 ? (
-                  <CourseAssigner kind="program" parentId={p.id}
-                    currentCourseIds={programCourses.filter((pc) => pc.program_id === p.id).map((pc) => pc.course_id)} />
-                ) : topicsOfProgram.map((t) => (
-                  <div key={t.id} className="pl-3 border-l-2 border-slate-200 space-y-1">
-                    <div className="text-sm font-medium">{t.name}</div>
-                    <CourseAssigner kind="topic" parentId={t.id}
-                      currentCourseIds={topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => tc.course_id)} />
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-          {topics.filter((t) => !t.program_id).map((t) => (
-            <div key={t.id} className="border rounded-md p-3 space-y-1">
-              <div className="font-medium">Chủ đề độc lập: {t.name}</div>
-              <CourseAssigner kind="topic" parentId={t.id}
-                currentCourseIds={topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => tc.course_id)} />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // ======================== Step 5 — Review ========================
   async function submitForApproval() {
     if (!planId) return;
     const { error } = await supabase.from("plans").update({ status: "pending" }).eq("id", planId);
@@ -472,106 +247,409 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
     nav({ to: "/admin/plans/$id", params: { id: planId } });
   }
 
-  function Step5() {
-    const totalCourses = topicCourses.length + programCourses.length;
-    return (
-      <div className="space-y-4">
-        <div className="grid gap-3 md:grid-cols-4">
-          <Card><CardContent className="p-4"><div className="text-xs text-slate-500">Ngân sách</div><div className="text-lg font-semibold">{info.budget.toLocaleString("vi-VN")} ₫</div></CardContent></Card>
-          <Card><CardContent className="p-4"><div className="text-xs text-slate-500">Thời gian</div><div className="text-sm font-medium">{info.start_date} → {info.end_date}</div></CardContent></Card>
-          <Card><CardContent className="p-4"><div className="text-xs text-slate-500">Chương trình / Chủ đề</div><div className="text-lg font-semibold">{programs.length} / {topics.length}</div></CardContent></Card>
-          <Card><CardContent className="p-4"><div className="text-xs text-slate-500">Tổng môn học</div><div className="text-lg font-semibold">{totalCourses}</div></CardContent></Card>
-        </div>
-        <Card>
-          <CardHeader><CardTitle>{info.title}</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <p><span className="text-slate-500">Mục tiêu:</span> {info.objective || "—"}</p>
-            {programs.map((p) => (
-              <div key={p.id} className="border rounded-md p-3">
-                <div className="font-medium">{p.name}</div>
-                <div className="text-xs text-slate-500">{p.start_date} → {p.end_date}</div>
-                <p className="text-sm mt-1">{p.description}</p>
-                <ul className="mt-2 space-y-1 pl-4 list-disc">
-                  {topics.filter((t) => t.program_id === p.id).map((t) => (
-                    <li key={t.id}>{t.name}
-                      <ul className="pl-4 list-circle text-slate-600">
-                        {topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => <li key={tc.course_id}>• {tc.course?.title ?? tc.course_id}</li>)}
-                      </ul>
-                    </li>
-                  ))}
-                  {programCourses.filter((pc) => pc.program_id === p.id).map((pc) => <li key={pc.course_id}>• {pc.course?.title ?? pc.course_id}</li>)}
-                </ul>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => persistDraft(5)}><Save className="h-4 w-4 mr-1" />Lưu bản nháp</Button>
-          <Button onClick={submitForApproval}><Send className="h-4 w-4 mr-1" />Gửi duyệt</Button>
-        </div>
-      </div>
-    );
-  }
-
-  // ======================== Render ========================
-  function StepNav() {
-    return (
-      <div className="flex justify-between mt-6">
-        <Button variant="outline" onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}><ChevronLeft className="h-4 w-4 mr-1" />Quay lại</Button>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => persistDraft(step)} disabled={saving}><Save className="h-4 w-4 mr-1" />Lưu</Button>
-          {step < 5 && <Button onClick={() => persistDraft(step + 1)} disabled={saving || (step === 1 && surveyLocked && step + 1 < 4)}>
-            Tiếp tục<ChevronRight className="h-4 w-4 ml-1" />
-          </Button>}
-        </div>
-      </div>
-    );
-  }
+  // ======================== Renderers ========================
+  const progress = Math.round(((step - 1) / (STEPS.length - 1)) * 100);
 
   return (
     <PageContainer
-      title={initialPlanId ? "Chỉnh sửa kế hoạch" : "Tạo kế hoạch đào tạo"}
-      breadcrumbs={[{ title: "Kế hoạch", path: "/admin/plans" }, { title: initialPlanId ? "Chỉnh sửa" : "Tạo mới" }]}
+      title="Tạo kế hoạch đào tạo"
+      breadcrumbs={[{ title: "Kế hoạch đào tạo", path: "/admin/plans" }, { title: initialPlanId ? "Chỉnh sửa" : "Tạo kế hoạch đào tạo" }]}
     >
-      {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-4 overflow-x-auto">
-        {STEPS.map((s, i) => {
-          const active = s.n === step;
-          const done = s.n < step;
-          const locked = surveyLocked && (s.n === 2 || s.n === 3);
-          return (
-            <div key={s.n} className="flex items-center gap-2">
-              <button disabled={locked} onClick={() => setStep(s.n)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm transition ${
-                  active ? "bg-blue-600 text-white" : done ? "bg-emerald-50 text-emerald-700" : locked ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                }`}>
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${active ? "bg-white text-blue-600" : done ? "bg-emerald-600 text-white" : "bg-slate-300 text-white"}`}>
-                  {done ? <Check className="h-3 w-3" /> : s.n}
-                </span>
-                {s.label}
+      <div className="grid gap-6 md:grid-cols-[320px_1fr]">
+        {/* Sidebar stepper */}
+        <div className="space-y-3">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium">Hành trình kế hoạch</span>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-700">{progress}%</Badge>
+              </div>
+              <div className="text-xs text-slate-500 mb-3">Bước {step} / {STEPS.length}</div>
+              <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} />
+              </div>
+            </CardContent>
+          </Card>
+
+          {STEPS.map((s) => {
+            const active = s.n === step;
+            const done = s.n < step;
+            const locked = surveyLocked && (s.n === 2 || s.n === 3);
+            return (
+              <button
+                key={s.n}
+                disabled={locked}
+                onClick={() => setStep(s.n)}
+                className={`w-full text-left rounded-lg border p-3 transition ${
+                  active ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
+                  : done ? "border-emerald-200 bg-white"
+                  : locked ? "border-slate-200 bg-slate-50 opacity-60 cursor-not-allowed"
+                  : "border-slate-200 bg-white hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`mt-0.5 w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
+                    active ? "bg-blue-600 text-white"
+                    : done ? "bg-emerald-500 text-white"
+                    : locked ? "bg-slate-200 text-slate-400"
+                    : "bg-slate-100 text-slate-500"
+                  }`}>
+                    {locked ? <Lock className="h-3.5 w-3.5" /> : done ? <Check className="h-3.5 w-3.5" /> : active ? <CircleDot className="h-3.5 w-3.5" /> : <span className="text-xs font-semibold">{s.n}</span>}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-slate-900">{s.label}</div>
+                    <div className="text-xs text-slate-500 mt-0.5">{s.sub}</div>
+                  </div>
+                </div>
               </button>
-              {i < STEPS.length - 1 && <div className="w-6 h-px bg-slate-300" />}
+            );
+          })}
+        </div>
+
+        {/* Right form */}
+        <div>
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-slate-400 mb-1">Bước {step}</div>
+                  <CardTitle className="text-xl">{STEPS[step - 1].label}</CardTitle>
+                  <p className="text-sm text-slate-500 mt-1">{stepDescription(step)}</p>
+                </div>
+                {STEPS[step - 1].required && <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Bắt buộc</Badge>}
+              </div>
+            </CardHeader>
+            <CardContent className="pt-2">
+              {step === 1 && (
+                <div className="space-y-5">
+                  <div>
+                    <Label>Tên kế hoạch *</Label>
+                    <Input className="mt-1" placeholder="VD: Kế hoạch đào tạo 2025" value={info.title} onChange={(e) => setInfo({ ...info, title: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Mục tiêu</Label>
+                    <Textarea className="mt-1" rows={4} placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo" value={info.objective} onChange={(e) => setInfo({ ...info, objective: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>Loại</Label>
+                    <Select value={info.type} onValueChange={(v) => setInfo({ ...info, type: v })}>
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>{PLAN_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="rounded-lg border p-4 bg-slate-50/50">
+                    <Label className="text-sm font-semibold">Thời gian triển khai</Label>
+                    <p className="text-xs text-slate-500 mt-1 mb-3">Xác định thời gian bắt đầu và kết thúc để chúng tôi giúp bạn theo dõi tiến độ.</p>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <Input type="date" value={info.start_date} onChange={(e) => setInfo({ ...info, start_date: e.target.value })} />
+                      <Input type="date" value={info.end_date} onChange={(e) => setInfo({ ...info, end_date: e.target.value })} />
+                    </div>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <Label>Ngân sách</Label>
+                      <Input className="mt-1" type="number" value={info.budget} onChange={(e) => setInfo({ ...info, budget: Number(e.target.value) })} />
+                    </div>
+                    <div>
+                      <Label>Khảo sát</Label>
+                      <Button variant="outline" type="button" className="mt-1 w-full justify-start" onClick={() => setSurveyDialogOpen(true)}>
+                        <Search className="h-4 w-4 mr-2" />
+                        {hasSurvey && survey.survey_id ? (surveys.find((s: any) => s.id === survey.survey_id)?.title ?? "Đã chọn") : "Chọn khảo sát"}
+                      </Button>
+                    </div>
+                  </div>
+                  {hasSurvey && planSurvey && (
+                    <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 flex gap-2">
+                      <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                      Trạng thái khảo sát: <Badge variant="outline" className="ml-1">{planSurvey.status}</Badge>
+                      {planSurvey.status !== "completed" && <span className="ml-1">— Bước 2-3 sẽ bị khoá đến khi khảo sát hoàn tất.</span>}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {step === 2 && (surveyLocked ? <LockedNotice /> : (
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm text-slate-600">Tạo các chương trình con thuộc kế hoạch này.</p>
+                    <Button size="sm" onClick={addProgram}><Plus className="h-4 w-4 mr-1" />Thêm chương trình</Button>
+                  </div>
+                  {programs.length === 0 && <EmptyBox label="Chưa có chương trình. Cần ít nhất 1 chương trình." />}
+                  {programs.map((p) => (
+                    <div key={p.id} className="border rounded-lg p-4 space-y-3 bg-white">
+                      <div className="grid gap-2 md:grid-cols-2">
+                        <Input placeholder="Tên chương trình *" value={p.name} onChange={(e) => updateProgram(p.id, { name: e.target.value })} />
+                        <div className="flex gap-2">
+                          <Input type="date" value={p.start_date ?? ""} onChange={(e) => updateProgram(p.id, { start_date: e.target.value })} />
+                          <Input type="date" value={p.end_date ?? ""} onChange={(e) => updateProgram(p.id, { end_date: e.target.value })} />
+                          <Button variant="ghost" size="icon" onClick={() => removeProgram(p.id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
+                        </div>
+                      </div>
+                      <Textarea placeholder="Mô tả" rows={2} value={p.description} onChange={(e) => updateProgram(p.id, { description: e.target.value })} />
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              {step === 3 && (surveyLocked ? <LockedNotice /> : (
+                <div className="space-y-4">
+                  {programs.map((p) => <TopicGroup key={p.id} programId={p.id} label={p.name} topics={topics} onAdd={() => addTopic(p.id)} onUpdate={updateTopic} onRemove={removeTopic} />)}
+                  <TopicGroup programId={null} label="Chủ đề độc lập (không thuộc chương trình)" topics={topics} onAdd={() => addTopic(null)} onUpdate={updateTopic} onRemove={removeTopic} />
+                </div>
+              ))}
+
+              {step === 4 && (
+                <div className="space-y-4">
+                  {programs.length === 0 && <EmptyBox label="Tạo chương trình ở Bước 2 trước." />}
+                  {programs.map((p) => {
+                    const topicsOfProgram = topics.filter((t) => t.program_id === p.id);
+                    return (
+                      <div key={p.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="font-medium">{p.name}</div>
+                        {topicsOfProgram.length === 0 ? (
+                          <CourseAssigner courses={courses} kind="program" parentId={p.id}
+                            currentCourseIds={programCourses.filter((pc) => pc.program_id === p.id).map((pc) => pc.course_id)}
+                            onAssign={(cid) => assignCourseToProgram(p.id, cid)}
+                            onUnassign={(cid) => unassignProgramCourse(p.id, cid)}
+                            onCreate={createCourse} />
+                        ) : topicsOfProgram.map((t) => (
+                          <div key={t.id} className="pl-3 border-l-2 border-slate-200 space-y-1">
+                            <div className="text-sm font-medium">{t.name}</div>
+                            <CourseAssigner courses={courses} kind="topic" parentId={t.id}
+                              currentCourseIds={topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => tc.course_id)}
+                              onAssign={(cid) => assignCourseToTopic(t.id, cid)}
+                              onUnassign={(cid) => unassignTopicCourse(t.id, cid)}
+                              onCreate={createCourse} />
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                  {topics.filter((t) => !t.program_id).map((t) => (
+                    <div key={t.id} className="border rounded-lg p-4 space-y-1">
+                      <div className="font-medium">Chủ đề độc lập: {t.name}</div>
+                      <CourseAssigner courses={courses} kind="topic" parentId={t.id}
+                        currentCourseIds={topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => tc.course_id)}
+                        onAssign={(cid) => assignCourseToTopic(t.id, cid)}
+                        onUnassign={(cid) => unassignTopicCourse(t.id, cid)}
+                        onCreate={createCourse} />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {step === 5 && (
+                <div className="space-y-4">
+                  <div className="grid gap-3 md:grid-cols-4">
+                    <SummaryCard label="Ngân sách" value={`${(info.budget || 0).toLocaleString("vi-VN")} ₫`} />
+                    <SummaryCard label="Thời gian" value={`${info.start_date || "—"} → ${info.end_date || "—"}`} />
+                    <SummaryCard label="Chương trình / Chủ đề" value={`${programs.length} / ${topics.length}`} />
+                    <SummaryCard label="Tổng môn học" value={String(topicCourses.length + programCourses.length)} />
+                  </div>
+                  <div className="border rounded-lg p-4">
+                    <div className="font-semibold text-lg">{info.title || "(Chưa có tên)"}</div>
+                    <p className="text-sm text-slate-600 mt-1">{info.objective || "—"}</p>
+                    <Separator className="my-3" />
+                    {programs.map((p) => (
+                      <div key={p.id} className="border rounded p-3 mb-2">
+                        <div className="font-medium">{p.name}</div>
+                        <div className="text-xs text-slate-500">{p.start_date} → {p.end_date}</div>
+                        <ul className="mt-2 space-y-1 pl-4 list-disc text-sm">
+                          {topics.filter((t) => t.program_id === p.id).map((t) => (
+                            <li key={t.id}>{t.name}
+                              <ul className="pl-4 text-slate-600">
+                                {topicCourses.filter((tc) => tc.topic_id === t.id).map((tc) => <li key={tc.course_id}>• {tc.course?.title ?? tc.course_id}</li>)}
+                              </ul>
+                            </li>
+                          ))}
+                          {programCourses.filter((pc) => pc.program_id === p.id).map((pc) => <li key={pc.course_id}>• {pc.course?.title ?? pc.course_id}</li>)}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Footer nav */}
+          <div className="flex justify-between items-center mt-4">
+            <Button variant="outline" onClick={() => setStep(Math.max(1, step - 1))} disabled={step === 1}>
+              <ChevronLeft className="h-4 w-4 mr-1" />Quay lại
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => persistDraft(step)} disabled={saving}><Save className="h-4 w-4 mr-1" />Lưu</Button>
+              {step === 1 && (
+                <Button variant="outline" onClick={() => persistDraft(2)} disabled={saving}>
+                  <Play className="h-4 w-4 mr-1" />Thực hiện kế hoạch
+                </Button>
+              )}
+              {step < 5 ? (
+                <Button onClick={() => persistDraft(step + 1)} disabled={saving} className="bg-blue-600 hover:bg-blue-700">
+                  Tiếp tục<ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              ) : (
+                <Button onClick={submitForApproval} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Send className="h-4 w-4 mr-1" />Gửi duyệt
+                </Button>
+              )}
             </div>
-          );
-        })}
+          </div>
+        </div>
       </div>
 
-      {step === 1 && Step1()}
-      {step === 2 && (surveyLocked ? <LockedNotice /> : Step2())}
-      {step === 3 && (surveyLocked ? <LockedNotice /> : Step3())}
-      {step === 4 && Step4()}
-      {step === 5 && Step5()}
-
-      <StepNav />
+      {/* Survey dialog */}
+      <Dialog open={surveyDialogOpen} onOpenChange={setSurveyDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader><DialogTitle>Chọn khảo sát nhu cầu đào tạo</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Khảo sát *</Label>
+              <Select value={survey.survey_id} onValueChange={(v) => { setSurvey({ ...survey, survey_id: v }); setHasSurvey(true); }}>
+                <SelectTrigger className="mt-1"><SelectValue placeholder="-- Chọn khảo sát --" /></SelectTrigger>
+                <SelectContent>{surveys.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.code} — {s.title}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div><Label>Bắt đầu</Label><Input type="date" className="mt-1" value={survey.start_date} onChange={(e) => setSurvey({ ...survey, start_date: e.target.value })} /></div>
+              <div><Label>Kết thúc</Label><Input type="date" className="mt-1" value={survey.end_date} onChange={(e) => setSurvey({ ...survey, end_date: e.target.value })} /></div>
+            </div>
+            <div>
+              <Label>Đối tượng</Label>
+              <Select value={survey.target_type} onValueChange={(v: any) => setSurvey({ ...survey, target_type: v, target_unit_ids: [] })}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>{PLAN_TARGET_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            {(survey.target_type === "dept" || survey.target_type === "branch") && (
+              <div>
+                <Label>{survey.target_type === "dept" ? "Phòng ban" : "Chi nhánh"}</Label>
+                <div className="border rounded-md p-2 max-h-40 overflow-auto space-y-1 mt-1">
+                  {(survey.target_type === "dept" ? departments : branches).map((u: any) => (
+                    <label key={u.id} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={survey.target_unit_ids.includes(u.id)} onChange={(e) => {
+                        setSurvey({ ...survey, target_unit_ids: e.target.checked ? [...survey.target_unit_ids, u.id] : survey.target_unit_ids.filter((x) => x !== u.id) });
+                      }} />
+                      {u.name}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => { setHasSurvey(false); setSurvey({ survey_id: "", start_date: "", end_date: "", target_type: "all", target_unit_ids: [] }); setSurveyDialogOpen(false); }}>Bỏ chọn</Button>
+            <Button onClick={() => setSurveyDialogOpen(false)}>Xác nhận</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
 
+function stepDescription(n: number) {
+  const map: Record<number, string> = {
+    1: "Xác định mục tiêu, phạm vi thời gian và khảo sát liên quan trước khi bắt đầu.",
+    2: "Tạo các chương trình đào tạo thuộc kế hoạch.",
+    3: "Tạo chủ đề chi tiết cho mỗi chương trình hoặc chủ đề độc lập.",
+    4: "Gán môn học vào chủ đề / chương trình. Có thể tạo nhanh môn học mới.",
+    5: "Xem lại toàn bộ kế hoạch và gửi cho người duyệt.",
+  };
+  return map[n] ?? "";
+}
+
 function LockedNotice() {
   return (
-    <Card><CardContent className="p-6 text-center text-amber-700 bg-amber-50">
+    <div className="rounded-lg border bg-amber-50 border-amber-200 p-6 text-center text-amber-800">
       <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
-      Khảo sát chưa hoàn thành. Phải hoàn tất khảo sát để mở khoá bước này.
-    </CardContent></Card>
+      Khảo sát chưa hoàn tất. Phải hoàn tất khảo sát trước khi mở khoá bước này.
+    </div>
+  );
+}
+
+function EmptyBox({ label }: { label: string }) {
+  return <div className="border-2 border-dashed rounded-lg p-8 text-center text-sm text-slate-500">{label}</div>;
+}
+
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="border rounded-lg p-3 bg-slate-50">
+      <div className="text-xs text-slate-500">{label}</div>
+      <div className="text-sm font-semibold mt-1">{value}</div>
+    </div>
+  );
+}
+
+function TopicGroup({ programId, label, topics, onAdd, onUpdate, onRemove }: {
+  programId: string | null; label: string; topics: DBTopic[];
+  onAdd: () => void; onUpdate: (id: string, patch: Partial<DBTopic>) => void; onRemove: (id: string) => void;
+}) {
+  const list = topics.filter((t) => t.program_id === programId);
+  return (
+    <div className="border rounded-lg p-4 space-y-2">
+      <div className="flex justify-between items-center">
+        <h4 className="font-medium text-sm">{label}</h4>
+        <Button size="sm" variant="outline" onClick={onAdd}><Plus className="h-3 w-3 mr-1" />Chủ đề</Button>
+      </div>
+      {list.length === 0 ? <p className="text-xs text-slate-400">Chưa có chủ đề</p> : list.map((t) => (
+        <div key={t.id} className="space-y-1 pl-2 border-l-2 border-slate-200">
+          <div className="flex gap-2">
+            <Input placeholder="Tên chủ đề" value={t.name} onChange={(e) => onUpdate(t.id, { name: e.target.value })} />
+            <Button variant="ghost" size="icon" onClick={() => onRemove(t.id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
+          </div>
+          <Textarea placeholder="Mô tả" rows={1} value={t.description} onChange={(e) => onUpdate(t.id, { description: e.target.value })} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CourseAssigner({ courses, kind, parentId, currentCourseIds, onAssign, onUnassign, onCreate }: {
+  courses: any[]; kind: "topic" | "program"; parentId: string;
+  currentCourseIds: string[];
+  onAssign: (courseId: string) => void; onUnassign: (courseId: string) => void; onCreate: (name: string) => Promise<string | null>;
+}) {
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [newName, setNewName] = useState("");
+  void kind; void parentId;
+  return (
+    <div className="space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {currentCourseIds.map((cid) => {
+          const c = courses.find((x: any) => x.id === cid);
+          return (
+            <Badge key={cid} variant="secondary" className="gap-1">
+              {c?.title ?? cid}
+              <button onClick={() => onUnassign(cid)} className="ml-1">×</button>
+            </Badge>
+          );
+        })}
+        <Button size="sm" variant="outline" onClick={() => setPickerOpen(!pickerOpen)}><Plus className="h-3 w-3 mr-1" />Gán môn học</Button>
+      </div>
+      {pickerOpen && (
+        <div className="border rounded-md p-2 space-y-2 bg-slate-50">
+          <div className="max-h-40 overflow-auto space-y-1">
+            {courses.map((c: any) => {
+              const taken = currentCourseIds.includes(c.id);
+              return (
+                <button key={c.id} disabled={taken} onClick={() => onAssign(c.id)}
+                  className={`block w-full text-left text-sm px-2 py-1 rounded ${taken ? "bg-amber-100 text-amber-700" : "hover:bg-white"}`}>
+                  {c.code} — {c.title} {taken && "(đã gán)"}
+                </button>
+              );
+            })}
+          </div>
+          <Separator />
+          <div className="flex gap-2">
+            <Input placeholder="Tạo môn học mới..." value={newName} onChange={(e) => setNewName(e.target.value)} />
+            <Button size="sm" onClick={async () => {
+              if (!newName.trim()) return;
+              const cid = await onCreate(newName.trim());
+              if (cid) { onAssign(cid); setNewName(""); }
+            }}>Tạo</Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
