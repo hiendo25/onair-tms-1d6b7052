@@ -66,7 +66,7 @@ function LearningPathsPage() {
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild><Link to="/admin/learning-paths/$id" params={{ id: lp.id }}><Eye className="h-4 w-4" />Chi tiết</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/$id/edit" params={{ id: lp.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link to="/admin/learning-paths/edit/$id" params={{ id: lp.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></DropdownMenuItem>
                       <DropdownMenuItem className="text-destructive"><Trash2 className="h-4 w-4" />Xóa</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

@@ -103,7 +103,7 @@ function ClassRoomPage() {
               <TableRow key={c.id}>
                 <TableCell className="text-center text-muted-foreground">{String(i + 1).padStart(2, "0")}</TableCell>
                 <TableCell>
-                  <Link to="/admin/class-room/$id" params={{ id: c.id }} className="font-medium hover:underline">
+                  <Link to="/admin/class-room/$id/students" params={{ id: c.id }} className="font-medium hover:underline">
                     {c.name}
                   </Link>
                   <div className="text-xs text-muted-foreground font-mono mt-0.5">{c.code}</div>
@@ -123,7 +123,7 @@ function ClassRoomPage() {
                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link to="/admin/class-room/$id" params={{ id: c.id }}>Xem chi tiết</Link>
+                        <Link to="/admin/class-room/$id/students" params={{ id: c.id }}>Xem chi tiết</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/admin/class-room/$id/edit" params={{ id: c.id }}>Chỉnh sửa</Link>

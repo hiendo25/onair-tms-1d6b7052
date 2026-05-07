@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/_app/admin/analytic")({
+export const Route = createFileRoute("/_app/analytic")({
   head: () => ({ meta: [{ title: "Báo cáo & phân tích — OnAir LMS" }] }),
   component: AnalyticPage,
 });

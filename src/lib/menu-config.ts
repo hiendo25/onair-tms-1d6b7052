@@ -12,7 +12,6 @@ import {
   GraduationCap,
   Users,
   Trophy,
-  Library,
   BarChart3,
   type LucideIcon,
 } from "lucide-react";
@@ -32,8 +31,8 @@ export const ADMIN_MENU: MenuItem[] = [
     key: "manage-org",
     icon: Building2,
     children: [
-      { title: "Chi nhánh", key: "branches", path: "/admin/branches" },
-      { title: "Phòng ban", key: "departments", path: "/admin/departments" },
+      { title: "Chi nhánh", key: "branches", path: "/branches" },
+      { title: "Phòng ban", key: "departments", path: "/departments" },
       { title: "Người dùng", key: "employees", path: "/admin/employees" },
       { title: "Vai trò & phân quyền", key: "roles", path: "/admin/roles" },
     ],
@@ -104,7 +103,7 @@ export const ADMIN_MENU: MenuItem[] = [
     ],
   },
   { title: "Gamification", key: "gamifications", path: "/admin/gamifications", icon: Star },
-  { title: "Báo cáo", key: "analytic", path: "/admin/analytic", icon: BarChart3 },
+  { title: "Báo cáo", key: "analytic", path: "/analytic", icon: BarChart3 },
 ];
 
 export const STUDENT_MENU: MenuItem[] = [
@@ -113,5 +112,4 @@ export const STUDENT_MENU: MenuItem[] = [
   { title: "Lớp học", key: "my-class", path: "/my-class", icon: Users },
   { title: "Bài kiểm tra", key: "my-as", path: "/my-assignments", icon: ClipboardList },
   { title: "Thưởng học tập", key: "my-gam", path: "/my-gamification", icon: Trophy },
-  { title: "Thư viện", key: "library", path: "/library", icon: Library },
 ];

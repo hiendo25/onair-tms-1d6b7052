@@ -76,7 +76,7 @@ function CoursesPage() {
                 <TableRow key={c.id}>
                   <TableCell className="text-center text-muted-foreground">{i + 1}</TableCell>
                   <TableCell>
-                    <Link to="/admin/online-course/$id" params={{ id: c.id }} className="font-medium hover:underline">
+                    <Link to="/admin/online-course/$id/edit" params={{ id: c.id }} className="font-medium hover:underline">
                       {c.title}
                     </Link>
                     <div className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{c.description}</div>
