@@ -41,9 +41,14 @@ function Page() {
   }), [rows, q, from, to]);
 
   const exportXlsx = () => {
-    exportCsv("survey-results.csv",
-      ["Khảo sát", "Kế hoạch", "Bắt đầu", "Kết thúc", "Trạng thái", "Phản hồi"],
-      filtered.map((r: any) => [r.survey?.title, r.plan?.title, r.start_date, r.end_date, r.status, r.survey?.responses_count ?? 0]));
+    exportCsv("survey-results.csv", filtered.map((r: any) => ({
+      "Khảo sát": r.survey?.title ?? "",
+      "Kế hoạch": r.plan?.title ?? "",
+      "Bắt đầu": r.start_date ?? "",
+      "Kết thúc": r.end_date ?? "",
+      "Trạng thái": r.status ?? "",
+      "Phản hồi": r.survey?.responses_count ?? 0,
+    })));
   };
 
   return (
