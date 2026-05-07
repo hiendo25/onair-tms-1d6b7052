@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   AlertCircle, BookOpen, ClipboardCheck, Trophy, Clock, Award, Star,
@@ -19,6 +19,17 @@ import { useOrg } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/student/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — OnAir TMS" }] }),
+  beforeLoad: async () => {
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) return;
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+    const isAdmin = (roles ?? []).some((r) => {
+      const role = r.role as string;
+      return role === "admin" || role === "tenant_admin";
+    });
+    if (isAdmin) throw redirect({ to: "/admin/dashboard" });
+  },
   component: StudentDashboard,
 });
 
