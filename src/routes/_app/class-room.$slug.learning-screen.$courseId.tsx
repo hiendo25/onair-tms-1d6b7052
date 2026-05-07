@@ -84,6 +84,36 @@ function LS() {
     }
   }
 
+  // Flashcards
+  const [flashOpen, setFlashOpen] = useState(false);
+  const [flashLoading, setFlashLoading] = useState(false);
+  const [flashCards, setFlashCards] = useState<AiFlashcard[] | null>(null);
+  const [flippedIdx, setFlippedIdx] = useState<Record<number, boolean>>({});
+
+  async function genFlashcards() {
+    setFlashOpen(true);
+    setFlashCards(null);
+    setFlippedIdx({});
+    setFlashLoading(true);
+    try { setFlashCards(await aiGenerateFlashcards(lessonTitle)); }
+    catch { toast.error("Không sinh được flashcard."); }
+    finally { setFlashLoading(false); }
+  }
+
+  async function saveFlashcards() {
+    if (!flashCards || !orgId) return;
+    const code = `FC-${Date.now().toString(36).toUpperCase()}`;
+    const { error } = await supabase.from("flashcards").insert({
+      org_id: orgId, code, title: `Flashcard: ${lessonTitle}`,
+      description: `Sinh tự động bằng AI cho bài "${lessonTitle}"`,
+      category: "AI generated", cards_count: flashCards.length, status: "draft",
+    });
+    if (error) { toast.error("Lưu thất bại: " + error.message); return; }
+    toast.success(`Đã lưu ${flashCards.length} flashcard.`);
+    setFlashOpen(false);
+  }
+
+
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
       <aside className="w-80 border-r bg-card overflow-y-auto">
