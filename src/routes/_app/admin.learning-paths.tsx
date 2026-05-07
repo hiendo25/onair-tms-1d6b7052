@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MOCK_LEARNING_PATHS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/learning-paths")({
   head: () => ({ meta: [{ title: "Lộ trình học tập — OnAir LMS" }] }),
@@ -49,7 +49,7 @@ function LearningPathsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_LEARNING_PATHS.filter(lp => !search || lp.title.toLowerCase().includes(search.toLowerCase())).map(lp => (
+            {data.learningPaths.filter(lp => !search || lp.title.toLowerCase().includes(search.toLowerCase())).map(lp => (
               <TableRow key={lp.id}>
                 <TableCell>
                   <Link to="/admin/learning-paths/$id" params={{ id: lp.id }} className="font-medium hover:underline">

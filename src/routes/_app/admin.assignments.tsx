@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MOCK_ASSIGNMENTS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/assignments")({
   head: () => ({ meta: [{ title: "Bài kiểm tra — OnAir LMS" }] }),
@@ -61,7 +61,7 @@ function AssignmentsPage() {
           </Card>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {MOCK_ASSIGNMENTS.map((a) => (
+            {data.assignments.map((a) => (
               <Card key={a.id} className="overflow-hidden p-0">
                 <div className="bg-blue-50 h-32 flex items-center justify-center relative">
                   <FileText className="h-12 w-12 text-primary" />

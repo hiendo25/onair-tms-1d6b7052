@@ -9,11 +9,11 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { MOCK_CLASSROOMS, MOCK_EMPLOYEES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/class-room/$id/students")({
   loader: ({ params }) => {
-    const classroom = MOCK_CLASSROOMS.find((c) => c.id === params.id);
+    const classroom = data.classrooms.find((c) => c.id === params.id);
     if (!classroom) throw notFound();
     return { classroom };
   },
@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_app/admin/class-room/$id/students")({
 
 function ClassroomStudents() {
   const { classroom: c } = Route.useLoaderData();
-  const students = MOCK_EMPLOYEES.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
+  const students = data.employees.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
 
   return (
     <PageContainer

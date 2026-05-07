@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { MOCK_LEARNING_PATHS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/learning-paths/$id")({
   loader: ({ params }) => {
-    const path = MOCK_LEARNING_PATHS.find((p) => p.id === params.id);
+    const path = data.learningPaths.find((p) => p.id === params.id);
     if (!path) throw notFound();
     return { path };
   },

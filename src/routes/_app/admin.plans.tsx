@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_PLANS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/plans")({
   head: () => ({ meta: [{ title: "Kế hoạch đào tạo — OnAir LMS" }] }),
@@ -32,7 +32,7 @@ function PlansPage() {
     >
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {(["draft", "approved", "running", "completed"] as const).map((s) => {
-          const count = MOCK_PLANS.filter(p => p.status === s).length;
+          const count = data.plans.filter(p => p.status === s).length;
           return (
             <Card key={s} className="p-4">
               <div className="text-xs uppercase text-muted-foreground tracking-wide">{STATUS_VARIANT[s].label}</div>
@@ -56,7 +56,7 @@ function PlansPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_PLANS.map(p => (
+            {data.plans.map(p => (
               <TableRow key={p.id}>
                 <TableCell className="font-medium">{p.name}</TableCell>
                 <TableCell>{p.year} / Q{p.quarter}</TableCell>

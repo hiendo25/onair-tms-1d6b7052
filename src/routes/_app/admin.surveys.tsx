@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MOCK_SURVEYS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/surveys")({
   head: () => ({ meta: [{ title: "Khảo sát — OnAir LMS" }] }),
@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_app/admin/surveys")({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {MOCK_SURVEYS.map(s => (
+            {data.surveys.map(s => (
               <TableRow key={s.id}>
                 <TableCell className="text-sm font-semibold">{s.title}</TableCell>
                 <TableCell>{s.questions}</TableCell>

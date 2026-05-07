@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
-import { MOCK_BRANCHES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/branches/$id")({
   head: () => ({ meta: [{ title: "Chi tiết chi nhánh — OnAir LMS" }] }),
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_app/branches/$id")({
 
 function BranchDetail() {
   const { id } = Route.useParams();
-  const b = MOCK_BRANCHES.find((x) => String(x.id) === id) ?? MOCK_BRANCHES[0];
+  const b = data.branches.find((x) => String(x.id) === id) ?? data.branches[0];
   return (
     <PageContainer
       title={b.name}

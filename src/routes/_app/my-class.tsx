@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MOCK_CLASSROOMS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 const TABS = [
   { value: "all", label: "Tất cả", count: 9 },
@@ -18,7 +18,7 @@ const TABS = [
 export const Route = createFileRoute("/_app/my-class")({
   head: () => ({ meta: [{ title: "Lớp học của tôi — OnAir LMS" }] }),
   component: () => {
-    const myClasses = MOCK_CLASSROOMS.slice(0, 6);
+    const myClasses = data.classrooms.slice(0, 6);
     return (
       <PageContainer
         title="Lớp học của tôi"

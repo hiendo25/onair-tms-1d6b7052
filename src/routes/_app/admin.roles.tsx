@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_ROLES } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/roles")({
   head: () => ({ meta: [{ title: "Vai trò & phân quyền — OnAir LMS" }] }),
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app/admin/roles")({
       actions={<Button size="sm"><Plus className="h-4 w-4" />Tạo vai trò</Button>}
     >
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {MOCK_ROLES.map(r => (
+        {data.roles.map(r => (
           <Card key={r.id} className="transition-shadow hover:shadow-md">
             <CardContent className="space-y-3 p-5">
               <div className="flex items-start justify-between">

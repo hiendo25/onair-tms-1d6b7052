@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { MOCK_FLASHCARDS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/flashcards")({
   head: () => ({ meta: [{ title: "Flashcard — OnAir LMS" }] }),
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_app/admin/flashcards")({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {MOCK_FLASHCARDS.map(f => (
+        {data.flashcards.map(f => (
           <Card key={f.id} className="overflow-hidden p-0 transition-shadow hover:shadow-md">
             <div className="relative flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
               <Layers className="h-12 w-12 text-indigo-600" />

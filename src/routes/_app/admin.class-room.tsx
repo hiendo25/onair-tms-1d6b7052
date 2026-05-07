@@ -15,7 +15,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MOCK_CLASSROOMS } from "@/lib/mock-data";
+import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/class-room")({
   head: () => ({ meta: [{ title: "Quản lý lớp học — OnAir LMS" }] }),
@@ -40,7 +40,7 @@ function ClassRoomPage() {
   const [type, setType] = useState("all");
 
   const filtered = useMemo(() => {
-    return MOCK_CLASSROOMS.filter((c) => {
+    return data.classrooms.filter((c) => {
       if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (runtime !== "all" && c.status !== runtime) return false;
       if (type !== "all" && c.type !== type) return false;
