@@ -17,10 +17,9 @@ function CRDetail() {
       breadcrumbs={[{ title: "Lớp học", path: "/my-class" }, { title: slug }]}
       actions={<Button asChild><Link to="/class-room/$slug/learning-screen/$courseId" params={{slug, courseId:"1"}}>Vào học</Link></Button>}>
       <div className="grid gap-3 md:grid-cols-3 mb-4">
-        {[["Học viên","32",Users],["Buổi học","12",Calendar],["Tiến độ","45%",Calendar]].map(([l,v,I])=>{
-          const Ico = I as any;
-          return <Card key={l as string}><CardContent className="p-4 flex items-center gap-3"><Ico className="h-8 w-8 text-primary"/><div><div className="text-xs text-muted-foreground">{l}</div><div className="text-lg font-semibold">{v}</div></div></CardContent></Card>;
-        })}
+        {([["Học viên","32",Users],["Buổi học","12",Calendar],["Tiến độ","45%",Calendar]] as const).map(([l,v,Ico])=>(
+          <Card key={l}><CardContent className="p-4 flex items-center gap-3"><Ico className="h-8 w-8 text-primary"/><div><div className="text-xs text-muted-foreground">{l}</div><div className="text-lg font-semibold">{v}</div></div></CardContent></Card>
+        ))}
       </div>
       <Tabs defaultValue="info">
         <TabsList>
