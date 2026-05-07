@@ -73,10 +73,10 @@ function AnalyticPage() {
             <CardTitle className="text-base">Học viên & Hoàn thành theo tháng</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex h-56 items-end justify-between gap-3">
+            <div className="flex h-56 items-stretch justify-between gap-3">
               {MONTHLY.map(d => (
-                <div key={d.m} className="flex flex-1 flex-col items-center gap-1">
-                  <div className="flex h-full w-full items-end gap-1">
+                <div key={d.m} className="flex flex-1 flex-col items-center">
+                  <div className="flex flex-1 w-full items-end gap-1">
                     <div
                       className="flex-1 rounded-t bg-primary transition-all"
                       style={{ height: `${(d.learners / MAX) * 100}%` }}
@@ -86,7 +86,7 @@ function AnalyticPage() {
                       style={{ height: `${(d.completed / MAX) * 100}%` }}
                     />
                   </div>
-                  <div className="text-xs text-muted-foreground">{d.m}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{d.m}</div>
                 </div>
               ))}
             </div>
