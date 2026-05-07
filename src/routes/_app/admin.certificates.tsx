@@ -23,7 +23,6 @@ const formFields: FieldDef<CertificateForm>[] = [
   { name: "title", label: "Tên chứng nhận", type: "text", required: true, placeholder: "VD: Chứng nhận hoàn thành" },
   { name: "code", label: "Mã chứng nhận", type: "text", required: true, note: CODE_NOTE },
   { name: "description", label: "Mô tả", type: "textarea", rows: 3 },
-  { name: "template_url", label: "URL ảnh mẫu (tùy chọn)", type: "url", placeholder: "https://..." },
   { name: "valid_months", label: "Thời hạn hiệu lực (tháng)", type: "number", required: true, placeholder: "VD: 12" },
   { name: "status", label: "Trạng thái", type: "select", required: true, options: STATUS_ACTIVE_INACTIVE },
 ];
