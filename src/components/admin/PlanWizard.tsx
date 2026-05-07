@@ -74,38 +74,42 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
   useEffect(() => {
     if (!initialPlanId) return;
     (async () => {
-      const { data: plan } = await supabase.from("plans").select("*").eq("id", initialPlanId).single();
-      if (plan) {
-        setInfo({
-          code: plan.code, title: plan.title, objective: plan.objective ?? "",
-          description: plan.description ?? "", type: plan.type,
-          start_date: plan.start_date ?? "", end_date: plan.end_date ?? "",
-          budget: Number(plan.budget) || 0,
-        });
-      }
-      const { data: ps } = await supabase.from("training_plan_programs").select("*").eq("plan_id", initialPlanId).order("order_index");
-      setPrograms((ps ?? []) as DBProgram[]);
-      const { data: ts } = await supabase.from("training_plan_topics").select("*").eq("plan_id", initialPlanId).order("order_index");
-      setTopics((ts ?? []) as DBTopic[]);
-      if (ps?.length) {
-        const { data: pc } = await supabase.from("training_plan_program_courses").select("program_id,course_id,course:online_courses(*)").in("program_id", ps.map((x: any) => x.id));
-        setProgramCourses((pc ?? []) as any);
-      }
-      if (ts?.length) {
-        const { data: tc } = await supabase.from("training_plan_topic_courses").select("topic_id,course_id,course:online_courses(*)").in("topic_id", ts.map((x: any) => x.id));
-        setTopicCourses((tc ?? []) as any);
-      }
-      const { data: tps } = await supabase.from("training_plan_surveys").select("*").eq("plan_id", initialPlanId).maybeSingle();
-      if (tps) {
-        setHasSurvey(true);
-        setSurvey({
-          survey_id: tps.survey_id,
-          start_date: tps.start_date ?? "",
-          end_date: tps.end_date ?? "",
-          target_type: (tps.target_type as "all" | "dept" | "branch") ?? "all",
-          target_unit_ids: (tps.target_unit_ids as string[]) ?? [],
-        });
-        setPlanSurvey(tps as unknown as DBPlanSurvey);
+      try {
+        const { data: plan } = await supabase.from("plans").select("*").eq("id", initialPlanId).single();
+        if (plan) {
+          setInfo({
+            code: plan.code, title: plan.title, objective: plan.objective ?? "",
+            description: plan.description ?? "", type: plan.type,
+            start_date: plan.start_date ?? "", end_date: plan.end_date ?? "",
+            budget: Number(plan.budget) || 0,
+          });
+        }
+        const { data: ps } = await supabase.from("training_plan_programs").select("*").eq("plan_id", initialPlanId).order("order_index");
+        setPrograms((ps ?? []) as DBProgram[]);
+        const { data: ts } = await supabase.from("training_plan_topics").select("*").eq("plan_id", initialPlanId).order("order_index");
+        setTopics((ts ?? []) as DBTopic[]);
+        if (ps?.length) {
+          const { data: pc } = await supabase.from("training_plan_program_courses").select("program_id,course_id,course:online_courses(*)").in("program_id", ps.map((x: any) => x.id));
+          setProgramCourses((pc ?? []) as any);
+        }
+        if (ts?.length) {
+          const { data: tc } = await supabase.from("training_plan_topic_courses").select("topic_id,course_id,course:online_courses(*)").in("topic_id", ts.map((x: any) => x.id));
+          setTopicCourses((tc ?? []) as any);
+        }
+        const { data: tps } = await supabase.from("training_plan_surveys").select("*").eq("plan_id", initialPlanId).maybeSingle();
+        if (tps) {
+          setHasSurvey(true);
+          setSurvey({
+            survey_id: tps.survey_id,
+            start_date: tps.start_date ?? "",
+            end_date: tps.end_date ?? "",
+            target_type: (tps.target_type as "all" | "dept" | "branch") ?? "all",
+            target_unit_ids: (tps.target_unit_ids as string[]) ?? [],
+          });
+          setPlanSurvey(tps as unknown as DBPlanSurvey);
+        }
+      } finally {
+        setLoadingPlan(false);
       }
     })();
   }, [initialPlanId]);
