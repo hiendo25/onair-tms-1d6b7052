@@ -1,61 +1,37 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Award, Search, Eye, Pencil, Trash2 } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useOrgData } from "@/lib/org-context";
+import { createFileRoute } from "@tanstack/react-router";
+import { useCertificates, useCertificateMutations, type DBCertificate } from "@/lib/data-hooks";
+import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/_app/admin/certificates")({
-  head: () => ({ meta: [{ title: "Chứng nhận — OnAir TMS" }] }),
-  component: CertificatesPage,
+  head: () => ({ meta: [{ title: "Chứng chỉ — OnAir TMS" }] }),
+  component: Page,
 });
+const STATUS = [{ value: "draft", label: "Nháp" }, { value: "active", label: "Hoạt động" }, { value: "inactive", label: "Ngưng" }];
 
-function CertificatesPage() {
-  const data = useOrgData();
+function Page() {
+  const { data: rows = [], isLoading } = useCertificates();
+  const m = useCertificateMutations();
   return (
-    <PageContainer
-      title="Quản lý chứng nhận"
-      breadcrumbs={[{ title: "Chứng nhận" }]}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-[300px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Tìm kiếm" className="pl-9" />
-        </div>
-        <Button asChild size="sm">
-          <Link to="/admin/certificates/create"><Plus className="h-4 w-4" />Tạo mẫu chứng nhận</Link>
-        </Button>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {data.certificates.map(c => (
-          <Card key={c.id} className="group overflow-hidden p-0 transition-shadow hover:shadow-md">
-            <div className="relative">
-              <div className="relative flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-amber-50 to-amber-200">
-                <div className="absolute inset-3 rounded border-2 border-amber-300/60" />
-                <Award className="h-12 w-12 text-amber-600" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button size="icon" variant="secondary" className="h-9 w-9 bg-white hover:bg-slate-100">
-                  <Eye className="h-4 w-4" />
-                </Button>
-                <Button asChild size="icon" variant="secondary" className="h-9 w-9 bg-white hover:bg-slate-100">
-                  <Link to="/admin/certificates/edit/$id" params={{ id: c.id }}><Pencil className="h-4 w-4" /></Link>
-                </Button>
-                <Button size="icon" variant="secondary" className="h-9 w-9 bg-white text-red-600 hover:bg-slate-100">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            <div className="p-3">
-              <h3 className="text-sm font-semibold leading-snug line-clamp-1">{c.name}</h3>
-              <div className="mt-1 text-xs text-muted-foreground">Đã cấp: {c.issued}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </PageContainer>
+    <SimpleEntityPage<DBCertificate>
+      title="Quản lý chứng chỉ" breadcrumbs={[{ title: "Công nhận" }, { title: "Chứng chỉ" }]}
+      rows={rows} isLoading={isLoading} searchKeys={["title", "code"]}
+      filters={[{ key: "status", placeholder: "Trạng thái", options: STATUS, match: (r, v) => r.status === v }]}
+      columns={[
+        { key: "code", label: "Mã", render: (r) => <Badge variant="outline">{r.code}</Badge> },
+        { key: "title", label: "Tên" }, { key: "valid_months", label: "Hạn (tháng)" },
+        { key: "issued_count", label: "Đã cấp" },
+        { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
+      ]}
+      fields={[
+        { key: "code", label: "Mã" }, { key: "title", label: "Tên" }, { key: "description", label: "Mô tả", type: "textarea" },
+        { key: "valid_months", label: "Thời hạn (tháng)", type: "number" },
+        { key: "status", label: "Trạng thái", type: "select", options: STATUS },
+      ]}
+      emptyValues={{ code: "", title: "", description: "", template_url: "", valid_months: 12, issued_count: 0, status: "active" }}
+      onCreate={(v) => m.create.mutateAsync(v)} onUpdate={(v) => m.update.mutateAsync(v)} onDelete={(id) => m.remove.mutateAsync(id)}
+      onBulkInsert={(rs) => m.bulkInsert.mutateAsync(rs.map((r: any) => ({ ...r, valid_months: Number(r.valid_months) || 12, issued_count: 0, template_url: "", status: r.status || "active" })))}
+      csvFilename="certificates.csv"
+    />
   );
 }
-

@@ -1,60 +1,37 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Layers, Search, Eye, Pencil, Trash2 } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { createFileRoute } from "@tanstack/react-router";
+import { useFlashcards, useFlashcardMutations, type DBFlashcard } from "@/lib/data-hooks";
+import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/flashcards")({
-  head: () => ({ meta: [{ title: "Flashcard — OnAir TMS" }] }),
-  component: FlashcardsPage,
+  head: () => ({ meta: [{ title: "Flashcards — OnAir TMS" }] }),
+  component: Page,
 });
+const STATUS = [{ value: "draft", label: "Nháp" }, { value: "active", label: "Hoạt động" }];
 
-function FlashcardsPage() {
-  const data = useOrgData();
+function Page() {
+  const { data: rows = [], isLoading } = useFlashcards();
+  const m = useFlashcardMutations();
   return (
-    <PageContainer
-      title="Flashcard"
-      breadcrumbs={[{ title: "Flashcard" }]}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:w-[300px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Tìm kiếm flashcard..." className="pl-9" />
-        </div>
-        <Button asChild size="sm">
-          <Link to="/admin/flashcards/create"><Plus className="h-4 w-4" />Tạo Flashcard</Link>
-        </Button>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {data.flashcards.map(f => (
-          <Card key={f.id} className="overflow-hidden p-0 transition-shadow hover:shadow-md">
-            <div className="relative flex aspect-[4/3] items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-100">
-              <Layers className="h-12 w-12 text-indigo-600" />
-              <Badge className="absolute right-2 top-2 bg-white/90 text-indigo-700 hover:bg-white/90">{f.cards} thẻ</Badge>
-            </div>
-            <div className="space-y-2 p-3">
-              <h3 className="text-sm font-semibold leading-snug line-clamp-2">{f.title}</h3>
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="text-[10px]">{f.category}</Badge>
-                <Switch defaultChecked />
-              </div>
-              <div className="flex items-center justify-end gap-1 border-t pt-2">
-                <Button size="icon" variant="ghost" className="h-7 w-7"><Eye className="h-3.5 w-3.5" /></Button>
-                <Button asChild size="icon" variant="ghost" className="h-7 w-7">
-                  <Link to="/admin/flashcards/$id/edit" params={{ id: f.id }}><Pencil className="h-3.5 w-3.5" /></Link>
-                </Button>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-red-600"><Trash2 className="h-3.5 w-3.5" /></Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </PageContainer>
+    <SimpleEntityPage<DBFlashcard>
+      title="Quản lý Flashcards" breadcrumbs={[{ title: "Đào tạo" }, { title: "Flashcards" }]}
+      rows={rows} isLoading={isLoading} searchKeys={["title", "code", "category"]}
+      filters={[{ key: "status", placeholder: "Trạng thái", options: STATUS, match: (r, v) => r.status === v }]}
+      columns={[
+        { key: "code", label: "Mã", render: (r) => <Badge variant="outline">{r.code}</Badge> },
+        { key: "title", label: "Tên" }, { key: "category", label: "Danh mục" },
+        { key: "cards_count", label: "Thẻ" }, { key: "students_count", label: "HV" },
+        { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
+      ]}
+      fields={[
+        { key: "code", label: "Mã" }, { key: "title", label: "Tên" }, { key: "description", label: "Mô tả", type: "textarea" },
+        { key: "category", label: "Danh mục" }, { key: "cards_count", label: "Số thẻ", type: "number" },
+        { key: "status", label: "Trạng thái", type: "select", options: STATUS },
+      ]}
+      emptyValues={{ code: "", title: "", description: "", category: "", cards_count: 0, students_count: 0, status: "active" }}
+      onCreate={(v) => m.create.mutateAsync(v)} onUpdate={(v) => m.update.mutateAsync(v)} onDelete={(id) => m.remove.mutateAsync(id)}
+      onBulkInsert={(rs) => m.bulkInsert.mutateAsync(rs.map((r: any) => ({ ...r, cards_count: Number(r.cards_count) || 0, students_count: 0, status: r.status || "active" })))}
+      csvFilename="flashcards.csv"
+    />
   );
 }
-

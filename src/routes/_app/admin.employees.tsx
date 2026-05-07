@@ -1,205 +1,66 @@
-import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Search, Download, Upload, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
+import { useEmployees, useEmployeeMutations, useBranches, useDepartments, useRoles, type DBEmployee } from "@/lib/data-hooks";
+import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/employees")({
-  head: () => ({ meta: [{ title: "Quản lý người dùng — OnAir TMS" }] }),
+  head: () => ({ meta: [{ title: "Quản lý nhân viên — OnAir TMS" }] }),
   component: EmployeesPage,
 });
 
-const ROLE_LABEL = { admin: "Quản trị viên", teacher: "Giảng viên", student: "Học sinh" } as const;
-
 function EmployeesPage() {
-  const data = useOrgData();
-  const [search, setSearch] = useState("");
-  const [branch, setBranch] = useState("all");
-  const [role, setRole] = useState("all");
-  const [open, setOpen] = useState(false);
+  const { data: rows = [], isLoading } = useEmployees();
+  const { data: branches = [] } = useBranches();
+  const { data: departments = [] } = useDepartments();
+  const { data: roles = [] } = useRoles();
+  const m = useEmployeeMutations();
 
-  const filtered = useMemo(() => {
-    return data.employees.filter((e) => {
-      if (search && !`${e.name} ${e.email} ${e.code}`.toLowerCase().includes(search.toLowerCase())) return false;
-      if (branch !== "all" && e.branch !== branch) return false;
-      if (role !== "all" && e.role !== role) return false;
-      return true;
-    });
-  }, [search, branch, role]);
+  const branchOpts = branches.map((b) => ({ value: b.name, label: b.name }));
+  const deptOpts = departments.map((d) => ({ value: d.name, label: d.name }));
+  const roleOpts = roles.map((r) => ({ value: r.name, label: r.name }));
 
   return (
-    <PageContainer
-      title="Danh sách người dùng"
-      breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Người dùng" }]}
-      actions={
-        <>
-          <Button variant="outline" size="sm"><Upload className="h-4 w-4" />Import</Button>
-          <Button variant="outline" size="sm"><Download className="h-4 w-4" />Export</Button>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4" />Thêm người dùng</Button>
-            </DialogTrigger>
-            <CreateEmployeeDialog onClose={() => setOpen(false)} />
-          </Dialog>
-        </>
-      }
-    >
-      <Card className="p-4">
-        <div className="flex flex-wrap gap-3">
-          <div className="relative flex-1 min-w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Tìm theo tên, email, mã NV..." className="pl-9" />
-          </div>
-          <Select value={branch} onValueChange={setBranch}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="Chi nhánh" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả chi nhánh</SelectItem>
-              {data.branchNames.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={role} onValueChange={setRole}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="Vai trò" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả vai trò</SelectItem>
-              <SelectItem value="admin">Quản trị</SelectItem>
-              <SelectItem value="teacher">Giảng viên</SelectItem>
-              <SelectItem value="student">Học viên</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </Card>
-
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Mã</TableHead>
-              <TableHead>Họ và tên</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Loại người dùng</TableHead>
-              <TableHead>Chức danh</TableHead>
-              <TableHead>Phòng ban</TableHead>
-              <TableHead>Chi nhánh</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filtered.map((e) => (
-              <TableRow key={e.id}>
-                <TableCell className="font-mono text-xs">{e.code}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="text-xs">{e.name.split(" ").slice(-2).map(n => n[0]).join("")}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">{e.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">{e.email}</TableCell>
-                <TableCell>{ROLE_LABEL[e.role]}</TableCell>
-                <TableCell>{(e as any).position ?? "--"}</TableCell>
-                <TableCell>{e.department}</TableCell>
-                <TableCell>{e.branch}</TableCell>
-                <TableCell>
-                  <Badge variant={e.status === "active" ? "default" : "destructive"}>
-                    {e.status === "active" ? "Hoạt động" : "Không hoạt động"}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem><Pencil className="h-4 w-4" />Chỉnh sửa</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive"><Trash2 className="h-4 w-4" />Xoá</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filtered.length === 0 && (
-              <TableRow><TableCell colSpan={9} className="h-32 text-center text-muted-foreground">Không có người dùng nào</TableCell></TableRow>
-            )}
-          </TableBody>
-        </Table>
-        <div className="flex items-center justify-between border-t px-4 py-3 text-sm text-muted-foreground">
-          <span>Hiển thị {filtered.length} / {data.employees.length} người dùng</span>
-          <div className="flex gap-1">
-            <Button variant="outline" size="sm" disabled>Trước</Button>
-            <Button variant="outline" size="sm" disabled>Sau</Button>
-          </div>
-        </div>
-      </Card>
-    </PageContainer>
-  );
-}
-
-function CreateEmployeeDialog({ onClose }: { onClose: () => void }) {
-  const data = useOrgData();
-  return (
-    <DialogContent className="sm:max-w-lg">
-      <DialogHeader>
-        <DialogTitle>Thêm người dùng</DialogTitle>
-        <DialogDescription>Nhập thông tin người dùng mới vào hệ thống.</DialogDescription>
-      </DialogHeader>
-      <div className="grid gap-4 py-2">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5"><Label>Họ và tên *</Label><Input placeholder="Nguyễn Văn A" /></div>
-          <div className="space-y-1.5"><Label>Mã nhân viên *</Label><Input placeholder="NV011" /></div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5"><Label>Email *</Label><Input type="email" placeholder="email@onair.com" /></div>
-          <div className="space-y-1.5"><Label>Số điện thoại</Label><Input placeholder="09xx xxx xxx" /></div>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <div className="space-y-1.5">
-            <Label>Chi nhánh</Label>
-            <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{data.branchNames.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Phòng ban</Label>
-            <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{data.departmentNames.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Chức vụ</Label>
-            <Select><SelectTrigger><SelectValue placeholder="Chọn..." /></SelectTrigger>
-              <SelectContent>{data.positions.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent></Select>
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Vai trò</Label>
-          <Select defaultValue="student"><SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">Quản trị</SelectItem>
-              <SelectItem value="teacher">Giảng viên</SelectItem>
-              <SelectItem value="student">Học viên</SelectItem>
-            </SelectContent></Select>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Huỷ</Button>
-        <Button onClick={onClose}>Thêm người dùng</Button>
-      </DialogFooter>
-    </DialogContent>
+    <SimpleEntityPage<DBEmployee>
+      title="Danh sách nhân viên"
+      breadcrumbs={[{ title: "Quản lý tổ chức" }, { title: "Nhân viên" }]}
+      rows={rows} isLoading={isLoading}
+      searchKeys={["name", "email", "employee_code", "phone"]}
+      filters={[
+        { key: "branch", placeholder: "Chi nhánh", options: branchOpts, match: (r, v) => r.branch === v },
+        { key: "department", placeholder: "Phòng ban", options: deptOpts, match: (r, v) => r.department === v },
+        { key: "role", placeholder: "Vai trò", options: roleOpts, match: (r, v) => r.role === v },
+        { key: "status", placeholder: "Trạng thái", options: [{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Ngưng" }], match: (r, v) => r.status === v },
+      ]}
+      columns={[
+        { key: "employee_code", label: "Mã" },
+        { key: "name", label: "Họ tên", render: (r) => (
+          <div className="flex items-center gap-2"><Avatar className="h-7 w-7"><AvatarFallback className="text-xs">{r.name.split(" ").slice(-2).map((n) => n[0]).join("")}</AvatarFallback></Avatar><span className="font-medium">{r.name}</span></div>
+        )},
+        { key: "email", label: "Email" },
+        { key: "branch", label: "Chi nhánh" },
+        { key: "department", label: "Phòng ban" },
+        { key: "position", label: "Chức vụ" },
+        { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
+      ]}
+      fields={[
+        { key: "employee_code", label: "Mã NV" },
+        { key: "name", label: "Họ tên" },
+        { key: "email", label: "Email" },
+        { key: "phone", label: "SĐT" },
+        { key: "branch", label: "Chi nhánh", type: "select", options: branchOpts },
+        { key: "department", label: "Phòng ban", type: "select", options: deptOpts },
+        { key: "role", label: "Vai trò", type: "select", options: roleOpts },
+        { key: "position", label: "Chức vụ" },
+        { key: "type", label: "Loại", type: "select", options: [{ value: "fulltime", label: "Toàn thời gian" }, { value: "parttime", label: "Bán thời gian" }] },
+        { key: "status", label: "Trạng thái", type: "select", options: [{ value: "active", label: "Hoạt động" }, { value: "inactive", label: "Ngưng" }] },
+      ]}
+      emptyValues={{ employee_code: "", name: "", email: "", phone: "", branch: "", department: "", role: "", position: "", type: "fulltime", status: "active", avatar_url: "" }}
+      onCreate={(v) => m.create.mutateAsync(v)}
+      onUpdate={(v) => m.update.mutateAsync(v)}
+      onDelete={(id) => m.remove.mutateAsync(id)}
+      onBulkInsert={(rows) => m.bulkInsert.mutateAsync(rows.map((r: any) => ({ ...r, type: r.type || "fulltime", status: r.status || "active", avatar_url: "" })))}
+      csvFilename="employees.csv"
+      csvHeaders={["employee_code", "name", "email", "phone", "branch", "department", "role", "position", "type", "status"]}
+    />
   );
 }

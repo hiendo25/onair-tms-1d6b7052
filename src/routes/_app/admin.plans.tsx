@@ -1,76 +1,43 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, MoreHorizontal } from "lucide-react";
-import { PageContainer } from "@/components/PageContainer";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { createFileRoute } from "@tanstack/react-router";
+import { usePlans, usePlanMutations, type DBPlan } from "@/lib/data-hooks";
+import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOrgData } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/admin/plans")({
   head: () => ({ meta: [{ title: "Kế hoạch đào tạo — OnAir TMS" }] }),
-  component: PlansPage,
+  component: Page,
 });
+const TYPE = [{ value: "training", label: "Đào tạo" }, { value: "onboarding", label: "Onboarding" }, { value: "promotion", label: "Lên cấp" }];
+const STATUS = [{ value: "draft", label: "Nháp" }, { value: "active", label: "Đang chạy" }, { value: "completed", label: "Hoàn thành" }];
 
-const STATUS_VARIANT = {
-  draft: { label: "Nháp", className: "bg-slate-100 text-slate-700 hover:bg-slate-100" },
-  approved: { label: "Đã duyệt", className: "bg-blue-100 text-blue-700 hover:bg-blue-100" },
-  running: { label: "Đang chạy", className: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" },
-  completed: { label: "Hoàn thành", className: "bg-violet-100 text-violet-700 hover:bg-violet-100" },
-} as const;
-
-function PlansPage() {
-  const data = useOrgData();
+function Page() {
+  const { data: rows = [], isLoading } = usePlans();
+  const m = usePlanMutations();
   return (
-    <PageContainer
-      title="Kế hoạch đào tạo"
-      breadcrumbs={[{ title: "Kế hoạch đào tạo" }]}
-      actions={
-        <Button asChild size="sm">
-          <Link to="/admin/plans/create"><Plus className="h-4 w-4" />Tạo kế hoạch</Link>
-        </Button>
-      }
-    >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {(["draft", "approved", "running", "completed"] as const).map((s) => {
-          const count = data.plans.filter(p => p.status === s).length;
-          return (
-            <Card key={s} className="p-4">
-              <div className="text-xs uppercase text-muted-foreground tracking-wide">{STATUS_VARIANT[s].label}</div>
-              <div className="mt-1 text-2xl font-semibold">{count}</div>
-            </Card>
-          );
-        })}
-      </div>
-
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tên kế hoạch</TableHead>
-              <TableHead>Năm / Quý</TableHead>
-              <TableHead className="text-right">Khóa học</TableHead>
-              <TableHead className="text-right">Học viên</TableHead>
-              <TableHead className="text-right">Ngân sách</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.plans.map(p => (
-              <TableRow key={p.id}>
-                <TableCell className="font-medium">{p.name}</TableCell>
-                <TableCell>{p.year} / Q{p.quarter}</TableCell>
-                <TableCell className="text-right">{p.totalCourses}</TableCell>
-                <TableCell className="text-right">{p.totalLearners}</TableCell>
-                <TableCell className="text-right font-mono text-sm">{p.budget}</TableCell>
-                <TableCell><Badge className={STATUS_VARIANT[p.status].className}>{STATUS_VARIANT[p.status].label}</Badge></TableCell>
-                <TableCell><Button variant="ghost" size="icon" className="h-8 w-8"><MoreHorizontal className="h-4 w-4" /></Button></TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-    </PageContainer>
+    <SimpleEntityPage<DBPlan>
+      title="Quản lý kế hoạch đào tạo" breadcrumbs={[{ title: "Quản lý" }, { title: "Kế hoạch" }]}
+      rows={rows} isLoading={isLoading} searchKeys={["title", "code"]}
+      filters={[
+        { key: "type", placeholder: "Loại", options: TYPE, match: (r, v) => r.type === v },
+        { key: "status", placeholder: "Trạng thái", options: STATUS, match: (r, v) => r.status === v },
+      ]}
+      columns={[
+        { key: "code", label: "Mã", render: (r) => <Badge variant="outline">{r.code}</Badge> },
+        { key: "title", label: "Tên" }, { key: "type", label: "Loại" },
+        { key: "target_count", label: "Mục tiêu" }, { key: "completed_count", label: "Hoàn thành" },
+        { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
+      ]}
+      fields={[
+        { key: "code", label: "Mã" }, { key: "title", label: "Tên" }, { key: "description", label: "Mô tả", type: "textarea" },
+        { key: "type", label: "Loại", type: "select", options: TYPE },
+        { key: "start_date", label: "Bắt đầu", type: "date" }, { key: "end_date", label: "Kết thúc", type: "date" },
+        { key: "target_count", label: "Mục tiêu", type: "number" },
+        { key: "status", label: "Trạng thái", type: "select", options: STATUS },
+      ]}
+      emptyValues={{ code: "", title: "", description: "", type: "training", target_count: 0, completed_count: 0, status: "draft" }}
+      onCreate={(v) => m.create.mutateAsync(v)} onUpdate={(v) => m.update.mutateAsync(v)} onDelete={(id) => m.remove.mutateAsync(id)}
+      onBulkInsert={(rs) => m.bulkInsert.mutateAsync(rs.map((r: any) => ({ ...r, target_count: Number(r.target_count) || 0, completed_count: 0, type: r.type || "training", status: r.status || "draft" })))}
+      csvFilename="plans.csv"
+    />
   );
 }
