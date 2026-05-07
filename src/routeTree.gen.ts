@@ -43,6 +43,7 @@ import { Route as AppAdminLearningPathsRouteImport } from './routes/_app/admin.l
 import { Route as AppAdminGamificationsRouteImport } from './routes/_app/admin.gamifications'
 import { Route as AppAdminFlashcardsRouteImport } from './routes/_app/admin.flashcards'
 import { Route as AppAdminEmployeesRouteImport } from './routes/_app/admin.employees'
+import { Route as AppAdminDashboardRouteImport } from './routes/_app/admin/dashboard'
 import { Route as AppAdminClassRoomRouteImport } from './routes/_app/admin.class-room'
 import { Route as AppAdminCertificatesRouteImport } from './routes/_app/admin.certificates'
 import { Route as AppAdminAssignmentsRouteImport } from './routes/_app/admin.assignments'
@@ -254,6 +255,11 @@ const AppAdminFlashcardsRoute = AppAdminFlashcardsRouteImport.update({
 const AppAdminEmployeesRoute = AppAdminEmployeesRouteImport.update({
   id: '/admin/employees',
   path: '/admin/employees',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAdminDashboardRoute = AppAdminDashboardRouteImport.update({
+  id: '/admin/dashboard',
+  path: '/admin/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAdminClassRoomRoute = AppAdminClassRoomRouteImport.update({
@@ -519,6 +525,7 @@ export interface FileRoutesByFullPath {
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
+  '/admin/dashboard': typeof AppAdminDashboardRoute
   '/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/admin/gamifications': typeof AppAdminGamificationsRoute
@@ -597,6 +604,7 @@ export interface FileRoutesByTo {
   '/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
+  '/admin/dashboard': typeof AppAdminDashboardRoute
   '/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/admin/gamifications': typeof AppAdminGamificationsRoute
@@ -677,6 +685,7 @@ export interface FileRoutesById {
   '/_app/admin/assignments': typeof AppAdminAssignmentsRouteWithChildren
   '/_app/admin/certificates': typeof AppAdminCertificatesRouteWithChildren
   '/_app/admin/class-room': typeof AppAdminClassRoomRouteWithChildren
+  '/_app/admin/dashboard': typeof AppAdminDashboardRoute
   '/_app/admin/employees': typeof AppAdminEmployeesRouteWithChildren
   '/_app/admin/flashcards': typeof AppAdminFlashcardsRouteWithChildren
   '/_app/admin/gamifications': typeof AppAdminGamificationsRoute
@@ -757,6 +766,7 @@ export interface FileRouteTypes {
     | '/admin/assignments'
     | '/admin/certificates'
     | '/admin/class-room'
+    | '/admin/dashboard'
     | '/admin/employees'
     | '/admin/flashcards'
     | '/admin/gamifications'
@@ -835,6 +845,7 @@ export interface FileRouteTypes {
     | '/admin/assignments'
     | '/admin/certificates'
     | '/admin/class-room'
+    | '/admin/dashboard'
     | '/admin/employees'
     | '/admin/flashcards'
     | '/admin/gamifications'
@@ -914,6 +925,7 @@ export interface FileRouteTypes {
     | '/_app/admin/assignments'
     | '/_app/admin/certificates'
     | '/_app/admin/class-room'
+    | '/_app/admin/dashboard'
     | '/_app/admin/employees'
     | '/_app/admin/flashcards'
     | '/_app/admin/gamifications'
@@ -1222,6 +1234,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/employees'
       fullPath: '/admin/employees'
       preLoaderRoute: typeof AppAdminEmployeesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/admin/dashboard': {
+      id: '/_app/admin/dashboard'
+      path: '/admin/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AppAdminDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/admin/class-room': {
@@ -1830,6 +1849,7 @@ interface AppRouteChildren {
   AppAdminAssignmentsRoute: typeof AppAdminAssignmentsRouteWithChildren
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
   AppAdminClassRoomRoute: typeof AppAdminClassRoomRouteWithChildren
+  AppAdminDashboardRoute: typeof AppAdminDashboardRoute
   AppAdminEmployeesRoute: typeof AppAdminEmployeesRouteWithChildren
   AppAdminFlashcardsRoute: typeof AppAdminFlashcardsRouteWithChildren
   AppAdminGamificationsRoute: typeof AppAdminGamificationsRoute
@@ -1858,6 +1878,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminAssignmentsRoute: AppAdminAssignmentsRouteWithChildren,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
   AppAdminClassRoomRoute: AppAdminClassRoomRouteWithChildren,
+  AppAdminDashboardRoute: AppAdminDashboardRoute,
   AppAdminEmployeesRoute: AppAdminEmployeesRouteWithChildren,
   AppAdminFlashcardsRoute: AppAdminFlashcardsRouteWithChildren,
   AppAdminGamificationsRoute: AppAdminGamificationsRoute,
@@ -1900,13 +1921,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
