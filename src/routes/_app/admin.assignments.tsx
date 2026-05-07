@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_app/admin/assignments")({
 });
 
 function AssignmentsPage() {
+  const data = useOrgData();
   const [tab, setTab] = useState("list");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");

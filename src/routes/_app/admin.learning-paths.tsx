@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_app/admin/learning-paths")({
 });
 
 function LearningPathsPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
 
   return (

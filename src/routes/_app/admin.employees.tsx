@@ -30,6 +30,7 @@ export const Route = createFileRoute("/_app/admin/employees")({
 const ROLE_LABEL = { admin: "Quản trị viên", teacher: "Giảng viên", student: "Học sinh" } as const;
 
 function EmployeesPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [branch, setBranch] = useState("all");
   const [role, setRole] = useState("all");
@@ -152,6 +153,7 @@ function EmployeesPage() {
 }
 
 function CreateEmployeeDialog({ onClose }: { onClose: () => void }) {
+  const data = useOrgData();
   return (
     <DialogContent className="sm:max-w-lg">
       <DialogHeader>

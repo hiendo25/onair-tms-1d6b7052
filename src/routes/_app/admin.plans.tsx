@@ -20,6 +20,7 @@ const STATUS_VARIANT = {
 } as const;
 
 function PlansPage() {
+  const data = useOrgData();
   return (
     <PageContainer
       title="Kế hoạch đào tạo"

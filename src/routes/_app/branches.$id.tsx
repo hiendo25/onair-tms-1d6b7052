@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_app/branches/$id")({
 });
 
 function BranchDetail() {
+  const data = useOrgData();
   const { id } = Route.useParams();
   const b = data.branches.find((x) => String(x.id) === id) ?? data.branches[0];
   return (

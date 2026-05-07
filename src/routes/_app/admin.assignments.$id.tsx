@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_app/admin/assignments/$id")({
 });
 
 function AssignmentDetail() {
+  const data = useOrgData();
   const { assignment: a } = Route.useLoaderData();
   const submissions = data.employees.filter((e) => e.role === "student").slice(0, 6);
 

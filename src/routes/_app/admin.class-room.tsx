@@ -35,6 +35,7 @@ const RUNTIME_COLOR: Record<string, string> = {
 };
 
 function ClassRoomPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [runtime, setRuntime] = useState("all");
   const [type, setType] = useState("all");

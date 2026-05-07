@@ -24,6 +24,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 };
 
 function CoursesPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
 

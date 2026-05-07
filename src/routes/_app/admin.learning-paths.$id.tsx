@@ -18,6 +18,7 @@ export const Route = createFileRoute("/_app/admin/learning-paths/$id")({
 });
 
 function LearningPathDetail() {
+  const data = useOrgData();
   const { path } = Route.useLoaderData();
   const totalCourses = path.phases.reduce((s: number, p: { courses: number }) => s + p.courses, 0);
   const totalWeeks = path.phases.reduce((s: number, p: { weeks: number }) => s + p.weeks, 0);

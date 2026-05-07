@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
 const TYPE_LABEL = { single: "Một đáp án", multiple: "Nhiều đáp án", essay: "Tự luận" } as const;
 
 function QuestionBankPage() {
+  const data = useOrgData();
   const [search, setSearch] = useState("");
   const [cat, setCat] = useState("all");
   const cats = Array.from(new Set(data.questions.map(q => q.category)));

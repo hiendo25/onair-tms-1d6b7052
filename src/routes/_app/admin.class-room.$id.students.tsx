@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_app/admin/class-room/$id/students")({
 });
 
 function ClassroomStudents() {
+  const data = useOrgData();
   const { classroom: c } = Route.useLoaderData();
   const students = data.employees.filter((e) => e.role === "student" || e.role === "teacher").slice(0, c.students > 8 ? 8 : c.students);
 
