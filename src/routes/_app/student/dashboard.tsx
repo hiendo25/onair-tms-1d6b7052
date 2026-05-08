@@ -1,29 +1,25 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import {
-  AlertCircle, BookOpen, ClipboardCheck, Trophy, Clock, Award, Star,
-  Crown, Flame, GraduationCap, CheckCircle2, PlayCircle, Medal, Sparkles,
+  Bell, Calendar, BookOpen, Trophy, Crown, ArrowRight, ChevronRight,
+  Video, Monitor, MapPin, ClipboardCheck, Clock, Lock, PlayCircle, Sparkles,
 } from "lucide-react";
-import { AiSpinner } from "@/components/ai/AiSpinner";
-import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
-import { aiPersonalInsight, type ActionableInsight } from "@/lib/ai-mock";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { PageContainer } from "@/components/PageContainer";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
 import { useOrg } from "@/lib/org-context";
 import { getUserRole } from "@/lib/roles";
-import { logLearningActivity } from "@/lib/log-activity";
-import { WeeklyLearningSummary } from "@/components/student/WeeklyLearningSummary";
-import { BranchRankingCard } from "@/components/student/BranchRankingCard";
+import { useMyXp, useMyTitle, useGamifications, useLeaderboard } from "@/lib/data-hooks";
 
 export const Route = createFileRoute("/_app/student/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — OnAir TMS" }] }),
+  head: () => ({ meta: [{ title: "Tổng quan — OnAir TMS" }] }),
   beforeLoad: async () => {
     const { role } = await getUserRole();
     if (role === "admin") throw redirect({ to: "/admin/dashboard" });
@@ -31,423 +27,362 @@ export const Route = createFileRoute("/_app/student/dashboard")({
   component: StudentDashboard,
 });
 
-// ─── Helpers ───────────────────────────────────────────────────────────
-const RANKS = [
-  { name: "Tân binh", min: 0 },
-  { name: "Cần mẫn", min: 500 },
-  { name: "Cao thủ", min: 1500 },
-  { name: "Huyền thoại", min: 3000 },
-];
-function computeRank(xp: number) {
-  let current = RANKS[0], next = RANKS[1];
-  for (let i = 0; i < RANKS.length; i++) {
-    if (xp >= RANKS[i].min) { current = RANKS[i]; next = RANKS[i + 1] ?? RANKS[i]; }
-  }
-  return { current, next };
-}
+type UpcomingType = "live" | "online" | "offline" | "quiz";
+type Upcoming = {
+  id: string;
+  type: UpcomingType;
+  title: string;
+  start: string;
+  end: string | null;
+  link: string;
+};
 
-const COURSE_THUMBS = [
-  "from-amber-400 to-orange-500",
-  "from-rose-400 to-red-500",
-  "from-emerald-400 to-teal-500",
-  "from-blue-400 to-indigo-500",
-  "from-violet-400 to-purple-500",
-];
-
-// ─── Component ─────────────────────────────────────────────────────────
 function StudentDashboard() {
+  const { user } = useAuth();
   const { orgId } = useOrg();
-  const { data: dash, isLoading } = useDashboardData(orgId);
-
-  // Seed minimal data for current user once
-  useSeedCurrentUser(orgId);
+  const { data, isLoading } = useStudentOverview(orgId, user?.id);
 
   return (
-    <PageContainer title="Tổng quan" breadcrumbs={[{ title: "Tổng quan" }]}>
+    <PageHeader user={user}>
       {isLoading ? (
-        <div className="py-12 text-center text-muted-foreground text-sm">Đang tải dữ liệu...</div>
+        <div className="space-y-3">
+          <Skeleton className="h-44 rounded-xl" />
+          <Skeleton className="h-72 rounded-xl" />
+          <Skeleton className="h-72 rounded-xl" />
+        </div>
       ) : (
         <>
-          <AiInsightCard
-            stats={dash?.myStats ?? null}
-            xp={dash?.myXp ?? 0}
+          <ProgressCard
+            paths={data?.paths ?? []}
+            xp={data?.xp ?? 0}
+            titleName={data?.titleName ?? null}
+            nextTitle={data?.nextTitle ?? null}
+            myRank={data?.myRank ?? null}
           />
-          <WeeklyLearningSummary />
-          <StudentInsightsLive orgId={orgId} xp={dash?.myXp ?? 0} todayTasks={dash?.todayTasks ?? []} activePath={dash?.activePath ?? null} />
-          <TodayTasksSection tasks={dash?.todayTasks ?? []} />
-          <ProgressSection
-            path={dash?.activePath ?? null}
-            stats={dash?.myStats ?? null}
-          />
-          <BranchRankingCard branchName={dash?.branchName ?? "Chi nhánh của tôi"} />
-          <AchievementSection
-            xp={dash?.myXp ?? 0}
-            leaderboard={dash?.leaderboard ?? []}
-            currentUserId={dash?.userId ?? null}
-            branchName={dash?.branchName ?? "Chi nhánh của tôi"}
-          />
-          <RecommendedSection courses={dash?.recommended ?? []} />
+          <ContinueLearning courses={data?.continue ?? []} />
+          <UpcomingSection items={data?.upcoming ?? []} />
         </>
       )}
-    </PageContainer>
+    </PageHeader>
   );
 }
 
-// ─── AI Insight ────────────────────────────────────────────────────────
-function AiInsightCard({ stats, xp }: { stats: any; xp: number }) {
-  const [insight, setInsight] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const key = `${stats?.user_id ?? "me"}-${xp}-${stats?.completed_courses ?? 0}-${stats?.quizzes_taken ?? 0}`;
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setInsight(null);
-    aiPersonalInsight({
-      completed_courses: stats?.completed_courses ?? 0,
-      quizzes_taken: stats?.quizzes_taken ?? 0,
-      average_score: Number(stats?.average_score ?? 0),
-      hours_learned: stats?.hours_learned ?? 0,
-      rank: computeRank(xp).current.name,
-    }).then((text) => {
-      if (!cancelled) { setInsight(text); setLoading(false); }
-    });
-    return () => { cancelled = true; };
-  }, [key]);
+// ─── Header ────────────────────────────────────────────────────────────
+function PageHeader({ user, children }: { user: any; children: React.ReactNode }) {
+  const name = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "bạn";
+  const { data: notif = 0 } = useQuery({
+    queryKey: ["notif-unread", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return 0;
+      const { count } = await supabase
+        .from("learning_activity")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      return count ?? 0;
+    },
+    enabled: !!user?.id,
+  });
 
   return (
-    <Card className="border-violet-200 bg-gradient-to-br from-violet-50 via-fuchsia-50 to-pink-50">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2 text-violet-900">
-          <span className="relative inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          Đây là nhận xét về quá trình học của bạn tuần này
+    <div className="container mx-auto max-w-6xl px-4 py-6 space-y-5">
+      <header className="flex items-center justify-between">
+        <Link to="/my-gamification" className="flex items-center gap-3 group">
+          <Avatar className="h-12 w-12 ring-2 ring-primary/20">
+            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarFallback className="bg-gradient-to-br from-primary to-violet-500 text-white font-semibold">
+              {name.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <div className="text-xs text-muted-foreground">Xin chào,</div>
+            <div className="font-semibold group-hover:text-primary transition">{name}</div>
+          </div>
+        </Link>
+        <div className="flex items-center gap-1">
+          <Button asChild size="icon" variant="ghost">
+            <Link to="/my-class" aria-label="Lịch học"><Calendar className="h-5 w-5" /></Link>
+          </Button>
+          <Button asChild size="icon" variant="ghost" className="relative">
+            <Link to="/my-flashcards" aria-label="Thông báo">
+              <Bell className="h-5 w-5" />
+              {notif > 0 && <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />}
+            </Link>
+          </Button>
+        </div>
+      </header>
+      {children}
+    </div>
+  );
+}
+
+// ─── Progress Card ─────────────────────────────────────────────────────
+function ProgressCard({
+  paths, xp, titleName, nextTitle, myRank,
+}: {
+  paths: { id: string; title: string; total: number; done: number }[];
+  xp: number;
+  titleName: string | null;
+  nextTitle: { title: string; xp_required: number } | null;
+  myRank: number | null;
+}) {
+  const single = paths.length === 1 ? paths[0] : null;
+  const totalAll = paths.reduce((s, p) => s + p.total, 0);
+  const doneAll = paths.reduce((s, p) => s + p.done, 0);
+  const pct = totalAll === 0 ? 0 : Math.round((doneAll / totalAll) * 100);
+  const xpPct = nextTitle && nextTitle.xp_required > 0
+    ? Math.min(100, Math.round((xp / nextTitle.xp_required) * 100))
+    : 100;
+
+  if (paths.length === 0) {
+    return (
+      <Card className="bg-gradient-to-br from-primary/5 via-background to-violet-50">
+        <CardContent className="py-10 text-center">
+          <BookOpen className="mx-auto h-10 w-10 text-muted-foreground/40" />
+          <h3 className="mt-3 font-semibold">Bạn chưa có khóa học nào</h3>
+          <p className="text-sm text-muted-foreground mt-1">Quản trị viên sẽ gán lộ trình học cho bạn.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const ringTo = single
+    ? { to: "/my-learning-paths/$id" as const, params: { id: single.id } }
+    : { to: "/my-learning-paths" as const };
+
+  return (
+    <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary/10 via-violet-100/40 to-pink-100/40">
+      <CardContent className="p-5 sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          {/* Circular progress */}
+          <Link {...(ringTo as any)} className="shrink-0 group">
+            <div className="relative h-32 w-32">
+              <svg className="h-full w-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="44" stroke="hsl(var(--muted))" strokeWidth="8" fill="none" />
+                <circle
+                  cx="50" cy="50" r="44" stroke="hsl(var(--primary))" strokeWidth="8" fill="none"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 44}
+                  strokeDashoffset={2 * Math.PI * 44 * (1 - pct / 100)}
+                  className="transition-all"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-2xl font-bold">{pct}%</div>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Hoàn thành</div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Stats */}
+          <div className="flex-1 space-y-3">
+            <div>
+              <div className="text-xs text-muted-foreground">
+                {single ? single.title : `${paths.length} lộ trình đang học`}
+              </div>
+              <div className="font-semibold">
+                {doneAll} / {totalAll} khoá học đã hoàn thành
+              </div>
+            </div>
+
+            <Link to="/my-gamification" className="block group">
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="h-3 w-3 text-amber-500" />
+                  {xp.toLocaleString()} XP
+                </span>
+                {nextTitle ? (
+                  <span className="text-muted-foreground">
+                    Lên "{nextTitle.title}": {(nextTitle.xp_required - xp).toLocaleString()} XP
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Đã đạt danh hiệu cao nhất</span>
+                )}
+              </div>
+              <Progress value={xpPct} className="h-2" />
+            </Link>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link to="/my-gamification">
+                <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 hover:opacity-90 cursor-pointer">
+                  <Crown className="h-3 w-3 mr-1" />
+                  {titleName || "Tân binh"}
+                </Badge>
+              </Link>
+              {myRank && (
+                <Link to="/my-gamification">
+                  <Badge variant="outline" className="bg-background hover:bg-accent cursor-pointer">
+                    <Trophy className="h-3 w-3 mr-1 text-amber-500" />
+                    Hạng #{myRank}
+                  </Badge>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Continue Learning ─────────────────────────────────────────────────
+type ContinueCourse = {
+  id: string;
+  title: string;
+  cover: string | null;
+  pathTitle: string;
+  progress: number;
+  status: "not_started" | "in_progress";
+  locked: boolean;
+};
+
+function ContinueLearning({ courses }: { courses: ContinueCourse[] }) {
+  const visible = courses.slice(0, 5);
+  const hasMore = courses.length > 5;
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <PlayCircle className="h-5 w-5 text-primary" />
+          Tiếp tục học
         </CardTitle>
+        {hasMore && (
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/my-courses">Xem tất cả <ChevronRight className="h-4 w-4" /></Link>
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
-        {loading ? (
-          <AiSpinner label="Để mình xem qua nhé..." />
+        {courses.length === 0 ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            Bạn chưa có khoá học nào.
+          </div>
         ) : (
-          <p className="text-sm leading-relaxed text-slate-800">{insight}</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.map(c => (
+              <Link
+                key={c.id}
+                to={c.locked ? "/my-courses" : "/my-courses/$id"}
+                params={c.locked ? undefined as any : { id: c.id }}
+                className={`group relative overflow-hidden rounded-lg border bg-card hover:shadow-md transition ${c.locked ? "opacity-60 pointer-events-none" : ""}`}
+              >
+                <div className="relative h-28 bg-gradient-to-br from-primary/20 to-violet-200">
+                  {c.cover ? (
+                    <img src={c.cover} alt={c.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-primary/30">
+                      <BookOpen className="h-10 w-10" />
+                    </div>
+                  )}
+                  {c.locked && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                      <Lock className="h-6 w-6 text-white" />
+                    </div>
+                  )}
+                  <Badge
+                    className={`absolute left-2 top-2 text-[10px] ${
+                      c.status === "in_progress" ? "bg-blue-500" : "bg-slate-500"
+                    } text-white border-0`}
+                  >
+                    {c.status === "in_progress" ? "Đang học" : "Chưa học"}
+                  </Badge>
+                </div>
+                <div className="p-3 space-y-2">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground line-clamp-1">
+                    {c.pathTitle}
+                  </div>
+                  <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition">
+                    {c.title}
+                  </h3>
+                  <div>
+                    <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                      <span>Tiến độ</span>
+                      <span>{c.progress}%</span>
+                    </div>
+                    <Progress value={c.progress} className="h-1" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
   );
 }
 
-// ─── Data hook ─────────────────────────────────────────────────────────
-function useDashboardData(orgId: string) {
-  return useQuery({
-    queryKey: ["student-dashboard", orgId],
-    queryFn: async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const userId = u.user?.id ?? null;
+// ─── Upcoming Learning ─────────────────────────────────────────────────
+const TYPE_META: Record<UpcomingType, { label: string; icon: typeof Video; color: string }> = {
+  live: { label: "Live", icon: Video, color: "bg-red-100 text-red-700" },
+  online: { label: "Online", icon: Monitor, color: "bg-blue-100 text-blue-700" },
+  offline: { label: "Offline", icon: MapPin, color: "bg-emerald-100 text-emerald-700" },
+  quiz: { label: "Bài kiểm tra", icon: ClipboardCheck, color: "bg-violet-100 text-violet-700" },
+};
 
-      // My stats
-      const myStatsQ = userId
-        ? await supabase.from("user_stats").select("*").eq("user_id", userId).eq("org_id", orgId).maybeSingle()
-        : { data: null };
-      const myStats = myStatsQ.data;
-
-      // My XP
-      const myXpQ = userId
-        ? await supabase.from("user_xp").select("xp").eq("user_id", userId).eq("org_id", orgId).maybeSingle()
-        : { data: null };
-      const myXp = myXpQ.data?.xp ?? 0;
-
-      const branchName = myStats?.branch || "Chi nhánh của tôi";
-
-      // Today tasks: pending submissions for this user
-      const tasksQ = userId
-        ? await supabase
-            .from("assignment_submissions")
-            .select("id, assignment_id, assignment_title, assignment_type, deadline, status")
-            .eq("user_id", userId)
-            .eq("org_id", orgId)
-            .neq("status", "completed")
-            .order("deadline", { ascending: true })
-            .limit(5)
-        : { data: [] };
-      const now = new Date();
-      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-      const todayTasks = (tasksQ.data ?? []).map((t: any) => {
-        const d = t.deadline ? new Date(t.deadline) : null;
-        const urgent = !!d && d <= endOfToday;
-        return {
-          id: t.id,
-          title: t.assignment_title,
-          type: t.assignment_type === "quiz" ? "quiz" : "lesson",
-          deadline: d
-            ? urgent ? `Hôm nay, ${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`
-              : d.toLocaleDateString("vi-VN")
-            : "Không có hạn",
-          urgent,
-          path: t.assignment_type === "quiz" ? "/my-assignments" : "/my-learning-paths",
-        };
-      });
-
-      // Active path
-      const pathQ = userId
-        ? await supabase
-            .from("user_learning_path_progress")
-            .select("path_id, path_title, progress, total_lessons, completed_lessons")
-            .eq("user_id", userId)
-            .eq("org_id", orgId)
-            .eq("is_active", true)
-            .order("updated_at", { ascending: false })
-            .limit(1)
-            .maybeSingle()
-        : { data: null };
-      const activePath = pathQ.data;
-
-      // Leaderboard: top 5 in same org
-      const lbQ = await supabase
-        .from("user_xp")
-        .select("user_id, xp")
-        .eq("org_id", orgId)
-        .order("xp", { ascending: false })
-        .limit(5);
-      const lbIds = (lbQ.data ?? []).map((r: any) => r.user_id);
-      const namesQ = lbIds.length
-        ? await supabase.from("user_stats").select("user_id, display_name, branch").in("user_id", lbIds)
-        : { data: [] };
-      const nameMap = new Map((namesQ.data ?? []).map((r: any) => [r.user_id, r]));
-      const leaderboard = (lbQ.data ?? []).map((r: any, i: number) => ({
-        rank: i + 1,
-        user_id: r.user_id,
-        name: nameMap.get(r.user_id)?.display_name || (r.user_id === userId ? "Bạn" : "Học viên"),
-        xp: r.xp,
-        isMe: r.user_id === userId,
-      }));
-
-      // Recommended courses
-      const recQ = userId
-        ? await supabase
-            .from("user_course_progress")
-            .select("course_id, course_title, progress")
-            .eq("user_id", userId)
-            .eq("org_id", orgId)
-            .lt("progress", 100)
-            .order("updated_at", { ascending: false })
-            .limit(3)
-        : { data: [] };
-      let recommended = (recQ.data ?? []).map((r: any, i: number) => ({
-        id: r.course_id, title: r.course_title, progress: r.progress,
-        thumb: COURSE_THUMBS[i % COURSE_THUMBS.length],
-      }));
-      // Fallback: pull org online courses
-      if (recommended.length < 3) {
-        const fallbackQ = await supabase
-          .from("online_courses")
-          .select("id, title")
-          .eq("org_id", orgId)
-          .eq("status", "published")
-          .limit(3 - recommended.length);
-        const existingIds = new Set(recommended.map((r) => r.id));
-        const extra = (fallbackQ.data ?? [])
-          .filter((c: any) => !existingIds.has(c.id))
-          .map((c: any, i: number) => ({
-            id: c.id, title: c.title, progress: 0,
-            thumb: COURSE_THUMBS[(recommended.length + i) % COURSE_THUMBS.length],
-          }));
-        recommended = [...recommended, ...extra];
-      }
-
-      return { userId, myXp, myStats, todayTasks, activePath, leaderboard, recommended, branchName };
-    },
-  });
-}
-
-// Seed defaults for current user on first visit so dashboard isn't empty
-function useSeedCurrentUser(orgId: string) {
-  useEffect(() => {
-    (async () => {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) return;
-
-      // Check if already seeded
-      const { data: existing } = await supabase
-        .from("user_xp").select("id").eq("user_id", uid).eq("org_id", orgId).maybeSingle();
-      if (existing) return;
-
-      const xp = 1820;
-      await supabase.from("user_xp").insert({ user_id: uid, org_id: orgId, xp, rank: "Cao thủ" });
-      await supabase.from("user_stats").insert({
-        user_id: uid, org_id: orgId,
-        completed_courses: 12, quizzes_taken: 28, average_score: 8.7, hours_learned: 47,
-        branch: "Highlands Nguyễn Huệ",
-        display_name: u.user?.email?.split("@")[0] ?? "Bạn",
-      });
-      await supabase.from("user_learning_path_progress").insert({
-        user_id: uid, org_id: orgId,
-        path_id: crypto.randomUUID(),
-        path_title: "Lộ trình Barista cấp 2",
-        total_lessons: 24, completed_lessons: 16, progress: 65, is_active: true,
-      });
-      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
-      const today18 = new Date(); today18.setHours(18, 0, 0, 0);
-      const today22 = new Date(); today22.setHours(22, 0, 0, 0);
-      await supabase.from("assignment_submissions").insert([
-        { user_id: uid, org_id: orgId, assignment_id: crypto.randomUUID(),
-          assignment_title: "Quy trình pha chế Phin Sữa Đá", assignment_type: "lesson",
-          deadline: today18.toISOString(), status: "pending" },
-        { user_id: uid, org_id: orgId, assignment_id: crypto.randomUUID(),
-          assignment_title: "Kiểm tra: An toàn vệ sinh thực phẩm", assignment_type: "quiz",
-          deadline: today22.toISOString(), status: "pending" },
-        { user_id: uid, org_id: orgId, assignment_id: crypto.randomUUID(),
-          assignment_title: "Bài học: Đón tiếp khách hàng VIP", assignment_type: "lesson",
-          deadline: tomorrow.toISOString(), status: "pending" },
-      ]);
-      await supabase.from("user_course_progress").insert([
-        { user_id: uid, org_id: orgId, course_id: crypto.randomUUID(),
-          course_title: "Pha chế Cold Brew chuẩn vị", progress: 35, status: "in_progress" },
-        { user_id: uid, org_id: orgId, course_id: crypto.randomUUID(),
-          course_title: "Kỹ năng Upsell tại quầy", progress: 0, status: "in_progress" },
-        { user_id: uid, org_id: orgId, course_id: crypto.randomUUID(),
-          course_title: "Vệ sinh máy Espresso đúng cách", progress: 70, status: "in_progress" },
-      ]);
-    })();
-  }, [orgId]);
-}
-
-// ─── Section 1: Today's tasks ──────────────────────────────────────────
-type Task = { id: string; title: string; type: string; deadline: string; urgent: boolean; path: string };
-
-function useCompleteTask(orgId: string) {
-  const qc = useQueryClient();
-  const navigate = useNavigate();
-  return useMutation({
-    mutationFn: async (task: Task) => {
-      const { data: u } = await supabase.auth.getUser();
-      const uid = u.user?.id;
-      if (!uid) throw new Error("Bạn cần đăng nhập");
-
-      // 1) Mark submission completed
-      const score = task.type === "quiz" ? Math.round((7 + Math.random() * 3) * 10) / 10 : null;
-      await supabase.from("assignment_submissions").update({
-        status: "completed",
-        submitted_at: new Date().toISOString(),
-        score,
-      }).eq("id", task.id).eq("user_id", uid);
-
-      // 2) Bump XP (+50 lesson, +100 quiz)
-      const xpGain = task.type === "quiz" ? 100 : 50;
-      const { data: xpRow } = await supabase
-        .from("user_xp").select("xp").eq("user_id", uid).eq("org_id", orgId).maybeSingle();
-      const newXp = (xpRow?.xp ?? 0) + xpGain;
-      const rank = newXp >= 3000 ? "Huyền thoại" : newXp >= 1500 ? "Cao thủ" : newXp >= 500 ? "Cần mẫn" : "Tân binh";
-      if (xpRow) {
-        await supabase.from("user_xp").update({ xp: newXp, rank })
-          .eq("user_id", uid).eq("org_id", orgId);
-      } else {
-        await supabase.from("user_xp").insert({ user_id: uid, org_id: orgId, xp: newXp, rank });
-      }
-
-      // 3) Bump stats
-      const { data: stats } = await supabase
-        .from("user_stats").select("*").eq("user_id", uid).eq("org_id", orgId).maybeSingle();
-      if (stats) {
-        const patch: any = { hours_learned: (stats.hours_learned ?? 0) + 1 };
-        if (task.type === "quiz") {
-          const newCount = (stats.quizzes_taken ?? 0) + 1;
-          const newAvg = Math.round((((stats.average_score ?? 0) * (stats.quizzes_taken ?? 0)) + (score ?? 0)) / newCount * 10) / 10;
-          patch.quizzes_taken = newCount;
-          patch.average_score = newAvg;
-        } else {
-          patch.completed_courses = (stats.completed_courses ?? 0) + 1;
-        }
-        await supabase.from("user_stats").update(patch).eq("user_id", uid).eq("org_id", orgId);
-      }
-
-      // 4) Bump active learning path
-      const { data: path } = await supabase
-        .from("user_learning_path_progress")
-        .select("*").eq("user_id", uid).eq("org_id", orgId).eq("is_active", true)
-        .order("updated_at", { ascending: false }).limit(1).maybeSingle();
-      if (path && path.completed_lessons < path.total_lessons) {
-        const completed = path.completed_lessons + 1;
-        const progress = Math.min(100, Math.round((completed / path.total_lessons) * 100));
-        await supabase.from("user_learning_path_progress").update({
-          completed_lessons: completed, progress,
-        }).eq("id", path.id);
-      }
-
-      // 5) Log learning activity
-      await logLearningActivity({
-        orgId,
-        action: task.type === "quiz" ? "quiz_submit" : "lesson_complete",
-        targetType: task.type === "quiz" ? "assignment" : "lesson",
-        targetId: task.id,
-        metadata: { title: task.title, score },
-      });
-
-      return { xpGain, score, redirect: task.path };
-    },
-    onSuccess: (res) => {
-      qc.invalidateQueries({ queryKey: ["student-dashboard"] });
-      const msg = res.score != null
-        ? `Hoàn thành! +${res.xpGain} XP · Điểm: ${res.score}/10`
-        : `Hoàn thành! +${res.xpGain} XP`;
-      toast.success(msg);
-      // Navigate to actual learning/quiz screen
-      setTimeout(() => navigate({ to: res.redirect }), 400);
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
-}
-
-function TodayTasksSection({ tasks }: { tasks: Task[] }) {
-  const { orgId } = useOrg();
-  const complete = useCompleteTask(orgId);
-  const hasTasks = tasks.length > 0;
-  const hasUrgent = tasks.some((t) => t.urgent);
+function UpcomingSection({ items }: { items: Upcoming[] }) {
+  const [tab, setTab] = useState<"all" | UpcomingType>("all");
+  const filtered = useMemo(
+    () => (tab === "all" ? items : items.filter(i => i.type === tab)).slice(0, 10),
+    [items, tab]
+  );
 
   return (
-    <Card className={hasUrgent ? "border-l-4 border-l-orange-500 bg-gradient-to-br from-orange-50 to-amber-50" : ""}>
-      <CardHeader className="flex flex-row items-center gap-2">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${hasUrgent ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-600"}`}>
-          <AlertCircle className="h-5 w-5" />
-        </div>
-        <CardTitle className="text-lg">Việc cần làm hôm nay</CardTitle>
-        {hasUrgent && (
-          <Badge variant="destructive" className="ml-2">{tasks.filter((t) => t.urgent).length} việc gấp</Badge>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
+          Nội dung sắp tới
+        </CardTitle>
+        {items.length > 10 && (
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/my-class">Xem thêm <ChevronRight className="h-4 w-4" /></Link>
+          </Button>
         )}
       </CardHeader>
-      <CardContent>
-        {!hasTasks ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500 mb-2" />
-            <p className="text-base font-medium">Bạn đã hoàn thành tất cả hôm nay 🎉</p>
-            <p className="text-sm text-muted-foreground mt-1">Quay lại vào ngày mai nhé!</p>
+      <CardContent className="space-y-3">
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+          <TabsList className="grid grid-cols-5 w-full sm:w-auto sm:inline-flex">
+            <TabsTrigger value="all">Tất cả</TabsTrigger>
+            <TabsTrigger value="live">Live</TabsTrigger>
+            <TabsTrigger value="online">Online</TabsTrigger>
+            <TabsTrigger value="offline">Offline</TabsTrigger>
+            <TabsTrigger value="quiz">Quiz</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        {filtered.length === 0 ? (
+          <div className="py-8 text-center text-sm text-muted-foreground">
+            Không có nội dung sắp diễn ra.
           </div>
         ) : (
           <div className="space-y-2">
-            {tasks.map((task) => {
-              const Icon = task.type === "quiz" ? ClipboardCheck : BookOpen;
-              const isPending = complete.isPending && complete.variables?.id === task.id;
+            {filtered.map(i => {
+              const meta = TYPE_META[i.type];
+              const Icon = meta.icon;
+              const start = new Date(i.start);
+              const end = i.end ? new Date(i.end) : null;
+              const fmt = (d: Date) => d.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
               return (
-                <div key={task.id} className={`flex items-center gap-3 rounded-lg border p-3 ${task.urgent ? "border-orange-200 bg-white" : "border-slate-200 bg-white"}`}>
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${task.urgent ? "bg-orange-100 text-orange-600" : "bg-slate-100 text-slate-600"}`}>
+                <Link
+                  key={i.id}
+                  to={i.link}
+                  className="flex items-center gap-3 rounded-lg border p-3 hover:bg-accent/50 transition"
+                >
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${meta.color}`}>
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{task.title}</p>
-                    <p className={`text-xs flex items-center gap-1 mt-0.5 ${task.urgent ? "text-orange-600 font-medium" : "text-muted-foreground"}`}>
-                      <Clock className="h-3 w-3" />
-                      {task.deadline}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px]">{meta.label}</Badge>
+                      <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {fmt(start)}{end ? ` – ${end.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}` : ""}
+                      </span>
+                    </div>
+                    <div className="font-medium text-sm truncate mt-0.5">{i.title}</div>
                   </div>
-                  <Button
-                    size="sm"
-                    disabled={isPending || complete.isPending}
-                    onClick={() => complete.mutate(task)}
-                    className={task.urgent ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-blue-600 hover:bg-blue-700 text-white"}
-                  >
-                    {isPending ? "Đang lưu..." : task.type === "quiz" ? "Làm bài" : "Học ngay"}
-                  </Button>
-                </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                </Link>
               );
             })}
           </div>
@@ -457,294 +392,175 @@ function TodayTasksSection({ tasks }: { tasks: Task[] }) {
   );
 }
 
-// ─── Section 2: Progress ───────────────────────────────────────────────
-function ProgressSection({ path, stats }: { path: any; stats: any }) {
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-blue-600" />
-            Lộ trình đang học
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {path ? (
-            <>
-              <div>
-                <h3 className="font-semibold text-base">{path.path_title}</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {path.completed_lessons}/{path.total_lessons} bài học hoàn thành
-                </p>
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tiến độ</span>
-                  <span className="font-semibold text-blue-600">{path.progress}%</span>
-                </div>
-                <Progress value={path.progress} className="h-2.5" />
-              </div>
-              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
-                <Link to="/my-learning-paths"><PlayCircle className="h-4 w-4 mr-2" />Tiếp tục học</Link>
-              </Button>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4 text-center">Chưa có lộ trình đang học.</p>
-          )}
-        </CardContent>
-      </Card>
+// ─── Data ──────────────────────────────────────────────────────────────
+function useStudentOverview(orgId: string, userId: string | undefined) {
+  const xpQ = useMyXp();
+  const titleQ = useMyTitle();
+  const gamQ = useGamifications();
+  const lbQ = useLeaderboard();
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Star className="h-5 w-5 text-amber-500" />
-            Thống kê cá nhân
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-3">
-            <StatBox icon={GraduationCap} label="Khóa hoàn thành" value={stats?.completed_courses ?? 0} color="bg-blue-50 text-blue-600" />
-            <StatBox icon={ClipboardCheck} label="Bài kiểm tra" value={stats?.quizzes_taken ?? 0} color="bg-purple-50 text-purple-600" />
-            <StatBox icon={Star} label="Điểm trung bình" value={stats?.average_score ?? 0} color="bg-amber-50 text-amber-600" />
-            <StatBox icon={Clock} label="Giờ học tích lũy" value={`${stats?.hours_learned ?? 0}h`} color="bg-emerald-50 text-emerald-600" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+  const overviewQ = useQuery({
+    queryKey: ["student-overview", orgId, userId],
+    enabled: !!userId,
+    queryFn: async () => {
+      // 1) Active learning paths
+      const { data: enrolls } = await supabase
+        .from("learning_path_enrollments")
+        .select("id, learning_path_id, progress, status, learning_paths(id, title)")
+        .eq("user_id", userId!)
+        .eq("org_id", orgId)
+        .neq("status", "completed");
 
-function StatBox({ icon: Icon, label, value, color }: { icon: typeof Star; label: string; value: string | number; color: string }) {
-  return (
-    <div className="rounded-lg border bg-white p-3">
-      <div className={`inline-flex h-8 w-8 items-center justify-center rounded-md ${color} mb-2`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <p className="text-2xl font-bold leading-tight">{value}</p>
-      <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
-    </div>
-  );
-}
+      const paths = (enrolls ?? []).map((e: any) => ({
+        id: e.learning_paths?.id ?? e.learning_path_id,
+        title: e.learning_paths?.title ?? "Lộ trình",
+        total: 0,
+        done: 0,
+      }));
 
-// ─── Section 3: Achievements & Leaderboard ─────────────────────────────
-function AchievementSection({
-  xp, leaderboard, currentUserId, branchName,
-}: { xp: number; leaderboard: any[]; currentUserId: string | null; branchName: string }) {
-  const { current, next } = computeRank(xp);
-  const xpToNext = Math.max(0, next.min - xp);
-  const range = Math.max(1, next.min - current.min);
-  const progressInRank = next.min === current.min ? 100 : Math.min(100, ((xp - current.min) / range) * 100);
+      // 2) Course counts per learning path
+      const pathIds = paths.map(p => p.id);
+      let continueCourses: ContinueCourse[] = [];
+      if (pathIds.length > 0) {
+        const { data: stages } = await supabase
+          .from("learning_path_stages")
+          .select("id, learning_path_id, learning_path_stage_courses(course_id)")
+          .in("learning_path_id", pathIds);
 
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card className="bg-gradient-to-br from-purple-600 to-indigo-700 text-white border-0">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2 text-white">
-            <Trophy className="h-5 w-5 text-amber-300" />Thành tích của tôi
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-400 text-amber-900">
-              <Crown className="h-7 w-7" />
-            </div>
-            <div>
-              <p className="text-xs text-purple-200">Hạng hiện tại</p>
-              <p className="text-2xl font-bold">{current.name}</p>
-            </div>
-            <div className="ml-auto text-right">
-              <p className="text-xs text-purple-200">Tổng XP</p>
-              <p className="text-2xl font-bold flex items-center gap-1 justify-end">
-                <Flame className="h-5 w-5 text-amber-300" />
-                {xp.toLocaleString()}
-              </p>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-purple-200">
-                {next.name === current.name ? "Đã đạt hạng cao nhất" : `Lên hạng ${next.name}`}
-              </span>
-              <span className="font-semibold">{xpToNext > 0 ? `Còn ${xpToNext.toLocaleString()} XP` : "🏆"}</span>
-            </div>
-            <Progress value={progressInRank} className="h-2 bg-purple-900" />
-          </div>
-          <Button asChild variant="secondary" className="w-full bg-white/15 hover:bg-white/25 text-white border-0">
-            <Link to="/my-gamification"><Award className="h-4 w-4 mr-2" />Xem huy hiệu</Link>
-          </Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Medal className="h-5 w-5 text-amber-500" />
-            Top học viên — {branchName}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {leaderboard.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">Chưa có đủ dữ liệu để đưa ra nhận xét, hãy tiếp tục học nhé.</p>
-          ) : (
-            <div className="space-y-1.5">
-              {leaderboard.map((u) => (
-                <div key={u.user_id} className={`flex items-center gap-3 rounded-lg p-2.5 ${u.isMe ? "bg-blue-50 border border-blue-200" : ""}`}>
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-bold text-sm ${
-                    u.rank === 1 ? "bg-amber-400 text-amber-900"
-                    : u.rank === 2 ? "bg-slate-300 text-slate-800"
-                    : u.rank === 3 ? "bg-orange-300 text-orange-900"
-                    : "bg-slate-100 text-slate-600"
-                  }`}>{u.rank}</div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm truncate ${u.isMe ? "font-bold text-blue-700" : "font-medium"}`}>
-                      {u.name} {u.isMe && <span className="text-xs">(bạn)</span>}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1 text-sm font-semibold text-amber-600">
-                    <Flame className="h-3.5 w-3.5" />
-                    {u.xp.toLocaleString()}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
-
-// ─── Section 4: Recommended courses ────────────────────────────────────
-function RecommendedSection({ courses }: { courses: any[] }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-blue-600" />Khóa học gợi ý
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {courses.length === 0 ? (
-          <p className="text-sm text-muted-foreground py-4 text-center">Chưa có khóa học gợi ý.</p>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-3">
-            {courses.map((c) => (
-              <div key={c.id} className="rounded-lg border bg-white overflow-hidden hover:shadow-md transition-shadow">
-                <div className={`h-32 bg-gradient-to-br ${c.thumb} flex items-center justify-center`}>
-                  <BookOpen className="h-12 w-12 text-white/80" />
-                </div>
-                <div className="p-4 space-y-3">
-                  <h3 className="font-semibold text-sm leading-snug line-clamp-2 min-h-[2.5rem]">{c.title}</h3>
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">{c.progress === 0 ? "Chưa bắt đầu" : "Đang học"}</span>
-                      <span className="font-semibold">{c.progress}%</span>
-                    </div>
-                    <Progress value={c.progress} className="h-1.5" />
-                  </div>
-                  <Button asChild size="sm" className="w-full bg-blue-600 hover:bg-blue-700">
-                    <Link to="/my-learning-paths">{c.progress === 0 ? "Bắt đầu" : "Tiếp tục"}</Link>
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-// ─── Student insights computed from real data ──────────────────────────
-type Path = { path_title: string; total_lessons: number; completed_lessons: number } | null;
-
-function StudentInsightsLive({
-  orgId, xp, todayTasks, activePath,
-}: { orgId: string; xp: number; todayTasks: Task[]; activePath: Path }) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["student-insights", orgId, xp, todayTasks.length, activePath?.completed_lessons ?? 0],
-    queryFn: async (): Promise<ActionableInsight[]> => {
-      const insights: ActionableInsight[] = [];
-
-      // 1) Bài kiểm tra/việc gấp chưa nộp
-      const urgent = todayTasks.filter((t) => t.urgent);
-      if (urgent.length > 0) {
-        const quizUrgent = urgent.find((t) => t.type === "quiz");
-        insights.push({
-          severity: "warning",
-          title: quizUrgent
-            ? `Bạn còn ${urgent.length} bài kiểm tra chưa nộp — hạn hôm nay`
-            : `Bạn còn ${urgent.length} việc cần hoàn thành hôm nay`,
-          detail: quizUrgent
-            ? `"${quizUrgent.title}" đến hạn hôm nay — nộp ngay để không mất điểm chuyên cần.`
-            : "Hoàn thành sớm để không bị trễ tiến độ học tuần này.",
-          ctaLabel: quizUrgent ? "Làm bài ngay" : "Xem việc cần làm",
-          to: quizUrgent ? "/my-assignments" : "/my-learning-paths",
+        const pathCourseMap = new Map<string, string[]>();
+        (stages ?? []).forEach((s: any) => {
+          const arr = pathCourseMap.get(s.learning_path_id) ?? [];
+          (s.learning_path_stage_courses ?? []).forEach((sc: any) => arr.push(sc.course_id));
+          pathCourseMap.set(s.learning_path_id, arr);
         });
-      }
 
-      // 2) Lộ trình còn bài chưa học
-      if (activePath && activePath.completed_lessons < activePath.total_lessons) {
-        const remaining = activePath.total_lessons - activePath.completed_lessons;
-        insights.push({
-          severity: "info",
-          title: `Lộ trình "${activePath.path_title}" còn ${remaining} bài chưa học`,
-          detail: "Tiếp tục để giữ đà học tập và mở khóa lộ trình tiếp theo.",
-          ctaLabel: "Tiếp tục học",
-          to: "/my-learning-paths",
-        });
-      }
+        const allCourseIds = Array.from(new Set(Array.from(pathCourseMap.values()).flat()));
+        // course details
+        const { data: courses } = allCourseIds.length
+          ? await supabase.from("online_courses").select("id, title, cover_url").in("id", allCourseIds)
+          : { data: [] as any[] };
+        const courseMap = new Map((courses ?? []).map((c: any) => [c.id, c]));
 
-      // 3) XP — sắp lên hạng
-      const { current, next } = computeRank(xp);
-      if (next.min > current.min) {
-        const remainXp = next.min - xp;
-        if (remainXp > 0 && remainXp <= 300) {
-          insights.push({
-            severity: "info",
-            title: `Bạn sắp lên hạng ${next.name} — còn ${remainXp} XP nữa`,
-            detail: "Vài bài học nữa là bạn được nâng hạng và mở huy hiệu mới.",
-            ctaLabel: "Xem lộ trình thăng hạng",
-            to: "/my-gamification",
-          });
+        // user enrollment per course
+        const { data: ces } = allCourseIds.length
+          ? await supabase
+              .from("course_enrollments")
+              .select("course_id, status, progress, updated_at")
+              .eq("user_id", userId!)
+              .eq("org_id", orgId)
+              .in("course_id", allCourseIds)
+          : { data: [] as any[] };
+        const ceMap = new Map((ces ?? []).map((e: any) => [e.course_id, e]));
+
+        // build totals + continue list
+        for (const p of paths) {
+          const ids = pathCourseMap.get(p.id) ?? [];
+          p.total = ids.length;
+          p.done = ids.filter(id => ceMap.get(id)?.status === "completed").length;
+          for (const cid of ids) {
+            const ce = ceMap.get(cid) as any;
+            const course = courseMap.get(cid) as any;
+            if (!course) continue;
+            if (ce?.status === "completed") continue;
+            continueCourses.push({
+              id: cid,
+              title: course.title,
+              cover: course.cover_url || null,
+              pathTitle: p.title,
+              progress: ce?.progress ?? 0,
+              status: ce?.status === "in_progress" ? "in_progress" : "not_started",
+              locked: false,
+            });
+          }
         }
+        // sort: in_progress first by updated_at desc, then not_started
+        continueCourses.sort((a, b) => {
+          if (a.status !== b.status) return a.status === "in_progress" ? -1 : 1;
+          const ua = (ceMap.get(a.id) as any)?.updated_at ?? "";
+          const ub = (ceMap.get(b.id) as any)?.updated_at ?? "";
+          return ub.localeCompare(ua);
+        });
       }
 
-      // 4) Chứng nhận sắp hết hạn (dựa vào certificates org-wide gần nhất)
-      const certs = await supabase
-        .from("certificates")
-        .select("title, valid_months, updated_at")
+      // 3) Upcoming
+      const nowIso = new Date().toISOString();
+      const upcoming: Upcoming[] = [];
+
+      // Classroom sessions where user is a student
+      const { data: cs } = await supabase
+        .from("classroom_students")
+        .select("classroom_id, classrooms(id, title, delivery, meeting_url, code)")
+        .eq("user_id", userId!)
+        .eq("org_id", orgId);
+      const classroomIds = (cs ?? []).map((r: any) => r.classroom_id);
+      const classroomMap = new Map((cs ?? []).map((r: any) => [r.classroom_id, r.classrooms]));
+
+      if (classroomIds.length) {
+        const { data: sessions } = await supabase
+          .from("classroom_sessions")
+          .select("id, classroom_id, title, start_at, end_at, meeting_url")
+          .in("classroom_id", classroomIds)
+          .gte("start_at", nowIso)
+          .order("start_at", { ascending: true })
+          .limit(20);
+        (sessions ?? []).forEach((s: any) => {
+          const cr = classroomMap.get(s.classroom_id) as any;
+          const delivery = cr?.delivery ?? "offline";
+          const t: UpcomingType = s.meeting_url ? "live" : delivery === "online" ? "online" : "offline";
+          upcoming.push({
+            id: s.id,
+            type: t,
+            title: s.title || cr?.title || "Buổi học",
+            start: s.start_at,
+            end: s.end_at,
+            link: `/class-room/${cr?.code || cr?.id}`,
+          });
+        });
+      }
+
+      // Exam assignments
+      const { data: exams } = await supabase
+        .from("exam_assignments")
+        .select("id, exam_snapshot, deadline, student_ids")
         .eq("org_id", orgId)
         .eq("status", "active")
-        .order("updated_at", { ascending: false })
-        .limit(1);
-      const c = certs.data?.[0];
-      if (c) {
-        const issued = new Date(c.updated_at as string);
-        const expire = new Date(issued);
-        expire.setMonth(expire.getMonth() + (c.valid_months ?? 12));
-        const daysLeft = Math.round((expire.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-        if (daysLeft <= 30 && daysLeft > 0) {
-          insights.push({
-            severity: "warning",
-            title: `Chứng nhận ${c.title} sắp hết hạn sau ${daysLeft} ngày`,
-            detail: "Cần gia hạn để tiếp tục đứng quầy theo quy định nội bộ.",
-            ctaLabel: "Gia hạn ngay",
-            to: "/my-certificates",
-          });
-        }
-      }
+        .contains("student_ids", [userId!])
+        .gte("deadline", nowIso)
+        .order("deadline", { ascending: true })
+        .limit(20);
+      (exams ?? []).forEach((e: any) => {
+        upcoming.push({
+          id: e.id,
+          type: "quiz",
+          title: e.exam_snapshot?.title || "Bài kiểm tra",
+          start: e.deadline,
+          end: null,
+          link: "/my-assignments",
+        });
+      });
 
-      return insights;
+      upcoming.sort((a, b) => a.start.localeCompare(b.start));
+
+      return { paths, continue: continueCourses, upcoming };
     },
   });
 
-  return (
-    <TeamInsightsCard
-      variant="student"
-      title="Việc nên làm tiếp theo"
-      insights={data ?? []}
-      loading={isLoading}
-    />
-  );
+  const titles = (gamQ.data ?? []).filter(g => g.type === "title" && g.active).sort((a, b) => (a.xp_required || 0) - (b.xp_required || 0));
+  const xp = xpQ.data?.xp ?? 0;
+  const currentTitle = (gamQ.data ?? []).find(g => g.id === titleQ.data?.title_id);
+  const nextT = titles.find(t => (t.xp_required || 0) > xp);
+  const myRank = lbQ.data?.find(r => r.user_id === userId)?.rank ?? null;
+
+  return {
+    isLoading: overviewQ.isLoading,
+    data: overviewQ.data
+      ? {
+          ...overviewQ.data,
+          xp,
+          titleName: currentTitle?.title ?? null,
+          nextTitle: nextT ? { title: nextT.title, xp_required: nextT.xp_required || 0 } : null,
+          myRank,
+        }
+      : undefined,
+  };
 }
