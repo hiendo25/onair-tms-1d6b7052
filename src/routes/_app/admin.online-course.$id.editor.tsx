@@ -64,6 +64,7 @@ function CourseEditor() {
       duration_minutes: c.duration_minutes, cover_url: c.cover_url,
       author_id: c.author_id, author_name: c.author_name, status: c.status,
     });
+    setCertificateId((c as any).certificate_id || "");
     const secs: EditorSection[] = existing.data.sections.map((s) => ({
       id: s.id, title: s.title, description: s.description, sort_order: s.sort_order,
       lessons: existing.data.lessons.filter((l) => l.section_id === s.id).map((l) => ({
