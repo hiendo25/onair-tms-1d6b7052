@@ -9,8 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import {
   useSurveys, useSurveyMutations, useSurveyQuestions, useSurveyQuestionMutations,
@@ -31,7 +29,6 @@ type LocalQuestion = {
   type: string;
   content: string;
   options: string[];
-  correct_answer: number[] | string | null;
   required: boolean;
   order_index: number;
 };
@@ -76,7 +73,6 @@ function Page() {
       setQuestions(mine.map(q => ({
         id: q.id, type: q.type, content: q.content,
         options: Array.isArray(q.options) ? (q.options as string[]) : [],
-        correct_answer: q.correct_answer as number[] | string | null,
         required: q.required, order_index: q.order_index,
       })));
     }
@@ -85,7 +81,7 @@ function Page() {
   function addQuestion() {
     setQuestions(prev => [...prev, {
       type: "single", content: "", options: defaultOptionsFor("single"),
-      correct_answer: null, required: true, order_index: prev.length,
+      required: true, order_index: prev.length,
     }]);
   }
 
@@ -95,7 +91,6 @@ function Page() {
       const next = { ...q, ...patch };
       if (patch.type && patch.type !== q.type) {
         next.options = defaultOptionsFor(patch.type);
-        next.correct_answer = null;
       }
       return next;
     }));
@@ -117,9 +112,7 @@ function Page() {
         const valid = q.options.filter(o => o.trim());
         if (valid.length < 2) return `Câu ${i + 1}: cần ≥ 2 đáp án`;
       }
-      if (q.type === "single" && (q.correct_answer == null)) return `Câu ${i + 1}: chọn 1 đáp án đúng`;
-      if (q.type === "multiple" && (!Array.isArray(q.correct_answer) || (q.correct_answer as number[]).length === 0)) return `Câu ${i + 1}: chọn ≥ 1 đáp án đúng`;
-      if (q.type === "yes_no" && q.correct_answer == null) return `Câu ${i + 1}: chọn đáp án đúng`;
+
     }
     return null;
   }
@@ -174,7 +167,6 @@ function Page() {
       await qm.create.mutateAsync({
         survey_id: surveyId, type: q.type, content: q.content.trim(),
         options: validOpts as unknown as DBSurveyQuestion["options"],
-        correct_answer: q.correct_answer as DBSurveyQuestion["correct_answer"],
         required: q.required, order_index: i,
       });
     }
@@ -265,11 +257,7 @@ function QuestionEditor({ index, value, onChange, onRemove }: {
   }
   function addOption() { onChange({ options: [...value.options, ""] }); }
   function removeOption(i: number) {
-    const correct = value.correct_answer;
-    let nextCorrect = correct;
-    if (Array.isArray(correct)) nextCorrect = (correct as number[]).filter(c => c !== i).map(c => c > i ? c - 1 : c);
-    else if (typeof correct === "number" && correct === i) nextCorrect = null;
-    onChange({ options: value.options.filter((_, idx) => idx !== i), correct_answer: nextCorrect as number[] | string | null });
+    onChange({ options: value.options.filter((_, idx) => idx !== i) });
   }
 
   return (
@@ -296,53 +284,26 @@ function QuestionEditor({ index, value, onChange, onRemove }: {
 
           {showOptions && (
             <div className="space-y-2">
-              {value.type === "single" || value.type === "yes_no" ? (
-                <RadioGroup
-                  value={Array.isArray(value.correct_answer) && value.correct_answer.length ? String((value.correct_answer as number[])[0]) : ""}
-                  onValueChange={(v) => onChange({ correct_answer: [Number(v)] as unknown as number[] })}
-                >
-                  {value.options.map((o, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <RadioGroupItem value={String(i)} />
-                      <Input value={o} disabled={!editableOptions}
-                        onChange={e => setOption(i, e.target.value)}
-                        placeholder={`Đáp án ${i + 1}`} />
-                      {editableOptions && value.options.length > 2 && (
-                        <Button size="icon" variant="ghost" onClick={() => removeOption(i)}><Trash2 className="h-4 w-4" /></Button>
-                      )}
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : value.type === "multiple" ? (
-                value.options.map((o, i) => {
-                  const arr = Array.isArray(value.correct_answer) ? (value.correct_answer as number[]) : [];
-                  const checked = arr.includes(i);
-                  return (
-                    <div key={i} className="flex items-center gap-2">
-                      <Checkbox checked={checked} onCheckedChange={(v) => {
-                        const next = v ? [...arr, i] : arr.filter(c => c !== i);
-                        onChange({ correct_answer: next });
-                      }} />
-                      <Input value={o} onChange={e => setOption(i, e.target.value)} placeholder={`Đáp án ${i + 1}`} />
-                      {value.options.length > 2 && (
-                        <Button size="icon" variant="ghost" onClick={() => removeOption(i)}><Trash2 className="h-4 w-4" /></Button>
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                value.options.map((o, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="w-6 text-center text-xs text-muted-foreground">#{i + 1}</span>
-                    <Input value={o} onChange={e => setOption(i, e.target.value)} placeholder={`Lựa chọn ${i + 1}`} />
-                    {value.options.length > 2 && (
-                      <Button size="icon" variant="ghost" onClick={() => removeOption(i)}><Trash2 className="h-4 w-4" /></Button>
-                    )}
-                  </div>
-                ))
-              )}
+              {value.options.map((o, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="w-6 shrink-0 text-center text-xs text-muted-foreground">{i + 1}.</span>
+                  <Input
+                    value={o}
+                    disabled={!editableOptions}
+                    onChange={e => setOption(i, e.target.value)}
+                    placeholder={`Lựa chọn ${i + 1}`}
+                  />
+                  {editableOptions && value.options.length > 2 && (
+                    <Button size="icon" variant="ghost" onClick={() => removeOption(i)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              ))}
               {editableOptions && (
-                <Button size="sm" variant="outline" onClick={addOption}><Plus className="h-4 w-4" /> Thêm đáp án</Button>
+                <Button size="sm" variant="outline" onClick={addOption}>
+                  <Plus className="h-4 w-4" /> Thêm lựa chọn
+                </Button>
               )}
             </div>
           )}
