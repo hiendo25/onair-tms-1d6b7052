@@ -29,7 +29,7 @@ function Page() {
   return (
     <PageContainer
       title="Danh sách danh hiệu"
-      breadcrumbs={[{ title: "Thưởng", href: "/my-gamification" }, { title: "Danh hiệu" }]}
+      breadcrumbs={[{ title: "Thưởng", path: "/my-gamification" }, { title: "Danh hiệu" }]}
       actions={<Link to="/my-gamification"><Button variant="outline" size="sm">← Quay lại</Button></Link>}
     >
       <Card>
