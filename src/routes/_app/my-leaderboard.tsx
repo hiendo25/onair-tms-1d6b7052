@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trophy, AlertCircle } from "lucide-react";
+import { useState } from "react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { useLeaderboard, useMyRank } from "@/lib/data-hooks";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLeaderboard, useMyRank, type LeaderboardScope } from "@/lib/data-hooks";
 import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/_app/my-leaderboard")({
@@ -15,8 +17,9 @@ export const Route = createFileRoute("/_app/my-leaderboard")({
 
 function Page() {
   const { user } = useAuth();
-  const lbQ = useLeaderboard(100);
-  const myRankQ = useMyRank();
+  const [scope, setScope] = useState<LeaderboardScope>("department");
+  const lbQ = useLeaderboard(100, scope);
+  const myRankQ = useMyRank(scope);
   const myInList = (lbQ.data ?? []).some((r) => r.user_id === user?.id);
 
   return (
@@ -27,9 +30,20 @@ function Page() {
     >
       <Card>
         <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-            <Trophy className="h-4 w-4" />Xếp hạng theo điểm học tập trong tổ chức
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Trophy className="h-4 w-4" />Xếp hạng theo điểm học tập
+            </div>
+            <Tabs value={scope} onValueChange={(v) => setScope(v as LeaderboardScope)}>
+              <TabsList>
+                <TabsTrigger value="department">Phòng ban</TabsTrigger>
+                <TabsTrigger value="org">Toàn tổ chức</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </div>
+          {scope === "department" && myRankQ.data && !myRankQ.data.department && (
+            <Alert className="mb-4"><AlertDescription>Bạn chưa được gán vào phòng ban nào. Liên hệ quản trị viên để cập nhật.</AlertDescription></Alert>
+          )}
           {lbQ.isLoading ? (
             <div className="space-y-2">{[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
           ) : lbQ.error ? (
@@ -45,9 +59,12 @@ function Page() {
                 return (
                   <div key={r.user_id} className={`flex items-center gap-3 rounded-md border p-3 ${me ? "border-primary bg-primary/5" : top ? "bg-amber-50/40" : ""}`}>
                     <div className="w-10 text-center text-lg font-bold">{medal || `#${r.rank}`}</div>
-                    <div className="flex-1 font-medium truncate">
-                      {r.profile?.full_name || "—"}
-                      {me && <span className="ml-2 text-xs text-primary">(Bạn)</span>}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">
+                        {r.profile?.full_name || "—"}
+                        {me && <span className="ml-2 text-xs text-primary">(Bạn)</span>}
+                      </div>
+                      {r.department && <div className="text-xs text-muted-foreground truncate">Phòng: {r.department}</div>}
                     </div>
                     <div className="font-mono font-semibold">{r.xp.toLocaleString()} điểm</div>
                   </div>
