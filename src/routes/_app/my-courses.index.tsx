@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Clock, Play, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
@@ -8,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
-import { useAuthUser } from "@/lib/auth";
 
 export const Route = createFileRoute("/_app/my-courses/")({
   head: () => ({ meta: [{ title: "Khóa học của tôi — OnAir TMS" }] }),
@@ -17,16 +17,16 @@ export const Route = createFileRoute("/_app/my-courses/")({
 
 function MyCourses() {
   const { orgId } = useOrg();
-  const user = useAuthUser();
+  const [userId, setUserId] = useState<string | null>(null);
+  useEffect(() => { supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null)); }, []);
 
   const courses = useQuery({
-    queryKey: ["my-courses", orgId, user?.id],
-    enabled: !!user?.id,
+    queryKey: ["my-courses", orgId, userId],
+    enabled: !!userId,
     queryFn: async () => {
-      // All published courses in org + enrollment progress
       const [{ data: courseRows }, { data: enrollRows }] = await Promise.all([
         supabase.from("online_courses").select("*").eq("org_id", orgId).eq("status", "published").order("created_at", { ascending: false }),
-        supabase.from("course_enrollments").select("*").eq("user_id", user!.id),
+        supabase.from("course_enrollments").select("*").eq("user_id", userId!),
       ]);
       const enrollMap = new Map((enrollRows ?? []).map((e) => [e.course_id, e]));
       return (courseRows ?? []).map((c) => ({ ...c, enrollment: enrollMap.get(c.id) }));
