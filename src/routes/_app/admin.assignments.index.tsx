@@ -144,5 +144,3 @@ function Page() {
   );
 }
 
-// keep unused legacy badge import resolved
-void Badge;
