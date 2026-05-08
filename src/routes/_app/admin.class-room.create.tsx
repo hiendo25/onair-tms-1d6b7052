@@ -191,6 +191,7 @@ function Page() {
         start_at: seriesStart || null, end_at: seriesEnd || null,
         start_date: seriesStart ? seriesStart.slice(0, 10) : null,
         end_date: seriesEnd ? seriesEnd.slice(0, 10) : null,
+        certificate_id: certificateId || null,
       } as never).select("id").single();
       if (error || !created) throw error ?? new Error("Insert failed");
       const classroomId = (created as { id: string }).id;
