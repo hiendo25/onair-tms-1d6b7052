@@ -103,6 +103,8 @@ function Page() {
   const [empDept, setEmpDept] = useState("all");
   const [qrStart, setQrStart] = useState(15);
   const [qrEnd, setQrEnd] = useState(15);
+  const [flashcardIds, setFlashcardIds] = useState<string[]>([]);
+  const { data: flashcards = [] } = useFlashcards();
 
   const { data: courses = [] } = useOnlineCourses();
   const { data: assignments = [] } = useAssignments();
