@@ -78,6 +78,7 @@ import { Route as AppAdminSurveysIdSubmissionsRouteImport } from './routes/_app/
 import { Route as AppAdminSurveysIdStatisticsRouteImport } from './routes/_app/admin.surveys.$id.statistics'
 import { Route as AppAdminSurveysIdEditRouteImport } from './routes/_app/admin.surveys.$id.edit'
 import { Route as AppAdminPlansIdEditRouteImport } from './routes/_app/admin.plans.$id.edit'
+import { Route as AppAdminOnlineCourseIdEditorRouteImport } from './routes/_app/admin.online-course.$id.editor'
 import { Route as AppAdminOnlineCourseIdEditRouteImport } from './routes/_app/admin.online-course.$id.edit'
 import { Route as AppAdminLearningPathsEditIdRouteImport } from './routes/_app/admin.learning-paths.edit.$id'
 import { Route as AppAdminFlashcardsIdEditRouteImport } from './routes/_app/admin.flashcards.$id.edit'
@@ -458,6 +459,12 @@ const AppAdminPlansIdEditRoute = AppAdminPlansIdEditRouteImport.update({
   path: '/admin/plans/$id/edit',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminOnlineCourseIdEditorRoute =
+  AppAdminOnlineCourseIdEditorRouteImport.update({
+    id: '/admin/online-course/$id/editor',
+    path: '/admin/online-course/$id/editor',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppAdminOnlineCourseIdEditRoute =
   AppAdminOnlineCourseIdEditRouteImport.update({
     id: '/admin/online-course/$id/edit',
@@ -615,6 +622,7 @@ export interface FileRoutesByFullPath {
   '/admin/flashcards/$id/edit': typeof AppAdminFlashcardsIdEditRoute
   '/admin/learning-paths/edit/$id': typeof AppAdminLearningPathsEditIdRoute
   '/admin/online-course/$id/edit': typeof AppAdminOnlineCourseIdEditRoute
+  '/admin/online-course/$id/editor': typeof AppAdminOnlineCourseIdEditorRoute
   '/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
   '/admin/surveys/$id/edit': typeof AppAdminSurveysIdEditRoute
   '/admin/surveys/$id/statistics': typeof AppAdminSurveysIdStatisticsRoute
@@ -700,6 +708,7 @@ export interface FileRoutesByTo {
   '/admin/flashcards/$id/edit': typeof AppAdminFlashcardsIdEditRoute
   '/admin/learning-paths/edit/$id': typeof AppAdminLearningPathsEditIdRoute
   '/admin/online-course/$id/edit': typeof AppAdminOnlineCourseIdEditRoute
+  '/admin/online-course/$id/editor': typeof AppAdminOnlineCourseIdEditorRoute
   '/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
   '/admin/surveys/$id/edit': typeof AppAdminSurveysIdEditRoute
   '/admin/surveys/$id/statistics': typeof AppAdminSurveysIdStatisticsRoute
@@ -787,6 +796,7 @@ export interface FileRoutesById {
   '/_app/admin/flashcards/$id/edit': typeof AppAdminFlashcardsIdEditRoute
   '/_app/admin/learning-paths/edit/$id': typeof AppAdminLearningPathsEditIdRoute
   '/_app/admin/online-course/$id/edit': typeof AppAdminOnlineCourseIdEditRoute
+  '/_app/admin/online-course/$id/editor': typeof AppAdminOnlineCourseIdEditorRoute
   '/_app/admin/plans/$id/edit': typeof AppAdminPlansIdEditRoute
   '/_app/admin/surveys/$id/edit': typeof AppAdminSurveysIdEditRoute
   '/_app/admin/surveys/$id/statistics': typeof AppAdminSurveysIdStatisticsRoute
@@ -874,6 +884,7 @@ export interface FileRouteTypes {
     | '/admin/flashcards/$id/edit'
     | '/admin/learning-paths/edit/$id'
     | '/admin/online-course/$id/edit'
+    | '/admin/online-course/$id/editor'
     | '/admin/plans/$id/edit'
     | '/admin/surveys/$id/edit'
     | '/admin/surveys/$id/statistics'
@@ -959,6 +970,7 @@ export interface FileRouteTypes {
     | '/admin/flashcards/$id/edit'
     | '/admin/learning-paths/edit/$id'
     | '/admin/online-course/$id/edit'
+    | '/admin/online-course/$id/editor'
     | '/admin/plans/$id/edit'
     | '/admin/surveys/$id/edit'
     | '/admin/surveys/$id/statistics'
@@ -1045,6 +1057,7 @@ export interface FileRouteTypes {
     | '/_app/admin/flashcards/$id/edit'
     | '/_app/admin/learning-paths/edit/$id'
     | '/_app/admin/online-course/$id/edit'
+    | '/_app/admin/online-course/$id/editor'
     | '/_app/admin/plans/$id/edit'
     | '/_app/admin/surveys/$id/edit'
     | '/_app/admin/surveys/$id/statistics'
@@ -1561,6 +1574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminPlansIdEditRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/online-course/$id/editor': {
+      id: '/_app/admin/online-course/$id/editor'
+      path: '/admin/online-course/$id/editor'
+      fullPath: '/admin/online-course/$id/editor'
+      preLoaderRoute: typeof AppAdminOnlineCourseIdEditorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/online-course/$id/edit': {
       id: '/_app/admin/online-course/$id/edit'
       path: '/admin/online-course/$id/edit'
@@ -1792,6 +1812,7 @@ interface AppRouteChildren {
   AppAdminFlashcardsIdEditRoute: typeof AppAdminFlashcardsIdEditRoute
   AppAdminLearningPathsEditIdRoute: typeof AppAdminLearningPathsEditIdRoute
   AppAdminOnlineCourseIdEditRoute: typeof AppAdminOnlineCourseIdEditRoute
+  AppAdminOnlineCourseIdEditorRoute: typeof AppAdminOnlineCourseIdEditorRoute
   AppAdminPlansIdEditRoute: typeof AppAdminPlansIdEditRoute
   AppAdminSurveysIdEditRoute: typeof AppAdminSurveysIdEditRoute
   AppAdminSurveysIdStatisticsRoute: typeof AppAdminSurveysIdStatisticsRoute
@@ -1861,6 +1882,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminFlashcardsIdEditRoute: AppAdminFlashcardsIdEditRoute,
   AppAdminLearningPathsEditIdRoute: AppAdminLearningPathsEditIdRoute,
   AppAdminOnlineCourseIdEditRoute: AppAdminOnlineCourseIdEditRoute,
+  AppAdminOnlineCourseIdEditorRoute: AppAdminOnlineCourseIdEditorRoute,
   AppAdminPlansIdEditRoute: AppAdminPlansIdEditRoute,
   AppAdminSurveysIdEditRoute: AppAdminSurveysIdEditRoute,
   AppAdminSurveysIdStatisticsRoute: AppAdminSurveysIdStatisticsRoute,

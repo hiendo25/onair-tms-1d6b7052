@@ -121,7 +121,7 @@ function CourseEditor() {
           const lessonRows = sec.lessons.map((l) => ({
             org_id: orgId, course_id: courseId, section_id: secRow.id,
             title: l.title, description: l.description, lesson_type: l.lesson_type,
-            content_url: l.content_url, content_meta: l.content_meta,
+            content_url: l.content_url, content_meta: l.content_meta as never,
             quiz_assignment_id: l.quiz_assignment_id, duration_seconds: l.duration_seconds,
             sort_order: l.sort_order, status: "active",
           }));
