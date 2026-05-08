@@ -84,6 +84,7 @@ function Page() {
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="not_yet_open">Chưa mở</SelectItem>
                 <SelectItem value="not_started">Chưa làm</SelectItem>
                 <SelectItem value="in_progress">Đang làm</SelectItem>
                 <SelectItem value="submitted">Đã nộp</SelectItem>
