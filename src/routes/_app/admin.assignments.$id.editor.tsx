@@ -1,23 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Search, Upload } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useAssignments, useAssignmentMutations, useQuestions, useExamQuestions, useExamQuestionMutations,
   type DBAssignment,
 } from "@/lib/data-hooks";
-import { ASSIGNMENT_STATUS } from "@/lib/admin-options";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/editor")({
@@ -37,33 +33,30 @@ function Page() {
   const existing = useMemo(() => rows.find(r => r.id === id), [rows, id]);
 
   const [title, setTitle] = useState("");
-  const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
-  const [timeLimit, setTimeLimit] = useState<number | "">(30);
-  const [maxAttempts, setMaxAttempts] = useState<number | "">(1);
-  const [passScore, setPassScore] = useState(70);
-  const [shuffleQ, setShuffleQ] = useState(false);
+  const [timeLimit, setTimeLimit] = useState<number | "">(45);
+  const [noTimeLimit, setNoTimeLimit] = useState(false);
+  const [passScore, setPassScore] = useState<number | "">(80);
+  const [shuffleQ, setShuffleQ] = useState(true);
   const [shuffleA, setShuffleA] = useState(false);
-  const [showResults, setShowResults] = useState(true);
-  const [status, setStatus] = useState("draft");
+  const [hideAnswers, setHideAnswers] = useState(false);
   const [picked, setPicked] = useState<{ question_id: string; points: number; sort_order: number }[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     if (existing) {
-      setTitle(existing.title); setCode(existing.code); setDescription(existing.description);
+      setTitle(existing.title); setDescription(existing.description);
       setTimeLimit(existing.time_limit_minutes ?? "");
-      setMaxAttempts(existing.max_attempts ?? "");
+      setNoTimeLimit(existing.time_limit_minutes == null);
       setPassScore(existing.pass_score);
       setShuffleQ(existing.shuffle_questions); setShuffleA(existing.shuffle_answers);
-      setShowResults(existing.show_results); setStatus(existing.status);
+      setHideAnswers(!existing.show_results);
     }
   }, [existing]);
 
   useEffect(() => {
     if (!isNew && existing) {
-      const mine = links.filter(l => l.assignment_id === existing.id)
-        .sort((a, b) => a.sort_order - b.sort_order);
+      const mine = links.filter(l => l.assignment_id === existing.id).sort((a, b) => a.sort_order - b.sort_order);
       setPicked(mine.map(l => ({ question_id: l.question_id, points: l.points, sort_order: l.sort_order })));
     }
   }, [links, existing, isNew]);
@@ -72,29 +65,29 @@ function Page() {
   const overLimit = totalPoints > 100;
 
   async function save() {
-    if (!title.trim()) return toast.error("Tên bài là bắt buộc");
-    if (!code.trim()) return toast.error("Mã bài là bắt buộc");
+    if (!title.trim()) return toast.error("Tên bài kiểm tra là bắt buộc");
+    if (!description.trim()) return toast.error("Mô tả là bắt buộc");
     if (overLimit) return toast.error("Tổng điểm vượt quá 100");
     const payload: Partial<DBAssignment> = {
-      title: title.trim(), code: code.trim(), description, type: "quiz",
-      time_limit_minutes: timeLimit === "" ? null : Number(timeLimit),
-      max_attempts: maxAttempts === "" ? null : Number(maxAttempts),
-      pass_score: passScore, shuffle_questions: shuffleQ, shuffle_answers: shuffleA,
-      show_results: showResults, status, total_questions: picked.length,
-      total_points: totalPoints,
+      title: title.trim(),
+      code: existing?.code || `EX-${Date.now().toString().slice(-6)}`,
+      description, type: "quiz",
+      time_limit_minutes: noTimeLimit || timeLimit === "" ? null : Number(timeLimit),
+      max_attempts: existing?.max_attempts ?? 1,
+      pass_score: passScore === "" ? 0 : Number(passScore),
+      shuffle_questions: shuffleQ, shuffle_answers: shuffleA,
+      show_results: !hideAnswers, status: existing?.status || "draft",
+      total_questions: picked.length, total_points: totalPoints,
     };
     let targetId = existing?.id;
     if (isNew) {
       await am.create.mutateAsync(payload);
-      // need fresh id; refetched rows aren't directly returned. Skip linking here; user can re-edit to add questions.
-      toast.success("Đã tạo. Mở lại bản ghi để thêm câu hỏi.");
+      toast.success("Đã tạo. Mở lại để chọn câu hỏi.");
       nav({ to: "/admin/assignments" });
       return;
-    } else {
-      await am.update.mutateAsync({ id: existing!.id, ...payload });
     }
+    await am.update.mutateAsync({ id: existing!.id, ...payload });
     if (targetId) {
-      // Replace links: delete old then insert new
       const old = links.filter(l => l.assignment_id === targetId);
       for (const o of old) await lm.remove.mutateAsync(o.id);
       for (const p of picked) {
@@ -108,42 +101,39 @@ function Page() {
   return (
     <PageContainer
       title={isNew ? "Tạo bài kiểm tra" : `Sửa: ${existing?.title ?? ""}`}
-      breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Ngân hàng bài KT", path: "/admin/assignments" }, { title: isNew ? "Tạo" : "Sửa" }]}
-      actions={<Button variant="outline" asChild><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" /> Quay lại</Link></Button>}
+      breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: isNew ? "Tạo bài kiểm tra" : "Sửa bài kiểm tra" }]}
     >
-      <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">Thông tin</TabsTrigger>
-          <TabsTrigger value="questions">Câu hỏi ({picked.length}) — {totalPoints}/100đ</TabsTrigger>
-          <TabsTrigger value="settings">Thiết lập</TabsTrigger>
-        </TabsList>
+      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+        {/* MAIN */}
+        <Card className="space-y-5 p-6">
+          <div>
+            <Label>Tên bài kiểm tra <span className="text-destructive">*</span></Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} maxLength={100} placeholder="Nhập tên bài kiểm tra" />
+            <div className="mt-1 text-xs text-muted-foreground">Tối đa 100 ký tự</div>
+          </div>
+          <div>
+            <Label>Mô tả <span className="text-destructive">*</span></Label>
+            <Textarea rows={5} value={description} onChange={e => setDescription(e.target.value)} maxLength={500} placeholder="Nhập mô tả bài kiểm tra" />
+            <div className="mt-1 text-xs text-muted-foreground">Tối đa 500 ký tự</div>
+          </div>
 
-        <TabsContent value="info">
-          <Card className="space-y-4 p-5">
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div><Label>Tên bài kiểm tra *</Label><Input value={title} onChange={e => setTitle(e.target.value)} maxLength={200} /></div>
-              <div><Label>Mã bài *</Label><Input value={code} onChange={e => setCode(e.target.value)} maxLength={50} /></div>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <Label>Chọn câu hỏi <span className="text-destructive">*</span></Label>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled><Upload className="h-4 w-4" /> Import câu hỏi</Button>
+                <Button size="sm" onClick={() => setPickerOpen(true)} disabled={isNew}>Chọn câu hỏi ({picked.length})</Button>
+              </div>
             </div>
-            <div><Label>Mô tả</Label><Textarea rows={4} value={description} onChange={e => setDescription(e.target.value)} maxLength={1000} /></div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="questions">
-          <Card className="space-y-3 p-5">
-            <div className="flex items-center justify-between">
-              <div className="text-sm">Tổng câu: <strong>{picked.length}</strong> · Tổng điểm: <strong className={overLimit ? "text-destructive" : ""}>{totalPoints}</strong>/100</div>
-              <Button size="sm" onClick={() => setPickerOpen(true)} disabled={isNew}><Plus className="h-4 w-4" /> Thêm câu hỏi</Button>
-            </div>
-            {isNew && <div className="rounded border border-dashed p-3 text-sm text-muted-foreground">Lưu thông tin trước, sau đó mở lại để thêm câu hỏi.</div>}
+            {isNew && <div className="rounded border border-dashed p-3 text-sm text-muted-foreground">Lưu thông tin trước, sau đó mở lại để chọn câu hỏi.</div>}
             {overLimit && <div className="rounded border border-destructive/40 bg-destructive/10 p-2 text-sm text-destructive">Tổng điểm vượt 100. Hãy điều chỉnh.</div>}
-            <div className="space-y-2">
+            <div className="mt-2 space-y-2">
               {picked.map((p, idx) => {
                 const q = bank.find(b => b.id === p.question_id);
                 return (
                   <div key={p.question_id} className="flex items-center gap-2 rounded border p-2">
-                    <span className="text-xs text-muted-foreground w-6">#{idx + 1}</span>
-                    <div className="flex-1 truncate text-sm">{q?.title || q?.question || "(Câu hỏi đã xoá)"}</div>
-                    <Badge variant="outline">{q?.type}</Badge>
+                    <span className="w-6 text-xs text-muted-foreground">#{idx + 1}</span>
+                    <div className="flex-1 truncate text-sm">{q?.title || q?.question || "(Đã xoá)"}</div>
                     <Input type="number" className="w-20" min={1} max={100} value={p.points}
                       onChange={e => setPicked(prev => prev.map((x, i) => i === idx ? { ...x, points: Number(e.target.value) || 0 } : x))} />
                     <Button size="icon" variant="ghost" onClick={() => setPicked(prev => prev.filter((_, i) => i !== idx).map((x, i) => ({ ...x, sort_order: i })))}>
@@ -153,30 +143,47 @@ function Page() {
                 );
               })}
             </div>
-          </Card>
-        </TabsContent>
+          </div>
 
-        <TabsContent value="settings">
-          <Card className="grid gap-4 p-5 sm:grid-cols-2">
-            <div><Label>Thời gian (phút)</Label><Input type="number" min={1} value={timeLimit} onChange={e => setTimeLimit(e.target.value === "" ? "" : Number(e.target.value))} /></div>
-            <div><Label>Số lần làm tối đa</Label><Input type="number" min={1} value={maxAttempts} onChange={e => setMaxAttempts(e.target.value === "" ? "" : Number(e.target.value))} /></div>
-            <div><Label>Điểm đạt (%)</Label><Input type="number" min={0} max={100} value={passScore} onChange={e => setPassScore(Number(e.target.value))} /></div>
-            <div><Label>Trạng thái</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{ASSIGNMENT_STATUS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
-              </Select>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <Label>Thời gian làm bài (phút) <span className="text-destructive">*</span></Label>
+              <Input type="number" min={1} placeholder="45" disabled={noTimeLimit}
+                value={timeLimit} onChange={e => setTimeLimit(e.target.value === "" ? "" : Number(e.target.value))} />
             </div>
-            <label className="flex items-center justify-between rounded border p-2"><span>Trộn câu hỏi</span><Switch checked={shuffleQ} onCheckedChange={setShuffleQ} /></label>
-            <label className="flex items-center justify-between rounded border p-2"><span>Trộn đáp án</span><Switch checked={shuffleA} onCheckedChange={setShuffleA} /></label>
-            <label className="flex items-center justify-between rounded border p-2 sm:col-span-2"><span>Hiển thị kết quả sau khi nộp</span><Switch checked={showResults} onCheckedChange={setShowResults} /></label>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            <div>
+              <Label>Điểm đạt tối thiểu <span className="text-destructive">*</span></Label>
+              <Input type="number" min={0} max={100} placeholder="80"
+                value={passScore} onChange={e => setPassScore(e.target.value === "" ? "" : Number(e.target.value))} />
+            </div>
+          </div>
+          <label className="flex items-center gap-2 text-sm">
+            <Checkbox checked={noTimeLimit} onCheckedChange={(v) => setNoTimeLimit(!!v)} />
+            <span>Không giới hạn thời gian</span>
+          </label>
+        </Card>
 
-      <div className="flex justify-end gap-2">
-        <Button variant="outline" asChild><Link to="/admin/assignments">Huỷ</Link></Button>
-        <Button onClick={save} disabled={overLimit}>Lưu</Button>
+        {/* SIDE */}
+        <div className="space-y-4">
+          <Card className="space-y-3 p-5">
+            <div className="font-semibold">Cấu hình</div>
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={shuffleQ} onCheckedChange={(v) => setShuffleQ(!!v)} /> <span>Xáo trộn câu hỏi</span></label>
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={shuffleA} onCheckedChange={(v) => setShuffleA(!!v)} /> <span>Xáo trộn đáp án</span></label>
+            <label className="flex items-center gap-2 text-sm"><Checkbox checked={hideAnswers} onCheckedChange={(v) => setHideAnswers(!!v)} /> <span>Ẩn đáp án đúng khi xem kết quả</span></label>
+          </Card>
+          <Card className="space-y-2 p-5">
+            <div className="font-semibold">Thông tin tóm tắt</div>
+            <SumRow label="Số câu hỏi" value={String(picked.length)} />
+            <SumRow label="Tổng điểm" value={String(totalPoints)} danger={overLimit} />
+            <SumRow label="Thời gian (phút)" value={noTimeLimit ? "Không giới hạn" : (timeLimit === "" ? "--" : String(timeLimit))} />
+            <SumRow label="Điểm đạt tối thiểu" value={passScore === "" ? "--" : String(passScore)} />
+          </Card>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <Button variant="outline" asChild><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" /> Huỷ</Link></Button>
+        <Button onClick={save} disabled={overLimit}>Xác nhận</Button>
       </div>
 
       <QuestionPicker open={pickerOpen} onOpenChange={setPickerOpen}
@@ -193,6 +200,15 @@ function Page() {
           });
         }} />
     </PageContainer>
+  );
+}
+
+function SumRow({ label, value, danger }: { label: string; value: string; danger?: boolean }) {
+  return (
+    <div className="flex items-center justify-between text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-medium ${danger ? "text-destructive" : ""}`}>{value}</span>
+    </div>
   );
 }
 
@@ -233,3 +249,5 @@ function QuestionPicker({ open, onOpenChange, bank, excludeIds, onPick }: {
     </Dialog>
   );
 }
+
+void Plus;
