@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Upload, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, Upload, Download, ChevronLeft, ChevronRight, Mail, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEmployees, useEmployeeMutations, useBranches, useDepartments, useRoles, type DBEmployee } from "@/lib/data-hooks";
+import { useOrg } from "@/lib/org-context";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { ImportCsvDialog } from "@/components/admin/ImportCsvDialog";
@@ -17,6 +18,7 @@ import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDi
 import { employeeSchema, type EmployeeForm } from "@/lib/admin-schemas";
 import { EMPLOYEE_TYPE, STATUS_ACTIVE_INACTIVE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_app/admin/employees/")({
   head: () => ({ meta: [{ title: "Quản lý nhân viên — OnAir TMS" }] }),
@@ -38,6 +40,7 @@ function EmployeesPage() {
   const { data: departments = [] } = useDepartments();
   const { data: roles = [] } = useRoles();
   const m = useEmployeeMutations();
+  const { orgId } = useOrg();
 
   const [q, setQ] = useState("");
   const [branch, setBranch] = useState("all");
@@ -49,11 +52,34 @@ function EmployeesPage() {
   const [open, setOpen] = useState(false);
   const [delId, setDelId] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
+  const [inviting, setInviting] = useState<string | null>(null);
+  const [invited, setInvited] = useState<Set<string>>(new Set());
+
+  async function sendInvite(emp: DBEmployee) {
+    if (!emp.email) { toast.error("Nhân viên chưa có email."); return; }
+    setInviting(emp.id);
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("invite-employee", {
+        body: { email: emp.email, name: emp.name, employeeId: emp.id, orgId },
+      });
+      if (fnErr || res?.error) throw new Error(fnErr?.message ?? res?.error);
+      setInvited((prev) => new Set([...prev, emp.id]));
+      toast.success(`Đã gửi lời mời đến ${emp.email}`);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Gửi invite thất bại.");
+    } finally {
+      setInviting(null);
+    }
+  }
 
   const branchOpts = useMemo(() => branches.map((b) => ({ value: b.name, label: b.name })), [branches]);
   const deptOpts = useMemo(
     () => departments
-      .filter((d) => branch === "all" || d.branch === branch)
+      .filter((d) => {
+        if (branch === "all") return true;
+        // exact match first, then partial (handles text mismatch in DB)
+        return d.branch === branch || d.branch?.includes(branch) || branch?.includes(d.branch ?? "");
+      })
       .map((d) => ({ value: d.name, label: d.name })),
     [departments, branch],
   );
@@ -145,12 +171,13 @@ function EmployeesPage() {
               <TableHead>Chi nhánh</TableHead>
               <TableHead>Loại người dùng</TableHead>
               <TableHead>Trạng thái</TableHead>
+              <TableHead>Tài khoản</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading && <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>}
-            {!isLoading && pageRows.length === 0 && <TableRow><TableCell colSpan={10} className="text-center text-muted-foreground">Không có dữ liệu</TableCell></TableRow>}
+            {isLoading && <TableRow><TableCell colSpan={11} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>}
+            {!isLoading && pageRows.length === 0 && <TableRow><TableCell colSpan={11} className="text-center text-muted-foreground">Không có dữ liệu</TableCell></TableRow>}
             {pageRows.map((r) => (
               <TableRow key={r.id}>
                 <TableCell className="font-mono text-xs">{r.employee_code || "-"}</TableCell>
@@ -170,6 +197,19 @@ function EmployeesPage() {
                   <Badge className={r.status === "active" ? "bg-emerald-500" : "bg-muted text-muted-foreground"}>
                     {r.status === "active" ? "Hoạt động" : "Ngưng hoạt động"}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {r.user_id ? (
+                    <Badge className="bg-emerald-100 text-emerald-700 gap-1"><CheckCircle2 className="h-3 w-3" />Đã kích hoạt</Badge>
+                  ) : invited.has(r.id) ? (
+                    <Badge className="bg-blue-100 text-blue-700 gap-1"><Mail className="h-3 w-3" />Đã gửi invite</Badge>
+                  ) : (
+                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700"
+                      onClick={() => sendInvite(r)} disabled={inviting === r.id || !r.email}>
+                      <Mail className="h-3 w-3" />
+                      {inviting === r.id ? "Đang gửi..." : "Gửi invite"}
+                    </Button>
+                  )}
                 </TableCell>
                 <TableCell><RowActions onEdit={() => { setEditing(r); setOpen(true); }} onDelete={() => setDelId(r.id)} /></TableCell>
               </TableRow>
