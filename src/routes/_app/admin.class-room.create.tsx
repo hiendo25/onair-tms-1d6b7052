@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useOrg } from "@/lib/org-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useOnlineCourses, useAssignments, useEmployees } from "@/lib/data-hooks";
+import { useOnlineCourses, useAssignments, useEmployees, useCertificates } from "@/lib/data-hooks";
 import { CLASSROOM_DELIVERY, CLASSROOM_MODE, MEETING_PROVIDER, QR_START_OFFSETS, QR_END_OFFSETS } from "@/lib/admin-options";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
