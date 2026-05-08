@@ -57,13 +57,13 @@ export const ADMIN_MENU: MenuItem[] = [
       { title: "Bài KT đã gán", key: "as-assigned", path: "/admin/assignments/assigned" },
     ],
   },
-  { title: "Quản lý chứng nhận", key: "certificates", path: "/admin/certificates", icon: Award },
   { title: "Khảo sát", key: "surveys", path: "/admin/surveys", icon: FileText },
   {
     title: "Thi đua & xếp hạng",
     key: "compete",
     icon: Trophy,
     children: [
+      { title: "Chứng nhận", key: "certificates", path: "/admin/certificates" },
       { title: "Flashcard", key: "flashcards", path: "/admin/flashcards" },
       { title: "Gamification", key: "gamifications", path: "/admin/gamifications" },
     ],
