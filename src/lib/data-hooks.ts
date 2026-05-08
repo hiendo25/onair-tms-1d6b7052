@@ -306,10 +306,22 @@ export const useSurveyAnswers = surveyAnswersCrud.useList;
 export const useSurveyAnswerMutations = surveyAnswersCrud.useMutations;
 
 // ===== Flashcards =====
-export type DBFlashcard = { id: string; org_id: string; code: string; title: string; description: string; category: string; cards_count: number; students_count: number; status: string; };
+export type DBFlashcard = {
+  id: string; org_id: string; code: string; name: string; title: string;
+  content: string; image_url: string; description: string; category: string;
+  cards_count: number; students_count: number; status: string; enabled: boolean;
+  created_at: string;
+};
 const flashcardsCrud = createOrgCrud<DBFlashcard>("flashcards", "flashcard");
 export const useFlashcards = flashcardsCrud.useList;
 export const useFlashcardMutations = flashcardsCrud.useMutations;
+
+export type DBClassroomFlashcard = { id: string; org_id: string; classroom_id: string; flashcard_id: string; display_order: number; created_at: string; };
+export type DBUserFlashcard = {
+  id: string; org_id: string; user_id: string; flashcard_id: string; classroom_id: string | null;
+  content_snapshot: { name?: string; content?: string; image_url?: string };
+  scheduled_at: string; delivered_at: string | null; viewed_at: string | null; created_at: string;
+};
 
 // ===== Gamifications =====
 export type DBGamification = { id: string; org_id: string; code: string; title: string; description: string; type: string; points: number; badge_url: string; condition: string; active: boolean; };

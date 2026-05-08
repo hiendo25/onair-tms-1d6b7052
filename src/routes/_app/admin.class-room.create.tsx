@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useOrg } from "@/lib/org-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useOnlineCourses, useAssignments, useEmployees, useCertificates } from "@/lib/data-hooks";
+import { useOnlineCourses, useAssignments, useEmployees, useCertificates, useFlashcards } from "@/lib/data-hooks";
 import { CLASSROOM_DELIVERY, CLASSROOM_MODE, MEETING_PROVIDER, QR_START_OFFSETS, QR_END_OFFSETS } from "@/lib/admin-options";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -103,6 +103,8 @@ function Page() {
   const [empDept, setEmpDept] = useState("all");
   const [qrStart, setQrStart] = useState(15);
   const [qrEnd, setQrEnd] = useState(15);
+  const [flashcardIds, setFlashcardIds] = useState<string[]>([]);
+  const { data: flashcards = [] } = useFlashcards();
 
   const { data: courses = [] } = useOnlineCourses();
   const { data: assignments = [] } = useAssignments();
@@ -261,6 +263,13 @@ function Page() {
           start_offset_minutes: qrStart, end_offset_minutes: qrEnd,
           qr_token: cryptoRandom(),
         } as never);
+      }
+
+      // Flashcards
+      if (flashcardIds.length) {
+        await supabase.from("classroom_flashcards").insert(flashcardIds.map((fid, idx) => ({
+          org_id: orgId, classroom_id: classroomId, flashcard_id: fid, display_order: idx,
+        })) as never);
       }
 
       toast.success("Đã tạo lớp học");
@@ -497,6 +506,32 @@ function Page() {
                   <p className="text-xs text-muted-foreground mt-2">Mã QR sẽ được sinh tự động sau khi đăng tải lớp học. Học viên cần ở trong bán kính ≤ 200m và thuộc danh sách được gán để điểm danh thành công.</p>
                 </div>
               )}
+
+              <div className="border-t pt-5">
+                <h3 className="font-semibold mb-1">Gán Flashcard ôn tập</h3>
+                <p className="text-xs text-muted-foreground mb-3">Flashcard tự phát cho học viên 15 phút sau khi hoàn thành lớp học. Mỗi học viên nhận tối đa 1 Flashcard/ngày.</p>
+                <div className="space-y-2 max-h-64 overflow-auto rounded border p-3">
+                  {flashcards.filter(f => f.enabled !== false).length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">Chưa có Flashcard nào đang bật. Tạo Flashcard tại module Flashcard trước.</div>
+                  ) : flashcards.filter(f => f.enabled !== false).map(f => (
+                    <label key={f.id} className="flex items-start gap-2 hover:bg-muted/30 rounded p-2 cursor-pointer">
+                      <Checkbox
+                        checked={flashcardIds.includes(f.id)}
+                        onCheckedChange={(v) => setFlashcardIds(v ? [...flashcardIds, f.id] : flashcardIds.filter(x => x !== f.id))}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{f.name || f.title}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{f.content}</div>
+                      </div>
+                      {flashcardIds.includes(f.id) && (
+                        <Badge variant="outline" className="shrink-0">#{flashcardIds.indexOf(f.id) + 1}</Badge>
+                      )}
+                    </label>
+                  ))}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">Đã chọn {flashcardIds.length} Flashcard · phát theo thứ tự chọn</div>
+              </div>
+
 
               <div className="flex justify-between pt-2">
                 <Button variant="outline" onClick={() => setTab("time")}>Quay lại</Button>

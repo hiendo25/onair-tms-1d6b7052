@@ -1,18 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Layers, Play } from "lucide-react";
+import { Layers, ImageIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useFlashcards } from "@/lib/data-hooks";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth-context";
+import { useOrg } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_app/my-flashcards")({
   head: () => ({ meta: [{ title: "Flashcard — OnAir TMS" }] }),
   component: Page,
 });
 
+type UFC = {
+  id: string; flashcard_id: string;
+  content_snapshot: { name?: string; content?: string; image_url?: string };
+  delivered_at: string | null; viewed_at: string | null; scheduled_at: string;
+};
+
 function Page() {
-  const { data: rows = [], isLoading } = useFlashcards();
+  const { user } = useAuth();
+  const { orgId } = useOrg();
+  const [openId, setOpenId] = useState<string | null>(null);
+
+  const { data: rows = [], isLoading, refetch } = useQuery({
+    queryKey: ["my-flashcards", user?.id, orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("user_flashcards")
+        .select("*")
+        .eq("user_id", user!.id)
+        .eq("org_id", orgId)
+        .lte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as UFC[];
+    },
+    enabled: !!user?.id && !!orgId,
+  });
+
+  const open = useMemo(() => rows.find(r => r.id === openId), [rows, openId]);
+
+  async function markViewed(r: UFC) {
+    setOpenId(r.id);
+    if (!r.viewed_at) {
+      await supabase.from("user_flashcards").update({ viewed_at: new Date().toISOString() } as never).eq("id", r.id);
+      refetch();
+    }
+  }
+
   return (
     <PageContainer title="Flashcard của tôi" breadcrumbs={[{ title: "Thư viện" }, { title: "Flashcard" }]}>
       {isLoading ? (
@@ -20,34 +59,54 @@ function Page() {
       ) : rows.length === 0 ? (
         <Card className="p-12 text-center text-muted-foreground">
           <Layers className="h-10 w-10 mx-auto mb-2 opacity-40" />
-          <p className="text-sm">Chưa có bộ flashcard nào</p>
+          <p className="text-sm">Bạn chưa nhận Flashcard nào</p>
+          <p className="text-xs mt-1">Flashcard sẽ xuất hiện tại đây sau khi bạn hoàn thành lớp học.</p>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {rows.map((f) => (
-            <Card key={f.id} className="hover:shadow-md transition">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 text-violet-600">
-                    <Layers className="h-5 w-5" />
-                  </div>
-                  <Badge variant="outline">{f.cards_count} thẻ</Badge>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {rows.map((f) => {
+            const snap = f.content_snapshot || {};
+            const isNew = !f.viewed_at;
+            return (
+              <Card key={f.id} className="cursor-pointer overflow-hidden hover:shadow-md transition" onClick={() => markViewed(f)}>
+                <div className="relative aspect-video bg-muted">
+                  {snap.image_url ? (
+                    <img src={snap.image_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-muted-foreground">
+                      <ImageIcon className="h-10 w-10 opacity-40" />
+                    </div>
+                  )}
+                  {isNew && <Badge className="absolute top-2 left-2 bg-rose-500">Mới</Badge>}
                 </div>
-                <div>
-                  <div className="font-medium">{f.title}</div>
-                  <div className="text-xs text-muted-foreground">{f.category || "—"}</div>
-                </div>
-                {f.description && <p className="text-xs text-muted-foreground line-clamp-2">{f.description}</p>}
-                <div className="flex items-center justify-end">
-                  <Button size="sm" variant="ghost" className="h-7">
-                    <Play className="h-3.5 w-3.5 mr-1" /> Học
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                <CardContent className="p-4 space-y-1">
+                  <div className="font-medium line-clamp-1">{snap.name || "Flashcard"}</div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{snap.content || ""}</p>
+                  <p className="text-[11px] text-muted-foreground pt-1">
+                    {new Date(f.scheduled_at).toLocaleDateString("vi-VN")}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
+
+      <Dialog open={!!openId} onOpenChange={(o) => !o && setOpenId(null)}>
+        <DialogContent className="max-w-md">
+          {open && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{open.content_snapshot?.name || "Flashcard"}</DialogTitle>
+              </DialogHeader>
+              {open.content_snapshot?.image_url && (
+                <img src={open.content_snapshot.image_url} alt="" className="rounded border w-full max-h-72 object-contain bg-muted" />
+              )}
+              <p className="text-sm whitespace-pre-wrap">{open.content_snapshot?.content}</p>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
