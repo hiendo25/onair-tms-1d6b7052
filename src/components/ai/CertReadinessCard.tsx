@@ -60,14 +60,26 @@ export function CertReadinessCard() {
     if (!result?.eligible.length) return;
     setIssuing("all");
     try {
-      const rows = result.eligible.map((e) => ({
-        employee_id: e.employee_id,
-        certificate_id: e.certificate_id,
-        org_id: orgId,
-        issued_at: new Date().toISOString(),
-        status: "active",
-      }));
-      const { error } = await supabase.from("employee_certificates").insert(rows);
+      const ids = result.eligible.map((e) => e.employee_id);
+      const { data: emps } = await supabase.from("employees").select("id, user_id, name").in("id", ids);
+      const map = new Map((emps ?? []).map((e) => [e.id, e]));
+      const rows = result.eligible
+        .map((e) => {
+          const emp = map.get(e.employee_id);
+          if (!emp?.user_id) return null;
+          return {
+            user_id: emp.user_id,
+            certificate_id: e.certificate_id,
+            org_id: orgId,
+            certificate_title: e.course_title,
+            recipient_name: emp.name ?? e.name,
+            issued_at: new Date().toISOString(),
+            status: "active",
+          };
+        })
+        .filter((r): r is NonNullable<typeof r> => r !== null);
+      if (!rows.length) { toast.error("Không có học viên hợp lệ."); return; }
+      const { error } = await supabase.from("user_certificates").insert(rows);
       if (error) throw error;
       toast.success(`Đã cấp ${rows.length} chứng chỉ thành công.`);
       setResult((prev) => prev ? { ...prev, eligible: [], total_eligible: 0 } : prev);
@@ -81,10 +93,14 @@ export function CertReadinessCard() {
   async function issueSingle(row: EligibleRow) {
     setIssuing(row.employee_id);
     try {
-      const { error } = await supabase.from("employee_certificates").insert({
-        employee_id: row.employee_id,
+      const { data: emp } = await supabase.from("employees").select("user_id, name").eq("id", row.employee_id).maybeSingle();
+      if (!emp?.user_id) { toast.error("Học viên chưa có tài khoản."); return; }
+      const { error } = await supabase.from("user_certificates").insert({
+        user_id: emp.user_id,
         certificate_id: row.certificate_id,
         org_id: orgId,
+        certificate_title: row.course_title,
+        recipient_name: emp.name ?? row.name,
         issued_at: new Date().toISOString(),
         status: "active",
       });

@@ -30,7 +30,7 @@ function useGradeData(assignmentId: string, employeeId: string) {
     queryKey: ["grade-data", assignmentId, employeeId],
     queryFn: async () => {
       const [assignmentRes, empRes] = await Promise.all([
-        supabase.from("assignments").select("id, title, code, pass_score, total_points").eq("id", assignmentId).single(),
+        supabase.from("assignments").select("id, title, code, pass_score, total_points, org_id").eq("id", assignmentId).single(),
         supabase.from("employees").select("id, name, employee_code, department, user_id").eq("id", employeeId).single(),
       ]);
 
@@ -160,6 +160,8 @@ function GradePage() {
       } else {
         await supabase.from("assignment_submissions").insert({
           assignment_id: id,
+          assignment_title: assignment.title ?? "",
+          org_id: assignment.org_id,
           user_id: emp.user_id,
           score: normalizedScore,
           status: passed ? "passed" : "failed",
