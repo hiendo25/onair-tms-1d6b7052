@@ -410,13 +410,13 @@ export function useLeaderboard() {
   return useQuery({
     queryKey: ["leaderboard", orgId],
     queryFn: async () => {
-      const { data } = await supabase.from("user_xp").select("user_id, total_xp").eq("org_id", orgId).order("total_xp", { ascending: false }).limit(50);
-      const rows = (data ?? []) as { user_id: string; total_xp: number }[];
+      const { data } = await supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).order("xp", { ascending: false }).limit(50);
+      const rows = (data ?? []) as { user_id: string; xp: number }[];
       if (!rows.length) return [];
       const ids = rows.map(r => r.user_id);
       const { data: profs } = await supabase.from("profiles").select("id, full_name, email, avatar_url").in("id", ids);
       const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-      return rows.map((r, i) => ({ rank: i + 1, user_id: r.user_id, total_xp: r.total_xp, profile: map.get(r.user_id) as any }));
+      return rows.map((r, i) => ({ rank: i + 1, user_id: r.user_id, xp: r.xp, profile: map.get(r.user_id) as any }));
     },
   });
 }
