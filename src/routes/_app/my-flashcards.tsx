@@ -34,8 +34,8 @@ function Page() {
         .select("*")
         .eq("user_id", user!.id)
         .eq("org_id", orgId)
-        .not("delivered_at", "is", null)
-        .order("delivered_at", { ascending: false });
+        .lte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as UFC[];
     },
