@@ -94,6 +94,7 @@ function Detail() {
           })}
         </div>
       </Card>
+      <QuizItemAnalysisCard assignmentId={ax.id} />
     </PageContainer>
   );
 }
