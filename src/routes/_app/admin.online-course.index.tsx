@@ -81,13 +81,15 @@ function OnlineCoursePage() {
 
   return (
     <PageContainer
-      title="Quản lý khoá học online"
-      breadcrumbs={[{ title: "Đào tạo" }, { title: "Khoá học online" }]}
+      title="Danh sách khóa học"
+      breadcrumbs={[{ title: "Quản lý khóa học" }, { title: "Danh sách khóa học" }]}
       actions={
         <div className="flex gap-2">
           <Button size="sm" variant="outline" onClick={() => exportCsv("online_courses.csv", rows)}><Download className="h-4 w-4" />Export</Button>
           <AiGenerateCourseButton />
-          <Button size="sm" onClick={() => { setEditing(null); setOpen(true); }}><Plus className="h-4 w-4" />Tạo khoá học</Button>
+          <Button size="sm" onClick={() => navigate({ to: "/admin/online-course/$id/editor", params: { id: "new" } })}>
+            <Plus className="h-4 w-4" />Tạo khóa học
+          </Button>
         </div>
       }
     >
@@ -95,7 +97,7 @@ function OnlineCoursePage() {
         <div className="mb-4 flex flex-wrap gap-2">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Tìm khoá học, mã, giảng viên..." value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
+            <Input className="pl-9" placeholder="Tìm kiếm..." value={q} onChange={(e) => { setQ(e.target.value); setPage(1); }} />
           </div>
           <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
             <SelectTrigger className="w-[200px]"><SelectValue placeholder="Danh mục" /></SelectTrigger>
@@ -117,11 +119,11 @@ function OnlineCoursePage() {
           <TableHeader>
             <TableRow>
               <TableHead className="w-12">STT</TableHead>
-              <TableHead>Tên khoá học</TableHead>
+              <TableHead>Tên khóa học</TableHead>
               <TableHead>Danh mục</TableHead>
-              <TableHead className="text-center">Số bài học</TableHead>
-              <TableHead>Bắt buộc</TableHead>
               <TableHead>Trạng thái</TableHead>
+              <TableHead>Tác giả</TableHead>
+              <TableHead>Ngày tạo</TableHead>
               <TableHead className="w-20"></TableHead>
             </TableRow>
           </TableHeader>
@@ -132,29 +134,23 @@ function OnlineCoursePage() {
               <TableRow key={r.id}>
                 <TableCell className="text-muted-foreground">{(page - 1) * PAGE_SIZE + i + 1}</TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-14 overflow-hidden rounded bg-muted">
-                      {r.cover_url ? <img src={r.cover_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-muted-foreground"><BookOpen className="h-4 w-4" /></div>}
-                    </div>
-                    <div>
-                      <Link to="/admin/online-course/$id" params={{ id: r.id }} className="font-medium hover:underline">{r.title}</Link>
-                      <div className="text-xs text-muted-foreground">{r.code}</div>
-                    </div>
-                  </div>
+                  <Link to="/admin/online-course/$id" params={{ id: r.id }} className="font-medium hover:underline">{r.title}</Link>
                 </TableCell>
                 <TableCell>{r.category || "-"}</TableCell>
-                <TableCell className="text-center">{r.lessons_count}</TableCell>
-                <TableCell>{r.is_required ? <Badge className="bg-amber-500">Bắt buộc</Badge> : <span className="text-muted-foreground">-</span>}</TableCell>
                 <TableCell>
-                  <Badge className={r.status === "published" ? "bg-emerald-500" : r.status === "draft" ? "bg-muted text-muted-foreground" : "bg-orange-500"}>
+                  <Badge className={r.status === "published" ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100" : r.status === "draft" ? "bg-slate-100 text-slate-700 hover:bg-slate-100" : "bg-orange-100 text-orange-700 hover:bg-orange-100"}>
                     {statusLabel[r.status] ?? r.status}
                   </Badge>
                 </TableCell>
+                <TableCell>{r.author_name || "-"}</TableCell>
+                <TableCell className="text-muted-foreground text-sm">
+                  {r.created_at ? new Date(r.created_at).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit", year: "numeric" }) : "-"}
+                </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => navigate({ to: "/admin/online-course/$id", params: { id: r.id } })} title="Chi tiết"><ExternalLink className="h-4 w-4" /></Button>
-                    <RowActions onEdit={() => { setEditing(r); setOpen(true); }} onDelete={() => setDelId(r.id)} />
-                  </div>
+                  <RowActions
+                    onEdit={() => navigate({ to: "/admin/online-course/$id/editor", params: { id: r.id } })}
+                    onDelete={() => setDelId(r.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -173,20 +169,21 @@ function OnlineCoursePage() {
         )}
       </Card>
 
-      <EntityFormDialog<CourseForm>
-        open={open} onOpenChange={setOpen}
-        title={editing ? "Cập nhật khoá học" : "Tạo khoá học"}
-        schema={courseSchema} fields={fields} defaultValues={empty} size="lg"
-        initialValues={editing ? {
-          code: editing.code, title: editing.title, description: editing.description, category: editing.category,
-          level: (editing.level as CourseForm["level"]) || "beginner", duration_minutes: editing.duration_minutes,
-          instructor: editing.instructor, cover_url: editing.cover_url,
-          is_required: !!editing.is_required, status: (editing.status as CourseForm["status"]) || "draft",
-        } : undefined}
-        onSubmit={submit} submitting={m.create.isPending || m.update.isPending}
-      />
-
-      <ConfirmDelete open={!!delId} onOpenChange={(v) => !v && setDelId(null)} onConfirm={async () => { if (delId) { await m.remove.mutateAsync(delId); setDelId(null); } }} />
+      <ConfirmDelete open={!!delId} onOpenChange={(v) => !v && setDelId(null)} onConfirm={async () => {
+        if (!delId) return;
+        // Block if used in classroom_courses or learning_path_stage_courses
+        const [cc, lpsc] = await Promise.all([
+          supabase.from("classroom_courses").select("id").eq("course_id", delId).limit(1),
+          supabase.from("learning_path_stage_courses").select("id").eq("course_id", delId).limit(1),
+        ]);
+        if ((cc.data?.length ?? 0) > 0 || (lpsc.data?.length ?? 0) > 0) {
+          toast.error("Khóa học đã được sử dụng, không thể xóa");
+          setDelId(null);
+          return;
+        }
+        await m.remove.mutateAsync(delId);
+        setDelId(null);
+      }} />
     </PageContainer>
   );
 }
