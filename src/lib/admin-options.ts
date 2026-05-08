@@ -124,6 +124,16 @@ export const SURVEY_TYPE = [
   { value: "satisfaction", label: "Mức độ hài lòng" },
 ];
 
+export const SURVEY_CATEGORY = [
+  { value: "training", label: "Đào tạo" },
+  { value: "satisfaction", label: "Mức độ hài lòng" },
+  { value: "needs", label: "Nhu cầu" },
+  { value: "instructor", label: "Giảng viên" },
+  { value: "course", label: "Khoá học" },
+  { value: "service", label: "Dịch vụ" },
+  { value: "other", label: "Khác" },
+];
+
 export const SURVEY_STATUS = [
   { value: "draft", label: "Bản nháp" },
   { value: "active", label: "Đang mở" },
