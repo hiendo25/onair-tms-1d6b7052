@@ -83,6 +83,13 @@ function Page() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input className="pl-9 rounded-full" placeholder="Tìm kiếm khảo sát..." value={q} onChange={e => setQ(e.target.value)} />
           </div>
+          <Select value={cat} onValueChange={setCat}>
+            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Lĩnh vực" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả lĩnh vực</SelectItem>
+              {SURVEY_CATEGORY.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
 
         <Table>
