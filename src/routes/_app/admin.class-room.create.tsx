@@ -362,6 +362,19 @@ function Page() {
                 <Textarea rows={3} value={objective} onChange={e => setObjective(e.target.value)} />
               </div>
 
+              <div className="space-y-1.5">
+                <Label>Mẫu chứng nhận <span className="text-xs text-muted-foreground">(tự cấp khi hoàn thành lớp)</span></Label>
+                <Select value={certificateId || "none"} onValueChange={(v) => setCertificateId(v === "none" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Chọn mẫu chứng nhận" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Không cấp chứng nhận</SelectItem>
+                    {certificates.filter(c => c.status === "active").map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="flex justify-end gap-2 pt-2">
                 <Button onClick={() => setTab("time")}>Tiếp tục</Button>
               </div>
