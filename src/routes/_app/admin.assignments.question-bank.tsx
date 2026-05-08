@@ -178,13 +178,18 @@ function Page() {
       title="Ngân hàng câu hỏi"
       breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Ngân hàng câu hỏi" }]}
     >
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-        <StatCard label="Tổng câu hỏi" value={stats.total} />
-        {QUESTION_TYPE.map(t => (
-          <StatCard key={t.value} label={t.label.split(" (")[0]} value={stats.counts[t.value] || 0} />
-        ))}
+      {/* Stat cards (icon style) */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
+        <IconStat icon={HelpCircle} color="text-blue-600 bg-blue-50" label="Tổng câu hỏi" value={stats.total} />
+        <IconStat icon={CheckSquare} color="text-emerald-600 bg-emerald-50" label="Trắc nghiệm" value={(stats.counts["single"] || 0) + (stats.counts["multiple"] || 0)} />
+        <IconStat icon={ArrowLeftRight} color="text-violet-600 bg-violet-50" label="Đúng/Sai" value={stats.counts["true_false"] || 0} />
+        <IconStat icon={FileText} color="text-amber-600 bg-amber-50" label="Tự luận" value={stats.counts["essay"] || 0} />
+        <IconStat icon={Upload} color="text-rose-600 bg-rose-50" label="Tải File" value={stats.counts["file_upload"] || 0} />
+        <IconStat icon={ArrowUpDown} color="text-cyan-600 bg-cyan-50" label="Sắp xếp" value={stats.counts["sorting"] || 0} />
+        <IconStat icon={Link2} color="text-indigo-600 bg-indigo-50" label="Nối câu" value={stats.counts["matching"] || 0} />
       </div>
+
+
 
       <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
         {/* Folder tree */}
