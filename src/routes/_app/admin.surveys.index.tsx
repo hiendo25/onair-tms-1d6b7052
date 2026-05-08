@@ -1,54 +1,147 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useSurveys, useSurveyMutations, type DBSurvey } from "@/lib/data-hooks";
-import { SimpleEntityPage, StatusBadge } from "@/components/admin/SimpleEntityPage";
-import { Badge } from "@/components/ui/badge";
-import { surveySchema, type SurveyForm } from "@/lib/admin-schemas";
-import { SURVEY_TYPE, SURVEY_STATUS, CODE_NOTE } from "@/lib/admin-options";
-import type { FieldDef } from "@/components/admin/EntityFormDialog";
+import { useMemo, useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Search, Plus, MoreVertical, Pencil, Trash2, BarChart3, Copy } from "lucide-react";
+import { PageContainer } from "@/components/PageContainer";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
+import {
+  useSurveys, useSurveyMutations, useSurveyAssignments,
+  useSurveyQuestions, useSurveyQuestionMutations,
+} from "@/lib/data-hooks";
+import { SURVEY_CATEGORY } from "@/lib/admin-options";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/surveys/")({
-  head: () => ({ meta: [{ title: "Khảo sát — OnAir TMS" }] }),
+  head: () => ({ meta: [{ title: "Danh sách khảo sát — OnAir TMS" }] }),
   component: Page,
 });
 
-const formFields: FieldDef<SurveyForm>[] = [
-  { name: "title", label: "Tên khảo sát", type: "text", required: true },
-  { name: "code", label: "Mã khảo sát", type: "text", required: true, note: CODE_NOTE },
-  { name: "description", label: "Mô tả", type: "textarea", rows: 3 },
-  { name: "type", label: "Loại khảo sát", type: "select", required: true, options: SURVEY_TYPE },
-  { name: "anonymous", label: "Cho phép trả lời ẩn danh", type: "switch" },
-  { name: "start_date", label: "Ngày bắt đầu", type: "date" },
-  { name: "end_date", label: "Ngày kết thúc", type: "date" },
-  { name: "target_count", label: "Số lượng mục tiêu", type: "number" },
-  { name: "status", label: "Trạng thái", type: "select", required: true, options: SURVEY_STATUS },
-];
-const empty: Partial<DBSurvey> = { code: "", title: "", description: "", type: "general", anonymous: false, responses_count: 0, target_count: 0, start_date: "", end_date: "", status: "draft" };
-
 function Page() {
   const { data: rows = [], isLoading } = useSurveys();
+  const { data: questions = [] } = useSurveyQuestions();
+  const { data: assigns = [] } = useSurveyAssignments();
   const m = useSurveyMutations();
+  const qm = useSurveyQuestionMutations();
+  const nav = useNavigate();
+  const [q, setQ] = useState("");
+  const [cat, setCat] = useState("all");
+  const [delId, setDelId] = useState<string | null>(null);
+
+  const filtered = useMemo(() => rows.filter(r => {
+    if (cat !== "all" && r.category !== cat) return false;
+    if (!q) return true;
+    const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return norm(r.title).includes(norm(q));
+  }), [rows, q, cat]);
+
+  function questionCount(sid: string) {
+    return questions.filter(qq => qq.survey_id === sid).length;
+  }
+
+  async function tryDelete(id: string) {
+    const a = assigns.find(x => x.survey_id === id);
+    if (a && a.start_date && new Date(a.start_date) <= new Date()) {
+      toast.error("Khảo sát đã đến thời gian làm — không thể xoá");
+      setDelId(null);
+      return;
+    }
+    const qs = questions.filter(x => x.survey_id === id);
+    for (const qq of qs) await qm.remove.mutateAsync(qq.id);
+    await m.remove.mutateAsync(id);
+    setDelId(null);
+  }
+
+  async function clone(id: string) {
+    const src = rows.find(r => r.id === id);
+    if (!src) return;
+    await m.create.mutateAsync({
+      title: `${src.title} (Bản sao)`, code: `${src.code}-COPY-${Date.now().toString().slice(-4)}`,
+      description: src.description, type: src.type, category: src.category,
+      anonymous: src.anonymous, status: "draft", target_count: 0, responses_count: 0, version: 1,
+    });
+    toast.success("Đã nhân bản");
+  }
+
   return (
-    <SimpleEntityPage<DBSurvey>
-      title="Quản lý khảo sát" breadcrumbs={[{ title: "Khảo sát" }]}
-      rows={rows} isLoading={isLoading} searchKeys={["title", "code"]}
-      filters={[
-        { key: "type", placeholder: "Loại", options: SURVEY_TYPE, match: (r, v) => r.type === v },
-        { key: "status", placeholder: "Trạng thái", options: SURVEY_STATUS, match: (r, v) => r.status === v },
-      ]}
-      columns={[
-        { key: "code", label: "Mã", render: (r) => <Badge variant="outline">{r.code}</Badge> },
-        { key: "title", label: "Tên" }, { key: "type", label: "Loại" },
-        { key: "responses_count", label: "Phản hồi" }, { key: "target_count", label: "Mục tiêu" },
-        { key: "status", label: "Trạng thái", render: (r) => <StatusBadge value={r.status} /> },
-      ]}
-      fields={[]}
-      schema={surveySchema}
-      formFields={formFields}
-      entityLabel="khảo sát"
-      emptyValues={empty}
-      onCreate={(v) => m.create.mutateAsync(v)} onUpdate={(v) => m.update.mutateAsync(v)} onDelete={(id) => m.remove.mutateAsync(id)}
-      onBulkInsert={(rs) => m.bulkInsert.mutateAsync(rs.map((r: any) => ({ ...r, target_count: Number(r.target_count) || 0, responses_count: 0, anonymous: r.anonymous === "true" || r.anonymous === true, type: r.type || "general", status: r.status || "draft" })))}
-      csvFilename="surveys.csv"
-    />
+    <PageContainer
+      title="Danh sách khảo sát"
+      breadcrumbs={[{ title: "Khảo sát" }, { title: "Danh sách khảo sát" }]}
+      actions={
+        <Button onClick={() => nav({ to: "/admin/surveys/$id/edit", params: { id: "new" } })}>
+          <Plus className="h-4 w-4" /> Tạo khảo sát
+        </Button>
+      }
+    >
+      <Card className="p-4">
+        <div className="mb-4 flex flex-wrap gap-2">
+          <div className="relative min-w-[240px] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Tìm kiếm khảo sát..." value={q} onChange={e => setQ(e.target.value)} />
+          </div>
+          <Select value={cat} onValueChange={setCat}>
+            <SelectTrigger className="w-[200px]"><SelectValue placeholder="Lĩnh vực" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả lĩnh vực</SelectItem>
+              {SURVEY_CATEGORY.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-12">STT</TableHead>
+              <TableHead>Tên khảo sát</TableHead>
+              <TableHead>Lĩnh vực</TableHead>
+              <TableHead>SL câu hỏi</TableHead>
+              <TableHead>Người tạo</TableHead>
+              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="w-12"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Đang tải...</TableCell></TableRow>}
+            {!isLoading && filtered.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground">Không có khảo sát</TableCell></TableRow>}
+            {filtered.map((r, idx) => (
+              <TableRow key={r.id}>
+                <TableCell>{idx + 1}</TableCell>
+                <TableCell className="font-medium">
+                  <Link to="/admin/surveys/$id/edit" params={{ id: r.id }} className="hover:text-primary">{r.title}</Link>
+                </TableCell>
+                <TableCell>{SURVEY_CATEGORY.find(c => c.value === r.category)?.label || "—"}</TableCell>
+                <TableCell>{questionCount(r.id)}</TableCell>
+                <TableCell>Super Admin</TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {new Date(r.created_at).toLocaleString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => clone(r.id)}><Copy className="h-4 w-4" /> Nhân bản</DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link to="/admin/surveys/$id/statistics" params={{ id: r.id }}><BarChart3 className="h-4 w-4" /> Thống kê</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link to="/admin/surveys/$id/edit" params={{ id: r.id }}><Pencil className="h-4 w-4" /> Chỉnh sửa</Link></DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => setDelId(r.id)}><Trash2 className="h-4 w-4" /> Xoá</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Card>
+      <ConfirmDelete
+        open={!!delId} onOpenChange={(o) => !o && setDelId(null)}
+        title="Xoá khảo sát" description="Hành động này sẽ xoá khảo sát và toàn bộ câu hỏi liên quan."
+        onConfirm={() => { if (delId) tryDelete(delId); }}
+      />
+    </PageContainer>
   );
 }

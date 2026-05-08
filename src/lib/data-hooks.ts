@@ -263,10 +263,34 @@ export const useCertificates = certificatesCrud.useList;
 export const useCertificateMutations = certificatesCrud.useMutations;
 
 // ===== Surveys =====
-export type DBSurvey = { id: string; org_id: string; code: string; title: string; description: string; type: string; anonymous: boolean; start_date: string | null; end_date: string | null; responses_count: number; target_count: number; status: string; };
+export type DBSurvey = { id: string; org_id: string; code: string; title: string; description: string; type: string; category: string; version: number; anonymous: boolean; start_date: string | null; end_date: string | null; responses_count: number; target_count: number; status: string; created_by: string | null; created_at: string; };
 const surveysCrud = createOrgCrud<DBSurvey>("surveys", "khảo sát");
 export const useSurveys = surveysCrud.useList;
 export const useSurveyMutations = surveysCrud.useMutations;
+
+// ===== Survey Questions =====
+export type DBSurveyQuestion = { id: string; org_id: string; survey_id: string; type: string; content: string; options: unknown; correct_answer: unknown; order_index: number; required: boolean; };
+const surveyQuestionsCrud = createOrgCrud<DBSurveyQuestion>("survey_questions", "câu hỏi khảo sát");
+export const useSurveyQuestions = surveyQuestionsCrud.useList;
+export const useSurveyQuestionMutations = surveyQuestionsCrud.useMutations;
+
+// ===== Survey Assignments =====
+export type DBSurveyAssignment = { id: string; org_id: string; survey_id: string; version: number; student_ids: string[]; start_date: string | null; end_date: string | null; status: string; created_at: string; };
+const surveyAssignmentsCrud = createOrgCrud<DBSurveyAssignment>("survey_assignments", "lần gán khảo sát");
+export const useSurveyAssignments = surveyAssignmentsCrud.useList;
+export const useSurveyAssignmentMutations = surveyAssignmentsCrud.useMutations;
+
+// ===== Survey Responses =====
+export type DBSurveyResponse = { id: string; org_id: string; survey_id: string; user_id: string | null; assignment_id: string | null; version: number; submitted_at: string; };
+const surveyResponsesCrud = createOrgCrud<DBSurveyResponse>("survey_responses", "phản hồi khảo sát");
+export const useSurveyResponses = surveyResponsesCrud.useList;
+export const useSurveyResponseMutations = surveyResponsesCrud.useMutations;
+
+// ===== Survey Answers =====
+export type DBSurveyAnswer = { id: string; org_id: string; response_id: string; question_id: string; value: unknown; };
+const surveyAnswersCrud = createOrgCrud<DBSurveyAnswer>("survey_answers", "đáp án khảo sát");
+export const useSurveyAnswers = surveyAnswersCrud.useList;
+export const useSurveyAnswerMutations = surveyAnswersCrud.useMutations;
 
 // ===== Flashcards =====
 export type DBFlashcard = { id: string; org_id: string; code: string; title: string; description: string; category: string; cards_count: number; students_count: number; status: string; };
