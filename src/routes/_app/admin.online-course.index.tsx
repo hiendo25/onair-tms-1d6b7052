@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Plus, Search, Download, ChevronLeft, ChevronRight, BookOpen, ExternalLink } from "lucide-react";
+import { Plus, Search, Download, ChevronLeft, ChevronRight } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
