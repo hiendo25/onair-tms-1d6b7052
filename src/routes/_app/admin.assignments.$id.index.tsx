@@ -1,142 +1,106 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Pencil, Clock, ListChecks, RefreshCw, Users, FileCheck2 } from "lucide-react";
+import { ArrowLeft, Pencil, Clock, ListChecks, RefreshCw, Users, Copy } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useOrgData } from "@/lib/org-context";
+import {
+  useAssignments, useAssignmentMutations, useExamQuestions, useQuestions,
+} from "@/lib/data-hooks";
+import { ASSIGNMENT_STATUS } from "@/lib/admin-options";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/assignments/$id/")({
-  notFoundComponent: () => <PageContainer title="Không tìm thấy bài kiểm tra"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
-  component: AssignmentDetail,
+  head: () => ({ meta: [{ title: "Chi tiết bài KT — OnAir TMS" }] }),
+  notFoundComponent: () => <PageContainer title="Không tìm thấy"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>,
+  component: Detail,
 });
 
-function AssignmentDetail() {
-  const data = useOrgData();
+function Detail() {
   const { id } = Route.useParams();
-  const a = data.assignments.find((x) => x.id === id);
+  const { data: rows = [] } = useAssignments();
+  const { data: links = [] } = useExamQuestions();
+  const { data: bank = [] } = useQuestions();
+  const am = useAssignmentMutations();
+  const a = rows.find(r => r.id === id);
   if (!a) return null;
-  const submissions = data.employees.filter((e) => e.role === "student").slice(0, 6);
+  const myLinks = links.filter(l => l.assignment_id === a.id).sort((x, y) => x.sort_order - y.sort_order);
+
+  async function clone() {
+    await am.create.mutateAsync({
+      title: `${a.title} (Bản sao)`, code: `${a.code}-CP-${Date.now().toString().slice(-4)}`,
+      description: a.description, type: a.type, deadline: a.deadline,
+      total_questions: a.total_questions, total_points: a.total_points,
+      pass_score: a.pass_score, time_limit_minutes: a.time_limit_minutes,
+      max_attempts: a.max_attempts, shuffle_questions: a.shuffle_questions,
+      shuffle_answers: a.shuffle_answers, show_results: a.show_results, status: "draft",
+    });
+    toast.success("Đã nhân bản");
+  }
 
   return (
     <PageContainer
       title={a.title}
       breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: a.title }]}
-      actions={
-        <>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin/assignments/$id/grade" params={{ id: a.id }}><FileCheck2 className="h-4 w-4" />Chấm bài</Link>
-          </Button>
-          <Button size="sm"><Pencil className="h-4 w-4" />Chỉnh sửa</Button>
-        </>
-      }
+      actions={<>
+        <Button variant="outline" size="sm" onClick={clone}><Copy className="h-4 w-4" /> Nhân bản</Button>
+        <Button variant="outline" size="sm" asChild><Link to="/admin/assignments/$id/assign" params={{ id: a.id }}><Users className="h-4 w-4" />Gán học viên</Link></Button>
+        <Button size="sm" asChild><Link to="/admin/assignments/$id/editor" params={{ id: a.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></Button>
+      </>}
     >
       <div className="grid gap-4 sm:grid-cols-4">
-        <InfoCard icon={ListChecks} label="Số câu hỏi" value={String(a.questions)} />
-        <InfoCard icon={Clock} label="Thời gian" value={`${a.duration} phút`} />
-        <InfoCard icon={RefreshCw} label="Số lần làm" value={String(a.attempts)} />
-        <InfoCard icon={Users} label="Đã nộp" value={`${submissions.length} học viên`} />
+        <Stat icon={ListChecks} label="Số câu hỏi" value={String(a.total_questions)} />
+        <Stat icon={ListChecks} label="Tổng điểm" value={`${a.total_points}/100`} />
+        <Stat icon={Clock} label="Thời gian" value={a.time_limit_minutes ? `${a.time_limit_minutes} phút` : "—"} />
+        <Stat icon={RefreshCw} label="Số lần làm" value={a.max_attempts ? String(a.max_attempts) : "Không giới hạn"} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Thông tin bài kiểm tra</CardTitle>
-            <div className="flex gap-2">
-              <Badge variant="outline">{a.type}</Badge>
-              <Badge variant={a.status === "published" ? "default" : "secondary"}>{a.status === "published" ? "Đã xuất bản" : "Bản nháp"}</Badge>
-            </div>
+      <Card className="p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <div className="text-xs text-muted-foreground">Mã bài</div>
+            <div className="font-medium">{a.code}</div>
           </div>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Bài kiểm tra dùng để đánh giá kiến thức học viên. Học viên có {a.attempts} lần làm trong tối đa {a.duration} phút mỗi lần.
-        </CardContent>
+          <div className="flex gap-2">
+            <Badge variant="outline">{a.type}</Badge>
+            <Badge variant={a.status === "published" ? "default" : "secondary"}>{ASSIGNMENT_STATUS.find(s => s.value === a.status)?.label || a.status}</Badge>
+          </div>
+        </div>
+        <div className="text-sm text-muted-foreground">{a.description || "Không có mô tả"}</div>
+        <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
+          <div>Điểm đạt: <strong>{a.pass_score}%</strong></div>
+          <div>Trộn câu hỏi: <strong>{a.shuffle_questions ? "Có" : "Không"}</strong></div>
+          <div>Hiển thị kết quả: <strong>{a.show_results ? "Có" : "Không"}</strong></div>
+        </div>
       </Card>
 
-      <Tabs defaultValue="questions">
-        <TabsList>
-          <TabsTrigger value="questions">Câu hỏi ({a.questions})</TabsTrigger>
-          <TabsTrigger value="submissions">Bài nộp ({submissions.length})</TabsTrigger>
-          <TabsTrigger value="analytics">Phân tích</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="questions">
-          <Card>
-            <div className="divide-y">
-              {data.questions.slice(0, 5).map((q, i) => (
-                <div key={q.id} className="p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
-                    <div className="flex-1">
-                      <div className="font-medium">{q.content}</div>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <Badge variant="outline" className="text-xs">{q.type === "single" ? "Một đáp án" : q.type === "multiple" ? "Nhiều đáp án" : "Tự luận"}</Badge>
-                        <Badge variant="secondary" className="text-xs">{q.category}</Badge>
-                        <Badge variant="outline" className="text-xs">{q.difficulty}</Badge>
-                      </div>
-                    </div>
-                  </div>
+      <Card className="p-5">
+        <div className="mb-3 text-sm font-semibold">Danh sách câu hỏi ({myLinks.length})</div>
+        <div className="space-y-2">
+          {myLinks.length === 0 && <div className="text-sm text-muted-foreground">Chưa có câu hỏi nào.</div>}
+          {myLinks.map((l, i) => {
+            const q = bank.find(b => b.id === l.question_id);
+            return (
+              <div key={l.id} className="flex items-start gap-3 rounded border p-3">
+                <span className="text-xs font-semibold text-primary">#{i + 1}</span>
+                <div className="flex-1">
+                  <div className="text-sm font-medium">{q?.title || q?.question || "(Câu hỏi đã xoá)"}</div>
+                  <div className="mt-1 flex gap-2"><Badge variant="outline" className="text-xs">{q?.type}</Badge><Badge variant="secondary" className="text-xs">{l.points}đ</Badge></div>
                 </div>
-              ))}
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="submissions">
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Học viên</TableHead>
-                  <TableHead>Thời gian nộp</TableHead>
-                  <TableHead>Điểm</TableHead>
-                  <TableHead>Trạng thái</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {submissions.map((s, i) => {
-                  const score = [85, 92, 70, 0, 78, 65][i];
-                  const submitted = score > 0;
-                  return (
-                    <TableRow key={s.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8"><AvatarFallback className="text-xs">{s.name.split(" ").slice(-2).map(n => n[0]).join("")}</AvatarFallback></Avatar>
-                          <div className="font-medium">{s.name}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{submitted ? `2026-04-2${i} 14:${20 + i}` : "—"}</TableCell>
-                      <TableCell><span className={`font-semibold ${score >= 80 ? "text-success" : score >= 50 ? "text-warning" : "text-muted-foreground"}`}>{submitted ? `${score}/100` : "—"}</span></TableCell>
-                      <TableCell><Badge variant={submitted ? "default" : "outline"}>{submitted ? "Đã chấm" : "Chưa nộp"}</Badge></TableCell>
-                      <TableCell>{submitted && <Button variant="link" size="sm" asChild><Link to="/admin/assignments/$id/grade" params={{ id: a.id }}>Xem</Link></Button>}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics"><Card><CardContent className="p-8 text-center text-muted-foreground">Biểu đồ phân tích kết quả.</CardContent></Card></TabsContent>
-      </Tabs>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
     </PageContainer>
   );
 }
 
-function InfoCard({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function Stat({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
   return (
-    <Card>
-      <CardContent className="flex items-center gap-3 p-5">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
-        <div>
-          <div className="text-xs text-muted-foreground">{label}</div>
-          <div className="font-display text-xl font-semibold">{value}</div>
-        </div>
-      </CardContent>
-    </Card>
+    <Card><CardContent className="flex items-center gap-3 p-5">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
+      <div><div className="text-xs text-muted-foreground">{label}</div><div className="font-display text-xl font-semibold">{value}</div></div>
+    </CardContent></Card>
   );
 }

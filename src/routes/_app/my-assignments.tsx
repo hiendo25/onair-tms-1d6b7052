@@ -1,5 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Search, MoreVertical } from "lucide-react";
+import { useMemo, useState } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Search, PlayCircle, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,85 +8,102 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-const ROWS = [
-  { id: "1", name: "Kiểm tra nghiệp vụ pha chế Q1/2025", description: "Đánh giá kỹ năng pha chế chuẩn Highlands", submitted_at: "12/03/2025 14:23", status: "graded", result: "pass", score: 92, max: 100 },
-  { id: "2", name: "Bài test VSATTP tháng 5/2025", description: "Bài kiểm tra định kỳ về vệ sinh an toàn thực phẩm", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
-  { id: "3", name: "Tình huống xử lý khiếu nại khách hàng", description: "Bài tự luận xử lý phàn nàn về đồ uống", submitted_at: "-", status: "in_progress", result: "none", score: null, max: 100 },
-  { id: "4", name: "Kiểm tra vận hành máy POS", description: "Bài kiểm tra thao tác trên POS Highlands", submitted_at: "15/04/2025 09:10", status: "graded", result: "pass", score: 85, max: 100 },
-  { id: "5", name: "Đánh giá kỹ năng phục vụ khách hàng", description: "Bài đánh giá tổng hợp dịch vụ khách hàng", submitted_at: "02/04/2025 16:42", status: "graded", result: "fail", score: 48, max: 100 },
-];
-
-const statusChip: Record<string, { label: string; cls: string }> = {
-  in_progress: { label: "Chưa nộp", cls: "bg-amber-100 text-amber-700" },
-  submitted: { label: "Đã nộp", cls: "bg-blue-100 text-blue-700" },
-  graded: { label: "Đã chấm", cls: "bg-emerald-100 text-emerald-700" },
-};
-
-const resultChip: Record<string, { label: string; cls: string }> = {
-  pass: { label: "Đạt", cls: "bg-emerald-100 text-emerald-700" },
-  fail: { label: "Không đạt", cls: "bg-amber-100 text-amber-700" },
-  late: { label: "Nộp trễ", cls: "bg-red-100 text-red-700" },
-};
+import { useExamAssignments, useExamAttempts } from "@/lib/data-hooks";
+import { useAuth } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/_app/my-assignments")({
   head: () => ({ meta: [{ title: "Bài kiểm tra của tôi — OnAir TMS" }] }),
-  component: () => (
-    <PageContainer
-      title="Bài kiểm tra của tôi"
-      breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}
-    >
+  component: Page,
+});
+
+function Page() {
+  const { user } = useAuth();
+  const uid = user?.id;
+  const { data: assigns = [] } = useExamAssignments();
+  const { data: attempts = [] } = useExamAttempts();
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const mine = useMemo(() => assigns.filter(a => uid && (a.student_ids || []).includes(uid)), [assigns, uid]);
+  const items = mine.map(a => {
+    const myAtt = attempts.filter(t => t.exam_assignment_id === a.id && t.user_id === uid)
+      .sort((x, y) => (y.attempt_number || 1) - (x.attempt_number || 1));
+    const last = myAtt[0];
+    const snap = a.exam_snapshot as { title?: string; max_attempts?: number; pass_score?: number; total_points?: number; show_results?: boolean };
+    const usedAttempts = myAtt.length;
+    const submitted = last?.status === "submitted";
+    const status = submitted ? "submitted" : last ? "in_progress" : "not_started";
+    return { a, snap, last, usedAttempts, status };
+  });
+
+  const filtered = items.filter(it => {
+    if (filter !== "all" && it.status !== filter) return false;
+    if (q && !(it.snap.title || "").toLowerCase().includes(q.toLowerCase())) return false;
+    return true;
+  });
+
+  return (
+    <PageContainer title="Bài kiểm tra của tôi" breadcrumbs={[{ title: "Bài kiểm tra của tôi" }]}>
       <Card className="p-6">
-        <h2 className="mb-4 text-lg font-semibold">Danh sách bài kiểm tra được giao</h2>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div className="relative w-full max-w-[300px]">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Tìm kiếm bài kiểm tra..." className="pl-9" />
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Danh sách bài kiểm tra được giao ({filtered.length})</h2>
+          <div className="flex gap-2">
+            <div className="relative w-[260px]">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Tìm bài kiểm tra..." value={q} onChange={e => setQ(e.target.value)} />
+            </div>
+            <Select value={filter} onValueChange={setFilter}>
+              <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="not_started">Chưa làm</SelectItem>
+                <SelectItem value="in_progress">Đang làm</SelectItem>
+                <SelectItem value="submitted">Đã nộp</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="in_progress">Chưa nộp</SelectItem>
-              <SelectItem value="submitted">Đã nộp</SelectItem>
-              <SelectItem value="graded">Đã chấm</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Tên bài kiểm tra</TableHead>
-              <TableHead>Mô tả</TableHead>
-              <TableHead>Ngày nộp</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Kết quả</TableHead>
-              <TableHead>Điểm</TableHead>
-              <TableHead className="text-right">Thao tác</TableHead>
-            </TableRow>
-          </TableHeader>
+          <TableHeader><TableRow>
+            <TableHead>Tên bài</TableHead><TableHead>Hạn nộp</TableHead>
+            <TableHead>Trạng thái</TableHead><TableHead>Điểm</TableHead>
+            <TableHead>Lần làm</TableHead><TableHead className="text-right">Thao tác</TableHead>
+          </TableRow></TableHeader>
           <TableBody>
-            {ROWS.map(r => (
-              <TableRow key={r.id}>
-                <TableCell className="font-medium">{r.name}</TableCell>
-                <TableCell className="max-w-[280px] truncate text-sm text-muted-foreground">{r.description}</TableCell>
-                <TableCell className="text-sm">{r.submitted_at}</TableCell>
-                <TableCell><Badge className={`${statusChip[r.status].cls} hover:${statusChip[r.status].cls}`}>{statusChip[r.status].label}</Badge></TableCell>
-                <TableCell>
-                  {r.result === "none" ? <span className="text-sm text-muted-foreground">-</span> :
-                    <Badge className={`${resultChip[r.result].cls} hover:${resultChip[r.result].cls}`}>{resultChip[r.result].label}</Badge>}
-                </TableCell>
-                <TableCell className="text-sm font-medium">
-                  {r.status === "graded" && r.score !== null ? `${r.score}/${r.max}` : <span className="text-muted-foreground">-</span>}
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button size="icon" variant="ghost" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {filtered.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Không có bài kiểm tra nào</TableCell></TableRow>}
+            {filtered.map(({ a, snap, last, usedAttempts, status }) => {
+              const maxAtt = snap.max_attempts;
+              const exhausted = maxAtt != null && usedAttempts >= maxAtt && status !== "in_progress";
+              const overDue = a.deadline && new Date(a.deadline) < new Date() && status !== "submitted";
+              const showResult = snap.show_results !== false;
+              return (
+                <TableRow key={a.id}>
+                  <TableCell className="font-medium">{snap.title || "—"}</TableCell>
+                  <TableCell className="text-sm">{a.deadline ? new Date(a.deadline).toLocaleString("vi-VN") : "—"}</TableCell>
+                  <TableCell>
+                    {status === "submitted" && <Badge>Đã nộp</Badge>}
+                    {status === "in_progress" && <Badge variant="secondary">Đang làm</Badge>}
+                    {status === "not_started" && <Badge variant="outline">Chưa làm</Badge>}
+                  </TableCell>
+                  <TableCell>{last?.status === "submitted" && showResult ? `${last.score ?? "—"}/${snap.total_points ?? 100}` : "—"}</TableCell>
+                  <TableCell>{usedAttempts}{maxAtt ? `/${maxAtt}` : ""}</TableCell>
+                  <TableCell className="text-right">
+                    {status === "submitted" && showResult ? (
+                      <Button size="sm" variant="outline" asChild><Link to="/my-assignments/$id/result/$employeeId" params={{ id: a.id, employeeId: uid! }}><CheckCircle2 className="h-4 w-4" />Kết quả</Link></Button>
+                    ) : exhausted ? (
+                      <Button size="sm" variant="outline" disabled>Hết lượt</Button>
+                    ) : overDue ? (
+                      <Button size="sm" variant="outline" disabled>Quá hạn</Button>
+                    ) : (
+                      <Button size="sm" asChild><Link to="/my-assignments/$id/submit/$employeeId" params={{ id: a.id, employeeId: uid || "me" }}><PlayCircle className="h-4 w-4" />{status === "in_progress" ? "Tiếp tục" : "Bắt đầu"}</Link></Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </Card>
     </PageContainer>
-  ),
-});
+  );
+}
