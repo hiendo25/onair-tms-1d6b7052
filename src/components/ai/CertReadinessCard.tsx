@@ -93,10 +93,14 @@ export function CertReadinessCard() {
   async function issueSingle(row: EligibleRow) {
     setIssuing(row.employee_id);
     try {
-      const { error } = await supabase.from("employee_certificates").insert({
-        employee_id: row.employee_id,
+      const { data: emp } = await supabase.from("employees").select("user_id, name").eq("id", row.employee_id).maybeSingle();
+      if (!emp?.user_id) { toast.error("Học viên chưa có tài khoản."); return; }
+      const { error } = await supabase.from("user_certificates").insert({
+        user_id: emp.user_id,
         certificate_id: row.certificate_id,
         org_id: orgId,
+        certificate_title: row.course_title,
+        recipient_name: emp.name ?? row.name,
         issued_at: new Date().toISOString(),
         status: "active",
       });
