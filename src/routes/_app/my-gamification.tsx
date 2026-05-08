@@ -25,8 +25,8 @@ function Page() {
   const xpQ = useMyXp();
   const titleQ = useMyTitle();
   const gamQ = useGamifications();
-  const lbQ = useLeaderboard(10);
-  const myRankQ = useMyRank();
+  const lbQ = useLeaderboard(10, "department");
+  const myRankQ = useMyRank("department");
   const rewardsQ = useRewards();
   const redeem = useRedeemReward();
 
