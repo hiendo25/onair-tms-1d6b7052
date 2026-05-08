@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Bell, Calendar, BookOpen, Trophy, Crown, ArrowRight, ChevronRight,
-  Video, Monitor, MapPin, ClipboardCheck, Clock, Lock, PlayCircle, Sparkles,
+  Video, Monitor, MapPin, Clock, Lock, PlayCircle, Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_app/student/dashboard")({
   component: StudentDashboard,
 });
 
-type UpcomingType = "live" | "online" | "offline" | "quiz";
+type UpcomingType = "live" | "online" | "offline";
 type Upcoming = {
   id: string;
   type: UpcomingType;
@@ -316,7 +316,6 @@ const TYPE_META: Record<UpcomingType, { label: string; icon: typeof Video; color
   live: { label: "Live", icon: Video, color: "bg-red-100 text-red-700" },
   online: { label: "Online", icon: Monitor, color: "bg-blue-100 text-blue-700" },
   offline: { label: "Offline", icon: MapPin, color: "bg-emerald-100 text-emerald-700" },
-  quiz: { label: "Bài kiểm tra", icon: ClipboardCheck, color: "bg-violet-100 text-violet-700" },
 };
 
 function UpcomingSection({ items }: { items: Upcoming[] }) {
@@ -341,12 +340,11 @@ function UpcomingSection({ items }: { items: Upcoming[] }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-          <TabsList className="grid grid-cols-5 w-full sm:w-auto sm:inline-flex">
+          <TabsList className="grid grid-cols-4 w-full sm:w-auto sm:inline-flex">
             <TabsTrigger value="all">Tất cả</TabsTrigger>
             <TabsTrigger value="live">Live</TabsTrigger>
             <TabsTrigger value="online">Online</TabsTrigger>
             <TabsTrigger value="offline">Offline</TabsTrigger>
-            <TabsTrigger value="quiz">Quiz</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -518,26 +516,6 @@ function useStudentOverview(orgId: string, userId: string | undefined) {
         });
       }
 
-      // Exam assignments
-      const { data: exams } = await supabase
-        .from("exam_assignments")
-        .select("id, exam_snapshot, deadline, student_ids")
-        .eq("org_id", orgId)
-        .eq("status", "active")
-        .contains("student_ids", [userId!])
-        .gte("deadline", nowIso)
-        .order("deadline", { ascending: true })
-        .limit(20);
-      (exams ?? []).forEach((e: any) => {
-        upcoming.push({
-          id: e.id,
-          type: "quiz",
-          title: e.exam_snapshot?.title || "Bài kiểm tra",
-          start: e.deadline,
-          end: null,
-          link: "/my-assignments",
-        });
-      });
 
       upcoming.sort((a, b) => a.start.localeCompare(b.start));
 
