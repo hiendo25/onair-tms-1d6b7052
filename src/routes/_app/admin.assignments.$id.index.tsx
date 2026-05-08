@@ -4,6 +4,7 @@ import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { QuizItemAnalysisCard } from "@/components/ai/QuizItemAnalysisCard";
 import {
   useAssignments, useAssignmentMutations, useExamQuestions, useQuestions,
 } from "@/lib/data-hooks";
@@ -93,6 +94,7 @@ function Detail() {
           })}
         </div>
       </Card>
+      <QuizItemAnalysisCard assignmentId={ax.id} />
     </PageContainer>
   );
 }
