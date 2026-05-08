@@ -7,9 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import {
-  useExamAssignments, useExamAttempts, useExamAttemptMutations,
-} from "@/lib/data-hooks";
+import { useExamAssignments } from "@/lib/data-hooks";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
 
@@ -18,7 +16,7 @@ export const Route = createFileRoute("/_app/my-assignments/$id/submit/$employeeI
   component: Page,
 });
 
-type SnapQ = { id: string; title: string; type: string; options: string[]; correct_answers: string[]; points: number; sort_order: number };
+type SnapQ = { id: string; title: string; type: string; options: string[]; points: number; sort_order: number };
 
 function Page() {
   const { id } = Route.useParams();
@@ -26,8 +24,6 @@ function Page() {
   const { user } = useAuth();
   const uid = user?.id;
   const { data: assigns = [] } = useExamAssignments();
-  const { data: attempts = [] } = useExamAttempts();
-  const m = useExamAttemptMutations();
   const a = useMemo(() => assigns.find(x => x.id === id), [assigns, id]);
 
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
@@ -39,35 +35,24 @@ function Page() {
   const snap = (a?.exam_snapshot ?? {}) as { title?: string; questions?: SnapQ[]; time_limit_minutes?: number | null; max_attempts?: number | null; pass_score?: number; total_points?: number; show_results?: boolean };
   const questions = useMemo(() => (snap.questions ?? []).slice().sort((x, y) => x.sort_order - y.sort_order), [snap.questions]);
 
-  // Init or resume attempt
+  // Init or resume attempt via edge function (validates deadline, max_attempts atomically)
   useEffect(() => {
     if (!a || !uid) return;
-    const mine = attempts.filter(t => t.exam_assignment_id === a.id && t.user_id === uid);
-    const inProgress = mine.find(t => t.status === "in_progress");
-    if (inProgress) {
-      setAttemptId(inProgress.id);
-      setAnswers((inProgress.answers || {}) as Record<string, string | string[]>);
-      if (snap.time_limit_minutes) {
-        const elapsed = Math.floor((Date.now() - new Date(inProgress.started_at).getTime()) / 1000);
-        setRemain(Math.max(0, snap.time_limit_minutes * 60 - elapsed));
-      }
-      return;
-    }
-    const used = mine.length;
-    if (snap.max_attempts && used >= snap.max_attempts) { toast.error("Bạn đã dùng hết số lần làm"); nav({ to: "/my-assignments" }); return; }
-    // create new attempt
     (async () => {
-      // We need the inserted id; useMutation.mutateAsync returns void in this codebase, so use direct supabase as fallback
       const { supabase } = await import("@/integrations/supabase/client");
-      const { data, error } = await supabase.from("exam_attempts").insert({
-        exam_assignment_id: a.id, user_id: uid, org_id: a.org_id,
-        attempt_number: used + 1, status: "in_progress", answers: {},
-      }).select("*").single();
-      if (error) { toast.error(error.message); return; }
-      setAttemptId(data.id);
-      if (snap.time_limit_minutes) setRemain(snap.time_limit_minutes * 60);
+      const { data: result, error: fnErr } = await supabase.functions.invoke("start-exam-attempt", {
+        body: { examAssignmentId: a.id },
+      });
+      if (fnErr || result?.error) {
+        toast.error(result?.error ?? fnErr?.message ?? "Không thể bắt đầu bài kiểm tra");
+        nav({ to: "/my-assignments" });
+        return;
+      }
+      setAttemptId(result.attemptId);
+      if (result.resumed) setAnswers((result.answers || {}) as Record<string, string | string[]>);
+      if (result.remainSeconds != null) setRemain(result.remainSeconds);
     })();
-  }, [a, uid, attempts.length]);
+  }, [a?.id, uid]);
 
   // Countdown
   useEffect(() => {
@@ -101,32 +86,26 @@ function Page() {
     if (submittedRef.current || !attemptId || !a) return;
     submittedRef.current = true;
     setSubmitting(true);
-    let earned = 0;
-    for (const q of questions) {
-      const ans = answers[q.id];
-      const correct = q.correct_answers || [];
-      let ok = false;
-      if (q.type === "multiple") {
-        const a1 = (Array.isArray(ans) ? ans : []).map(String).sort();
-        const c1 = correct.map(String).sort();
-        ok = a1.length === c1.length && a1.every((v, i) => v === c1[i]);
-      } else {
-        ok = String(ans ?? "") === String(correct[0] ?? "");
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      // Flush latest answers before grading
+      await supabase.from("exam_attempts").update({ answers }).eq("id", attemptId);
+      const { data: result, error: fnErr } = await supabase.functions.invoke("grade-exam-attempt", {
+        body: { attemptId, auto },
+      });
+      if (fnErr || result?.error) {
+        const msg = result?.error ?? fnErr?.message ?? "Nộp bài không thành công";
+        toast.error(msg);
+        submittedRef.current = false;
+        return;
       }
-      if (ok) earned += q.points || 0;
+      if (auto) toast.warning("Hết giờ — bài đã được tự động nộp");
+      else toast.success(result.showResults ? `Điểm: ${result.earned}/${result.totalPoints} (${result.scorePct}%)` : "Đã nộp bài thành công");
+      if (!result.showResults) nav({ to: "/my-assignments" });
+      else nav({ to: "/my-assignments/$id/result/$employeeId", params: { id: a.id, employeeId: uid! } });
+    } finally {
+      setSubmitting(false);
     }
-    const totalPoints = snap.total_points || questions.reduce((s, q) => s + (q.points || 0), 0) || 1;
-    const scorePct = Math.round((earned / totalPoints) * 100);
-    const passed = scorePct >= (snap.pass_score ?? 0);
-    const { supabase } = await import("@/integrations/supabase/client");
-    await supabase.from("exam_attempts").update({
-      answers, status: "submitted", submitted_at: new Date().toISOString(),
-      score: earned, passed,
-    }).eq("id", attemptId);
-    if (auto) toast.warning("Hết giờ — bài đã được tự động nộp");
-    else toast.success(snap.show_results === false ? "Đã nộp bài thành công" : `Điểm: ${earned}/${totalPoints} (${scorePct}%)`);
-    if (snap.show_results === false) nav({ to: "/my-assignments" });
-    else nav({ to: "/my-assignments/$id/result/$employeeId", params: { id: a.id, employeeId: uid! } });
   }
   function autoSubmit() { doSubmit(true); }
 

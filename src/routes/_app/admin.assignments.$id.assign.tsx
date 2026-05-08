@@ -55,7 +55,7 @@ function AssignPage() {
         const q = bank.find(b => b.id === l.question_id);
         return q ? {
           id: q.id, title: q.title || q.question, type: q.type,
-          options: q.options, correct_answers: q.correct_answers,
+          options: q.options,
           points: l.points, sort_order: l.sort_order,
         } : null;
       }).filter(Boolean),

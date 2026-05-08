@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
-import { useAssignments, useAssignmentMutations, useExamQuestions } from "@/lib/data-hooks";
+import { useAssignments, useAssignmentMutations } from "@/lib/data-hooks";
 import { ASSIGNMENT_STATUS } from "@/lib/admin-options";
 import { toast } from "sonner";
 
@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_app/admin/assignments/")({
 
 function Page() {
   const { data: rows = [], isLoading } = useAssignments();
-  const { data: links = [] } = useExamQuestions();
   const m = useAssignmentMutations();
   const nav = useNavigate();
   const [q, setQ] = useState("");
@@ -93,7 +92,7 @@ function Page() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtered.map(r => {
-              const qCount = links.filter(l => l.assignment_id === r.id).length || r.total_questions;
+              const qCount = r.total_questions;
               return (
                 <Card key={r.id} className="group flex flex-col overflow-hidden p-0 transition-shadow hover:shadow-md">
                   <div

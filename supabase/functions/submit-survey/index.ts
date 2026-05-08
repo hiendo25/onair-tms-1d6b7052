@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
 
     // Load survey + questions
     const [{ data: survey, error: sErr }, { data: questions, error: qErr }] = await Promise.all([
-      admin.from("surveys").select("id, org_id, status, anonymous, start_date, end_date, version, responses_count").eq("id", surveyId).maybeSingle(),
+      admin.from("surveys").select("id, org_id, status, anonymous, start_date, end_date, version").eq("id", surveyId).maybeSingle(),
       admin.from("survey_questions").select("id, type, options, required, order_index").eq("survey_id", surveyId).order("order_index"),
     ]);
 
@@ -190,12 +190,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Bump counter (best-effort, non-fatal)
-    await admin
-      .from("surveys")
-      .update({ responses_count: (survey.responses_count ?? 0) + 1 })
-      .eq("id", surveyId);
-
+    // responses_count is maintained by DB trigger on survey_responses
     return json({ ok: true, responseId: resp.id });
   } catch (e) {
     return json({ error: e instanceof Error ? e.message : "Lỗi không xác định" }, 500);
