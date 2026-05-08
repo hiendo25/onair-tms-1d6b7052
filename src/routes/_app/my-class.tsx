@@ -42,7 +42,8 @@ function MyClassPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | Delivery>("all");
-  const [tab, setTab] = useState<"active" | "ended">("active");
+  const [modeFilter, setModeFilter] = useState<"all" | "single" | "series">("all");
+  const [tab, setTab] = useState<"all" | "ongoing" | "today" | "upcoming" | "ended">("all");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -90,10 +91,13 @@ function MyClassPage() {
       const courses = q.data!.cc.filter((r: any) => r.classroom_id === c.id);
       const delivery: Delivery =
         (c.delivery as Delivery) || (c.type as Delivery) || "offline";
-      // status: ended if all sessions ended or end_at in past, or e-learning all completed
+      const mode: "single" | "series" = (c.mode === "series" ? "series" : "single");
       const lastEnd = sessions.length
         ? Math.max(...sessions.map((s: any) => new Date(s.end_at ?? s.start_at ?? 0).getTime()))
         : new Date(c.end_at ?? c.end_date ?? 0).getTime();
+      const firstStart = sessions.length
+        ? Math.min(...sessions.map((s: any) => new Date(s.start_at ?? 0).getTime()))
+        : new Date(c.start_at ?? c.start_date ?? 0).getTime();
       const nextSession =
         sessions.find((s: any) => new Date(s.end_at ?? s.start_at ?? 0).getTime() > now) ?? null;
 
@@ -110,19 +114,29 @@ function MyClassPage() {
 
       const ended =
         delivery === "elearning"
-          ? elearningTotal > 0 && elearningProgress >= 100
+          ? (elearningTotal > 0 && elearningProgress >= 100) || (lastEnd > 0 && lastEnd < now)
           : lastEnd > 0 && lastEnd < now;
 
+      // Time-based status for live/offline
+      let timeStatus: "ongoing" | "today" | "upcoming" | "ended" = "upcoming";
+      if (ended) timeStatus = "ended";
+      else if (nextSession) {
+        const s = new Date(nextSession.start_at ?? 0).getTime();
+        const e = new Date(nextSession.end_at ?? nextSession.start_at ?? 0).getTime();
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+        if (now >= s && now <= e) timeStatus = "ongoing";
+        else if (s >= todayStart.getTime() && s <= todayEnd.getTime()) timeStatus = "today";
+        else timeStatus = "upcoming";
+      } else if (delivery === "elearning") {
+        if (elearningProgress > 0 && elearningProgress < 100) timeStatus = "ongoing";
+        else if (firstStart > now) timeStatus = "upcoming";
+        else timeStatus = "today";
+      }
+
       return {
-        c,
-        delivery,
-        sessions,
-        courses,
-        nextSession,
-        elearningProgress,
-        elearningTotal,
-        ended,
-        lastEnd,
+        c, delivery, mode, sessions, courses, nextSession,
+        elearningProgress, elearningTotal, ended, lastEnd, timeStatus,
       };
     });
   }, [q.data, now]);
@@ -130,23 +144,28 @@ function MyClassPage() {
   const filtered = useMemo(() => {
     const term = stripVN(search.trim());
     return items
-      .filter((it) => (tab === "ended" ? it.ended : !it.ended))
+      .filter((it) => tab === "all" ? true : tab === "ended" ? it.ended : it.timeStatus === tab)
       .filter((it) => (typeFilter === "all" ? true : it.delivery === typeFilter))
+      .filter((it) => (modeFilter === "all" ? true : it.mode === modeFilter))
       .filter((it) =>
         !term
           ? true
           : stripVN(it.c.title ?? "").includes(term) ||
             stripVN(it.c.code ?? "").includes(term),
       );
-  }, [items, search, typeFilter, tab]);
+  }, [items, search, typeFilter, modeFilter, tab]);
 
   const counts = useMemo(
     () => ({
-      active: items.filter((i) => !i.ended).length,
+      all: items.length,
+      ongoing: items.filter((i) => !i.ended && i.timeStatus === "ongoing").length,
+      today: items.filter((i) => !i.ended && i.timeStatus === "today").length,
+      upcoming: items.filter((i) => !i.ended && i.timeStatus === "upcoming").length,
       ended: items.filter((i) => i.ended).length,
     }),
     [items],
   );
+
 
   return (
     <PageContainer
@@ -166,7 +185,7 @@ function MyClassPage() {
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
           <SelectTrigger className="w-[180px]">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue />
+            <SelectValue placeholder="Hình thức" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả hình thức</SelectItem>
@@ -175,18 +194,32 @@ function MyClassPage() {
             <SelectItem value="elearning">E-learning</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={modeFilter} onValueChange={(v) => setModeFilter(v as any)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Loại lớp" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả loại lớp</SelectItem>
+            <SelectItem value="single">Lớp đơn</SelectItem>
+            <SelectItem value="series">Lớp chuỗi</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList>
-          <TabsTrigger value="active" className="gap-2">
-            Đang hoạt động
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{counts.active}</span>
-          </TabsTrigger>
-          <TabsTrigger value="ended" className="gap-2">
-            Đã kết thúc
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{counts.ended}</span>
-          </TabsTrigger>
+        <TabsList className="flex-wrap h-auto">
+          {([
+            ["all", "Tất cả", counts.all],
+            ["ongoing", "Đang diễn ra", counts.ongoing],
+            ["today", "Diễn ra hôm nay", counts.today],
+            ["upcoming", "Sắp diễn ra", counts.upcoming],
+            ["ended", "Đã kết thúc", counts.ended],
+          ] as const).map(([v, label, n]) => (
+            <TabsTrigger key={v} value={v} className="gap-2">
+              {label}
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{n}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
@@ -222,16 +255,22 @@ function MyClassPage() {
   );
 }
 
-function EmptyState({ tab, hasAny }: { tab: "active" | "ended"; hasAny: boolean }) {
+function EmptyState({ tab, hasAny }: { tab: string; hasAny: boolean }) {
   return (
     <Card className="flex flex-col items-center gap-3 p-12 text-center">
       <BookOpen className="h-10 w-10 text-muted-foreground" />
       <p className="text-sm text-muted-foreground">
         {!hasAny
           ? "Bạn chưa được gán lớp học nào."
-          : tab === "active"
-          ? "Không có lớp học đang hoạt động."
-          : "Không có lớp học đã kết thúc."}
+          : tab === "ended"
+          ? "Không có lớp học đã kết thúc."
+          : tab === "ongoing"
+          ? "Không có lớp học đang diễn ra."
+          : tab === "today"
+          ? "Không có lớp học nào diễn ra hôm nay."
+          : tab === "upcoming"
+          ? "Không có lớp học sắp diễn ra."
+          : "Không có lớp học phù hợp bộ lọc."}
       </p>
     </Card>
   );
