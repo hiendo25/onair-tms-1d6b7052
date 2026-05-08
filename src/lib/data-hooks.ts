@@ -91,7 +91,16 @@ export const useOnlineCourses = onlineCoursesCrud.useList;
 export const useOnlineCourseMutations = onlineCoursesCrud.useMutations;
 
 // ===== Classrooms =====
-export type DBClassroom = { id: string; org_id: string; code: string; title: string; description: string; instructor: string; location: string; capacity: number; students_count: number; start_date: string | null; end_date: string | null; type: string; status: string; };
+export type DBClassroom = {
+  id: string; org_id: string; code: string; title: string; description: string;
+  instructor: string; location: string; capacity: number; students_count: number;
+  start_date: string | null; end_date: string | null; type: string; status: string;
+  delivery: "live" | "online" | "offline"; mode: "single" | "series";
+  cover_url: string; topics: string[]; objective: string; materials: unknown;
+  meeting_provider: string; meeting_url: string; meeting_id: string; meeting_password: string;
+  start_at: string | null; end_at: string | null; created_by: string | null;
+  created_at: string;
+};
 const classroomsCrud = createOrgCrud<DBClassroom>("classrooms", "lớp học");
 export const useClassrooms = classroomsCrud.useList;
 export const useClassroomMutations = classroomsCrud.useMutations;
