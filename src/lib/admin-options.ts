@@ -160,3 +160,24 @@ export const SURVEY_QUESTION_TYPE = [
 ];
 
 export const CODE_NOTE = "Mã chỉ từ 2 - 8 ký tự, không khoảng trắng, không ký tự đặc biệt (ngoại trừ -).";
+
+export const QUESTION_STATUS = [
+  { value: "active", label: "Hoạt động" },
+  { value: "inactive", label: "Ngưng sử dụng" },
+];
+
+export const EXAM_STATUS = [
+  { value: "draft", label: "Bản nháp" },
+  { value: "ready", label: "Sẵn sàng sử dụng" },
+];
+
+export const EXAM_ASSIGNMENT_STATUS = [
+  { value: "active", label: "Hoạt động" },
+  { value: "inactive", label: "Ngừng hoạt động" },
+];
+
+export const ATTEMPT_STATUS = [
+  { value: "not_started", label: "Chưa bắt đầu" },
+  { value: "in_progress", label: "Đang làm" },
+  { value: "submitted", label: "Hoàn thành" },
+];
