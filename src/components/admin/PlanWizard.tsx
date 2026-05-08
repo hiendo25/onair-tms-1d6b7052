@@ -420,14 +420,14 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                     </div>
                   ))}
                 </div>
-              ))}
+              )}
 
-              {step === 3 && (surveyLocked ? <LockedNotice /> : (
+              {step === 3 && (
                 <div className="space-y-4">
                   {programs.map((p) => <TopicGroup key={p.id} programId={p.id} label={p.name} topics={topics} onAdd={() => addTopic(p.id)} onUpdate={updateTopic} onRemove={removeTopic} />)}
                   <TopicGroup programId={null} label="Chủ đề độc lập (không thuộc chương trình)" topics={topics} onAdd={() => addTopic(null)} onUpdate={updateTopic} onRemove={removeTopic} />
                 </div>
-              ))}
+              )}
 
               {step === 4 && (
                 <div className="space-y-4">
