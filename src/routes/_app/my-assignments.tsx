@@ -159,6 +159,8 @@ function Page() {
                     <TableCell className="text-right">
                       {status === "submitted" && showResult ? (
                         <Button size="sm" variant="outline" asChild><Link to="/my-assignments/$id/result/$employeeId" params={{ id: a.id, employeeId: uid! }}><CheckCircle2 className="h-4 w-4" />Kết quả</Link></Button>
+                      ) : status === "not_yet_open" ? (
+                        <Button size="sm" variant="outline" disabled title={`Mở lúc ${fmt((a as any).available_from)}`}>Chưa mở</Button>
                       ) : exhausted ? (
                         <Button size="sm" variant="outline" disabled>Hết lượt</Button>
                       ) : status === "overdue" ? (
