@@ -362,12 +362,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                     <Label>Mục tiêu</Label>
                     <Textarea className="mt-1" rows={4} placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo" value={info.objective} onChange={(e) => setInfo({ ...info, objective: e.target.value })} />
                   </div>
-                  <div>
-                    <Label>Loại</Label>
-                    <Select value={info.type} onValueChange={(v) => setInfo({ ...info, type: v })}>
-                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>{PLAN_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
-                    </Select>
                   </div>
                   <div className="rounded-lg border p-4 bg-slate-50/50">
                     <Label className="text-sm font-semibold">Thời gian triển khai</Label>
