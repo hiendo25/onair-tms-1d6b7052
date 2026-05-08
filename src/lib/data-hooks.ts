@@ -79,7 +79,7 @@ export const useRoles = rolesCrud.useList;
 export const useRoleMutations = rolesCrud.useMutations;
 
 // ===== Employees =====
-export type DBEmployee = { id: string; org_id: string; employee_code: string; name: string; email: string; phone: string; branch: string; department: string; role: string; position: string; type: string; status: string; avatar_url: string; joined_at: string | null; };
+export type DBEmployee = { id: string; org_id: string; employee_code: string; name: string; email: string; phone: string; branch: string; department: string; role: string; position: string; type: string; status: string; avatar_url: string; joined_at: string | null; user_id: string | null; };
 const employeesCrud = createOrgCrud<DBEmployee>("employees", "nhân viên");
 export const useEmployees = employeesCrud.useList;
 export const useEmployeeMutations = employeesCrud.useMutations;
