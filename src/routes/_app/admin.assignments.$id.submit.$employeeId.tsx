@@ -1,25 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { PageContainer } from "@/components/PageContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
+// Admin does not submit exams on behalf of students.
+// This route was a placeholder; redirect to the grade view instead.
 export const Route = createFileRoute("/_app/admin/assignments/$id/submit/$employeeId")({
-  head: () => ({ meta: [{ title: "Nộp bài KT — OnAir TMS" }] }),
-  component: Submit,
+  beforeLoad: ({ params }) => {
+    throw redirect({
+      to: "/admin/assignments/$id/grade/$employeeId",
+      params: { id: params.id, employeeId: params.employeeId },
+      replace: true,
+    });
+  },
+  component: () => null,
 });
-function Submit() {
-  const { id, employeeId } = Route.useParams();
-  return (
-    <PageContainer title="Nộp bài kiểm tra" breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: `#${id}` }, { title: `HV ${employeeId}` }]}>
-      <Card><CardHeader><CardTitle>Câu hỏi</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          {Array.from({length:3}).map((_,i)=>(
-            <div key={i} className="space-y-2"><div className="font-medium">Câu {i+1}: ?</div><Textarea rows={3} /></div>
-          ))}
-          <div className="flex justify-end"><Button>Nộp bài</Button></div>
-        </CardContent>
-      </Card>
-    </PageContainer>
-  );
-}
