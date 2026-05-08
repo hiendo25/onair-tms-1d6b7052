@@ -336,7 +336,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
               </button>
             );
           })}
-
+        </div>
 
         {/* Right form */}
         <div>
