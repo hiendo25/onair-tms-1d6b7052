@@ -307,8 +307,8 @@ function Page() {
         </DialogContent>
       </Dialog>
 
-      <ConfirmDelete open={!!delFolder} title="Xoá folder" description={`Xoá folder "${delFolder?.name}"?`} onCancel={() => setDelFolder(null)} onConfirm={() => delFolder && deleteFolder(delFolder)} />
-      <ConfirmDelete open={!!delQ} title="Xoá câu hỏi" description={`Xoá câu hỏi "${delQ?.title || delQ?.question}"?`} onCancel={() => setDelQ(null)} onConfirm={() => delQ && handleDeleteQ(delQ)} />
+      <ConfirmDelete open={!!delFolder} onOpenChange={(o) => !o && setDelFolder(null)} title="Xoá folder" description={`Xoá folder "${delFolder?.name}"?`} onConfirm={() => { if (delFolder) deleteFolder(delFolder); }} />
+      <ConfirmDelete open={!!delQ} onOpenChange={(o) => !o && setDelQ(null)} title="Xoá câu hỏi" description={`Xoá câu hỏi "${delQ?.title || delQ?.question}"?`} onConfirm={() => { if (delQ) handleDeleteQ(delQ); }} />
     </PageContainer>
   );
 }
