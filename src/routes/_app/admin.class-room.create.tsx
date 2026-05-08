@@ -507,6 +507,32 @@ function Page() {
                 </div>
               )}
 
+              <div className="border-t pt-5">
+                <h3 className="font-semibold mb-1">Gán Flashcard ôn tập</h3>
+                <p className="text-xs text-muted-foreground mb-3">Flashcard tự phát cho học viên 15 phút sau khi hoàn thành lớp học. Mỗi học viên nhận tối đa 1 Flashcard/ngày.</p>
+                <div className="space-y-2 max-h-64 overflow-auto rounded border p-3">
+                  {flashcards.filter(f => f.enabled !== false).length === 0 ? (
+                    <div className="text-sm text-muted-foreground text-center py-4">Chưa có Flashcard nào đang bật. Tạo Flashcard tại module Flashcard trước.</div>
+                  ) : flashcards.filter(f => f.enabled !== false).map(f => (
+                    <label key={f.id} className="flex items-start gap-2 hover:bg-muted/30 rounded p-2 cursor-pointer">
+                      <Checkbox
+                        checked={flashcardIds.includes(f.id)}
+                        onCheckedChange={(v) => setFlashcardIds(v ? [...flashcardIds, f.id] : flashcardIds.filter(x => x !== f.id))}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">{f.name || f.title}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">{f.content}</div>
+                      </div>
+                      {flashcardIds.includes(f.id) && (
+                        <Badge variant="outline" className="shrink-0">#{flashcardIds.indexOf(f.id) + 1}</Badge>
+                      )}
+                    </label>
+                  ))}
+                </div>
+                <div className="text-xs text-muted-foreground mt-2">Đã chọn {flashcardIds.length} Flashcard · phát theo thứ tự chọn</div>
+              </div>
+
+
               <div className="flex justify-between pt-2">
                 <Button variant="outline" onClick={() => setTab("time")}>Quay lại</Button>
                 <Button onClick={publish} disabled={submitting}>{submitting ? "Đang đăng tải..." : "Đăng tải"}</Button>
