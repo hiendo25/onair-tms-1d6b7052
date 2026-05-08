@@ -160,6 +160,8 @@ function GradePage() {
       } else {
         await supabase.from("assignment_submissions").insert({
           assignment_id: id,
+          assignment_title: assignment.title ?? "",
+          org_id: assignment.org_id,
           user_id: emp.user_id,
           score: normalizedScore,
           status: passed ? "passed" : "failed",
