@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { zodValidator } from "@tanstack/zod-adapter";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
@@ -21,7 +20,7 @@ import { toast } from "sonner";
 const search = z.object({ folder: z.string().optional().default("") });
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank/$id/edit")({
-  validateSearch: zodValidator(search),
+  validateSearch: (input: Record<string, unknown>) => search.parse(input),
   head: () => ({ meta: [{ title: "Tạo câu hỏi — OnAir TMS" }] }),
   component: Page,
 });
