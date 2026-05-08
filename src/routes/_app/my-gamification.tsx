@@ -136,12 +136,12 @@ function Page() {
         </Card>
       </div>
 
-      {/* 3.3 Bảng xếp hạng preview */}
+      {/* 3.3 Bảng xếp hạng preview — Top 3 + thứ hạng của tôi */}
       <Card>
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold flex items-center gap-2"><Trophy className="h-4 w-4" />Bảng xếp hạng</h3>
-            <Link to="/my-leaderboard" className="text-xs text-primary hover:underline">Xem đầy đủ →</Link>
+            <h3 className="text-base font-semibold flex items-center gap-2"><Trophy className="h-4 w-4" />Bảng xếp hạng (Top 3)</h3>
+            <Link to="/my-leaderboard"><Button variant="outline" size="sm">Xem toàn bộ →</Button></Link>
           </div>
           {lbQ.isLoading ? (
             <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
@@ -150,26 +150,38 @@ function Page() {
           ) : top3.length === 0 ? (
             <div className="text-center text-sm text-muted-foreground py-8">Chưa có dữ liệu xếp hạng</div>
           ) : (
-            <div className="space-y-2">
-              {top3.map((r) => {
-                const me = r.user_id === user?.id;
-                const medals = ["🥇", "🥈", "🥉"];
-                return (
-                  <div key={r.user_id} className={`flex items-center gap-3 rounded-md border p-3 ${me ? "border-primary bg-primary/5" : ""}`}>
-                    <div className="text-2xl w-8 text-center">{medals[r.rank - 1] || r.rank}</div>
-                    <div className="flex-1 font-medium">{r.profile?.full_name || "—"}{me && <span className="ml-2 text-xs text-primary">(Bạn)</span>}</div>
-                    <div className="font-mono font-semibold">{r.xp.toLocaleString()} điểm</div>
-                  </div>
-                );
-              })}
-              {!myInTop && myRankQ.data && (
-                <div className="flex items-center gap-3 rounded-md border border-primary bg-primary/5 p-3 mt-3">
-                  <div className="w-8 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
-                  <div className="flex-1 font-medium">Bạn</div>
-                  <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
-                </div>
+            <>
+              <div className="space-y-2">
+                {top3.map((r) => {
+                  const me = r.user_id === user?.id;
+                  const medals = ["🥇", "🥈", "🥉"];
+                  return (
+                    <div key={r.user_id} className={`flex items-center gap-3 rounded-md border p-3 ${me ? "border-primary bg-primary/5" : "bg-amber-50/40"}`}>
+                      <div className="text-2xl w-8 text-center">{medals[r.rank - 1]}</div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium truncate">{r.profile?.full_name || "—"}{me && <span className="ml-2 text-xs text-primary">(Bạn)</span>}</div>
+                        {r.department && <div className="text-xs text-muted-foreground truncate">Phòng: {r.department}</div>}
+                      </div>
+                      <div className="font-mono font-semibold">{r.xp.toLocaleString()} điểm</div>
+                    </div>
+                  );
+                })}
+              </div>
+              {!myInTop && (
+                <>
+                  <div className="text-center text-xs text-muted-foreground py-2">···</div>
+                  {myRankQ.data ? (
+                    <div className="flex items-center gap-3 rounded-md border-2 border-primary bg-primary/5 p-3">
+                      <div className="w-8 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
+                      <div className="flex-1 font-medium">Bạn</div>
+                      <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
+                    </div>
+                  ) : (
+                    <div className="text-center text-xs text-muted-foreground">Chưa có thứ hạng của bạn</div>
+                  )}
+                </>
               )}
-            </div>
+            </>
           )}
         </CardContent>
       </Card>
