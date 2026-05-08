@@ -193,16 +193,68 @@ export function useLpInvalidate() {
 
 
 // ===== Assignments =====
-export type DBAssignment = { id: string; org_id: string; code: string; title: string; description: string; type: string; deadline: string | null; total_questions: number; assigned_count: number; completed_count: number; status: string; };
-const assignmentsCrud = createOrgCrud<DBAssignment>("assignments", "bài tập");
+export type DBAssignment = {
+  id: string; org_id: string; code: string; title: string; description: string; type: string;
+  deadline: string | null; total_questions: number; assigned_count: number; completed_count: number;
+  status: string; pass_score: number;
+  time_limit_minutes: number | null; max_attempts: number | null;
+  shuffle_questions: boolean; shuffle_answers: boolean; show_results: boolean;
+  total_points: number; created_by: string | null;
+  created_at: string;
+};
+const assignmentsCrud = createOrgCrud<DBAssignment>("assignments", "bài kiểm tra");
 export const useAssignments = assignmentsCrud.useList;
 export const useAssignmentMutations = assignmentsCrud.useMutations;
 
 // ===== Question bank =====
-export type DBQuestion = { id: string; org_id: string; question: string; type: string; category: string; difficulty: string; options: unknown; correct_answer: string; explanation: string; points: number; tags: string[]; };
+export type DBQuestion = {
+  id: string; org_id: string; folder_id: string | null;
+  title: string; question: string; type: string; category: string; difficulty: string;
+  options: string[]; correct_answer: string; correct_answers: string[];
+  explanation: string; points: number; tags: string[]; status: string;
+  created_at: string;
+};
 const questionsCrud = createOrgCrud<DBQuestion>("question_bank", "câu hỏi");
 export const useQuestions = questionsCrud.useList;
 export const useQuestionMutations = questionsCrud.useMutations;
+
+// ===== Question folders =====
+export type DBQuestionFolder = { id: string; org_id: string; parent_id: string | null; name: string; created_at: string; updated_at: string };
+const qFoldersCrud = createOrgCrud<DBQuestionFolder>("question_folders", "thư mục");
+export const useQuestionFolders = qFoldersCrud.useList;
+export const useQuestionFolderMutations = qFoldersCrud.useMutations;
+
+// ===== Exam questions (link) =====
+export type DBExamQuestion = { id: string; org_id: string; assignment_id: string; question_id: string; sort_order: number; points: number; created_at: string };
+const examQCrud = createOrgCrud<DBExamQuestion>("exam_questions", "câu hỏi bài KT");
+export const useExamQuestions = examQCrud.useList;
+export const useExamQuestionMutations = examQCrud.useMutations;
+
+// ===== Exam assignments (lần gán) =====
+export type DBExamAssignment = {
+  id: string; org_id: string; exam_id: string;
+  exam_snapshot: Record<string, unknown>;
+  audience: Array<{ type: string; id: string; label?: string }>;
+  student_ids: string[];
+  deadline: string | null; status: string; assigned_by: string | null;
+  created_at: string; updated_at: string;
+};
+const examACrud = createOrgCrud<DBExamAssignment>("exam_assignments", "lần gán");
+export const useExamAssignments = examACrud.useList;
+export const useExamAssignmentMutations = examACrud.useMutations;
+
+// ===== Exam attempts =====
+export type DBExamAttempt = {
+  id: string; org_id: string; exam_assignment_id: string; user_id: string;
+  attempt_number: number; status: "in_progress" | "submitted";
+  started_at: string; submitted_at: string | null;
+  score: number | null; passed: boolean | null;
+  answers: Record<string, string | string[]>;
+  created_at: string; updated_at: string;
+};
+const examAttCrud = createOrgCrud<DBExamAttempt>("exam_attempts", "lần làm bài");
+export const useExamAttempts = examAttCrud.useList;
+export const useExamAttemptMutations = examAttCrud.useMutations;
 
 // ===== Certificates =====
 export type DBCertificate = { id: string; org_id: string; code: string; title: string; description: string; template_url: string; valid_months: number; issued_count: number; status: string; };
