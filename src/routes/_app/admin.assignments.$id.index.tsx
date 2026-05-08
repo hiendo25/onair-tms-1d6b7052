@@ -24,16 +24,17 @@ function Detail() {
   const am = useAssignmentMutations();
   const a = rows.find(r => r.id === id);
   if (!a) return null;
-  const myLinks = links.filter(l => l.assignment_id === a.id).sort((x, y) => x.sort_order - y.sort_order);
+  const ax = a;
+  const myLinks = links.filter(l => l.assignment_id === ax.id).sort((x, y) => x.sort_order - y.sort_order);
 
   async function clone() {
     await am.create.mutateAsync({
-      title: `${a.title} (Bản sao)`, code: `${a.code}-CP-${Date.now().toString().slice(-4)}`,
-      description: a.description, type: a.type, deadline: a.deadline,
-      total_questions: a.total_questions, total_points: a.total_points,
-      pass_score: a.pass_score, time_limit_minutes: a.time_limit_minutes,
-      max_attempts: a.max_attempts, shuffle_questions: a.shuffle_questions,
-      shuffle_answers: a.shuffle_answers, show_results: a.show_results, status: "draft",
+      title: `${ax.title} (Bản sao)`, code: `${ax.code}-CP-${Date.now().toString().slice(-4)}`,
+      description: ax.description, type: ax.type, deadline: ax.deadline,
+      total_questions: ax.total_questions, total_points: ax.total_points,
+      pass_score: ax.pass_score, time_limit_minutes: ax.time_limit_minutes,
+      max_attempts: ax.max_attempts, shuffle_questions: ax.shuffle_questions,
+      shuffle_answers: ax.shuffle_answers, show_results: ax.show_results, status: "draft",
     });
     toast.success("Đã nhân bản");
   }
