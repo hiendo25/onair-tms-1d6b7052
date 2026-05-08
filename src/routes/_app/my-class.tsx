@@ -185,7 +185,7 @@ function MyClassPage() {
         <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as any)}>
           <SelectTrigger className="w-[180px]">
             <Filter className="mr-2 h-4 w-4" />
-            <SelectValue />
+            <SelectValue placeholder="Hình thức" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả hình thức</SelectItem>
@@ -194,18 +194,32 @@ function MyClassPage() {
             <SelectItem value="elearning">E-learning</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={modeFilter} onValueChange={(v) => setModeFilter(v as any)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Loại lớp" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả loại lớp</SelectItem>
+            <SelectItem value="single">Lớp đơn</SelectItem>
+            <SelectItem value="series">Lớp chuỗi</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-        <TabsList>
-          <TabsTrigger value="active" className="gap-2">
-            Đang hoạt động
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{counts.active}</span>
-          </TabsTrigger>
-          <TabsTrigger value="ended" className="gap-2">
-            Đã kết thúc
-            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{counts.ended}</span>
-          </TabsTrigger>
+        <TabsList className="flex-wrap h-auto">
+          {([
+            ["all", "Tất cả", counts.all],
+            ["ongoing", "Đang diễn ra", counts.ongoing],
+            ["today", "Diễn ra hôm nay", counts.today],
+            ["upcoming", "Sắp diễn ra", counts.upcoming],
+            ["ended", "Đã kết thúc", counts.ended],
+          ] as const).map(([v, label, n]) => (
+            <TabsTrigger key={v} value={v} className="gap-2">
+              {label}
+              <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-semibold">{n}</span>
+            </TabsTrigger>
+          ))}
         </TabsList>
 
         <TabsContent value={tab} className="mt-4">
@@ -241,7 +255,7 @@ function MyClassPage() {
   );
 }
 
-function EmptyState({ tab, hasAny }: { tab: "active" | "ended"; hasAny: boolean }) {
+function EmptyState({ tab, hasAny }: { tab: string; hasAny: boolean }) {
   return (
     <Card className="flex flex-col items-center gap-3 p-12 text-center">
       <BookOpen className="h-10 w-10 text-muted-foreground" />
