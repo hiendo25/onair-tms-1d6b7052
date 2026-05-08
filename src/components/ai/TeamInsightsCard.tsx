@@ -5,7 +5,10 @@ import { AlertTriangle, Info, CheckCircle2, Sparkles, RefreshCw, ArrowRight } fr
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiTeamInsights, aiStudentActionInsights, type ActionableInsight } from "@/lib/ai-mock";
+import { type ActionableInsight } from "@/lib/ai-mock";
+import { supabase } from "@/integrations/supabase/client";
+import { useOrg } from "@/lib/org-context";
+import { useAuth } from "@/lib/auth-context";
 
 const ICONS = {
   warning: { Icon: AlertTriangle, cls: "bg-amber-100 text-amber-700" },
