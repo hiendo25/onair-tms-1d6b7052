@@ -361,6 +361,33 @@ export type Database = {
         }
         Relationships: []
       }
+      classroom_flashcards: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          display_order: number
+          flashcard_id: string
+          id: string
+          org_id: string
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          display_order?: number
+          flashcard_id: string
+          id?: string
+          org_id: string
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          display_order?: number
+          flashcard_id?: string
+          id?: string
+          org_id?: string
+        }
+        Relationships: []
+      }
       classroom_qr_settings: {
         Row: {
           classroom_id: string
@@ -1070,9 +1097,13 @@ export type Database = {
           cards_count: number
           category: string
           code: string
+          content: string
           created_at: string
           description: string
+          enabled: boolean
           id: string
+          image_url: string
+          name: string | null
           org_id: string
           status: string
           students_count: number
@@ -1083,9 +1114,13 @@ export type Database = {
           cards_count?: number
           category?: string
           code: string
+          content?: string
           created_at?: string
           description?: string
+          enabled?: boolean
           id?: string
+          image_url?: string
+          name?: string | null
           org_id: string
           status?: string
           students_count?: number
@@ -1096,9 +1131,13 @@ export type Database = {
           cards_count?: number
           category?: string
           code?: string
+          content?: string
           created_at?: string
           description?: string
+          enabled?: boolean
           id?: string
+          image_url?: string
+          name?: string | null
           org_id?: string
           status?: string
           students_count?: number
@@ -2612,6 +2651,45 @@ export type Database = {
           org_id?: string
           title?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_flashcards: {
+        Row: {
+          classroom_id: string | null
+          content_snapshot: Json
+          created_at: string
+          delivered_at: string | null
+          flashcard_id: string
+          id: string
+          org_id: string
+          scheduled_at: string
+          user_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          classroom_id?: string | null
+          content_snapshot?: Json
+          created_at?: string
+          delivered_at?: string | null
+          flashcard_id: string
+          id?: string
+          org_id: string
+          scheduled_at?: string
+          user_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          classroom_id?: string | null
+          content_snapshot?: Json
+          created_at?: string
+          delivered_at?: string | null
+          flashcard_id?: string
+          id?: string
+          org_id?: string
+          scheduled_at?: string
+          user_id?: string
+          viewed_at?: string | null
         }
         Relationships: []
       }
