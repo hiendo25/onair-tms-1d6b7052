@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { z } from "zod";
-import { ArrowLeft, Plus, Trash2, GripVertical, Upload, X, ChevronDown, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, GripVertical, Upload, X, ChevronDown } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
