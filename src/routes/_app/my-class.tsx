@@ -42,7 +42,8 @@ function MyClassPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | Delivery>("all");
-  const [tab, setTab] = useState<"active" | "ended">("active");
+  const [modeFilter, setModeFilter] = useState<"all" | "single" | "series">("all");
+  const [tab, setTab] = useState<"all" | "ongoing" | "today" | "upcoming" | "ended">("all");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
