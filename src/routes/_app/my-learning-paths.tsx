@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Clock, CheckCircle2, Lock, ArrowRight, Search } from "lucide-react";
+import { BookOpen, Clock, CheckCircle2, Lock, ArrowRight, Search, GraduationCap, AlertTriangle } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useOrg } from "@/lib/org-context";
@@ -22,8 +21,15 @@ export const Route = createFileRoute("/_app/my-learning-paths")({
 });
 
 type EnrollmentWithPath = DBLpEnrollment & { learning_paths: DBLearningPath | null };
+type DerivedStatus = DBLpEnrollment["status"];
 
-function statusBadge(s: DBLpEnrollment["status"]) {
+function deriveStatus(e: DBLpEnrollment): DerivedStatus {
+  if (e.status === "completed") return "completed";
+  if (e.deadline && new Date(e.deadline).getTime() < Date.now()) return "overdue";
+  return e.status;
+}
+
+function statusBadge(s: DerivedStatus) {
   const label = LP_ENROLLMENT_STATUS.find(o => o.value === s)?.label ?? s;
   const cls = s === "completed" ? "bg-emerald-100 text-emerald-700"
     : s === "in_progress" ? "bg-blue-100 text-blue-700"
@@ -36,9 +42,9 @@ function MyPaths() {
   const { user } = useAuth();
   const { orgId } = useOrg();
   const [q, setQ] = useState("");
-  const [filter, setFilter] = useState<"all" | DBLpEnrollment["status"]>("all");
+  const [filter, setFilter] = useState<"all" | DerivedStatus>("all");
 
-  const { data: enrollments = [], isLoading } = useQuery({
+  const { data: enrollments = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["my-enrollments", orgId, user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
@@ -53,35 +59,40 @@ function MyPaths() {
     },
   });
 
+  const withDerived = useMemo(
+    () => enrollments.map(e => ({ ...e, derivedStatus: deriveStatus(e) })),
+    [enrollments]
+  );
+
   const filtered = useMemo(() => {
     const ql = q.trim().toLowerCase();
-    return enrollments.filter(e => {
-      if (filter !== "all" && e.status !== filter) return false;
+    return withDerived.filter(e => {
+      if (filter !== "all" && e.derivedStatus !== filter) return false;
       if (!ql) return true;
       const lp = e.learning_paths;
       return lp ? (lp.title.toLowerCase().includes(ql) || lp.code.toLowerCase().includes(ql)) : false;
     });
-  }, [enrollments, q, filter]);
+  }, [withDerived, q, filter]);
 
   const stats = useMemo(() => {
-    const total = enrollments.length;
-    const done = enrollments.filter(e => e.status === "completed").length;
-    const doing = enrollments.filter(e => e.status === "in_progress").length;
-    const avg = total === 0 ? 0 : Math.round(enrollments.reduce((s, e) => s + e.progress, 0) / total);
-    return { total, done, doing, avg };
-  }, [enrollments]);
+    const total = withDerived.length;
+    const done = withDerived.filter(e => e.derivedStatus === "completed").length;
+    const doing = withDerived.filter(e => e.derivedStatus === "in_progress").length;
+    const notStarted = withDerived.filter(e => e.derivedStatus === "not_started").length;
+    return { total, done, doing, notStarted };
+  }, [withDerived]);
 
   return (
     <PageContainer
-      title="Lộ trình của tôi"
+      title="Lộ trình học của tôi"
       description="Các lộ trình học tập bạn đã được ghi danh"
       breadcrumbs={[{ title: "Học tập" }, { title: "Lộ trình của tôi" }]}
     >
       <div className="grid gap-3 sm:grid-cols-4">
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Tổng lộ trình</div><div className="text-2xl font-bold">{stats.total}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Đang học</div><div className="text-2xl font-bold text-blue-600">{stats.doing}</div></CardContent></Card>
+        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Chưa học</div><div className="text-2xl font-bold text-slate-600">{stats.notStarted}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Hoàn thành</div><div className="text-2xl font-bold text-emerald-600">{stats.done}</div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Tiến độ TB</div><div className="text-2xl font-bold">{stats.avg}%</div></CardContent></Card>
       </div>
 
       <Card>
@@ -102,10 +113,17 @@ function MyPaths() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-lg" />)}
         </div>
+      ) : isError ? (
+        <Card><CardContent className="p-12 text-center">
+          <AlertTriangle className="mx-auto h-12 w-12 text-red-500/70" />
+          <h3 className="mt-4 font-semibold">Không thể tải dữ liệu</h3>
+          <p className="text-sm text-muted-foreground">Đã có lỗi xảy ra. Vui lòng thử lại.</p>
+          <Button onClick={() => refetch()} className="mt-4" size="sm">Thử lại</Button>
+        </CardContent></Card>
       ) : filtered.length === 0 ? (
         <Card><CardContent className="p-12 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-muted-foreground/40" />
-          <h3 className="mt-4 font-semibold">{enrollments.length === 0 ? "Bạn chưa được ghi danh lộ trình nào" : "Không có kết quả phù hợp"}</h3>
+          <h3 className="mt-4 font-semibold">{enrollments.length === 0 ? "Bạn chưa có lộ trình học nào." : "Không có kết quả phù hợp"}</h3>
           <p className="text-sm text-muted-foreground">{enrollments.length === 0 ? "Quản trị viên sẽ gán lộ trình học cho bạn." : "Thử thay đổi bộ lọc hoặc từ khoá tìm kiếm."}</p>
         </CardContent></Card>
       ) : (
@@ -114,7 +132,8 @@ function MyPaths() {
             const lp = e.learning_paths;
             if (!lp) return null;
             const locked = lp.status === "locked";
-            const overdue = e.status === "overdue";
+            const status = e.derivedStatus;
+            const overdue = status === "overdue";
             return (
               <Card key={e.id} className={`overflow-hidden flex flex-col ${locked ? "opacity-60" : ""}`}>
                 <div className="relative h-32 bg-gradient-to-br from-primary/10 to-violet-200">
@@ -123,13 +142,27 @@ function MyPaths() {
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-primary/30"><BookOpen className="h-12 w-12" /></div>
                   )}
-                  <div className="absolute left-2 top-2">{statusBadge(e.status)}</div>
+                  <div className="absolute left-2 top-2">{statusBadge(status)}</div>
                   {locked && <Badge className="absolute right-2 top-2 bg-amber-100 text-amber-700"><Lock className="h-3 w-3" /> Đã khoá</Badge>}
                 </div>
                 <CardContent className="flex-1 flex flex-col p-4 gap-2">
-                  <div>
-                    <Badge variant="outline" className="text-[10px]">{lp.code}</Badge>
-                    <h3 className="mt-1 font-semibold line-clamp-2">{lp.title}</h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Badge variant="outline" className="text-[10px]">{lp.code}</Badge>
+                      <h3 className="mt-1 font-semibold line-clamp-2">{lp.title}</h3>
+                    </div>
+                    {!locked && (
+                      <Link
+                        to="/my-learning-paths/$id"
+                        params={{ id: lp.id }}
+                        search={{ tab: "courses" } as never}
+                        className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
+                        title="Khoá học của tôi"
+                        aria-label="Khoá học của tôi"
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                      </Link>
+                    )}
                   </div>
                   {lp.description && <p className="text-xs text-muted-foreground line-clamp-2">{lp.description}</p>}
                   <div className="space-y-1">
@@ -153,14 +186,14 @@ function MyPaths() {
                     )}
                   </div>
                   <div className="mt-auto pt-2">
-                    {e.status === "completed" ? (
+                    {status === "completed" ? (
                       <Button asChild variant="outline" className="w-full" size="sm">
                         <Link to="/my-learning-paths/$id" params={{ id: lp.id }}><CheckCircle2 className="h-4 w-4" /> Xem lại</Link>
                       </Button>
                     ) : (
                       <Button asChild className="w-full" size="sm" disabled={locked}>
                         <Link to="/my-learning-paths/$id" params={{ id: lp.id }}>
-                          {e.status === "not_started" ? "Bắt đầu" : "Tiếp tục"} <ArrowRight className="h-4 w-4" />
+                          {status === "not_started" ? "Bắt đầu" : "Tiếp tục"} <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
                     )}
