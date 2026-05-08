@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
 
     // Fetch course progress
     const { data: progress } = emp.user_id
-      ? await supabase.from("user_course_progress")
+      ? await supabase.from("course_enrollments")
           .select("status, progress, course_id")
           .eq("user_id", emp.user_id)
           .eq("org_id", orgId)

@@ -60,10 +60,10 @@ function MyPathDetail() {
     queryKey: ["lp-done-courses", user?.id, allCourseIds.join(",")],
     enabled: !!user?.id && allCourseIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase.from("learning_activity")
-        .select("target_id").eq("user_id", user!.id).eq("action", "course_complete").in("target_id", allCourseIds);
+      const { data, error } = await supabase.from("course_enrollments")
+        .select("course_id, status, progress").eq("user_id", user!.id).in("course_id", allCourseIds);
       if (error) throw error;
-      return new Set((data ?? []).map(r => r.target_id as string));
+      return new Set((data ?? []).filter(r => r.status === "completed" || (r.progress ?? 0) >= 100).map(r => r.course_id as string));
     },
   });
 

@@ -55,7 +55,7 @@ export function useBranchReadiness(orgId: string) {
         supabase.from("branches").select("id, name").eq("org_id", orgId),
         supabase.from("employees").select("id, name, branch, user_id").eq("org_id", orgId),
         supabase.from("online_courses").select("id").eq("org_id", orgId).eq("is_required", true),
-        supabase.from("user_course_progress").select("user_id, course_id, status, progress").eq("org_id", orgId),
+        supabase.from("course_enrollments").select("user_id, course_id, status, progress").eq("org_id", orgId),
         supabase.from("assignment_submissions").select("user_id, status, score, assignment_id").eq("org_id", orgId),
         supabase.from("learning_activity").select("user_id, created_at").eq("org_id", orgId).gte("created_at", sevenDaysAgo),
         supabase.from("user_certificates").select("user_id, expires_at, status").eq("org_id", orgId),

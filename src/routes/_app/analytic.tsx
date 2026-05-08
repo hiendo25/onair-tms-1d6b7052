@@ -23,7 +23,7 @@ function useBranchCompletion(orgId: string) {
       // Fetch all user_stats + employees for org, then group avg progress by branch
       const [{ data: stats }, { data: progress }] = await Promise.all([
         supabase.from("user_stats").select("user_id, branch").eq("org_id", orgId),
-        supabase.from("user_course_progress").select("user_id, progress").eq("org_id", orgId),
+        supabase.from("course_enrollments").select("user_id, progress").eq("org_id", orgId),
       ]);
       const userBranch = new Map<string, string>();
       (stats ?? []).forEach((s: any) => userBranch.set(s.user_id, s.branch || ""));

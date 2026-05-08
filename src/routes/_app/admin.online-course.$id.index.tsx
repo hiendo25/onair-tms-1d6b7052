@@ -63,6 +63,15 @@ function CourseDetail() {
     },
   });
 
+  const enrollmentCount = useQuery({
+    queryKey: ["course_enrollment_count", courseId],
+    queryFn: async () => {
+      const { count, error } = await supabase.from("course_enrollments").select("id", { count: "exact", head: true }).eq("course_id", courseId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+
   const inv = () => {
     qc.invalidateQueries({ queryKey: ["course_sections", courseId] });
     qc.invalidateQueries({ queryKey: ["course_lessons", courseId] });
@@ -112,8 +121,6 @@ function CourseDetail() {
         title: lesForm.title, content: lesForm.content, lesson_type: lesForm.lesson_type, sort_order: count,
       });
       if (error) return toast.error(error.message);
-      // bump lessons_count
-      await supabase.from("online_courses").update({ lessons_count: (lessons.data?.length ?? 0) + 1 }).eq("id", courseId);
       toast.success("Đã thêm bài học");
     }
     setLesOpen(false); inv();
@@ -177,7 +184,7 @@ function CourseDetail() {
           <CardContent className="grid grid-cols-2 gap-4">
             <div><div className="text-2xl font-semibold">{sections.data?.length ?? 0}</div><div className="text-xs text-muted-foreground">Học phần</div></div>
             <div><div className="text-2xl font-semibold">{lessons.data?.length ?? 0}</div><div className="text-xs text-muted-foreground">Bài học</div></div>
-            <div><div className="text-2xl font-semibold">{c.students_count}</div><div className="text-xs text-muted-foreground">Học viên</div></div>
+            <div><div className="text-2xl font-semibold">{enrollmentCount.data ?? 0}</div><div className="text-xs text-muted-foreground">Học viên</div></div>
             <div><div className="text-2xl font-semibold">{c.duration_minutes}</div><div className="text-xs text-muted-foreground">Phút</div></div>
           </CardContent>
         </Card>

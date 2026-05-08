@@ -45,7 +45,7 @@ function useEmployeeDetail(employeeId: string, orgId: string) {
       const userId = emp.user_id;
       const [progressRes, subsRes, certsRes, requiredRes] = await Promise.all([
         userId
-          ? supabase.from("user_course_progress").select("course_id, status, progress, updated_at").eq("user_id", userId).eq("org_id", orgId)
+          ? supabase.from("course_enrollments").select("course_id, status, progress, updated_at").eq("user_id", userId).eq("org_id", orgId)
           : Promise.resolve({ data: [] }),
         userId
           ? supabase.from("assignment_submissions").select("score, status, submitted_at").eq("user_id", userId)

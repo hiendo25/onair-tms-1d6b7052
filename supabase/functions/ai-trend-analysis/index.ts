@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
     const monthlyData = await Promise.all(
       months.map(async (m) => {
         const { data: prog } = await supabase
-          .from("user_course_progress")
+          .from("course_enrollments")
           .select("user_id, progress, status")
           .eq("org_id", orgId)
           .gte("updated_at", m.from)
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
         const rates = await Promise.all(
           months.map(async (m) => {
             const { data: prog } = await supabase
-              .from("user_course_progress")
+              .from("course_enrollments")
               .select("progress, status")
               .eq("org_id", orgId)
               .in("user_id", branchUserIds)

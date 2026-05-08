@@ -209,27 +209,70 @@ function EditLP() {
       if (!lpId) throw new Error("missing id");
 
       if (!isNew) {
-        const { error: delErr } = await supabase.from("learning_path_stages").delete().eq("learning_path_id", lpId);
-        if (delErr) throw delErr;
-      }
-      for (const [si, st] of stages.entries()) {
-        const { data: stIns, error: stErr } = await supabase.from("learning_path_stages").insert({
-          org_id: orgId, learning_path_id: lpId, name: st.name, description: st.description,
-          stage_order: si, start_date: st.start_date || null, end_date: st.end_date || null,
-        } as never).select("id").single();
-        if (stErr) throw stErr;
-        const stageId = (stIns as { id: string }).id;
-        if (st.courses.length > 0) {
-          const { error } = await supabase.from("learning_path_stage_courses").insert(
-            st.courses.map((c, ci) => ({ org_id: orgId, stage_id: stageId, course_id: c.course_id, course_order: ci })) as never
-          );
-          if (error) throw error;
+        // Upsert stages: update existing, insert new, delete removed
+        const origStageIds = new Set(stagesData.map(s => s.id));
+        const keptStageIds = new Set(stages.filter(s => s.id).map(s => s.id!));
+        const removedStageIds = [...origStageIds].filter(id => !keptStageIds.has(id));
+
+        if (removedStageIds.length) {
+          await supabase.from("learning_path_stages").delete().in("id", removedStageIds);
         }
-        if (st.assignments.length > 0) {
-          const { error } = await supabase.from("learning_path_stage_assignments").insert(
-            st.assignments.map(a => ({ org_id: orgId, stage_id: stageId, assignment_id: a.assignment_id, unlock_condition: "after_all_courses", required: a.required })) as never
-          );
-          if (error) throw error;
+
+        for (const [si, st] of stages.entries()) {
+          let stageId: string;
+          if (st.id) {
+            const { error: stErr } = await supabase.from("learning_path_stages")
+              .update({ name: st.name, description: st.description, stage_order: si, start_date: st.start_date || null, end_date: st.end_date || null } as never)
+              .eq("id", st.id);
+            if (stErr) throw stErr;
+            stageId = st.id;
+          } else {
+            const { data: stIns, error: stErr } = await supabase.from("learning_path_stages").insert({
+              org_id: orgId, learning_path_id: lpId, name: st.name, description: st.description,
+              stage_order: si, start_date: st.start_date || null, end_date: st.end_date || null,
+            } as never).select("id").single();
+            if (stErr) throw stErr;
+            stageId = (stIns as { id: string }).id;
+          }
+
+          // For stage children: delete all + re-insert is safe here since FK cascade
+          // protects course_enrollments (which reference course_id, not stage_id)
+          await supabase.from("learning_path_stage_courses").delete().eq("stage_id", stageId);
+          await supabase.from("learning_path_stage_assignments").delete().eq("stage_id", stageId);
+
+          if (st.courses.length > 0) {
+            const { error } = await supabase.from("learning_path_stage_courses").insert(
+              st.courses.map((c, ci) => ({ org_id: orgId, stage_id: stageId, course_id: c.course_id, course_order: ci })) as never
+            );
+            if (error) throw error;
+          }
+          if (st.assignments.length > 0) {
+            const { error } = await supabase.from("learning_path_stage_assignments").insert(
+              st.assignments.map(a => ({ org_id: orgId, stage_id: stageId, assignment_id: a.assignment_id, unlock_condition: "after_all_courses", required: a.required })) as never
+            );
+            if (error) throw error;
+          }
+        }
+      } else {
+        for (const [si, st] of stages.entries()) {
+          const { data: stIns, error: stErr } = await supabase.from("learning_path_stages").insert({
+            org_id: orgId, learning_path_id: lpId, name: st.name, description: st.description,
+            stage_order: si, start_date: st.start_date || null, end_date: st.end_date || null,
+          } as never).select("id").single();
+          if (stErr) throw stErr;
+          const stageId = (stIns as { id: string }).id;
+          if (st.courses.length > 0) {
+            const { error } = await supabase.from("learning_path_stage_courses").insert(
+              st.courses.map((c, ci) => ({ org_id: orgId, stage_id: stageId, course_id: c.course_id, course_order: ci })) as never
+            );
+            if (error) throw error;
+          }
+          if (st.assignments.length > 0) {
+            const { error } = await supabase.from("learning_path_stage_assignments").insert(
+              st.assignments.map(a => ({ org_id: orgId, stage_id: stageId, assignment_id: a.assignment_id, unlock_condition: "after_all_courses", required: a.required })) as never
+            );
+            if (error) throw error;
+          }
         }
       }
 

@@ -100,8 +100,11 @@ function CourseEditor() {
     setSaving(true);
     try {
       const totalLessons = sections.reduce((acc, s) => acc + s.lessons.length, 0);
+      const { count: enrolledCount } = !isNew
+        ? await supabase.from("course_enrollments").select("id", { count: "exact", head: true }).eq("course_id", id)
+        : { count: 0 };
       const coursePayload = {
-        ...info, lessons_count: totalLessons, org_id: orgId,
+        ...info, lessons_count: totalLessons, students_count: enrolledCount ?? 0, org_id: orgId,
         certificate_id: certificateId || null,
       };
 
@@ -115,27 +118,83 @@ function CourseEditor() {
         if (error) throw error;
       }
 
-      // Replace sections + lessons (simple approach)
+      // Upsert sections/lessons: update existing, insert new, delete removed
       if (!isNew) {
-        await supabase.from("course_lessons").delete().eq("course_id", courseId);
-        await supabase.from("course_sections").delete().eq("course_id", courseId);
-      }
-      for (const sec of sections) {
-        const { data: secRow, error: secErr } = await supabase.from("course_sections").insert({
-          org_id: orgId, course_id: courseId,
-          title: sec.title, description: sec.description, sort_order: sec.sort_order, status: "active",
-        }).select("id").single();
-        if (secErr) throw secErr;
-        if (sec.lessons.length) {
-          const lessonRows = sec.lessons.map((l) => ({
-            org_id: orgId, course_id: courseId, section_id: secRow.id,
-            title: l.title, description: l.description, lesson_type: l.lesson_type,
-            content_url: l.content_url, content_meta: l.content_meta as never,
-            quiz_assignment_id: l.quiz_assignment_id, duration_seconds: l.duration_seconds,
-            sort_order: l.sort_order, status: "active",
-          }));
-          const { error: lesErr } = await supabase.from("course_lessons").insert(lessonRows);
-          if (lesErr) throw lesErr;
+        const origSectionIds = new Set((existing.data?.sections ?? []).map((s) => s.id));
+        const keptSectionIds = new Set(sections.filter((s) => !s.id.startsWith("tmp-")).map((s) => s.id));
+        const removedSectionIds = [...origSectionIds].filter((id) => !keptSectionIds.has(id));
+
+        if (removedSectionIds.length) {
+          await supabase.from("course_lessons").delete().in("section_id", removedSectionIds);
+          await supabase.from("course_sections").delete().in("id", removedSectionIds);
+        }
+
+        const origLessonIds = new Set((existing.data?.lessons ?? []).map((l) => l.id));
+
+        for (const sec of sections) {
+          const isNewSec = sec.id.startsWith("tmp-");
+          let realSecId: string;
+
+          if (isNewSec) {
+            const { data: secRow, error: secErr } = await supabase.from("course_sections").insert({
+              org_id: orgId, course_id: courseId,
+              title: sec.title, description: sec.description, sort_order: sec.sort_order, status: "active",
+            }).select("id").single();
+            if (secErr) throw secErr;
+            realSecId = secRow.id;
+          } else {
+            const { error: secErr } = await supabase.from("course_sections")
+              .update({ title: sec.title, description: sec.description, sort_order: sec.sort_order })
+              .eq("id", sec.id);
+            if (secErr) throw secErr;
+            realSecId = sec.id;
+          }
+
+          const keptLessonIds = new Set(sec.lessons.filter((l) => !l.id.startsWith("tmp-")).map((l) => l.id));
+          const removedLessonIds = [...origLessonIds].filter((id) => {
+            const orig = existing.data?.lessons.find((l) => l.id === id);
+            return orig && orig.section_id === (isNewSec ? undefined : sec.id) && !keptLessonIds.has(id);
+          });
+          if (removedLessonIds.length) {
+            await supabase.from("course_lessons").delete().in("id", removedLessonIds);
+          }
+
+          for (const l of sec.lessons) {
+            const lessonPayload = {
+              org_id: orgId, course_id: courseId, section_id: realSecId,
+              title: l.title, description: l.description, lesson_type: l.lesson_type,
+              content_url: l.content_url, content_meta: l.content_meta as never,
+              quiz_assignment_id: l.quiz_assignment_id, duration_seconds: l.duration_seconds,
+              sort_order: l.sort_order, status: "active",
+            };
+            if (l.id.startsWith("tmp-")) {
+              const { error: lesErr } = await supabase.from("course_lessons").insert(lessonPayload);
+              if (lesErr) throw lesErr;
+            } else {
+              const { error: lesErr } = await supabase.from("course_lessons").update(lessonPayload).eq("id", l.id);
+              if (lesErr) throw lesErr;
+            }
+          }
+        }
+      } else {
+        // New course: straight insert
+        for (const sec of sections) {
+          const { data: secRow, error: secErr } = await supabase.from("course_sections").insert({
+            org_id: orgId, course_id: courseId,
+            title: sec.title, description: sec.description, sort_order: sec.sort_order, status: "active",
+          }).select("id").single();
+          if (secErr) throw secErr;
+          if (sec.lessons.length) {
+            const lessonRows = sec.lessons.map((l) => ({
+              org_id: orgId, course_id: courseId, section_id: secRow.id,
+              title: l.title, description: l.description, lesson_type: l.lesson_type,
+              content_url: l.content_url, content_meta: l.content_meta as never,
+              quiz_assignment_id: l.quiz_assignment_id, duration_seconds: l.duration_seconds,
+              sort_order: l.sort_order, status: "active",
+            }));
+            const { error: lesErr } = await supabase.from("course_lessons").insert(lessonRows);
+            if (lesErr) throw lesErr;
+          }
         }
       }
 

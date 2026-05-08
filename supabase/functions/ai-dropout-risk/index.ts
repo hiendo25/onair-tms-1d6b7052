@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
 
     const [{ data: employees }, { data: progress }, { data: submissions }, { data: recentLogins }] = await Promise.all([
       supabase.from("employees").select("id, name, department, branch, user_id, employee_code").eq("org_id", orgId).eq("status", "active"),
-      supabase.from("user_course_progress").select("user_id, progress, updated_at, status").eq("org_id", orgId),
+      supabase.from("course_enrollments").select("user_id, progress, updated_at, status").eq("org_id", orgId),
       supabase.from("assignment_submissions").select("user_id, status, submitted_at").eq("org_id", orgId),
       supabase.from("learning_activities").select("user_id, created_at").eq("org_id", orgId).gte("created_at", sevenDaysAgo),
     ]);

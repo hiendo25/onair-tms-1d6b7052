@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useEmployees, useEmployeeMutations, useBranches, useDepartments, useRoles, type DBEmployee } from "@/lib/data-hooks";
 import { useOrg } from "@/lib/org-context";
 import { RowActions } from "@/components/admin/RowActions";
@@ -19,6 +21,7 @@ import { employeeSchema, type EmployeeForm } from "@/lib/admin-schemas";
 import { EMPLOYEE_TYPE, STATUS_ACTIVE_INACTIVE } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/employees/")({
   head: () => ({ meta: [{ title: "Quản lý nhân viên — OnAir TMS" }] }),
@@ -54,13 +57,17 @@ function EmployeesPage() {
   const [importing, setImporting] = useState(false);
   const [inviting, setInviting] = useState<string | null>(null);
   const [invited, setInvited] = useState<Set<string>>(new Set());
+  const [inviteTarget, setInviteTarget] = useState<DBEmployee | null>(null);
+  const [inviteRole, setInviteRole] = useState<"student" | "admin">("student");
 
-  async function sendInvite(emp: DBEmployee) {
-    if (!emp.email) { toast.error("Nhân viên chưa có email."); return; }
+  async function confirmSendInvite() {
+    const emp = inviteTarget;
+    if (!emp) return;
+    setInviteTarget(null);
     setInviting(emp.id);
     try {
       const { data: res, error: fnErr } = await supabase.functions.invoke("invite-employee", {
-        body: { email: emp.email, name: emp.name, employeeId: emp.id, orgId },
+        body: { email: emp.email, name: emp.name, employeeId: emp.id, orgId, role: inviteRole },
       });
       if (fnErr || res?.error) throw new Error(fnErr?.message ?? res?.error);
       setInvited((prev) => new Set([...prev, emp.id]));
@@ -205,7 +212,7 @@ function EmployeesPage() {
                     <Badge className="bg-blue-100 text-blue-700 gap-1"><Mail className="h-3 w-3" />Đã gửi invite</Badge>
                   ) : (
                     <Button size="sm" variant="outline" className="h-7 text-xs gap-1 border-amber-300 text-amber-700"
-                      onClick={() => sendInvite(r)} disabled={inviting === r.id || !r.email}>
+                      onClick={() => { setInviteRole("student"); setInviteTarget(r); }} disabled={inviting === r.id || !r.email}>
                       <Mail className="h-3 w-3" />
                       {inviting === r.id ? "Đang gửi..." : "Gửi invite"}
                     </Button>
@@ -266,6 +273,35 @@ function EmployeesPage() {
           })));
         }}
       />
+
+      <Dialog open={!!inviteTarget} onOpenChange={(v) => !v && setInviteTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Gửi lời mời tài khoản</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <p className="text-sm text-muted-foreground">
+              Gửi email mời <span className="font-medium text-foreground">{inviteTarget?.name}</span> ({inviteTarget?.email}) tạo tài khoản.
+            </p>
+            <div className="space-y-1.5">
+              <Label>Quyền truy cập hệ thống</Label>
+              <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as "student" | "admin")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Học viên — truy cập khoá học & bài kiểm tra</SelectItem>
+                  <SelectItem value="admin">Quản trị viên — toàn quyền quản lý</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteTarget(null)}>Huỷ</Button>
+            <Button onClick={confirmSendInvite}><Mail className="h-4 w-4" />Gửi invite</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

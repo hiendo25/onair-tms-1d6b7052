@@ -58,7 +58,7 @@ function useClassroomStudents(classroomId: string) {
       const [empsRes, progressRes, submissionsRes] = await Promise.all([
         supabase.from("employees").select("id, name, email, department, employee_code, user_id").in("id", employeeIds),
         courseIds.length > 0
-          ? supabase.from("user_course_progress").select("user_id, course_id, progress, status").in("course_id", courseIds)
+          ? supabase.from("course_enrollments").select("user_id, course_id, progress, status").in("course_id", courseIds)
           : Promise.resolve({ data: [] }),
         assignmentIds.length > 0
           ? supabase.from("assignment_submissions").select("user_id, assignment_id, status, score").in("assignment_id", assignmentIds)
