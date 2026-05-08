@@ -76,6 +76,8 @@ function Page() {
   const [topics, setTopics] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [objective, setObjective] = useState("");
+  const [certificateId, setCertificateId] = useState<string>("");
+  const { data: certificates = [] } = useCertificates();
 
   // Tab 2: Time (single)
   const [startAt, setStartAt] = useState("");
