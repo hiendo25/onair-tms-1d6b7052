@@ -339,7 +339,9 @@ export type DBGamificationSettings = {
 };
 export type DBUserBadge = { id: string; org_id: string; user_id: string; badge_id: string; earned_at: string; };
 export type DBUserTitle = { id: string; org_id: string; user_id: string; title_id: string; assigned_at: string; };
-export type DBUserXp = { id: string; org_id: string; user_id: string; xp: number; };
+export type DBUserXp = { id: string; org_id: string; user_id: string; xp: number; redeem_point: number; };
+export type DBReward = { id: string; org_id: string; name: string; description: string; image_url: string; required_point: number; expired_at: string | null; status: string; stock: number | null; created_at: string; updated_at: string; };
+export type DBUserRedemption = { id: string; org_id: string; user_id: string; reward_id: string; reward_snapshot: { name?: string; description?: string; image_url?: string }; point_spent: number; status: string; created_at: string; };
 
 export function useGamificationSettings() {
   const { orgId } = useOrg();
