@@ -85,10 +85,21 @@ export const useEmployees = employeesCrud.useList;
 export const useEmployeeMutations = employeesCrud.useMutations;
 
 // ===== Online courses =====
-export type DBOnlineCourse = { id: string; org_id: string; code: string; title: string; description: string; category: string; level: string; duration_minutes: number; instructor: string; students_count: number; lessons_count: number; status: string; cover_url: string; is_required: boolean; };
+export type DBOnlineCourse = { id: string; org_id: string; code: string; title: string; description: string; category: string; level: string; duration_minutes: number; instructor: string; students_count: number; lessons_count: number; status: string; cover_url: string; is_required: boolean; author_id: string | null; author_name: string; created_at: string; };
 const onlineCoursesCrud = createOrgCrud<DBOnlineCourse>("online_courses", "khoá học");
 export const useOnlineCourses = onlineCoursesCrud.useList;
 export const useOnlineCourseMutations = onlineCoursesCrud.useMutations;
+
+export type DBCourseSection = { id: string; org_id: string; course_id: string; title: string; description: string; sort_order: number; status: string; created_at: string; };
+export type DBCourseLesson = {
+  id: string; org_id: string; course_id: string; section_id: string;
+  title: string; description: string; content: string; lesson_type: "video" | "pdf" | "scorm" | "quiz" | "file";
+  content_url: string; content_meta: Record<string, unknown>;
+  quiz_assignment_id: string | null; duration_seconds: number;
+  sort_order: number; status: string; created_at: string;
+};
+export type DBCourseEnrollment = { id: string; org_id: string; course_id: string; user_id: string; status: "not_started" | "in_progress" | "completed"; progress: number; started_at: string | null; completed_at: string | null; created_at: string; updated_at: string };
+export type DBLessonProgress = { id: string; org_id: string; course_id: string; lesson_id: string; user_id: string; status: "not_started" | "in_progress" | "completed"; progress_pct: number; meta: Record<string, unknown>; started_at: string | null; completed_at: string | null; updated_at: string };
 
 // ===== Classrooms =====
 export type DBClassroom = {
