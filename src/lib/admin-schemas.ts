@@ -10,8 +10,7 @@ export const codeSchema = (label: string) =>
     .regex(/^[A-Za-z0-9-]+$/, "Chỉ cho phép chữ không dấu, số và dấu gạch ngang (-), không có khoảng trắng.")
     .transform((v) => v.toUpperCase());
 
-const optStr = z.string().default("");
-const optDate = z.string().default("");
+const optStr = z.string();
 
 export const branchSchema = z.object({
   code: codeSchema("chi nhánh"),
