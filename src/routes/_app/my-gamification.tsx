@@ -171,11 +171,7 @@ function Page() {
                 <>
                   <div className="text-center text-xs text-muted-foreground py-2">···</div>
                   {myRankQ.data ? (
-                    <div className="flex items-center gap-3 rounded-md border-2 border-primary bg-primary/5 p-3">
-                      <div className="w-8 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
-                      <div className="flex-1 font-medium">Bạn</div>
-                      <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
-                    </div>
+                    <MyRankCard rank={myRankQ.data.rank} xp={myRankQ.data.xp} ahead={(lbQ.data ?? []).filter((r) => r.xp > (myRankQ.data?.xp ?? 0)).sort((a, b) => a.xp - b.xp)[0]} />
                   ) : (
                     <div className="text-center text-xs text-muted-foreground">Chưa có thứ hạng của bạn</div>
                   )}
