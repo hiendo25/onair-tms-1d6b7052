@@ -121,8 +121,8 @@ function MyClassPage() {
       let timeStatus: "ongoing" | "today" | "upcoming" | "ended" = "upcoming";
       if (ended) timeStatus = "ended";
       else if (nextSession) {
-        const s = new Date(nextSession.start_at).getTime();
-        const e = new Date(nextSession.end_at ?? s).getTime();
+        const s = new Date(nextSession.start_at ?? 0).getTime();
+        const e = new Date(nextSession.end_at ?? nextSession.start_at ?? 0).getTime();
         const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
         const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
         if (now >= s && now <= e) timeStatus = "ongoing";
