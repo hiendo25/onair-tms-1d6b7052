@@ -51,7 +51,7 @@ function useClassroomStudents(classroomId: string) {
       const studentLinks = studentsRes.data ?? [];
       if (studentLinks.length === 0) return [];
 
-      const employeeIds = studentLinks.map((s) => s.employee_id).filter(Boolean);
+      const employeeIds = studentLinks.map((s) => s.employee_id).filter((v): v is string => !!v);
       const courseIds = (coursesRes.data ?? []).map((c) => c.course_id);
       const assignmentIds = (assignmentsRes.data ?? []).map((a) => a.assignment_id);
 
