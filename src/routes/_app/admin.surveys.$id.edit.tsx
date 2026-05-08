@@ -298,7 +298,7 @@ function QuestionEditor({ index, value, onChange, onRemove }: {
             <div className="space-y-2">
               {value.type === "single" || value.type === "yes_no" ? (
                 <RadioGroup
-                  value={typeof value.correct_answer === "number" ? String(value.correct_answer) : ""}
+                  value={Array.isArray(value.correct_answer) && value.correct_answer.length ? String((value.correct_answer as number[])[0]) : ""}
                   onValueChange={(v) => onChange({ correct_answer: [Number(v)] as unknown as number[] })}
                 >
                   {value.options.map((o, i) => (
