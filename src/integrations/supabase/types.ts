@@ -484,6 +484,7 @@ export type Database = {
       classrooms: {
         Row: {
           capacity: number
+          certificate_id: string | null
           code: string
           cover_url: string
           created_at: string
@@ -514,6 +515,7 @@ export type Database = {
         }
         Insert: {
           capacity?: number
+          certificate_id?: string | null
           code: string
           cover_url?: string
           created_at?: string
@@ -544,6 +546,7 @@ export type Database = {
         }
         Update: {
           capacity?: number
+          certificate_id?: string | null
           code?: string
           cover_url?: string
           created_at?: string
@@ -1599,6 +1602,7 @@ export type Database = {
           author_id: string | null
           author_name: string
           category: string
+          certificate_id: string | null
           code: string
           cover_url: string
           created_at: string
@@ -1620,6 +1624,7 @@ export type Database = {
           author_id?: string | null
           author_name?: string
           category?: string
+          certificate_id?: string | null
           code: string
           cover_url?: string
           created_at?: string
@@ -1641,6 +1646,7 @@ export type Database = {
           author_id?: string | null
           author_name?: string
           category?: string
+          certificate_id?: string | null
           code?: string
           cover_url?: string
           created_at?: string
@@ -2496,36 +2502,48 @@ export type Database = {
         Row: {
           certificate_id: string
           certificate_title: string
+          class_id: string | null
+          course_id: string | null
           created_at: string
-          expires_at: string
+          expires_at: string | null
           id: string
           issued_at: string
           org_id: string
+          recipient_name: string
           status: string
+          template_snapshot: Json
           updated_at: string
           user_id: string
         }
         Insert: {
           certificate_id: string
           certificate_title?: string
+          class_id?: string | null
+          course_id?: string | null
           created_at?: string
-          expires_at: string
+          expires_at?: string | null
           id?: string
           issued_at?: string
           org_id: string
+          recipient_name?: string
           status?: string
+          template_snapshot?: Json
           updated_at?: string
           user_id: string
         }
         Update: {
           certificate_id?: string
           certificate_title?: string
+          class_id?: string | null
+          course_id?: string | null
           created_at?: string
-          expires_at?: string
+          expires_at?: string | null
           id?: string
           issued_at?: string
           org_id?: string
+          recipient_name?: string
           status?: string
+          template_snapshot?: Json
           updated_at?: string
           user_id?: string
         }
