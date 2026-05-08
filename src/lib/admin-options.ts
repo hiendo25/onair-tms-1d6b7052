@@ -24,6 +24,33 @@ export const CLASSROOM_STATUS = [
   { value: "cancelled", label: "Đã huỷ" },
 ];
 
+export const CLASSROOM_DELIVERY = [
+  { value: "live", label: "Lớp học trực tuyến (Live)", short: "Live" },
+  { value: "online", label: "Lớp học E-learning (Online)", short: "Online" },
+  { value: "offline", label: "Lớp học trực tiếp (Offline)", short: "Offline" },
+];
+export const CLASSROOM_MODE = [
+  { value: "single", label: "Lớp đơn", short: "Đơn" },
+  { value: "series", label: "Lớp chuỗi", short: "Chuỗi" },
+];
+export const MEETING_PROVIDER = [
+  { value: "zoom", label: "Zoom" },
+  { value: "google_meet", label: "Google Meet" },
+  { value: "ms_teams", label: "Microsoft Teams" },
+];
+export const QR_START_OFFSETS = [
+  { value: 30, label: "Trước giờ bắt đầu lớp 30 phút" },
+  { value: 15, label: "Trước giờ bắt đầu lớp 15 phút" },
+  { value: 10, label: "Trước giờ bắt đầu lớp 10 phút" },
+  { value: 0, label: "Đúng giờ bắt đầu lớp học" },
+];
+export const QR_END_OFFSETS = [
+  { value: 10, label: "Sau khi lớp bắt đầu 10 phút" },
+  { value: 15, label: "Sau khi lớp bắt đầu 15 phút" },
+  { value: 30, label: "Sau khi lớp bắt đầu 30 phút" },
+  { value: -1, label: "Đúng giờ kết thúc lớp học" },
+];
+
 export const COURSE_LEVEL = [
   { value: "beginner", label: "Cơ bản" },
   { value: "intermediate", label: "Trung cấp" },
