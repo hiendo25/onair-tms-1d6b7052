@@ -407,18 +407,85 @@ export function useMyTitle() {
   });
 }
 
-export function useLeaderboard() {
+export function useLeaderboard(limit = 50) {
   const { orgId } = useOrg();
   return useQuery({
-    queryKey: ["leaderboard", orgId],
+    queryKey: ["leaderboard", orgId, limit],
     queryFn: async () => {
-      const { data } = await supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).order("xp", { ascending: false }).limit(50);
+      const { data, error } = await supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).order("xp", { ascending: false }).limit(limit);
+      if (error) throw error;
       const rows = (data ?? []) as { user_id: string; xp: number }[];
       if (!rows.length) return [];
       const ids = rows.map(r => r.user_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, avatar_url").in("id", ids);
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids);
       const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-      return rows.map((r, i) => ({ rank: i + 1, user_id: r.user_id, xp: r.xp, profile: map.get(r.user_id) as any }));
+      // Dense skip rank: 1, 2, 2, 4
+      let lastXp: number | null = null;
+      let lastRank = 0;
+      return rows.map((r, i) => {
+        const rank = lastXp !== null && r.xp === lastXp ? lastRank : i + 1;
+        lastXp = r.xp; lastRank = rank;
+        return { rank, user_id: r.user_id, xp: r.xp, profile: map.get(r.user_id) as any };
+      });
+    },
+  });
+}
+
+export function useMyRank() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["my_rank", orgId],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data: me } = await supabase.from("user_xp").select("xp").eq("org_id", orgId).eq("user_id", u.user.id).maybeSingle();
+      const myXp = (me as any)?.xp ?? 0;
+      const { count } = await supabase.from("user_xp").select("user_id", { count: "exact", head: true }).eq("org_id", orgId).gt("xp", myXp);
+      return { rank: (count ?? 0) + 1, xp: myXp };
+    },
+  });
+}
+
+export function useRewards() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["rewards", orgId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("rewards").select("*").eq("org_id", orgId).eq("status", "active").order("required_point", { ascending: true });
+      if (error) throw error;
+      return ((data ?? []) as DBReward[]).filter(r => !r.expired_at || new Date(r.expired_at) > new Date());
+    },
+  });
+}
+
+export function useRedeemReward() {
+  const qc = useQueryClient();
+  const { orgId } = useOrg();
+  return useMutation({
+    mutationFn: async (rewardId: string) => {
+      const { data, error } = await (supabase as any).rpc("redeem_reward", { _reward_id: rewardId });
+      if (error) throw error;
+      if (!data?.ok) throw new Error(data?.error || "redeem_failed");
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["user_xp_me", orgId] });
+      qc.invalidateQueries({ queryKey: ["rewards", orgId] });
+      qc.invalidateQueries({ queryKey: ["my_redemptions", orgId] });
+    },
+  });
+}
+
+export function useMyRedemptions() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["my_redemptions", orgId],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return [];
+      const { data, error } = await (supabase as any).from("user_redemptions").select("*").eq("org_id", orgId).eq("user_id", u.user.id).order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as DBUserRedemption[];
     },
   });
 }
