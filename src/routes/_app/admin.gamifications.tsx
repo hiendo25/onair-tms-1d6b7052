@@ -40,12 +40,10 @@ function Page() {
           <TabsTrigger value="settings"><SettingsIcon className="mr-1 h-4 w-4" />Cấu hình điểm</TabsTrigger>
           <TabsTrigger value="badges"><Award className="mr-1 h-4 w-4" />Huy hiệu</TabsTrigger>
           <TabsTrigger value="titles"><Crown className="mr-1 h-4 w-4" />Danh hiệu</TabsTrigger>
-          <TabsTrigger value="leaderboard"><Trophy className="mr-1 h-4 w-4" />Bảng xếp hạng</TabsTrigger>
         </TabsList>
         <TabsContent value="settings"><SettingsTab /></TabsContent>
         <TabsContent value="badges"><EntityTab type="badge" /></TabsContent>
         <TabsContent value="titles"><EntityTab type="title" /></TabsContent>
-        <TabsContent value="leaderboard"><LeaderboardTab /></TabsContent>
       </Tabs>
     </PageContainer>
   );
