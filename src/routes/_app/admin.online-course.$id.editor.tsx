@@ -36,9 +36,11 @@ function CourseEditor() {
 
   const [tab, setTab] = useState<"info" | "content">("info");
   const [info, setInfo] = useState<CourseInfo>(empty);
+  const [certificateId, setCertificateId] = useState<string>("");
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const { data: certificates = [] } = useCertificates();
 
   const existing = useQuery({
     queryKey: ["online_courses", id],
