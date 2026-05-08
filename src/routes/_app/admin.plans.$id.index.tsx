@@ -253,6 +253,8 @@ function PlanDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDelete open={confirmDel} onOpenChange={setConfirmDel} onConfirm={deletePlan} description={`Xoá kế hoạch "${plan.title}"? Hành động này không thể hoàn tác.`} />
     </PageContainer>
   );
 }
