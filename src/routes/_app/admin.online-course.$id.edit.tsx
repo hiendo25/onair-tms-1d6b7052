@@ -11,7 +11,7 @@ import { aiWriteCourseDescription } from "@/lib/ai-mock";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/online-course/$id/edit")({
-  head: () => ({ meta: [{ title: "Chỉnh sửa môn học — OnAir TMS" }] }),
+  head: () => ({ meta: [{ title: "Chỉnh sửa khóa học — OnAir TMS" }] }),
   component: EditCourse,
 });
 
@@ -37,7 +37,7 @@ function EditCourse() {
   }
 
   return (
-    <PageContainer title="Chỉnh sửa môn học" breadcrumbs={[{ title: "Môn học", path: "/admin/online-course" }, { title: `#${id}` }, { title: "Sửa" }]}>
+    <PageContainer title="Chỉnh sửa khóa học" breadcrumbs={[{ title: "Khóa học", path: "/admin/online-course" }, { title: `#${id}` }, { title: "Sửa" }]}>
       <Card><CardHeader><CardTitle>Thông tin</CardTitle></CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div><Label>Tên môn</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>

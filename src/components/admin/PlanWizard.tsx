@@ -24,7 +24,7 @@ const STEPS = [
   { n: 1, label: "Thông tin kế hoạch", sub: "Mục tiêu, thời gian và ngân sách", required: true },
   { n: 2, label: "Chương trình đào tạo", sub: "Chương trình đào tạo của bạn", required: true },
   { n: 3, label: "Chủ đề", sub: "Chương trình đào tạo của bạn", required: true },
-  { n: 4, label: "Gán môn học (tùy chọn)", sub: "Gán môn học cho chương trình và chủ đề khi cần", required: false },
+  { n: 4, label: "Gán khóa học (tùy chọn)", sub: "Gán khóa học cho chương trình và chủ đề khi cần", required: false },
   { n: 5, label: "Gửi duyệt đề xuất", sub: "Kiểm tra và gửi kế hoạch để phê duyệt", required: true },
 ];
 
@@ -475,7 +475,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                     <SummaryCard label="Ngân sách" value={`${(info.budget || 0).toLocaleString("vi-VN")} ₫`} />
                     <SummaryCard label="Thời gian" value={`${info.start_date || "—"} → ${info.end_date || "—"}`} />
                     <SummaryCard label="Chương trình / Chủ đề" value={`${programs.length} / ${topics.length}`} />
-                    <SummaryCard label="Tổng môn học" value={String(topicCourses.length + programCourses.length)} />
+                    <SummaryCard label="Tổng khóa học" value={String(topicCourses.length + programCourses.length)} />
                   </div>
                   <div className="border rounded-lg p-4">
                     <div className="font-semibold text-lg">{info.title || "(Chưa có tên)"}</div>
@@ -583,7 +583,7 @@ function stepDescription(n: number) {
     1: "Xác định mục tiêu, phạm vi thời gian và khảo sát liên quan trước khi bắt đầu.",
     2: "Tạo các chương trình đào tạo thuộc kế hoạch.",
     3: "Tạo chủ đề chi tiết cho mỗi chương trình hoặc chủ đề độc lập.",
-    4: "Gán môn học vào chủ đề / chương trình. Có thể tạo nhanh môn học mới.",
+    4: "Gán khóa học vào chủ đề / chương trình. Có thể tạo nhanh khóa học mới.",
     5: "Xem lại toàn bộ kế hoạch và gửi cho người duyệt.",
   };
   return map[n] ?? "";
@@ -655,7 +655,7 @@ function CourseAssigner({ courses, kind, parentId, currentCourseIds, onAssign, o
             </Badge>
           );
         })}
-        <Button size="sm" variant="outline" onClick={() => setPickerOpen(!pickerOpen)}><Plus className="h-3 w-3 mr-1" />Gán môn học</Button>
+        <Button size="sm" variant="outline" onClick={() => setPickerOpen(!pickerOpen)}><Plus className="h-3 w-3 mr-1" />Gán khóa học</Button>
       </div>
       {pickerOpen && (
         <div className="border rounded-md p-2 space-y-2 bg-slate-50">
@@ -672,7 +672,7 @@ function CourseAssigner({ courses, kind, parentId, currentCourseIds, onAssign, o
           </div>
           <Separator />
           <div className="flex gap-2">
-            <Input placeholder="Tạo môn học mới..." value={newName} onChange={(e) => setNewName(e.target.value)} />
+            <Input placeholder="Tạo khóa học mới..." value={newName} onChange={(e) => setNewName(e.target.value)} />
             <Button size="sm" onClick={async () => {
               if (!newName.trim()) return;
               const cid = await onCreate(newName.trim());

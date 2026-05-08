@@ -204,7 +204,7 @@ function PlanDetail() {
                   })}
                   {pcs.length > 0 && (
                     <div className="border-l-2 border-amber-200 pl-3">
-                      <div className="text-xs font-medium text-slate-500">Môn học trực tiếp</div>
+                      <div className="text-xs font-medium text-slate-500">Khóa học trực tiếp</div>
                       <ul className="text-sm">
                         {pcs.map((pc: any) => <li key={pc.course_id}>• {pc.course?.code} — {pc.course?.title}</li>)}
                       </ul>
