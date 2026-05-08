@@ -44,13 +44,13 @@ function AssignPage() {
 
   async function submit() {
     if (sel.size === 0) return toast.error("Chọn ít nhất 1 học viên");
-    const myLinks = links.filter(l => l.assignment_id === a.id);
+    const myLinks = links.filter(l => l.assignment_id === ax.id);
     const snapshot = {
-      title: a.title, code: a.code, description: a.description,
-      time_limit_minutes: a.time_limit_minutes, max_attempts: a.max_attempts,
-      pass_score: a.pass_score, total_points: a.total_points,
-      shuffle_questions: a.shuffle_questions, shuffle_answers: a.shuffle_answers,
-      show_results: a.show_results,
+      title: ax.title, code: ax.code, description: ax.description,
+      time_limit_minutes: ax.time_limit_minutes, max_attempts: ax.max_attempts,
+      pass_score: ax.pass_score, total_points: ax.total_points,
+      shuffle_questions: ax.shuffle_questions, shuffle_answers: ax.shuffle_answers,
+      show_results: ax.show_results,
       questions: myLinks.map(l => {
         const q = bank.find(b => b.id === l.question_id);
         return q ? {
@@ -63,7 +63,7 @@ function AssignPage() {
     const ids = Array.from(sel);
     const userIds = employees.filter(e => ids.includes(e.id) && e.user_id).map(e => e.user_id as string);
     await m.create.mutateAsync({
-      exam_id: a.id, exam_snapshot: snapshot as never,
+      exam_id: ax.id, exam_snapshot: snapshot as never,
       audience: ids.map(eid => ({ type: "employee", id: eid })) as never,
       student_ids: userIds, deadline: deadline || null, status: "active",
       assigned_by: user?.id ?? null,
@@ -72,12 +72,12 @@ function AssignPage() {
     nav({ to: "/admin/assignments/assigned" });
   }
 
-  const myAssigns = existingAssigns.filter(x => x.exam_id === a.id);
+  const myAssigns = existingAssigns.filter(x => x.exam_id === ax.id);
 
   return (
     <PageContainer
-      title={`Gán: ${a.title}`}
-      breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: a.title, path: `/admin/assignments/${a.id}` }, { title: "Gán" }]}
+      title={`Gán: ${ax.title}`}
+      breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: ax.title, path: `/admin/assignments/${ax.id}` }, { title: "Gán" }]}
       actions={<Button variant="outline" asChild><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" /> Quay lại</Link></Button>}
     >
       <Card className="space-y-3 p-5">
