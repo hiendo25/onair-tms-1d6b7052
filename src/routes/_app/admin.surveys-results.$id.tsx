@@ -1,11 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Sparkles } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
+import { AiSpinner } from "@/components/ai/AiSpinner";
 import { supabase } from "@/integrations/supabase/client";
+
+type TextAnalysis = {
+  sentiment: string;
+  sentiment_summary: string;
+  themes: { label: string; count: number; sample: string }[];
+  key_insight: string;
+  total_analyzed: number;
+};
 
 export const Route = createFileRoute("/_app/admin/surveys-results/$id")({
   head: () => ({ meta: [{ title: "Chi tiết kết quả khảo sát — OnAir TMS" }] }),
@@ -14,6 +26,24 @@ export const Route = createFileRoute("/_app/admin/surveys-results/$id")({
 
 function Page() {
   const { id } = Route.useParams();
+  const [textAnalysis, setTextAnalysis] = useState<Record<string, TextAnalysis | null>>({});
+  const [analyzing, setAnalyzing] = useState<Record<string, boolean>>({});
+
+  async function analyzeEssay(questionId: string, questionContent: string) {
+    setAnalyzing((p) => ({ ...p, [questionId]: true }));
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-survey-text-analysis", {
+        body: { surveyId: id, questionId, questionContent },
+      });
+      if (fnErr) throw fnErr;
+      setTextAnalysis((p) => ({ ...p, [questionId]: res as TextAnalysis }));
+    } catch {
+      setTextAnalysis((p) => ({ ...p, [questionId]: null }));
+    } finally {
+      setAnalyzing((p) => ({ ...p, [questionId]: false }));
+    }
+  }
+
   const { data, isLoading } = useQuery({
     queryKey: ["survey-detail-results", id],
     queryFn: async () => {
@@ -66,6 +96,54 @@ function Page() {
             </CardTitle></CardHeader>
             <CardContent>
               <QuestionResults question={q} answers={ans} totalRespondents={totalRespondents} />
+              {q.type === "essay" && ans.length > 0 && (
+                <div className="mt-3 pt-3 border-t space-y-3">
+                  <Button
+                    size="sm"
+                    onClick={() => analyzeEssay(q.id, q.content)}
+                    disabled={analyzing[q.id]}
+                    className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    {analyzing[q.id] ? "Đang phân tích..." : textAnalysis[q.id] ? "Phân tích lại" : "Phân tích câu trả lời bằng AI"}
+                  </Button>
+                  {analyzing[q.id] && <AiSpinner label="Đang phân tích các câu trả lời..." />}
+                  {textAnalysis[q.id] && !analyzing[q.id] && (
+                    <Card className="border-violet-200 bg-gradient-to-br from-violet-50 to-fuchsia-50">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-violet-600" />
+                          <span className="font-semibold text-sm text-violet-900">Phân tích AI — {textAnalysis[q.id]!.total_analyzed} câu trả lời</span>
+                          <Badge className={
+                            textAnalysis[q.id]!.sentiment === "positive" ? "bg-emerald-100 text-emerald-700" :
+                            textAnalysis[q.id]!.sentiment === "negative" ? "bg-red-100 text-red-700" :
+                            "bg-slate-100 text-slate-700"
+                          }>{textAnalysis[q.id]!.sentiment}</Badge>
+                        </div>
+                        <p className="text-sm">{textAnalysis[q.id]!.sentiment_summary}</p>
+                        <div>
+                          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Chủ đề chính</div>
+                          <div className="space-y-2">
+                            {textAnalysis[q.id]!.themes.map((t, ti) => (
+                              <div key={ti} className="rounded-md border bg-white p-2.5">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-sm font-medium">{t.label}</span>
+                                  <Badge variant="outline" className="text-xs">~{t.count} người</Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground italic">"{t.sample}"</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="rounded-md bg-violet-100 p-3">
+                          <div className="text-xs font-semibold text-violet-700 mb-1">💡 Insight chính</div>
+                          <p className="text-sm text-violet-900">{textAnalysis[q.id]!.key_insight}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
               <div className="mt-3 text-xs text-slate-500 border-t pt-2">
                 {answered} đã trả lời · {skipped} bỏ qua · {totalRespondents > 0 ? Math.round((answered / totalRespondents) * 100) : 0}% hoàn thành
               </div>

@@ -6,8 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiGenerateCourseOutline, type AiCourseOutline } from "@/lib/ai-mock";
 import { supabase } from "@/integrations/supabase/client";
+
+type AiCourseOutline = {
+  title: string; description: string; category: string; level: string;
+  duration_minutes: number;
+  modules: { title: string; description: string; lessons: string[]; sample_questions: { question: string; options: string[]; correct_index: number; explanation: string }[] }[];
+};
 import { useOrg } from "@/lib/org-context";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -31,7 +36,13 @@ export function AiGenerateCourseButton() {
     if (!topic.trim()) { toast.error("Vui lòng nhập chủ đề."); return; }
     setLoading(true);
     setOutline(null);
-    try { setOutline(await aiGenerateCourseOutline(topic, count, audience)); }
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-generate-course", {
+        body: { topic, lessonCount: count, audience },
+      });
+      if (fnErr) throw fnErr;
+      setOutline(res as AiCourseOutline);
+    }
     catch { toast.error("Tạo khóa học thất bại."); }
     finally { setLoading(false); }
   }

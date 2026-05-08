@@ -96,7 +96,10 @@ function Page() {
               const qCount = links.filter(l => l.assignment_id === r.id).length || r.total_questions;
               return (
                 <Card key={r.id} className="group flex flex-col overflow-hidden p-0 transition-shadow hover:shadow-md">
-                  <Link to="/admin/assignments/$id" params={{ id: r.id }} className="relative flex h-32 items-center justify-center bg-blue-50">
+                  <div
+                    className="relative flex h-32 cursor-pointer items-center justify-center bg-blue-50"
+                    onClick={() => nav({ to: "/admin/assignments/$id", params: { id: r.id } })}
+                  >
                     <FileQuestion className="h-12 w-12 text-blue-400" />
                     <Link
                       to="/admin/assignments/$id/assign"
@@ -107,7 +110,7 @@ function Page() {
                     >
                       <UserPlus2 className="h-4 w-4 text-blue-600" />
                     </Link>
-                  </Link>
+                  </div>
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-1 flex items-start justify-between gap-2">
                       <Link to="/admin/assignments/$id" params={{ id: r.id }} className="line-clamp-1 font-semibold hover:text-primary">

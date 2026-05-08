@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Clock, CheckCircle2, Lock, ArrowRight, Search, GraduationCap, AlertTriangle } from "lucide-react";
+import { BookOpen, Clock, CheckCircle2, Lock, ArrowRight, Search, GraduationCap, AlertTriangle, Sparkles } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -9,9 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
+import { AiSpinner } from "@/components/ai/AiSpinner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { useOrg } from "@/lib/org-context";
+
+type AiRec = {
+  recommendations: { path_id: string; title: string; reason: string; priority: "high" | "medium" | "low" }[];
+  overall_advice: string;
+  message?: string;
+};
 import { LP_ENROLLMENT_STATUS } from "@/lib/admin-options";
 import type { DBLpEnrollment, DBLearningPath } from "@/lib/data-hooks";
 
@@ -43,6 +50,8 @@ function MyPaths() {
   const { orgId } = useOrg();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | DerivedStatus>("all");
+  const [rec, setRec] = useState<AiRec | null>(null);
+  const [recLoading, setRecLoading] = useState(false);
 
   const { data: enrollments = [], isLoading, isError, refetch } = useQuery({
     queryKey: ["my-enrollments", orgId, user?.id],
@@ -74,6 +83,23 @@ function MyPaths() {
     });
   }, [withDerived, q, filter]);
 
+  async function getRecommendations() {
+    if (!user?.id) return;
+    setRecLoading(true);
+    setRec(null);
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-learning-recommendation", {
+        body: { userId: user.id, orgId },
+      });
+      if (fnErr) throw fnErr;
+      setRec(res as AiRec);
+    } catch {
+      setRec(null);
+    } finally {
+      setRecLoading(false);
+    }
+  }
+
   const stats = useMemo(() => {
     const total = withDerived.length;
     const done = withDerived.filter(e => e.derivedStatus === "completed").length;
@@ -94,6 +120,58 @@ function MyPaths() {
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Chưa học</div><div className="text-2xl font-bold text-slate-600">{stats.notStarted}</div></CardContent></Card>
         <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Hoàn thành</div><div className="text-2xl font-bold text-emerald-600">{stats.done}</div></CardContent></Card>
       </div>
+
+      {/* AI recommendation block */}
+      <Card className="border-violet-200 bg-gradient-to-br from-violet-50/60 to-fuchsia-50/60">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-violet-600" />
+              <span className="font-semibold text-sm text-violet-900">Gợi ý lộ trình học của AI</span>
+            </div>
+            <Button size="sm" onClick={getRecommendations} disabled={recLoading}
+              className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:opacity-95 text-white">
+              <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+              {recLoading ? "Đang phân tích..." : rec ? "Gợi ý lại" : "Gợi ý lộ trình phù hợp"}
+            </Button>
+          </div>
+          {recLoading && <AiSpinner label="Đang phân tích hồ sơ học tập..." />}
+          {rec && !recLoading && (
+            <div className="space-y-3">
+              {rec.message ? (
+                <p className="text-sm text-muted-foreground">{rec.message}</p>
+              ) : (
+                <>
+                  {rec.overall_advice && (
+                    <p className="text-sm text-violet-800 italic">{rec.overall_advice}</p>
+                  )}
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {rec.recommendations.map((r) => (
+                      <div key={r.path_id} className="rounded-lg border bg-white p-3 space-y-1.5">
+                        <div className="flex items-start justify-between gap-1">
+                          <span className="font-medium text-sm line-clamp-2">{r.title}</span>
+                          <Badge className={
+                            r.priority === "high" ? "bg-red-100 text-red-700 shrink-0" :
+                            r.priority === "medium" ? "bg-amber-100 text-amber-700 shrink-0" :
+                            "bg-slate-100 text-slate-700 shrink-0"
+                          }>{r.priority === "high" ? "Ưu tiên cao" : r.priority === "medium" ? "Nên học" : "Tùy chọn"}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{r.reason}</p>
+                        <Button asChild size="sm" variant="outline" className="w-full border-violet-200 text-violet-700 h-7 text-xs">
+                          <Link to="/my-learning-paths/$id" params={{ id: r.path_id }}>Xem lộ trình <ArrowRight className="h-3 w-3 ml-1" /></Link>
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+          {!rec && !recLoading && (
+            <p className="text-sm text-muted-foreground">AI sẽ phân tích tiến độ và gợi ý lộ trình học phù hợp nhất với vị trí và mức độ hiện tại của bạn.</p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent className="p-3 flex flex-wrap items-center gap-2">

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Search, Plus, Award, Pencil, Trash2, Maximize2, Download } from "lucide-react";
+import { CertReadinessCard } from "@/components/ai/CertReadinessCard";
 import { useCertificates, useCertificateMutations, type DBCertificate, type CertificateContent } from "@/lib/data-hooks";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
@@ -82,6 +83,8 @@ function Page() {
         </Button>
       }
     >
+      <CertReadinessCard />
+
       <div className="relative max-w-sm">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input placeholder="Tìm kiếm" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-8 rounded-full" />

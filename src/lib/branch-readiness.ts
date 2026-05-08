@@ -36,16 +36,6 @@ export function scoreColor(score: number) {
   return l === "ready" ? "bg-emerald-500" : l === "watch" ? "bg-amber-500" : "bg-red-500";
 }
 
-// Deterministic mock so values are stable per branch when real data is missing.
-function hash(s: string) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-function mockMetric(seed: string, base: number) {
-  return Math.max(20, Math.min(98, base + (hash(seed) % 30) - 15));
-}
-
 function pct(num: number, den: number) {
   if (!den) return NaN;
   return Math.round((num / den) * 100);
@@ -83,43 +73,41 @@ export function useBranchReadiness(orgId: string) {
         (assignmentsRes.data ?? []).map((a) => [a.id, a.pass_score ?? 70]),
       );
 
-      const userBranch = new Map<string, string>();
-      employees.forEach((e) => { if (e.user_id) userBranch.set(e.user_id, e.branch || "—"); });
-
-      const empByBranch = new Map<string, number>();
-      employees.forEach((e) => {
-        const k = e.branch || "—";
-        empByBranch.set(k, (empByBranch.get(k) ?? 0) + 1);
-      });
-
       const activeUsers = new Set(activity.map((a) => a.user_id));
 
-      const submittedTotal = submissions.length;
-      const passedTotal = submissions.filter((s) => {
-        const threshold = passByAssignment.get(s.assignment_id) ?? 70;
-        return s.status === "passed" || (typeof s.score === "number" && Number(s.score) >= threshold);
-      }).length;
-      const orgPassRate = pct(passedTotal, submittedTotal);
-
-      const completedRequired = progress.filter((p) => requiredCourseIds.has(p.course_id) && (p.status === "completed" || (p.progress ?? 0) >= 100)).length;
-      const requiredAttempts = progress.filter((p) => requiredCourseIds.has(p.course_id)).length;
-      const orgRequiredRate = pct(completedRequired, requiredAttempts);
-
-      const totalEmployees = employees.length;
-      const orgActiveRate = pct(activeUsers.size, totalEmployees);
-
-      const now = Date.now();
-      const validCerts = certs.filter((c) => c.status === "active" && (!c.expires_at || new Date(c.expires_at).getTime() > now)).length;
-      const orgCertRate = certs.length ? pct(validCerts, certs.length) : NaN;
-
       return branches.map((b) => {
-        const seed = `${b.id}-${b.name}`;
-        const required = Number.isFinite(orgRequiredRate) ? mockMetric(`${seed}-req`, orgRequiredRate) : mockMetric(`${seed}-req`, 70);
-        const passed = Number.isFinite(orgPassRate) ? mockMetric(`${seed}-pass`, orgPassRate) : mockMetric(`${seed}-pass`, 75);
-        const certs = Number.isFinite(orgCertRate) ? mockMetric(`${seed}-certs`, orgCertRate) : mockMetric(`${seed}-certs`, 80);
-        const active = Number.isFinite(orgActiveRate) ? mockMetric(`${seed}-act`, orgActiveRate) : mockMetric(`${seed}-act`, 65);
-        const score = computeReadiness({ required, passed, certs, active });
-        return { branchId: b.id, branchName: b.name, required, passed, certs, active, score };
+        const branchEmps = employees.filter((e) => e.branch === b.name);
+        const branchUserIds = new Set(branchEmps.map((e) => e.user_id).filter(Boolean) as string[]);
+        const branchEmpCount = branchEmps.length;
+
+        // % hoàn thành khóa bắt buộc theo branch
+        const branchProgress = progress.filter((p) => branchUserIds.has(p.user_id) && requiredCourseIds.has(p.course_id));
+        const branchCompleted = branchProgress.filter((p) => p.status === "completed" || (p.progress ?? 0) >= 100).length;
+        const required = pct(branchCompleted, branchProgress.length);
+
+        // % pass bài kiểm tra theo branch
+        const branchSubs = submissions.filter((s) => branchUserIds.has(s.user_id));
+        const branchPassed = branchSubs.filter((s) => {
+          const threshold = passByAssignment.get(s.assignment_id) ?? 70;
+          return s.status === "passed" || (typeof s.score === "number" && Number(s.score) >= threshold);
+        }).length;
+        const passed = pct(branchPassed, branchSubs.length);
+
+        // % active 7 ngày theo branch
+        const branchActive = branchEmps.filter((e) => e.user_id && activeUsers.has(e.user_id)).length;
+        const active = pct(branchActive, branchEmpCount);
+
+        // % chứng chỉ còn hiệu lực theo branch
+        const branchCerts = certs.filter((c) => branchUserIds.has(c.user_id));
+        const branchValidCerts = branchCerts.filter((c) => c.status === "active" && (!c.expires_at || new Date(c.expires_at).getTime() > Date.now())).length;
+        const certsRate = pct(branchValidCerts, branchCerts.length);
+
+        const r = Number.isFinite(required) ? required : 0;
+        const p2 = Number.isFinite(passed) ? passed : 0;
+        const c2 = Number.isFinite(certsRate) ? certsRate : 0;
+        const a = Number.isFinite(active) ? active : 0;
+        const score = computeReadiness({ required: r, passed: p2, certs: c2, active: a });
+        return { branchId: b.id, branchName: b.name, required: r, passed: p2, certs: c2, active: a, score };
       });
     },
   });

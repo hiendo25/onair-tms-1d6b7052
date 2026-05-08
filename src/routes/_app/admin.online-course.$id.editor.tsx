@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, Layers, Save, X, Loader2 } from "lucide-react";
+import { ArrowLeft, BookOpen, Layers, Save, X, Loader2, Sparkles } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Award } from "lucide-react";
 import { toast } from "sonner";
+import { AiQuizGeneratorDialog } from "@/components/ai/AiQuizGeneratorDialog";
 
 export const Route = createFileRoute("/_app/admin/online-course/$id/editor")({
   head: () => ({ meta: [{ title: "Chỉnh sửa khoá học — OnAir TMS" }] }),
@@ -40,6 +41,7 @@ function CourseEditor() {
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [quizGenOpen, setQuizGenOpen] = useState(false);
   const { data: certificates = [] } = useCertificates();
 
   const existing = useQuery({
@@ -205,6 +207,14 @@ function CourseEditor() {
 
         <TabsContent value="content">
           <Card className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-muted-foreground">Cấu trúc phần học và bài học của khóa</span>
+              {info.title && (
+                <Button size="sm" variant="outline" className="border-violet-300 text-violet-700" onClick={() => setQuizGenOpen(true)}>
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Sinh câu hỏi từ khóa học
+                </Button>
+              )}
+            </div>
             <SectionsLessonsEditor sections={sections} onChange={handleSecChange} />
             <div className="mt-6 flex justify-between border-t pt-4">
               <Button variant="outline" onClick={() => setTab("info")}><ArrowLeft className="h-4 w-4 mr-1" />Quay lại</Button>
@@ -214,6 +224,12 @@ function CourseEditor() {
               </Button>
             </div>
           </Card>
+          <AiQuizGeneratorDialog
+            lessonTitle={info.title}
+            lessonContent={info.description}
+            open={quizGenOpen}
+            onClose={() => setQuizGenOpen(false)}
+          />
         </TabsContent>
       </Tabs>
     </PageContainer>

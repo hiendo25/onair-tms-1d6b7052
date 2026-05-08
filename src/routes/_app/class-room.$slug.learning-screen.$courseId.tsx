@@ -5,8 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, CheckCircle2, PlayCircle, Sparkles } from "lucide-react";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiSummarizeLesson, aiGenerateFlashcards, type AiFlashcard } from "@/lib/ai-mock";
+import { LessonChatbot } from "@/components/ai/LessonChatbot";
 import { supabase } from "@/integrations/supabase/client";
+
+type AiFlashcard = { front: string; back: string };
 import { useOrg } from "@/lib/org-context";
 import { logLearningActivity } from "@/lib/log-activity";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -78,7 +80,11 @@ function LS() {
     if (!cacheKey || !lessonTitle || current || loading) return;
     setLoading(true);
     try {
-      const bullets = await aiSummarizeLesson(lessonTitle);
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-content-assist", {
+        body: { action: "summarize", lessonTitle, content: currentLesson?.content ?? "" },
+      });
+      if (fnErr) throw fnErr;
+      const bullets = (res as { bullets: string[] }).bullets;
       setSummaries((prev) => ({ ...prev, [cacheKey]: bullets }));
     } finally {
       setLoading(false);
@@ -96,7 +102,13 @@ function LS() {
     setFlashCards(null);
     setFlippedIdx({});
     setFlashLoading(true);
-    try { setFlashCards(await aiGenerateFlashcards(lessonTitle)); }
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-content-assist", {
+        body: { action: "flashcards", lessonTitle, content: currentLesson?.content ?? "" },
+      });
+      if (fnErr) throw fnErr;
+      setFlashCards((res as { cards: AiFlashcard[] }).cards);
+    }
     catch { toast.error("Không sinh được flashcard."); }
     finally { setFlashLoading(false); }
   }
@@ -229,6 +241,8 @@ function LS() {
           </Button>
         </div>
       </main>
+
+      <LessonChatbot lessonTitle={lessonTitle} lessonContent={currentLesson?.content} />
 
       <Dialog open={flashOpen} onOpenChange={setFlashOpen}>
         <DialogContent className="max-w-3xl">

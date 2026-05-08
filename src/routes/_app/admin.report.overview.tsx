@@ -3,6 +3,8 @@ import { PageContainer } from "@/components/PageContainer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import { TeamInsightsCard } from "@/components/ai/TeamInsightsCard";
+import { AiMonthlyReportCard } from "@/components/ai/AiMonthlyReportCard";
+import { DropoutRiskCard } from "@/components/ai/DropoutRiskCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useLeaderboard } from "@/lib/data-hooks";
 
@@ -16,6 +18,10 @@ function ReportOverview() {
   return (
     <PageContainer title="Báo cáo tổng quan" breadcrumbs={[{ title: "Báo cáo" }, { title: "Tổng quan" }]}>
       <TeamInsightsCard />
+
+      <AiMonthlyReportCard />
+
+      <DropoutRiskCard />
 
       <Card>
         <CardHeader>
