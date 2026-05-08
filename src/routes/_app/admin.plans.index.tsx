@@ -203,8 +203,8 @@ function Page() {
 function PlanRow({ index, row, onDelete, onSubmit, onEdit }: { index: number; row: DBPlan; onDelete: () => Promise<unknown>; onSubmit: () => void; onEdit: () => void; }) {
   const [confirm, setConfirm] = useState(false);
   const status = PLAN_STATUS_BADGE[row.status];
-  const canEdit = row.status === "draft" || row.status === "rejected";
-  const canDelete = row.status === "draft" || row.status === "rejected";
+  const canEdit = true;
+  const canDelete = true;
   const canSubmit = row.status === "draft";
   const hasTime = row.start_date && row.end_date;
   return (
