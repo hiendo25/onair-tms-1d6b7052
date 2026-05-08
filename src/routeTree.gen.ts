@@ -26,6 +26,7 @@ import { Route as AppMyCertificatesRouteImport } from './routes/_app/my-certific
 import { Route as AppMyAssignmentsRouteImport } from './routes/_app/my-assignments'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAnalyticRouteImport } from './routes/_app/analytic'
+import { Route as AppMyCoursesIndexRouteImport } from './routes/_app/my-courses.index'
 import { Route as AppDepartmentsIndexRouteImport } from './routes/_app/departments.index'
 import { Route as AppBranchesIndexRouteImport } from './routes/_app/branches.index'
 import { Route as SurveysIdSubmitRouteImport } from './routes/surveys.$id.submit'
@@ -177,6 +178,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
 const AppAnalyticRoute = AppAnalyticRouteImport.update({
   id: '/analytic',
   path: '/analytic',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyCoursesIndexRoute = AppMyCoursesIndexRouteImport.update({
+  id: '/my-courses/',
+  path: '/my-courses/',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDepartmentsIndexRoute = AppDepartmentsIndexRouteImport.update({
@@ -584,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/branches/': typeof AppBranchesIndexRoute
   '/departments/': typeof AppDepartmentsIndexRoute
+  '/my-courses/': typeof AppMyCoursesIndexRoute
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRouteWithChildren
   '/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
@@ -670,6 +677,7 @@ export interface FileRoutesByTo {
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/branches': typeof AppBranchesIndexRoute
   '/departments': typeof AppDepartmentsIndexRoute
+  '/my-courses': typeof AppMyCoursesIndexRoute
   '/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRouteWithChildren
   '/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
@@ -758,6 +766,7 @@ export interface FileRoutesById {
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/_app/branches/': typeof AppBranchesIndexRoute
   '/_app/departments/': typeof AppDepartmentsIndexRoute
+  '/_app/my-courses/': typeof AppMyCoursesIndexRoute
   '/_app/admin/assignments/assigned': typeof AppAdminAssignmentsAssignedRoute
   '/_app/admin/assignments/question-bank': typeof AppAdminAssignmentsQuestionBankRouteWithChildren
   '/_app/admin/class-room/create': typeof AppAdminClassRoomCreateRoute
@@ -846,6 +855,7 @@ export interface FileRouteTypes {
     | '/surveys/$id/submit'
     | '/branches/'
     | '/departments/'
+    | '/my-courses/'
     | '/admin/assignments/assigned'
     | '/admin/assignments/question-bank'
     | '/admin/class-room/create'
@@ -932,6 +942,7 @@ export interface FileRouteTypes {
     | '/surveys/$id/submit'
     | '/branches'
     | '/departments'
+    | '/my-courses'
     | '/admin/assignments/assigned'
     | '/admin/assignments/question-bank'
     | '/admin/class-room/create'
@@ -1019,6 +1030,7 @@ export interface FileRouteTypes {
     | '/surveys/$id/submit'
     | '/_app/branches/'
     | '/_app/departments/'
+    | '/_app/my-courses/'
     | '/_app/admin/assignments/assigned'
     | '/_app/admin/assignments/question-bank'
     | '/_app/admin/class-room/create'
@@ -1208,6 +1220,13 @@ declare module '@tanstack/react-router' {
       path: '/analytic'
       fullPath: '/analytic'
       preLoaderRoute: typeof AppAnalyticRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-courses/': {
+      id: '/_app/my-courses/'
+      path: '/my-courses'
+      fullPath: '/my-courses/'
+      preLoaderRoute: typeof AppMyCoursesIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/departments/': {
@@ -1779,6 +1798,7 @@ interface AppRouteChildren {
   AppStudentDashboardRoute: typeof AppStudentDashboardRoute
   AppBranchesIndexRoute: typeof AppBranchesIndexRoute
   AppDepartmentsIndexRoute: typeof AppDepartmentsIndexRoute
+  AppMyCoursesIndexRoute: typeof AppMyCoursesIndexRoute
   AppAdminAssignmentsAssignedRoute: typeof AppAdminAssignmentsAssignedRoute
   AppAdminAssignmentsQuestionBankRoute: typeof AppAdminAssignmentsQuestionBankRouteWithChildren
   AppAdminClassRoomCreateRoute: typeof AppAdminClassRoomCreateRoute
@@ -1848,6 +1868,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppStudentDashboardRoute: AppStudentDashboardRoute,
   AppBranchesIndexRoute: AppBranchesIndexRoute,
   AppDepartmentsIndexRoute: AppDepartmentsIndexRoute,
+  AppMyCoursesIndexRoute: AppMyCoursesIndexRoute,
   AppAdminAssignmentsAssignedRoute: AppAdminAssignmentsAssignedRoute,
   AppAdminAssignmentsQuestionBankRoute:
     AppAdminAssignmentsQuestionBankRouteWithChildren,
