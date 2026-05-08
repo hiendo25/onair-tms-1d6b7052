@@ -257,10 +257,23 @@ export const useExamAttempts = examAttCrud.useList;
 export const useExamAttemptMutations = examAttCrud.useMutations;
 
 // ===== Certificates =====
-export type DBCertificate = { id: string; org_id: string; code: string; title: string; description: string; template_url: string; valid_months: number; issued_count: number; status: string; };
+export type CertificateContent = {
+  heading: string;
+  awarded_to_label: string;
+  description: string;
+  issue_date_label: string;
+  expire_date_label: string;
+};
+export type DBCertificate = { id: string; org_id: string; code: string; title: string; description: string; template_url: string; frame_url: string; content: CertificateContent; valid_months: number; issued_count: number; status: string; };
 const certificatesCrud = createOrgCrud<DBCertificate>("certificates", "chứng chỉ");
 export const useCertificates = certificatesCrud.useList;
 export const useCertificateMutations = certificatesCrud.useMutations;
+
+export type DBCertificateFrame = { id: string; org_id: string; name: string; image_url: string; is_default: boolean; };
+const certificateFramesCrud = createOrgCrud<DBCertificateFrame>("certificate_frames", "khung chứng nhận");
+export const useCertificateFrames = certificateFramesCrud.useList;
+export const useCertificateFrameMutations = certificateFramesCrud.useMutations;
+
 
 // ===== Surveys =====
 export type DBSurvey = { id: string; org_id: string; code: string; title: string; description: string; type: string; category: string; version: number; anonymous: boolean; start_date: string | null; end_date: string | null; responses_count: number; target_count: number; status: string; created_by: string | null; created_at: string; };
