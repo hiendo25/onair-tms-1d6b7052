@@ -262,9 +262,15 @@ function EmptyState({ tab, hasAny }: { tab: string; hasAny: boolean }) {
       <p className="text-sm text-muted-foreground">
         {!hasAny
           ? "Bạn chưa được gán lớp học nào."
-          : tab === "active"
-          ? "Không có lớp học đang hoạt động."
-          : "Không có lớp học đã kết thúc."}
+          : tab === "ended"
+          ? "Không có lớp học đã kết thúc."
+          : tab === "ongoing"
+          ? "Không có lớp học đang diễn ra."
+          : tab === "today"
+          ? "Không có lớp học nào diễn ra hôm nay."
+          : tab === "upcoming"
+          ? "Không có lớp học sắp diễn ra."
+          : "Không có lớp học phù hợp bộ lọc."}
       </p>
     </Card>
   );
