@@ -100,6 +100,7 @@ function CourseEditor() {
       const totalLessons = sections.reduce((acc, s) => acc + s.lessons.length, 0);
       const coursePayload = {
         ...info, lessons_count: totalLessons, org_id: orgId,
+        certificate_id: certificateId || null,
       };
 
       let courseId = id;
