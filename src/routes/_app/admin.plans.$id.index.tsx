@@ -135,8 +135,12 @@ function PlanDetail() {
       title={plan.title}
       breadcrumbs={[{ title: "Kế hoạch", path: "/admin/plans" }, { title: plan.code }]}
       actions={
-        (plan.status === "draft" || plan.status === "rejected") &&
-        <Button variant="outline" size="sm" asChild><Link to="/admin/plans/$id/edit" params={{ id }}><Edit className="h-4 w-4 mr-1" />Chỉnh sửa</Link></Button>
+        (plan.status === "draft" || plan.status === "rejected") && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild><Link to="/admin/plans/$id/edit" params={{ id }}><Edit className="h-4 w-4 mr-1" />Chỉnh sửa</Link></Button>
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setConfirmDel(true)}><Trash2 className="h-4 w-4 mr-1" />Xoá</Button>
+          </div>
+        )
       }
     >
       {/* 4 stat cards */}
