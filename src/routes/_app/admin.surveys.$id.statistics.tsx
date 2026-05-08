@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiSurveyInsight, type SurveyInsight } from "@/lib/ai-mock";
+import { type SurveyInsight } from "@/lib/ai-mock";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_app/admin/surveys/$id/statistics")({
   head: () => ({ meta: [{ title: "Thống kê khảo sát — OnAir TMS" }] }),
@@ -22,8 +23,11 @@ function Stats() {
   async function analyze() {
     setLoading(true);
     setError(null);
-    try { setData(await aiSurveyInsight()); }
-    catch { setError("Có gì đó chưa đúng, thử lại nhé."); }
+    try {
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-survey-summary", { body: { surveyId: id } });
+      if (fnErr) throw fnErr;
+      setData(res as SurveyInsight);
+    } catch (e) { setError(e instanceof Error ? e.message : "Có gì đó chưa đúng, thử lại nhé."); }
     finally { setLoading(false); }
   }
 
