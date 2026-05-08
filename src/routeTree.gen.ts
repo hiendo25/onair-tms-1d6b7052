@@ -30,6 +30,7 @@ import { Route as AppDepartmentsIndexRouteImport } from './routes/_app/departmen
 import { Route as AppBranchesIndexRouteImport } from './routes/_app/branches.index'
 import { Route as SurveysIdSubmitRouteImport } from './routes/surveys.$id.submit'
 import { Route as AppStudentDashboardRouteImport } from './routes/_app/student/dashboard'
+import { Route as AppMyLearningPathsIdRouteImport } from './routes/_app/my-learning-paths.$id'
 import { Route as AppDepartmentsListRouteImport } from './routes/_app/departments.list'
 import { Route as AppDepartmentsIdRouteImport } from './routes/_app/departments.$id'
 import { Route as AppClassRoomSlugRouteImport } from './routes/_app/class-room.$slug'
@@ -194,6 +195,11 @@ const AppStudentDashboardRoute = AppStudentDashboardRouteImport.update({
   id: '/student/dashboard',
   path: '/student/dashboard',
   getParentRoute: () => AppRoute,
+} as any)
+const AppMyLearningPathsIdRoute = AppMyLearningPathsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppMyLearningPathsRoute,
 } as any)
 const AppDepartmentsListRoute = AppDepartmentsListRouteImport.update({
   id: '/departments/list',
@@ -554,6 +560,7 @@ export interface FileRoutesByFullPath {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/my-learning-paths/$id': typeof AppMyLearningPathsIdRoute
   '/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/branches/': typeof AppBranchesIndexRoute
@@ -636,6 +643,7 @@ export interface FileRoutesByTo {
   '/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/departments/$id': typeof AppDepartmentsIdRoute
   '/departments/list': typeof AppDepartmentsListRoute
+  '/my-learning-paths/$id': typeof AppMyLearningPathsIdRoute
   '/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/branches': typeof AppBranchesIndexRoute
@@ -720,6 +728,7 @@ export interface FileRoutesById {
   '/_app/class-room/$slug': typeof AppClassRoomSlugRouteWithChildren
   '/_app/departments/$id': typeof AppDepartmentsIdRoute
   '/_app/departments/list': typeof AppDepartmentsListRoute
+  '/_app/my-learning-paths/$id': typeof AppMyLearningPathsIdRoute
   '/_app/student/dashboard': typeof AppStudentDashboardRoute
   '/surveys/$id/submit': typeof SurveysIdSubmitRouteWithChildren
   '/_app/branches/': typeof AppBranchesIndexRoute
@@ -804,6 +813,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/my-learning-paths/$id'
     | '/student/dashboard'
     | '/surveys/$id/submit'
     | '/branches/'
@@ -886,6 +896,7 @@ export interface FileRouteTypes {
     | '/class-room/$slug'
     | '/departments/$id'
     | '/departments/list'
+    | '/my-learning-paths/$id'
     | '/student/dashboard'
     | '/surveys/$id/submit'
     | '/branches'
@@ -969,6 +980,7 @@ export interface FileRouteTypes {
     | '/_app/class-room/$slug'
     | '/_app/departments/$id'
     | '/_app/departments/list'
+    | '/_app/my-learning-paths/$id'
     | '/_app/student/dashboard'
     | '/surveys/$id/submit'
     | '/_app/branches/'
@@ -1188,6 +1200,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/student/dashboard'
       preLoaderRoute: typeof AppStudentDashboardRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/my-learning-paths/$id': {
+      id: '/_app/my-learning-paths/$id'
+      path: '/$id'
+      fullPath: '/my-learning-paths/$id'
+      preLoaderRoute: typeof AppMyLearningPathsIdRouteImport
+      parentRoute: typeof AppMyLearningPathsRoute
     }
     '/_app/departments/list': {
       id: '/_app/departments/list'
@@ -1628,11 +1647,13 @@ const AppMyAssignmentsRouteWithChildren =
   AppMyAssignmentsRoute._addFileChildren(AppMyAssignmentsRouteChildren)
 
 interface AppMyLearningPathsRouteChildren {
+  AppMyLearningPathsIdRoute: typeof AppMyLearningPathsIdRoute
   AppMyLearningPathsLearningScreenCourseIdRoute: typeof AppMyLearningPathsLearningScreenCourseIdRoute
   AppMyLearningPathsPhaseIdRoute: typeof AppMyLearningPathsPhaseIdRoute
 }
 
 const AppMyLearningPathsRouteChildren: AppMyLearningPathsRouteChildren = {
+  AppMyLearningPathsIdRoute: AppMyLearningPathsIdRoute,
   AppMyLearningPathsLearningScreenCourseIdRoute:
     AppMyLearningPathsLearningScreenCourseIdRoute,
   AppMyLearningPathsPhaseIdRoute: AppMyLearningPathsPhaseIdRoute,
