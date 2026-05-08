@@ -83,7 +83,7 @@ function Page() {
                   <div className="font-medium line-clamp-1">{snap.name || "Flashcard"}</div>
                   <p className="text-xs text-muted-foreground line-clamp-2">{snap.content || ""}</p>
                   <p className="text-[11px] text-muted-foreground pt-1">
-                    {f.delivered_at ? new Date(f.delivered_at).toLocaleDateString("vi-VN") : ""}
+                    {new Date(f.scheduled_at).toLocaleDateString("vi-VN")}
                   </p>
                 </CardContent>
               </Card>
