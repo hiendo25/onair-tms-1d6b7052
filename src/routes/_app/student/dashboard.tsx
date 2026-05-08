@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   Bell, Calendar, BookOpen, Trophy, Crown, ArrowRight, ChevronRight,
-  Video, Monitor, MapPin, ClipboardCheck, Clock, Lock, PlayCircle, Sparkles,
+  Video, Monitor, MapPin, Clock, Lock, PlayCircle, Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
