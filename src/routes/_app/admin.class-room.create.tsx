@@ -265,7 +265,12 @@ function Page() {
         } as never);
       }
 
-      toast.success("Đã tạo lớp học");
+      // Flashcards
+      if (flashcardIds.length) {
+        await supabase.from("classroom_flashcards").insert(flashcardIds.map((fid, idx) => ({
+          org_id: orgId, classroom_id: classroomId, flashcard_id: fid, display_order: idx,
+        })) as never);
+      }
       navigate({ to: "/admin/class-room" });
     } catch (e) {
       toast.error((e as Error).message);
