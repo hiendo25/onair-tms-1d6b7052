@@ -42,7 +42,7 @@ function Detail() {
   return (
     <PageContainer
       title={ax.title}
-      breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: a.title }]}
+      breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: ax.title }]}
       actions={<>
         <Button variant="outline" size="sm" onClick={clone}><Copy className="h-4 w-4" /> Nhân bản</Button>
         <Button variant="outline" size="sm" asChild><Link to="/admin/assignments/$id/assign" params={{ id: ax.id }}><Users className="h-4 w-4" />Gán học viên</Link></Button>
@@ -50,10 +50,10 @@ function Detail() {
       </>}
     >
       <div className="grid gap-4 sm:grid-cols-4">
-        <Stat icon={ListChecks} label="Số câu hỏi" value={String(a.total_questions)} />
+        <Stat icon={ListChecks} label="Số câu hỏi" value={String(ax.total_questions)} />
         <Stat icon={ListChecks} label="Tổng điểm" value={`${ax.total_points}/100`} />
         <Stat icon={Clock} label="Thời gian" value={ax.time_limit_minutes ? `${ax.time_limit_minutes} phút` : "—"} />
-        <Stat icon={RefreshCw} label="Số lần làm" value={ax.max_attempts ? String(a.max_attempts) : "Không giới hạn"} />
+        <Stat icon={RefreshCw} label="Số lần làm" value={ax.max_attempts ? String(ax.max_attempts) : "Không giới hạn"} />
       </div>
 
       <Card className="p-5">
@@ -64,7 +64,7 @@ function Detail() {
           </div>
           <div className="flex gap-2">
             <Badge variant="outline">{ax.type}</Badge>
-            <Badge variant={ax.status === "published" ? "default" : "secondary"}>{ASSIGNMENT_STATUS.find(s => s.value === a.status)?.label || a.status}</Badge>
+            <Badge variant={ax.status === "published" ? "default" : "secondary"}>{ASSIGNMENT_STATUS.find(s => s.value === ax.status)?.label || ax.status}</Badge>
           </div>
         </div>
         <div className="text-sm text-muted-foreground">{ax.description || "Không có mô tả"}</div>
