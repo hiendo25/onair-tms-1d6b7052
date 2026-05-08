@@ -10,7 +10,10 @@ import { CourseInfoForm, type CourseInfo } from "@/components/admin/CourseInfoFo
 import { SectionsLessonsEditor, type EditorSection, type EditorLesson } from "@/components/admin/SectionsLessonsEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
-import { useOnlineCourses } from "@/lib/data-hooks";
+import { useOnlineCourses, useCertificates } from "@/lib/data-hooks";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Award } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/online-course/$id/editor")({
