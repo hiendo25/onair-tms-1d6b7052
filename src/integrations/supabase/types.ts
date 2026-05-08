@@ -181,11 +181,43 @@ export type Database = {
           },
         ]
       }
+      certificate_frames: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_default: boolean
+          name: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_default?: boolean
+          name: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_default?: boolean
+          name?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           code: string
+          content: Json
           created_at: string
           description: string
+          frame_url: string
           id: string
           issued_count: number
           org_id: string
@@ -197,8 +229,10 @@ export type Database = {
         }
         Insert: {
           code: string
+          content?: Json
           created_at?: string
           description?: string
+          frame_url?: string
           id?: string
           issued_count?: number
           org_id: string
@@ -210,8 +244,10 @@ export type Database = {
         }
         Update: {
           code?: string
+          content?: Json
           created_at?: string
           description?: string
+          frame_url?: string
           id?: string
           issued_count?: number
           org_id?: string
