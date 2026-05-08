@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app/my-assignments")({
 const stripVN = (s: string) =>
   (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
 
-type Status = "not_started" | "in_progress" | "submitted" | "overdue";
+type Status = "not_started" | "in_progress" | "submitted" | "overdue" | "not_yet_open";
 
 function Page() {
   const { user } = useAuth();
