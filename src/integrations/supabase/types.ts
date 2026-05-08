@@ -202,55 +202,316 @@ export type Database = {
         }
         Relationships: []
       }
+      classroom_agenda: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          end_at: string
+          id: string
+          order_index: number
+          org_id: string
+          session_id: string | null
+          start_at: string
+          title: string
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          end_at: string
+          id?: string
+          order_index?: number
+          org_id: string
+          session_id?: string | null
+          start_at: string
+          title: string
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          end_at?: string
+          id?: string
+          order_index?: number
+          org_id?: string
+          session_id?: string | null
+          start_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      classroom_assignments: {
+        Row: {
+          assignment_id: string
+          classroom_id: string
+          created_at: string
+          id: string
+          org_id: string
+          session_id: string | null
+        }
+        Insert: {
+          assignment_id: string
+          classroom_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          session_id?: string | null
+        }
+        Update: {
+          assignment_id?: string
+          classroom_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          session_id?: string | null
+        }
+        Relationships: []
+      }
+      classroom_courses: {
+        Row: {
+          classroom_id: string
+          course_id: string
+          course_order: number
+          created_at: string
+          end_at: string | null
+          id: string
+          instructors: Json
+          org_id: string
+          session_id: string | null
+          start_at: string | null
+        }
+        Insert: {
+          classroom_id: string
+          course_id: string
+          course_order?: number
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          instructors?: Json
+          org_id: string
+          session_id?: string | null
+          start_at?: string | null
+        }
+        Update: {
+          classroom_id?: string
+          course_id?: string
+          course_order?: number
+          created_at?: string
+          end_at?: string | null
+          id?: string
+          instructors?: Json
+          org_id?: string
+          session_id?: string | null
+          start_at?: string | null
+        }
+        Relationships: []
+      }
+      classroom_qr_settings: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          enabled: boolean
+          end_offset_minutes: number
+          id: string
+          org_id: string
+          qr_token: string
+          session_id: string | null
+          start_offset_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          enabled?: boolean
+          end_offset_minutes?: number
+          id?: string
+          org_id: string
+          qr_token?: string
+          session_id?: string | null
+          start_offset_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          enabled?: boolean
+          end_offset_minutes?: number
+          id?: string
+          org_id?: string
+          qr_token?: string
+          session_id?: string | null
+          start_offset_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      classroom_sessions: {
+        Row: {
+          classroom_id: string
+          created_at: string
+          description: string
+          end_at: string | null
+          id: string
+          location: string
+          meeting_id: string
+          meeting_password: string
+          meeting_provider: string
+          meeting_url: string
+          org_id: string
+          session_order: number
+          start_at: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          classroom_id: string
+          created_at?: string
+          description?: string
+          end_at?: string | null
+          id?: string
+          location?: string
+          meeting_id?: string
+          meeting_password?: string
+          meeting_provider?: string
+          meeting_url?: string
+          org_id: string
+          session_order?: number
+          start_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          classroom_id?: string
+          created_at?: string
+          description?: string
+          end_at?: string | null
+          id?: string
+          location?: string
+          meeting_id?: string
+          meeting_password?: string
+          meeting_provider?: string
+          meeting_url?: string
+          org_id?: string
+          session_order?: number
+          start_at?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      classroom_students: {
+        Row: {
+          assigned_at: string
+          classroom_id: string
+          employee_id: string | null
+          id: string
+          org_id: string
+          user_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          classroom_id: string
+          employee_id?: string | null
+          id?: string
+          org_id: string
+          user_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          classroom_id?: string
+          employee_id?: string | null
+          id?: string
+          org_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       classrooms: {
         Row: {
           capacity: number
           code: string
+          cover_url: string
           created_at: string
+          created_by: string | null
+          delivery: string
           description: string
+          end_at: string | null
           end_date: string | null
           id: string
           instructor: string
           location: string
+          materials: Json
+          meeting_id: string
+          meeting_password: string
+          meeting_provider: string
+          meeting_url: string
+          mode: string
+          objective: string
           org_id: string
+          start_at: string | null
           start_date: string | null
           status: string
           students_count: number
           title: string
+          topics: string[]
           type: string
           updated_at: string
         }
         Insert: {
           capacity?: number
           code: string
+          cover_url?: string
           created_at?: string
+          created_by?: string | null
+          delivery?: string
           description?: string
+          end_at?: string | null
           end_date?: string | null
           id?: string
           instructor?: string
           location?: string
+          materials?: Json
+          meeting_id?: string
+          meeting_password?: string
+          meeting_provider?: string
+          meeting_url?: string
+          mode?: string
+          objective?: string
           org_id: string
+          start_at?: string | null
           start_date?: string | null
           status?: string
           students_count?: number
           title: string
+          topics?: string[]
           type?: string
           updated_at?: string
         }
         Update: {
           capacity?: number
           code?: string
+          cover_url?: string
           created_at?: string
+          created_by?: string | null
+          delivery?: string
           description?: string
+          end_at?: string | null
           end_date?: string | null
           id?: string
           instructor?: string
           location?: string
+          materials?: Json
+          meeting_id?: string
+          meeting_password?: string
+          meeting_provider?: string
+          meeting_url?: string
+          mode?: string
+          objective?: string
           org_id?: string
+          start_at?: string | null
           start_date?: string | null
           status?: string
           students_count?: number
           title?: string
+          topics?: string[]
           type?: string
           updated_at?: string
         }
