@@ -69,6 +69,13 @@ function PlanDetail() {
     toast.success("Đã từ chối"); setRejectOpen(false); refresh();
     qc.invalidateQueries({ queryKey: ["plans", orgId] });
   }
+  async function deletePlan() {
+    const { error } = await supabase.from("plans").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Đã xoá kế hoạch");
+    qc.invalidateQueries({ queryKey: ["plans", orgId] });
+    nav({ to: "/admin/plans" });
+  }
   async function activateSurvey() {
     if (!planSurvey) return;
     await supabase.from("training_plan_surveys").update({ status: "active" }).eq("id", planSurvey.id);
