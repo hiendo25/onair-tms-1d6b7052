@@ -10,7 +10,10 @@ import { CourseInfoForm, type CourseInfo } from "@/components/admin/CourseInfoFo
 import { SectionsLessonsEditor, type EditorSection, type EditorLesson } from "@/components/admin/SectionsLessonsEditor";
 import { supabase } from "@/integrations/supabase/client";
 import { useOrg } from "@/lib/org-context";
-import { useOnlineCourses } from "@/lib/data-hooks";
+import { useOnlineCourses, useCertificates } from "@/lib/data-hooks";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Award } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/online-course/$id/editor")({
@@ -33,9 +36,11 @@ function CourseEditor() {
 
   const [tab, setTab] = useState<"info" | "content">("info");
   const [info, setInfo] = useState<CourseInfo>(empty);
+  const [certificateId, setCertificateId] = useState<string>("");
   const [sections, setSections] = useState<EditorSection[]>([]);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const { data: certificates = [] } = useCertificates();
 
   const existing = useQuery({
     queryKey: ["online_courses", id],
@@ -59,6 +64,7 @@ function CourseEditor() {
       duration_minutes: c.duration_minutes, cover_url: c.cover_url,
       author_id: c.author_id, author_name: c.author_name, status: c.status,
     });
+    setCertificateId((c as any).certificate_id || "");
     const secs: EditorSection[] = existing.data.sections.map((s) => ({
       id: s.id, title: s.title, description: s.description, sort_order: s.sort_order,
       lessons: existing.data.lessons.filter((l) => l.section_id === s.id).map((l) => ({
@@ -94,6 +100,7 @@ function CourseEditor() {
       const totalLessons = sections.reduce((acc, s) => acc + s.lessons.length, 0);
       const coursePayload = {
         ...info, lessons_count: totalLessons, org_id: orgId,
+        certificate_id: certificateId || null,
       };
 
       let courseId = id;
@@ -176,6 +183,19 @@ function CourseEditor() {
         <TabsContent value="info">
           <Card className="p-6">
             <CourseInfoForm value={info} onChange={handleInfoChange} categories={cats} />
+            <div className="mt-6 border-t pt-4">
+              <Label className="flex items-center gap-2 mb-2"><Award className="h-4 w-4 text-amber-600" /> Mẫu chứng nhận khi hoàn thành</Label>
+              <Select value={certificateId || "none"} onValueChange={(v) => { setCertificateId(v === "none" ? "" : v); setDirty(true); }}>
+                <SelectTrigger className="max-w-md"><SelectValue placeholder="Không cấp chứng nhận" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Không cấp chứng nhận</SelectItem>
+                  {certificates.filter(c => c.status === "active").map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="text-xs text-muted-foreground mt-1">Mỗi khoá học chỉ gán 1 mẫu. Học viên hoàn thành sẽ được tự động cấp.</div>
+            </div>
             <div className="mt-6 flex justify-between border-t pt-4">
               <Button variant="outline" onClick={onCancel}><ArrowLeft className="h-4 w-4 mr-1" />Quay lại</Button>
               <Button onClick={() => setTab("content")}>Tiếp tục</Button>

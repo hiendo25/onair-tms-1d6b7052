@@ -109,7 +109,7 @@ export function useBranchReadiness(orgId: string) {
       const orgActiveRate = pct(activeUsers.size, totalEmployees);
 
       const now = Date.now();
-      const validCerts = certs.filter((c) => c.status === "active" && new Date(c.expires_at).getTime() > now).length;
+      const validCerts = certs.filter((c) => c.status === "active" && (!c.expires_at || new Date(c.expires_at).getTime() > now)).length;
       const orgCertRate = certs.length ? pct(validCerts, certs.length) : NaN;
 
       return branches.map((b) => {

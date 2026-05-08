@@ -34,7 +34,7 @@ export function ComplianceDeadlineCard() {
 
       const now = Date.now();
       return (certsRes.data ?? []).map((c) => {
-        const days = Math.ceil((new Date(c.expires_at).getTime() - now) / (1000 * 60 * 60 * 24));
+        const days = c.expires_at ? Math.ceil((new Date(c.expires_at).getTime() - now) / (1000 * 60 * 60 * 24)) : Infinity;
         const emp = empByUid.get(c.user_id);
         return {
           id: c.id,
