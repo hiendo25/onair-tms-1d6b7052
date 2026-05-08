@@ -17,7 +17,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthSigninRouteImport } from './routes/auth.signin'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
+import { Route as AppMyTitlesRouteImport } from './routes/_app/my-titles'
 import { Route as AppMyLearningPathsRouteImport } from './routes/_app/my-learning-paths'
+import { Route as AppMyLeaderboardRouteImport } from './routes/_app/my-leaderboard'
 import { Route as AppMyGamificationRouteImport } from './routes/_app/my-gamification'
 import { Route as AppMyFlashcardsRouteImport } from './routes/_app/my-flashcards'
 import { Route as AppMyFavoritesRouteImport } from './routes/_app/my-favorites'
@@ -136,9 +138,19 @@ const AuthErrorRoute = AuthErrorRouteImport.update({
   path: '/auth/error',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMyTitlesRoute = AppMyTitlesRouteImport.update({
+  id: '/my-titles',
+  path: '/my-titles',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMyLearningPathsRoute = AppMyLearningPathsRouteImport.update({
   id: '/my-learning-paths',
   path: '/my-learning-paths',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyLeaderboardRoute = AppMyLeaderboardRouteImport.update({
+  id: '/my-leaderboard',
+  path: '/my-leaderboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMyGamificationRoute = AppMyGamificationRouteImport.update({
@@ -579,7 +591,9 @@ export interface FileRoutesByFullPath {
   '/my-favorites': typeof AppMyFavoritesRoute
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
+  '/my-leaderboard': typeof AppMyLeaderboardRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -667,7 +681,9 @@ export interface FileRoutesByTo {
   '/my-favorites': typeof AppMyFavoritesRoute
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
+  '/my-leaderboard': typeof AppMyLeaderboardRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -757,7 +773,9 @@ export interface FileRoutesById {
   '/_app/my-favorites': typeof AppMyFavoritesRoute
   '/_app/my-flashcards': typeof AppMyFlashcardsRoute
   '/_app/my-gamification': typeof AppMyGamificationRoute
+  '/_app/my-leaderboard': typeof AppMyLeaderboardRoute
   '/_app/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/_app/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -847,7 +865,9 @@ export interface FileRouteTypes {
     | '/my-favorites'
     | '/my-flashcards'
     | '/my-gamification'
+    | '/my-leaderboard'
     | '/my-learning-paths'
+    | '/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -935,7 +955,9 @@ export interface FileRouteTypes {
     | '/my-favorites'
     | '/my-flashcards'
     | '/my-gamification'
+    | '/my-leaderboard'
     | '/my-learning-paths'
+    | '/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -1024,7 +1046,9 @@ export interface FileRouteTypes {
     | '/_app/my-favorites'
     | '/_app/my-flashcards'
     | '/_app/my-gamification'
+    | '/_app/my-leaderboard'
     | '/_app/my-learning-paths'
+    | '/_app/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -1171,11 +1195,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthErrorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/my-titles': {
+      id: '/_app/my-titles'
+      path: '/my-titles'
+      fullPath: '/my-titles'
+      preLoaderRoute: typeof AppMyTitlesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/my-learning-paths': {
       id: '/_app/my-learning-paths'
       path: '/my-learning-paths'
       fullPath: '/my-learning-paths'
       preLoaderRoute: typeof AppMyLearningPathsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-leaderboard': {
+      id: '/_app/my-leaderboard'
+      path: '/my-leaderboard'
+      fullPath: '/my-leaderboard'
+      preLoaderRoute: typeof AppMyLeaderboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/my-gamification': {
@@ -1805,7 +1843,9 @@ interface AppRouteChildren {
   AppMyFavoritesRoute: typeof AppMyFavoritesRoute
   AppMyFlashcardsRoute: typeof AppMyFlashcardsRoute
   AppMyGamificationRoute: typeof AppMyGamificationRoute
+  AppMyLeaderboardRoute: typeof AppMyLeaderboardRoute
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRouteWithChildren
+  AppMyTitlesRoute: typeof AppMyTitlesRoute
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
   AppAdminDashboardRoute: typeof AppAdminDashboardRoute
   AppAdminGamificationsRoute: typeof AppAdminGamificationsRoute
@@ -1876,7 +1916,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppMyFavoritesRoute: AppMyFavoritesRoute,
   AppMyFlashcardsRoute: AppMyFlashcardsRoute,
   AppMyGamificationRoute: AppMyGamificationRoute,
+  AppMyLeaderboardRoute: AppMyLeaderboardRoute,
   AppMyLearningPathsRoute: AppMyLearningPathsRouteWithChildren,
+  AppMyTitlesRoute: AppMyTitlesRoute,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
   AppAdminDashboardRoute: AppAdminDashboardRoute,
   AppAdminGamificationsRoute: AppAdminGamificationsRoute,

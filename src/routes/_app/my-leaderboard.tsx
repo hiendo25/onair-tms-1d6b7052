@@ -1,0 +1,72 @@
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Trophy, AlertCircle } from "lucide-react";
+import { PageContainer } from "@/components/PageContainer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { useLeaderboard, useMyRank } from "@/lib/data-hooks";
+import { useAuth } from "@/lib/auth-context";
+
+export const Route = createFileRoute("/_app/my-leaderboard")({
+  head: () => ({ meta: [{ title: "Bảng xếp hạng — OnAir TMS" }] }),
+  component: Page,
+});
+
+function Page() {
+  const { user } = useAuth();
+  const lbQ = useLeaderboard(100);
+  const myRankQ = useMyRank();
+  const myInList = (lbQ.data ?? []).some((r) => r.user_id === user?.id);
+
+  return (
+    <PageContainer
+      title="Bảng xếp hạng"
+      breadcrumbs={[{ title: "Thưởng", path: "/my-gamification" }, { title: "Bảng xếp hạng" }]}
+      actions={<Link to="/my-gamification"><Button variant="outline" size="sm">← Quay lại</Button></Link>}
+    >
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+            <Trophy className="h-4 w-4" />Xếp hạng theo điểm học tập trong tổ chức
+          </div>
+          {lbQ.isLoading ? (
+            <div className="space-y-2">{[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+          ) : lbQ.error ? (
+            <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>Lỗi tải dữ liệu. <Button variant="link" size="sm" onClick={() => lbQ.refetch()}>Thử lại</Button></AlertDescription></Alert>
+          ) : (lbQ.data ?? []).length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-12">Chưa có dữ liệu</div>
+          ) : (
+            <div className="space-y-1.5">
+              {(lbQ.data ?? []).map((r) => {
+                const me = r.user_id === user?.id;
+                const top = r.rank <= 3;
+                const medal = ["🥇", "🥈", "🥉"][r.rank - 1];
+                return (
+                  <div key={r.user_id} className={`flex items-center gap-3 rounded-md border p-3 ${me ? "border-primary bg-primary/5" : top ? "bg-amber-50/40" : ""}`}>
+                    <div className="w-10 text-center text-lg font-bold">{medal || `#${r.rank}`}</div>
+                    <div className="flex-1 font-medium truncate">
+                      {r.profile?.full_name || "—"}
+                      {me && <span className="ml-2 text-xs text-primary">(Bạn)</span>}
+                    </div>
+                    <div className="font-mono font-semibold">{r.xp.toLocaleString()} điểm</div>
+                  </div>
+                );
+              })}
+              {!myInList && myRankQ.data && (
+                <>
+                  <div className="text-center text-xs text-muted-foreground py-2">···</div>
+                  <div className="flex items-center gap-3 rounded-md border-2 border-primary bg-primary/5 p-3">
+                    <div className="w-10 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
+                    <div className="flex-1 font-medium">Bạn</div>
+                    <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </PageContainer>
+  );
+}

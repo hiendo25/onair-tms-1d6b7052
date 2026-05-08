@@ -2079,6 +2079,48 @@ export type Database = {
           },
         ]
       }
+      rewards: {
+        Row: {
+          created_at: string
+          description: string
+          expired_at: string | null
+          id: string
+          image_url: string
+          name: string
+          org_id: string
+          required_point: number
+          status: string
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          expired_at?: string | null
+          id?: string
+          image_url?: string
+          name: string
+          org_id: string
+          required_point?: number
+          status?: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          expired_at?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          org_id?: string
+          required_point?: number
+          status?: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       survey_answers: {
         Row: {
           created_at: string
@@ -2828,6 +2870,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_redemptions: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          point_spent: number
+          reward_id: string
+          reward_snapshot: Json
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          point_spent: number
+          reward_id: string
+          reward_snapshot?: Json
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          point_spent?: number
+          reward_id?: string
+          reward_snapshot?: Json
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2921,6 +3004,7 @@ export type Database = {
           id: string
           org_id: string
           rank: string
+          redeem_point: number
           updated_at: string
           user_id: string
           xp: number
@@ -2930,6 +3014,7 @@ export type Database = {
           id?: string
           org_id: string
           rank?: string
+          redeem_point?: number
           updated_at?: string
           user_id: string
           xp?: number
@@ -2939,6 +3024,7 @@ export type Database = {
           id?: string
           org_id?: string
           rank?: string
+          redeem_point?: number
           updated_at?: string
           user_id?: string
           xp?: number
@@ -2961,6 +3047,7 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      redeem_reward: { Args: { _reward_id: string }; Returns: Json }
     }
     Enums: {
       app_role: "admin" | "student"
