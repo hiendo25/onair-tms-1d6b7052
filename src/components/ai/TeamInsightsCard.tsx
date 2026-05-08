@@ -34,27 +34,34 @@ export function TeamInsightsCard({
     const rbp = (router as unknown as { routesByPath?: Record<string, unknown> }).routesByPath ?? {};
     return new Set(Object.keys(rbp));
   }, [router]);
+  const { orgId } = useOrg();
+  const { user } = useAuth();
   const externalMode = insights !== undefined || loadingProp !== undefined;
-  const [data, setData] = useState<ActionableInsight[] | null>(externalMode ? null : null);
+  const [data, setData] = useState<ActionableInsight[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function load() {
     if (externalMode) return;
+    if (!orgId) return;
     setLoading(true);
     setError(null);
     try {
-      const r = variant === "student" ? await aiStudentActionInsights() : await aiTeamInsights();
-      const sorted = [...r].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]).slice(0, 3);
+      const { data: res, error: fnErr } = await supabase.functions.invoke("ai-team-insights", {
+        body: { orgId, variant, userId: user?.id },
+      });
+      if (fnErr) throw fnErr;
+      const list = (res?.insights ?? []) as ActionableInsight[];
+      const sorted = [...list].sort((a, b) => SEVERITY_RANK[a.severity] - SEVERITY_RANK[b.severity]).slice(0, 3);
       setData(sorted);
-    } catch {
-      setError("Có gì đó chưa đúng, thử lại nhé.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Có gì đó chưa đúng, thử lại nhé.");
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => { void load(); }, [variant, externalMode]);
+  useEffect(() => { void load(); }, [variant, externalMode, orgId, user?.id]);
 
   const effLoading = externalMode ? !!loadingProp : loading;
   const effData = externalMode
