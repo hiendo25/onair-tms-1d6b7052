@@ -155,7 +155,6 @@ function MyPaths() {
                       <Link
                         to="/my-learning-paths/$id"
                         params={{ id: lp.id }}
-                        search={{ tab: "courses" } as never}
                         className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-primary"
                         title="Khoá học của tôi"
                         aria-label="Khoá học của tôi"
