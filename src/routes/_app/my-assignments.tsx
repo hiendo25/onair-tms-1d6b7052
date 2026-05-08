@@ -42,8 +42,18 @@ function Page() {
       const snap = (a.exam_snapshot ?? {}) as { title?: string; max_attempts?: number; pass_score?: number; total_points?: number; show_results?: boolean; time_limit_minutes?: number };
       const usedAttempts = myAtt.length;
       const submitted = last?.status === "submitted";
+      const availableFromMs = (a as any).available_from ? new Date((a as any).available_from).getTime() : null;
+      const notYetOpen = availableFromMs != null && now < availableFromMs && !submitted && !last;
       const isOverdue = !!a.deadline && new Date(a.deadline).getTime() < now && !submitted;
-      const status: Status = submitted ? "submitted" : isOverdue ? "overdue" : last ? "in_progress" : "not_started";
+      const status: Status = submitted
+        ? "submitted"
+        : notYetOpen
+        ? "not_yet_open"
+        : isOverdue
+        ? "overdue"
+        : last
+        ? "in_progress"
+        : "not_started";
       const total = snap.total_points ?? 100;
       const pass = snap.pass_score ?? 0;
       const score = typeof last?.score === "number" ? Number(last.score) : null;
