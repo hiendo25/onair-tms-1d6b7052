@@ -339,7 +339,7 @@ export type DBGamificationSettings = {
 };
 export type DBUserBadge = { id: string; org_id: string; user_id: string; badge_id: string; earned_at: string; };
 export type DBUserTitle = { id: string; org_id: string; user_id: string; title_id: string; assigned_at: string; };
-export type DBUserXp = { id: string; org_id: string; user_id: string; total_xp: number; };
+export type DBUserXp = { id: string; org_id: string; user_id: string; xp: number; };
 
 export function useGamificationSettings() {
   const { orgId } = useOrg();
