@@ -1,19 +1,17 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, Eye, Trash2, Users, Calendar, BookOpen, FileCheck2 } from "lucide-react";
+import { Search, HelpCircle, CheckCircle2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
-import {
-  useExamAssignments, useExamAssignmentMutations, useAssignments, useExamAttempts,
-} from "@/lib/data-hooks";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { useExamAssignments, useAssignments, useExamAttempts } from "@/lib/data-hooks";
 
 export const Route = createFileRoute("/_app/admin/assignments/assigned")({
-  head: () => ({ meta: [{ title: "Bài KT đã gán — OnAir TMS" }] }),
+  head: () => ({ meta: [{ title: "Danh sách bài gán — OnAir TMS" }] }),
   component: Page,
 });
 
@@ -21,76 +19,102 @@ function Page() {
   const { data: assigns = [] } = useExamAssignments();
   const { data: exams = [] } = useAssignments();
   const { data: attempts = [] } = useExamAttempts();
-  const m = useExamAssignmentMutations();
   const [q, setQ] = useState("");
-  const [delId, setDelId] = useState<string | null>(null);
+  const [status, setStatus] = useState("all");
 
-  const filtered = useMemo(() => assigns.filter(a => {
+  const enriched = useMemo(() => assigns.map(a => {
     const ex = exams.find(e => e.id === a.exam_id);
-    const t = (ex?.title || "").toLowerCase();
-    return !q || t.includes(q.toLowerCase());
-  }), [assigns, exams, q]);
+    const myAtt = attempts.filter(t => t.exam_assignment_id === a.id);
+    const total = a.student_ids?.length || 0;
+    const submitted = myAtt.filter(t => t.status === "submitted").length;
+    const pct = total ? Math.round((submitted / total) * 100) : 0;
+    return { a, ex, total, submitted, pct };
+  }), [assigns, exams, attempts]);
 
-  const totalAssigned = assigns.reduce((s, a) => s + (a.student_ids?.length || 0), 0);
-  const totalAttempts = attempts.length;
-  const totalSubmitted = attempts.filter(a => a.status === "submitted").length;
-  const totalPassed = attempts.filter(a => a.passed === true).length;
+  const filtered = enriched.filter(({ a, ex }) => {
+    if (q && !(ex?.title || "").toLowerCase().includes(q.toLowerCase())) return false;
+    if (status !== "all" && a.status !== status) return false;
+    return true;
+  });
+
+  const totalAssigns = assigns.length;
+  const completedAssigns = enriched.filter(e => e.pct === 100).length;
 
   return (
-    <PageContainer title="Bài kiểm tra đã gán" breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Đã gán" }]}>
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Stat icon={BookOpen} label="Lần gán" value={String(assigns.length)} />
-        <Stat icon={Users} label="Lượt gán học viên" value={String(totalAssigned)} />
-        <Stat icon={FileCheck2} label="Đã nộp" value={`${totalSubmitted}/${totalAttempts}`} />
-        <Stat icon={Calendar} label="Đạt" value={String(totalPassed)} />
+    <PageContainer
+      title="Danh sách bài gán"
+      breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Danh sách bài gán" }]}
+    >
+      {/* Top stats */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:max-w-2xl">
+        <StatRow icon={HelpCircle} color="text-blue-600 bg-blue-50" label="Tổng bài gán" value={totalAssigns} />
+        <StatRow icon={CheckCircle2} color="text-emerald-600 bg-emerald-50" label="Hoàn thành" value={completedAssigns} />
       </div>
 
-      <Card className="p-4">
-        <div className="mb-4 relative max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input className="pl-9" placeholder="Tìm theo tên bài KT..." value={q} onChange={e => setQ(e.target.value)} />
+      <Card className="space-y-4 p-5">
+        <div className="flex flex-wrap gap-2">
+          <div className="relative min-w-[260px] flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input className="pl-9" placeholder="Tìm kiếm" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="w-[200px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả trạng thái</SelectItem>
+              <SelectItem value="active">Hoạt động</SelectItem>
+              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Table>
-          <TableHeader><TableRow>
-            <TableHead>Bài kiểm tra</TableHead><TableHead>Học viên</TableHead>
-            <TableHead>Hạn nộp</TableHead><TableHead>Trạng thái</TableHead>
-            <TableHead>Ngày gán</TableHead><TableHead className="text-right">Thao tác</TableHead>
-          </TableRow></TableHeader>
-          <TableBody>
-            {filtered.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">Chưa có lần gán nào</TableCell></TableRow>}
-            {filtered.map(a => {
-              const ex = exams.find(e => e.id === a.exam_id);
-              const myAtt = attempts.filter(t => t.exam_assignment_id === a.id);
-              const submitted = myAtt.filter(t => t.status === "submitted").length;
-              return (
-                <TableRow key={a.id}>
-                  <TableCell className="font-medium">{ex?.title || "(Đã xoá)"}</TableCell>
-                  <TableCell>{submitted}/{a.student_ids?.length || 0}</TableCell>
-                  <TableCell>{a.deadline ? new Date(a.deadline).toLocaleString("vi-VN") : "—"}</TableCell>
-                  <TableCell><Badge variant={a.status === "active" ? "default" : "secondary"}>{a.status}</Badge></TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{new Date(a.created_at).toLocaleDateString("vi-VN")}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button size="icon" variant="ghost" asChild><Link to="/admin/assignments/$id/students" params={{ id: a.id }}><Eye className="h-4 w-4" /></Link></Button>
-                      <Button size="icon" variant="ghost" onClick={() => setDelId(a.id)}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+
+        {filtered.length === 0 ? (
+          <div className="py-16 text-center text-sm text-muted-foreground">Chưa có lần gán nào</div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map(({ a, ex, total, submitted, pct }, idx) => (
+              <div key={a.id} className="flex items-start gap-4 rounded-lg border bg-card p-4 transition-shadow hover:shadow-sm">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+                  {idx + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold">{ex?.title || "(Bài KT đã xoá)"}</div>
+                  {ex?.description && <div className="mt-1 line-clamp-2 text-sm text-muted-foreground">{ex.description}</div>}
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                    <Badge variant="secondary" className="bg-blue-50 text-blue-700">{ex?.type === "exam" ? "Công nghệ" : "Kinh doanh"}</Badge>
+                    <span className="text-muted-foreground">
+                      Hạn nộp: {a.deadline ? new Date(a.deadline).toLocaleDateString("vi-VN", { weekday: "long", day: "2-digit", month: "long", year: "numeric" }) : "—"}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex w-[260px] shrink-0 flex-col items-end gap-1">
+                  <div className="flex w-full items-center gap-2">
+                    <Progress value={pct} className="h-2 flex-1" />
+                    <span className="w-10 text-right text-xs font-medium">{pct}%</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">Hoàn thành {submitted}/{total}</div>
+                  <Button asChild variant="link" size="sm" className="h-auto p-0 text-blue-600">
+                    <Link to="/admin/assignments/$id/students" params={{ id: a.id }}>Xem chi tiết</Link>
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </Card>
-      <ConfirmDelete open={!!delId} onOpenChange={v => !v && setDelId(null)} onConfirm={async () => { if (delId) { await m.remove.mutateAsync(delId); setDelId(null); } }} />
     </PageContainer>
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function StatRow({ icon: Icon, color, label, value }: { icon: React.ComponentType<{ className?: string }>; color: string; label: string; value: number }) {
   return (
-    <Card><CardContent className="flex items-center gap-3 p-5">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary"><Icon className="h-5 w-5" /></div>
-      <div><div className="text-xs text-muted-foreground">{label}</div><div className="font-display text-xl font-semibold">{value}</div></div>
-    </CardContent></Card>
+    <Card className="flex items-center gap-3 p-4">
+      <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${color}`}>
+        <Icon className="h-5 w-5" />
+      </div>
+      <div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="text-2xl font-semibold leading-tight">{value}</div>
+      </div>
+    </Card>
   );
 }

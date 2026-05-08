@@ -102,10 +102,13 @@ export const ASSIGNMENT_STATUS = [
 ];
 
 export const QUESTION_TYPE = [
-  { value: "single", label: "Một đáp án (Radio)" },
-  { value: "multiple", label: "Nhiều đáp án (Checkbox)" },
-  { value: "true_false", label: "Đúng / Sai" },
-  { value: "essay", label: "Tự luận" },
+  { value: "single", label: "Trắc nghiệm", short: "Trắc nghiệm" },
+  { value: "multiple", label: "Trắc nghiệm (nhiều đáp án)", short: "Trắc nghiệm" },
+  { value: "true_false", label: "Đúng / Sai", short: "Đúng/Sai" },
+  { value: "essay", label: "Tự luận", short: "Tự luận" },
+  { value: "file_upload", label: "Tải File", short: "Tải File" },
+  { value: "sorting", label: "Sắp xếp", short: "Sắp xếp" },
+  { value: "matching", label: "Nối câu", short: "Nối câu" },
 ];
 
 export const DIFFICULTY = [
