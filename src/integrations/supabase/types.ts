@@ -65,13 +65,20 @@ export type Database = {
           code: string
           completed_count: number
           created_at: string
+          created_by: string | null
           deadline: string | null
           description: string
           id: string
+          max_attempts: number | null
           org_id: string
           pass_score: number
+          show_results: boolean
+          shuffle_answers: boolean
+          shuffle_questions: boolean
           status: string
+          time_limit_minutes: number | null
           title: string
+          total_points: number
           total_questions: number
           type: string
           updated_at: string
@@ -81,13 +88,20 @@ export type Database = {
           code: string
           completed_count?: number
           created_at?: string
+          created_by?: string | null
           deadline?: string | null
           description?: string
           id?: string
+          max_attempts?: number | null
           org_id: string
           pass_score?: number
+          show_results?: boolean
+          shuffle_answers?: boolean
+          shuffle_questions?: boolean
           status?: string
+          time_limit_minutes?: number | null
           title: string
+          total_points?: number
           total_questions?: number
           type?: string
           updated_at?: string
@@ -97,13 +111,20 @@ export type Database = {
           code?: string
           completed_count?: number
           created_at?: string
+          created_by?: string | null
           deadline?: string | null
           description?: string
           id?: string
+          max_attempts?: number | null
           org_id?: string
           pass_score?: number
+          show_results?: boolean
+          shuffle_answers?: boolean
+          shuffle_questions?: boolean
           status?: string
+          time_limit_minutes?: number | null
           title?: string
+          total_points?: number
           total_questions?: number
           type?: string
           updated_at?: string
@@ -853,6 +874,157 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      exam_assignments: {
+        Row: {
+          assigned_by: string | null
+          audience: Json
+          created_at: string
+          deadline: string | null
+          exam_id: string
+          exam_snapshot: Json
+          id: string
+          org_id: string
+          status: string
+          student_ids: string[]
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          audience?: Json
+          created_at?: string
+          deadline?: string | null
+          exam_id: string
+          exam_snapshot?: Json
+          id?: string
+          org_id: string
+          status?: string
+          student_ids?: string[]
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          audience?: Json
+          created_at?: string
+          deadline?: string | null
+          exam_id?: string
+          exam_snapshot?: Json
+          id?: string
+          org_id?: string
+          status?: string
+          student_ids?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_assignments_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_attempts: {
+        Row: {
+          answers: Json
+          attempt_number: number
+          created_at: string
+          exam_assignment_id: string
+          id: string
+          org_id: string
+          passed: boolean | null
+          score: number | null
+          started_at: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          attempt_number?: number
+          created_at?: string
+          exam_assignment_id: string
+          id?: string
+          org_id: string
+          passed?: boolean | null
+          score?: number | null
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          attempt_number?: number
+          created_at?: string
+          exam_assignment_id?: string
+          id?: string
+          org_id?: string
+          passed?: boolean | null
+          score?: number | null
+          started_at?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_exam_assignment_id_fkey"
+            columns: ["exam_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "exam_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_questions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          id: string
+          org_id: string
+          points: number
+          question_id: string
+          sort_order: number
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          points?: number
+          question_id: string
+          sort_order?: number
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          points?: number
+          question_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_questions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "question_bank"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       flashcards: {
         Row: {
@@ -1658,49 +1830,107 @@ export type Database = {
         Row: {
           category: string
           correct_answer: string
+          correct_answers: Json
           created_at: string
           difficulty: string
           explanation: string
+          folder_id: string | null
           id: string
           options: Json
           org_id: string
           points: number
           question: string
+          status: string
           tags: string[]
+          title: string
           type: string
           updated_at: string
         }
         Insert: {
           category?: string
           correct_answer?: string
+          correct_answers?: Json
           created_at?: string
           difficulty?: string
           explanation?: string
+          folder_id?: string | null
           id?: string
           options?: Json
           org_id: string
           points?: number
           question: string
+          status?: string
           tags?: string[]
+          title?: string
           type?: string
           updated_at?: string
         }
         Update: {
           category?: string
           correct_answer?: string
+          correct_answers?: Json
           created_at?: string
           difficulty?: string
           explanation?: string
+          folder_id?: string | null
           id?: string
           options?: Json
           org_id?: string
           points?: number
           question?: string
+          status?: string
           tags?: string[]
+          title?: string
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "question_bank_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "question_folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      question_folders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          org_id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          org_id: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          org_id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_folders_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "question_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       survey_answers: {
         Row: {
