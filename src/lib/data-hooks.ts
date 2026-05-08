@@ -407,41 +407,78 @@ export function useMyTitle() {
   });
 }
 
-export function useLeaderboard(limit = 50) {
+async function getDeptUserIds(orgId: string, department: string): Promise<string[]> {
+  const { data } = await supabase.from("employees").select("user_id, department").eq("org_id", orgId).eq("department", department);
+  return ((data ?? []) as any[]).map(e => e.user_id).filter(Boolean);
+}
+
+async function getMyDepartment(orgId: string, userId: string): Promise<string | null> {
+  const { data } = await supabase.from("employees").select("department").eq("org_id", orgId).eq("user_id", userId).maybeSingle();
+  const d = (data as any)?.department;
+  return d && String(d).trim() ? String(d) : null;
+}
+
+export type LeaderboardScope = "org" | "department";
+
+export function useLeaderboard(limit = 50, scope: LeaderboardScope = "org") {
   const { orgId } = useOrg();
   return useQuery({
-    queryKey: ["leaderboard", orgId, limit],
+    queryKey: ["leaderboard", orgId, limit, scope],
     queryFn: async () => {
-      const { data, error } = await supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).order("xp", { ascending: false }).limit(limit);
+      let q = supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).order("xp", { ascending: false }).limit(limit);
+      let dept: string | null = null;
+      if (scope === "department") {
+        const { data: u } = await supabase.auth.getUser();
+        if (!u.user) return [];
+        dept = await getMyDepartment(orgId, u.user.id);
+        if (!dept) return [];
+        const ids = await getDeptUserIds(orgId, dept);
+        if (!ids.length) return [];
+        q = supabase.from("user_xp").select("user_id, xp").eq("org_id", orgId).in("user_id", ids).order("xp", { ascending: false }).limit(limit);
+      }
+      const { data, error } = await q;
       if (error) throw error;
       const rows = (data ?? []) as { user_id: string; xp: number }[];
       if (!rows.length) return [];
       const ids = rows.map(r => r.user_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids);
-      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
-      // Dense skip rank: 1, 2, 2, 4
+      const [{ data: profs }, { data: emps }] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, avatar_url").in("id", ids),
+        supabase.from("employees").select("user_id, department").eq("org_id", orgId).in("user_id", ids),
+      ]);
+      const pMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const dMap = new Map((emps ?? []).map((e: any) => [e.user_id, e.department]));
       let lastXp: number | null = null;
       let lastRank = 0;
       return rows.map((r, i) => {
         const rank = lastXp !== null && r.xp === lastXp ? lastRank : i + 1;
         lastXp = r.xp; lastRank = rank;
-        return { rank, user_id: r.user_id, xp: r.xp, profile: map.get(r.user_id) as any };
+        return { rank, user_id: r.user_id, xp: r.xp, profile: pMap.get(r.user_id) as any, department: (dMap.get(r.user_id) as string) || "" };
       });
     },
   });
 }
 
-export function useMyRank() {
+export function useMyRank(scope: LeaderboardScope = "org") {
   const { orgId } = useOrg();
   return useQuery({
-    queryKey: ["my_rank", orgId],
+    queryKey: ["my_rank", orgId, scope],
     queryFn: async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return null;
       const { data: me } = await supabase.from("user_xp").select("xp").eq("org_id", orgId).eq("user_id", u.user.id).maybeSingle();
       const myXp = (me as any)?.xp ?? 0;
-      const { count } = await supabase.from("user_xp").select("user_id", { count: "exact", head: true }).eq("org_id", orgId).gt("xp", myXp);
-      return { rank: (count ?? 0) + 1, xp: myXp };
+      let q = supabase.from("user_xp").select("user_id", { count: "exact", head: true }).eq("org_id", orgId).gt("xp", myXp);
+      if (scope === "department") {
+        const dept = await getMyDepartment(orgId, u.user.id);
+        if (!dept) return { rank: 1, xp: myXp, department: null as string | null };
+        const ids = await getDeptUserIds(orgId, dept);
+        if (!ids.length) return { rank: 1, xp: myXp, department: dept };
+        q = supabase.from("user_xp").select("user_id", { count: "exact", head: true }).eq("org_id", orgId).in("user_id", ids).gt("xp", myXp);
+        const { count } = await q;
+        return { rank: (count ?? 0) + 1, xp: myXp, department: dept };
+      }
+      const { count } = await q;
+      return { rank: (count ?? 0) + 1, xp: myXp, department: null as string | null };
     },
   });
 }
