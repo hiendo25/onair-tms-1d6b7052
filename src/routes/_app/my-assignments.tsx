@@ -142,6 +142,7 @@ function Page() {
                       {status === "submitted" && <Badge>Đã nộp</Badge>}
                       {status === "in_progress" && <Badge variant="secondary">Đang làm</Badge>}
                       {status === "not_started" && <Badge variant="outline">Chưa làm</Badge>}
+                      {status === "not_yet_open" && <Badge variant="outline" className="border-amber-500 text-amber-600">Chưa mở</Badge>}
                       {status === "overdue" && <Badge variant="destructive">Trễ hạn</Badge>}
                     </TableCell>
                     <TableCell>
