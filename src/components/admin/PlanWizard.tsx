@@ -394,7 +394,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                     <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800 flex gap-2">
                       <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                       Trạng thái khảo sát: <Badge variant="outline" className="ml-1">{planSurvey.status}</Badge>
-                      {planSurvey.status !== "completed" && <span className="ml-1">— Bước 2-3 sẽ bị khoá đến khi khảo sát hoàn tất.</span>}
                     </div>
                   )}
                 </div>
