@@ -362,7 +362,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                     <Label>Mục tiêu</Label>
                     <Textarea className="mt-1" rows={4} placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo" value={info.objective} onChange={(e) => setInfo({ ...info, objective: e.target.value })} />
                   </div>
-                  </div>
                   <div className="rounded-lg border p-4 bg-slate-50/50">
                     <Label className="text-sm font-semibold">Thời gian triển khai</Label>
                     <p className="text-xs text-slate-500 mt-1 mb-3">Xác định thời gian bắt đầu và kết thúc để chúng tôi giúp bạn theo dõi tiến độ.</p>
