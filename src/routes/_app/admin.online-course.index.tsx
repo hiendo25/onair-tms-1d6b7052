@@ -23,10 +23,6 @@ export const Route = createFileRoute("/_app/admin/online-course/")({
 });
 
 const PAGE_SIZE = 10;
-const empty: CourseForm = {
-  code: "", title: "", description: "", category: "", level: "beginner",
-  duration_minutes: 0, instructor: "", cover_url: "", is_required: false, status: "draft",
-};
 
 const statusLabel: Record<string, string> = {
   draft: "Nháp", published: "Đã xuất bản", unpublished: "Ngừng xuất bản",
@@ -41,8 +37,6 @@ function OnlineCoursePage() {
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
-  const [editing, setEditing] = useState<DBOnlineCourse | null>(null);
-  const [open, setOpen] = useState(false);
   const [delId, setDelId] = useState<string | null>(null);
 
   const cats = useMemo(
@@ -50,34 +44,13 @@ function OnlineCoursePage() {
     [rows],
   );
 
-  const fields: FieldDef<CourseForm>[] = useMemo(() => [
-    { name: "title", label: "Tên khoá học", type: "text", required: true, placeholder: "Tối đa 200 ký tự" },
-    { name: "code", label: "Mã khoá học", type: "text", required: true, placeholder: "VD: ONB-01", note: CODE_NOTE },
-    { name: "cover_url", label: "Thumbnail (URL ảnh)", type: "url", placeholder: "https://..." },
-    { name: "description", label: "Mô tả", type: "textarea", required: true, rows: 4, placeholder: "Mô tả mục tiêu và nội dung khoá học" },
-    {
-      name: "category", label: "Danh mục", type: "select", required: true, placeholder: "Chọn / nhập danh mục",
-      options: cats.length ? cats.map((c) => ({ value: c, label: c })) : [{ value: "Chung", label: "Chung" }],
-    },
-    { name: "level", label: "Cấp độ", type: "select", required: true, options: COURSE_LEVEL },
-    { name: "duration_minutes", label: "Thời lượng (phút)", type: "number" },
-    { name: "instructor", label: "Giảng viên", type: "text" },
-    { name: "is_required", label: "Khoá học bắt buộc", type: "switch", help: "Bắt buộc tất cả nhân viên hoàn thành" },
-    { name: "status", label: "Trạng thái", type: "select", required: true, options: COURSE_STATUS },
-  ], [cats]);
-
   const filtered = useMemo(() => rows.filter((r) => {
-    const m1 = !q || [r.title, r.code, r.instructor, r.category].some((x) => x?.toLowerCase().includes(q.toLowerCase()));
+    const m1 = !q || [r.title, r.code, r.author_name, r.category].some((x) => x?.toLowerCase().includes(q.toLowerCase()));
     return m1 && (category === "all" || r.category === category) && (status === "all" || r.status === status);
   }), [rows, q, category, status]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  const submit = async (v: CourseForm) => {
-    if (editing?.id) await m.update.mutateAsync({ ...v, id: editing.id, students_count: editing.students_count, lessons_count: editing.lessons_count } as DBOnlineCourse);
-    else await m.create.mutateAsync({ ...v, students_count: 0, lessons_count: 0 });
-  };
 
   return (
     <PageContainer
