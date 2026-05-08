@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_app/my-assignments")({
 const stripVN = (s: string) =>
   (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
 
-type Status = "not_started" | "in_progress" | "submitted" | "overdue";
+type Status = "not_started" | "in_progress" | "submitted" | "overdue" | "not_yet_open";
 
 function Page() {
   const { user } = useAuth();
@@ -42,8 +42,18 @@ function Page() {
       const snap = (a.exam_snapshot ?? {}) as { title?: string; max_attempts?: number; pass_score?: number; total_points?: number; show_results?: boolean; time_limit_minutes?: number };
       const usedAttempts = myAtt.length;
       const submitted = last?.status === "submitted";
+      const availableFromMs = (a as any).available_from ? new Date((a as any).available_from).getTime() : null;
+      const notYetOpen = availableFromMs != null && now < availableFromMs && !submitted && !last;
       const isOverdue = !!a.deadline && new Date(a.deadline).getTime() < now && !submitted;
-      const status: Status = submitted ? "submitted" : isOverdue ? "overdue" : last ? "in_progress" : "not_started";
+      const status: Status = submitted
+        ? "submitted"
+        : notYetOpen
+        ? "not_yet_open"
+        : isOverdue
+        ? "overdue"
+        : last
+        ? "in_progress"
+        : "not_started";
       const total = snap.total_points ?? 100;
       const pass = snap.pass_score ?? 0;
       const score = typeof last?.score === "number" ? Number(last.score) : null;
@@ -74,6 +84,7 @@ function Page() {
               <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tất cả</SelectItem>
+                <SelectItem value="not_yet_open">Chưa mở</SelectItem>
                 <SelectItem value="not_started">Chưa làm</SelectItem>
                 <SelectItem value="in_progress">Đang làm</SelectItem>
                 <SelectItem value="submitted">Đã nộp</SelectItem>
@@ -131,6 +142,7 @@ function Page() {
                       {status === "submitted" && <Badge>Đã nộp</Badge>}
                       {status === "in_progress" && <Badge variant="secondary">Đang làm</Badge>}
                       {status === "not_started" && <Badge variant="outline">Chưa làm</Badge>}
+                      {status === "not_yet_open" && <Badge variant="outline" className="border-amber-500 text-amber-600">Chưa mở</Badge>}
                       {status === "overdue" && <Badge variant="destructive">Trễ hạn</Badge>}
                     </TableCell>
                     <TableCell>
@@ -147,6 +159,8 @@ function Page() {
                     <TableCell className="text-right">
                       {status === "submitted" && showResult ? (
                         <Button size="sm" variant="outline" asChild><Link to="/my-assignments/$id/result/$employeeId" params={{ id: a.id, employeeId: uid! }}><CheckCircle2 className="h-4 w-4" />Kết quả</Link></Button>
+                      ) : status === "not_yet_open" ? (
+                        <Button size="sm" variant="outline" disabled title={`Mở lúc ${fmt((a as any).available_from)}`}>Chưa mở</Button>
                       ) : exhausted ? (
                         <Button size="sm" variant="outline" disabled>Hết lượt</Button>
                       ) : status === "overdue" ? (
