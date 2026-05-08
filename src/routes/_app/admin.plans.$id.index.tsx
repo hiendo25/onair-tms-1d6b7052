@@ -29,6 +29,7 @@ function PlanDetail() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
   const [reason, setReason] = useState("");
 
   const { data, isLoading } = useQuery({
