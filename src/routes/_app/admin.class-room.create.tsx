@@ -61,7 +61,6 @@ function Page() {
   const { orgId } = useOrg();
   const navigate = useNavigate();
   const isLive = delivery === "live";
-  const isOnline = delivery === "online";
   const isOffline = delivery === "offline";
 
   const [mode, setMode] = useState<"single" | "series">(initialMode);
