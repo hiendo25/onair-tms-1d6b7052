@@ -51,7 +51,7 @@ function useEmployeeDetail(employeeId: string, orgId: string) {
           ? supabase.from("assignment_submissions").select("score, status, submitted_at").eq("user_id", userId)
           : Promise.resolve({ data: [] }),
         userId
-          ? supabase.from("employee_certificates").select("id, issued_at").eq("employee_id", employeeId)
+          ? supabase.from("user_certificates").select("id, issued_at").eq("user_id", userId)
           : Promise.resolve({ data: [] }),
         supabase.from("online_courses").select("id").eq("org_id", orgId).eq("is_required", true),
       ]);
