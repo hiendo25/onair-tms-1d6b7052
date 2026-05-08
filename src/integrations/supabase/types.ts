@@ -945,6 +945,7 @@ export type Database = {
         Row: {
           assigned_by: string | null
           audience: Json
+          available_from: string | null
           created_at: string
           deadline: string | null
           exam_id: string
@@ -958,6 +959,7 @@ export type Database = {
         Insert: {
           assigned_by?: string | null
           audience?: Json
+          available_from?: string | null
           created_at?: string
           deadline?: string | null
           exam_id: string
@@ -971,6 +973,7 @@ export type Database = {
         Update: {
           assigned_by?: string | null
           audience?: Json
+          available_from?: string | null
           created_at?: string
           deadline?: string | null
           exam_id?: string
