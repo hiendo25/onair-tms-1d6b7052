@@ -80,10 +80,12 @@ export function AiQuizGeneratorDialog({ lessonTitle, lessonContent, open, onClos
     try {
       const rows = toSave.map((q) => ({
         org_id: orgId,
+        title: q.question,
         question: q.question,
         type: "single",
         options: q.options,
-        answer: q.options[q.correct_index],
+        correct_answer: q.options[q.correct_index] ?? "",
+        correct_answers: [q.options[q.correct_index] ?? ""],
         explanation: q.explanation,
         difficulty: q.difficulty,
         points: q.difficulty === "hard" ? 3 : q.difficulty === "medium" ? 2 : 1,
