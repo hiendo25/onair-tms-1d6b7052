@@ -399,7 +399,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                 </div>
               )}
 
-              {step === 2 && (surveyLocked ? <LockedNotice /> : (
+              {step === 2 && (
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <p className="text-sm text-slate-600">Tạo các chương trình con thuộc kế hoạch này.</p>
