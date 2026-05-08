@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Check, ChevronLeft, ChevronRight, Plus, Trash2, AlertTriangle, Send, Save, Lock, CircleDot, Play, Search } from "lucide-react";
-import { PLAN_TYPE, PLAN_TARGET_TYPE } from "@/lib/admin-options";
+import { PLAN_TARGET_TYPE } from "@/lib/admin-options";
 import { toast } from "sonner";
 import type { DBProgram, DBTopic, DBPlanSurvey } from "@/lib/plan-helpers";
 
@@ -361,13 +361,6 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
                   <div>
                     <Label>Mục tiêu</Label>
                     <Textarea className="mt-1" rows={4} placeholder="Mô tả mục tiêu ngắn của kế hoạch đào tạo" value={info.objective} onChange={(e) => setInfo({ ...info, objective: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Loại</Label>
-                    <Select value={info.type} onValueChange={(v) => setInfo({ ...info, type: v })}>
-                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                      <SelectContent>{PLAN_TYPE.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
-                    </Select>
                   </div>
                   <div className="rounded-lg border p-4 bg-slate-50/50">
                     <Label className="text-sm font-semibold">Thời gian triển khai</Label>
