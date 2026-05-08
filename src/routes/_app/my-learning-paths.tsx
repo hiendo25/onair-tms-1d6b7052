@@ -155,11 +155,11 @@ function MyPaths() {
                   <div className="mt-auto pt-2">
                     {e.status === "completed" ? (
                       <Button asChild variant="outline" className="w-full" size="sm">
-                        <Link to="/admin/learning-paths/$id" params={{ id: lp.id }}><CheckCircle2 className="h-4 w-4" /> Xem lại</Link>
+                        <Link to="/my-learning-paths/$id" params={{ id: lp.id }}><CheckCircle2 className="h-4 w-4" /> Xem lại</Link>
                       </Button>
                     ) : (
                       <Button asChild className="w-full" size="sm" disabled={locked}>
-                        <Link to="/admin/learning-paths/$id" params={{ id: lp.id }}>
+                        <Link to="/my-learning-paths/$id" params={{ id: lp.id }}>
                           {e.status === "not_started" ? "Bắt đầu" : "Tiếp tục"} <ArrowRight className="h-4 w-4" />
                         </Link>
                       </Button>
