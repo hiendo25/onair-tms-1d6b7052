@@ -271,6 +271,8 @@ function Page() {
           org_id: orgId, classroom_id: classroomId, flashcard_id: fid, display_order: idx,
         })) as never);
       }
+
+      toast.success("Đã tạo lớp học");
       navigate({ to: "/admin/class-room" });
     } catch (e) {
       toast.error((e as Error).message);
