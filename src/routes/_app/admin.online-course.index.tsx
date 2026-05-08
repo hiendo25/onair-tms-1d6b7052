@@ -11,11 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useOnlineCourses, useOnlineCourseMutations, type DBOnlineCourse } from "@/lib/data-hooks";
 import { RowActions } from "@/components/admin/RowActions";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
-import { EntityFormDialog, type FieldDef } from "@/components/admin/EntityFormDialog";
-import { courseSchema, type CourseForm } from "@/lib/admin-schemas";
-import { COURSE_LEVEL, COURSE_STATUS, CODE_NOTE } from "@/lib/admin-options";
+import { COURSE_STATUS } from "@/lib/admin-options";
 import { exportCsv } from "@/lib/csv";
 import { AiGenerateCourseButton } from "@/components/ai/AiGenerateCourseButton";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/online-course/")({
   head: () => ({ meta: [{ title: "Khoá học online — OnAir TMS" }] }),
