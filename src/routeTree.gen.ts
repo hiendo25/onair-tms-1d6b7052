@@ -91,6 +91,7 @@ import { Route as AppAdminClassRoomIdEditRouteImport } from './routes/_app/admin
 import { Route as AppAdminCertificatesEditIdRouteImport } from './routes/_app/admin.certificates.edit.$id'
 import { Route as AppAdminAssignmentsEditIdRouteImport } from './routes/_app/admin.assignments.edit.$id'
 import { Route as AppAdminAssignmentsIdStudentsRouteImport } from './routes/_app/admin.assignments.$id.students'
+import { Route as AppAdminAssignmentsIdEditorRouteImport } from './routes/_app/admin.assignments.$id.editor'
 import { Route as AppAdminAssignmentsIdAssignRouteImport } from './routes/_app/admin.assignments.$id.assign'
 import { Route as AppAdminAssignmentsQuestionBankIdEditRouteImport } from './routes/_app/admin.assignments.question-bank.$id.edit'
 import { Route as AppAdminAssignmentsIdSubmitEmployeeIdRouteImport } from './routes/_app/admin.assignments.$id.submit.$employeeId'
@@ -535,6 +536,12 @@ const AppAdminAssignmentsIdStudentsRoute =
     path: '/admin/assignments/$id/students',
     getParentRoute: () => AppRoute,
   } as any)
+const AppAdminAssignmentsIdEditorRoute =
+  AppAdminAssignmentsIdEditorRouteImport.update({
+    id: '/admin/assignments/$id/editor',
+    path: '/admin/assignments/$id/editor',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppAdminAssignmentsIdAssignRoute =
   AppAdminAssignmentsIdAssignRouteImport.update({
     id: '/admin/assignments/$id/assign',
@@ -626,6 +633,7 @@ export interface FileRoutesByFullPath {
   '/admin/surveys-results/': typeof AppAdminSurveysResultsIndexRoute
   '/admin/surveys/': typeof AppAdminSurveysIndexRoute
   '/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
+  '/admin/assignments/$id/editor': typeof AppAdminAssignmentsIdEditorRoute
   '/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
   '/admin/certificates/edit/$id': typeof AppAdminCertificatesEditIdRoute
@@ -714,6 +722,7 @@ export interface FileRoutesByTo {
   '/admin/surveys-results': typeof AppAdminSurveysResultsIndexRoute
   '/admin/surveys': typeof AppAdminSurveysIndexRoute
   '/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
+  '/admin/assignments/$id/editor': typeof AppAdminAssignmentsIdEditorRoute
   '/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
   '/admin/certificates/edit/$id': typeof AppAdminCertificatesEditIdRoute
@@ -804,6 +813,7 @@ export interface FileRoutesById {
   '/_app/admin/surveys-results/': typeof AppAdminSurveysResultsIndexRoute
   '/_app/admin/surveys/': typeof AppAdminSurveysIndexRoute
   '/_app/admin/assignments/$id/assign': typeof AppAdminAssignmentsIdAssignRoute
+  '/_app/admin/assignments/$id/editor': typeof AppAdminAssignmentsIdEditorRoute
   '/_app/admin/assignments/$id/students': typeof AppAdminAssignmentsIdStudentsRoute
   '/_app/admin/assignments/edit/$id': typeof AppAdminAssignmentsEditIdRoute
   '/_app/admin/certificates/edit/$id': typeof AppAdminCertificatesEditIdRoute
@@ -894,6 +904,7 @@ export interface FileRouteTypes {
     | '/admin/surveys-results/'
     | '/admin/surveys/'
     | '/admin/assignments/$id/assign'
+    | '/admin/assignments/$id/editor'
     | '/admin/assignments/$id/students'
     | '/admin/assignments/edit/$id'
     | '/admin/certificates/edit/$id'
@@ -982,6 +993,7 @@ export interface FileRouteTypes {
     | '/admin/surveys-results'
     | '/admin/surveys'
     | '/admin/assignments/$id/assign'
+    | '/admin/assignments/$id/editor'
     | '/admin/assignments/$id/students'
     | '/admin/assignments/edit/$id'
     | '/admin/certificates/edit/$id'
@@ -1071,6 +1083,7 @@ export interface FileRouteTypes {
     | '/_app/admin/surveys-results/'
     | '/_app/admin/surveys/'
     | '/_app/admin/assignments/$id/assign'
+    | '/_app/admin/assignments/$id/editor'
     | '/_app/admin/assignments/$id/students'
     | '/_app/admin/assignments/edit/$id'
     | '/_app/admin/certificates/edit/$id'
@@ -1689,6 +1702,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminAssignmentsIdStudentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/admin/assignments/$id/editor': {
+      id: '/_app/admin/assignments/$id/editor'
+      path: '/admin/assignments/$id/editor'
+      fullPath: '/admin/assignments/$id/editor'
+      preLoaderRoute: typeof AppAdminAssignmentsIdEditorRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/admin/assignments/$id/assign': {
       id: '/_app/admin/assignments/$id/assign'
       path: '/admin/assignments/$id/assign'
@@ -1843,6 +1863,7 @@ interface AppRouteChildren {
   AppAdminSurveysResultsIndexRoute: typeof AppAdminSurveysResultsIndexRoute
   AppAdminSurveysIndexRoute: typeof AppAdminSurveysIndexRoute
   AppAdminAssignmentsIdAssignRoute: typeof AppAdminAssignmentsIdAssignRoute
+  AppAdminAssignmentsIdEditorRoute: typeof AppAdminAssignmentsIdEditorRoute
   AppAdminAssignmentsIdStudentsRoute: typeof AppAdminAssignmentsIdStudentsRoute
   AppAdminAssignmentsEditIdRoute: typeof AppAdminAssignmentsEditIdRoute
   AppAdminClassRoomIdEditRoute: typeof AppAdminClassRoomIdEditRoute
@@ -1915,6 +1936,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAdminSurveysResultsIndexRoute: AppAdminSurveysResultsIndexRoute,
   AppAdminSurveysIndexRoute: AppAdminSurveysIndexRoute,
   AppAdminAssignmentsIdAssignRoute: AppAdminAssignmentsIdAssignRoute,
+  AppAdminAssignmentsIdEditorRoute: AppAdminAssignmentsIdEditorRoute,
   AppAdminAssignmentsIdStudentsRoute: AppAdminAssignmentsIdStudentsRoute,
   AppAdminAssignmentsEditIdRoute: AppAdminAssignmentsEditIdRoute,
   AppAdminClassRoomIdEditRoute: AppAdminClassRoomIdEditRoute,

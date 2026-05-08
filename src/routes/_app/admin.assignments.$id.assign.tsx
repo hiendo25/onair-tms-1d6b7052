@@ -38,6 +38,7 @@ function AssignPage() {
   useEffect(() => { setSel(new Set()); }, [id]);
 
   if (!a) return <PageContainer title="Không tìm thấy bài KT"><Button asChild variant="outline"><Link to="/admin/assignments"><ArrowLeft className="h-4 w-4" />Quay lại</Link></Button></PageContainer>;
+  const ax = a;
 
   const filtered = employees.filter(e => !q || e.name.toLowerCase().includes(q.toLowerCase()) || e.email.toLowerCase().includes(q.toLowerCase()));
 
