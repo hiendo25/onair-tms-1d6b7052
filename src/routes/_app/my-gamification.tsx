@@ -171,11 +171,7 @@ function Page() {
                 <>
                   <div className="text-center text-xs text-muted-foreground py-2">···</div>
                   {myRankQ.data ? (
-                    <div className="flex items-center gap-3 rounded-md border-2 border-primary bg-primary/5 p-3">
-                      <div className="w-8 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
-                      <div className="flex-1 font-medium">Bạn</div>
-                      <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
-                    </div>
+                    <MyRankCard rank={myRankQ.data.rank} xp={myRankQ.data.xp} ahead={(lbQ.data ?? []).filter((r) => r.xp > (myRankQ.data?.xp ?? 0)).sort((a, b) => a.xp - b.xp)[0]} />
                   ) : (
                     <div className="text-center text-xs text-muted-foreground">Chưa có thứ hạng của bạn</div>
                   )}
@@ -285,5 +281,30 @@ function Page() {
         </DialogContent>
       </Dialog>
     </PageContainer>
+  );
+}
+
+function MyRankCard({ rank, xp, ahead }: { rank: number; xp: number; ahead?: { xp: number; rank: number; profile?: { full_name: string | null } | null } }) {
+  const gap = ahead ? Math.max(0, ahead.xp - xp + 1) : 0;
+  const pct = ahead && ahead.xp > 0 ? Math.min(100, Math.round((xp / ahead.xp) * 100)) : 100;
+  return (
+    <div className="rounded-md border-2 border-primary bg-primary/5 p-3 space-y-2">
+      <div className="flex items-center gap-3">
+        <div className="w-8 text-center font-bold text-primary">#{rank}</div>
+        <div className="flex-1 font-medium">Bạn</div>
+        <div className="font-mono font-semibold">{xp.toLocaleString()} điểm</div>
+      </div>
+      {ahead ? (
+        <>
+          <Progress value={pct} className="h-1.5" />
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Còn <strong className="text-foreground">{gap.toLocaleString()}</strong> điểm để vượt #{ahead.rank}{ahead.profile?.full_name ? ` (${ahead.profile.full_name})` : ""}</span>
+            <span>{pct}%</span>
+          </div>
+        </>
+      ) : (
+        <div className="text-xs text-emerald-600 font-medium">🏆 Bạn đang đứng đầu!</div>
+      )}
+    </div>
   );
 }

@@ -70,16 +70,36 @@ function Page() {
                   </div>
                 );
               })}
-              {!myInList && myRankQ.data && (
-                <>
-                  <div className="text-center text-xs text-muted-foreground py-2">···</div>
-                  <div className="flex items-center gap-3 rounded-md border-2 border-primary bg-primary/5 p-3">
-                    <div className="w-10 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
-                    <div className="flex-1 font-medium">Bạn</div>
-                    <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
-                  </div>
-                </>
-              )}
+              {!myInList && myRankQ.data && (() => {
+                const ahead = (lbQ.data ?? []).filter((r) => r.xp > (myRankQ.data?.xp ?? 0)).sort((a, b) => a.xp - b.xp)[0];
+                const gap = ahead ? Math.max(0, ahead.xp - myRankQ.data.xp + 1) : 0;
+                const pct = ahead && ahead.xp > 0 ? Math.min(100, Math.round((myRankQ.data.xp / ahead.xp) * 100)) : 100;
+                return (
+                  <>
+                    <div className="text-center text-xs text-muted-foreground py-2">···</div>
+                    <div className="rounded-md border-2 border-primary bg-primary/5 p-3 space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 text-center font-bold text-primary">#{myRankQ.data.rank}</div>
+                        <div className="flex-1 font-medium">Bạn</div>
+                        <div className="font-mono font-semibold">{myRankQ.data.xp.toLocaleString()} điểm</div>
+                      </div>
+                      {ahead ? (
+                        <>
+                          <div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/20">
+                            <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <span>Còn <strong className="text-foreground">{gap.toLocaleString()}</strong> điểm để vượt #{ahead.rank}{ahead.profile?.full_name ? ` (${ahead.profile.full_name})` : ""}</span>
+                            <span>{pct}%</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="text-xs text-emerald-600 font-medium">🏆 Bạn đang đứng đầu!</div>
+                      )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           )}
         </CardContent>
