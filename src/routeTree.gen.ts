@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignupRouteImport } from './routes/auth.signup'
 import { Route as AuthSigninRouteImport } from './routes/auth.signin'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
+import { Route as AppMyTitlesRouteImport } from './routes/_app/my-titles'
 import { Route as AppMyLearningPathsRouteImport } from './routes/_app/my-learning-paths'
 import { Route as AppMyGamificationRouteImport } from './routes/_app/my-gamification'
 import { Route as AppMyFlashcardsRouteImport } from './routes/_app/my-flashcards'
@@ -135,6 +136,11 @@ const AuthErrorRoute = AuthErrorRouteImport.update({
   id: '/auth/error',
   path: '/auth/error',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppMyTitlesRoute = AppMyTitlesRouteImport.update({
+  id: '/my-titles',
+  path: '/my-titles',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppMyLearningPathsRoute = AppMyLearningPathsRouteImport.update({
   id: '/my-learning-paths',
@@ -580,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -668,6 +675,7 @@ export interface FileRoutesByTo {
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -758,6 +766,7 @@ export interface FileRoutesById {
   '/_app/my-flashcards': typeof AppMyFlashcardsRoute
   '/_app/my-gamification': typeof AppMyGamificationRoute
   '/_app/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
+  '/_app/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
   '/auth/signin': typeof AuthSigninRoute
   '/auth/signup': typeof AuthSignupRoute
@@ -848,6 +857,7 @@ export interface FileRouteTypes {
     | '/my-flashcards'
     | '/my-gamification'
     | '/my-learning-paths'
+    | '/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -936,6 +946,7 @@ export interface FileRouteTypes {
     | '/my-flashcards'
     | '/my-gamification'
     | '/my-learning-paths'
+    | '/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -1025,6 +1036,7 @@ export interface FileRouteTypes {
     | '/_app/my-flashcards'
     | '/_app/my-gamification'
     | '/_app/my-learning-paths'
+    | '/_app/my-titles'
     | '/auth/error'
     | '/auth/signin'
     | '/auth/signup'
@@ -1170,6 +1182,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/error'
       preLoaderRoute: typeof AuthErrorRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/my-titles': {
+      id: '/_app/my-titles'
+      path: '/my-titles'
+      fullPath: '/my-titles'
+      preLoaderRoute: typeof AppMyTitlesRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/my-learning-paths': {
       id: '/_app/my-learning-paths'
@@ -1806,6 +1825,7 @@ interface AppRouteChildren {
   AppMyFlashcardsRoute: typeof AppMyFlashcardsRoute
   AppMyGamificationRoute: typeof AppMyGamificationRoute
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRouteWithChildren
+  AppMyTitlesRoute: typeof AppMyTitlesRoute
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
   AppAdminDashboardRoute: typeof AppAdminDashboardRoute
   AppAdminGamificationsRoute: typeof AppAdminGamificationsRoute
@@ -1877,6 +1897,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMyFlashcardsRoute: AppMyFlashcardsRoute,
   AppMyGamificationRoute: AppMyGamificationRoute,
   AppMyLearningPathsRoute: AppMyLearningPathsRouteWithChildren,
+  AppMyTitlesRoute: AppMyTitlesRoute,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
   AppAdminDashboardRoute: AppAdminDashboardRoute,
   AppAdminGamificationsRoute: AppAdminGamificationsRoute,
