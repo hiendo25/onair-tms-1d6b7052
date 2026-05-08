@@ -183,6 +183,19 @@ function CourseEditor() {
         <TabsContent value="info">
           <Card className="p-6">
             <CourseInfoForm value={info} onChange={handleInfoChange} categories={cats} />
+            <div className="mt-6 border-t pt-4">
+              <Label className="flex items-center gap-2 mb-2"><Award className="h-4 w-4 text-amber-600" /> Mẫu chứng nhận khi hoàn thành</Label>
+              <Select value={certificateId || "none"} onValueChange={(v) => { setCertificateId(v === "none" ? "" : v); setDirty(true); }}>
+                <SelectTrigger className="max-w-md"><SelectValue placeholder="Không cấp chứng nhận" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Không cấp chứng nhận</SelectItem>
+                  {certificates.filter(c => c.status === "active").map(c => (
+                    <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="text-xs text-muted-foreground mt-1">Mỗi khoá học chỉ gán 1 mẫu. Học viên hoàn thành sẽ được tự động cấp.</div>
+            </div>
             <div className="mt-6 flex justify-between border-t pt-4">
               <Button variant="outline" onClick={onCancel}><ArrowLeft className="h-4 w-4 mr-1" />Quay lại</Button>
               <Button onClick={() => setTab("content")}>Tiếp tục</Button>
