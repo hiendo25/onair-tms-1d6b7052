@@ -86,7 +86,7 @@ function PageHeader({ user, children }: { user: any; children: React.ReactNode }
   return (
     <div className="container mx-auto max-w-6xl px-4 py-6 space-y-5">
       <header className="flex items-center justify-between">
-        <Link to="/profile" className="flex items-center gap-3 group">
+        <Link to="/my-gamification" className="flex items-center gap-3 group">
           <Avatar className="h-12 w-12 ring-2 ring-primary/20">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-gradient-to-br from-primary to-violet-500 text-white font-semibold">
