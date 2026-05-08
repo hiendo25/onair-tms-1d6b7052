@@ -517,14 +517,133 @@ export type Database = {
         }
         Relationships: []
       }
-      course_lessons: {
+      course_audit_logs: {
         Row: {
-          content: string
+          action: string
+          changes: Json
+          course_id: string | null
+          created_at: string
+          id: string
+          org_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          changes?: Json
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          org_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          changes?: Json
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      course_enrollments: {
+        Row: {
+          completed_at: string | null
           course_id: string
           created_at: string
           id: string
+          org_id: string
+          progress: number
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          progress?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          progress?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      course_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string
+          id: string
+          lesson_id: string
+          meta: Json
+          org_id: string
+          progress_pct: number
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          meta?: Json
+          org_id: string
+          progress_pct?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          meta?: Json
+          org_id?: string
+          progress_pct?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      course_lessons: {
+        Row: {
+          content: string
+          content_meta: Json
+          content_url: string
+          course_id: string
+          created_at: string
+          description: string
+          duration_seconds: number
+          id: string
           lesson_type: string
           org_id: string
+          quiz_assignment_id: string | null
           section_id: string
           sort_order: number
           status: string
@@ -533,11 +652,16 @@ export type Database = {
         }
         Insert: {
           content?: string
+          content_meta?: Json
+          content_url?: string
           course_id: string
           created_at?: string
+          description?: string
+          duration_seconds?: number
           id?: string
           lesson_type?: string
           org_id: string
+          quiz_assignment_id?: string | null
           section_id: string
           sort_order?: number
           status?: string
@@ -546,11 +670,16 @@ export type Database = {
         }
         Update: {
           content?: string
+          content_meta?: Json
+          content_url?: string
           course_id?: string
           created_at?: string
+          description?: string
+          duration_seconds?: number
           id?: string
           lesson_type?: string
           org_id?: string
+          quiz_assignment_id?: string | null
           section_id?: string
           sort_order?: number
           status?: string
@@ -1259,6 +1388,8 @@ export type Database = {
       }
       online_courses: {
         Row: {
+          author_id: string | null
+          author_name: string
           category: string
           code: string
           cover_url: string
@@ -1278,6 +1409,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          author_id?: string | null
+          author_name?: string
           category?: string
           code: string
           cover_url?: string
@@ -1297,6 +1430,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          author_id?: string | null
+          author_name?: string
           category?: string
           code?: string
           cover_url?: string
