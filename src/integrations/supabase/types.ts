@@ -1146,6 +1146,60 @@ export type Database = {
         }
         Relationships: []
       }
+      gamification_settings: {
+        Row: {
+          assignment_enabled: boolean
+          assignment_points: number
+          class_enabled: boolean
+          class_points: number
+          course_enabled: boolean
+          course_points: number
+          created_at: string
+          enabled: boolean
+          id: string
+          org_id: string
+          path_enabled: boolean
+          path_points: number
+          phase_enabled: boolean
+          phase_points: number
+          updated_at: string
+        }
+        Insert: {
+          assignment_enabled?: boolean
+          assignment_points?: number
+          class_enabled?: boolean
+          class_points?: number
+          course_enabled?: boolean
+          course_points?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          org_id: string
+          path_enabled?: boolean
+          path_points?: number
+          phase_enabled?: boolean
+          phase_points?: number
+          updated_at?: string
+        }
+        Update: {
+          assignment_enabled?: boolean
+          assignment_points?: number
+          class_enabled?: boolean
+          class_points?: number
+          course_enabled?: boolean
+          course_points?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          org_id?: string
+          path_enabled?: boolean
+          path_points?: number
+          phase_enabled?: boolean
+          phase_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gamifications: {
         Row: {
           active: boolean
@@ -1154,12 +1208,15 @@ export type Database = {
           condition: string
           created_at: string
           description: string
+          icon: string
           id: string
           org_id: string
           points: number
+          priority: number
           title: string
           type: string
           updated_at: string
+          xp_required: number
         }
         Insert: {
           active?: boolean
@@ -1168,12 +1225,15 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string
+          icon?: string
           id?: string
           org_id: string
           points?: number
+          priority?: number
           title: string
           type?: string
           updated_at?: string
+          xp_required?: number
         }
         Update: {
           active?: boolean
@@ -1182,12 +1242,15 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string
+          icon?: string
           id?: string
           org_id?: string
           points?: number
+          priority?: number
           title?: string
           type?: string
           updated_at?: string
+          xp_required?: number
         }
         Relationships: []
       }
@@ -2537,6 +2600,30 @@ export type Database = {
           },
         ]
       }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          org_id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          org_id: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_certificates: {
         Row: {
           certificate_id: string
@@ -2797,6 +2884,30 @@ export type Database = {
           org_id?: string
           quizzes_taken?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_titles: {
+        Row: {
+          assigned_at: string
+          id: string
+          org_id: string
+          title_id: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          id?: string
+          org_id: string
+          title_id: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          id?: string
+          org_id?: string
+          title_id?: string
           user_id?: string
         }
         Relationships: []
