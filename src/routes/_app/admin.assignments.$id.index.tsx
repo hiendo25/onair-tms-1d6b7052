@@ -41,37 +41,37 @@ function Detail() {
 
   return (
     <PageContainer
-      title={a.title}
+      title={ax.title}
       breadcrumbs={[{ title: "Bài kiểm tra", path: "/admin/assignments" }, { title: a.title }]}
       actions={<>
         <Button variant="outline" size="sm" onClick={clone}><Copy className="h-4 w-4" /> Nhân bản</Button>
-        <Button variant="outline" size="sm" asChild><Link to="/admin/assignments/$id/assign" params={{ id: a.id }}><Users className="h-4 w-4" />Gán học viên</Link></Button>
-        <Button size="sm" asChild><Link to="/admin/assignments/$id/editor" params={{ id: a.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></Button>
+        <Button variant="outline" size="sm" asChild><Link to="/admin/assignments/$id/assign" params={{ id: ax.id }}><Users className="h-4 w-4" />Gán học viên</Link></Button>
+        <Button size="sm" asChild><Link to="/admin/assignments/$id/editor" params={{ id: ax.id }}><Pencil className="h-4 w-4" />Chỉnh sửa</Link></Button>
       </>}
     >
       <div className="grid gap-4 sm:grid-cols-4">
         <Stat icon={ListChecks} label="Số câu hỏi" value={String(a.total_questions)} />
-        <Stat icon={ListChecks} label="Tổng điểm" value={`${a.total_points}/100`} />
-        <Stat icon={Clock} label="Thời gian" value={a.time_limit_minutes ? `${a.time_limit_minutes} phút` : "—"} />
-        <Stat icon={RefreshCw} label="Số lần làm" value={a.max_attempts ? String(a.max_attempts) : "Không giới hạn"} />
+        <Stat icon={ListChecks} label="Tổng điểm" value={`${ax.total_points}/100`} />
+        <Stat icon={Clock} label="Thời gian" value={ax.time_limit_minutes ? `${ax.time_limit_minutes} phút` : "—"} />
+        <Stat icon={RefreshCw} label="Số lần làm" value={ax.max_attempts ? String(a.max_attempts) : "Không giới hạn"} />
       </div>
 
       <Card className="p-5">
         <div className="mb-3 flex items-center justify-between">
           <div>
             <div className="text-xs text-muted-foreground">Mã bài</div>
-            <div className="font-medium">{a.code}</div>
+            <div className="font-medium">{ax.code}</div>
           </div>
           <div className="flex gap-2">
-            <Badge variant="outline">{a.type}</Badge>
-            <Badge variant={a.status === "published" ? "default" : "secondary"}>{ASSIGNMENT_STATUS.find(s => s.value === a.status)?.label || a.status}</Badge>
+            <Badge variant="outline">{ax.type}</Badge>
+            <Badge variant={ax.status === "published" ? "default" : "secondary"}>{ASSIGNMENT_STATUS.find(s => s.value === a.status)?.label || a.status}</Badge>
           </div>
         </div>
-        <div className="text-sm text-muted-foreground">{a.description || "Không có mô tả"}</div>
+        <div className="text-sm text-muted-foreground">{ax.description || "Không có mô tả"}</div>
         <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
-          <div>Điểm đạt: <strong>{a.pass_score}%</strong></div>
-          <div>Trộn câu hỏi: <strong>{a.shuffle_questions ? "Có" : "Không"}</strong></div>
-          <div>Hiển thị kết quả: <strong>{a.show_results ? "Có" : "Không"}</strong></div>
+          <div>Điểm đạt: <strong>{ax.pass_score}%</strong></div>
+          <div>Trộn câu hỏi: <strong>{ax.shuffle_questions ? "Có" : "Không"}</strong></div>
+          <div>Hiển thị kết quả: <strong>{ax.show_results ? "Có" : "Không"}</strong></div>
         </div>
       </Card>
 
