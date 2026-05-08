@@ -1974,6 +1974,56 @@ export type Database = {
           },
         ]
       }
+      survey_assignments: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          org_id: string
+          start_date: string | null
+          status: string
+          student_ids: string[]
+          survey_id: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          org_id: string
+          start_date?: string | null
+          status?: string
+          student_ids?: string[]
+          survey_id: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          org_id?: string
+          start_date?: string | null
+          status?: string
+          student_ids?: string[]
+          survey_id?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_assignments_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       survey_questions: {
         Row: {
           content: string
@@ -2023,32 +2073,86 @@ export type Database = {
       }
       survey_responses: {
         Row: {
+          assignment_id: string | null
           created_at: string
           id: string
           org_id: string
           submitted_at: string
           survey_id: string
           user_id: string | null
+          version: number
         }
         Insert: {
+          assignment_id?: string | null
           created_at?: string
           id?: string
           org_id: string
           submitted_at?: string
           survey_id: string
           user_id?: string | null
+          version?: number
         }
         Update: {
+          assignment_id?: string | null
           created_at?: string
           id?: string
           org_id?: string
           submitted_at?: string
           survey_id?: string
           user_id?: string | null
+          version?: number
         }
         Relationships: [
           {
+            foreignKeyName: "survey_responses_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "survey_assignments"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_versions: {
+        Row: {
+          change_note: string
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          snapshot: Json
+          survey_id: string
+          version: number
+        }
+        Insert: {
+          change_note?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          snapshot: Json
+          survey_id: string
+          version: number
+        }
+        Update: {
+          change_note?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          snapshot?: Json
+          survey_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_versions_survey_id_fkey"
             columns: ["survey_id"]
             isOneToOne: false
             referencedRelation: "surveys"
@@ -2059,8 +2163,10 @@ export type Database = {
       surveys: {
         Row: {
           anonymous: boolean
+          category: string
           code: string
           created_at: string
+          created_by: string | null
           description: string
           end_date: string | null
           id: string
@@ -2072,11 +2178,14 @@ export type Database = {
           title: string
           type: string
           updated_at: string
+          version: number
         }
         Insert: {
           anonymous?: boolean
+          category?: string
           code: string
           created_at?: string
+          created_by?: string | null
           description?: string
           end_date?: string | null
           id?: string
@@ -2088,11 +2197,14 @@ export type Database = {
           title: string
           type?: string
           updated_at?: string
+          version?: number
         }
         Update: {
           anonymous?: boolean
+          category?: string
           code?: string
           created_at?: string
+          created_by?: string | null
           description?: string
           end_date?: string | null
           id?: string
@@ -2104,6 +2216,7 @@ export type Database = {
           title?: string
           type?: string
           updated_at?: string
+          version?: number
         }
         Relationships: []
       }
