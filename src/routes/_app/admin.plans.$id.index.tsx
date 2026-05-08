@@ -9,7 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit, Check, X, ChevronDown, Send } from "lucide-react";
+import { Edit, Check, X, ChevronDown, Send, Trash2 } from "lucide-react";
+import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchPlanFull, PLAN_STATUS_BADGE } from "@/lib/plan-helpers";
 import { useAuth } from "@/lib/auth-context";
@@ -28,6 +29,7 @@ function PlanDetail() {
   const qc = useQueryClient();
   const nav = useNavigate();
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [confirmDel, setConfirmDel] = useState(false);
   const [reason, setReason] = useState("");
 
   const { data, isLoading } = useQuery({
@@ -66,6 +68,13 @@ function PlanDetail() {
     if (error) { toast.error(error.message); return; }
     toast.success("Đã từ chối"); setRejectOpen(false); refresh();
     qc.invalidateQueries({ queryKey: ["plans", orgId] });
+  }
+  async function deletePlan() {
+    const { error } = await supabase.from("plans").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Đã xoá kế hoạch");
+    qc.invalidateQueries({ queryKey: ["plans", orgId] });
+    nav({ to: "/admin/plans" });
   }
   async function activateSurvey() {
     if (!planSurvey) return;
@@ -126,8 +135,12 @@ function PlanDetail() {
       title={plan.title}
       breadcrumbs={[{ title: "Kế hoạch", path: "/admin/plans" }, { title: plan.code }]}
       actions={
-        (plan.status === "draft" || plan.status === "rejected") &&
-        <Button variant="outline" size="sm" asChild><Link to="/admin/plans/$id/edit" params={{ id }}><Edit className="h-4 w-4 mr-1" />Chỉnh sửa</Link></Button>
+        (plan.status === "draft" || plan.status === "rejected") && (
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild><Link to="/admin/plans/$id/edit" params={{ id }}><Edit className="h-4 w-4 mr-1" />Chỉnh sửa</Link></Button>
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setConfirmDel(true)}><Trash2 className="h-4 w-4 mr-1" />Xoá</Button>
+          </div>
+        )
       }
     >
       {/* 4 stat cards */}
@@ -204,7 +217,7 @@ function PlanDetail() {
                   })}
                   {pcs.length > 0 && (
                     <div className="border-l-2 border-amber-200 pl-3">
-                      <div className="text-xs font-medium text-slate-500">Môn học trực tiếp</div>
+                      <div className="text-xs font-medium text-slate-500">Khóa học trực tiếp</div>
                       <ul className="text-sm">
                         {pcs.map((pc: any) => <li key={pc.course_id}>• {pc.course?.code} — {pc.course?.title}</li>)}
                       </ul>
@@ -240,6 +253,8 @@ function PlanDetail() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDelete open={confirmDel} onOpenChange={setConfirmDel} onConfirm={deletePlan} description={`Xoá kế hoạch "${plan.title}"? Hành động này không thể hoàn tác.`} />
     </PageContainer>
   );
 }

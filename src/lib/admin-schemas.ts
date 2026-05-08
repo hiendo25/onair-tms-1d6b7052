@@ -83,7 +83,7 @@ export type ClassroomForm = z.infer<typeof classroomSchema>;
 
 export const courseSchema = z.object({
   code: codeSchema("khoá học"),
-  title: z.string().min(1, "Tên môn học không bỏ trống").max(200, "Vui lòng nhập tối đa 200 ký tự"),
+  title: z.string().min(1, "Tên khóa học không bỏ trống").max(200, "Vui lòng nhập tối đa 200 ký tự"),
   description: z.string().min(1, "Không bỏ trống nội dung."),
   category: z.string().min(1, "Chọn lĩnh vực."),
   level: z.enum(["beginner", "intermediate", "advanced"]),
