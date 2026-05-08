@@ -25,12 +25,14 @@ export const Route = createFileRoute("/_app/admin/learning-paths/")({
 const statusVariant: Record<string, string> = {
   inactive: "bg-slate-100 text-slate-700 hover:bg-slate-100",
   active: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
+  published: "bg-emerald-100 text-emerald-700 hover:bg-emerald-100",
+  draft: "bg-slate-100 text-slate-700 hover:bg-slate-100",
   locked: "bg-amber-100 text-amber-700 hover:bg-amber-100",
 };
 const statusLabel = (v: string) => {
-  if (v === "active") return "Đang hoạt động";
+  if (v === "active" || v === "published") return "Đang hoạt động";
   if (v === "locked") return "Đã khoá";
-  if (v === "inactive") return "Chưa hoạt động";
+  if (v === "inactive" || v === "draft") return "Chưa hoạt động";
   return PATH_STATUS.find(s => s.value === v)?.label ?? v;
 };
 
