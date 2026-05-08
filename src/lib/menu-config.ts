@@ -74,7 +74,6 @@ export const ADMIN_MENU: MenuItem[] = [
 export const STUDENT_MENU: MenuItem[] = [
   { title: "Tổng quan", key: "s-dashboard", path: "/student/dashboard", icon: LayoutDashboard },
   { title: "Lộ trình", key: "my-lp", path: "/my-learning-paths", icon: GraduationCap },
-  { title: "Khóa học", key: "my-courses", path: "/my-courses", icon: BookOpen },
   { title: "Lớp học", key: "my-class", path: "/my-class", icon: Users },
   { title: "Bài kiểm tra", key: "my-as", path: "/my-assignments", icon: ClipboardList },
   { title: "Thưởng học tập", key: "my-gam", path: "/my-gamification", icon: Trophy },
