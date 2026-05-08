@@ -91,10 +91,13 @@ function MyClassPage() {
       const courses = q.data!.cc.filter((r: any) => r.classroom_id === c.id);
       const delivery: Delivery =
         (c.delivery as Delivery) || (c.type as Delivery) || "offline";
-      // status: ended if all sessions ended or end_at in past, or e-learning all completed
+      const mode: "single" | "series" = (c.mode === "series" ? "series" : "single");
       const lastEnd = sessions.length
         ? Math.max(...sessions.map((s: any) => new Date(s.end_at ?? s.start_at ?? 0).getTime()))
         : new Date(c.end_at ?? c.end_date ?? 0).getTime();
+      const firstStart = sessions.length
+        ? Math.min(...sessions.map((s: any) => new Date(s.start_at ?? 0).getTime()))
+        : new Date(c.start_at ?? c.start_date ?? 0).getTime();
       const nextSession =
         sessions.find((s: any) => new Date(s.end_at ?? s.start_at ?? 0).getTime() > now) ?? null;
 
@@ -111,19 +114,29 @@ function MyClassPage() {
 
       const ended =
         delivery === "elearning"
-          ? elearningTotal > 0 && elearningProgress >= 100
+          ? (elearningTotal > 0 && elearningProgress >= 100) || (lastEnd > 0 && lastEnd < now)
           : lastEnd > 0 && lastEnd < now;
 
+      // Time-based status for live/offline
+      let timeStatus: "ongoing" | "today" | "upcoming" | "ended" = "upcoming";
+      if (ended) timeStatus = "ended";
+      else if (nextSession) {
+        const s = new Date(nextSession.start_at).getTime();
+        const e = new Date(nextSession.end_at ?? s).getTime();
+        const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+        if (now >= s && now <= e) timeStatus = "ongoing";
+        else if (s >= todayStart.getTime() && s <= todayEnd.getTime()) timeStatus = "today";
+        else timeStatus = "upcoming";
+      } else if (delivery === "elearning") {
+        if (elearningProgress > 0 && elearningProgress < 100) timeStatus = "ongoing";
+        else if (firstStart > now) timeStatus = "upcoming";
+        else timeStatus = "today";
+      }
+
       return {
-        c,
-        delivery,
-        sessions,
-        courses,
-        nextSession,
-        elearningProgress,
-        elearningTotal,
-        ended,
-        lastEnd,
+        c, delivery, mode, sessions, courses, nextSession,
+        elearningProgress, elearningTotal, ended, lastEnd, timeStatus,
       };
     });
   }, [q.data, now]);
@@ -131,23 +144,28 @@ function MyClassPage() {
   const filtered = useMemo(() => {
     const term = stripVN(search.trim());
     return items
-      .filter((it) => (tab === "ended" ? it.ended : !it.ended))
+      .filter((it) => tab === "all" ? true : tab === "ended" ? it.ended : it.timeStatus === tab)
       .filter((it) => (typeFilter === "all" ? true : it.delivery === typeFilter))
+      .filter((it) => (modeFilter === "all" ? true : it.mode === modeFilter))
       .filter((it) =>
         !term
           ? true
           : stripVN(it.c.title ?? "").includes(term) ||
             stripVN(it.c.code ?? "").includes(term),
       );
-  }, [items, search, typeFilter, tab]);
+  }, [items, search, typeFilter, modeFilter, tab]);
 
   const counts = useMemo(
     () => ({
-      active: items.filter((i) => !i.ended).length,
+      all: items.length,
+      ongoing: items.filter((i) => !i.ended && i.timeStatus === "ongoing").length,
+      today: items.filter((i) => !i.ended && i.timeStatus === "today").length,
+      upcoming: items.filter((i) => !i.ended && i.timeStatus === "upcoming").length,
       ended: items.filter((i) => i.ended).length,
     }),
     [items],
   );
+
 
   return (
     <PageContainer
