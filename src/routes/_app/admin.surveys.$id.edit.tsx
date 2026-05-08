@@ -299,7 +299,7 @@ function QuestionEditor({ index, value, onChange, onRemove }: {
               {value.type === "single" || value.type === "yes_no" ? (
                 <RadioGroup
                   value={typeof value.correct_answer === "number" ? String(value.correct_answer) : ""}
-                  onValueChange={(v) => onChange({ correct_answer: Number(v) })}
+                  onValueChange={(v) => onChange({ correct_answer: [Number(v)] as unknown as number[] })}
                 >
                   {value.options.map((o, i) => (
                     <div key={i} className="flex items-center gap-2">
