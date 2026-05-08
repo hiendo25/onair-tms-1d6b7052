@@ -324,10 +324,102 @@ export type DBUserFlashcard = {
 };
 
 // ===== Gamifications =====
-export type DBGamification = { id: string; org_id: string; code: string; title: string; description: string; type: string; points: number; badge_url: string; condition: string; active: boolean; };
+export type DBGamification = { id: string; org_id: string; code: string; title: string; description: string; type: string; points: number; badge_url: string; icon: string; condition: string; active: boolean; priority: number; xp_required: number; };
 const gamificationsCrud = createOrgCrud<DBGamification>("gamifications", "huy hiệu");
 export const useGamifications = gamificationsCrud.useList;
 export const useGamificationMutations = gamificationsCrud.useMutations;
+
+export type DBGamificationSettings = {
+  id: string; org_id: string; enabled: boolean;
+  course_enabled: boolean; course_points: number;
+  class_enabled: boolean; class_points: number;
+  phase_enabled: boolean; phase_points: number;
+  path_enabled: boolean; path_points: number;
+  assignment_enabled: boolean; assignment_points: number;
+};
+export type DBUserBadge = { id: string; org_id: string; user_id: string; badge_id: string; earned_at: string; };
+export type DBUserTitle = { id: string; org_id: string; user_id: string; title_id: string; assigned_at: string; };
+export type DBUserXp = { id: string; org_id: string; user_id: string; total_xp: number; };
+
+export function useGamificationSettings() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["gamification_settings", orgId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("gamification_settings").select("*").eq("org_id", orgId).maybeSingle();
+      if (error) throw error;
+      return (data ?? null) as DBGamificationSettings | null;
+    },
+  });
+}
+
+export function useGamificationSettingsMutation() {
+  const { orgId } = useOrg();
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (p: Partial<DBGamificationSettings>) => {
+      const { error } = await supabase.from("gamification_settings").upsert({ ...p, org_id: orgId } as never, { onConflict: "org_id" });
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gamification_settings", orgId] }); toast.success("Đã lưu cấu hình"); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useMyXp() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["user_xp_me", orgId],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("user_xp").select("*").eq("org_id", orgId).eq("user_id", u.user.id).maybeSingle();
+      return (data ?? null) as DBUserXp | null;
+    },
+  });
+}
+
+export function useMyBadges() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["user_badges_me", orgId],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return [];
+      const { data } = await supabase.from("user_badges").select("*").eq("org_id", orgId).eq("user_id", u.user.id);
+      return (data ?? []) as DBUserBadge[];
+    },
+  });
+}
+
+export function useMyTitle() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["user_title_me", orgId],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return null;
+      const { data } = await supabase.from("user_titles").select("*").eq("org_id", orgId).eq("user_id", u.user.id).maybeSingle();
+      return (data ?? null) as DBUserTitle | null;
+    },
+  });
+}
+
+export function useLeaderboard() {
+  const { orgId } = useOrg();
+  return useQuery({
+    queryKey: ["leaderboard", orgId],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_xp").select("user_id, total_xp").eq("org_id", orgId).order("total_xp", { ascending: false }).limit(50);
+      const rows = (data ?? []) as { user_id: string; total_xp: number }[];
+      if (!rows.length) return [];
+      const ids = rows.map(r => r.user_id);
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, email, avatar_url").in("id", ids);
+      const map = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      return rows.map((r, i) => ({ rank: i + 1, user_id: r.user_id, total_xp: r.total_xp, profile: map.get(r.user_id) as any }));
+    },
+  });
+}
 
 // ===== Plans =====
 export type DBPlan = {
