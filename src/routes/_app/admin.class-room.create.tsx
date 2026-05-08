@@ -15,7 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useOrg } from "@/lib/org-context";
 import { supabase } from "@/integrations/supabase/client";
-import { useOnlineCourses, useAssignments, useEmployees } from "@/lib/data-hooks";
+import { useOnlineCourses, useAssignments, useEmployees, useCertificates } from "@/lib/data-hooks";
 import { CLASSROOM_DELIVERY, CLASSROOM_MODE, MEETING_PROVIDER, QR_START_OFFSETS, QR_END_OFFSETS } from "@/lib/admin-options";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -76,6 +76,8 @@ function Page() {
   const [topics, setTopics] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [objective, setObjective] = useState("");
+  const [certificateId, setCertificateId] = useState<string>("");
+  const { data: certificates = [] } = useCertificates();
 
   // Tab 2: Time (single)
   const [startAt, setStartAt] = useState("");
@@ -189,6 +191,7 @@ function Page() {
         start_at: seriesStart || null, end_at: seriesEnd || null,
         start_date: seriesStart ? seriesStart.slice(0, 10) : null,
         end_date: seriesEnd ? seriesEnd.slice(0, 10) : null,
+        certificate_id: certificateId || null,
       } as never).select("id").single();
       if (error || !created) throw error ?? new Error("Insert failed");
       const classroomId = (created as { id: string }).id;
@@ -357,6 +360,19 @@ function Page() {
               <div className="space-y-1.5">
                 <Label>Mục tiêu của lớp học</Label>
                 <Textarea rows={3} value={objective} onChange={e => setObjective(e.target.value)} />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Mẫu chứng nhận <span className="text-xs text-muted-foreground">(tự cấp khi hoàn thành lớp)</span></Label>
+                <Select value={certificateId || "none"} onValueChange={(v) => setCertificateId(v === "none" ? "" : v)}>
+                  <SelectTrigger><SelectValue placeholder="Chọn mẫu chứng nhận" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Không cấp chứng nhận</SelectItem>
+                    {certificates.filter(c => c.status === "active").map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
