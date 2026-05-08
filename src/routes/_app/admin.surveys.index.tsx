@@ -123,3 +123,11 @@ function Page() {
           </TableBody>
         </Table>
       </Card>
+      <ConfirmDelete
+        open={!!delId} onOpenChange={(o) => !o && setDelId(null)}
+        title="Xoá khảo sát" description="Hành động này sẽ xoá khảo sát và toàn bộ câu hỏi liên quan."
+        onConfirm={() => { if (delId) tryDelete(delId); }}
+      />
+    </PageContainer>
+  );
+}
