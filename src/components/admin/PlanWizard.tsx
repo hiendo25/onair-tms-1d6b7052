@@ -306,7 +306,7 @@ export function PlanWizard({ planId: initialPlanId }: { planId?: string }) {
           {STEPS.map((s) => {
             const active = s.n === step;
             const done = s.n < step;
-            const locked = surveyLocked && (s.n === 2 || s.n === 3);
+            const locked = false;
             return (
               <button
                 key={s.n}
