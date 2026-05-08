@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, Search, FolderPlus, ChevronRight, ChevronDown, Folder, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, FolderPlus, ChevronRight, ChevronDown, Folder, MoreVertical, Pencil, Trash2, HelpCircle, CheckSquare, ArrowLeftRight, FileText, Upload, ArrowUpDown, Link2, Download, Filter as FilterIcon } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
