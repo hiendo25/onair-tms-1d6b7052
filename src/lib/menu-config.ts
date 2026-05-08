@@ -64,6 +64,7 @@ export const ADMIN_MENU: MenuItem[] = [
     icon: FileText,
     children: [
       { title: "Danh sách khảo sát", key: "surveys-list", path: "/admin/surveys" },
+      { title: "Tạo khảo sát", key: "surveys-new", path: "/admin/surveys/new/edit" },
       { title: "Kết quả khảo sát", key: "surveys-results", path: "/admin/surveys-results" },
     ],
   },
