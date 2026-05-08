@@ -19,6 +19,7 @@ import { Route as AuthSigninRouteImport } from './routes/auth.signin'
 import { Route as AuthErrorRouteImport } from './routes/auth.error'
 import { Route as AppMyTitlesRouteImport } from './routes/_app/my-titles'
 import { Route as AppMyLearningPathsRouteImport } from './routes/_app/my-learning-paths'
+import { Route as AppMyLeaderboardRouteImport } from './routes/_app/my-leaderboard'
 import { Route as AppMyGamificationRouteImport } from './routes/_app/my-gamification'
 import { Route as AppMyFlashcardsRouteImport } from './routes/_app/my-flashcards'
 import { Route as AppMyFavoritesRouteImport } from './routes/_app/my-favorites'
@@ -145,6 +146,11 @@ const AppMyTitlesRoute = AppMyTitlesRouteImport.update({
 const AppMyLearningPathsRoute = AppMyLearningPathsRouteImport.update({
   id: '/my-learning-paths',
   path: '/my-learning-paths',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyLeaderboardRoute = AppMyLeaderboardRouteImport.update({
+  id: '/my-leaderboard',
+  path: '/my-leaderboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMyGamificationRoute = AppMyGamificationRouteImport.update({
@@ -585,6 +591,7 @@ export interface FileRoutesByFullPath {
   '/my-favorites': typeof AppMyFavoritesRoute
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
+  '/my-leaderboard': typeof AppMyLeaderboardRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
@@ -674,6 +681,7 @@ export interface FileRoutesByTo {
   '/my-favorites': typeof AppMyFavoritesRoute
   '/my-flashcards': typeof AppMyFlashcardsRoute
   '/my-gamification': typeof AppMyGamificationRoute
+  '/my-leaderboard': typeof AppMyLeaderboardRoute
   '/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
@@ -765,6 +773,7 @@ export interface FileRoutesById {
   '/_app/my-favorites': typeof AppMyFavoritesRoute
   '/_app/my-flashcards': typeof AppMyFlashcardsRoute
   '/_app/my-gamification': typeof AppMyGamificationRoute
+  '/_app/my-leaderboard': typeof AppMyLeaderboardRoute
   '/_app/my-learning-paths': typeof AppMyLearningPathsRouteWithChildren
   '/_app/my-titles': typeof AppMyTitlesRoute
   '/auth/error': typeof AuthErrorRoute
@@ -856,6 +865,7 @@ export interface FileRouteTypes {
     | '/my-favorites'
     | '/my-flashcards'
     | '/my-gamification'
+    | '/my-leaderboard'
     | '/my-learning-paths'
     | '/my-titles'
     | '/auth/error'
@@ -945,6 +955,7 @@ export interface FileRouteTypes {
     | '/my-favorites'
     | '/my-flashcards'
     | '/my-gamification'
+    | '/my-leaderboard'
     | '/my-learning-paths'
     | '/my-titles'
     | '/auth/error'
@@ -1035,6 +1046,7 @@ export interface FileRouteTypes {
     | '/_app/my-favorites'
     | '/_app/my-flashcards'
     | '/_app/my-gamification'
+    | '/_app/my-leaderboard'
     | '/_app/my-learning-paths'
     | '/_app/my-titles'
     | '/auth/error'
@@ -1195,6 +1207,13 @@ declare module '@tanstack/react-router' {
       path: '/my-learning-paths'
       fullPath: '/my-learning-paths'
       preLoaderRoute: typeof AppMyLearningPathsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-leaderboard': {
+      id: '/_app/my-leaderboard'
+      path: '/my-leaderboard'
+      fullPath: '/my-leaderboard'
+      preLoaderRoute: typeof AppMyLeaderboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/my-gamification': {
@@ -1824,6 +1843,7 @@ interface AppRouteChildren {
   AppMyFavoritesRoute: typeof AppMyFavoritesRoute
   AppMyFlashcardsRoute: typeof AppMyFlashcardsRoute
   AppMyGamificationRoute: typeof AppMyGamificationRoute
+  AppMyLeaderboardRoute: typeof AppMyLeaderboardRoute
   AppMyLearningPathsRoute: typeof AppMyLearningPathsRouteWithChildren
   AppMyTitlesRoute: typeof AppMyTitlesRoute
   AppAdminCertificatesRoute: typeof AppAdminCertificatesRouteWithChildren
@@ -1896,6 +1916,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMyFavoritesRoute: AppMyFavoritesRoute,
   AppMyFlashcardsRoute: AppMyFlashcardsRoute,
   AppMyGamificationRoute: AppMyGamificationRoute,
+  AppMyLeaderboardRoute: AppMyLeaderboardRoute,
   AppMyLearningPathsRoute: AppMyLearningPathsRouteWithChildren,
   AppMyTitlesRoute: AppMyTitlesRoute,
   AppAdminCertificatesRoute: AppAdminCertificatesRouteWithChildren,
