@@ -1,30 +1,21 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { Plus, Search, Trash2, Sparkles } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus, Search, FolderPlus, ChevronRight, ChevronDown, Folder, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import { PageContainer } from "@/components/PageContainer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
-import { RowActions } from "@/components/admin/RowActions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { ConfirmDelete } from "@/components/admin/ConfirmDelete";
-import { useQuestions, useQuestionMutations, type DBQuestion } from "@/lib/data-hooks";
-import { QUESTION_TYPE, DIFFICULTY } from "@/lib/admin-options";
-import { AiSpinner } from "@/components/ai/AiSpinner";
-import { aiGenerateQuestions, type AiQuestion } from "@/lib/ai-mock";
+import {
+  useQuestions, useQuestionMutations, useQuestionFolders, useQuestionFolderMutations,
+  useExamQuestions, type DBQuestion, type DBQuestionFolder
+} from "@/lib/data-hooks";
+import { QUESTION_TYPE, DIFFICULTY, QUESTION_STATUS } from "@/lib/admin-options";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
@@ -32,645 +23,301 @@ export const Route = createFileRoute("/_app/admin/assignments/question-bank")({
   component: Page,
 });
 
-type FormState = {
-  question: string;
-  type: "single" | "multiple" | "true_false" | "essay";
-  category: string;
-  difficulty: "easy" | "medium" | "hard";
-  points: number;
-  options: string[];
-  correct_answer: string; // for single/true_false: single value; for multiple: comma-separated indices
-  explanation: string;
-};
-
-const EMPTY: FormState = {
-  question: "",
-  type: "single",
-  category: "",
-  difficulty: "medium",
-  points: 1,
-  options: ["", "", "", ""],
-  correct_answer: "",
-  explanation: "",
-};
-
-const labelOf = (arr: { value: string; label: string }[], v: string) =>
-  arr.find((o) => o.value === v)?.label ?? v;
-
 function difficultyBadge(d: string) {
-  const cls =
-    d === "easy" ? "bg-emerald-500" : d === "hard" ? "bg-rose-500" : "bg-amber-500";
-  return <Badge className={cls}>{labelOf(DIFFICULTY, d)}</Badge>;
+  const map: Record<string, string> = {
+    easy: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    medium: "bg-amber-100 text-amber-700 border-amber-200",
+    hard: "bg-rose-100 text-rose-700 border-rose-200",
+  };
+  return <Badge variant="outline" className={map[d] || ""}>{DIFFICULTY.find(x => x.value === d)?.label || d}</Badge>;
 }
 
 function Page() {
-  const { data: rows = [], isLoading } = useQuestions();
-  const m = useQuestionMutations();
+  const { data: rows = [] } = useQuestions();
+  const { data: folders = [] } = useQuestionFolders();
+  const { data: examQs = [] } = useExamQuestions();
+  const qm = useQuestionMutations();
+  const fm = useQuestionFolderMutations();
 
+  const [selFolder, setSelFolder] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [q, setQ] = useState("");
   const [fType, setFType] = useState("all");
-  const [fCat, setFCat] = useState("all");
   const [fDiff, setFDiff] = useState("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [fStatus, setFStatus] = useState("all");
 
-  const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<DBQuestion | null>(null);
-  const [form, setForm] = useState<FormState>(EMPTY);
-  const [delId, setDelId] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [folderOpen, setFolderOpen] = useState<{ parent: string | null; editing: DBQuestionFolder | null } | null>(null);
+  const [folderName, setFolderName] = useState("");
+  const [delFolder, setDelFolder] = useState<DBQuestionFolder | null>(null);
+  const [delQ, setDelQ] = useState<DBQuestion | null>(null);
 
-  // AI generation state
-  const [aiOpen, setAiOpen] = useState(false);
-  const [aiSource, setAiSource] = useState("");
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiResults, setAiResults] = useState<AiQuestion[] | null>(null);
-  const [aiSelected, setAiSelected] = useState<Set<number>>(new Set());
-  const [aiSaving, setAiSaving] = useState(false);
+  const usedQuestionIds = useMemo(() => new Set(examQs.map(e => e.question_id)), [examQs]);
 
-  async function runAi() {
-    if (!aiSource.trim()) {
-      toast.error("Vui lòng nhập nội dung tham khảo");
+  const filtered = useMemo(() => {
+    return rows.filter(r => {
+      if (selFolder && r.folder_id !== selFolder) return false;
+      if (q) {
+        const t = q.toLowerCase();
+        if (!(r.title || "").toLowerCase().includes(t) && !(r.question || "").toLowerCase().includes(t)) return false;
+      }
+      if (fType !== "all" && r.type !== fType) return false;
+      if (fDiff !== "all" && r.difficulty !== fDiff) return false;
+      if (fStatus !== "all" && (r.status || "active") !== fStatus) return false;
+      return true;
+    });
+  }, [rows, selFolder, q, fType, fDiff, fStatus]);
+
+  // Build folder tree
+  const childMap = useMemo(() => {
+    const m = new Map<string | null, DBQuestionFolder[]>();
+    folders.forEach(f => {
+      const k = f.parent_id;
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(f);
+    });
+    return m;
+  }, [folders]);
+
+  function toggleExpand(id: string) {
+    setExpanded(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  }
+
+  async function saveFolder() {
+    if (!folderName.trim()) return toast.error("Tên thư mục là bắt buộc");
+    const siblings = folders.filter(f => f.parent_id === (folderOpen?.parent ?? null) && f.id !== folderOpen?.editing?.id);
+    if (siblings.some(f => f.name.toLowerCase() === folderName.trim().toLowerCase())) {
+      return toast.error("Tên folder đã tồn tại trong cùng cấp");
+    }
+    if (folderOpen?.editing) {
+      await fm.update.mutateAsync({ id: folderOpen.editing.id, name: folderName.trim() });
+    } else {
+      await fm.create.mutateAsync({ parent_id: folderOpen?.parent ?? null, name: folderName.trim() } as Partial<DBQuestionFolder>);
+    }
+    setFolderOpen(null);
+    setFolderName("");
+  }
+
+  async function deleteFolder(f: DBQuestionFolder) {
+    const hasChildren = folders.some(x => x.parent_id === f.id);
+    const hasQuestions = rows.some(r => r.folder_id === f.id);
+    if (hasChildren || hasQuestions) {
+      toast.error("Folder còn chứa câu hỏi / folder con. Vui lòng di chuyển hoặc xoá dữ liệu trước");
       return;
     }
-    setAiLoading(true);
-    setAiResults(null);
-    try {
-      const out = await aiGenerateQuestions(aiSource, 10);
-      setAiResults(out);
-      setAiSelected(new Set(out.map((_, i) => i)));
-    } finally {
-      setAiLoading(false);
+    await fm.remove.mutateAsync(f.id);
+    setDelFolder(null);
+    if (selFolder === f.id) setSelFolder(null);
+  }
+
+  function renderFolderNode(f: DBQuestionFolder, depth: number) {
+    const children = childMap.get(f.id) || [];
+    const isExpanded = expanded.has(f.id);
+    const isSel = selFolder === f.id;
+    return (
+      <div key={f.id}>
+        <div
+          className={`group flex items-center gap-1 rounded-md py-1.5 pr-1 text-sm cursor-pointer hover:bg-muted ${isSel ? "bg-primary/10 text-primary font-medium" : ""}`}
+          style={{ paddingLeft: depth * 16 + 4 }}
+          onClick={() => setSelFolder(f.id)}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleExpand(f.id); }}
+            className="flex h-4 w-4 items-center justify-center"
+          >
+            {children.length > 0 ? (isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />) : null}
+          </button>
+          <Folder className="h-4 w-4 shrink-0 text-amber-500" />
+          <span className="flex-1 truncate">{f.name}</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="opacity-0 group-hover:opacity-100" onClick={(e) => e.stopPropagation()}>
+                <MoreVertical className="h-3.5 w-3.5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => { setFolderOpen({ parent: f.id, editing: null }); setFolderName(""); }}>
+                <FolderPlus className="h-4 w-4" /> Thêm folder con
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { setFolderOpen({ parent: f.parent_id, editing: f }); setFolderName(f.name); }}>
+                <Pencil className="h-4 w-4" /> Đổi tên
+              </DropdownMenuItem>
+              <DropdownMenuItem className="text-destructive" onClick={() => setDelFolder(f)}>
+                <Trash2 className="h-4 w-4" /> Xoá
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        {isExpanded && children.map(c => renderFolderNode(c, depth + 1))}
+      </div>
+    );
+  }
+
+  const stats = useMemo(() => {
+    const total = rows.length;
+    const counts: Record<string, number> = {};
+    rows.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+    return { total, counts };
+  }, [rows]);
+
+  async function handleDeleteQ(qq: DBQuestion) {
+    if (usedQuestionIds.has(qq.id)) {
+      return toast.error("Câu hỏi đang được sử dụng trong bài kiểm tra. Không thể xoá.");
     }
+    await qm.remove.mutateAsync(qq.id);
+    setDelQ(null);
   }
 
-  async function saveSelected() {
-    if (!aiResults) return;
-    setAiSaving(true);
-    try {
-      const picks = aiResults.filter((_, i) => aiSelected.has(i));
-      for (const q of picks) {
-        await m.create.mutateAsync({
-          question: q.question,
-          type: "single",
-          category: "AI tạo",
-          difficulty: "medium",
-          points: 1,
-          options: q.options,
-          correct_answer: String(q.correct_index),
-          explanation: q.explanation,
-          tags: ["ai-generated"],
-        });
-      }
-      toast.success(`Đã thêm ${picks.length} câu hỏi vào ngân hàng`);
-      setAiOpen(false);
-      setAiResults(null);
-      setAiSource("");
-    } catch (e: any) {
-      toast.error(e?.message ?? "Có gì đó chưa đúng, thử lại nhé.");
-    } finally {
-      setAiSaving(false);
-    }
-  }
-
-
-  const categories = useMemo(
-    () => Array.from(new Set(rows.map((r) => r.category).filter(Boolean))),
-    [rows]
-  );
-
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (q && !r.question.toLowerCase().includes(q.toLowerCase())) return false;
-        if (fType !== "all" && r.type !== fType) return false;
-        if (fCat !== "all" && r.category !== fCat) return false;
-        if (fDiff !== "all" && r.difficulty !== fDiff) return false;
-        return true;
-      }),
-    [rows, q, fType, fCat, fDiff]
-  );
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
-
-  function openCreate() {
-    setEditing(null);
-    setForm(EMPTY);
-    setOpen(true);
-  }
-
-  function openEdit(r: DBQuestion) {
-    setEditing(r);
-    const opts = Array.isArray(r.options) ? (r.options as string[]) : [];
-    setForm({
-      question: r.question,
-      type: (r.type as FormState["type"]) || "single",
-      category: r.category || "",
-      difficulty: (r.difficulty as FormState["difficulty"]) || "medium",
-      points: r.points || 1,
-      options: opts.length ? opts : ["", "", "", ""],
-      correct_answer: r.correct_answer || "",
-      explanation: r.explanation || "",
-    });
-    setOpen(true);
-  }
-
-  async function submit() {
-    if (!form.question.trim()) return;
-    setSubmitting(true);
-    try {
-      let payload: Partial<DBQuestion> = {
-        question: form.question.trim(),
-        type: form.type,
-        category: form.category,
-        difficulty: form.difficulty,
-        points: Number(form.points) || 1,
-        explanation: form.explanation,
-        correct_answer: form.correct_answer,
-        options: [],
-        tags: [],
-      };
-      if (form.type === "single" || form.type === "multiple") {
-        payload.options = form.options.filter((o) => o.trim().length > 0);
-      } else if (form.type === "true_false") {
-        payload.options = ["true", "false"];
-      } else {
-        payload.options = [];
-        payload.correct_answer = form.explanation; // mẫu trả lời
-      }
-      if (editing) {
-        await m.update.mutateAsync({ id: editing.id, ...payload });
-      } else {
-        await m.create.mutateAsync(payload);
-      }
-      setOpen(false);
-    } finally {
-      setSubmitting(false);
-    }
-  }
+  const roots = childMap.get(null) || [];
 
   return (
     <PageContainer
       title="Ngân hàng câu hỏi"
-      breadcrumbs={[
-        { title: "Đào tạo" },
-        { title: "Bài kiểm tra" },
-        { title: "Ngân hàng câu hỏi" },
-      ]}
-      actions={
-        <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setAiOpen(true)}
-            className="border-violet-300 text-violet-700 hover:bg-violet-50"
-          >
-            <Sparkles className="h-4 w-4" />
-            Gợi ý câu hỏi từ nội dung này
-          </Button>
-          <Button size="sm" onClick={openCreate}>
-            <Plus className="h-4 w-4" />
-            Tạo câu hỏi
-          </Button>
-        </div>
-      }
+      breadcrumbs={[{ title: "Bài kiểm tra" }, { title: "Ngân hàng câu hỏi" }]}
     >
-      <Card className="p-4">
-        <div className="mb-4 flex flex-wrap gap-2">
-          <div className="relative min-w-[220px] flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              className="pl-9"
-              placeholder="Tìm kiếm nội dung câu hỏi..."
-              value={q}
-              onChange={(e) => {
-                setQ(e.target.value);
-                setPage(1);
-              }}
-            />
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
+        <StatCard label="Tổng câu hỏi" value={stats.total} />
+        {QUESTION_TYPE.map(t => (
+          <StatCard key={t.value} label={t.label.split(" (")[0]} value={stats.counts[t.value] || 0} />
+        ))}
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+        {/* Folder tree */}
+        <Card className="p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Thư mục</span>
+            <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => { setFolderOpen({ parent: null, editing: null }); setFolderName(""); }}>
+              <FolderPlus className="h-4 w-4" />
+            </Button>
           </div>
-          <Select value={fType} onValueChange={(v) => { setFType(v); setPage(1); }}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Loại câu hỏi" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả loại</SelectItem>
-              {QUESTION_TYPE.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={fCat} onValueChange={(v) => { setFCat(v); setPage(1); }}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Chủ đề" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả chủ đề</SelectItem>
-              {categories.map((c) => (
-                <SelectItem key={c} value={c}>{c}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={fDiff} onValueChange={(v) => { setFDiff(v); setPage(1); }}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Độ khó" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả độ khó</SelectItem>
-              {DIFFICULTY.map((o) => (
-                <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+          <div
+            className={`mb-1 cursor-pointer rounded-md px-2 py-1.5 text-sm hover:bg-muted ${selFolder === null ? "bg-primary/10 text-primary font-medium" : ""}`}
+            onClick={() => setSelFolder(null)}
+          >
+            Tất cả câu hỏi
+          </div>
+          {roots.length === 0 ? (
+            <div className="px-2 py-4 text-center text-xs text-muted-foreground">
+              Chưa có folder nào.<br />Nhấn + để tạo folder đầu tiên.
+            </div>
+          ) : (
+            roots.map(r => renderFolderNode(r, 0))
+          )}
+        </Card>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nội dung câu hỏi</TableHead>
-              <TableHead>Loại</TableHead>
-              <TableHead>Chủ đề</TableHead>
-              <TableHead>Độ khó</TableHead>
-              <TableHead>Điểm</TableHead>
-              <TableHead className="w-12"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Đang tải...
-                </TableCell>
-              </TableRow>
-            )}
-            {!isLoading && paged.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center text-muted-foreground">
-                  Không có câu hỏi
-                </TableCell>
-              </TableRow>
-            )}
-            {paged.map((r) => (
-              <TableRow key={r.id}>
-                <TableCell>
-                  <span className="line-clamp-2 max-w-md">{r.question}</span>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{labelOf(QUESTION_TYPE, r.type)}</Badge>
-                </TableCell>
-                <TableCell>{r.category || "-"}</TableCell>
-                <TableCell>{difficultyBadge(r.difficulty)}</TableCell>
-                <TableCell>{r.points}</TableCell>
-                <TableCell>
-                  <RowActions onEdit={() => openEdit(r)} onDelete={() => setDelId(r.id)} />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Số hàng mỗi trang</span>
-            <Select value={String(pageSize)} onValueChange={(v) => { setPageSize(Number(v)); setPage(1); }}>
-              <SelectTrigger className="h-8 w-[80px]">
-                <SelectValue />
-              </SelectTrigger>
+        {/* Right panel */}
+        <Card className="p-4">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[200px] flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input className="pl-9" placeholder="Tìm kiếm" value={q} onChange={e => setQ(e.target.value)} />
+            </div>
+            <Select value={fType} onValueChange={setFType}>
+              <SelectTrigger className="w-[160px]"><SelectValue placeholder="Loại câu hỏi" /></SelectTrigger>
               <SelectContent>
-                {[10, 20, 50, 100].map((n) => (
-                  <SelectItem key={n} value={String(n)}>{n}</SelectItem>
-                ))}
+                <SelectItem value="all">Tất cả loại</SelectItem>
+                {QUESTION_TYPE.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <span>{filtered.length} câu hỏi</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-              Trước
+            <Select value={fDiff} onValueChange={setFDiff}>
+              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Mức độ" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả mức độ</SelectItem>
+                {DIFFICULTY.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={fStatus} onValueChange={setFStatus}>
+              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                {QUESTION_STATUS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button asChild>
+              <Link to="/admin/assignments/question-bank/$id/edit" params={{ id: "new" }} search={{ folder: selFolder ?? "" }}>
+                <Plus className="h-4 w-4" /> Tạo câu hỏi mới
+              </Link>
             </Button>
-            <span className="text-sm">Trang {page}/{totalPages}</span>
-            <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
-              Sau
-            </Button>
           </div>
-        </div>
-      </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi"}</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4">
-            <div className="grid gap-1.5">
-              <Label>Loại câu hỏi *</Label>
-              <Select value={form.type} onValueChange={(v) => setForm({ ...form, type: v as FormState["type"], correct_answer: "" })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {QUESTION_TYPE.map((o) => (
-                    <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {filtered.length === 0 ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              {rows.length === 0
+                ? <>Chưa có câu hỏi nào trong folder này.<br />Nhấn + Tạo câu hỏi để bắt đầu.</>
+                : "Không tìm thấy câu hỏi phù hợp"}
             </div>
-
-            <div className="grid gap-1.5">
-              <Label>Nội dung câu hỏi *</Label>
-              <Textarea
-                rows={3}
-                value={form.question}
-                onChange={(e) => setForm({ ...form, question: e.target.value })}
-                placeholder="Nhập nội dung câu hỏi"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="grid gap-1.5">
-                <Label>Chủ đề</Label>
-                <Input
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  placeholder="VD: Kiến thức sản phẩm"
-                />
+          ) : (
+            <div className="divide-y">
+              <div className="grid grid-cols-[40px_1fr_auto] gap-2 py-2 text-xs font-semibold text-muted-foreground">
+                <div>STT</div><div>Nội dung câu hỏi</div><div></div>
               </div>
-              <div className="grid gap-1.5">
-                <Label>Độ khó *</Label>
-                <Select value={form.difficulty} onValueChange={(v) => setForm({ ...form, difficulty: v as FormState["difficulty"] })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {DIFFICULTY.map((o) => (
-                      <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid gap-1.5 max-w-[160px]">
-              <Label>Điểm *</Label>
-              <Input
-                type="number"
-                step="0.1"
-                min="0.1"
-                value={form.points}
-                onChange={(e) => setForm({ ...form, points: Number(e.target.value) })}
-              />
-            </div>
-
-            {form.type === "single" && (
-              <div className="grid gap-2">
-                <Label>Đáp án (chọn 1 đáp án đúng)</Label>
-                <RadioGroup
-                  value={form.correct_answer}
-                  onValueChange={(v) => setForm({ ...form, correct_answer: v })}
-                >
-                  {form.options.map((opt, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <RadioGroupItem value={String(i)} id={`opt-${i}`} />
-                      <Input
-                        value={opt}
-                        onChange={(e) => {
-                          const next = [...form.options];
-                          next[i] = e.target.value;
-                          setForm({ ...form, options: next });
-                        }}
-                        placeholder={`Đáp án ${i + 1}`}
-                      />
-                      {form.options.length > 2 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const next = form.options.filter((_, idx) => idx !== i);
-                            setForm({ ...form, options: next });
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
+              {filtered.map((r, i) => (
+                <div key={r.id} className="grid grid-cols-[40px_1fr_auto] items-center gap-2 py-3 text-sm">
+                  <div className="text-muted-foreground">{i + 1}</div>
+                  <div>
+                    <div className="font-medium">{r.title || r.question}</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {difficultyBadge(r.difficulty)}
+                      <Badge variant="outline">{QUESTION_TYPE.find(x => x.value === r.type)?.label.split(" (")[0]}</Badge>
+                      {r.category && <Badge variant="secondary">{r.category}</Badge>}
+                      <Badge variant="outline">{r.points} điểm</Badge>
+                      {(r.status || "active") === "inactive" && <Badge className="bg-gray-200 text-gray-700">Ngưng sử dụng</Badge>}
                     </div>
-                  ))}
-                </RadioGroup>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  onClick={() => setForm({ ...form, options: [...form.options, ""] })}
-                >
-                  <Plus className="h-4 w-4" /> Thêm đáp án
-                </Button>
-              </div>
-            )}
-
-            {form.type === "multiple" && (
-              <div className="grid gap-2">
-                <Label>Đáp án (chọn nhiều đáp án đúng)</Label>
-                {form.options.map((opt, i) => {
-                  const selected = (form.correct_answer || "")
-                    .split(",")
-                    .filter(Boolean);
-                  const checked = selected.includes(String(i));
-                  return (
-                    <div key={i} className="flex items-center gap-2">
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(v) => {
-                          const set = new Set(selected);
-                          if (v) set.add(String(i));
-                          else set.delete(String(i));
-                          setForm({
-                            ...form,
-                            correct_answer: Array.from(set).sort().join(","),
-                          });
-                        }}
-                      />
-                      <Input
-                        value={opt}
-                        onChange={(e) => {
-                          const next = [...form.options];
-                          next[i] = e.target.value;
-                          setForm({ ...form, options: next });
-                        }}
-                        placeholder={`Đáp án ${i + 1}`}
-                      />
-                      {form.options.length > 2 && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            const next = form.options.filter((_, idx) => idx !== i);
-                            setForm({ ...form, options: next });
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-fit"
-                  onClick={() => setForm({ ...form, options: [...form.options, ""] })}
-                >
-                  <Plus className="h-4 w-4" /> Thêm đáp án
-                </Button>
-              </div>
-            )}
-
-            {form.type === "true_false" && (
-              <div className="grid gap-2">
-                <Label>Đáp án đúng</Label>
-                <RadioGroup
-                  value={form.correct_answer}
-                  onValueChange={(v) => setForm({ ...form, correct_answer: v })}
-                >
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="true" id="tf-true" />
-                    <Label htmlFor="tf-true">Đúng</Label>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <RadioGroupItem value="false" id="tf-false" />
-                    <Label htmlFor="tf-false">Sai</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
-
-            {form.type === "essay" && (
-              <div className="grid gap-1.5">
-                <Label>Đáp án mẫu (không bắt buộc)</Label>
-                <Textarea
-                  rows={3}
-                  value={form.correct_answer}
-                  onChange={(e) => setForm({ ...form, correct_answer: e.target.value })}
-                  placeholder="Đáp án mẫu giúp giảng viên chấm bài"
-                />
-              </div>
-            )}
-
-            <div className="grid gap-1.5">
-              <Label>Giải thích</Label>
-              <Textarea
-                rows={2}
-                value={form.explanation}
-                onChange={(e) => setForm({ ...form, explanation: e.target.value })}
-                placeholder="Hiển thị sau khi học viên trả lời"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Huỷ</Button>
-            <Button onClick={submit} disabled={submitting}>
-              {editing ? "Lưu thay đổi" : "Tạo câu hỏi"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmDelete
-        open={!!delId}
-        onOpenChange={(v) => !v && setDelId(null)}
-        onConfirm={async () => {
-          if (delId) {
-            await m.remove.mutateAsync(delId);
-            setDelId(null);
-          }
-        }}
-      />
-
-      {/* AI generation dialog */}
-      <Dialog open={aiOpen} onOpenChange={(v) => { setAiOpen(v); if (!v) { setAiResults(null); } }}>
-        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-violet-600" />
-              Gợi ý câu hỏi từ nội dung này
-            </DialogTitle>
-            <DialogDescription>
-              Dán nội dung tài liệu / SOP. AI sẽ tạo 10 câu trắc nghiệm — bạn chọn câu muốn lưu.
-            </DialogDescription>
-          </DialogHeader>
-
-          {!aiResults && !aiLoading && (
-            <div className="grid gap-3">
-              <Label>Nội dung tham khảo</Label>
-              <Textarea
-                rows={8}
-                placeholder="Dán SOP, mô tả khóa học, hoặc nội dung bài học vào đây..."
-                value={aiSource}
-                onChange={(e) => setAiSource(e.target.value)}
-              />
-            </div>
-          )}
-
-          {aiLoading && <AiSpinner label="Để mình xem qua nhé..." />}
-
-          {aiResults && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
-                  AI đã tạo {aiResults.length} câu — đã chọn {aiSelected.size}
-                </p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="ghost" onClick={() => setAiSelected(new Set(aiResults.map((_, i) => i)))}>Chọn tất cả</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setAiSelected(new Set())}>Bỏ chọn</Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin/assignments/question-bank/$id/edit" params={{ id: r.id }} search={{ folder: "" }}><Pencil className="h-4 w-4" /> Chỉnh sửa</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => qm.update.mutateAsync({ id: r.id, status: (r.status || "active") === "active" ? "inactive" : "active" })}>
+                        {(r.status || "active") === "active" ? "Ngưng sử dụng" : "Kích hoạt lại"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onClick={() => setDelQ(r)}>
+                        <Trash2 className="h-4 w-4" /> Xoá
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              </div>
-              <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
-                {aiResults.map((q, i) => {
-                  const checked = aiSelected.has(i);
-                  return (
-                    <div key={i} className={`rounded-lg border p-3 ${checked ? "border-violet-300 bg-violet-50/50" : "border-slate-200"}`}>
-                      <div className="flex gap-3">
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) => {
-                            const next = new Set(aiSelected);
-                            if (v) next.add(i); else next.delete(i);
-                            setAiSelected(next);
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm">{i + 1}. {q.question}</p>
-                          <ul className="mt-2 space-y-0.5 text-sm">
-                            {q.options.map((o, j) => (
-                              <li key={j} className={j === q.correct_index ? "text-emerald-700 font-medium" : "text-slate-600"}>
-                                {String.fromCharCode(65 + j)}. {o} {j === q.correct_index && "✓"}
-                              </li>
-                            ))}
-                          </ul>
-                          <p className="mt-2 text-xs text-muted-foreground italic">💡 {q.explanation}</p>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              ))}
             </div>
           )}
+        </Card>
+      </div>
 
+      {/* Folder dialog */}
+      <Dialog open={!!folderOpen} onOpenChange={(o) => !o && setFolderOpen(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{folderOpen?.editing ? "Đổi tên folder" : "Tạo folder"}</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <Label>Tên folder *</Label>
+            <Input value={folderName} onChange={e => setFolderName(e.target.value)} placeholder="VD: Công nghệ AI" />
+          </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setAiOpen(false)}>Đóng</Button>
-            {!aiResults && (
-              <Button onClick={runAi} disabled={aiLoading} className="bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white">
-                <Sparkles className="h-4 w-4 mr-1.5" />
-                {aiLoading ? "Đang tạo..." : "Tạo câu hỏi"}
-              </Button>
-            )}
-            {aiResults && (
-              <Button onClick={saveSelected} disabled={aiSaving || aiSelected.size === 0}>
-                {aiSaving ? "Đang lưu..." : `Lưu ${aiSelected.size} câu vào ngân hàng`}
-              </Button>
-            )}
+            <Button variant="outline" onClick={() => setFolderOpen(null)}>Huỷ</Button>
+            <Button onClick={saveFolder}>Lưu</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDelete open={!!delFolder} title="Xoá folder" description={`Xoá folder "${delFolder?.name}"?`} onCancel={() => setDelFolder(null)} onConfirm={() => delFolder && deleteFolder(delFolder)} />
+      <ConfirmDelete open={!!delQ} title="Xoá câu hỏi" description={`Xoá câu hỏi "${delQ?.title || delQ?.question}"?`} onCancel={() => setDelQ(null)} onConfirm={() => delQ && handleDeleteQ(delQ)} />
     </PageContainer>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <Card className="p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="mt-1 text-2xl font-semibold">{value}</div>
+    </Card>
   );
 }
